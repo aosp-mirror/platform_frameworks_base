@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"ప్లే చేయి"</string>
     <string name="pip_pause" msgid="8412075640017218862">"పాజ్ చేయి"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP నియం. "<b>"HOME"</b>"నొక్కిఉంచండి"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIPని నియంత్రించడానికి హోమ్ బటన్‌ను నొక్కి పట్టుకోండి"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"చిత్రంలో చిత్రం"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"ఇది మీరు మరొకటి ప్లే చేసే వరకు మీ వీడియోను వీక్షణలో ఉంచుతుంది. దాన్ని నియంత్రించడానికి "<b>"హోమ్"</b>" నొక్కి, పట్టుకోండి."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"అర్థమైంది"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"తీసివేస్తుంది"</string>
 </resources>

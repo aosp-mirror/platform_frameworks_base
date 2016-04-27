@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Відтворити"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Призупинити"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Щоб керувати PIP, утримуйте кнопку "<b>"ГОЛОВНИЙ ЕКРАН"</b></string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Щоб керувати PIP, утримуйте кнопку \"ГОЛОВНИЙ ЕКРАН\""</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Картинка в картинці"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Відео буде закріплено, доки ви не запустите інше відео. Щоб керувати, утримуйте кнопку "<b>"HOME"</b>"."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Закрити"</string>
 </resources>

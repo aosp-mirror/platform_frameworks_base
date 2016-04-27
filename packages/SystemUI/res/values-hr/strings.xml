@@ -72,7 +72,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Spremanje snimke zaslona..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Spremanje snimke zaslona."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Zaslon je snimljen."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Dodirnite za prikaz snimke zaslona."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Dodirnite da biste vidjeli snimku zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nije bilo moguće snimiti zaslon."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Prilikom spremanja snimke zaslona pojavio se problem."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Zaslon nije snimljen zbog ograničenog prostora za pohranu."</string>
@@ -119,6 +119,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Podatkovni signal pun."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Spojen na <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Spojen na <xliff:g id="BLUETOOTH">%s</xliff:g> ."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Povezani ste sa sljedećim uređajem: <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Nema signala WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX s jednim stupcem."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX s dva stupca."</string>
@@ -149,12 +150,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nema SIM kartice."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobilni podaci"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobilni podaci uključeni"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobilni podaci isključeni"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Posredno povezivanje Bluetootha."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Način rada u zrakoplovu"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nema SIM kartice."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Promjena mreže operatera."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Otvaranje pojedinosti o bateriji"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterija <xliff:g id="NUMBER">%d</xliff:g> posto."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Baterija se puni, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> posto."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Postavke sustava."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Obavijesti."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Brisanje obavijesti"</string>
@@ -192,9 +197,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"\"Ne ometaj\" uključeno, samo prioritetno."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Ne ometaj\" uključeno, potpuna tišina."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Ne ometaj\" uključeno, samo za alarme."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ne ometaj."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"\"Ne ometaj\" isključeno."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Ne ometaj\" isključeno."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Ne ometaj\" uključeno."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth isključen."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth uključen."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth se povezuje."</string>
@@ -248,7 +255,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Zaslon je sada zaključan u vodoravnom usmjerenju."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Zaslona je sada zaključan u okomitom usmjerenju."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Izlog za slastice"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Sanjarenje"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Čuvar zaslona"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ne ometaj"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Samo prioritetno"</string>
@@ -260,6 +267,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Upareni uređaji nisu dostupni"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Svjetlina"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatsko izmjenjivanje"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automatsko zakretanje zaslona"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Postavljeno na <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Izmjenjivanje je zaključano"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Okomito"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Vodoravno"</string>
@@ -278,6 +287,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nema mreže"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi isključen"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nije dostupna nijedna Wi-Fi mreža"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Emitiranje"</string>
@@ -313,6 +323,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> onemogućena je u sigurnom načinu."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Izbriši sve"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Aplikacija ne podržava podijeljeni zaslon"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Povucite ovdje da biste upotrebljavali podijeljeni zaslon"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podijeli vodoravno"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podijeli okomito"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podijeli prilagođeno"</string>
@@ -330,7 +341,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitne obavijesti pri dnu"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Dodirnite ponovo da biste otvorili"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Dodirnite opet za otvaranje"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Prijeđite prstom prema gore za otključavanje"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Prijeđite prstom od ikone za telefon"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Prijeđite prstom od ikone za glasovnu pomoć"</string>
@@ -408,7 +419,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširivanje"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sažimanje"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Zaslon je prikvačen"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i držite Natrag da biste ga otkvačili."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Zaslon će tako ostati u prvom planu dok ga ne otkvačite. Dodirnite i zadržite Natrag da biste ga otkvačili."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Shvaćam"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, hvala"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti pločicu <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -418,11 +429,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Dopusti"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odbij"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> predstavlja dijaloški okvir za upravljanje glasnoćom"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Dodirnite da biste vratili izvorno."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Dodirnite da biste vratili izvornik."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Upotrebljavate radni profil"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Dodirnite da biste uključili zvuk."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Dodirnite da biste postavili na vibraciju. Usluge pristupačnosti možda neće imati zvuk."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Dodirnite da biste isključili zvuk. Usluge pristupačnosti možda neće imati zvuk."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s kontrole glasnoće prikazane. Kliznite prstom prema gore da biste ih odbacili."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrole glasnoće skrivene"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Ugađanje korisničkog sučelja sustava"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži ugrađeni postotak baterije"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikazivanje postotka razine baterije na ikoni trake statusa kada se ne puni"</string>
@@ -467,19 +480,24 @@
     <string name="block" msgid="2734508760962682611">"Blokiraj sve obavijesti"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Ne utišavaj"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Ne utišavaj i ne blokiraj"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Prikaži potpune postavke važnosti"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Blokirano"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Najmanja važnost"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Mala važnost"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Uobičajena važnost"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Velika važnost"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Hitno"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Nikad ne prikazuj te obavijesti"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Prikaži tiho pri dnu popisa obavijesti"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Prikaži te obavijesti tiho"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Dopusti obavijestima da emitiraju zvučne signale"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Prikaži na zaslonu i dopusti zvuk"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži pri vrhu popisa obavijesti, prikaži na zaslonu i dopusti zvuk"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Napredne kontrole obavijesti"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Uključeno"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Isključeno"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"Napredne kontrole obavijesti omogućuju vam da postavite razinu važnosti za obavijesti aplikacije od 0 do 5. \n\n"<b>"Razina 5"</b>" \n– prikaži na vrhu popisa obavijesti \n– dopusti prekide prikaza na cijelom zaslonu \n– uvijek dopusti brzi pregled \n\n"<b>"Razina 4"</b>" \n– onemogući prekid prikaza na cijelom zaslonu \n– uvijek dopusti brzi pregled \n\n"<b>"Razina 3"</b>" \n– onemogući prekid prikaza na cijelom zaslonu \n– nikad ne dopusti brzi pregled\n\n"<b>"Razina 2"</b>" \n– onemogući prekid prikaza na cijelom zaslonu \n– nikad ne dopusti brzi pregled \n– nikad ne emitiraj zvuk ni vibraciju \n\n"<b>"Razina 1"</b>" \n– onemogući prekid prikaza na cijelom zaslonu \n– nikad ne dopusti brzi pregled \n– nikad ne emitiraj zvuk ni vibraciju \n– ne prikazuj na zaključanom zaslonu i traci statusa \n– prikaži na dnu popisa obavijesti \n\n"<b>"Razina 0"</b>" \n– blokiraj sve obavijesti aplikacije"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Važnost: automatski"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Važnost: razina 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Važnost: razina 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Važnost: razina 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Važnost: razina 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Važnost: razina 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Važnost: razina 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Aplikacija određuje važnost za svaku obavijest."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Nikad ne prikazuj obavijesti te aplikacije."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Bez prekida prikaza na cijelom zaslonu, brzog pregleda, zvuka ili vibracije. Ne prikazuj na zaključanom zaslonu i traci statusa."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Bez prekida prikaza na cijelom zaslonu, bez brzog pregleda, zvuka i vibracije."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Bez prekida prikaza na cijelom zaslonu i bez brzog pregleda."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Uvijek dopusti brzi pregled. Bez prekida prikaza na cijelom zaslonu."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Uvijek dopusti brzi pregled i prekid prikaza na cijelom zaslonu."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Kontrole obavijesti za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -594,10 +612,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Ostalo"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Razdjelnik podijeljenog zaslona"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Pomakni prema dolje"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Pomakni prema gore"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Pomakni ulijevo"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Pomakni udesno"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Lijevi zaslon u cijeli zaslon"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Lijevi zaslon na 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Lijevi zaslon na 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"Lijevi zaslon na 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Desni zaslon u cijeli zaslon"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Gornji zaslon u cijeli zaslon"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Gornji zaslon na 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Gornji zaslon na 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Gornji zaslon na 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Donji zaslon u cijeli zaslon"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Položaj <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dodirnite dvaput da biste uredili."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Dodirnite dvaput da biste dodali."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Položaj <xliff:g id="POSITION">%1$d</xliff:g>. Dodirnite dvaput da biste odabrali."</string>
@@ -607,9 +631,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Pločica <xliff:g id="TILE_NAME">%1$s</xliff:g> uklonjena"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Pločica <xliff:g id="TILE_NAME">%1$s</xliff:g> premještena je na položaj <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Uređivač brzih postavki."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> obavijest: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Aplikacija možda neće funkcionirati s podijeljenim zaslonom."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikacija ne podržava podijeljeni zaslon."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Proširivanje Brzih postavki."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Otvaranje postavki."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Otvaranje brzih postavki."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Zatvaranje brzih postavki."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm je postavljen."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prijavljeni ste kao <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nema interneta."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Otvaranje pojedinosti."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otvaranje postavki za <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Uređivanje redoslijeda postavki."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Stranica <xliff:g id="ID_1">%1$d</xliff:g> od <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

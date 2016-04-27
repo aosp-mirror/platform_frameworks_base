@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Пускане"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Пауза"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Контр. на PIP: Задр. "<b>"HOME"</b></string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"За контролиране на PIP натиснете и задръжте бутона „HOME“"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Картина в картина"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Видеоклипът ви ще остане видим, докато не пуснете друг. Натиснете и задръжте "<b>"HOME"</b>", за да контролирате функцията."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Разбрах"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Отхвърляне"</string>
 </resources>

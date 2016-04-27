@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Spela upp"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pausa"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Styr PIP med "<b>"startknappen"</b></string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Styr bild-i-bild genom att hålla ned startsideknappen"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Bild-i-bild"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Då visas videon tills du spelar upp en annan. Tryck länge på "<b>"startknappen"</b>" om du vill styra uppspelningen."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorera"</string>
 </resources>

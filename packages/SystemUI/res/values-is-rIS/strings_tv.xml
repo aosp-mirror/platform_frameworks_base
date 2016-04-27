@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Spila"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Hlé"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Haltu "<b>"HOME"</b>"-hnappinum inni til að stjórna innfelldri mynd"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Haltu „Home“-hnappinum inni til að stjórna innfelldri mynd"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Mynd í mynd"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Þetta heldur myndskeiðinu sýnilegu þar til þú spilar annað. Haltu inni "<b>"HOME"</b>" til að stjórna."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Ég skil"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Hunsa"</string>
 </resources>

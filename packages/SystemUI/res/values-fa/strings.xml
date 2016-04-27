@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره عکس صفحه‌نمایش..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"عکس صفحه‌نمایش ذخیره شد."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"عکس صفحه‌نمایش گرفته شد."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"برای مشاهده عکس صفحه‌نمایشتان، لمس کنید."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"برای مشاهده عکس صفحه‌نمایشتان ضربه بزنید."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"عکس صفحه‌نمایش گرفته نشد."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"هنگام ذخیره عکس صفحه‌نمایش مشکلی رخ داد."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"به دلیل محدود بودن فضای ذخیره‌سازی نمی‌توانید عکس صفحه‌نمایش را ذخیره کنید."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"قدرت سیگنال داده کامل است."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"به <xliff:g id="WIFI">%s</xliff:g> متصل شد."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"به <xliff:g id="BLUETOOTH">%s</xliff:g> متصل شد."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"متصل به <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏WiMAX وجود ندارد."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏WiMAX دارای یک نوار است."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏WiMAX دارای دو نوار است."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"بدون سیم کارت."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"داده شبکه تلفن همراه"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"داده شبکه تلفن همراه روشن"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"داده تلفن همراه خاموش است"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"اتصال اینترنت با بلوتوث تلفن همراه."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"حالت هواپیما."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"سیم‌کارتی موجود نیست."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"تغییر شبکه شرکت مخابراتی."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"باز کردن جزئیات باتری"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"باتری <xliff:g id="NUMBER">%d</xliff:g> درصد."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"در حال شارژ باتری، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> درصد"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"تنظیمات سیستم."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"اعلان‌ها."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"پاک کردن اعلان"</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"«مزاحم نشوید» روشن است، فقط اولویت‌دار."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"حالت «مزاحم نشوید» روشن است، سکوت کامل."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"حالت «مزاحم نشوید» روشن است، فقط هشدارها."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"مزاحم نشوید."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"«مزاحم نشوید» خاموش است."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"«مزاحم نشوید» خاموش شد."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"«مزاحم نشوید» روشن شد."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"بلوتوث."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"بلوتوث خاموش است."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"بلوتوث روشن است."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"بلوتوث در حال اتصال است."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"صفحه اکنون روی جهت افقی قفل شده است."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"صفحه اکنون روی جهت عمودی قفل شده است."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ویترین دسر"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"رویاپردازی"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"محافظ صفحه"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"اترنت"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"مزاحم نشوید"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"فقط اولویت‌دار"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"هیچ دستگاه مرتبط شده‌ای موجود نیست"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"روشنایی"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"چرخش خودکار"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"چرخش خودکار صفحه‌نمایش"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"تنظیم روی <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"چرخش قفل شد"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"عمودی"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"افقی"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"متصل نیست"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"شبکه‌ای موجود نیست"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi خاموش است"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi روشن"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏هیچ شبکه Wi-Fi موجود نیست"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"فرستادن"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"در حال فرستادن"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> در حالت ایمن غیرفعال است."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"پاک کردن همه"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"برنامه از تقسیم صفحه پشتیبانی نمی‌کند"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"برای استفاده از تقسیم صفحه، به اینجا بکشید"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسیم افقی"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسیم عمودی"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"سفارشی کردن تقسیم"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدیوها و بازی‌ها را مسدود می‌کند."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"اعلان‌های کمتر فوری در زیر"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"برای باز کردن دوباره لمس کنید"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"برای باز کردن دوباره ضربه بزنید"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
     <string name="phone_hint" msgid="4872890986869209950">"انگشتتان را از نماد تلفن تند بکشید"</string>
     <string name="voice_hint" msgid="8939888732119726665">"برای «دستیار صوتی»، تند بکشید"</string>
@@ -400,16 +411,16 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"دریافت سریع‌تر اعلان‌ها"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نه سپاسگزارم"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"نه متشکرم"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"راه‌اندازی"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. ‏<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"اکنون به پایان برسد"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"بزرگ کردن"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"کوچک کردن"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"صفحه نمایش پین شد"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"در نما نگه‌داشته می‌شود تا اینکه پین را بردارید. برای برداشتن پین، «برگشت» را لمس کنید و نگه‌دارید."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"تا زمانی که پین را بردارید، در نما نگه‌داشته می‌شود. برای برداشتن پین، «برگشت» را لمس کنید و نگه‌دارید."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"متوجه شدم"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"نه سپاسگزارم"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"نه متشکرم"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"پنهان کردن"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"مجاز است"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"اجازه ندارد"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> کنترل‌کننده صدا است"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"برای بازیابی کنترل‌کننده اصلی، لمس کنید."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"برای بازیابی نسخه اصلی ضربه بزنید."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"درحال استفاده از نمایه کاری‌تان هستید"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای بی‌صدا کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏کنترل‌های میزان صدای %s  نشان داده شدند. برای نپذیرفتن انگشتتان را تند بکشید."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"کنترل‌های صدا پنهان هستند"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"تنظیم‌کننده واسط کاربری سیستم"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"نمایش درصد شارژ باتری جاسازی شده"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"نمایش درصد سطح باتری در نماد نوار وضعیت، هنگامی که باتری شارژ نمی‌شود"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"مسدود کردن همه اعلان‌ها"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"ساکت نشود"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"ساکت یا مسدود نشود"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"نمایش تنظیمات کامل اهمیت"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"مسدود شده"</string>
-    <string name="min_importance" msgid="1901894910809414782">"کمترین اهمیت"</string>
-    <string name="low_importance" msgid="4109929986107147930">"اهمیت کم"</string>
-    <string name="default_importance" msgid="8192107689995742653">"اهمیت معمولی"</string>
-    <string name="high_importance" msgid="1527066195614050263">"اهمیت زیاد"</string>
-    <string name="max_importance" msgid="5089005872719563894">"اهمیت فوری"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"هرگز این اعلان‌ها نشان داده نشوند"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"بدون صدا در پایین فهرست اعلان نشان داده شود"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"این اعلان‌ها بی‌صدا نشان داده شوند"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"به این اعلان‌ها اجازه داده شود صدادار باشند"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"در صفحه نشان داده شوند و صدادار باشند"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"در بالای فهرست اعلان نشان داده شوند، در صفحه نشان داده شوند و صدادار باشند"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"کنترل‌های قدرتمند اعلان"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"روشن"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"خاموش"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در صفحه درحالت قفل و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"اهمیت: خودکار"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"اهمیت: سطح ۰"</string>
+    <string name="min_importance" msgid="560779348928574878">"اهمیت: سطح ۱"</string>
+    <string name="low_importance" msgid="7571498511534140">"اهمیت: سطح ۲"</string>
+    <string name="default_importance" msgid="7609889614553354702">"اهمیت: سطح ۳"</string>
+    <string name="high_importance" msgid="3441537905162782568">"اهمیت: سطح ۴"</string>
+    <string name="max_importance" msgid="4880179829869865275">"اهمیت: سطح ۵"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"برنامه اهمیت هر اعلان را تعیین می‌کند."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"اعلان‌های این برنامه هرگز نشان داده نمی‌شود."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"بدون وقفه نمایش تمام‌صفحه، نمایش اجمالی، صدا یا لرزش. عدم نمایش در صفحه قفل و نوار وضعیت."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"بدون وقفه نمایش تمام‌صفحه، نمایش اجمالی، صدا یا لرزش."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"بدون وقفه نمایش تمام‌صفحه یا نمایش اجمالی."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"همیشه نمایش اجمالی. بدون وقفه نمایش تمام‌صفحه."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"همیشه نمایش اجمالی، و مجاز بودن وقفه برای نمایش تمام‌صفحه."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"تنظیمات بیشتر"</string>
     <string name="notification_done" msgid="5279426047273930175">"تمام"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"کنترل‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"موارد دیگر"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"تقسیم‌کننده صفحه"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"انتقال به پایین"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"انتقال به بالا"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"انتقال به چپ"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"انتقال به راست"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"تمام‌صفحه چپ"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"٪۷۰ چپ"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"٪۵۰ چپ"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"٪۳۰ چپ"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"تمام‌صفحه راست"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"تمام‌صفحه بالا"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"٪۷۰ بالا"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"٪۵۰ بالا"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"٪۳۰ بالا"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"تمام‌صفحه پایین"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"موقعیت <xliff:g id="POSITION">%1$d</xliff:g>، <xliff:g id="TILE_NAME">%2$s</xliff:g>. برای ویرایش دو ضربه سریع بزنید."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. برای افزودن دو ضربه سریع بزنید."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"موقعیت <xliff:g id="POSITION">%1$d</xliff:g>. برای انتخاب دو ضربه سریع بزنید."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> حذف می‌شود"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> به موقعیت <xliff:g id="POSITION">%2$d</xliff:g> منتقل شد"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ویرایشگر تنظیمات سریع."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"اعلان <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ممکن است برنامه با تقسیم صفحه کار نکند."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"برنامه از تقسیم صفحه پشتیبانی نمی‌کند."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"بزرگ کردن تنظیمات سریع."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"باز کردن تنظیمات."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"باز کردن تنظیمات سریع."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"بستن تنظیمات سریع."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"تنظیم زنگ ساعت."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"واردشده به سیستم به‌عنوان <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"عدم اتصال به اینترنت."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"باز کردن جزئیات."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ویرایش ترتیب تنظیمات."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

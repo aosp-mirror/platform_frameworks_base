@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Afspil"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pause"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Hold "<b>"HOME"</b>" nede for at styre PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"Tryk på HOME-knappen, og hold den nede for at styre PIP"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Billede i billede"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Dette fastholder visningen af din video, indtil du afspiller en anden. Tryk på "<b>"START"</b>", og hold fingeren nede for at styre det."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Afvis"</string>
 </resources>

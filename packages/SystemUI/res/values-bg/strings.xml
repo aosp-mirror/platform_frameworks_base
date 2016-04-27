@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Екранната снимка се запазва..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Екранната снимка се запазва."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Екранната снимка е заснета."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Докоснете, за да видите екранната си снимка."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Докоснете, за да видите екранната снимка."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Екранната снимка не можа да бъде заснета."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"При запазването на екранната снимка възникна проблем."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Екранната снимка не може да се запази поради ограничено място в хранилището."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Сигналът за данни е пълен."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Има връзка с <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Има връзка с <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Установена е връзка с/ъс <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Няма WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX е с една чертичка."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX е с две чертички."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM карта."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилни данни"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Преносът на мобилни данни е включен"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилните данни са изключени"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Тетъринг през Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Самолетен режим."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Няма SIM карта."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Промяна на мрежата на оператора."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Отваряне на подробностите за батерията"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> процента батерия."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батерията се зарежда – <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> процента."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системни настройки."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Известия."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Изчистване на известието."</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Настройката „Не безпокойте“ е включена – само с приоритет."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Настройката „Не безпокойте“ е включена в режим за пълна тишина."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Настройката „Не безпокойте“ е включена в режим само с будилници."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не безпокойте."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Настройката „Не безпокойте“ е изключена."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Настройката „Не безпокойте“ е изключена."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Настройката „Не безпокойте“ е включена."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Функцията за Bluetooth е изключена."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Функцията за Bluetooth е включена."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Установява се връзка през Bluetooth."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Екранът е заключен в хоризонтална ориентация."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Екранът е заключен във вертикална ориентация."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Витрина с десерти"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Мечта"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Скрийнсейвър"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не безпокойте"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Само с приоритет"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Няма налични сдвоени устройства"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Яркост"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматична ориентация"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Автоматично завъртане на екрана"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Задали сте <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Ориентацията е заключена"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Вертикален режим"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Хоризонтален режим"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Няма връзка"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Няма мрежа"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi е изключен"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Функцията за Wi-Fi е включена"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Няма налични Wi-Fi мрежи"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Предаване"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Предава се"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Приложението <xliff:g id="APP">%s</xliff:g> е деактивирано в безопасния режим."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Изчистване на всичко"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Приложението не поддържа разделен екран"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Преместете тук с плъзгане, за да използвате режим за разделен екран"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хоризонтално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Вертикално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Персонализирано разделяне"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Докоснете отново за отваряне"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Плъзнете нагоре, за да отключите"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Плъзнете с пръст от иконата, за да използвате телефона"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Прекарайте пръст от иконата, за да получите гласова помощ"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Разгъване"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Свиване"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Екранът е фиксиран"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Така екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Разбрах"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Не, благодаря"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Да се скрие ли „<xliff:g id="TILE_LABEL">%1$s</xliff:g>“?"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Разрешаване"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Отказване"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> изпълнява ролята на диалоговия прозорец за силата на звука"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Докоснете, за да възстановите оригинала."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Докоснете, за да се възстанови първоначалната стойност."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Използвате служебния си потребителски профил"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Докоснете, за да включите отново звука."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Докоснете, за да зададете вибриране. Възможно е звукът на услугите за достъпност да бъде заглушен."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Докоснете, за да заглушите звука. Възможно е звукът на услугите за достъпност да бъде заглушен."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Показани са контролите за силата на звука на %s. Прекарайте пръст нагоре, за да ги скриете."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Контролите за силата на звука са скрити"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Тунер на системния потребителски интерфейс"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показване на процента на вградената батерия"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Показване на процента на нивото на батерията в иконата на лентата на състоянието, когато не се зарежда"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"Блокиране на всички известия"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Без заглушаване на звуковите сигнали"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Без заглушаване на звуковите сигнали или блокиране"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Показване на пълните настройки за важността"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Блокирано"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Минимална важност"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Малка важност"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Нормална важност"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Голяма важност"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Неотложна важност"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Тези известия не се показват"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Показване без звуков сигнал най-долу в списъка с известия"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Показване на тези известия без звуков сигнал"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Разрешаване при тези известия да се издава звуков сигнал"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Показване на екрана и разрешаване на звуков сигнал"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Показване най-горе в списъка с известия, както и на екрана и разрешаване на звуков сигнал"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Контроли за известията"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Вкл."</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Изкл."</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"С помощта на контролите за известията можете да зададете ниво на важност от 0 до 5 за известията от дадено приложение. \n\n"<b>"Ниво 5"</b>" \n– Показване най-горе в списъка с известия. \n– Разрешаване на прекъсването на цял екран. \n– Известията винаги се показват мимолетно. \n\n"<b>"Ниво 4"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията винаги се показват мимолетно. \n\n"<b>"Ниво 3"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n\n"<b>"Ниво 2"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n– Без издаване на звуков сигнал и вибриране. \n\n"<b>"Ниво 1"</b>" \n– Предотвратяване на прекъсването на цял екран. \n– Известията никога не се показват мимолетно. \n– Без издаване на звуков сигнал и вибриране. \n– Скриване от заключения екран и лентата на състоянието. \n– Показване най-долу в списъка с известия. \n\n"<b>"Ниво 0"</b>" \n– Блокиране на всички известия от приложението."</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Важност: Автоматично"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Важност: Ниво 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Важност: Ниво 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Важност: Ниво 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Важност: Ниво 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Важност: Ниво 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Важност: Ниво 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Приложението определя важността на всяко известие."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Известията от това приложение никога не се показват."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Без прекъсв. на цял екран, мимол. показв., звук или вибр. Скриване от закл. екран и лентата на съст."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Без прекъсване на цял екран, мимолетно показване, звук или вибриране."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Без прекъсване на цял екран или мимолетно показване."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Приложенията винаги се показват мимолетно. Без прекъсване на цял екран."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Приложенията винаги се показват мимолетно и е разрешено прекъсването на цял екран."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Още настройки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Контроли за известията от <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Друго"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Разделител в режима за разделен екран"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Преместване надолу"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Преместване нагоре"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Преместване наляво"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Преместване надясно"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Ляв екран: Показване на цял екран"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Ляв екран: 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Ляв екран: 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"Ляв екран: 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Десен екран: Показване на цял екран"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Горен екран: Показване на цял екран"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Горен екран: 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Горен екран: 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Горен екран: 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Долен екран: Показване на цял екран"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>, „<xliff:g id="TILE_NAME">%2$s</xliff:g>“. Докоснете двукратно, за да редактирате."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"„<xliff:g id="TILE_NAME">%1$s</xliff:g>“. Докоснете двукратно, за да добавите."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Позиция <xliff:g id="POSITION">%1$d</xliff:g>. Докоснете двукратно, за да изберете."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Премахнахте „<xliff:g id="TILE_NAME">%1$s</xliff:g>“"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Преместихте „<xliff:g id="TILE_NAME">%1$s</xliff:g>“ на позиция <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Редактор за бързи настройки."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Известие от <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Приложението може да не работи в режим на разделен екран."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Приложението не поддържа разделен екран."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Разгъване на бързите настройки."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Отваряне на настройките."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Отваряне на бързите настройки."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Затваряне на бързите настройки."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Будилникът е навит."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Влезли сте като <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Няма връзка с интернет."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Отвaряне на страницата с подробности."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Отваряне на настройките за <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Редактиране на подредбата на настройките."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Страница <xliff:g id="ID_1">%1$d</xliff:g> от <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>

@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"הפעל"</string>
     <string name="pip_pause" msgid="8412075640017218862">"השהה"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"‏לחץ לחיצה ארוכה על "<b>"דף הבית"</b>" כדי לשלוט ב-PIP"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"‏לחץ לחיצה ממושכת על לחצן דף הבית כדי לשלוט ב-PIP"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"תמונה בתוך תמונה"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"תכונה זו שומרת על תצוגת הסרטון עד שתפעיל סרטון אחר. לחץ לחיצה ממושכת על לחצן ה"<b>"בית"</b>" כדי לשלוט בתכונה."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"הבנתי"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"דחה"</string>
 </resources>

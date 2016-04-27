@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Esita"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Peata"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"PIP juht. hoidke all nuppu "<b>"AVAEKRAAN"</b></string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP juhtimiseks vajutage pikalt nuppu AVAEKRAAN"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Pilt pildis"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"See hoiab teie videot kuval, kuni esitate järgmise. Selle juhtimiseks vajutage pikalt nuppu "<b>"AVAEKRAAN"</b>"."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Selge"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Loobu"</string>
 </resources>

@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Ойнотуу"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Тындыруу"</string>
     <string name="pip_hold_home" msgid="340086535668778109"><b>"БАШКЫ БЕТ"</b>" басып туруп PIP\'ти башкарыңыз"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"PIP башкаруу үчүн БАШКЫ БЕТ баскычын басып, кармап туруңуз"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Сүрөт ичиндеги сүрөт"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Ушуну менен, башка видео ойнотмоюнча видеоңуз көрсөтүлө берет. Аны башкаруу үчүн "<b>"БАШКЫ БЕТ"</b>" баскычын басып, кармап туруңуз."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Түшүндүм"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Көз жаздымда калтыруу"</string>
 </resources>

@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已拍攝螢幕擷取畫面。"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"輕觸即可查看螢幕擷取畫面。"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"輕觸即可查看螢幕擷圖。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"無法拍攝螢幕擷取畫面。"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"儲存螢幕擷圖時發生問題。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"由於儲存空間有限，因此無法儲存螢幕擷取畫面。"</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"數據網路訊號滿格。"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"已連線至<xliff:g id="WIFI">%s</xliff:g>。"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"已連線至<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"已連線至 <xliff:g id="CAST">%s</xliff:g>。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"沒有 WiMAX 訊號。"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 訊號一格。"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 訊號兩格。"</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"行動數據"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"已啟用行動數據連線"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"行動數據連線已關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"沒有 SIM 卡。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"行動通訊業者網路正在變更。"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"開啟電量詳細資料"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"電池電量為百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"充電中，已完成百分之 <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>。"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"系統設定"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"「零打擾」設定為開啟，只會顯示優先通知。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"「零打擾」設定為開啟，完全靜音。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"「零打擾」設定為開啟，只會顯示鬧鐘。"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"零打擾。"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"「零打擾」設定為關閉。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已停用「零打擾」設定。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已啟用「零打擾」設定。"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"藍牙。"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"藍牙已關閉。"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"藍牙已開啟。"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"正在建立藍牙連線。"</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"螢幕現已鎖定為橫向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"螢幕現已鎖定為縱向模式。"</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"休眠模式"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"螢幕保護程式"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"乙太網路"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"零打擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"僅限優先通知"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"找不到配對的裝置"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動旋轉"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"自動旋轉螢幕"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"設為<xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"已鎖定旋轉"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"縱向"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"橫向"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"未連線"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"沒有網路"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi 已關閉"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"已開啟 Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"沒有 Wi-Fi 網路"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"投放"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"投放"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」在安全模式中為停用狀態。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"這個應用程式不支援分割畫面"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"拖曳到這裡即可使用分割畫面"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"再次輕觸即可開啟"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"再次輕觸即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑動即可解鎖"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑動手機圖示即可啟用"</string>
     <string name="voice_hint" msgid="8939888732119726665">"滑動語音小幫手圖示即可啟用"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收合"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住「返回」按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住「返回」按鈕即可取消固定。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏<xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"允許"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在是預設的音量控制對話方塊。"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸這裡即可恢復原始設定。"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"輕觸即可恢復原始設定。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您正在使用 Work 設定檔"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕觸即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕觸即可設為震動，但系統可能會將無障礙服務一併設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕觸即可設為靜音，但系統可能會將無障礙服務一併設為靜音。"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"已顯示 %s 個音量控制項。向上滑動即可關閉。"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"已隱藏音量控制項"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"系統使用者介面調整精靈"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"顯示嵌入式電池百分比"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充電時在狀態列圖示中顯示電量百分比"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"封鎖所有通知"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"不設定靜音"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"不設定靜音或封鎖"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"顯示完整的重要性設定"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"封鎖"</string>
-    <string name="min_importance" msgid="1901894910809414782">"最低重要性"</string>
-    <string name="low_importance" msgid="4109929986107147930">"低重要性"</string>
-    <string name="default_importance" msgid="8192107689995742653">"一般重要性"</string>
-    <string name="high_importance" msgid="1527066195614050263">"高重要性"</string>
-    <string name="max_importance" msgid="5089005872719563894">"緊急重要性"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"一律不顯示這些通知"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"顯示在通知清單底端，但不發出任何音效"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"顯示這些通知，但不發出任何音效"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"允許這些通知發出音效"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"短暫顯示在畫面上並發出音效"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"顯示在通知清單頂端，同時短暫顯示在畫面上並發出音效"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"電源通知控制項"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"開啟"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"關閉"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"只要使用電源通知控制項，您就能為應用程式通知設定從 0 到 5 的重要性等級。\n\n"<b>"等級 5"</b>" \n- 顯示在通知清單頂端 \n- 允許全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 4"</b>" \n- 禁止全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 3"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n\n"<b>"等級 2"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n\n"<b>"等級 1"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n- 在鎖定畫面和狀態列中隱藏 \n- 顯示在通知清單底端 \n\n"<b>"等級 0"</b>" \n- 封鎖應用程式的所有通知"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"重要性：自動"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"重要性：等級 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"重要性：等級 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"重要性：等級 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"重要性：等級 3"</string>
+    <string name="high_importance" msgid="3441537905162782568">"重要性：等級 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"重要性：等級 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"應用程式會判定每則通知的重要性。"</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"一律不顯示這個應用程式的通知。"</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"禁止全螢幕通知、短暫顯示通知、音效或震動。不在鎖定畫面和狀態列中顯示。"</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"禁止全螢幕通知、短暫顯示通知、音效或震動。"</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"禁止全螢幕通知或短暫顯示通知。"</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"一律允許短暫顯示通知，禁止全螢幕通知。"</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"一律允許短暫顯示通知，同時允許全螢幕通知。"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」通知控制項"</string>
@@ -593,22 +611,36 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"其他"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"分割畫面分隔線"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"向下移"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"向上移"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"向左移"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"向右移"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"位置 <xliff:g id="POSITION">%1$d</xliff:g>，<xliff:g id="TILE_NAME">%2$s</xliff:g>。輕按兩下即可編輯。"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>。輕按兩下即可新增。"</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"位置 <xliff:g id="POSITION">%1$d</xliff:g>。輕按兩下即可選取。"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"以全螢幕顯示左側畫面"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"以 70% 的螢幕空間顯示左側畫面"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"以 50% 的螢幕空間顯示左側畫面"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"以 30% 的螢幕空間顯示左側畫面"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"以全螢幕顯示右側畫面"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"以全螢幕顯示頂端畫面"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"以 70% 的螢幕空間顯示頂端畫面"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"以 50% 的螢幕空間顯示頂端畫面"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"以 30% 的螢幕空間顯示頂端畫面"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"以全螢幕顯示底部畫面"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"位置 <xliff:g id="POSITION">%1$d</xliff:g>，<xliff:g id="TILE_NAME">%2$s</xliff:g>。輕觸兩下即可編輯。"</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>。輕觸兩下即可新增。"</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"位置 <xliff:g id="POSITION">%1$d</xliff:g>。輕觸兩下即可選取。"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"移動 <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"移除 <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"已將 <xliff:g id="TILE_NAME">%1$s</xliff:g> 新增到位置 <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"已移除 <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"已將 <xliff:g id="TILE_NAME">%1$s</xliff:g> 移到位置 <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"快速設定編輯器。"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> 通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"這個應用程式不支援分割畫面。"</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"展開快速設定。"</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"開啟設定。"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"開啟快速設定。"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"關閉快速設定。"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"已設定鬧鐘。"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"以「<xliff:g id="ID_1">%s</xliff:g>」的身分登入"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"沒有網際網路連線。"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"開啟詳細資料。"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"開啟「<xliff:g id="ID_1">%s</xliff:g>」設定。"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"編輯設定順序。"</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 頁，共 <xliff:g id="ID_2">%2$d</xliff:g> 頁"</string>
 </resources>

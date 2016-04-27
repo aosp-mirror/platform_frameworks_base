@@ -24,7 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"چلائیں"</string>
     <string name="pip_pause" msgid="8412075640017218862">"موقوف کریں"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"‏PIP کنٹرول کرنے کیلئے "<b>"ہوم"</b>" پکڑے رکھیں"</string>
-    <string name="pip_onboarding_description" msgid="2882896641362814195">"‏PIP کنٹرول کرنے کیلئے ہوم بٹن دبائیں اور پکڑے رکھیں"</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"تصویر میں تصویر"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"یہ آپ کی ویڈیو تب تک دکھاتا رہتا ہے جب تک آپ کوئی دوسری نہیں چلاتے۔ اسے کنٹرول کرنے کیلئے "<b>"ہوم"</b>" دبائیں اور پکڑے رہیں۔"</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"سمجھ آ گئی"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"برخاست کریں"</string>
 </resources>

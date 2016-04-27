@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Αποθήκευση στιγμιότυπου οθόνης..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Γίνεται αποθήκευση του στιγμιότυπου οθόνης."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Λήφθηκε το στιγμιότυπο οθόνης ."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Πατήστε για να δείτε το στιγμιότυπο οθόνης που δημιουργήσατε."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Παρουσιάστηκε πρόβλημα κατά την αποθήκευση του στιγμιότυπου οθόνης."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Δεν είναι δυνατή η αποθήκευση του στιγμιότυπου οθόνης λόγω περιορισμένου χώρου αποθήκευσης."</string>
@@ -118,6 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Πλήρες σήμα δεδομένων."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Συνδέθηκε στο <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Συνδέθηκε στο <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Συνδέθηκε σε <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Δεν υπάρχει σήμα WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Σήμα WiMAX μία γραμμή."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Σήμα WiMAX δύο γραμμές."</string>
@@ -148,12 +149,16 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Δεν υπάρχει SIM."</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Δεδομένα κινητής τηλεφωνίας"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Τα δεδομένα κινητής τηλεφωνίας είναι ενεργά"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Τα δεδομένα κινητής τηλεφωνίας είναι απενεργοποιημένα"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Πρόσδεση Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Λειτουργία πτήσης."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Δεν υπάρχει κάρτα SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Αλλαγή δικτύου εταιρείας κινητής τηλεφωνίας."</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"Άνοιγμα λεπτομερειών μπαταρίας"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Μπαταρία <xliff:g id="NUMBER">%d</xliff:g> τοις εκατό."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Φόρτιση μπαταρίας, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> τοις εκατό."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Ρυθμίσεις συστήματος."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Ειδοποιήσεις."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Εκκαθάριση ειδοποίησης."</string>
@@ -191,9 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε, μόνο προτεραιότητας."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε, πλήρης σίγαση."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Μην ενοχλείτε, μόνο ειδοποιήσεις."</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Μην ενοχλείτε."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Η λειτουργία \"Μην ενοχλείτε\" απενεργοποιήθηκε."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Η λειτουργία \"Μην ενοχλείτε\" απενεργοποιήθηκε."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Η λειτουργία \"Μην ενοχλείτε\" ενεργοποιήθηκε."</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Ανενεργό Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Ενεργό Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Σύνδεση Bluetooth."</string>
@@ -247,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Η οθόνη έχει κλειδωθεί σε οριζόντιο προσανατολισμό."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Η οθόνη έχει κλειδωθεί σε κατακόρυφο προσανατολισμό."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Επιδόρπιο"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Προφύλαξη οθόνης"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Μην ενοχλείτε"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Μόνο προτεραιότητας"</string>
@@ -259,6 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Δεν υπάρχουν διαθέσιμες συσκευές σε σύζευξη"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Φωτεινότητα"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Αυτόματη περιστροφή"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Αυτόματη περιστροφή οθόνης"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Ορίστηκε σε <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Η περιστροφή είναι κλειδωμένη"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Κατακόρυφα"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Οριζόντια"</string>
@@ -277,6 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Μη συνδεδεμένο"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Κανένα δίκτυο"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ανενεργό"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Ενεργό Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Δεν υπάρχουν διαθέσιμα δίκτυα Wi-Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Μετάδοση"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Μετάδοση"</string>
@@ -312,6 +322,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> έχει απενεργοποιηθεί στην ασφαλή λειτουργία."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Διαγραφή όλων"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Η εφαρμογή δεν υποστηρίζει τον διαχωρισμό οθόνης"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Σύρετε εδώ για να χρησιμοποιήσετε τον διαχωρισμό οθόνης"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>
@@ -329,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Αυτή η επιλογή αποκλείει όλους τους ήχους και τις δονήσεις, μεταξύ των οποίων των ξυπνητηριών, της μουσικής, των βίντεο και των παιχνιδιών."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Λιγότερο επείγουσες ειδοποιήσεις παρακάτω"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"Αγγίξτε ξανά για άνοιγμα"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Πατήστε ξανά για να ανοίξετε"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Σύρετε για να ξεκλειδώσετε"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Σύρετε προς τα έξω για τηλέφωνο"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Σύρετε προς τα έξω για voice assist"</string>
@@ -407,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Ανάπτυξη"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Σύμπτυξη"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Η οθόνη καρφιτσώθηκε"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"Με αυτόν τον τρόπο παραμένει σε προβολή έως ότου την ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα το στοιχείο επιστροφής για να την ξεκαρφιτσώσετε."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Με αυτόν τον τρόπο παραμένει σε προβολή έως ότου την ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα το στοιχείο επιστροφής για να την ξεκαρφιτσώσετε."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Το κατάλαβα"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Όχι"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Απόκρυψη <xliff:g id="TILE_LABEL">%1$s</xliff:g>;"</string>
@@ -417,11 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Να επιτραπεί"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Απόρριψη"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> αποτελεί το παράθυρο διαλόγου ελέγχου έντασης"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"Αγγίξτε για επαναφορά αρχικού."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Πατήστε για να επαναφέρετε την αρχική μορφή της εικόνας."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Χρησιμοποιείτε το προφίλ εργασίας σας"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Πατήστε για κατάργηση σίγασης."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Πατήστε για ενεργοποιήσετε τη δόνηση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Πατήστε για σίγαση. Οι υπηρεσίες προσβασιμότητας ενδέχεται να τεθούν σε σίγαση."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Εμφανίζονται τα στοιχεία ελέγχου έντασης %s. Σύρετε για παράβλεψη."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Έγινε απόκρυψη των στοιχείων ελέγχου έντασης"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Εμφάνιση ποσοστού ενσωματωμένης μπαταρίας"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Εμφάνιση ποσοστού επιπέδου μπαταρίας μέσα στο εικονίδιο της γραμμής κατάστασης όταν δεν γίνεται φόρτιση"</string>
@@ -466,19 +479,24 @@
     <string name="block" msgid="2734508760962682611">"Αποκλεισμός όλων των ειδοποιήσεων"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"Χωρίς σίγαση"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"Χωρίς σίγαση ή αποκλεισμό"</string>
-    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Εμφάνιση όλων των ρυθμίσεων βαρύτητας"</string>
-    <string name="blocked_importance" msgid="5198578988978234161">"Αποκλεισμένες"</string>
-    <string name="min_importance" msgid="1901894910809414782">"Ελάχιστη βαρύτητα"</string>
-    <string name="low_importance" msgid="4109929986107147930">"Μικρής βαρύτητας"</string>
-    <string name="default_importance" msgid="8192107689995742653">"Κανονικής βαρύτητας"</string>
-    <string name="high_importance" msgid="1527066195614050263">"Μεγάλης βαρύτητας"</string>
-    <string name="max_importance" msgid="5089005872719563894">"Επείγουσες"</string>
-    <string name="notification_importance_blocked" msgid="2397192642657872872">"Να μην εμφανίζονται ποτέ αυτές οι ειδοποιήσεις"</string>
-    <string name="notification_importance_min" msgid="1938190340516905748">"Να εμφανίζονται στο κάτω μέρος της λίστας ειδοποιήσεων χωρίς ήχο"</string>
-    <string name="notification_importance_low" msgid="3657252049508213048">"Να εμφανίζονται αυτές οι ειδοποιήσεις χωρίς ήχο"</string>
-    <string name="notification_importance_default" msgid="4466466472622442175">"Να επιτρέπονται οι ήχοι από αυτές τις ειδοποιήσεις"</string>
-    <string name="notification_importance_high" msgid="2135428926525093825">"Να προβάλλονται στην οθόνη και να επιτρέπεται ο ήχος"</string>
-    <string name="notification_importance_max" msgid="5806278962376556491">"Να εμφανίζονται στην κορυφή της λίστας ειδοποιήσεων, να προβάλλονται στην οθόνη και να επιτρέπεται ο ήχος"</string>
+    <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Στοιχεία ελέγχου ειδοποίησης ισχύος"</string>
+    <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Ενεργή"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Ανενεργή"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"Με τα στοιχεία ελέγχου ειδοποίησης ισχύος, μπορείτε να ορίσετε ένα επίπεδο βαρύτητας από 0 έως 5 για τις ειδοποιήσεις μιας εφαρμογής. \n\n"<b>"Επίπεδο 5"</b>" \n- Εμφάνιση στην κορυφή της λίστας ειδοποιήσεων \n- Να επιτρέπεται η διακοπή πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 4"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να γίνεται πάντα σύντομη προβολή \n\n"<b>"Επίπεδο 3"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n\n"<b>"Επίπεδο 2"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n\n"<b>"Επίπεδο 1"</b>" \n- Αποτροπή διακοπής πλήρους οθόνης \n- Να μην γίνεται ποτέ σύντομη προβολή \n- Να μην χρησιμοποιείται ποτέ ήχος και δόνηση \n- Απόκρυψη από την οθόνη κλειδώματος και τη γραμμή κατάστασης \n- Εμφάνιση στο κάτω μέρος της λίστας ειδοποιήσεων \n\n"<b>"Επίπεδο 0"</b>" \n- Αποκλεισμός όλων των ειδοποιήσεων από την εφαρμογή"</string>
+    <string name="user_unspecified_importance" msgid="361613856933432117">"Βαρύτητα: Αυτόματη"</string>
+    <string name="blocked_importance" msgid="5035073235408414397">"Βαρύτητα: Επίπεδο 0"</string>
+    <string name="min_importance" msgid="560779348928574878">"Βαρύτητα: Επίπεδο 1"</string>
+    <string name="low_importance" msgid="7571498511534140">"Βαρύτητα: Επίπεδο 2"</string>
+    <string name="default_importance" msgid="7609889614553354702">"Βαρύτητα: Επίπεδο 30"</string>
+    <string name="high_importance" msgid="3441537905162782568">"Βαρύτητα: Επίπεδο 4"</string>
+    <string name="max_importance" msgid="4880179829869865275">"Βαρύτητα: Επίπεδο 5"</string>
+    <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Η εφαρμογή αποφασίζει για τη βαρύτητα κάθε ειδοποίησης."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Να μην εμφανίζονται ποτέ ειδοποιήσεις από αυτήν την εφαρμογή."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"Χωρίς λειτ. διακοπ., σύντ. προβ., ήχου ή δόν. σε πλ. οθόνη. Απόκρ. από οθ. κλειδ. και γραμμή κατάστ."</string>
+    <string name="notification_importance_low" msgid="7950291702044409847">"Να μην είναι διαθέσιμες οι λειτουργίες διακοπής, σύντομης προβολής, ήχου ή δόνησης σε πλήρη οθόνη."</string>
+    <string name="notification_importance_default" msgid="5924405820269074915">"Να μην γίνεται διακοπή ή σύντομη προβολή σε πλήρη οθόνη."</string>
+    <string name="notification_importance_high" msgid="1729480727023990427">"Να γίνεται πάντα σύντομη προβολή. Να μην γίνεται διακοπή σε πλήρη οθόνη."</string>
+    <string name="notification_importance_max" msgid="2508384624461849111">"Να γίνεται πάντα σύντομη προβολή και να επιτρέπεται η διακοπή σε πλήρη οθόνη."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Περισσότερες ρυθμίσεις"</string>
     <string name="notification_done" msgid="5279426047273930175">"Τέλος"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Στοιχεία ελέγχου κοινοποίησης <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -593,10 +611,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"Άλλο"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Διαχωριστικό οθόνης"</string>
-    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Μετακίνηση προς τα κάτω"</string>
-    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Μετακίνηση προς τα επάνω"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Μετακίνηση αριστερά"</string>
-    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Μετακίνηση δεξιά"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Αριστερή πλήρης οθόνη"</string>
+    <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Αριστερή 70%"</string>
+    <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Αριστερή 50%"</string>
+    <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"Αριστερή 30%"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"Δεξιά πλήρης οθόνη"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"Πάνω πλήρης οθόνη"</string>
+    <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Πάνω 70%"</string>
+    <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Πάνω 50%"</string>
+    <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Πάνω 30%"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Κάτω πλήρης οθόνη"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Θέση <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Πατήστε δύο φορές για επεξεργασία."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Πατήστε δύο φορές για προσθήκη."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Θέση <xliff:g id="POSITION">%1$d</xliff:g>. Πατήστε δύο φορές για επιλογή."</string>
@@ -606,9 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Το <xliff:g id="TILE_NAME">%1$s</xliff:g> καταργείται"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"Το <xliff:g id="TILE_NAME">%1$s</xliff:g> μετακινήθηκε στη θέση <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Επεξεργασία γρήγορων ρυθμίσεων."</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Ειδοποίηση <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Δεν είναι δυνατή η λειτουργία της εφαρμογής με διαχωρισμό οθόνης."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Η εφαρμογή δεν υποστηρίζει διαχωρισμό οθόνης."</string>
-    <string name="accessibility_quick_settings_expand" msgid="4982484435775933070">"Ανάπτυξη γρήγορων ρυθμίσεων."</string>
-    <!-- no translation found for accessibility_quick_settings_page (5032979051755200721) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Άνοιγμα ρυθμίσεων."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Άνοιγμα γρήγορων ρυθμίσεων."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Κλείσιμο γρήγορων ρυθμίσεων."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Το ξυπνητήρι ορίστηκε."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Σύνδεση ως <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Δεν υπάρχει σύνδεση στο διαδίκτυο."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Άνοιγμα λεπτομερειών."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Άνοιγμα ρυθμίσεων <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Επεξεργασία σειράς ρυθμίσεων."</string>
+    <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Σελίδα <xliff:g id="ID_1">%1$d</xliff:g> από <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>
