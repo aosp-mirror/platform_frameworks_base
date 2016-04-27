@@ -33,6 +33,7 @@
 #include <memory>
 #include <stdio.h>
 #include <ui/DisplayInfo.h>
+#include <ui/HdrCapabilities.h>
 #include <ui/FrameStats.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -82,6 +83,11 @@ static struct {
     nsecs_t UNDEFINED_TIME_NANO;
     jmethodID init;
 } gWindowAnimationFrameStatsClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gHdrCapabilitiesClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -610,6 +616,22 @@ static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return javaObjectForIBinder(env, ctrl->getHandle());
 }
 
+static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
+    if (token == NULL) return NULL;
+
+    HdrCapabilities capabilities;
+    SurfaceComposerClient::getHdrCapabilities(token, &capabilities);
+
+    const auto& types = capabilities.getSupportedHdrTypes();
+    auto typesArray = env->NewIntArray(types.size());
+    env->SetIntArrayRegion(typesArray, 0, types.size(), types.data());
+
+    return env->NewObject(gHdrCapabilitiesClassInfo.clazz, gHdrCapabilitiesClassInfo.ctor,
+            typesArray, capabilities.getDesiredMaxLuminance(),
+            capabilities.getDesiredMaxAverageLuminance(), capabilities.getDesiredMinLuminance());
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -671,6 +693,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
+    {"nativeGetHdrCapabilities", "(Landroid/os/IBinder;)Landroid/view/Display$HdrCapabilities;",
+            (void*)nativeGetHdrCapabilities },
     {"nativeClearContentFrameStats", "(J)Z",
             (void*)nativeClearContentFrameStats },
     {"nativeGetContentFrameStats", "(JLandroid/view/WindowContentFrameStats;)Z",
@@ -732,6 +756,11 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gWindowAnimationFrameStatsClassInfo.init =  GetMethodIDOrDie(env,
             animFrameStatsClazz, "init", "(J[J)V");
     gWindowAnimationFrameStatsClassInfo.UNDEFINED_TIME_NANO = undefined_time_nano;
+
+    jclass hdrCapabilitiesClazz = FindClassOrDie(env, "android/view/Display$HdrCapabilities");
+    gHdrCapabilitiesClassInfo.clazz = MakeGlobalRefOrDie(env, hdrCapabilitiesClazz);
+    gHdrCapabilitiesClassInfo.ctor = GetMethodIDOrDie(env, hdrCapabilitiesClazz, "<init>",
+            "([IFFF)V");
 
     return err;
 }

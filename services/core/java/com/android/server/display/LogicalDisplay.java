@@ -241,6 +241,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.supportedColorTransforms = Arrays.copyOf(
                     deviceInfo.supportedColorTransforms,
                     deviceInfo.supportedColorTransforms.length);
+            mBaseDisplayInfo.hdrCapabilities = deviceInfo.hdrCapabilities;
             mBaseDisplayInfo.logicalDensityDpi = deviceInfo.densityDpi;
             mBaseDisplayInfo.physicalXDpi = deviceInfo.xDpi;
             mBaseDisplayInfo.physicalYDpi = deviceInfo.yDpi;
