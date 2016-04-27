@@ -1899,6 +1899,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public void onTetheringChanged(String iface, boolean tethering) {
+        // No need to enforce permission because setRestrictBackground() will do it.
+        if (LOGD) Log.d(TAG, "onTetherStateChanged(" + iface + ", " + tethering + ")");
+        synchronized (mRulesLock) {
+            if (mRestrictBackground && tethering) {
+                Log.d(TAG, "Tethering on (" + iface +"); disable Data Saver");
+                setRestrictBackground(false);
+            }
+        }
+    }
+
+    @Override
     public void setRestrictBackground(boolean restrictBackground) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
         final long token = Binder.clearCallingIdentity();

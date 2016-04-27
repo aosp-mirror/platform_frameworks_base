@@ -610,6 +610,13 @@ public class Tethering extends BaseNetworkObserver {
         return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
+    public void untetherAll() {
+        if (DBG) Log.d(TAG, "Untethering " + mIfaces);
+        for (String iface : mIfaces.keySet()) {
+            untether(iface);
+        }
+    }
+
     public int getLastTetherError(String iface) {
         TetherInterfaceSM sm = null;
         synchronized (mPublicSync) {
