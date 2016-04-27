@@ -13808,9 +13808,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int[] allUsers;
         final int[] installedUsers;
 
-        // First find the old package info and check signatures
         synchronized(mPackages) {
             oldPackage = mPackages.get(pkgName);
+            if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
+
+            // don't allow upgrade to target a release SDK from a pre-release SDK
+            final boolean oldTargetsPreRelease = oldPackage.applicationInfo.targetSdkVersion
+                    == android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
+            final boolean newTargetsPreRelease = pkg.applicationInfo.targetSdkVersion
+                    == android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
+            if (oldTargetsPreRelease
+                    && !newTargetsPreRelease
+                    && ((policyFlags & PackageParser.PARSE_FORCE_SDK) == 0)) {
+                Slog.w(TAG, "Can't install package targeting released sdk");
+                res.setReturnCode(PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
+                return;
+            }
+
+            // don't allow an upgrade from full to ephemeral
             final boolean oldIsEphemeral = oldPackage.applicationInfo.isEphemeralApp();
             if (isEphemeral && !oldIsEphemeral) {
                 // can't downgrade from full to ephemeral
@@ -13818,7 +13833,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 res.setReturnCode(PackageManager.INSTALL_FAILED_EPHEMERAL_INVALID);
                 return;
             }
-            if (DEBUG_INSTALL) Slog.d(TAG, "replacePackageLI: new=" + pkg + ", old=" + oldPackage);
+
+            // verify signatures are valid
             final PackageSetting ps = mSettings.mPackages.get(pkgName);
             if (shouldCheckUpgradeKeySetLP(ps, scanFlags)) {
                 if (!checkUpgradeKeySetLP(ps, pkg)) {
@@ -14426,6 +14442,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final boolean onExternal = (((installFlags & PackageManager.INSTALL_EXTERNAL) != 0)
                 || (args.volumeUuid != null));
         final boolean ephemeral = ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0);
+        final boolean forceSdk = ((installFlags & PackageManager.INSTALL_FORCE_SDK) != 0);
         boolean replace = false;
         int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
@@ -14454,7 +14471,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 | PackageParser.PARSE_ENFORCE_CODE
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
-                | (ephemeral ? PackageParser.PARSE_IS_EPHEMERAL : 0);
+                | (ephemeral ? PackageParser.PARSE_IS_EPHEMERAL : 0)
+                | (forceSdk ? PackageParser.PARSE_FORCE_SDK : 0);
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
         pp.setDisplayMetrics(mMetrics);
