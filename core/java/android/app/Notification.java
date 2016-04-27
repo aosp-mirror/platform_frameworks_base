@@ -3351,7 +3351,8 @@ public class Notification implements Parcelable
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
-            big.setViewVisibility(R.id.actions_container, View.GONE);
+            // actions_container is only reset when there are no actions to avoid focus issues with
+            // remote inputs.
             big.setViewVisibility(R.id.actions, View.GONE);
             big.removeAllViews(R.id.actions);
 
@@ -3396,6 +3397,8 @@ public class Notification implements Parcelable
                     }
                     big.addView(R.id.actions, button);
                 }
+            } else {
+                big.setViewVisibility(R.id.actions_container, View.GONE);
             }
 
             CharSequence[] replyText = mN.extras.getCharSequenceArray(EXTRA_REMOTE_INPUT_HISTORY);
