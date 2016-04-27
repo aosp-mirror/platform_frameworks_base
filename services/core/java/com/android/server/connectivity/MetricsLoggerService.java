@@ -192,11 +192,13 @@ public class MetricsLoggerService extends SystemService {
                 }
             }
 
-            if (!mPendingIntents.isEmpty()) {
-                pw.println();
-                pw.println("Pending intents:");
-                for (PendingIntent pi : mPendingIntents) {
-                    pw.println(pi.toString());
+            synchronized (mPendingIntents) {
+                if (!mPendingIntents.isEmpty()) {
+                    pw.println();
+                    pw.println("Pending intents:");
+                    for (PendingIntent pi : mPendingIntents) {
+                        pw.println(pi.toString());
+                    }
                 }
             }
 
@@ -327,9 +329,9 @@ public class MetricsLoggerService extends SystemService {
                         result[i++] = e;
                     }
                 }
-            }
 
-            reference.setValue(mLastEventReference);
+                reference.setValue(mLastEventReference);
+            }
 
             return result;
         }
