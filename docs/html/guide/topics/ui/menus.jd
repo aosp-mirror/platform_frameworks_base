@@ -75,14 +75,6 @@ versions of Android:</p>
     <dd>The <a href="#options-menu">options menu</a> is the primary collection of menu items for an
 activity. It's where you should place actions that have a global impact on the app, such as
 "Search," "Compose email," and "Settings."
-  <p>If you're developing for Android 2.3 or lower, users can
-reveal the options menu panel by pressing the <em>Menu</em> button.</p>
-  <p>On Android 3.0 and higher, items from the options menu are presented by the
-  app bar as a combination of on-screen action
-items and overflow options. Beginning with Android 3.0, the <em>Menu</em> button is deprecated (some
-devices
-don't have one), so you should migrate toward using the action bar to provide access to actions and
-other options.</p>
   <p>See the section about <a href="#options-menu">Creating an Options Menu</a>.</p>
     </dd>
     
@@ -91,8 +83,7 @@ other options.</p>
    <dd>A context menu is a <a href="#FloatingContextMenu">floating menu</a> that appears when the
 user performs a long-click on an element. It provides actions that affect the selected content or
 context frame.
-  <p>When developing for Android 3.0 and higher, you should instead use the <a
-href="#CAB">contextual action mode</a> to enable actions on selected content. This mode displays
+  <p>The <a href="#CAB">contextual action mode</a> displays
 action items that affect the selected content in a bar at the top of the screen and allows the user
 to select multiple items.</p>
   <p>See the section about <a href="#context-menu">Creating Contextual Menus</a>.</p>
@@ -278,8 +269,8 @@ properties with {@link android.view.MenuItem} APIs.</p>
 
 <p>If you've developed your application for Android 2.3.x and lower, the system calls {@link
 android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} to create the options menu
-when the user opens the menu for the first time. If you've developed for Android 3.0 and higher, the
-system calls {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} when
+when the user opens the menu for the first time. If you've developed for Android 3.0 and higher,
+the system calls {@link android.app.Activity#onCreateOptionsMenu(Menu) onCreateOptionsMenu()} when
 starting the activity, in order to show items to the app bar.</p>
 
 
@@ -503,10 +494,6 @@ or selects the <em>Done</em> action on the left side of the bar.</p>
 associated with the app bar. They operate
 independently, even though the contextual action bar visually overtakes the app bar
 position.</p>
-
-<p>If you're developing for Android 3.0 (API level 11) or higher, you
-should usually use the contextual action mode to present contextual actions, instead of the <a
-href="#FloatingContextMenu">floating context menu</a>.</p>
 
 <p>For views that provide contextual actions, you should usually invoke the contextual action mode
 upon one of two events (or both):</p>
@@ -737,13 +724,12 @@ level 11 and higher.</p>
 
 <p>If you <a href="#xml">define your menu in XML</a>, here's how you can show the popup menu:</p>
 <ol>
-  <li>Instantate a {@link android.widget.PopupMenu} with its constructor, which takes the
+  <li>Instantiate a {@link android.widget.PopupMenu} with its constructor, which takes the
 current application {@link android.content.Context} and the {@link android.view.View} to which the
 menu should be anchored.</li>
   <li>Use {@link android.view.MenuInflater} to inflate your menu resource into the {@link
 android.view.Menu} object returned by {@link
-android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}. On API level 14 and above, you can use
-{@link android.widget.PopupMenu#inflate PopupMenu.inflate()} instead.</li>
+android.widget.PopupMenu#getMenu() PopupMenu.getMenu()}.</li>
   <li>Call {@link android.widget.PopupMenu#show() PopupMenu.show()}.</li>
 </ol>
 

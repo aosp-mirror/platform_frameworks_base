@@ -549,7 +549,7 @@ values with the defaults.</p>
 <p>In rare cases, you might want to design your settings such that the first screen
 displays only a list of <a href="#Subscreens">subscreens</a> (such as in the system Settings app,
 as shown in figures 4 and 5). When you're developing such a design for Android 3.0 and higher, you
-should use a new "headers" feature in Android 3.0, instead of building subscreens with nested
+should use the "headers" feature instead of building subscreens with nested
 {@link android.preference.PreferenceScreen} elements.</p>
 
 <p>To build your settings with headers, you need to:</p>
@@ -719,7 +719,7 @@ Android 3.0 ({@code res/xml/preference_headers_legacy.xml}):</p>
 
 <p>Because support for {@code <preference-headers>} was added in Android 3.0, the system calls
 {@link android.preference.PreferenceActivity#onBuildHeaders onBuildHeaders()} in your {@link
-android.preference.PreferenceActivity} only when running on Androd 3.0 or higher. In order to load
+android.preference.PreferenceActivity} only when running on Android 3.0 or higher. In order to load
 the "legacy" headers file ({@code preference_headers_legacy.xml}), you must check the Android
 version and, if the version is older than Android 3.0 ({@link
 android.os.Build.VERSION_CODES#HONEYCOMB}), call {@link

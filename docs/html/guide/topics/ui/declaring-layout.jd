@@ -211,7 +211,7 @@ set the width or height: </p>
 <ul>
   <li><var>wrap_content</var> tells your view to size itself to the dimensions
 required by its content.</li>
-  <li><var>match_parent</var> (named <var>fill_parent</var> before API Level 8)
+  <li><var>match_parent</var>
 tells your view to become as big as its parent view group will allow.</li>
 </ul>
 
