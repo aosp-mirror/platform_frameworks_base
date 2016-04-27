@@ -67,7 +67,6 @@ public class RootsCache {
 
     private final Context mContext;
     private final ContentObserver mObserver;
-    private OnCacheUpdateListener mCacheUpdateListener;
 
     private final RootInfo mRecentsRoot;
 
@@ -117,10 +116,6 @@ public class RootsCache {
             if (DEBUG) Log.d(TAG, "Updating roots due to change at " + uri);
             updateAuthorityAsync(uri.getAuthority());
         }
-    }
-
-    static interface OnCacheUpdateListener {
-        void onCacheUpdate();
     }
 
     /**
@@ -280,13 +275,6 @@ public class RootsCache {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            if (mCacheUpdateListener != null) {
-                mCacheUpdateListener.onCacheUpdate();
-            }
-        }
-
         private void handleDocumentsProvider(ProviderInfo info) {
             // Ignore stopped packages for now; we might query them
             // later during UI interaction.
@@ -443,10 +431,6 @@ public class RootsCache {
             final Collection<RootInfo> roots = mRoots.get(authority);
             return roots != null ? roots : Collections.<RootInfo>emptyList();
         }
-    }
-
-    public void setOnCacheUpdateListener(OnCacheUpdateListener cacheUpdateListener) {
-        mCacheUpdateListener = cacheUpdateListener;
     }
 
     /**
