@@ -70,6 +70,8 @@ toc:
     path: /preview/j8-jack.html
   - title: Android for Work Updates
     path: /preview/features/afw.html
+  - title: Scoped Directory Access
+    path: /preview/features/scoped-folder-access.html
 
 - title: Samples
   path: /preview/samples.html
