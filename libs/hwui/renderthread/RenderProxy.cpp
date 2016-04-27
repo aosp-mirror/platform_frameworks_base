@@ -623,12 +623,13 @@ CREATE_BRIDGE3(copySurfaceInto, RenderThread* thread,
             *args->surface, args->bitmap);
 }
 
-bool RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
+int RenderProxy::copySurfaceInto(sp<Surface>& surface, SkBitmap* bitmap) {
     SETUP_TASK(copySurfaceInto);
     args->bitmap = bitmap;
     args->surface = surface.get();
     args->thread = &RenderThread::getInstance();
-    return (bool) staticPostAndWait(task);
+    return static_cast<int>(
+            reinterpret_cast<intptr_t>( staticPostAndWait(task) ));
 }
 
 void RenderProxy::post(RenderTask* task) {
