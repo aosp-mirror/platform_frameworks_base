@@ -29,8 +29,7 @@
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Visa inte igen"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Felrapporter"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Det gick inte att läsa felrapporten"</string>
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Det gick inte att lägga till information om felrapporten i ZIP-filen"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"namnlös"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Information"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Skärmdump"</string>
