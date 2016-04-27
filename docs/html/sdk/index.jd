@@ -503,7 +503,7 @@ VT-x, Intel® EM64T (Intel® 64), and Execute Disable (XD) Bit functionality</li
 <li>2 GB of available disk space minimum (500 MB for IDE + 1.5 GB for
 Android SDK and emulator system image). 4 GB Recommended.</li>
 <li>1280 x 800 minimum screen resolution</li>
-<li>Java Development Kit (JDK) 8</li>
+<li>Java Development Kit (JDK) 6</li>
 </ul>
 </div>
 
