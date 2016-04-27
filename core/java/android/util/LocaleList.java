@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.Locale;
 
 /**
- * LocaleList is an immutable list of Locales, typically used to keep an
- * ordered user preferences for locales.
+ * LocaleList is an immutable list of Locales, typically used to keep an ordered list of user
+ * preferences for locales.
  */
 public final class LocaleList implements Parcelable {
     private final Locale[] mList;
@@ -46,19 +46,42 @@ public final class LocaleList implements Parcelable {
     private static final Locale[] sEmptyList = new Locale[0];
     private static final LocaleList sEmptyLocaleList = new LocaleList();
 
-    public Locale get(int location) {
-        return (0 <= location && location < mList.length) ? mList[location] : null;
+    /**
+     * Retrieves the {@link Locale} at the specified index.
+     *
+     * @param index The position to retrieve.
+     * @return The {@link Locale} in the given index.
+     */
+    public Locale get(int index) {
+        return (0 <= index && index < mList.length) ? mList[index] : null;
     }
 
+    /**
+     * Returns whether the {@link LocaleList} contains no {@link Locale} items.
+     *
+     * @return {@code true} if this {@link LocaleList} has no {@link Locale} items, {@code false}
+     *     otherwise.
+     */
     public boolean isEmpty() {
         return mList.length == 0;
     }
 
+    /**
+     * Returns the number of {@link Locale} items in this {@link LocaleList}.
+     */
     @IntRange(from=0)
     public int size() {
         return mList.length;
     }
 
+    /**
+     * Searches this {@link LocaleList} for the specified {@link Locale} and returns the index of
+     * the first occurrence.
+     *
+     * @param locale The {@link Locale} to search for.
+     * @return The index of the first occurrence of the {@link Locale} or {@code -1} if the item
+     *     wasn't found.
+     */
     @IntRange(from=-1)
     public int indexOf(Locale locale) {
         for (int i = 0; i < mList.length; i++) {
@@ -118,6 +141,9 @@ public final class LocaleList implements Parcelable {
         dest.writeString(mStringRepresentation);
     }
 
+    /**
+     * Retrieves a String representation of the language tags in this list.
+     */
     @NonNull
     public String toLanguageTags() {
         return mStringRepresentation;
@@ -126,6 +152,8 @@ public final class LocaleList implements Parcelable {
     /**
      * It is almost always better to call {@link #getEmptyLocaleList()} instead which returns
      * a pre-constructed empty locale list.
+     *
+     * @hide
      */
     public LocaleList() {
         mList = sEmptyList;
@@ -133,25 +161,15 @@ public final class LocaleList implements Parcelable {
     }
 
     /**
+     * Creates a new {@link LocaleList}.
+     *
+     * <p>For empty lists of {@link Locale} items it is better to use {@link #getEmptyLocaleList()},
+     * which returns a pre-constructed empty list.</p>
+     *
      * @throws NullPointerException if any of the input locales is <code>null</code>.
      * @throws IllegalArgumentException if any of the input locales repeat.
      */
-    public LocaleList(@Nullable Locale locale) {
-        if (locale == null) {
-            mList = sEmptyList;
-            mStringRepresentation = "";
-        } else {
-            mList = new Locale[1];
-            mList[0] = (Locale) locale.clone();
-            mStringRepresentation = locale.toLanguageTag();
-        }
-    }
-
-    /**
-     * @throws NullPointerException if any of the input locales is <code>null</code>.
-     * @throws IllegalArgumentException if any of the input locales repeat.
-     */
-    public LocaleList(@Nullable Locale[] list) {
+    public LocaleList(@Nullable Locale... list) {
         if (list == null || list.length == 0) {
             mList = sEmptyList;
             mStringRepresentation = "";
@@ -242,11 +260,20 @@ public final class LocaleList implements Parcelable {
         }
     };
 
+    /**
+     * Retrieve an empty instance of {@link LocaleList}.
+     */
     @NonNull
     public static LocaleList getEmptyLocaleList() {
         return sEmptyLocaleList;
     }
 
+    /**
+     * Generates a new LocaleList with the given language tags.
+     *
+     * @param list The language tags to be included as a single {@link String} separated by commas.
+     * @return A new instance with the {@link Locale} items identified by the given tags.
+     */
     @NonNull
     public static LocaleList forLanguageTags(@Nullable String list) {
         if (list == null || list.equals("")) {
@@ -374,7 +401,8 @@ public final class LocaleList implements Parcelable {
      * Returns the first match in the locale list given an unordered array of supported locales
      * in BCP 47 format.
      *
-     * If the locale list is empty, null would be returned.
+     * @return The first {@link Locale} from this list that appears in the given array, or
+     *     {@code null} if the {@link LocaleList} is empty.
      */
     @Nullable
     public Locale getFirstMatch(String[] supportedLocales) {
@@ -445,9 +473,9 @@ public final class LocaleList implements Parcelable {
      * preferred locales, having concluded that the primary preference is not supported but a
      * secondary preference is.
      *
-     * Note that the default LocaleList would change if Locale.setDefault() is called. This method
-     * takes that into account by always checking the output of Locale.getDefault() and
-     * recalculating the default LocaleList if needed.
+     * <p>Note that the default LocaleList would change if Locale.setDefault() is called. This
+     * method takes that into account by always checking the output of Locale.getDefault() and
+     * recalculating the default LocaleList if needed.</p>
      */
     @NonNull @Size(min=1)
     public static LocaleList getDefault() {
