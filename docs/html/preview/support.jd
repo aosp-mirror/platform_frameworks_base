@@ -253,11 +253,34 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>Gaps between binding numbers and non-zero
+      as the first binding number causes {@code vkCreateGraphicsPipeline()} to fail.</li>
+      <li>Vulkan exhibits incorrect sampling behavior on projected texture coordinates.</li>
+      <li>in the multithreadCmdBuffer sample, {@code vkCmdClearColorImage()} crashes when
+      running with the N-DP2 driver.</li>
+      <li>Return values from {@code vkGetPhysicalDeviceFormatProperties()} do not set a value
+      for {@code VkFormatProperties::linearTilingFeatures}, which takes a value of 0 as
+      a result.</li>
+      <li>Vulkan floating point frame buffer attachments are not handled correctly.</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V shaders may trigger driver asserts.</li>
+      <li>Some pipeline configurations may cause {@code vkCreateGraphicsPipeline()}
+      to crash.</li>
+  </ul>
+</ul>
+
 <h4>Device-specific issues</h4>
 
 <dl>
   <dt>
-    <strong>Seed</strong>
+    <strong>Android One</strong>
   </dt>
 
   <dd>
@@ -265,7 +288,7 @@ page.image=images/cards/card-n-support_2x.png
   </dd>
 
   <dt>
-    <strong>Ryu</strong>
+    <strong>Pixel C</strong>
   </dt>
 
   <dd>
@@ -273,7 +296,7 @@ page.image=images/cards/card-n-support_2x.png
   </dd>
 
   <dt>
-    <strong>Shamu</strong>
+    <strong>Nexus 6</strong>
   </dt>
 
   <dd>
@@ -282,7 +305,7 @@ page.image=images/cards/card-n-support_2x.png
   </dd>
 
   <dt>
-    <strong>Fugu</strong>
+    <strong>Nexus Player</strong>
   </dt>
 
   <dd>
