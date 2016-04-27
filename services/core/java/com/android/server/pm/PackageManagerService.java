@@ -498,8 +498,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public static final int REASON_LAST = REASON_FORCED_DEXOPT;
 
-    // Special String to skip shared libraries check during compilation.
-    private static final String SPECIAL_SHARED_LIBRARY = "&";
+    /** Special library name that skips shared libraries check during compilation. */
+    private static final String SKIP_SHARED_LIBRARY_CHECK = "&";
 
     final ServiceThread mHandlerThread;
 
@@ -2336,7 +2336,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
                                         getCompilerFilterForReason(REASON_SHARED_APK),
                                         StorageManager.UUID_PRIVATE_INTERNAL,
-                                        SPECIAL_SHARED_LIBRARY);
+                                        SKIP_SHARED_LIBRARY_CHECK);
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
