@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Toca per compartir l\'informe d\'errors"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Toca per compartir l\'informe d\'errors sense captura de pantalla o espera que es creï la captura"</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Els informes d\'errors contenen dades dels diferents fitxers de registre del sistema, inclosa informació que pot ser confidencial (com ara l\'ús d\'aplicacions i les dades d\'ubicació). Comparteix-los només amb aplicacions i persones de confiança."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"No ho tornis a mostrar"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes d\'error"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"No s\'ha pogut llegir el fitxer de l\'informe d\'errors"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"No s\'ha pogut afegir la informació detallada de l\'informe d\'errors al fitxer ZIP"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sense nom"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalls"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Captura de pantalla"</string>

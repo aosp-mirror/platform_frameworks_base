@@ -25,12 +25,11 @@
     <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Koppintson a hibajelentés megosztásához"</string>
     <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Koppintson ide, ha képernyőkép nélkül osztaná meg a hibajelentést, vagy várjon a képernyőképre."</string>
     <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Koppintson ide, ha képernyőkép nélkül osztaná meg a hibajelentést, vagy várjon a képernyőképre."</string>
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_confirm" msgid="5917407234515812495">"A programhiba-jelentések a rendszer különböző naplófájljaiból származó adatokat tartalmaznak, köztük bizalmas információkat is (például alkalmazáshasználati információkat és helyadatokat). Csak olyan alkalmazásokkal és személyekkel osszon meg programhiba-jelentéseket, amelyekben vagy akikben megbízik."</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Ne jelenjen meg többé"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Hibajelentések"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"A hibajelentési fájlt nem sikerült beolvasni"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"Nem lehet hozzáadni a hibajelentés részleteit a ZIP-fájlhoz"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"névtelen"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Részletek"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Képernyőkép"</string>
