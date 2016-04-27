@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"बन्द गर्नुहोस्"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"यी फाइलहरू प्रतिलिपि गरिएको थिएनः <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"यी फाइलहरू सारिएको थिएन: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"यी फाइलहरूलाई मेटाइएको थिएन: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"यी फाइलहरू अर्को ढाँचामा परिणत गरिएका थिए: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> क्लिपबोर्डमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरू प्रतिलिपि बनाइए।</item>
@@ -137,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> वस्तुहरूलाई मेट्ने हो?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> वस्तुलाई मेट्ने हो?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"माफ गर्नुहोस्, तपाईँ एक पटकमा १००० वस्तुहरूसम्म मात्र चयन गर्न सक्नुहुन्छ"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"१००० वस्तुहरूलाई मात्र चयन गर्न सकियो"</string>
 </resources>

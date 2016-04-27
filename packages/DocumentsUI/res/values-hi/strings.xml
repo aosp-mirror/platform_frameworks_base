@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"बंद करें"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"इन फ़ाइलों की कॉपी नहीं बनाई गई: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ये फ़ाइलें नहीं ले जाई गईं: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"इन फ़ाइलों को हटाया नहीं गया: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ये फ़ाइलें किसी अन्‍य प्रारूप में रूपांतरित हो गई थीं: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">क्‍लिपबोर्ड पर <xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी बनाई गई.</item>
@@ -137,4 +138,6 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम हटाएं?</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> आइटम हटाएं?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"क्षमा करें, आप एक बार में केवल 1000 अाइटम तक चुन सकते हैं"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"केवल 1000 आइटम चुने जा सकते हैं"</string>
 </resources>

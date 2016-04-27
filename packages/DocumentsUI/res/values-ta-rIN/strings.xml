@@ -100,6 +100,7 @@
     <string name="close" msgid="3043722427445528732">"மூடு"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"பின்வரும் கோப்புகள் நகலெடுக்கப்படவில்லை: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"பின்வரும் கோப்புகள் நகர்த்தப்படவில்லை: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"பின்வரும் கோப்புகள் நீக்கப்படவில்லை: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"இந்தக் கோப்புகள் வேறொரு வடிவத்திற்கு மாற்றப்பட்டன: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">கிளிப்போர்டிற்கு <xliff:g id="COUNT_1">%1$d</xliff:g> கோப்புகள் நகலெடுக்கப்பட்டன.</item>
@@ -137,4 +138,6 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> உருப்படிகளை நீக்கவா?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> உருப்படியை நீக்கவா?</item>
     </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"ஒரு சமயத்தில் 1000 உருப்படிகள் வரை மட்டுமே நீங்கள் தேர்ந்தெடுக்கலாம்"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"1000 உருப்படிகளை மட்டுமே தேர்ந்தெடுக்கலாம்"</string>
 </resources>
