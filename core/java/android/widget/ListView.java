@@ -1308,7 +1308,7 @@ public class ListView extends AbsListView {
 
         // Include the padding of the list
         int returnedHeight = mListPadding.top + mListPadding.bottom;
-        final int dividerHeight = ((mDividerHeight > 0) && mDivider != null) ? mDividerHeight : 0;
+        final int dividerHeight = mDividerHeight;
         // The previous height value that was less than maxHeight and contained
         // no partial children
         int prevHeightWithoutPartialChild = 0;
