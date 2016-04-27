@@ -43,22 +43,22 @@ static struct {
     jfieldID y;
 } gPointClassInfo;
 
-static Mutex sLock;
-
-static int sUnmatchedInitRequestCount = 0;
+// See PdfEditor.cpp
+extern Mutex sPdfiumLock;
+extern int sUnmatchedPdfiumInitRequestCount;
 
 static void initializeLibraryIfNeeded() {
-    Mutex::Autolock _l(sLock);
-    if (sUnmatchedInitRequestCount == 0) {
+    Mutex::Autolock _l(sPdfiumLock);
+    if (sUnmatchedPdfiumInitRequestCount == 0) {
         FPDF_InitLibrary();
     }
-    sUnmatchedInitRequestCount++;
+    sUnmatchedPdfiumInitRequestCount++;
 }
 
 static void destroyLibraryIfNeeded() {
-    Mutex::Autolock _l(sLock);
-    sUnmatchedInitRequestCount--;
-    if (sUnmatchedInitRequestCount == 0) {
+    Mutex::Autolock _l(sPdfiumLock);
+    sUnmatchedPdfiumInitRequestCount--;
+    if (sUnmatchedPdfiumInitRequestCount == 0) {
        FPDF_DestroyLibrary();
     }
 }
