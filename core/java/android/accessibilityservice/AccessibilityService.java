@@ -925,18 +925,25 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Returns the region of the screen currently being magnified. If
-         * magnification is not enabled, the returned region will be empty.
+         * Returns the region of the screen currently active for magnification. Changes to
+         * magnification scale and center only affect this portion of the screen. The rest of the
+         * screen, for example input methods, cannot be magnified. This region is relative to the
+         * unscaled screen and is independent of the scale and center point.
+         * <p>
+         * The returned region will be empty if magnification is not active. Magnification is active
+         * if magnification gestures are enabled or if a service is running that can control
+         * magnification.
          * <p>
          * <strong>Note:</strong> If the service is not yet connected (e.g.
          * {@link AccessibilityService#onServiceConnected()} has not yet been
          * called) or the service has been disconnected, this method will
          * return an empty region.
          *
-         * @return the screen-relative bounds of the magnified region
+         * @return the region of the screen currently active for magnification, or an empty region
+         * if magnification is not active.
          */
         @NonNull
-        public Region getMagnifiedRegion() {
+        public Region getMagnificationRegion() {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance().getConnection(
                             mService.mConnectionId);
@@ -1049,11 +1056,12 @@ public abstract class AccessibilityService extends Service {
              * Called when the magnified region, scale, or center changes.
              *
              * @param controller the magnification controller
-             * @param region the new magnified region, may be empty if
-             *               magnification is not enabled (e.g. scale is 1)
+             * @param region the magnification region
              * @param scale the new scale
-             * @param centerX the new X coordinate around which magnification is focused
-             * @param centerY the new Y coordinate around which magnification is focused
+             * @param centerX the new X coordinate, in unscaled coordinates, around which
+             * magnification is focused
+             * @param centerY the new Y coordinate, in unscaled coordinates, around which
+             * magnification is focused
              */
             void onMagnificationChanged(@NonNull MagnificationController controller,
                     @NonNull Region region, float scale, float centerX, float centerY);
