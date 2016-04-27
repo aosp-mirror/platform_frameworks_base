@@ -3457,7 +3457,8 @@ final class ActivityStack {
         // First things first: if this activity is currently visible,
         // and the resumed activity is not yet visible, then hold off on
         // finishing until the resumed one becomes visible.
-        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)) {
+        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
+                && !mStackSupervisor.allResumedActivitiesVisible()) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                 addToStopping(r, false /* immediate */);
             }
