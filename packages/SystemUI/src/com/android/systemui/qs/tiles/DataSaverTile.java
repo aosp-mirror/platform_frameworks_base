@@ -15,6 +15,8 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
+
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -52,6 +54,7 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
     @Override
     protected void handleClick() {
         mState.value = !mDataSaverController.isDataSaverEnabled();
+        MetricsLogger.action(mContext, getMetricsCategory(), mState.value);
         mDataSaverController.setDataSaverEnabled(mState.value);
         refreshState(mState.value);
     }
