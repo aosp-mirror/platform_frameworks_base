@@ -19,6 +19,9 @@ package android.net.metrics;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
+
+import com.android.internal.util.MessageUtils;
 
 /**
  * {@hide}
@@ -71,7 +74,17 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
     };
 
     public static void logEvent(int netId, long durationMs, int probeType, int returnCode) {
-        logEvent(IPCE_NETMON_PORTAL_PROBE,
-                 new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
+        logEvent(new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ValidationProbeEvent(%d, %s:%d, %dms)",
+                netId, Decoder.constants.get(probeType), returnCode, durationMs);
+    }
+
+    final static class Decoder {
+        static final SparseArray<String> constants = MessageUtils.findMessageNames(
+                new Class[]{ValidationProbeEvent.class}, new String[]{"PROBE_"});
     }
 };
