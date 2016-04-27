@@ -149,26 +149,4 @@ public class EditText extends TextView {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_TEXT);
         }
     }
-
-    /** @hide */
-    @Override
-    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SET_TEXT: {
-                if (!isEnabled()) {
-                    return false;
-                }
-                CharSequence text = (arguments != null) ? arguments.getCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE) : null;
-                setText(text);
-                if (text != null && text.length() > 0) {
-                    setSelection(text.length());
-                }
-                return true;
-            }
-            default: {
-                return super.performAccessibilityActionInternal(action, arguments);
-            }
-        }
-    }
 }
