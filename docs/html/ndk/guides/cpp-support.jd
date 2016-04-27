@@ -178,9 +178,9 @@ shared library file is named {@code libc++_shared.so}.</p>
 need to explicitly turn on exceptions or RTTI support. For information on how to do this, see
 <a href="#xp">C++ Exceptions</a> and <a href="#rt">RTTI</a>.</p>
 
-<p>The NDK provides prebuilt static and shared libraries for {@code libc++} compiled by Clang 3.4,
-but you can force the NDK to rebuild {@code libc++} from sources by adding the following line to
-your {@code Application.mk} file, or setting it in your environment prior to building: </p>
+<p>The NDK provides prebuilt static and shared libraries for {@code libc++}, but you can force the
+NDK to rebuild {@code libc++} from sources by adding the following line to your
+{@code Application.mk} file, or setting it in your environment prior to building: </p>
 
 <pre>
 LIBCXX_FORCE_REBUILD := true
