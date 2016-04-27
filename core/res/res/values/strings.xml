@@ -2428,41 +2428,49 @@
 
     <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
     <plurals name="duration_minutes_shortest">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>m</item>
         <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>m</item>
     </plurals>
 
     <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
     <plurals name="duration_hours_shortest">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>h</item>
         <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>h</item>
     </plurals>
 
     <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
     <plurals name="duration_days_shortest">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>d</item>
         <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>d</item>
     </plurals>
 
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
     <plurals name="duration_years_shortest">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>y</item>
         <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>y</item>
     </plurals>
 
     <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <plurals name="duration_minutes_shortest_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>m</item>
         <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>m</item>
     </plurals>
 
     <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <plurals name="duration_hours_shortest_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>h</item>
         <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>h</item>
     </plurals>
 
     <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <plurals name="duration_days_shortest_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>d</item>
         <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>d</item>
     </plurals>
 
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <plurals name="duration_years_shortest_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>y</item>
         <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>y</item>
     </plurals>
 
