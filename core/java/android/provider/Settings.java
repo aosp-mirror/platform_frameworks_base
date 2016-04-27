@@ -726,18 +726,18 @@ public final class Settings {
             "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS";
 
     /**
-     * Activity Action: Show screen for controlling which apps can ignore background data
-     * restrictions.
+     * Activity Action: Show screen for controlling background data
+     * restrictions for a particular application.
      * <p>
-     * Input: if the Intent's data URI is set with an application name (using the "package" schema,
-     * like "package:com.my.app"), then when the screen is displayed it will focus on such app. If
-     * the data is not set, it will just open the screen.
+     * Input: Intent's data URI set with an application name, using the
+     * "package" schema (like "package:com.my.app").
+     *
      * <p>
      * Output: Nothing.
      * <p>
      * Applications can also use {@link android.net.ConnectivityManager#getRestrictBackgroundStatus
-     * ConnectivityManager#getRestrictBackgroundStatus()} to determine the status of the background
-     * data restrictions for them.
+     * ConnectivityManager#getRestrictBackgroundStatus()} to determine the
+     * status of the background data restrictions for them.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS =
