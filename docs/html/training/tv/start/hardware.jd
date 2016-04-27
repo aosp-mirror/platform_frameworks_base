@@ -115,6 +115,10 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
     <td>Sensors</td>
     <td>{@code android.hardware.sensor}</td>
   </tr>
+  <tr>
+    <td>Screen in portrait orientation</td>
+    <td>{@code android.hardware.screen.portrait}</td>
+  </tr>
 </table>
 
 <p id="cont-mic" class="note">
