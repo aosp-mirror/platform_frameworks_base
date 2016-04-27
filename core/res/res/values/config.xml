@@ -2383,10 +2383,6 @@
          must match the value of config_cameraLaunchGestureSensorType in OEM's HAL -->
     <string translatable="false" name="config_cameraLaunchGestureSensorStringType"></string>
 
-    <!-- Whether to open UI submenus side by side with the top menu (as opposed to
-         replacing the top menu). -->
-    <bool name="config_enableCascadingSubmenus">false</bool>
-
     <!-- Allow the gesture to double tap the power button twice to start the camera while the device
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
