@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Leisti"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pristabdyti"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Kad vald. PIP, pal. pasp. m. "<b>"PAGRINDINIS"</b></string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Vaizdas vaizde"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Vaizdo įrašas bus rodomas, kol paleisite kitą vaizdo įrašą. Jei norite valdyti, palaikykite paspaudę mygtuką "<b>"HOME"</b>"."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Supratau"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Atsisakyti"</string>
 </resources>

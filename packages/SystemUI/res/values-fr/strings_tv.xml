@@ -24,10 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Lire"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Suspendre"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Appui long "<b>"ACCUEIL"</b>" pour contrôler PIP"</string>
-    <!-- no translation found for pip_onboarding_title (7850436557670253991) -->
-    <skip />
-    <!-- no translation found for pip_onboarding_description (4028124563309465267) -->
-    <skip />
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Mode PIP"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Cette option maintient une vidéo affichée jusqu\'à la lecture de la suivante. Appuyez de manière prolongée sur le bouton "<b>"ACCUEIL"</b>" pour la contrôler."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"OK"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorer"</string>
 </resources>

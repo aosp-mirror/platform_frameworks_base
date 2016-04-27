@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रिनसट बचत हुँदै छ।"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रिनसट क्याप्चर गरियो।"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"तपाईँको स्क्रिनसट हेर्न छुनुहोस्।"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"आफ्नो स्क्रिनसट हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रिनसट क्याप्चर गर्न सकिएन।"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रिनसटलाई सुरक्षित गर्दा समस्या भयो।"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"सीमित भण्डारण स्थान उपलब्ध रहेको हुनाले स्क्रिनसटलाई सुरक्षित गर्न सकिँदैन।"</string>
@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"यसले अलार्म, संगीत, भिडियोहरू र खेलहरूसहित सबै ध्वनिहरू र कम्पनहरूलाई रोक्छ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"तल कम जरुरी सूचनाहरू"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"खोल्न फेरि छुनुहोस्"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"खोल्न पुनः ट्याप गर्नुहोस्"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"अनलक गर्न स्वाप गर्नुहोस्"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनको लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
     <string name="voice_hint" msgid="8939888732119726665">"आवाज सहायताका लागि आइकनबाट स्वाइप गर्नुहोस्"</string>
@@ -418,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तार गर्नुहोस्"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संक्षिप्त पार्नुहोस्"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"पर्दा राखेका छ"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"तपाईँले अनपिन नगरेसम्म यसले त्यसलाई देखाइ राख्छ। अनपिन गर्न छुनुहोस् र होल्ड गर्नुहोस्"</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"तपाईँले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्नका लागि पछाडि बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"धन्यवाद पर्दैन"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"लुकाउनुहुन्छ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -428,7 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"अनुमति दिनुहोस्"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार गर्नुहोस्"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुनर्स्थापना गर्न छुनुहोस्।"</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"मूललाई पुनर्स्थापना गर्न ट्याप गर्नुहोस्।"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तपाईँले कार्य प्रोफाइल प्रयोग गर्दै हुनुहुन्छ"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। अनम्यूट गर्नका लागि ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। कम्पनमा सेट गर्नका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>

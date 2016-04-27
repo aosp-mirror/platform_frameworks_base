@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ವೀಕ್ಷಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
@@ -118,8 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ಡೇಟಾ ಸಂಕೇತ ತುಂಬಿದೆ."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
-    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
-    <skip />
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX ಸಂಕೇತವಿಲ್ಲ."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX ಒಂದು ಪಟ್ಟಿ."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX ಎರಡು ಪಟ್ಟಿಗಳು."</string>
@@ -150,17 +149,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"ಎಡ್ಜ್‌"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ಯಾವುದೇ ಸಿಮ್‌ ಇಲ್ಲ."</string>
-    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ ಆನ್ ಆಗಿದೆ"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ಬ್ಲೂಟೂತ್‌‌ ಟೆಥರಿಂಗ್."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ಏರೋಪ್ಲೇನ್‌ ಮೋಡ್‌"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ಯಾವುದೇ ಸಿಮ್‌ ಇಲ್ಲ."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ವಾಹಕ ನೆಟ್‌ವರ್ಕ್ ಬದಲಾಯಿಸುವಿಕೆ."</string>
-    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
-    <skip />
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"ಬ್ಯಾಟರಿ ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ಬ್ಯಾಟರಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರತಿಶತ."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ಬ್ಯಾಟರಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ಪ್ರತಿಶತ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು."</string>
@@ -200,13 +196,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್, ಆದ್ಯತೆ ಮಾತ್ರ."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ, ಒಟ್ಟು ನಿಶ್ಯಬ್ಧ."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"ಅಲಾರಮ್‌‌ಗಳಿಗೆ ಮಾತ್ರ ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆಫ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ತೊಂದರೆ ಮಾಡಬೇಡಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ಬ್ಲೂಟೂತ್."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ಬ್ಲೂಟೂತ್ ಆಫ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ಬ್ಲೂಟೂತ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ಬ್ಲೂಟೂತ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
@@ -272,10 +266,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"ಯಾವುದೇ ಜೋಡಿಸಲಾದ ಸಾಧನಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ಸ್ವಯಂ-ತಿರುಗುವಿಕೆ"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"ಪರದೆಯನ್ನು ಸ್ವಯಂ-ತಿರುಗಿಸಿ"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"ತಿರುಗುವಿಕೆ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"ಪೋಟ್ರೇಟ್"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"ಲ್ಯಾಂಡ್‌ಸ್ಕೇಪ್"</string>
@@ -294,8 +286,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ಆಫ್"</string>
-    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
-    <skip />
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ವೈ-ಫೈ ಆನ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ಯಾವುದೇ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"ಬಿತ್ತರಿಸುವಿಕೆ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
@@ -349,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ಇದು ಅಲಾರಮ್‌ಗಳು, ಸಂಗೀತ, ವೀಡಿಯೊಗಳು, ಮತ್ತು ಆಟಗಳು ಸೇರಿದಂತೆ ಎಲ್ಲಾ ಧ್ವನಿಗಳು ಮತ್ತು ವೈಬ್ರೇಶನ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ಕೆಳಗೆ ಕಡಿಮೆ ಅವಸರದ ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"ತೆರೆಯಲು ಮತ್ತೊಮ್ಮೆ ಸ್ಪರ್ಶಿಸಿ"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಸ್ವೈಪ್‌ ಮಾಡಿ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="voice_hint" msgid="8939888732119726665">"ಧ್ವನಿ ಸಹಾಯಕ್ಕಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
@@ -427,7 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ವಿಸ್ತರಿಸು"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ಸಂಕುಚಿಸು"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ಪರದೆಯನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹಿಂದೆ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹಿಂದೆ ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ತಿಳಿಯಿತು"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ಧನ್ಯವಾದಗಳು"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
@@ -437,15 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ಅನುಮತಿಸು"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ನಿರಾಕರಿಸು"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"ಮೂಲಕ್ಕೆ ಮರುಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ನೀವು ಬಳಸುತ್ತಿರುವಿರಿ"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
-    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
-    <skip />
-    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
-    <skip />
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಣಗಳನ್ನು ತೋರಿಸಲಾಗಿದೆ. ವಜಾಗೊಳಿಸಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಣಗಳನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"ಸಿಸ್ಟಮ್ UI ಟ್ಯೂನರ್"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ಎಂಬೆಡ್ ಮಾಡಲಾದ ಬ್ಯಾಟರಿ ಶೇಕಡಾ ತೋರಿಸಿ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ಚಾರ್ಜ್ ಮಾಡದಿರುವಾಗ ಸ್ಥಿತಿ ಪಟ್ಟಿ ಐಕಾನ್ ಒಳಗೆ ಬ್ಯಾಟರಿ ಮಟ್ಟದ ಶೇಕಡಾವನ್ನು ತೋರಿಸಿ"</string>
@@ -641,27 +630,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="POSITION">%2$d</xliff:g> ಸ್ಥಾನಕ್ಕೆ <xliff:g id="TILE_NAME">%1$s</xliff:g> ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳ ಸಂಪಾದಕ."</string>
-    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
-    <skip />
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> ಅಧಿಸೂಚನೆ: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ವಿಭಜಿಸಿದ ಪರದೆಯಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
-    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮುಚ್ಚಿ."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> ಅವರಂತೆ ಸೈನ್ ಇನ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ."</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಸಂಪಾದಿಸು."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="ID_1">%1$d</xliff:g> ಪುಟ"</string>
 </resources>

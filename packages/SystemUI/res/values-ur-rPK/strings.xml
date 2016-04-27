@@ -71,7 +71,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"اسکرین شاٹ محفوظ ہو رہا ہے…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"اسکرین شاٹ محفوظ کیا جا رہا ہے۔"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"اسکرین شاٹ کیپچر کیا گیا۔"</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"اپنے اسکرین شاٹ دیکھنے کیلئے چھوئیں۔"</string>
+    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
+    <skip />
     <string name="screenshot_failed_title" msgid="705781116746922771">"اسکرین شاٹ کیپچر نہیں کر سکے۔"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"اسکرین شاٹ محفوظ کرتے وقت مسئلہ پیش آ گیا۔"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"محدود اسٹوریج جگہ کی وجہ سے اسکرین شاٹس نہیں لئے جا سکتے۔"</string>
@@ -118,8 +119,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"ڈیٹا سگنل بھرا ہوا ہے۔"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"<xliff:g id="WIFI">%s</xliff:g> سے منسلک ہیں۔"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"<xliff:g id="BLUETOOTH">%s</xliff:g> سے منسلک ہیں۔"</string>
-    <!-- no translation found for accessibility_cast_name (4026393061247081201) -->
-    <skip />
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"<xliff:g id="CAST">%s</xliff:g> سے منسلک ہے۔"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"‏کوئی WiMAX نہیں ہے۔"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"‏WiMAX ایک بار۔"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"‏WiMAX دو بارز۔"</string>
@@ -150,17 +150,14 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏کوئی SIM نہیں ہے۔"</string>
-    <!-- no translation found for accessibility_cell_data (7080312242791850520) -->
-    <skip />
-    <!-- no translation found for accessibility_cell_data_on (4310018593519761767) -->
-    <skip />
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"سیلولر ڈیٹا"</string>
+    <string name="accessibility_cell_data_on" msgid="4310018593519761767">"سیلولر ڈیٹا آن ہے"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"سیلولر ڈیٹا آف ہے"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ مربوط کرنا۔"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ہوائی جہاز وضع۔"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏کوئی SIM کارڈ نہیں ہے۔"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"کیریئر نیٹ ورک تبدیل ہو رہا ہے۔"</string>
-    <!-- no translation found for accessibility_battery_details (7645516654955025422) -->
-    <skip />
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"بیٹری کی تفصیلات کھولیں"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"بیٹری <xliff:g id="NUMBER">%d</xliff:g> فیصد۔"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"بیٹری چارجنگ، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> فیصد۔"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"سسٹم کی ترتیبات۔"</string>
@@ -200,13 +197,11 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"ڈسٹرب نہ کریں آن ہے، صرف ترجیحی۔"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"مداخلت نہ کریں آن ہے، مکمل خاموشی۔"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"ڈسٹرب نہ کریں آن ہے، صرف الارمز۔"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd (6607873236717185815) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ڈسٹرب نہ کریں۔"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"ڈسٹرب نہ کریں آف ہے۔"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"ڈسٹرب نہ کریں کو آف کر دیا گیا۔"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"ڈسٹرب نہ کریں کو آن کر دیا گیا۔"</string>
-    <!-- no translation found for accessibility_quick_settings_bluetooth (6341675755803320038) -->
-    <skip />
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"بلوٹوتھ۔"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"بلوٹوتھ آف ہے۔"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"بلوٹوتھ آن ہے۔"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"بلوٹوتھ منسلک ہو رہا ہے۔"</string>
@@ -272,10 +267,8 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"کوئی جوڑا بنائے ہوئے آلات دستیاب نہیں ہیں"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"چمکیلا پن"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"خود کار طور پر گھمائیں"</string>
-    <!-- no translation found for accessibility_quick_settings_rotation (4231661040698488779) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_rotation_value (1428962304214992318) -->
-    <skip />
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"اسکرین کو خود کار طور پر گھمائیں"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> پر سیٹ کریں"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"گردش مقفل ہے"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"پورٹریٹ"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"لینڈ اسکیپ"</string>
@@ -294,8 +287,7 @@
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"مربوط نہیں ہے"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"کوئی نیٹ ورک نہیں ہے"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏Wi-Fi آف ہے"</string>
-    <!-- no translation found for quick_settings_wifi_on_label (7607810331387031235) -->
-    <skip />
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi آن ہے"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏کوئی WI-FI نیٹ ورک دستیاب نہیں"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"کاسٹ کریں"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"کاسٹنگ"</string>
@@ -349,7 +341,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"‎+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>‎"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"کم اہم اطلاعات ذیل میں ہیں"</string>
-    <string name="notification_tap_again" msgid="8524949573675922138">"کھولنے کیلئے دوبارہ ٹچ کریں"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"کھولنے کیلئے دوبارہ تھپتھپائیں"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"غیر مقفل کرنے کیلئے اوپر سوائپ کریں"</string>
     <string name="phone_hint" msgid="4872890986869209950">"فون کیلئے آئیکن سے سوائپ کریں"</string>
     <string name="voice_hint" msgid="8939888732119726665">"صوتی معاون کیلئے آئیکن سے سوائپ کریں"</string>
@@ -427,7 +419,8 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"سکیڑیں"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
-    <string name="screen_pinning_description" msgid="3577937698406151604">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
+    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"سمجھ آ گئی"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"نہیں شکریہ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> کو چھپائیں؟"</string>
@@ -437,15 +430,14 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"اجازت دیں"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"مسترد کریں"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"اصل کو بحال کرنے کیلئے ٹچ کریں۔"</string>
+    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
+    <skip />
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"آپ اپنا دفتری پروفائل استعمال کر رہے ہیں۔"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>
-    <!-- no translation found for volume_dialog_accessibility_shown_message (1834631467074259998) -->
-    <skip />
-    <!-- no translation found for volume_dialog_accessibility_dismissed_message (51543526013711399) -->
-    <skip />
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"‏%s والیوم کے کنٹرولز دکھائے جا رہے ہیں۔ برخاست کرنے کیلئے سوائپ کریں۔"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"والیوم کے کنٹرولز مخفی ہیں"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"‏سسٹم UI ٹیونر"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"سرایت کردہ بیٹری کی فیصد دکھائیں"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"جب چارج نہ ہو رہا ہو تو بیٹری کی سطح کی فیصد اسٹیٹس بار آئیکن کے اندر دکھائیں"</string>
@@ -641,27 +633,17 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> ہٹا دیا گیا"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="POSITION">%2$d</xliff:g> پوزیشن پر <xliff:g id="TILE_NAME">%1$s</xliff:g> منتقل ہو گیا ہے"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"فوری ترتیبات کا ایڈیٹر۔"</string>
-    <!-- no translation found for accessibility_desc_notification_icon (8352414185263916335) -->
-    <skip />
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> اطلاع: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ممکن ہے کہ ایپ سپلٹ اسکرین کے ساتھ کام نہ کرے۔"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ایپ سپلٹ اسکرین کو سپورٹ نہیں کرتی۔"</string>
-    <!-- no translation found for accessibility_quick_settings_settings (6132460890024942157) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_expand (2375165227880477530) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_collapse (1792625797142648105) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_alarm_set (1863000242431528676) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_user (1567445362870421770) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_no_internet (31890692343084075) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_details (4230931801728005194) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_open_settings (7806613775728380737) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_edit (7839992848995240393) -->
-    <skip />
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"ترتیبات کھولیں۔"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"فوری ترتیبات کھولیں۔"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"فوری ترتیبات بند کریں۔"</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"الارم سیٹ ہو گیا۔"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> کے بطور سائن ان ہے"</string>
+    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"انٹرنیٹ نہیں ہے۔"</string>
+    <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"تفصیلات کھولیں۔"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ترتیبات کھولیں۔"</string>
+    <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
 </resources>
