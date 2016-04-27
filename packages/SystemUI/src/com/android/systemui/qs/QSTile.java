@@ -117,6 +117,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         return null; // optional
     }
 
+    protected DetailAdapter createDetailAdapter() { throw new UnsupportedOperationException(); }
+
     /**
      * Is a startup check whether this device currently supports this tile.
      * Should not be used to conditionally hide tiles.  Only checked on tile
@@ -133,6 +135,17 @@ public abstract class QSTile<TState extends State> implements Listenable {
         Intent getSettingsIntent();
         void setToggleState(boolean state);
         int getMetricsCategory();
+
+        /**
+         * @return the height in px the content of the detail view should take.
+         */
+        default int getDetailViewHeight() { throw new UnsupportedOperationException(); };
+
+        /**
+         * Indicates whether the detail view wants to have its header (back button, title and
+         * toggle) shown.
+         */
+        default boolean hasHeader() { return true; }
     }
 
     // safe to call from any thread

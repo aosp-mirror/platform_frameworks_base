@@ -73,7 +73,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
-    private QuickQSPanel mHeaderQsPanel;
+    protected QuickQSPanel mHeaderQsPanel;
     private boolean mShowEmergencyCallsOnly;
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;

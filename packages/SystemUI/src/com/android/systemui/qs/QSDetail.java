@@ -46,23 +46,23 @@ public class QSDetail extends LinearLayout {
     private final SparseArray<View> mDetailViews = new SparseArray<>();
 
     private ViewGroup mDetailContent;
-    private TextView mDetailSettingsButton;
-    private TextView mDetailDoneButton;
+    protected TextView mDetailSettingsButton;
+    protected TextView mDetailDoneButton;
     private QSDetailClipper mClipper;
     private DetailAdapter mDetailAdapter;
     private QSPanel mQsPanel;
 
-    private View mQsDetailHeader;
-    private TextView mQsDetailHeaderTitle;
+    protected View mQsDetailHeader;
+    protected TextView mQsDetailHeaderTitle;
     private Switch mQsDetailHeaderSwitch;
     private ImageView mQsDetailHeaderProgress;
 
-    private QSTileHost mHost;
+    protected QSTileHost mHost;
 
     private boolean mScanState;
     private boolean mClosingDetail;
     private boolean mFullyExpanded;
-    private View mQsDetailHeaderBack;
+    protected View mQsDetailHeaderBack;
     private BaseStatusBarHeader mHeader;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
@@ -139,28 +139,13 @@ public class QSDetail extends LinearLayout {
         return mClosingDetail;
     }
 
-    private void handleShowingDetail(final QSTile.DetailAdapter adapter, int x, int y) {
+
+
+    public void handleShowingDetail(final QSTile.DetailAdapter adapter, int x, int y) {
         final boolean showingDetail = adapter != null;
         setClickable(showingDetail);
         if (showingDetail) {
-            mQsDetailHeaderTitle.setText(adapter.getTitle());
-            final Boolean toggleState = adapter.getToggleState();
-            if (toggleState == null) {
-                mQsDetailHeaderSwitch.setVisibility(INVISIBLE);
-                mQsDetailHeader.setClickable(false);
-            } else {
-                mQsDetailHeaderSwitch.setVisibility(VISIBLE);
-                mQsDetailHeaderSwitch.setChecked(toggleState);
-                mQsDetailHeader.setClickable(true);
-                mQsDetailHeader.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        boolean checked = !mQsDetailHeaderSwitch.isChecked();
-                        mQsDetailHeaderSwitch.setChecked(checked);
-                        adapter.setToggleState(checked);
-                    }
-                });
-            }
+            setupDetailHeader(adapter);
         }
 
         boolean visibleDiff = (mDetailAdapter != null) != (adapter != null);
@@ -172,14 +157,7 @@ public class QSDetail extends LinearLayout {
                     mDetailContent);
             if (detailView == null) throw new IllegalStateException("Must return detail view");
 
-            final Intent settingsIntent = adapter.getSettingsIntent();
-            mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
-            mDetailSettingsButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mHost.startActivityDismissingKeyguard(settingsIntent);
-                }
-            });
+            setupDetailFooter(adapter);
 
             mDetailContent.removeAllViews();
             mDetailContent.addView(detailView);
@@ -203,6 +181,11 @@ public class QSDetail extends LinearLayout {
             mQsPanelCallback.onScanStateChanged(false);
         }
         sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+
+        animateDetailVisibleDiff(x, y, visibleDiff, listener);
+    }
+
+    protected void animateDetailVisibleDiff(int x, int y, boolean visibleDiff, AnimatorListener listener) {
         if (visibleDiff) {
             if (mFullyExpanded || mDetailAdapter != null) {
                 setAlpha(1);
@@ -213,6 +196,38 @@ public class QSDetail extends LinearLayout {
                         .setListener(listener)
                         .start();
             }
+        }
+    }
+
+    protected void setupDetailFooter(DetailAdapter adapter) {
+        final Intent settingsIntent = adapter.getSettingsIntent();
+        mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
+        mDetailSettingsButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mHost.startActivityDismissingKeyguard(settingsIntent);
+            }
+        });
+    }
+
+    protected void setupDetailHeader(final DetailAdapter adapter) {
+        mQsDetailHeaderTitle.setText(adapter.getTitle());
+        final Boolean toggleState = adapter.getToggleState();
+        if (toggleState == null) {
+            mQsDetailHeaderSwitch.setVisibility(INVISIBLE);
+            mQsDetailHeader.setClickable(false);
+        } else {
+            mQsDetailHeaderSwitch.setVisibility(VISIBLE);
+            mQsDetailHeaderSwitch.setChecked(toggleState);
+            mQsDetailHeader.setClickable(true);
+            mQsDetailHeader.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean checked = !mQsDetailHeaderSwitch.isChecked();
+                    mQsDetailHeaderSwitch.setChecked(checked);
+                    adapter.setToggleState(checked);
+                }
+            });
         }
     }
 
@@ -233,7 +248,7 @@ public class QSDetail extends LinearLayout {
         }
     }
 
-    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
+    protected QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
         @Override
         public void onToggleStateChanged(final boolean state) {
             post(new Runnable() {

@@ -955,7 +955,7 @@ public class NotificationPanelView extends PanelView implements
         onQsExpansionStarted(0);
     }
 
-    private void onQsExpansionStarted(int overscrollAmount) {
+    protected void onQsExpansionStarted(int overscrollAmount) {
         cancelQsAnimation();
         cancelHeightAnimator();
 

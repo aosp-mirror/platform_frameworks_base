@@ -56,7 +56,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     private int mPanelPaddingBottom;
     private int mBrightnessPaddingTop;
-    private boolean mExpanded;
+    protected boolean mExpanded;
     private boolean mListening;
 
     private Callback mCallback;
@@ -226,6 +226,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         } else {
             logTiles();
         }
+    }
+
+    public boolean isExpanded() {
+        return mExpanded;
     }
 
     public void setListening(boolean listening) {
