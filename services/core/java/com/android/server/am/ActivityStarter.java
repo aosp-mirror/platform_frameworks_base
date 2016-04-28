@@ -685,8 +685,8 @@ class ActivityStarter {
                     Binder.restoreCallingIdentity(token);
                 }
                 if (parent != null
-                        && userManager.isUserUnlocked(parent.getUserHandle())
-                        && !userManager.isUserUnlocked(userInfo.getUserHandle())) {
+                        && userManager.isUserUnlockingOrUnlocked(parent.getUserHandle())
+                        && !userManager.isUserUnlockingOrUnlocked(userInfo.getUserHandle())) {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);

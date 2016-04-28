@@ -36,7 +36,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.view.WindowManager.LayoutParams;
@@ -984,10 +983,27 @@ public class UserManager {
 
     /** {@hide} */
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        // TODO: eventually pivot this back to look at ActivityManager state,
-        // but there is race where we can start a non-encryption-aware launcher
-        // before that lifecycle has entered the running unlocked state.
-        return mContext.getSystemService(StorageManager.class).isUserKeyUnlocked(userId);
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_UNLOCKED);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public boolean isUserUnlockingOrUnlocked(UserHandle user) {
+        return isUserUnlockingOrUnlocked(user.getIdentifier());
+    }
+
+    /** {@hide} */
+    public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
+        try {
+            return ActivityManagerNative.getDefault().isUserRunning(userId,
+                    ActivityManager.FLAG_AND_UNLOCKING_OR_UNLOCKED);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
