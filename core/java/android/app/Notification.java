@@ -939,14 +939,6 @@ public class Notification implements Parcelable
     public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
 
     /**
-     * {@link #extras} key: a boolean describing whether the platform should automatically
-     * generate possible replies to
-     * {@link android.app.Notification.MessagingStyle.Message} objects provided by a
-     * {@link android.app.Notification.MessagingStyle} notification.
-     */
-    public static final String EXTRA_ALLOW_GENERATED_REPLIES = "android.allowGeneratedReplies";
-
-    /**
      * {@link #extras} key: a {@link String} to be displayed as the title to a conversation
      * represented by a {@link android.app.Notification.MessagingStyle}
      */
@@ -996,6 +988,7 @@ public class Notification implements Parcelable
         private final Bundle mExtras;
         private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
+        private boolean mAllowGeneratedReplies = false;
 
         /**
          * Small icon representing the action.
@@ -1029,6 +1022,7 @@ public class Notification implements Parcelable
             }
             mExtras = Bundle.setDefusable(in.readBundle(), true);
             mRemoteInputs = in.createTypedArray(RemoteInput.CREATOR);
+            mAllowGeneratedReplies = in.readInt() == 1;
         }
 
         /**
@@ -1036,11 +1030,11 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
-            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
+            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, false);
         }
 
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
-                RemoteInput[] remoteInputs) {
+                RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
             this.mIcon = icon;
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 this.icon = icon.getResId();
@@ -1049,6 +1043,7 @@ public class Notification implements Parcelable
             this.actionIntent = intent;
             this.mExtras = extras != null ? extras : new Bundle();
             this.mRemoteInputs = remoteInputs;
+            this.mAllowGeneratedReplies = allowGeneratedReplies;
         }
 
         /**
@@ -1070,6 +1065,14 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Return whether the platform should automatically generate possible replies for this
+         * {@link Action}
+         */
+        public boolean getAllowGeneratedReplies() {
+            return mAllowGeneratedReplies;
+        }
+
+        /**
          * Get the list of inputs to be collected from the user when this action is sent.
          * May return null if no remote inputs were added.
          */
@@ -1084,6 +1087,7 @@ public class Notification implements Parcelable
             private final Icon mIcon;
             private final CharSequence mTitle;
             private final PendingIntent mIntent;
+            private boolean mAllowGeneratedReplies;
             private final Bundle mExtras;
             private ArrayList<RemoteInput> mRemoteInputs;
 
@@ -1169,6 +1173,20 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Set whether the platform should automatically generate possible replies to add to
+             * {@link RemoteInput#getChoices()}. If the {@link Action} doesn't have a
+             * {@link RemoteInput}, this has no effect.
+             * @param allowGeneratedReplies {@code true} to allow generated replies, {@code false}
+             * otherwise
+             * @return this object for method chaining
+             * The default value is {@code false}
+             */
+            public Builder setAllowGeneratedReplies(boolean allowGeneratedReplies) {
+                mAllowGeneratedReplies = allowGeneratedReplies;
+                return this;
+            }
+
+            /**
              * Apply an extender to this action builder. Extenders may be used to add
              * metadata or change options on this builder.
              */
@@ -1185,7 +1203,8 @@ public class Notification implements Parcelable
             public Action build() {
                 RemoteInput[] remoteInputs = mRemoteInputs != null
                         ? mRemoteInputs.toArray(new RemoteInput[mRemoteInputs.size()]) : null;
-                return new Action(mIcon, mTitle, mIntent, mExtras, remoteInputs);
+                return new Action(mIcon, mTitle, mIntent, mExtras, remoteInputs,
+                        mAllowGeneratedReplies);
             }
         }
 
@@ -1196,7 +1215,8 @@ public class Notification implements Parcelable
                     title,
                     actionIntent, // safe to alias
                     new Bundle(mExtras),
-                    getRemoteInputs());
+                    getRemoteInputs(),
+                    getAllowGeneratedReplies());
         }
         @Override
         public int describeContents() {
@@ -1220,6 +1240,7 @@ public class Notification implements Parcelable
             }
             out.writeBundle(mExtras);
             out.writeTypedArray(mRemoteInputs, flags);
+            out.writeInt(mAllowGeneratedReplies ? 1 : 0);
         }
         public static final Parcelable.Creator<Action> CREATOR =
                 new Parcelable.Creator<Action>() {
@@ -4333,7 +4354,6 @@ public class Notification implements Parcelable
 
         CharSequence mUserDisplayName;
         CharSequence mConversationTitle;
-        boolean mAllowGeneratedReplies = true;
         List<Message> mMessages = new ArrayList<>();
 
         MessagingStyle() {
@@ -4354,25 +4374,6 @@ public class Notification implements Parcelable
          */
         public CharSequence getUserDisplayName() {
             return mUserDisplayName;
-        }
-
-        /**
-         * Set whether the platform should automatically generate possible replies from messages.
-         * @param allowGeneratedReplies {@code true} to allow generated replies, {@code false}
-         * otherwise
-         * @return this object for method chaining
-         * The default value is {@code true}
-         */
-        public MessagingStyle setAllowGeneratedReplies(boolean allowGeneratedReplies) {
-            mAllowGeneratedReplies = allowGeneratedReplies;
-            return this;
-        }
-
-        /**
-         * Return whether the platform should automatically generate possible replies from messages.
-         */
-        public boolean getAllowGeneratedReplies() {
-            return mAllowGeneratedReplies;
         }
 
         /**
@@ -4449,7 +4450,6 @@ public class Notification implements Parcelable
             if (mConversationTitle != null) {
                 extras.putCharSequence(EXTRA_CONVERSATION_TITLE, mConversationTitle);
             }
-            extras.putBoolean(EXTRA_ALLOW_GENERATED_REPLIES, mAllowGeneratedReplies);
             if (!mMessages.isEmpty()) { extras.putParcelableArray(EXTRA_MESSAGES,
                     Message.getBundleArrayForMessages(mMessages));
             }
@@ -4465,8 +4465,6 @@ public class Notification implements Parcelable
             mMessages.clear();
             mUserDisplayName = extras.getString(EXTRA_SELF_DISPLAY_NAME);
             mConversationTitle = extras.getString(EXTRA_CONVERSATION_TITLE);
-            mAllowGeneratedReplies = extras.getBoolean(EXTRA_ALLOW_GENERATED_REPLIES,
-                    mAllowGeneratedReplies);
             Parcelable[] parcelables = extras.getParcelableArray(EXTRA_MESSAGES);
             if (parcelables != null && parcelables instanceof Parcelable[]) {
                 mMessages = Message.getMessagesFromBundleArray(parcelables);
