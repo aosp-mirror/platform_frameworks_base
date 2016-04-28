@@ -4,24 +4,35 @@ toc:
   section:
   - title: Design Principles
     path: /design/get-started/principles.html
-    custom_link_attributes:
-    - es-lang="Principios de diseño para Android"
-    - ja-lang="Android デザイン指針"
-    - ko-lang="Android 디자인 원칙"
-    - pt-br-lang="Princípios de projeto para Android"
-    - ru-lang="Принципы проектирования Android"
-    - zh-cn-lang="Android 设计原则"
-    - zh-tw-lang="Android 設計原則"
+    path_attributes:
+    - name: es-lang
+      value: Principios de diseño para Android
+    - name: ja-lang
+      value: Android デザイン指針
+    - name: ko-lang
+      value: Android 디자인 원칙
+    - name: pt-br-lang
+      value: Princípios de projeto para Android
+    - name: ru-lang
+      value: Принципы проектирования Android
+    - name: zh-cn-lang
+      value: Android 设计原则
+    - name: zh-tw-lang
+      value: Android 設計原則
   - title: New in Android
     path: /design/patterns/new.html
 
 - title: Material for Android
   path: /design/material/index.html
-  custom_link_attributes:
-  - ja-lang="マテリアル デザイン"
-  - ko-lang="머티어리얼 디자인"
-  - zh-cn-lang="材料设计"
-  - zh-tw-lang="材料設計"
+  path_attributes:
+  - name: ja-lang
+    value: マテリアル デザイン
+  - name: ko-lang
+    value: 머티어리얼 디자인
+  - name: zh-cn-lang
+    value: 材料设计
+  - name: zh-tw-lang
+    value: 材料設計
 
 - title: Devices
   path: /design/devices.html
@@ -64,24 +75,38 @@ toc:
     path: /design/style/devices-displays.html
   - title: Navigation
     path: /design/patterns/navigation.html
-    custom_link_attributes:
-    - es-lang="Navegación con los botones Back y Up"
-    - ja-lang="Back と Up を使用したナビゲーション"
-    - ko-lang="뒤로 및 위로 탐색 기능이 포함된 탐색"
-    - pt-br-lang="Navegação com Voltar e Para cima"
-    - ru-lang="Навигация с помощью кнопок \"Назад\" и \"Вверх\""
-    - zh-cn-lang="使用返回和向上导航"
-    - zh-tw-lang="使用 [返回] 及 [上一層] 導覽"
+    path_attributes:
+    - name: es-lang
+      value: Navegación con los botones Back y Up
+    - name: ja-lang
+      value: Back と Up を使用したナビゲーション
+    - name: ko-lang
+      value: 뒤로 및 위로 탐색 기능이 포함된 탐색
+    - name: pt-br-lang
+      value: Navegação com Voltar e Para cima
+    - name: ru-lang
+      value: Навигация с помощью кнопок "Назад" и "Вверх"
+    - name: zh-cn-lang
+      value: 使用返回和向上导航
+    - name: zh-tw-lang
+      value: 使用 [返回] 及 [上一層] 導覽
   - title: Notifications
     path: /design/patterns/notifications.html
-    custom_link_attributes:
-    - es-lang="Notificaciones"
-    - ja-lang="通知"
-    - ko-lang="알림"
-    - pt-br-lang="Notificações"
-    - ru-lang="Уведомления"
-    - zh-cn-lang="通知"
-    - zh-tw-lang="通知"
+    path_attributes:
+    - name: es-lang
+      value: Notificaciones
+    - name: ja-lang
+      value: 通知
+    - name: ko-lang
+      value: 알림
+    - name: pt-br-lang
+      value: Notificações
+    - name: ru-lang
+      value: Уведомления
+    - name: zh-cn-lang
+      value: 通知
+    - name: zh-tw-lang
+      value: 通知
   - title: Widgets
     path: /design/patterns/widgets.html
   - title: Swipe Views
@@ -90,14 +115,21 @@ toc:
     path: /design/patterns/fullscreen.html
   - title: Confirming & Acknowledging
     path: /design/patterns/confirming-acknowledging.html
-    custom_link_attributes:
-    - es-lang="Confirmación y reconocimiento"
-    - ja-lang="確認と通知"
-    - ko-lang="확인 및 승인하기"
-    - pt-br-lang="Confirmação e reconhecimento"
-    - ru-lang="Подтверждение и уведомление"
-    - zh-cn-lang="确认和确知"
-    - zh-tw-lang="確認及確認完成"
+    path_attributes:
+    - name: es-lang
+      value: Confirmación y reconocimiento
+    - name: ja-lang
+      value: 確認と通知
+    - name: ko-lang
+      value: 확인 및 승인하기
+    - name: pt-br-lang
+      value: Confirmação e reconhecimento
+    - name: ru-lang
+      value: Подтверждение и уведомление
+    - name: zh-cn-lang
+      value: 确认和确知
+    - name: zh-tw-lang
+      value: 確認及確認完成
   - title: Pure Android
     path: /design/patterns/pure-android.html
   - title: Compatibility

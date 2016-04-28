@@ -1,13 +1,15 @@
 toc:
 - title: Core App Quality
   path: /distribute/essentials/quality/core.html
-  custom_link_attributes:
-  - zh-cn-lang="应用的核心质量"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 应用的核心质量
 
 - title: Tablet App Quality
   path: /distribute/essentials/quality/tablets.html
-  custom_link_attributes:
-  - zh-cn-lang="平板电脑应用的质量"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 平板电脑应用的质量
 
 - title: Wear App Quality
   path: /distribute/essentials/quality/wear.html
@@ -20,31 +22,36 @@ toc:
 
 - title: Launch Checklist
   path: /distribute/tools/launch-checklist.html
-  custom_link_attributes:
-  - zh-cn-lang="发布检查清单"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 发布检查清单
 
 - title: Localization Checklist
   path: /distribute/tools/localization-checklist.html
-  custom_link_attributes:
-  - zh-cn-lang="本地化检查清单"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 本地化检查清单
 
 - title: Brand Guidelines
   path: /distribute/tools/promote/brand.html
-  custom_link_attributes:
-  - zh-cn-lang="品牌指南"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 品牌指南
 
 - title: Device Art Generator
   path: /distribute/tools/promote/device-art.html
 
 - title: Google Play Badges
   path: https://play.google.com/intl/en_us/badges/
-  custom_link_attributes:
-  - zh-cn-lang="Google Play 徽章生成器"
+  path_attributes:
+  - name: zh-cn-lang
+    value: Google Play 徽章生成器
 
 - title: Linking to Your Products
   path: /distribute/tools/promote/linking.html
-  custom_link_attributes:
-  - zh-cn-lang="链接到您的商品"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 链接到您的商品
 
 - title: Alternative Distribution
   path: /distribute/tools/open-distribution.html
