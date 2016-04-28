@@ -1613,7 +1613,14 @@ public abstract class TvInputService extends Service {
          * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
          * </ul>
          */
-        public void notifyError(@TvInputManager.RecordingError final int error) {
+        public void notifyError(@TvInputManager.RecordingError int error) {
+            if (error < TvInputManager.RECORDING_ERROR_START
+                    || error > TvInputManager.RECORDING_ERROR_END) {
+                Log.w(TAG, "notifyError - invalid error code (" + error
+                        + ") is changed to RECORDING_ERROR_UNKNOWN.");
+                error = TvInputManager.RECORDING_ERROR_UNKNOWN;
+            }
+            final int validError = error;
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1621,7 +1628,7 @@ public abstract class TvInputService extends Service {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyError");
                         if (mSessionCallback != null) {
-                            mSessionCallback.onError(error);
+                            mSessionCallback.onError(validError);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyError", e);
