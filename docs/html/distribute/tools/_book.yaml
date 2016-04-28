@@ -1,31 +1,36 @@
 toc:
 - title: Launch Checklist
   path: /distribute/tools/launch-checklist.html
-  custom_link_attributes:
-  - zh-cn-lang="发布检查清单"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 发布检查清单
 
 - title: Localization Checklist
   path: /distribute/tools/localization-checklist.html
-  custom_link_attributes:
-  - zh-cn-lang="本地化检查清单"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 本地化检查清单
 
 - title: Device Art Generator
   path: /distribute/tools/promote/device-art.html
 
 - title: Google Play Badges
   path: /distribute/tools/promote/badges.html
-  custom_link_attributes:
-  - zh-cn-lang="Google Play 徽章生成器"
+  path_attributes:
+  - name: zh-cn-lang
+    value: Google Play 徽章生成器
 
 - title: Linking to Your Products
   path: /distribute/tools/promote/linking.html
-  custom_link_attributes:
-  - zh-cn-lang="链接到您的商品"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 链接到您的商品
 
 - title: Brand Guidelines
   path: /distribute/tools/promote/brand.html
-  custom_link_attributes:
-  - zh-cn-lang="品牌指南"
+  path_attributes:
+  - name: zh-cn-lang
+    value: 品牌指南
 
 - title: Alternative Distribution
   path: /distribute/tools/open-distribution.html
