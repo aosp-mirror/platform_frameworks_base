@@ -4255,10 +4255,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Collection<InetAddress> dnses = newLp.getDnsServers();
         if (DBG) log("Setting DNS servers for network " + netId + " to " + dnses);
         try {
-            mNetd.setDnsServersForNetwork(
+            mNetd.setDnsConfigurationForNetwork(
                     netId, NetworkUtils.makeStrings(dnses), newLp.getDomains());
         } catch (Exception e) {
-            loge("Exception in setDnsServersForNetwork: " + e);
+            loge("Exception in setDnsConfigurationForNetwork: " + e);
         }
         final NetworkAgentInfo defaultNai = getDefaultNetwork();
         if (defaultNai != null && defaultNai.network.netId == netId) {
