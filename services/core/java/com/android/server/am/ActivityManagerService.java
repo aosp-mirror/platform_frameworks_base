@@ -1946,9 +1946,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     startPersistentApps(PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 }
                 installEncryptionUnawareProviders(userId);
-                if (msg.obj instanceof ProgressReporter) {
-                    ((ProgressReporter) msg.obj).finish();
-                }
+                mUserController.finishUserUnlocked((UserState) msg.obj);
                 break;
             }
             case SYSTEM_USER_CURRENT_MSG: {
@@ -6304,7 +6302,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.debugging = false;
         app.cached = false;
         app.killedByAm = false;
-        app.unlocked = mContext.getSystemService(UserManager.class).isUserUnlocked(app.userId);
+
+        // We carefully use the same state that PackageManager uses for
+        // filtering, since we use this flag to decide if we need to install
+        // providers when user is unlocked later
+        app.unlocked = StorageManager.isUserKeyUnlocked(app.userId);
 
         mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
 
@@ -11024,14 +11026,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * belonging to any running apps.
      */
     private void installEncryptionUnawareProviders(int userId) {
-        if (!StorageManager.isFileEncryptedNativeOrEmulated()) {
-            // TODO: eventually pivot this back to look at current user state,
-            // similar to the comment in UserManager.isUserUnlocked(), but for
-            // now, if we started apps when "unlocked" then unaware providers
-            // have already been spun up.
-            return;
-        }
-
         // We're only interested in providers that are encryption unaware, and
         // we don't care about uninstalled apps, since there's no way they're
         // running at this point.
