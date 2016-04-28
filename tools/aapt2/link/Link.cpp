@@ -1478,6 +1478,21 @@ int link(const std::vector<StringPiece>& args) {
         return 1;
     }
 
+    // Expand all argument-files passed into the command line. These start with '@'.
+    std::vector<std::string> argList;
+    for (const std::string& arg : flags.getArgs()) {
+        if (util::stringStartsWith<char>(arg, "@")) {
+            const std::string path = arg.substr(1, arg.size() - 1);
+            std::string error;
+            if (!file::appendArgsFromFile(path, &argList, &error)) {
+                context.getDiagnostics()->error(DiagMessage(path) << error);
+                return 1;
+            }
+        } else {
+            argList.push_back(arg);
+        }
+    }
+
     if (verbose) {
         context.setVerbose(verbose);
     }
@@ -1587,7 +1602,7 @@ int link(const std::vector<StringPiece>& args) {
     }
 
     LinkCommand cmd(&context, options);
-    return cmd.run(flags.getArgs());
+    return cmd.run(argList);
 }
 
 } // namespace aapt

@@ -95,6 +95,12 @@ std::string packageToPath(const StringPiece& package);
  */
 Maybe<android::FileMap> mmapPath(const StringPiece& path, std::string* outError);
 
+/**
+ * Reads the file at path and appends each line to the outArgList vector.
+ */
+bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outArgList,
+                        std::string* outError);
+
 /*
  * Filter that determines which resource files/directories are
  * processed by AAPT. Takes a pattern string supplied by the user.
