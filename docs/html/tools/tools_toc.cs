@@ -147,6 +147,9 @@
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>tools/help/android-monitor.html">Android Monitor</a></div>
         <ul>
+          <li><a href="<?cs var:toroot ?>tools/help/am-basics.html"><span
+            class="en">Android Monitor Basics</span></a>
+          </li>
           <li><a href="<?cs var:toroot ?>tools/help/am-logcat.html"><span
             class="en">logcat Monitor</span></a>
           </li>
@@ -161,6 +164,25 @@
           </li>
           <li><a href="<?cs var:toroot ?>tools/help/am-network.html"><span
             class="en">Network Monitor</span></a>
+          </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-hprof.html"><span
+            class="en">HPROF Viewer and Analyzer</span></a>
+           </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-allocation.html"><span
+            class="en">Allocation Tracker</span></a>
+             </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-methodtrace.html"><span
+            class="en">Method Trace</span></a>
+            </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-sysinfo.html"><span
+            class="en">System Information</span></a>
+            </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-screenshot.html"><span
+            class="en">Screen Capture</span></a>
+            </li>
+            <li><a href="<?cs var:toroot ?>tools/help/am-video.html"><span
+            class="en">Video Capture</span></a>
+            </li>
           </li>
         </ul>
       </li>
@@ -217,6 +239,7 @@ class="en">Tools Help</span></a></div>
       </li>
 
       <li><a href="<?cs var:toroot ?>tools/help/hprof-conv.html">hprof-conv</a></li>
+      <li><a href="<?cs var:toroot ?>tools/help/image-asset-studio.html">Image Asset Studio</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/jobb.html">jobb</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/lint.html">lint</span></a></li>
       <li class="nav-section">
