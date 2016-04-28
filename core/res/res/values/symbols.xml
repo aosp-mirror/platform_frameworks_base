@@ -2588,4 +2588,8 @@
   <java-symbol type="string" name="config_tvRemoteServicePackage" />
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
+
+  <!-- Pinner Service -->
+  <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
+
 </resources>
