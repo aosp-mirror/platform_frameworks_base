@@ -1,7 +1,12 @@
 page.title=Network Monitor
 parent.title=Android Monitor
 parent.link=android-monitor.html
-page.tags=monitor
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the Network Monitor to analyze network requests, including how and when your app transfers data. Preserve battery life by optimizing network use.
+page.image=tools/help/thumbnails/am-networkmon.png
+page.article=true
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -11,62 +16,11 @@ page.tags=monitor
   <li><a href="#running">Displaying a Running App in the Network Monitor</a></li>
 </ol>
 
- <h2>See also</h2>
-  <ol>
-    <li>
-        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
-      </li>
-    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-  </ol>
-
 <h2>Video</h2>
   <ol>
     <li><a href="https://www.youtube.com/watch?v=fEEulSk1kNY"
       class="external-link">Battery Drain and Networking</a></li>
   </ol>
-
-<h2>
-  Dependencies and Prerequisites
-</h2>
-
-<ul>
-  <li>
-    <a href="{@docRoot}tools/building/building-studio.html#RunningOnDeviceStudio">Connect a
-    hardware device</a> to your development computer.
-  </li>
-
-  <li>Make sure your development computer detects your hardware device, which often happens
-  automatically when you connect it to a USB port.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
-    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
-    <strong>Developer Options</strong> on the device.
-  </li>
-
-  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
-  <code>build.gradle</code> file (it’s initially set by default).
-  </li>
-
-  <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-  <strong>Enable ADB Integration</strong>.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-</ul>
 
 </div>
 </div>
@@ -91,32 +45,35 @@ page.tags=monitor
 </h2>
 
 <p>
-  Follow these steps:
+  To display an app running on a particular device in the Network Monitor:
 </p>
 
 <ol>
-  <li>Connect a hardware device.
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
   </li>
-
+  <p>Connect a hardware device; the Network Monitor doesn't monitor an emulator.
+  </p>
+ <li>Open an app project.
+  </li>
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on the hardware device.
+  </li>
   <li>
-    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
+  </li>
+  <li>Click the <strong>Monitors</strong> tab and <a href=
+  "{@docRoot}tools/help/am-basics.html#rearranging">display the Network Monitor</a>.
   </li>
 
-  <li>Click the <strong>Network</strong> tab.
+  <li>Enable the Network Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png"
+    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect it.
   </li>
 
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on the hardware device.
-  </li>
-
-  <li>To start the Network Monitor, click Pause <img src="{@docRoot}images/tools/am-ipause.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to
-  deselect it.
-  </li>
 <p>
   Any network traffic begins to appear in the Network Monitor:
 </p>
-  <img src="{@docRoot}images/tools/am-networkmon.png" style="vertical-align:sub;margin:0;width:450px" />
+  <img src="{@docRoot}images/tools/am-networkmon2.png" style="vertical-align:sub;margin:0" />
 <p>
   The Network Monitor adds up the amount of time it takes for the device to transmit and receive
   kilobytes of data.
