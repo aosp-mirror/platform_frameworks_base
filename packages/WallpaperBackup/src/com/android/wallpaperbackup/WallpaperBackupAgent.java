@@ -22,22 +22,28 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackupDataOutput;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.system.Os;
 import android.util.Slog;
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class WallpaperBackupAgent extends BackupAgent {
     private static final String TAG = "WallpaperBackup";
     private static final boolean DEBUG = false;
 
     // NB: must be kept in sync with WallpaperManagerService but has no
-    // compile-time visiblity.
+    // compile-time visibility.
 
     // Target filenames within the system's wallpaper directory
     static final String WALLPAPER = "wallpaper_orig";
@@ -107,11 +113,7 @@ public class WallpaperBackupAgent extends BackupAgent {
     }
 
     // We use the default onRestoreFile() implementation that will recreate our stage files,
-    // then postprocess in onRestoreFinished() to move them on top of the live data.
-    //
-    // NOTE: this relies on our local files dir being on the same filesystem as the live
-    // system wallpaper data.  If this is not the case then an actual copy operation will
-    // be needed.
+    // then post-process in onRestoreFinished() to apply the new wallpaper.
     @Override
     public void onRestoreFinished() {
         if (DEBUG) {
@@ -125,19 +127,25 @@ public class WallpaperBackupAgent extends BackupAgent {
             // to back up the original image on the source device.
             if (imageStage.exists()) {
                 if (DEBUG) {
-                    Slog.v(TAG, "Got restored wallpaper; renaming into place");
+                    Slog.v(TAG, "Got restored wallpaper; applying");
                 }
-                // Rename the image file into place last because that is the trigger for
-                // the wallpaper observer to generate a new crop/scale
-                Os.rename(infoStage.getCanonicalPath(), mWallpaperInfo.getCanonicalPath());
-                Os.rename(imageStage.getCanonicalPath(), mWallpaperFile.getCanonicalPath());
+
+                // Parse the restored info file to find the crop hint.  Note that this currently
+                // relies on a priori knowledge of the wallpaper info file schema.
+                Rect cropHint = parseCropHint(infoStage);
+                if (cropHint != null) {
+                    if (DEBUG) {
+                        Slog.v(TAG, "Restored crop hint " + cropHint + "; now writing data");
+                    }
+                    WallpaperManager wm = getSystemService(WallpaperManager.class);
+                    try (FileInputStream in = new FileInputStream(imageStage)) {
+                        wm.setStream(in, cropHint, true, WallpaperManager.FLAG_SYSTEM);
+                    } finally {} // auto-closes 'in'
+                }
             }
         } catch (Exception e) {
             Slog.e(TAG, "Unable to restore wallpaper: " + e.getMessage());
-            mWm.clearWallpaper(WallpaperManager.FLAG_SYSTEM, UserHandle.USER_SYSTEM);
         } finally {
-            // These "should" not exist because of the renames, but make sure
-            // in case of errors/exceptions/etc.
             if (DEBUG) {
                 Slog.v(TAG, "Removing restore stage files");
             }
@@ -146,8 +154,41 @@ public class WallpaperBackupAgent extends BackupAgent {
         }
     }
 
+    private Rect parseCropHint(File wallpaperInfo) {
+        Rect cropHint = new Rect();
+        try (FileInputStream stream = new FileInputStream(wallpaperInfo)) {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, StandardCharsets.UTF_8.name());
+
+            int type;
+            do {
+                type = parser.next();
+                if (type == XmlPullParser.START_TAG) {
+                    String tag = parser.getName();
+                    if ("wp".equals(tag)) {
+                        cropHint.left = getAttributeInt(parser, "cropLeft", 0);
+                        cropHint.top = getAttributeInt(parser, "cropTop", 0);
+                        cropHint.right = getAttributeInt(parser, "cropRight", 0);
+                        cropHint.bottom = getAttributeInt(parser, "cropBottom", 0);
+                    }
+                }
+            } while (type != XmlPullParser.END_DOCUMENT);
+        } catch (Exception e) {
+            // Whoops; can't process the info file at all.  Report failure.
+            Slog.w(TAG, "Failed to parse restored metadata: " + e.getMessage());
+            return null;
+        }
+
+        return cropHint;
+    }
+
+    private int getAttributeInt(XmlPullParser parser, String name, int defValue) {
+        final String value = parser.getAttributeValue(null, name);
+        return (value == null) ? defValue : Integer.parseInt(value);
+    }
+
     //
-    // Key/value API: abstract, so required, but not used
+    // Key/value API: abstract, therefore required; but not used
     //
 
     @Override
