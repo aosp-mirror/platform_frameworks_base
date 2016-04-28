@@ -1098,6 +1098,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
         pw.println(prefix + "mDeferDetach=" + mDeferDetach);
         pw.println(prefix + "mFullscreen=" + mFullscreen);
         pw.println(prefix + "mBounds=" + mBounds.toShortString());
+        if (mMinimizeAmount != 0f) {
+            pw.println(prefix + "mMinimizeAmout=" + mMinimizeAmount);
+        }
+        if (mAdjustedForIme) {
+            pw.println(prefix + "mAdjustedForIme=true");
+            pw.println(prefix + "mAdjustImeAmount=" + mAdjustImeAmount);
+            pw.println(prefix + "mAdjustDividerAmount=" + mAdjustDividerAmount);
+        }
         if (!mAdjustedBounds.isEmpty()) {
             pw.println(prefix + "mAdjustedBounds=" + mAdjustedBounds.toShortString());
         }

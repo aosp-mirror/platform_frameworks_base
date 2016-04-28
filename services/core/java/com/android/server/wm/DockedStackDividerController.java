@@ -377,7 +377,7 @@ public class DockedStackDividerController implements DimLayerUser {
 
         // If the app that having visibility change is not the top visible one in the task,
         // it does not affect whether the docked stack is minimized, ignore it.
-        if (task.getTopVisibleAppToken() == null || task.getTopVisibleAppToken() != wtoken) {
+        if (task.getTopAppToken() == null || task.getTopAppToken() != wtoken) {
             return;
         }
 
@@ -598,7 +598,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
+        final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
