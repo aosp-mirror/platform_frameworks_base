@@ -34,11 +34,11 @@ page.title=Support Library Features
 
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}tools/support-library/index.html#revisions">
+      <li><a href="{@docRoot}go/libraries/support-library/index.html#revisions">
         Support Library Revisions</a></li>
-      <li><a href="{@docRoot}tools/support-library/setup.html">
+      <li><a href="{@docRoot}go/libraries/support-library/setup.html">
         Support Library Setup</a></li>
-      <li><a href="{@docRoot}tools/testing-support-library/index.html">
+      <li><a href="{@docRoot}go/libraries/testing-support-library/index.html">
         Testing Support Library</a></li>
     </ol>
 
