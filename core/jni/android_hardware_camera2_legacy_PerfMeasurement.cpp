@@ -114,7 +114,7 @@ class PerfMeasurementContext {
      * will be active at once, which is a function of the GPU's level of
      * pipelining and the frequency of queries.
      */
-    PerfMeasurementContext(size_t maxQueryCount):
+    explicit PerfMeasurementContext(size_t maxQueryCount):
             mTimingStartIndex(0),
             mTimingEndIndex(0),
             mTimingQueryIndex(0) {
