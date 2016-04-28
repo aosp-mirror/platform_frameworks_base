@@ -6290,9 +6290,11 @@ public class WindowManagerService extends IWindowManager.Stub
                         + maxLayer + " appToken=" + appToken);
                 for (int i = 0; i < windows.size(); i++) {
                     WindowState win = windows.get(i);
+                    WindowSurfaceController controller = win.mWinAnimator.mSurfaceController;
                     Slog.i(TAG_WM, win + ": " + win.mLayer
                             + " animLayer=" + win.mWinAnimator.mAnimLayer
-                            + " surfaceLayer=" + win.mWinAnimator.mSurfaceController.getLayer());
+                            + " surfaceLayer=" + ((controller == null)
+                                ? "null" : controller.getLayer()));
                 }
             }
 
