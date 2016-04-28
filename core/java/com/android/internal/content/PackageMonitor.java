@@ -45,6 +45,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_CHANGED);
         sPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         sPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        sPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         sPackageFilt.addDataScheme("package");
         sNonDataFilt.addAction(Intent.ACTION_UID_REMOVED);
         sNonDataFilt.addAction(Intent.ACTION_USER_STOPPED);
@@ -275,6 +276,9 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     public void onFinishPackageChanges() {
     }
 
+    public void onPackageDataCleared(String packageName, int uid) {
+    }
+
     public int getChangingUserId() {
         return mChangeUserId;
     }
@@ -364,6 +368,12 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
                     mSomePackagesChanged = true;
                 }
                 onPackageModified(pkg);
+            }
+        } else if (Intent.ACTION_PACKAGE_DATA_CLEARED.equals(action)) {
+            String pkg = getPackageName(intent);
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, 0);
+            if (pkg != null) {
+                onPackageDataCleared(pkg, uid);
             }
         } else if (Intent.ACTION_QUERY_PACKAGE_RESTART.equals(action)) {
             mDisappearingPackages = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
