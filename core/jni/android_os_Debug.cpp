@@ -597,6 +597,13 @@ static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 
 static long get_allocated_vmalloc_memory() {
     char line[1024];
+    // Ignored tags that don't actually consume memory (ie remappings)
+    static const char* const ignored_tags[] = {
+            "ioremap",
+            "map_lowmem",
+            "vm_map_ram",
+            NULL
+    };
     long size, vmalloc_allocated_size = 0;
     FILE* fp = fopen("/proc/vmallocinfo", "r");
     if (fp == NULL) {
@@ -606,12 +613,17 @@ static long get_allocated_vmalloc_memory() {
         if (fgets(line, 1024, fp) == NULL) {
             break;
         }
-
-        if (!strstr(line, "ioremap") && !strstr(line, "map_lowmem")) {
-            // Ignore ioremap and map_lowmem regions, since they don't actually consume memory
-            if (sscanf(line, "%*x-%*x %ld", &size) == 1) {
-                vmalloc_allocated_size += size;
+        bool valid_line = true;
+        int i = 0;
+        while (ignored_tags[i]) {
+            if (strstr(line, ignored_tags[i]) != NULL) {
+                valid_line = false;
+                break;
             }
+            i++;
+        }
+        if (valid_line && (sscanf(line, "%*x-%*x %ld", &size) == 1)) {
+            vmalloc_allocated_size += size;
         }
     }
     fclose(fp);
