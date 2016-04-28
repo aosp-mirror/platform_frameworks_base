@@ -3438,7 +3438,9 @@ final class ActivityStack {
                 mWindowManager.prepareAppTransition(transit, false);
                 mWindowManager.setAppVisibility(r.appToken, false);
                 mWindowManager.executeAppTransition();
-                mStackSupervisor.mWaitingVisibleActivities.add(r);
+                if (!mStackSupervisor.mWaitingVisibleActivities.contains(r)) {
+                    mStackSupervisor.mWaitingVisibleActivities.add(r);
+                }
             }
             return finishCurrentActivityLocked(r, (r.visible || r.nowVisible) ?
                     FINISH_AFTER_VISIBLE : FINISH_AFTER_PAUSE, oomAdj) == null;
