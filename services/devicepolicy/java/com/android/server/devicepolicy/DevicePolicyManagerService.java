@@ -6224,6 +6224,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void enforceUserUnlocked(int userId) {
+        // Since we're doing this operation on behalf of an app, we only
+        // want to use the actual "unlocked" state.
         Preconditions.checkState(mUserManager.isUserUnlocked(userId),
                 "User must be running and unlocked");
     }

@@ -256,13 +256,13 @@ public class LockSettingsService extends ILockSettings.Stub {
         for (int i = 0; i < users.size(); i++) {
             UserInfo user = users.get(i);
             UserHandle userHandle = user.getUserHandle();
-            if (!mUserManager.isUserUnlocked(userHandle)) {
+            if (!mUserManager.isUserUnlockingOrUnlocked(userHandle)) {
                 if (!user.isManagedProfile()) {
                     showEncryptionNotification(userHandle);
                 } else {
                     UserInfo parent = mUserManager.getProfileParent(user.id);
                     if (parent != null &&
-                            mUserManager.isUserUnlocked(parent.getUserHandle()) &&
+                            mUserManager.isUserUnlockingOrUnlocked(parent.getUserHandle()) &&
                             !mUserManager.isQuietModeEnabled(userHandle)) {
                         // Only show notifications for managed profiles once their parent
                         // user is unlocked.
@@ -350,7 +350,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             UserInfo profile = profiles.get(i);
             if (profile.isManagedProfile()) {
                 UserHandle userHandle = profile.getUserHandle();
-                if (!mUserManager.isUserUnlocked(userHandle) &&
+                if (!mUserManager.isUserUnlockingOrUnlocked(userHandle) &&
                         !mUserManager.isQuietModeEnabled(userHandle)) {
                     showEncryptionNotificationForProfile(userHandle);
                 }
