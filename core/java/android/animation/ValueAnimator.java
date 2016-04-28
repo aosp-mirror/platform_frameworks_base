@@ -353,6 +353,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
      *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
+     *
      * <p>Since ValueAnimator does not know how to animate between arbitrary Objects, this
      * factory method also takes a TypeEvaluator object that the ValueAnimator will use
      * to perform that interpolation.
@@ -433,6 +438,11 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      * starting value for the animation (unlike ObjectAnimator, which can derive that value
      * from the target object and property being animated). Therefore, there should typically
      * be two or more values.
+     *
+     * <p><strong>Note:</strong> The Object values are stored as references to the original
+     * objects, which means that changes to those objects after this method is called will
+     * affect the values on the animator. If the objects will be mutated externally after
+     * this method is called, callers should pass a copy of those objects instead.
      *
      * <p>If there are already multiple sets of values defined for this ValueAnimator via more
      * than one PropertyValuesHolder object, this method will set the values for the first
