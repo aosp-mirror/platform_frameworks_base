@@ -4333,15 +4333,21 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (visibilityChanged && !delayed) {
-            if (visible) {
+        if (visibilityChanged) {
+            if (visible && !delayed) {
                 // The token was made immediately visible, there will be no entrance animation.
                 // We need to inform the client the enter animation was finished.
                 wtoken.mEnteringAnimation = true;
                 mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(wtoken.token);
             }
-            getDefaultDisplayContentLocked().getDockedDividerController()
-                    .notifyAppVisibilityChanged(wtoken, visible);
+
+            if (!mClosingApps.contains(wtoken) && !mOpeningApps.contains(wtoken)) {
+                // The token is not closing nor opening, so even if there is an animation set, that
+                // doesn't mean that it goes through the normal app transition cycle so we have
+                // to inform the docked controller about visibility change.
+                getDefaultDisplayContentLocked().getDockedDividerController()
+                        .notifyAppVisibilityChanged(wtoken, visible);
+            }
         }
 
         return delayed;
