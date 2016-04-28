@@ -1570,6 +1570,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
                     PostInstallData data = mRunningInstalls.get(msg.arg1);
+                    final boolean didRestore = (msg.arg2 != 0);
                     mRunningInstalls.delete(msg.arg1);
 
                     if (data != null) {
@@ -1584,7 +1585,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                         // Handle the parent package
                         handlePackagePostInstall(parentRes, grantPermissions, killApp,
-                                grantedPermissions, args.observer);
+                                grantedPermissions, didRestore, args.installerPackageName,
+                                args.observer);
 
                         // Handle the child packages
                         final int childCount = (parentRes.addedChildPackages != null)
@@ -1592,7 +1594,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         for (int i = 0; i < childCount; i++) {
                             PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
                             handlePackagePostInstall(childRes, grantPermissions, killApp,
-                                    grantedPermissions, args.observer);
+                                    grantedPermissions, false, args.installerPackageName,
+                                    args.observer);
                         }
 
                         // Log tracing if needed
@@ -1788,6 +1791,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
             boolean killApp, String[] grantedPermissions,
+            boolean launchedForRestore, String installerPackage,
             IPackageInstallObserver2 installObserver) {
         if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
             // Send the removed broadcasts
@@ -1872,6 +1876,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                             null /*package*/, null /*extras*/, 0 /*flags*/,
                             packageName /*targetPackage*/,
                             null /*finishedReceiver*/, updateUsers);
+                } else if (launchedForRestore && !isSystemApp(res.pkg)) {
+                    // First-install and we did a restore, so we're responsible for the
+                    // first-launch broadcast.
+                    if (DEBUG_BACKUP) {
+                        Slog.i(TAG, "Post-restore of " + packageName
+                                + " sending FIRST_LAUNCH in " + Arrays.toString(firstUsers));
+                    }
+                    sendFirstLaunchBroadcast(packageName, installerPackage, firstUsers);
                 }
 
                 // Send broadcast package appeared if forward locked/external for all users
@@ -11723,7 +11735,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void finishPackageInstall(int token) {
+    public void finishPackageInstall(int token, boolean didLaunch) {
         enforceSystemOrRoot("Only the system is allowed to finish installs");
 
         if (DEBUG_INSTALL) {
@@ -11731,7 +11743,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
 
-        final Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+        final Message msg = mHandler.obtainMessage(POST_INSTALL, token, didLaunch ? 1 : 0);
         mHandler.sendMessage(msg);
     }
 
@@ -12058,6 +12070,54 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         });
+    }
+
+    /**
+     * Callback from PackageSettings whenever an app is first transitioned out of the
+     * 'stopped' state.  Normally we just issue the broadcast, but we can't do that if
+     * the app was "launched" for a restoreAtInstall operation.  Therefore we check
+     * here whether the app is the target of an ongoing install, and only send the
+     * broadcast immediately if it is not in that state.  If it *is* undergoing a restore,
+     * the first-launch broadcast will be sent implicitly on that basis in POST_INSTALL
+     * handling.
+     */
+    void notifyFirstLaunch(final String pkgName, final String installerPackage, final int userId) {
+        // Serialize this with the rest of the install-process message chain.  In the
+        // restore-at-install case, this Runnable will necessarily run before the
+        // POST_INSTALL message is processed, so the contents of mRunningInstalls
+        // are coherent.  In the non-restore case, the app has already completed install
+        // and been launched through some other means, so it is not in a problematic
+        // state for observers to see the FIRST_LAUNCH signal.
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < mRunningInstalls.size(); i++) {
+                    final PostInstallData data = mRunningInstalls.valueAt(i);
+                    if (pkgName.equals(data.res.pkg.applicationInfo.packageName)) {
+                        // right package; but is it for the right user?
+                        for (int uIndex = 0; uIndex < data.res.newUsers.length; uIndex++) {
+                            if (userId == data.res.newUsers[uIndex]) {
+                                if (DEBUG_BACKUP) {
+                                    Slog.i(TAG, "Package " + pkgName
+                                            + " being restored so deferring FIRST_LAUNCH");
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+                // didn't find it, so not being restored
+                if (DEBUG_BACKUP) {
+                    Slog.i(TAG, "Package " + pkgName + " sending normal FIRST_LAUNCH");
+                }
+                sendFirstLaunchBroadcast(pkgName, installerPackage, new int[] {userId});
+            }
+        });
+    }
+
+    private void sendFirstLaunchBroadcast(String pkgName, String installerPkg, int[] userIds) {
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_FIRST_LAUNCH, pkgName, null, 0,
+                installerPkg, null, userIds);
     }
 
     private abstract class HandlerParams {
