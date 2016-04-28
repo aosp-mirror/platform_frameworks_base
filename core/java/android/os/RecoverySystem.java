@@ -434,6 +434,9 @@ public class RecoverySystem {
             String filename = packageFile.getCanonicalPath();
             Log.w(TAG, "!!! REBOOTING TO INSTALL " + filename + " !!!");
 
+            // If the package name ends with "_s.zip", it's a security update.
+            boolean securityUpdate = filename.endsWith("_s.zip");
+
             // If the package is on the /data partition, the package needs to
             // be processed (i.e. uncrypt'd). The caller specifies if that has
             // been done in 'processed' parameter.
@@ -468,7 +471,12 @@ public class RecoverySystem {
 
             final String filenameArg = "--update_package=" + filename + "\n";
             final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
-            final String command = filenameArg + localeArg;
+            final String securityArg = "--security\n";
+
+            String command = filenameArg + localeArg;
+            if (securityUpdate) {
+                command += securityArg;
+            }
 
             RecoverySystem rs = (RecoverySystem) context.getSystemService(
                     Context.RECOVERY_SERVICE);
@@ -501,6 +509,7 @@ public class RecoverySystem {
     public static void scheduleUpdateOnBoot(Context context, File packageFile)
             throws IOException {
         String filename = packageFile.getCanonicalPath();
+        boolean securityUpdate = filename.endsWith("_s.zip");
 
         // If the package is on the /data partition, use the block map file as
         // the package name instead.
@@ -510,7 +519,12 @@ public class RecoverySystem {
 
         final String filenameArg = "--update_package=" + filename + "\n";
         final String localeArg = "--locale=" + Locale.getDefault().toString() + "\n";
-        final String command = filenameArg + localeArg;
+        final String securityArg = "--security\n";
+
+        String command = filenameArg + localeArg;
+        if (securityUpdate) {
+            command += securityArg;
+        }
 
         RecoverySystem rs = (RecoverySystem) context.getSystemService(Context.RECOVERY_SERVICE);
         if (!rs.setupBcb(command)) {
