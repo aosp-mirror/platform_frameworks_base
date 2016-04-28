@@ -51,7 +51,8 @@ public abstract class EnrollClient extends ClientMonitor {
                     " getGroupId():" + getGroupId());
         }
         if (remaining == 0) {
-            FingerprintUtils.getInstance().addFingerprintForUser(getContext(), fingerId, groupId);
+            FingerprintUtils.getInstance().addFingerprintForUser(getContext(), fingerId,
+                    getTargetUserId());
         }
         return sendEnrollResult(fingerId, groupId, remaining);
     }

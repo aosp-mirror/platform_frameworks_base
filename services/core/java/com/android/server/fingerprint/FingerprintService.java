@@ -540,13 +540,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         startClient(client, true /* initiatedByClient */);
     }
 
-    private void startEnrollment(IBinder token, byte [] cryptoToken, int callingUserId, int groupId,
+    private void startEnrollment(IBinder token, byte [] cryptoToken, int userId,
             IFingerprintServiceReceiver receiver, int flags, boolean restricted,
             String opPackageName) {
-        updateActiveGroup(groupId, opPackageName);
+        updateActiveGroup(userId, opPackageName);
+
+        final int groupId = userId; // default group for fingerprint enrollment
 
         EnrollClient client = new EnrollClient(getContext(), mHalDeviceId, token, receiver,
-                callingUserId, groupId, cryptoToken, restricted, opPackageName) {
+                userId, groupId, cryptoToken, restricted, opPackageName) {
 
             @Override
             public IFingerprintDaemon getFingerprintDaemon() {
@@ -680,15 +682,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         }
 
         @Override // Binder call
-        public void enroll(final IBinder token, final byte[] cryptoToken, final int groupId,
+        public void enroll(final IBinder token, final byte[] cryptoToken, final int userId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             checkPermission(MANAGE_FINGERPRINT);
             final int limit =  mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
-            final int callingUserId = UserHandle.getCallingUserId();
-            final int enrolled = FingerprintService.this.
-                    getEnrolledFingerprints(callingUserId).size();
+
+            final int enrolled = FingerprintService.this.getEnrolledFingerprints(userId).size();
             if (enrolled >= limit) {
                 Slog.w(TAG, "Too many fingerprints registered");
                 return;
@@ -696,7 +697,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
             // Group ID is arbitrarily set to parent profile user ID. It just represents
             // the default fingerprints for the user.
-            if (!isCurrentUserOrProfile(groupId)) {
+            if (!isCurrentUserOrProfile(userId)) {
                 return;
             }
 
@@ -704,7 +705,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startEnrollment(token, cryptoToken, callingUserId, groupId, receiver, flags,
+                    startEnrollment(token, cryptoToken, userId, receiver, flags,
                             restricted, opPackageName);
                 }
             });
