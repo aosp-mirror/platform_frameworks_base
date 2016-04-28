@@ -7706,6 +7706,15 @@ public final class Settings {
         public static final String CAPTIVE_PORTAL_SERVER = "captive_portal_server";
 
         /**
+         * Whether to use HTTPS for network validation. This is enabled by default and the setting
+         * needs to be set to 0 to disable it. This setting is a misnomer because captive portals
+         * don't actually use HTTPS, but it's consistent with the other settings.
+         *
+         * @hide
+         */
+        public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
+
+        /**
          * Whether network service discovery is enabled.
          *
          * @hide
