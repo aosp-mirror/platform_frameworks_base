@@ -266,6 +266,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -274,6 +275,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -13787,6 +13789,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         return false;
     }
 
+    private static void updateDigest(MessageDigest digest, File file) throws IOException {
+        try (DigestInputStream digestStream =
+                new DigestInputStream(new FileInputStream(file), digest)) {
+            while (digestStream.read() != -1) {} // nothing to do; just plow through the file
+        }
+    }
+
     private void replacePackageLIF(PackageParser.Package pkg, final int policyFlags, int scanFlags,
             UserHandle user, String installerPackageName, PackageInstalledInfo res) {
         final boolean isEphemeral = (policyFlags & PackageParser.PARSE_IS_EPHEMERAL) != 0;
@@ -13839,6 +13848,32 @@ public class PackageManagerService extends IPackageManager.Stub {
                             "New package has a different signature: " + pkgName);
                     return;
                 }
+            }
+
+            // don't allow a system upgrade unless the upgrade hash matches
+            if (oldPackage.restrictUpdateHash != null && oldPackage.isSystemApp()) {
+                byte[] digestBytes = null;
+                try {
+                    final MessageDigest digest = MessageDigest.getInstance("SHA-512");
+                    updateDigest(digest, new File(pkg.baseCodePath));
+                    if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+                        for (String path : pkg.splitCodePaths) {
+                            updateDigest(digest, new File(path));
+                        }
+                    }
+                    digestBytes = digest.digest();
+                } catch (NoSuchAlgorithmException | IOException e) {
+                    res.setError(INSTALL_FAILED_INVALID_APK,
+                            "Could not compute hash: " + pkgName);
+                    return;
+                }
+                if (!Arrays.equals(oldPackage.restrictUpdateHash, digestBytes)) {
+                    res.setError(INSTALL_FAILED_INVALID_APK,
+                            "New package fails restrict-update check: " + pkgName);
+                    return;
+                }
+                // retain upgrade restriction
+                pkg.restrictUpdateHash = oldPackage.restrictUpdateHash;
             }
 
             // Check for shared user id changes
