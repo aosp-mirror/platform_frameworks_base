@@ -252,6 +252,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             findScrollContainer();
             if (mScrollContainer != null) {
                 mScrollContainer.requestDisallowLongPress();
+                mScrollContainer.requestDisallowDismiss();
             }
         }
         return super.onInterceptTouchEvent(ev);
