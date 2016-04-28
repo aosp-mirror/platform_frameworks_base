@@ -61,5 +61,14 @@ toc:
   - title: OpenSL ES for Android
     path: /ndk/guides/audio/opensl-for-android.html
 
-- title: Graphics
+- title: Vulkan
   path: /ndk/guides/graphics/index.html
+  section:
+  - title: Getting Started
+    path: /ndk/guides/graphics/getting-started.html
+  - title: Design Guidelines
+    path: /ndk/guides/graphics/design-notes.html
+  - title: Shader Compilers
+    path: /ndk/guides/graphics/shader-compilers.html
+  - title: Validation Layers
+    path: /ndk/guides/graphics/validation-layer.html
