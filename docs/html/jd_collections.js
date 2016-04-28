@@ -1699,6 +1699,37 @@ var RESOURCE_COLLECTIONS = {
       "https://www.youtube.com/watch?v=j3QC6hcpy90"
     ]
   },
+"tools/help/log": {
+    "title": "",
+    "resources": [
+       "tools/help/am-logcat.html"
+    ]
+  },
+"tools/help/monitor": {
+    "title": "",
+    "resources": [
+       "tools/help/am-memory.html",
+       "tools/help/am-cpu.html",
+       "tools/help/am-gpu.html",
+       "tools/help/am-network.html"
+    ]
+  },
+ "tools/help/data": {
+    "title": "",
+    "resources": [
+       "tools/help/am-hprof.html",
+       "tools/help/am-allocation.html",
+       "tools/help/am-methodtrace.html",
+       "tools/help/am-sysinfo.html"
+    ]
+  },
+  "tools/help/shot": {
+    "title": "",
+    "resources": [
+       "tools/help/am-screenshot.html",
+       "tools/help/am-video.html"
+    ]
+  },
   "tools/performance/rendering": {
     "title": "",
     "resources": [
