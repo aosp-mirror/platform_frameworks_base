@@ -110,11 +110,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
 
-    // Display rotation as of the last time the display information was updated for this stack.
-    private int mLastUpdateDisplayInfoRotation = -1;
-    // Display rotation as of the last time the configuration was updated for this stack.
-    private int mLastConfigChangedRotation = -1;
-
     // Whether the stack and all its tasks is currently being drag-resized
     private boolean mDragResizing;
 
@@ -371,28 +366,19 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final int newDensity = mDisplayContent.getDisplayInfo().logicalDensityDpi;
         if (mRotation == newRotation && mDensity == newDensity) {
             setBounds(mTmpRect2);
-        } else {
-            mLastUpdateDisplayInfoRotation = newRotation;
-            updateBoundsAfterConfigChange(true);
         }
+
+        // If the rotation or density didn't match, we'll update it in onConfigurationChanged.
     }
 
     boolean onConfigurationChanged() {
-        mLastConfigChangedRotation = getDisplayInfo().rotation;
-        return updateBoundsAfterConfigChange(false);
+        return updateBoundsAfterConfigChange();
     }
 
-    boolean updateBoundsAfterConfigChange(boolean scheduleResize) {
+    private boolean updateBoundsAfterConfigChange() {
         if (mFullscreen) {
             // Bounds will already be set correctly when display info is updated in the case of
             // fullscreen.
-            return false;
-        }
-
-        if (mLastConfigChangedRotation != mLastUpdateDisplayInfoRotation) {
-            // We wait for the rotation values after configuration change and display info. update
-            // to be equal before updating the bounds due to rotation change otherwise things might
-            // get out of alignment...
             return false;
         }
 
@@ -400,7 +386,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final int newDensity = getDisplayInfo().logicalDensityDpi;
 
         if (mRotation == newRotation && mDensity == newDensity) {
-            // Nothing to do here if the rotation didn't change
+            // Nothing to do here as we already update the state in updateDisplayInfo.
             return false;
         }
 
@@ -416,16 +402,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             }
         }
 
-        if (scheduleResize) {
-            // Post message to inform activity manager of the bounds change simulating
-            // a one-way call. We do this to prevent a deadlock between window manager
-            // lock and activity manager lock been held.
-            mService.mH.obtainMessage(RESIZE_STACK, mStackId,
-                    0 /*allowResizeInDockedMode*/, mTmpRect2).sendToTarget();
-        } else {
-            mBoundsAfterRotation.set(mTmpRect2);
-        }
-
+        mBoundsAfterRotation.set(mTmpRect2);
         return true;
     }
 
