@@ -160,6 +160,12 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
 
     /**
+     * See {@link #setAvoidMoveToFront}.
+     * @hide
+     */
+    private static final String KEY_DONT_MOVE_TO_FRONT = "android.activity.dontMoveToFront";
+
+    /**
      * Where the docked stack should be positioned.
      * @hide
      */
@@ -232,6 +238,7 @@ public class ActivityOptions {
     private int mLaunchStackId = INVALID_STACK_ID;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private boolean mAvoidMoveToFront;
     private AppTransitionAnimationSpec mAnimSpecs[];
 
     /**
@@ -774,6 +781,7 @@ public class ActivityOptions {
         }
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
+        mAvoidMoveToFront = opts.getBoolean(KEY_DONT_MOVE_TO_FRONT, false);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -950,6 +958,23 @@ public class ActivityOptions {
         return mLaunchTaskId;
     }
 
+    /**
+     * Set's whether the task should be moved to the front. This is different from
+     * {@link #getLaunchTaskBehind()} as we don't want to have an animation at all when launching
+     * an activity that shouldn't be moved to the front.
+     * @hide
+     */
+    public void setAvoidMoveToFront(boolean avoidMoveToFront) {
+        mAvoidMoveToFront = avoidMoveToFront;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getAvoidMoveToFront() {
+        return mAvoidMoveToFront;
+    }
+
     /** @hide */
     public int getDockCreateMode() {
         return mDockCreateMode;
@@ -1103,6 +1128,7 @@ public class ActivityOptions {
         }
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
+        b.putBoolean(KEY_DONT_MOVE_TO_FRONT, mAvoidMoveToFront);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
