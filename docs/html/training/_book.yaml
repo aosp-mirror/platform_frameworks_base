@@ -4,8 +4,9 @@ toc:
   section:
   - title: Building Your First App
     path: /training/basics/firstapp/index.html
-    custom_link_attributes:
-    - description="After you've installed the Android SDK, start with this class to learn the basics about Android app development."
+    path_attributes:
+    - name: description
+      value: After you've installed the Android SDK, start with this class to learn the basics about Android app development.
     section:
     - title: Creating an Android Project
       path: /training/basics/firstapp/creating-project.html
@@ -17,8 +18,9 @@ toc:
       path: /training/basics/firstapp/starting-activity.html
   - title: Supporting Different Devices
     path: /training/basics/supporting-devices/index.html
-    custom_link_attributes:
-    - description="How to build your app with alternative resources that provide an optimized user experience on multiple device form factors using a single APK."
+    path_attributes:
+    - name: description
+      value: How to build your app with alternative resources that provide an optimized user experience on multiple device form factors using a single APK.
     section:
     - title: Supporting Different Languages
       path: /training/basics/supporting-devices/languages.html
@@ -28,137 +30,215 @@ toc:
       path: /training/basics/supporting-devices/platforms.html
   - title: Managing the Activity Lifecycle
     path: /training/basics/activity-lifecycle/index.html
-    custom_link_attributes:
-    - ja-lang="アクティビティのライフサイクル 管理"
-    - ko-lang="액티비티 수명 주기 관리하기"
-    - pt-br-lang="Como gerenciar o ciclo de vida da atividade"
-    - ru-lang="Управление жизненным циклом операций"
-    - zh-cn-lang="管理活动生命周期"
-    - zh-tw-lang="管理應用行為顯示生命週期"
-    - description="How Android activities live and die and how to create a seamless user experience by implementing lifecycle callback methods."
+    path_attributes:
+    - name: ja-lang
+      value: アクティビティのライフサイクル 管理
+    - name: ko-lang
+      value: 액티비티 수명 주기 관리하기
+    - name: pt-br-lang
+      value: Como gerenciar o ciclo de vida da atividade
+    - name: ru-lang
+      value: Управление жизненным циклом операций
+    - name: zh-cn-lang
+      value: 管理活动生命周期
+    - name: zh-tw-lang
+      value: 管理應用行為顯示生命週期
+    - name: description
+      value: How Android activities live and die and how to create a seamless user experience by implementing lifecycle callback methods.
     section:
     - title: Starting an Activity
       path: /training/basics/activity-lifecycle/starting.html
-      custom_link_attributes:
-      - ja-lang="アクティビティを開始する"
-      - ko-lang="액티비티 시작하기"
-      - pt-br-lang="Iniciando uma atividade"
-      - ru-lang="Запуск операции"
-      - zh-cn-lang="开始活动"
-      - zh-tw-lang="啟動應用行為顯示"
+      path_attributes:
+      - name: ja-lang
+        value: アクティビティを開始する
+      - name: ko-lang
+        value: 액티비티 시작하기
+      - name: pt-br-lang
+        value: Iniciando uma atividade
+      - name: ru-lang
+        value: Запуск операции
+      - name: zh-cn-lang
+        value: 开始活动
+      - name: zh-tw-lang
+        value: 啟動應用行為顯示
     - title: Pausing and Resuming an Activity
       path: /training/basics/activity-lifecycle/pausing.html
     - title: Stopping and Restarting an Activity
       path: /training/basics/activity-lifecycle/stopping.html
-      custom_link_attributes:
-      - ja-lang="アクティビティの一時停止と再開"
-      - ko-lang="액티비티 일시정지 및 재개하기"
-      - pt-br-lang="Pausando e reiniciando uma atividade"
-      - ru-lang="Приостановка и возобновление операции"
-      - zh-cn-lang="暂停和继续活动"
-      - zh-tw-lang="暫停並繼續應用行為顯示"
+      path_attributes:
+      - name: ja-lang
+        value: アクティビティの一時停止と再開
+      - name: ko-lang
+        value: 액티비티 일시정지 및 재개하기
+      - name: pt-br-lang
+        value: Pausando e reiniciando uma atividade
+      - name: ru-lang
+        value: Приостановка и возобновление операции
+      - name: zh-cn-lang
+        value: 暂停和继续活动
+      - name: zh-tw-lang
+        value: 暫停並繼續應用行為顯示
     - title: Recreating an Activity
       path: /training/basics/activity-lifecycle/recreating.html
-      custom_link_attributes:
-      - ja-lang="アクティビティを再作成する"
-      - ko-lang="액티비티 재생성하기"
-      - pt-br-lang="Recriando uma atividade"
-      - ru-lang="Воссоздание операции"
-      - zh-cn-lang="重新创建活动"
-      - zh-tw-lang="重新建立應用行為顯示"
+      path_attributes:
+      - name: ja-lang
+        value: アクティビティを再作成する
+      - name: ko-lang
+        value: 액티비티 재생성하기
+      - name: pt-br-lang
+        value: Recriando uma atividade
+      - name: ru-lang
+        value: Воссоздание операции
+      - name: zh-cn-lang
+        value: 重新创建活动
+      - name: zh-tw-lang
+        value: 重新建立應用行為顯示
   - title: Building a Dynamic UI with Fragments
     path: /training/basics/fragments/index.html
-    custom_link_attributes:
-    - description="How to build a user interface for your app that is flexible enough to present multiple UI components on large screens and a more constrained set of UI components on smaller screens—essential for building a single APK for both phones and tablets."
+    path_attributes:
+    - name: description
+      value: How to build a user interface for your app that is flexible enough to present multiple UI components on large screens and a more constrained set of UI components on smaller screens—essential for building a single APK for both phones and tablets.
     section:
     - title: Creating a Fragment
       path: /training/basics/fragments/creating.html
     - title: Building a Flexible UI
       path: /training/basics/fragments/fragment-ui.html
-      custom_link_attributes:
-      - zh-cn-lang="构建灵活的界面"
+      path_attributes:
+      - name: zh-cn-lang
+        value: 构建灵活的界面
     - title: Communicating with Other Fragments
       path: /training/basics/fragments/communicating.html
   - title: Saving Data
     path: /training/basics/data-storage/index.html
-    custom_link_attributes:
-    - ja-lang="データの保存"
-    - ko-lang="데이터 저장하기"
-    - pt-br-lang="Salvando dados"
-    - ru-lang="Сохранение данных"
-    - zh-cn-lang="保存数据"
-    - zh-tw-lang="儲存資料"
-    - description="How to save data on the device, whether it's temporary files, downloaded app assets, user media, structured data, or something else."
+    path_attributes:
+    - name: ja-lang
+      value: データの保存
+    - name: ko-lang
+      value: 데이터 저장하기
+    - name: pt-br-lang
+      value: Salvando dados
+    - name: ru-lang
+      value: Сохранение данных
+    - name: zh-cn-lang
+      value: 保存数据
+    - name: zh-tw-lang
+      value: 儲存資料
+    - name: description
+      value: How to save data on the device, whether it's temporary files, downloaded app assets, user media, structured data, or something else.
     section:
     - title: Saving Key-Value Sets
       path: /training/basics/data-storage/shared-preferences.html
-      custom_link_attributes:
-      - ja-lang="キー値セットを保存する"
-      - ko-lang="키-값 세트 저장하기"
-      - pt-br-lang="Salvando conjuntos de valor-chave"
-      - ru-lang="Сохранение наборов \"ключ-значение\""
-      - zh-cn-lang="保存键值集"
-      - zh-tw-lang="儲存索引鍵值組"
+      path_attributes:
+      - name: ja-lang
+        value: キー値セットを保存する
+      - name: ko-lang
+        value: 키-값 세트 저장하기
+      - name: pt-br-lang
+        value: Salvando conjuntos de valor-chave
+      - name: ru-lang
+        value: Сохранение наборов "ключ-значение"
+      - name: zh-cn-lang
+        value: 保存键值集
+      - name: zh-tw-lang
+        value: 儲存索引鍵值組
     - title: Saving Files
       path: /training/basics/data-storage/files.html
-      custom_link_attributes:
-      - ja-lang="ファイルを保存する"
-      - ko-lang="파일 저장하기"
-      - pt-br-lang="Salvando arquivos"
-      - ru-lang="Сохранение файлов"
-      - zh-cn-lang="保存文件"
-      - zh-tw-lang="儲存檔案"
+      path_attributes:
+      - name: ja-lang
+        value: ファイルを保存する
+      - name: ko-lang
+        value: 파일 저장하기
+      - name: pt-br-lang
+        value: Salvando arquivos
+      - name: ru-lang
+        value: Сохранение файлов
+      - name: zh-cn-lang
+        value: 保存文件
+      - name: zh-tw-lang
+        value: 儲存檔案
     - title: Saving Data in SQL Databases
       path: /training/basics/data-storage/databases.html
-      custom_link_attributes:
-      - ja-lang="SQL データベースにデータを保存する"
-      - ko-lang="SQL 데이터베이스에 데이터 저장하기"
-      - pt-br-lang="Salvando dados em bancos de dados do SQL"
-      - ru-lang="Сохранение данных в базах данных SQL"
-      - zh-cn-lang="在 SQL 数据库中保存数据"
-      - zh-tw-lang="在 SQL 資料庫中儲存資料"
+      path_attributes:
+      - name: ja-lang
+        value: SQL データベースにデータを保存する
+      - name: ko-lang
+        value: SQL 데이터베이스에 데이터 저장하기
+      - name: pt-br-lang
+        value: Salvando dados em bancos de dados do SQL
+      - name: ru-lang
+        value: Сохранение данных в базах данных SQL
+      - name: zh-cn-lang
+        value: 在 SQL 数据库中保存数据
+      - name: zh-tw-lang
+        value: 在 SQL 資料庫中儲存資料
   - title: Interacting with Other Apps
     path: /training/basics/intents/index.html
-    custom_link_attributes:
-    - ja-lang="他のアプリとの相互操作"
-    - ko-lang="액티비티 수명 주기 관리하기"
-    - pt-br-lang="Interagindo com outros aplicativos"
-    - ru-lang="Взаимодействие с другими приложениями"
-    - zh-cn-lang="与其他应用交互"
-    - zh-tw-lang="與其他應用程式互動"
-    - description="How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map."
+    path_attributes:
+    - name: ja-lang
+      value: 他のアプリとの相互操作
+    - name: ko-lang
+      value: 액티비티 수명 주기 관리하기
+    - name: pt-br-lang
+      value: Interagindo com outros aplicativos
+    - name: ru-lang
+      value: Взаимодействие с другими приложениями
+    - name: zh-cn-lang
+      value: 与其他应用交互
+    - name: zh-tw-lang
+      value: 與其他應用程式互動
+    - name: description
+      value: How to build a user experience that leverages other apps available on the device to perform advanced user tasks, such as capture a photo or view an address on a map.
     section:
     - title: Sending the User to Another App
       path: /training/basics/intents/sending.html
-      custom_link_attributes:
-      - ja-lang="別のアプリにユーザーを送る"
-      - ko-lang="다른 앱으로 사용자 보내기"
-      - pt-br-lang="Enviando o usuário para outro aplicativo"
-      - ru-lang="Направление пользователя в другое приложение"
-      - zh-cn-lang="向另一个应用发送用户"
-      - zh-tw-lang="將使用者傳送至其他應用程式"
+      path_attributes:
+      - name: ja-lang
+        value: 別のアプリにユーザーを送る
+      - name: ko-lang
+        value: 다른 앱으로 사용자 보내기
+      - name: pt-br-lang
+        value: Enviando o usuário para outro aplicativo
+      - name: ru-lang
+        value: Направление пользователя в другое приложение
+      - name: zh-cn-lang
+        value: 向另一个应用发送用户
+      - name: zh-tw-lang
+        value: 將使用者傳送至其他應用程式
     - title: Getting a Result from the Activity
       path: /training/basics/intents/result.html
-      custom_link_attributes:
-      - ja-lang="アクティビティから結果を取得する"
-      - ko-lang="액티비티로부터 결과 가져오기"
-      - pt-br-lang="Obtendo resultados de uma atividade"
-      - ru-lang="Получение результата операции"
-      - zh-cn-lang="获取活动的结果"
-      - zh-tw-lang="從應用行為顯示取得結果"
+      path_attributes:
+      - name: ja-lang
+        value: アクティビティから結果を取得する
+      - name: ko-lang
+        value: 액티비티로부터 결과 가져오기
+      - name: pt-br-lang
+        value: Obtendo resultados de uma atividade
+      - name: ru-lang
+        value: Получение результата операции
+      - name: zh-cn-lang
+        value: 获取活动的结果
+      - name: zh-tw-lang
+        value: 從應用行為顯示取得結果
     - title: Allowing Other Apps to Start Your Activity
       path: /training/basics/intents/filters.html
-      custom_link_attributes:
-      - ja-lang="他のアプリからのアクティビティの開始を許可する"
-      - ko-lang="다른 앱이 자신의 액티비티를 시작하도록 허용하기"
-      - pt-br-lang="Permitindo que outros aplicativos iniciem sua atividade"
-      - ru-lang="Разрешение другим приложениям на запуск вашей операции"
-      - zh-cn-lang="允许其他应用开始您的活动"
-      - zh-tw-lang="允許其他應用程式啟動您的應用行為顯示"
+      path_attributes:
+      - name: ja-lang
+        value: 他のアプリからのアクティビティの開始を許可する
+      - name: ko-lang
+        value: 다른 앱이 자신의 액티비티를 시작하도록 허용하기
+      - name: pt-br-lang
+        value: Permitindo que outros aplicativos iniciem sua atividade
+      - name: ru-lang
+        value: Разрешение другим приложениям на запуск вашей операции
+      - name: zh-cn-lang
+        value: 允许其他应用开始您的活动
+      - name: zh-tw-lang
+        value: 允許其他應用程式啟動您的應用行為顯示
   - title: Working with System Permissions
     path: /training/permissions/index.html
-    custom_link_attributes:
-    - description="How to declare that your app needs access to features and resources outside of its 'sandbox', and how to request those privileges at runtime."
+    path_attributes:
+    - name: description
+      value: How to declare that your app needs access to features and resources outside of its 'sandbox', and how to request those privileges at runtime.
     section:
     - title: Declaring Permissions
       path: /training/permissions/declaring.html
@@ -172,8 +252,9 @@ toc:
   section:
   - title: Sharing Simple Data
     path: /training/sharing/index.html
-    custom_link_attributes:
-    - description="How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content."
+    path_attributes:
+    - name: description
+      value: How to take your app interaction to the next level by sharing information with other apps, receive information back, and provide a simple and scalable way to perform Share actions with user content.
     section:
     - title: Sending Simple Data to Other Apps
       path: /training/sharing/send.html
@@ -183,8 +264,9 @@ toc:
       path: /training/sharing/shareaction.html
   - title: Sharing Files
     path: /training/secure-file-sharing/index.html
-    custom_link_attributes:
-    - description="How to provide secure access to a file associated with your app using a content URI and temporary access permissions."
+    path_attributes:
+    - name: description
+      value: How to provide secure access to a file associated with your app using a content URI and temporary access permissions.
     section:
     - title: Setting Up File Sharing
       path: /training/secure-file-sharing/setup-sharing.html
@@ -196,8 +278,9 @@ toc:
       path: /training/secure-file-sharing/retrieve-info.html
   - title: Sharing Files with NFC
     path: /training/beam-files/index.html
-    custom_link_attributes:
-    - description="How to transfer files between devices using the NFC Android Beam feature."
+    path_attributes:
+    - name: description
+      value: How to transfer files between devices using the NFC Android Beam feature.
     section:
     - title: Sending Files to Another Device
       path: /training/beam-files/send-files.html
@@ -209,8 +292,9 @@ toc:
   section:
   - title: Managing Audio Playback
     path: /training/managing-audio/index.html
-    custom_link_attributes:
-    - description="How to respond to hardware audio key presses, request audio focus when playing audio, and respond appropriately to changes in audio focus."
+    path_attributes:
+    - name: description
+      value: How to respond to hardware audio key presses, request audio focus when playing audio, and respond appropriately to changes in audio focus.
     section:
     - title: Controlling Your App's Volume and Playback
       path: /training/managing-audio/volume-playback.html
@@ -220,8 +304,9 @@ toc:
       path: /training/managing-audio/audio-output.html
   - title: Capturing Photos
     path: /training/camera/index.html
-    custom_link_attributes:
-    - description="How to leverage existing camera apps on the user's device to capture photos or control the camera hardware directly and build your own camera app."
+    path_attributes:
+    - name: description
+      value: How to leverage existing camera apps on the user's device to capture photos or control the camera hardware directly and build your own camera app.
     section:
     - title: Taking Photos Simply
       path: /training/camera/photobasics.html
@@ -231,8 +316,9 @@ toc:
       path: /training/camera/cameradirect.html
   - title: Printing Content
     path: /training/printing/index.html
-    custom_link_attributes:
-    - description="How to print photos, HTML documents, and custom documents from your app."
+    path_attributes:
+    - name: description
+      value: How to print photos, HTML documents, and custom documents from your app.
     section:
     - title: Photos
       path: /training/printing/photos.html
@@ -246,8 +332,9 @@ toc:
   section:
   - title: Displaying Bitmaps Efficiently
     path: /training/displaying-bitmaps/index.html
-    custom_link_attributes:
-    - description="How to load and process bitmaps while keeping your user interface responsive and avoid exceeding memory limits."
+    path_attributes:
+    - name: description
+      value: How to load and process bitmaps while keeping your user interface responsive and avoid exceeding memory limits.
     section:
     - title: Loading Large Bitmaps Efficiently
       path: /training/displaying-bitmaps/load-bitmap.html
@@ -261,8 +348,9 @@ toc:
       path: /training/displaying-bitmaps/display-bitmap.html
   - title: Displaying Graphics with OpenGL ES
     path: /training/graphics/opengl/index.html
-    custom_link_attributes:
-    - description="How to create OpenGL graphics within the Android app framework and respond to touch input."
+    path_attributes:
+    - name: description
+      value: How to create OpenGL graphics within the Android app framework and respond to touch input.
     section:
     - title: Building an OpenGL ES Environment
       path: /training/graphics/opengl/environment.html
@@ -278,8 +366,9 @@ toc:
       path: /training/graphics/opengl/touch.html
   - title: Animating Views Using Scenes and Transitions
     path: /training/transitions/index.html
-    custom_link_attributes:
-    - description="How to animate state changes in a view hierarchy using transitions."
+    path_attributes:
+    - name: description
+      value: How to animate state changes in a view hierarchy using transitions.
     section:
     - title: The Transitions Framework
       path: /training/transitions/overview.html
@@ -291,8 +380,9 @@ toc:
       path: /training/transitions/custom-transitions.html
   - title: Adding Animations
     path: /training/animation/index.html
-    custom_link_attributes:
-    - description="How to add transitional animations to your user interface."
+    path_attributes:
+    - name: description
+      value: How to add transitional animations to your user interface.
     section:
     - title: Crossfading Two Views
       path: /training/animation/crossfade.html
@@ -310,8 +400,9 @@ toc:
   section:
   - title: Connecting Devices Wirelessly
     path: /training/connect-devices-wirelessly/index.html
-    custom_link_attributes:
-    - description="How to find and connect to local devices using Network Service Discovery and how to create peer-to-peer connections with Wi-Fi."
+    path_attributes:
+    - name: description
+      value: How to find and connect to local devices using Network Service Discovery and how to create peer-to-peer connections with Wi-Fi.
     section:
     - title: Using Network Service Discovery
       path: /training/connect-devices-wirelessly/nsd.html
@@ -321,8 +412,9 @@ toc:
       path: /training/connect-devices-wirelessly/nsd-wifi-direct.html
   - title: Performing Network Operations
     path: /training/basics/network-ops/index.html
-    custom_link_attributes:
-    - description="How to create a network connection, monitor the connection for changes in connectivity, and perform transactions with XML data."
+    path_attributes:
+    - name: description
+      value: How to create a network connection, monitor the connection for changes in connectivity, and perform transactions with XML data.
     section:
     - title: Connecting to the Network
       path: /training/basics/network-ops/connecting.html
@@ -332,8 +424,9 @@ toc:
       path: /training/basics/network-ops/xml.html
   - title: Transferring Data Without Draining the Battery
     path: /training/efficient-downloads/index.html
-    custom_link_attributes:
-    - description="How to minimize your app's impact on the battery when performing downloads and other network transactions."
+    path_attributes:
+    - name: description
+      value: How to minimize your app's impact on the battery when performing downloads and other network transactions.
     section:
     - title: Optimizing Downloads for Efficient Network Access
       path: /training/efficient-downloads/efficient-network-access.html
@@ -345,8 +438,9 @@ toc:
       path: /training/efficient-downloads/connectivity_patterns.html
   - title: Syncing to the Cloud
     path: /training/backup/index.html
-    custom_link_attributes:
-    - description="How to sync and back up app and user data to remote web services in the cloud and how to restore the data back to multiple devices."
+    path_attributes:
+    - name: description
+      value: How to sync and back up app and user data to remote web services in the cloud and how to restore the data back to multiple devices.
     section:
     - title: Configuring Auto Backup
       path: /training/backup/autosyncapi.html
@@ -354,12 +448,14 @@ toc:
       path: /training/backup/backupapi.html
   - title: Resolving Cloud Save Conflicts
     path: /training/cloudsave/conflict-res.html
-    custom_link_attributes:
-    - description="How to design a robust conflict resolution strategy for apps that save data to the cloud."
+    path_attributes:
+    - name: description
+      value: How to design a robust conflict resolution strategy for apps that save data to the cloud.
   - title: Transferring Data Using Sync Adapters
     path: /training/sync-adapters/index.html
-    custom_link_attributes:
-    - description="How to transfer data between the cloud and the device using the Android sync adapter framework"
+    path_attributes:
+    - name: description
+      value: How to transfer data between the cloud and the device using the Android sync adapter framework
     section:
     - title: Creating a Stub Authenticator
       path: /training/sync-adapters/creating-authenticator.html
@@ -371,8 +467,9 @@ toc:
       path: /training/sync-adapters/running-sync-adapter.html
   - title: Transmitting Network Data Using Volley
     path: /training/volley/index.html
-    custom_link_attributes:
-    - description="How to perform fast, scalable UI operations over the network using Volley"
+    path_attributes:
+    - name: description
+      value: How to perform fast, scalable UI operations over the network using Volley
     section:
     - title: Sending a Simple Request
       path: /training/volley/simple.html
@@ -388,8 +485,9 @@ toc:
   section:
   - title: Making Your App Location-Aware
     path: /training/location/index.html
-    custom_link_attributes:
-    - description="How to add location-aware features to your app by getting the user's current location."
+    path_attributes:
+    - name: description
+      value: How to add location-aware features to your app by getting the user's current location.
     section:
     - title: Getting the Last Known Location
       path: /training/location/retrieve-current.html
@@ -403,16 +501,18 @@ toc:
       path: /training/location/geofencing.html
   - title: Adding Maps
     path: /training/maps/index.html
-    custom_link_attributes:
-    - description="How to add maps and mapping information to your app."
+    path_attributes:
+    - name: description
+      value: How to add maps and mapping information to your app.
 
 - title: Building Apps with User Info & Sign-In
   path: /training/building-userinfo.html
   section:
   - title: Accessing Contacts Data
     path: /training/contacts-provider/index.html
-    custom_link_attributes:
-    - description="How to use Android's central address book, the Contacts Provider, to display contacts and their details and modify contact information."
+    path_attributes:
+    - name: description
+      value: How to use Android's central address book, the Contacts Provider, to display contacts and their details and modify contact information.
     section:
     - title: Retrieving a List of Contacts
       path: /training/contacts-provider/retrieve-names.html
@@ -424,16 +524,18 @@ toc:
       path: /training/contacts-provider/display-contact-badge.html
   - title: Adding Sign-In
     path: /training/sign-in/index.html
-    custom_link_attributes:
-    - description="How to add user sign-in functionality to your app."
+    path_attributes:
+    - name: description
+      value: How to add user sign-in functionality to your app.
 
 - title: Building Apps for Wearables
   path: /training/building-wearables.html
   section:
   - title: Adding Wearable Features to Notifications
     path: /training/wearables/notifications/index.html
-    custom_link_attributes:
-    - description="How to build handheld notifications that are synced to and look great on wearables."
+    path_attributes:
+    - name: description
+      value: How to build handheld notifications that are synced to and look great on wearables.
     section:
     - title: Creating a Notification
       path: /training/wearables/notifications/creating.html
@@ -445,8 +547,9 @@ toc:
       path: /training/wearables/notifications/stacks.html
   - title: Creating Wearable Apps
     path: /training/wearables/apps/index.html
-    custom_link_attributes:
-    - description="How to build apps that run directly on wearables."
+    path_attributes:
+    - name: description
+      value: How to build apps that run directly on wearables.
     section:
     - title: Creating and Running a Wearable App
       path: /training/wearables/apps/creating.html
@@ -462,8 +565,9 @@ toc:
       path: /training/wearables/apps/bt-debugging.html
   - title: Creating Custom UIs
     path: /training/wearables/ui/index.html
-    custom_link_attributes:
-    - description="How to create custom user interfaces for wearable apps."
+    path_attributes:
+    - name: description
+      value: How to create custom user interfaces for wearable apps.
     section:
     - title: Defining Layouts
       path: /training/wearables/ui/layouts.html
@@ -479,8 +583,9 @@ toc:
       path: /training/wearables/ui/exit.html
   - title: Sending and Syncing Data
     path: /training/wearables/data-layer/index.html
-    custom_link_attributes:
-    - description="How to sync data between handhelds and wearables."
+    path_attributes:
+    - name: description
+      value: How to sync data between handhelds and wearables.
     section:
     - title: Accessing the Wearable Data Layer
       path: /training/wearables/data-layer/accessing.html
@@ -494,8 +599,9 @@ toc:
       path: /training/wearables/data-layer/events.html
   - title: Creating Watch Faces
     path: /training/wearables/watch-faces/index.html
-    custom_link_attributes:
-    - description="How to create watch faces for wearables."
+    path_attributes:
+    - name: description
+      value: How to create watch faces for wearables.
     section:
     - title: Designing Watch Faces
       path: /training/wearables/watch-faces/designing.html
@@ -515,70 +621,85 @@ toc:
       path: /training/wearables/watch-faces/performance.html
   - title: Detecting Location
     path: /training/articles/wear-location-detection.html
-    custom_link_attributes:
-    - description="How to detect location data on Android Wear devices."
+    path_attributes:
+    - name: description
+      value: How to detect location data on Android Wear devices.
   - title: Requesting Permissions
     path: /training/articles/wear-permissions.html
-    custom_link_attributes:
-    - description="How to request permissions on Android Wear devices."
+    path_attributes:
+    - name: description
+      value: How to request permissions on Android Wear devices.
   - title: Using the Speaker
     path: /training/wearables/wearable-sounds.html
-    custom_link_attributes:
-    - description="How to use the speaker on Android Wear devices."
+    path_attributes:
+    - name: description
+      value: How to use the speaker on Android Wear devices.
 
 - title: Building Apps for TV
   path: /training/tv/index.html
   section:
   - title: Building TV Apps
     path: /training/tv/start/index.html
-    custom_link_attributes:
-    - ja-lang="TV アプリのビルド"
-    - description="How to start building TV apps or extend your existing app to run on TV devices."
+    path_attributes:
+    - name: ja-lang
+      value: TV アプリのビルド
+    - name: description
+      value: How to start building TV apps or extend your existing app to run on TV devices.
     section:
     - title: Getting Started with TV Apps
       path: /training/tv/start/start.html
-      custom_link_attributes:
-      - ja-lang="TV アプリのビルドを開始する"
+      path_attributes:
+      - name: ja-lang
+        value: TV アプリのビルドを開始する
     - title: Handling TV Hardware
       path: /training/tv/start/hardware.html
-      custom_link_attributes:
-      - ja-lang="TV ハードウェアを処理する"
+      path_attributes:
+      - name: ja-lang
+        value: TV ハードウェアを処理する
     - title: Building TV Layouts
       path: /training/tv/start/layouts.html
-      custom_link_attributes:
-      - ja-lang="TV 向けレイアウトをビルドする"
+      path_attributes:
+      - name: ja-lang
+        value: TV 向けレイアウトをビルドする
     - title: Creating TV Navigation
       path: /training/tv/start/navigation.html
-      custom_link_attributes:
-      - ja-lang="TV 用のナビゲーションを作成する"
+      path_attributes:
+      - name: ja-lang
+        value: TV 用のナビゲーションを作成する
   - title: Building TV Playback Apps
     path: /training/tv/playback/index.html
-    custom_link_attributes:
-    - ja-lang="TV 再生アプリのビルド"
-    - description="How to build apps that provide media catalogs and play content."
+    path_attributes:
+    - name: ja-lang
+      value: TV 再生アプリのビルド
+    - name: description
+      value: How to build apps that provide media catalogs and play content.
     section:
     - title: Creating a Catalog Browser
       path: /training/tv/playback/browse.html
-      custom_link_attributes:
-      - ja-lang="カタログ ブラウザを作成する"
+      path_attributes:
+      - name: ja-lang
+        value: カタログ ブラウザを作成する
     - title: Providing a Card View
       path: /training/tv/playback/card.html
     - title: Building a Details View
       path: /training/tv/playback/details.html
-      custom_link_attributes:
-      - ja-lang="詳細ビューをビルドする"
+      path_attributes:
+      - name: ja-lang
+        value: 詳細ビューをビルドする
     - title: Displaying a Now Playing Card
       path: /training/tv/playback/now-playing.html
-      custom_link_attributes:
-      - ja-lang="再生中カードを表示する"
+      path_attributes:
+      - name: ja-lang
+        value: 再生中カードを表示する
     - title: Adding a Guided Step
       path: /training/tv/playback/guided-step.html
     - title: Enabling Background Playback
       path: /training/tv/playback/options.html
   - title: Helping Users Find Content on TV
     path: /training/tv/discovery/index.html
-    custom_link_attributes:
-    - description="How to help users discover content from your app."
+    path_attributes:
+    - name: description
+      value: How to help users discover content from your app.
     section:
     - title: Recommending TV Content
       path: /training/tv/discovery/recommendations.html
@@ -588,12 +709,14 @@ toc:
       path: /training/tv/discovery/in-app-search.html
   - title: Building TV Games
     path: /training/tv/games/index.html
-    custom_link_attributes:
-    - description="How to build games for TV."
+    path_attributes:
+    - name: description
+      value: How to build games for TV.
   - title: Building TV Channels
     path: /training/tv/tif/index.html
-    custom_link_attributes:
-    - description="How to build channels for TV."
+    path_attributes:
+    - name: description
+      value: How to build channels for TV.
     section:
     - title: Developing a TV Input Service
       path: /training/tv/tif/tvinput.html
@@ -603,24 +726,28 @@ toc:
       path: /training/tv/tif/ui.html
   - title: TV Apps Checklist
     path: /training/tv/publishing/checklist.html
-    custom_link_attributes:
-    - description="An itemized list of requirements for TV apps."
+    path_attributes:
+    - name: description
+      value: An itemized list of requirements for TV apps.
 
 - title: Building Apps for Auto
   path: /training/auto/index.html
   section:
   - title: Getting Started with Auto
     path: /training/auto/start/index.html
-    custom_link_attributes:
-    - description="How to start building or extending apps that work with Auto devices."
+    path_attributes:
+    - name: description
+      value: How to start building or extending apps that work with Auto devices.
   - title: Playing Audio for Auto
     path: /training/auto/audio/index.html
-    custom_link_attributes:
-    - description="How to extend audio apps to play content on Auto devices."
+    path_attributes:
+    - name: description
+      value: How to extend audio apps to play content on Auto devices.
   - title: Messaging for Auto
     path: /training/auto/messaging/index.html
-    custom_link_attributes:
-    - description="How to extend text messaging apps to work with Auto devices."
+    path_attributes:
+    - name: description
+      value: How to extend text messaging apps to work with Auto devices.
 
 - title: Building Apps for Work
   path: /training/enterprise/index.html
@@ -639,8 +766,9 @@ toc:
   section:
   - title: Designing Effective Navigation
     path: /training/design-navigation/index.html
-    custom_link_attributes:
-    - description="How to plan your app's screen hierarchy and forms of navigation so users can effectively and intuitively traverse your app content using various navigation patterns."
+    path_attributes:
+    - name: description
+      value: How to plan your app's screen hierarchy and forms of navigation so users can effectively and intuitively traverse your app content using various navigation patterns.
     section:
     - title: Planning Screens and Their Relationships
       path: /training/design-navigation/screen-planning.html
@@ -654,8 +782,9 @@ toc:
       path: /training/design-navigation/wireframing.html
   - title: Implementing Effective Navigation
     path: /training/implementing-navigation/index.html
-    custom_link_attributes:
-    - description="How to implement various navigation patterns such as swipe views, a navigation drawer, and up navigation."
+    path_attributes:
+    - name: description
+      value: How to implement various navigation patterns such as swipe views, a navigation drawer, and up navigation.
     section:
     - title: Creating Swipe Views with Tabs
       path: /training/implementing-navigation/lateral.html
@@ -669,8 +798,9 @@ toc:
       path: /training/implementing-navigation/descendant.html
   - title: Notifying the User
     path: /training/notify-user/index.html
-    custom_link_attributes:
-    - description="How to display messages called notifications outside of your application's UI."
+    path_attributes:
+    - name: description
+      value: How to display messages called notifications outside of your application's UI.
     section:
     - title: Building a Notification
       path: /training/notify-user/build-notification.html
@@ -684,8 +814,9 @@ toc:
       path: /training/notify-user/display-progress.html
   - title: Supporting Swipe-to-Refresh
     path: /training/swipe/index.html
-    custom_link_attributes:
-    - description="How to modify your app's layout to support manual content updates triggered by the swipe-to-refresh gesture."
+    path_attributes:
+    - name: description
+      value: How to modify your app's layout to support manual content updates triggered by the swipe-to-refresh gesture.
     section:
     - title: Adding Swipe-to-Refresh To Your App
       path: /training/swipe/add-swipe-interface.html
@@ -693,8 +824,9 @@ toc:
       path: /training/swipe/respond-refresh-request.html
   - title: Adding Search Functionality
     path: /training/search/index.html
-    custom_link_attributes:
-    - description="How to properly add a search interface to your app and create a searchable database."
+    path_attributes:
+    - name: description
+      value: How to properly add a search interface to your app and create a searchable database.
     section:
     - title: Setting up the Search Interface
       path: /training/search/setup.html
@@ -704,8 +836,9 @@ toc:
       path: /training/search/backward-compat.html
   - title: Making Your App Content Searchable by Google
     path: /training/app-indexing/index.html
-    custom_link_attributes:
-    - description="How to enable deep linking and indexing of your application content so that users can open this content directly from their mobile search results."
+    path_attributes:
+    - name: description
+      value: How to enable deep linking and indexing of your application content so that users can open this content directly from their mobile search results.
     section:
     - title: Enabling Deep Links for App Content
       path: /training/app-indexing/deep-linking.html
@@ -713,47 +846,64 @@ toc:
       path: /training/app-indexing/enabling-app-indexing.html
   - title: Optimizing Content for the Assistant
     path: /training/articles/assistant.html
-    custom_link_attributes:
-    - description="Support contextually relevant actions through the Assist API."
+    path_attributes:
+    - name: description
+      value: Support contextually relevant actions through the Assist API.
   - title: Handling App Links
     path: /training/app-links/index.html
-    custom_link_attributes:
-    - description="How to enable the system to handle web requests by taking the user directly to your app instead of your website."
+    path_attributes:
+    - name: description
+      value: How to enable the system to handle web requests by taking the user directly to your app instead of your website.
 
 - title: Best Practices for User Interface
   path: /training/best-ui.html
   section:
   - title: Designing for Multiple Screens
     path: /training/multiscreen/index.html
-    custom_link_attributes:
-    - es-lang="Cómo diseñar aplicaciones para varias pantallas"
-    - ja-lang="複数画面のデザイン"
-    - zh-cn-lang="针对多种屏幕进行设计"
-    - description="How to build a user interface that's flexible enough to fit perfectly on any screen and how to create different interaction patterns that are optimized for different screen sizes."
+    path_attributes:
+    - name: es-lang
+      value: Cómo diseñar aplicaciones para varias pantallas
+    - name: ja-lang
+      value: 複数画面のデザイン
+    - name: zh-cn-lang
+      value: 针对多种屏幕进行设计
+    - name: description
+      value: How to build a user interface that's flexible enough to fit perfectly on any screen and how to create different interaction patterns that are optimized for different screen sizes.
     section:
     - title: Supporting Different Screen Sizes
       path: /training/multiscreen/screensizes.html
-      custom_link_attributes:
-      - es-lang="Cómo admitir varios tamaños de pantalla"
-      - ja-lang="さまざまな画面サイズのサポート"
-      - ko-lang="다양한 화면 크기 지원"
-      - zh-cn-lang="支持各种屏幕尺寸"
+      path_attributes:
+      - name: es-lang
+        value: Cómo admitir varios tamaños de pantalla
+      - name: ja-lang
+        value: さまざまな画面サイズのサポート
+      - name: ko-lang
+        value: 다양한 화면 크기 지원
+      - name: zh-cn-lang
+        value: 支持各种屏幕尺寸
     - title: Supporting Different Screen Densities
       path: /training/multiscreen/screendensities.html
-      custom_link_attributes:
-      - es-lang="Cómo admitir varias densidades de pantalla"
-      - ja-lang="さまざまな画面密度のサポート"
-      - zh-cn-lang="支持各种屏幕密度"
+      path_attributes:
+      - name: es-lang
+        value: Cómo admitir varias densidades de pantalla
+      - name: ja-lang
+        value: さまざまな画面密度のサポート
+      - name: zh-cn-lang
+        value: 支持各种屏幕密度
     - title: Implementing Adaptive UI Flows
       path: /training/multiscreen/adaptui.html
-      custom_link_attributes:
-      - es-lang="Cómo implementar interfaces de usuario adaptables"
-      - ja-lang="順応性のある UI フローの実装"
-      - zh-cn-lang="实施自适应用户界面流程"
+      path_attributes:
+      - name: es-lang
+        value: Cómo implementar interfaces de usuario adaptables
+      - name: ja-lang
+        value: 順応性のある UI フローの実装
+      - name: zh-cn-lang
+        value: 实施自适应用户界面流程
   - title: Adding the App Bar
     path: /training/appbar/index.html
-    custom_link_attributes:
-    - description="How to use the support library's toolbar widget to implement an app bar that displays properly on a wide range of devices."
+    path_attributes:
+    - name: description
+      value: How to use the support library's toolbar widget to implement an app bar that displays properly on a wide range of devices.
     section:
     - title: Setting Up the App Bar
       path: /training/appbar/setting-up.html
@@ -765,8 +915,9 @@ toc:
       path: /training/appbar/action-views.html
   - title: Showing Pop-Up Messages
     path: /training/snackbar/index.html
-    custom_link_attributes:
-    - description="How to use the support library's Snackbar widget to display a brief pop-up message."
+    path_attributes:
+    - name: description
+      value: How to use the support library's Snackbar widget to display a brief pop-up message.
     section:
     - title: Building and Displaying a Pop-Up Message
       path: /training/snackbar/showing.html
@@ -774,8 +925,9 @@ toc:
       path: /training/snackbar/action.html
   - title: Creating Custom Views
     path: /training/custom-views/index.html
-    custom_link_attributes:
-    - description="How to build custom UI widgets that are interactive and smooth."
+    path_attributes:
+    - name: description
+      value: How to build custom UI widgets that are interactive and smooth.
     section:
     - title: Creating a Custom View Class
       path: /training/custom-views/create-view.html
@@ -787,8 +939,9 @@ toc:
       path: /training/custom-views/optimizing-view.html
   - title: Creating Backward-Compatible UIs
     path: /training/backward-compatible-ui/index.html
-    custom_link_attributes:
-    - description="How to use UI components and other APIs from the more recent versions of Android while remaining compatible with older versions of the platform."
+    path_attributes:
+    - name: description
+      value: How to use UI components and other APIs from the more recent versions of Android while remaining compatible with older versions of the platform.
     section:
     - title: Abstracting the New APIs
       path: /training/backward-compatible-ui/abstracting.html
@@ -800,8 +953,9 @@ toc:
       path: /training/backward-compatible-ui/using-component.html
   - title: Implementing Accessibility
     path: /training/accessibility/index.html
-    custom_link_attributes:
-    - description="How to make your app accessible to users with vision impairment or other physical disabilities."
+    path_attributes:
+    - name: description
+      value: How to make your app accessible to users with vision impairment or other physical disabilities.
     section:
     - title: Developing Accessible Applications
       path: /training/accessibility/accessible-app.html
@@ -811,8 +965,9 @@ toc:
       path: /training/accessibility/testing.html
   - title: Managing the System UI
     path: /training/system-ui/index.html
-    custom_link_attributes:
-    - description="How to hide and show status and navigation bars across different versions of Android, while managing the display of other screen components."
+    path_attributes:
+    - name: description
+      value: How to hide and show status and navigation bars across different versions of Android, while managing the display of other screen components.
     section:
     - title: Dimming the System Bars
       path: /training/system-ui/dim.html
@@ -826,110 +981,184 @@ toc:
       path: /training/system-ui/visibility.html
   - title: Creating Apps with Material Design
     path: /training/material/index.html
-    custom_link_attributes:
-    - es-lang="Crear aplicaciones con Material Design"
-    - in-lang="Desain Bahan untuk Pengembang"
-    - ja-lang="マテリアル デザインでのアプリ作成"
-    - ko-lang="개발자를 위한 머티리얼 디자인"
-    - pt-br-lang="Material Design para desenvolvedores"
-    - ru-lang="Создание приложений с помощью Material Design"
-    - vi-lang="Material Design cho Nhà phát triển"
-    - zh-cn-lang="面向开发者的材料设计"
-    - zh-tw-lang="開發人員材料設計"
-    - description="How to implement material design on Android."
+    path_attributes:
+    - name: es-lang
+      value: Crear aplicaciones con Material Design
+    - name: in-lang
+      value: Desain Bahan untuk Pengembang
+    - name: ja-lang
+      value: マテリアル デザインでのアプリ作成
+    - name: ko-lang
+      value: 개발자를 위한 머티리얼 디자인
+    - name: pt-br-lang
+      value: Material Design para desenvolvedores
+    - name: ru-lang
+      value: Создание приложений с помощью Material Design
+    - name: vi-lang
+      value: Material Design cho Nhà phát triển
+    - name: zh-cn-lang
+      value: 面向开发者的材料设计
+    - name: zh-tw-lang
+      value: 開發人員材料設計
+    - name: description
+      value: How to implement material design on Android.
     section:
     - title: Getting Started
       path: /training/material/get-started.html
-      custom_link_attributes:
-      - es-lang="Comencemos"
-      - in-lang="Memulai"
-      - ja-lang="スタート ガイド"
-      - ko-lang="시작하기"
-      - pt-br-lang="Como iniciar"
-      - ru-lang="Начало работы"
-      - vi-lang="Bắt đầu"
-      - zh-cn-lang="入门指南"
-      - zh-tw-lang="開始使用"
+      path_attributes:
+      - name: es-lang
+        value: Comencemos
+      - name: in-lang
+        value: Memulai
+      - name: ja-lang
+        value: スタート ガイド
+      - name: ko-lang
+        value: 시작하기
+      - name: pt-br-lang
+        value: Como iniciar
+      - name: ru-lang
+        value: Начало работы
+      - name: vi-lang
+        value: Bắt đầu
+      - name: zh-cn-lang
+        value: 入门指南
+      - name: zh-tw-lang
+        value: 開始使用
     - title: Using the Material Theme
       path: /training/material/theme.html
-      custom_link_attributes:
-      - es-lang="Usar el tema Material"
-      - in-lang="Menggunakan Tema Bahan"
-      - ja-lang="マテリアル テーマの使用"
-      - ko-lang="머티어리얼 테마 사용"
-      - pt-br-lang="Como usar o tema do Material"
-      - ru-lang="Использование темы Material Design"
-      - vi-lang="Sử dụng Chủ đề Material"
-      - zh-cn-lang="使用材料主题"
-      - zh-tw-lang="使用材料設計風格"
+      path_attributes:
+      - name: es-lang
+        value: Usar el tema Material
+      - name: in-lang
+        value: Menggunakan Tema Bahan
+      - name: ja-lang
+        value: マテリアル テーマの使用
+      - name: ko-lang
+        value: 머티어리얼 테마 사용
+      - name: pt-br-lang
+        value: Como usar o tema do Material
+      - name: ru-lang
+        value: Использование темы Material Design
+      - name: vi-lang
+        value: Sử dụng Chủ đề Material
+      - name: zh-cn-lang
+        value: 使用材料主题
+      - name: zh-tw-lang
+        value: 使用材料設計風格
     - title: Creating Lists and Cards
       path: /training/material/lists-cards.html
-      custom_link_attributes:
-      - es-lang="Crear listas y tarjetas"
-      - in-lang="Membuat Daftar dan Kartu"
-      - ja-lang="リストとカードの作成"
-      - ko-lang="목록 및 카드 생성"
-      - pt-br-lang="Como criar listas e cartões"
-      - ru-lang="Создание списков и подсказок"
-      - vi-lang="Tạo Danh sách và Thẻ"
-      - zh-cn-lang="创建列表与卡片"
-      - zh-tw-lang="建立清單和卡片"
+      path_attributes:
+      - name: es-lang
+        value: Crear listas y tarjetas
+      - name: in-lang
+        value: Membuat Daftar dan Kartu
+      - name: ja-lang
+        value: リストとカードの作成
+      - name: ko-lang
+        value: 목록 및 카드 생성
+      - name: pt-br-lang
+        value: Como criar listas e cartões
+      - name: ru-lang
+        value: Создание списков и подсказок
+      - name: vi-lang
+        value: Tạo Danh sách và Thẻ
+      - name: zh-cn-lang
+        value: 创建列表与卡片
+      - name: zh-tw-lang
+        value: 建立清單和卡片
     - title: Defining Shadows and Clipping Views
       path: /training/material/shadows-clipping.html
-      custom_link_attributes:
-      - es-lang="Definir vistas de recorte y sombras"
-      - in-lang="Mendefinisikan Bayangan dan Memangkas Tampilan"
-      - ja-lang="シャドウとクリッピング ビューの定義"
-      - ko-lang="그림자 정의 및 뷰 클리핑"
-      - pt-br-lang="Como definir sombras e recortar visualizações"
-      - ru-lang="Определение теней и обрезка представлений"
-      - vi-lang="Định nghĩa Đổ bóng và Dạng xem Cắt hình"
-      - zh-cn-lang="定义阴影与裁剪视图"
-      - zh-tw-lang="定義陰影和裁剪檢視"
+      path_attributes:
+      - name: es-lang
+        value: Definir vistas de recorte y sombras
+      - name: in-lang
+        value: Mendefinisikan Bayangan dan Memangkas Tampilan
+      - name: ja-lang
+        value: シャドウとクリッピング ビューの定義
+      - name: ko-lang
+        value: 그림자 정의 및 뷰 클리핑
+      - name: pt-br-lang
+        value: Como definir sombras e recortar visualizações
+      - name: ru-lang
+        value: Определение теней и обрезка представлений
+      - name: vi-lang
+        value: Định nghĩa Đổ bóng và Dạng xem Cắt hình
+      - name: zh-cn-lang
+        value: 定义阴影与裁剪视图
+      - name: zh-tw-lang
+        value: 定義陰影和裁剪檢視
     - title: Working with Drawables
       path: /training/material/drawables.html
-      custom_link_attributes:
-      - es-lang="Trabajar con interfaces dibujables"
-      - in-lang="Bekerja dengan Drawable"
-      - ja-lang="ドローアブルの使用"
-      - ko-lang="Drawable 사용"
-      - pt-br-lang="Como trabalhar com desenháveis"
-      - ru-lang="Работа с элементами дизайна"
-      - vi-lang="Làm việc với Nội dung vẽ được"
-      - zh-cn-lang="使用 Drawables"
-      - zh-tw-lang="使用可繪項目"
+      path_attributes:
+      - name: es-lang
+        value: Trabajar con interfaces dibujables
+      - name: in-lang
+        value: Bekerja dengan Drawable
+      - name: ja-lang
+        value: ドローアブルの使用
+      - name: ko-lang
+        value: Drawable 사용
+      - name: pt-br-lang
+        value: Como trabalhar com desenháveis
+      - name: ru-lang
+        value: Работа с элементами дизайна
+      - name: vi-lang
+        value: Làm việc với Nội dung vẽ được
+      - name: zh-cn-lang
+        value: 使用 Drawables
+      - name: zh-tw-lang
+        value: 使用可繪項目
     - title: Defining Custom Animations
       path: /training/material/animations.html
-      custom_link_attributes:
-      - es-lang="Definir animaciones personalizadas"
-      - in-lang="Mendefinisikan Animasi Custom"
-      - ja-lang="カスタム アニメーションの定義"
-      - ko-lang="사용자지정 애니메이션 정의"
-      - pt-br-lang="Como definir animações personalizadas"
-      - ru-lang="Определение настраиваемой анимации"
-      - vi-lang="Định nghĩa Hoạt hình Tùy chỉnh"
-      - zh-cn-lang="定义定制动画"
-      - zh-tw-lang="定義自訂動畫"
+      path_attributes:
+      - name: es-lang
+        value: Definir animaciones personalizadas
+      - name: in-lang
+        value: Mendefinisikan Animasi Custom
+      - name: ja-lang
+        value: カスタム アニメーションの定義
+      - name: ko-lang
+        value: 사용자지정 애니메이션 정의
+      - name: pt-br-lang
+        value: Como definir animações personalizadas
+      - name: ru-lang
+        value: Определение настраиваемой анимации
+      - name: vi-lang
+        value: Định nghĩa Hoạt hình Tùy chỉnh
+      - name: zh-cn-lang
+        value: 定义定制动画
+      - name: zh-tw-lang
+        value: 定義自訂動畫
     - title: Maintaining Compatibility
       path: /training/material/compatibility.html
-      custom_link_attributes:
-      - es-lang="Mantener la compatibilidad"
-      - in-lang="Mempertahankan Kompatibilitas"
-      - ja-lang="互換性の維持"
-      - ko-lang="호환성 유지"
-      - pt-br-lang="Como manter a compatibilidade"
-      - ru-lang="Обеспечение совместимости"
-      - vi-lang="Duy trì Tính tương thích"
-      - zh-cn-lang="维护兼容性"
-      - zh-tw-lang="維持相容性"
+      path_attributes:
+      - name: es-lang
+        value: Mantener la compatibilidad
+      - name: in-lang
+        value: Mempertahankan Kompatibilitas
+      - name: ja-lang
+        value: 互換性の維持
+      - name: ko-lang
+        value: 호환성 유지
+      - name: pt-br-lang
+        value: Como manter a compatibilidade
+      - name: ru-lang
+        value: Обеспечение совместимости
+      - name: vi-lang
+        value: Duy trì Tính tương thích
+      - name: zh-cn-lang
+        value: 维护兼容性
+      - name: zh-tw-lang
+        value: 維持相容性
 
 - title: Best Practices for User Input
   path: /training/best-user-input.html
   section:
   - title: Using Touch Gestures
     path: /training/gestures/index.html
-    custom_link_attributes:
-    - description="How to write apps that allow users to interact with the touch screen via touch gestures."
+    path_attributes:
+    - name: description
+      value: How to write apps that allow users to interact with the touch screen via touch gestures.
     section:
     - title: Detecting Common Gestures
       path: /training/gestures/detector.html
@@ -945,8 +1174,9 @@ toc:
       path: /training/gestures/viewgroup.html
   - title: Handling Keyboard Input
     path: /training/keyboard-input/index.html
-    custom_link_attributes:
-    - description="How to specify the appearance and behaviors of soft input methods (such as on-screen keyboards) and how to optimize the experience with hardware keyboards."
+    path_attributes:
+    - name: description
+      value: How to specify the appearance and behaviors of soft input methods (such as on-screen keyboards) and how to optimize the experience with hardware keyboards.
     section:
     - title: Specifying the Input Method Type
       path: /training/keyboard-input/style.html
@@ -958,8 +1188,9 @@ toc:
       path: /training/keyboard-input/commands.html
   - title: Supporting Game Controllers
     path: /training/game-controllers/index.html
-    custom_link_attributes:
-    - description="How to write apps that support game controllers."
+    path_attributes:
+    - name: description
+      value: How to write apps that support game controllers.
     section:
     - title: Handling Controller Actions
       path: /training/game-controllers/controller-input.html
@@ -973,8 +1204,9 @@ toc:
   section:
   - title: Running in a Background Service
     path: /training/run-background-service/index.html
-    custom_link_attributes:
-    - description="How to improve UI performance and responsiveness by sending work to a Service running in the background"
+    path_attributes:
+    - name: description
+      value: How to improve UI performance and responsiveness by sending work to a Service running in the background
     section:
     - title: Creating a Background Service
       path: /training/run-background-service/create-service.html
@@ -984,8 +1216,9 @@ toc:
       path: /training/run-background-service/report-status.html
   - title: Loading Data in the Background
     path: /training/load-data-background/index.html
-    custom_link_attributes:
-    - description="How to use CursorLoader to query data without affecting UI responsiveness."
+    path_attributes:
+    - name: description
+      value: How to use CursorLoader to query data without affecting UI responsiveness.
     section:
     - title: Running a Query with a CursorLoader
       path: /training/load-data-background/setup-loader.html
@@ -993,8 +1226,9 @@ toc:
       path: /training/load-data-background/handle-results.html
   - title: Managing Device Awake State
     path: /training/scheduling/index.html
-    custom_link_attributes:
-    - description="How to use repeating alarms and wake locks to run background jobs."
+    path_attributes:
+    - name: description
+      value: How to use repeating alarms and wake locks to run background jobs.
     section:
     - title: Keeping the Device Awake
       path: /training/scheduling/wakelock.html
@@ -1006,16 +1240,19 @@ toc:
   section:
   - title: Managing Your App's Memory
     path: /training/articles/memory.html
-    custom_link_attributes:
-    - description="How to keep your app's memory footprint small in order to improve performance on a variety of mobile devices."
+    path_attributes:
+    - name: description
+      value: How to keep your app's memory footprint small in order to improve performance on a variety of mobile devices.
   - title: Performance Tips
     path: /training/articles/perf-tips.html
-    custom_link_attributes:
-    - description="How to optimize your app's performance in various ways to improve its responsiveness and battery efficiency."
+    path_attributes:
+    - name: description
+      value: How to optimize your app's performance in various ways to improve its responsiveness and battery efficiency.
   - title: Improving Layout Performance
     path: /training/improving-layouts/index.html
-    custom_link_attributes:
-    - description="How to identify problems in your app's layout performance and improve the UI responsiveness."
+    path_attributes:
+    - name: description
+      value: How to identify problems in your app's layout performance and improve the UI responsiveness.
     section:
     - title: Optimizing Layout Hierarchies
       path: /training/improving-layouts/optimizing-layout.html
@@ -1027,11 +1264,15 @@ toc:
       path: /training/improving-layouts/smooth-scrolling.html
   - title: Optimizing Battery Life
     path: /training/monitoring-device-state/index.html
-    custom_link_attributes:
-    - es-lang="Cómo optimizar la duración de la batería"
-    - ja-lang="電池消費量の最適化"
-    - zh-cn-lang="优化电池使用时间"
-    - description="How to minimize the amount of power your app requires by adapting to current power conditions and performing power-hungry tasks at proper intervals."
+    path_attributes:
+    - name: es-lang
+      value: Cómo optimizar la duración de la batería
+    - name: ja-lang
+      value: 電池消費量の最適化
+    - name: zh-cn-lang
+      value: 优化电池使用时间
+    - name: description
+      value: How to minimize the amount of power your app requires by adapting to current power conditions and performing power-hungry tasks at proper intervals.
     section:
     - title: Reducing Network Battery Drain
       path: /training/performance/battery/network/index.html
@@ -1052,32 +1293,45 @@ toc:
       path: /training/monitoring-device-state/doze-standby.html
     - title: Monitoring the Battery Level and Charging State
       path: /training/monitoring-device-state/battery-monitoring.html
-      custom_link_attributes:
-      - es-lang="Cómo controlar el nivel de batería y el estado de carga"
-      - ja-lang="電池残量と充電状態の監視"
-      - zh-cn-lang="监控电池电量和充电状态"
+      path_attributes:
+      - name: es-lang
+        value: Cómo controlar el nivel de batería y el estado de carga
+      - name: ja-lang
+        value: 電池残量と充電状態の監視
+      - name: zh-cn-lang
+        value: 监控电池电量和充电状态
     - title: Determining and Monitoring the Docking State and Type
       path: /training/monitoring-device-state/docking-monitoring.html
-      custom_link_attributes:
-      - es-lang="Cómo determinar y controlar el tipo de conector y el estado de la conexión"
-      - ja-lang="ホルダーの装着状態とタイプの特定と監視"
-      - zh-cn-lang="确定和监控基座对接状态和类型"
+      path_attributes:
+      - name: es-lang
+        value: Cómo determinar y controlar el tipo de conector y el estado de la conexión
+      - name: ja-lang
+        value: ホルダーの装着状態とタイプの特定と監視
+      - name: zh-cn-lang
+        value: 确定和监控基座对接状态和类型
     - title: Determining and Monitoring the Connectivity Status
       path: /training/monitoring-device-state/connectivity-monitoring.html
-      custom_link_attributes:
-      - es-lang="Cómo determinar y controlar el estado de la conectividad"
-      - ja-lang="接続状態の特定と監視"
-      - zh-cn-lang="确定和监控网络连接状态"
+      path_attributes:
+      - name: es-lang
+        value: Cómo determinar y controlar el estado de la conectividad
+      - name: ja-lang
+        value: 接続状態の特定と監視
+      - name: zh-cn-lang
+        value: 确定和监控网络连接状态
     - title: Manipulating Broadcast Receivers On Demand
       path: /training/monitoring-device-state/manifest-receivers.html
-      custom_link_attributes:
-      - es-lang="Cómo manipular los receptores de emisión bajo demanda"
-      - ja-lang="オンデマンドでのブロードキャスト レシーバ操作"
-      - zh-cn-lang="根据需要操作广播接收器"
+      path_attributes:
+      - name: es-lang
+        value: Cómo manipular los receptores de emisión bajo demanda
+      - name: ja-lang
+        value: オンデマンドでのブロードキャスト レシーバ操作
+      - name: zh-cn-lang
+        value: 根据需要操作广播接收器
   - title: Sending Operations to Multiple Threads
     path: /training/multiple-threads/index.html
-    custom_link_attributes:
-    - description="How to improve the performance and scalability of long-running operations by dispatching work to multiple threads."
+    path_attributes:
+    - name: description
+      value: How to improve the performance and scalability of long-running operations by dispatching work to multiple threads.
     section:
     - title: Specifying the Code to Run on a Thread
       path: /training/multiple-threads/define-runnable.html
@@ -1089,68 +1343,81 @@ toc:
       path: /training/multiple-threads/communicate-ui.html
   - title: Keeping Your App Responsive
     path: /training/articles/perf-anr.html
-    custom_link_attributes:
-    - description="How to keep your app responsive to user interaction so the UI does not lock-up and display an \"Application Not Responding\" dialog."
+    path_attributes:
+    - name: description
+      value: How to keep your app responsive to user interaction so the UI does not lock-up and display an "Application Not Responding" dialog.
   - title: JNI Tips
     path: /training/articles/perf-jni.html
-    custom_link_attributes:
-    - description="How to efficiently use the Java Native Interface with the Android NDK."
+    path_attributes:
+    - name: description
+      value: How to efficiently use the Java Native Interface with the Android NDK.
   - title: SMP Primer for Android
     path: /training/articles/smp.html
-    custom_link_attributes:
-    - description="Tips for coding Android apps on symmetric multiprocessor systems."
+    path_attributes:
+    - name: description
+      value: Tips for coding Android apps on symmetric multiprocessor systems.
 
 - title: Best Practices for Security & Privacy
   path: /training/best-security.html
   section:
   - title: Security Tips
     path: /training/articles/security-tips.html
-    custom_link_attributes:
-    - description="How to perform various tasks and keep your app's data and your user's data secure."
+    path_attributes:
+    - name: description
+      value: How to perform various tasks and keep your app's data and your user's data secure.
   - title: Security with HTTPS and SSL
     path: /training/articles/security-ssl.html
-    custom_link_attributes:
-    - description="How to ensure that your app is secure when performing network transactions."
+    path_attributes:
+    - name: description
+      value: How to ensure that your app is secure when performing network transactions.
   - title: Updating Your Security Provider to Protect Against SSL Exploits
     path: /training/articles/security-gms-provider.html
-    custom_link_attributes:
-    - description="How to use and update Google Play services security provider, to protect against SSL exploits."
+    path_attributes:
+    - name: description
+      value: How to use and update Google Play services security provider, to protect against SSL exploits.
   - title: Checking Device Compatibility with SafetyNet
     path: /training/safetynet/index.html
-    custom_link_attributes:
-    - description="How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app."
+    path_attributes:
+    - name: description
+      value: How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app.
   - title: Enhancing Security with Device Management Policies
     path: /training/enterprise/device-management-policy.html
-    custom_link_attributes:
-    - description="How to create an application that enforces security policies on devices."
+    path_attributes:
+    - name: description
+      value: How to create an application that enforces security policies on devices.
 
 - title: Best Practices for Permissions & Identifiers
   path: /training/best-permissions-ids.html
   section:
   - title: Permissions and User Data
     path: /training/articles/user-data-overview.html
-    custom_link_attributes:
-    - description="Overview of app permissions on Android and how they affect your users."
+    path_attributes:
+    - name: description
+      value: Overview of app permissions on Android and how they affect your users.
   - title: Best Practices for App Permissions
     path: /training/articles/user-data-permissions.html
-    custom_link_attributes:
-    - description="How to manage permissions the right way for users."
+    path_attributes:
+    - name: description
+      value: How to manage permissions the right way for users.
   - title: Best Practices for Unique Identifiers
     path: /training/articles/user-data-ids.html
-    custom_link_attributes:
-    - description="Unique identifiers available and how to choose the right one for your use case."
+    path_attributes:
+    - name: description
+      value: Unique identifiers available and how to choose the right one for your use case.
 
 - title: Best Practices for Testing
   path: /training/testing/index.html
   section:
   - title: Getting Started with Testing
     path: /training/testing/start/index.html
-    custom_link_attributes:
-    - description="How to get started with testing your Android applications."
+    path_attributes:
+    - name: description
+      value: How to get started with testing your Android applications.
   - title: Building Effective Unit Tests
     path: /training/testing/unit-testing/index.html
-    custom_link_attributes:
-    - description="How to build effective unit tests for Android apps."
+    path_attributes:
+    - name: description
+      value: How to build effective unit tests for Android apps.
     section:
     - title: Building Local Unit Tests
       path: /training/testing/unit-testing/local-unit-tests.html
@@ -1158,8 +1425,9 @@ toc:
       path: /training/testing/unit-testing/instrumented-unit-tests.html
   - title: Automating UI Tests
     path: /training/testing/ui-testing/index.html
-    custom_link_attributes:
-    - description="How to automate your user interface tests for Android apps."
+    path_attributes:
+    - name: description
+      value: How to automate your user interface tests for Android apps.
     section:
     - title: Testing UI for a Single App
       path: /training/testing/ui-testing/espresso-testing.html
@@ -1167,8 +1435,9 @@ toc:
       path: /training/testing/ui-testing/uiautomator-testing.html
   - title: Testing App Component Integrations
     path: /training/testing/integration-testing/index.html
-    custom_link_attributes:
-    - description="How to build effective integration tests for Android apps."
+    path_attributes:
+    - name: description
+      value: How to build effective integration tests for Android apps.
     section:
     - title: Testing Your Service
       path: /training/testing/integration-testing/service-testing.html
@@ -1176,16 +1445,18 @@ toc:
       path: /training/testing/integration-testing/content-provider-testing.html
   - title: Testing Display Performance
     path: /training/testing/performance.html
-    custom_link_attributes:
-    - description="How to automate UI performance testing."
+    path_attributes:
+    - name: description
+      value: How to automate UI performance testing.
 
 - title: Using Google Play to Distribute & Monetize
   path: /training/distribute.html
   section:
   - title: Selling In-app Products
     path: /training/in-app-billing/index.html
-    custom_link_attributes:
-    - description="How to sell in-app products from your application using In-app Billing."
+    path_attributes:
+    - name: description
+      value: How to sell in-app products from your application using In-app Billing.
     section:
     - title: Preparing Your App
       path: /training/in-app-billing/preparing-iab-app.html
@@ -1197,8 +1468,9 @@ toc:
       path: /training/in-app-billing/test-iab-app.html
   - title: Maintaining Multiple APKs
     path: /training/multiple-apks/index.html
-    custom_link_attributes:
-    - description="How to publish your app on Google Play with separate APKs that target different devices, while using a single app listing."
+    path_attributes:
+    - name: description
+      value: How to publish your app on Google Play with separate APKs that target different devices, while using a single app listing.
     section:
     - title: Creating Multiple APKs for Different API Levels
       path: /training/multiple-apks/api.html

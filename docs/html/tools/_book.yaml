@@ -2,10 +2,8 @@ toc:
 - title: Download
   path: /sdk/index.html
   section:
-  - title: Installing the SDK
+  - title: Install Android Studio
     path: /sdk/installing/index.html
-  - title: Adding SDK Packages
-    path: /sdk/installing/adding-packages.html
 
 - title: Workflow
   path: /tools/workflow/index.html
@@ -27,13 +25,15 @@ toc:
     path: /tools/debugging/index.html
   - title: Publishing
     path: /tools/publishing/publishing_overview.html
-    custom_link_attributes:
-    - zh-cn-lang="发布概述"
+    path_attributes:
+    - name: zh-cn-lang
+      value: 发布概述
     section:
     - title: Preparing for Release
       path: /tools/publishing/preparing.html
-      custom_link_attributes:
-      - zh-cn-lang="准备发布"
+      path_attributes:
+      - name: zh-cn-lang
+        value: 准备发布
     - title: Versioning Your Apps
       path: /tools/publishing/versioning.html
     - title: Signing Your Apps
@@ -65,7 +65,9 @@ toc:
       path: /tools/debugging/improving-w-lint.html
     - title: Improving Code Inspection with Annotations
       path: /tools/debugging/annotations.html
-    - title: Deep Link and App Indexing API Support
+    - title: Shrink Your Code and Resources
+      path: /tools/help/proguard.html
+    - title: Supporting URLs and App Indexing in Android Studio
       path: /tools/help/app-link-indexing.html
   - title: UI Tools
     path: /tools/studio/ui-tools.html
@@ -82,6 +84,11 @@ toc:
       path: /tools/help/image-asset-studio.html
   - title: AVD Manager
     path: /tools/devices/managing-avds.html
+  - title: Android Emulator
+    path: /tools/devices/emulator.html
+    section:
+    - title: Android Emulator Command-Line Features
+      path: /tools/help/emulator.html
   - title: Debugging Tools
     path: /tools/debugging/debugging-studio.html
     section:
@@ -152,15 +159,8 @@ toc:
       path: /tools/debugging/debugging-log.html
   - title: mksdcard
     path: /tools/help/mksdcard.html
-  - title: ProGuard
-    path: /tools/help/proguard.html
   - title: Tracer for OpenGL ES
     path: /tools/help/gltracer.html
-  - title: Virtual Device Emulator
-    path: /tools/devices/emulator.html
-    section:
-    - title: Command Reference
-      path: /tools/help/emulator.html
   - title: zipalign
     path: /tools/help/zipalign.html
 
