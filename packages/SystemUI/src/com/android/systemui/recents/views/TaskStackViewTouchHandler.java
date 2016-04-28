@@ -631,7 +631,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /**
      * Returns the scaled size used to calculate the dismiss fraction.
      */
-    private float getScaledDismissSize() {
+    public float getScaledDismissSize() {
         return 1.5f * Math.max(mSv.getWidth(), mSv.getHeight());
     }
 }

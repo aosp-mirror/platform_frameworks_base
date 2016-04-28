@@ -420,6 +420,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
+     * Returns the touch handler for this task stack.
+     */
+    public TaskStackViewTouchHandler getTouchHandler() {
+        return mTouchHandler;
+    }
+
+    /**
      * Adds a task to the ignored set.
      */
     void addIgnoreTask(Task task) {
