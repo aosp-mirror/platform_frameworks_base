@@ -1,7 +1,12 @@
 page.title=logcat Monitor
 parent.title=Android Monitor
 parent.link=android-monitor.html
-page.tags=monitor
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the logcat Monitor to view system and user-defined log messages. You can filter the messages to display just the items that interest you.
+page.image=tools/help/thumbnails/am-logcatmon2.png
+page.article=true
+
 @jd:body
 <div id="qv-wrapper">
   <div id="qv">
@@ -43,16 +48,13 @@ page.tags=monitor
       </li>
 
       <li>
-        <a href="#printing">Printing the Log</a>
+        <a href="#printing">Printing and Writing to a File</a>
       </li>
 
       <li>
-        <a href="#clearing">Clearing the Log</a>
+        <a href="#clearing">Clearing and Restarting the Log</a>
       </li>
 
-      <li>
-        <a href="#restarting">Restarting the Log</a>
-      </li>
     </ol>
 
     <h2>
@@ -63,58 +65,31 @@ page.tags=monitor
       <li>
         <a href="{@docRoot}tools/debugging/debugging-log.html">Reading and Writing Logs</a>
       </li>
-      <li>
-        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
     </ol>
 
-    <h2>
-      Dependencies and Prerequisites
-    </h2>
-
-    <ul>
-      <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-      <strong>Enable ADB Integration</strong>.
-      </li>
-  <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-    </ul>
   </div>
 </div>
 
 <p>
   The Android logging system provides a mechanism for collecting and viewing system debug output.
-  logcat Monitor displays messages that you added to your app by using the <a href=
-  "{@docRoot}reference/android/util/Log.html">Log</a> class, as well as system
-  messages, such as stack traces when the emulator throws an error or a garbage collection occurs.
-  The monitor displays messages in real time and also keeps a history so you can view older
+  The logcat Monitor displays system messages, such as when a garbage collection occurs, as well as
+  messages that you added to your app by using the <a href=
+  "{@docRoot}reference/android/util/Log.html">Log</a> class.
+  It displays messages in real time and also keeps a history so you can view older
   messages.
 </p>
 
 <p>
   To display just the information of interest, you can create filters, modify how much information
   is displayed in messages, set priority levels, display messages produced by app code
-  only, and search the log. By default, logcat Monitor shows the log output related to the running
-  application only.
+  only, and search the log. By default, the logcat Monitor shows the log output related to the
+  most recently run app only.
 </p>
 
 <p>
-  You can traverse the stack trace when your app throws an exception, as well as view the
-  associated code. This feature can help you fix exceptions and improve app operation.
+  When an app throws an exception, the logcat Monitor shows a message followed by the associated
+  stack trace containing links to
+  the code. This feature can help you fix errors and improve app operation.
 </p>
 
 <h2 id="format">
@@ -125,9 +100,9 @@ page.tags=monitor
   Every Android log message has a tag and a priority associated with it. The tag of a system
   log message
   is a short string indicating the system component from which the message originates (for example,
-  <code>ActivityManager</code>). A user-defined tag can be any string that you find helpful, such
-  as the name of the current class (the recommended tag). You define it in a <code>Log</code>
-  method call, for example:
+  {@link android.app.ActivityManager}). A user-defined tag can be any string that you find helpful,
+  such as the name of the current class (the recommended tag). You define it in a
+  {@link android.util.Log} method call, for example:
 </p>
 
 <pre>
@@ -189,31 +164,38 @@ Log.d(tag, message);
 </h2>
 
 <p>
-  Follow these steps:
+  To display the log messages for a particular app:
 </p>
 
 <ol>
-  <li>Optionally connect a hardware device.
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
   </li>
-
+ <li>Open an app project.
+  </li>
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on a hardware device or
+  emulator.
+  </li>
   <li>
-    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
   </li>
 
   <li>Click the <strong>logcat</strong> tab.
   </li>
 
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on a hardware device or
-  emulator.
-  </li>
+
 <p>
-  By default, the logcat Monitor displays messages for the app running on the device or emulator:
+  By default, the logcat Monitor displays just the log messages for your app running on the
+  device or emulator:
 </p>
-<img src="{@docRoot}images/tools/am-logcatmon.png" />
+<img src="{@docRoot}images/tools/am-logcatmon2.png" />
 <p>
   To change this default, see <a href="#filtering">Filtering logcat Messages</a>.
 </p>
+<li>Optionally <a href=
+  "{@docRoot}tools/help/am-basics.html#switching">select a different device, emulator, or process</a>.
+  </li>
 </ol>
 
 <h2 id="level">
@@ -221,17 +203,17 @@ Log.d(tag, message);
 </h2>
 
 <p>
-  You can control how many messages appear in logcat Monitor by setting the log level. You can
+  You can control how many messages appear in the logcat Monitor by setting the log level. You can
   display all messages, or just the messages indicating the most severe conditions.
 </p>
 
 <p>
-  Remember that logcat Monitor continues to collect all messages regardless of the log level setting.
-  The setting just determines what logcat Monitor displays.
+  Remember that the logcat Monitor continues to collect all messages regardless of the log level setting.
+  The setting just determines what the logcat Monitor displays.
 </p>
 
 <p>
-  Follow this step:
+  To set the log level:
 </p>
 
 <ul>
@@ -259,7 +241,7 @@ Log.d(tag, message);
       </li>
 
       <li>
-        <strong>Error</strong> - Show issues that have caused errors, as well as the message levels
+        <strong>Error</strong> - Show issues that have caused errors, as well as the message level
         lower in this list.
       </li>
 
@@ -275,7 +257,7 @@ Log.d(tag, message);
     </h2>
 
     <p>
-      You can search the messages currently displayed in logcat Monitor. Follow these steps:
+      To search the messages currently displayed in the logcat Monitor:
     </p>
 
     <ol>
@@ -292,7 +274,7 @@ Log.d(tag, message);
     </p>
   </li>
 
-  <li>Press <strong>Enter</strong> to store the sequence in the menu during this session.
+  <li>Press Enter to store the search string in the menu during this session.
   </li>
 
   <li>To repeat a search, choose it from the search menu. Select or deselect
@@ -310,12 +292,12 @@ Log.d(tag, message);
 
     <p class="note">
       <strong>Note:</strong> The filter applies to your full logcat history, not just those messages
-      currently displayed in logcat Monitor. Make sure your other display options are set
+      currently displayed in the logcat Monitor. Make sure your other display options are set
       appropriately so you can see the filter output you want to examine.
     </p>
 
     <p>
-      To define and apply a filter, follow these steps:
+      To define and apply a filter:
     </p>
 
     <ol>
@@ -323,15 +305,18 @@ Log.d(tag, message);
         <ul>
           <li>
             <strong>Show only selected application</strong> - Display the messages produced by the
-            app code only.
+            app code only (the default). The logcat Monitor filters the log messages using the PID
+            of the active app.
           </li>
 
           <li>
-            <strong>No Filters</strong> - Apply no filters (the default).
+            <strong>No Filters</strong> - Apply no filters. The logcat Monitor
+            displays all log messages from the device, regardless of which process you selected.
           </li>
 
           <li>
-            <strong>Edit Filter Configuration</strong> - Create or modify a custom filter.
+            <strong>Edit Filter Configuration</strong> - Create or modify a custom filter. For
+            example, you could create a filter to view log messages from two apps at the same time.
           </li>
         </ul>
 
@@ -386,7 +371,7 @@ Log.d(tag, message);
             </ul>
 
             <li>
-              Click <strong>+</strong> to add it to the left pane.
+              Click <strong>+</strong> to add the filter definition to the left pane.
             </li>
 
             <p>
@@ -398,6 +383,14 @@ Log.d(tag, message);
               <strong>Cancel</strong>, any filter additions or modifications are lost.
             </li>
             </ol>
+            <li>
+              Make sure you see the log messages you want to examine.
+            </li>
+             <p>
+              If you don't think you see the log messages you want, try selecting
+              <strong>No filters</strong> and <a href="#searching">searching</a> for particular
+              log messages.
+            </p>
             </ol>
 
             <h2 id="logheader">
@@ -405,7 +398,7 @@ Log.d(tag, message);
             </h2>
 
             <p>
-              You can customize the header display to show just the information you’re interested
+              To customize the header display to show just the information you’re interested
               in:
             </p>
 
@@ -440,7 +433,9 @@ Log.d(tag, message);
               in the Code Editor. If needed (and possible), the decompiler derives source code that
               you can view.
             </p>
-
+             <p>
+              To move up and down the stack trace, and view the associated code in the Code Editor:
+            </p>
             <ul>
               <li>Click Up the Stack Trace <img src="{@docRoot}images/tools/am-iupstack.png"
                 style="vertical-align:sub;margin:0;height:17px" alt="Up the Stack Trace icon" />
@@ -460,8 +455,11 @@ Log.d(tag, message);
             </h2>
 
             <p>
-              Clicking a particular message stops the display of messages. You can quickly move to
-              the end of the log to see the real-time message flow.
+              Clicking a particular message stops the display of messages.
+            </p>
+            <p>
+              To quickly move to
+              the end of the log to see the real-time message flow:
             </p>
 
 <ul>
@@ -477,25 +475,48 @@ Log.d(tag, message);
 </ul>
 
 <h2 id="printing">
-  Printing the Log
+  Printing and Writing to a File
 </h2>
 <p>
-  Follow these steps:
+  To preserve log information, you can send the log to a printer, write the log to a PDF file, or
+  copy and paste the log into a text file.
+</p>
+<p>
+  To print the log or write it to a PDF file:
 </p>
 <ol>
   <li>Click Print <img src="{@docRoot}images/tools/am-iprint.png"
     style="vertical-align:sub;margin:0;height:17px" alt="Print icon" />.
   </li>
   <li>
-    In the <em>Print</em> dialog, optionally change print parameters, and then click
+    In the Android Studio <em>Print</em> dialog, optionally change print parameters, and then click
     <strong>Print</strong>.
+  </li>
+  <li>
+    In the operating system <em>Print</em> dialog, optionally change print parameters, and then click
+    <strong>Print</strong>.
+  </li>
+  <p>
+  You can set the parameters to send the log to a printer or write it to a PDF file.
+</p>
+</ol>
+<p>
+  To copy the log to a text file:
+</p>
+<ol>
+  <li>In the logcat Monitor, select and then copy log text.
+  </li>
+  <p>Press Ctrl+A (⌘A) to select all.</p>
+  <li>
+    Open a text editor and paste the text into a file.
+  </li>
 </ol>
 
 <h2 id="clearing">
-  Clearing the Log
+  Clearing and Restarting the Log
 </h2>
 <p>
-  To clear (flush) the entire log, follow this step:
+  To clear (flush) the entire log:
 </p>
 <ul>
   <li>Click Clear logcat <img src="{@docRoot}images/tools/am-iclear.png"
@@ -504,14 +525,8 @@ Log.d(tag, message);
 </ul>
 
 
-
-<h2 id="restarting">
-  Restarting the Log
-</h2>
-
 <p>
-  If there is a problem and the log is no longer progressing, you can restart the log. Follow this
-  step:
+  If there's a problem and the log is no longer progressing, you can restart the log:
 </p>
 
 <ul>
