@@ -2573,6 +2573,12 @@ int doPackage(Bundle* bundle)
         goto bail;
     }
 
+    // Write out the Main Dex ProGuard file
+    err = writeMainDexProguardFile(bundle, assets);
+    if (err < 0) {
+        goto bail;
+    }
+
     // Write the apk
     if (outputAPKFile) {
         // Gather all resources and add them to the APK Builder. The builder will then
