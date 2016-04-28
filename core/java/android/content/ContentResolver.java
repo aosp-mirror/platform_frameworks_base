@@ -1748,7 +1748,7 @@ public abstract class ContentResolver {
      *
      * @hide
      */
-    public void notifyChange(Uri uri, ContentObserver observer, boolean syncToNetwork,
+    public void notifyChange(@NonNull Uri uri, ContentObserver observer, boolean syncToNetwork,
             @UserIdInt int userHandle) {
         try {
             getContentService().notifyChange(
@@ -1765,7 +1765,7 @@ public abstract class ContentResolver {
      *
      * @hide
      */
-    public void notifyChange(Uri uri, ContentObserver observer, @NotifyFlags int flags,
+    public void notifyChange(@NonNull Uri uri, ContentObserver observer, @NotifyFlags int flags,
             @UserIdInt int userHandle) {
         try {
             getContentService().notifyChange(
