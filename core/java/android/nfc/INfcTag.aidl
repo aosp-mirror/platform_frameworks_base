@@ -31,7 +31,6 @@ interface INfcTag
     boolean isNdef(int nativeHandle);
     boolean isPresent(int nativeHandle);
     TransceiveResult transceive(int nativeHandle, in byte[] data, boolean raw);
-    boolean done(int nativeHandle, int debounceMs);
 
     NdefMessage ndefRead(int nativeHandle);
     int ndefWrite(int nativeHandle, in NdefMessage msg);
