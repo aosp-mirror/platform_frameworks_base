@@ -346,11 +346,12 @@ static void renderVertexBuffer(BakedOpRenderer& renderer, const BakedOpState& st
         bool shadowInterp = vertexBufferRenderFlags & VertexBufferRenderFlags::ShadowInterp;
         const int transformFlags = vertexBufferRenderFlags & VertexBufferRenderFlags::Offset
                 ? TransformFlags::OffsetByFudgeFactor : 0;
+
         Glop glop;
         GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
                 .setRoundRectClipState(state.roundRectClipState)
-                .setMeshVertexBuffer(vertexBuffer, shadowInterp)
-                .setFillPaint(paint, state.alpha)
+                .setMeshVertexBuffer(vertexBuffer)
+                .setFillPaint(paint, state.alpha, shadowInterp)
                 .setTransform(state.computedState.transform, transformFlags)
                 .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
                 .build();

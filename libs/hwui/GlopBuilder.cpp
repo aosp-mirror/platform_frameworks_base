@@ -193,7 +193,7 @@ GlopBuilder& GlopBuilder::setMeshColoredTexturedMesh(ColorTextureVertex* vertexD
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp) {
+GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer) {
     TRIGGER_STAGE(kMeshStage);
 
     const VertexBuffer::MeshFeatureFlags flags = vertexBuffer.getMeshFeatureFlags();
@@ -210,8 +210,6 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, 
             alphaVertex ? kAlphaVertexStride : kVertexStride };
     mOutGlop->mesh.elementCount = indices
                 ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
-
-    mDescription.useShadowAlphaInterp = shadowInterp;
     return *this;
 }
 
@@ -368,15 +366,23 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture,
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
+GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale, bool shadowInterp) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    if (CC_LIKELY(!shadowInterp)) {
+        mOutGlop->fill.texture = {
+                nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    } else {
+        mOutGlop->fill.texture = {
+                mCaches.textureState().getShadowLutTexture(), GL_TEXTURE_2D,
+                GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    }
 
     setFill(paint.getColor(), alphaScale,
             PaintUtils::getXfermode(paint.getXfermode()), Blend::ModeOrderSwap::NoSwap,
             paint.getShader(), paint.getColorFilter());
+    mDescription.useShadowAlphaInterp = shadowInterp;
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     return *this;
 }
@@ -592,8 +598,11 @@ GlopBuilder& GlopBuilder::setRoundRectClipState(const RoundRectClipState* roundR
 void verify(const ProgramDescription& description, const Glop& glop) {
     if (glop.fill.texture.texture != nullptr) {
         LOG_ALWAYS_FATAL_IF(((description.hasTexture && description.hasExternalTexture)
-                        || (!description.hasTexture && !description.hasExternalTexture)
-                        || ((glop.mesh.vertices.attribFlags & VertexAttribFlags::TextureCoord) == 0)),
+                        || (!description.hasTexture
+                                && !description.hasExternalTexture
+                                && !description.useShadowAlphaInterp)
+                        || ((glop.mesh.vertices.attribFlags & VertexAttribFlags::TextureCoord) == 0
+                                && !description.useShadowAlphaInterp)),
                 "Texture %p, hT%d, hET %d, attribFlags %x",
                 glop.fill.texture.texture,
                 description.hasTexture, description.hasExternalTexture,
