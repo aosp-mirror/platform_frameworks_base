@@ -56,15 +56,6 @@ public class NotificationContentView extends FrameLayout {
     private final Rect mClipBounds = new Rect();
     private final int mMinContractedHeight;
     private final int mNotificationContentMarginEnd;
-    private final OnLayoutChangeListener mLayoutUpdater = new OnLayoutChangeListener() {
-        @Override
-        public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                int oldLeft,
-                int oldTop, int oldRight, int oldBottom) {
-            selectLayout(false /* animate */, false /* force */);
-        }
-    };
-
 
     private View mContractedChild;
     private View mExpandedChild;
@@ -119,6 +110,7 @@ public class NotificationContentView extends FrameLayout {
     private int mTransformationStartVisibleType;
     private boolean mUserExpanding;
     private int mSingleLineWidthIndention;
+    private boolean mForceSelectNextLayout = true;
     private PendingIntent mPreviousExpandedRemoteInputIntent;
     private PendingIntent mPreviousHeadsUpRemoteInputIntent;
 
@@ -270,6 +262,8 @@ public class NotificationContentView extends FrameLayout {
         super.onLayout(changed, left, top, right, bottom);
         updateClipping();
         invalidateOutline();
+        selectLayout(false /* animate */, mForceSelectNextLayout /* force */);
+        mForceSelectNextLayout = false;
     }
 
     @Override
@@ -317,44 +311,35 @@ public class NotificationContentView extends FrameLayout {
     public void setContractedChild(View child) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
-            mContractedChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mContractedChild);
         }
         addView(child);
         mContractedChild = child;
-        mContractedChild.addOnLayoutChangeListener(mLayoutUpdater);
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        selectLayout(false /* animate */, true /* force */);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
 
     public void setExpandedChild(View child) {
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
-            mExpandedChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mExpandedChild);
         }
         addView(child);
         mExpandedChild = child;
-        mExpandedChild.addOnLayoutChangeListener(mLayoutUpdater);
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        selectLayout(false /* animate */, true /* force */);
     }
 
     public void setHeadsUpChild(View child) {
         if (mHeadsUpChild != null) {
             mHeadsUpChild.animate().cancel();
-            mHeadsUpChild.removeOnLayoutChangeListener(mLayoutUpdater);
             removeView(mHeadsUpChild);
         }
         addView(child);
         mHeadsUpChild = child;
-        mHeadsUpChild.addOnLayoutChangeListener(mLayoutUpdater);
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        selectLayout(false /* animate */, true /* force */);
     }
 
     @Override
@@ -408,7 +393,8 @@ public class NotificationContentView extends FrameLayout {
             updateBackgroundColor(true /* animate */);
         }
         if (mTransformationStartVisibleType != UNDEFINED
-                && mVisibleType != mTransformationStartVisibleType) {
+                && mVisibleType != mTransformationStartVisibleType
+                && getViewForVisibleType(mTransformationStartVisibleType) != null) {
             final TransformableView shownView = getTransformableViewForVisibleType(mVisibleType);
             final TransformableView hiddenView = getTransformableViewForVisibleType(
                     mTransformationStartVisibleType);
@@ -501,26 +487,66 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mUserExpanding) {
             updateContentTransformation();
-            return;
-        }
-        int visibleType = calculateVisibleType();
-        if (visibleType != mVisibleType || force) {
+        } else {
+            int visibleType = calculateVisibleType();
+            if (visibleType != mVisibleType || force) {
             View visibleView = getViewForVisibleType(visibleType);
             if (visibleView != null) {
                 visibleView.setVisibility(VISIBLE);
                 transferRemoteInputFocus(visibleType);
             }
 
-            if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
-                    || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
-                    || (visibleType == VISIBLE_TYPE_SINGLELINE && mSingleLineView != null)
-                    || visibleType == VISIBLE_TYPE_CONTRACTED)) {
-                animateToVisibleType(visibleType);
-            } else {
-                updateViewVisibilities(visibleType);
+                if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
+                        || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
+                        || (visibleType == VISIBLE_TYPE_SINGLELINE && mSingleLineView != null)
+                        || visibleType == VISIBLE_TYPE_CONTRACTED)) {
+                    animateToVisibleType(visibleType);
+                } else {
+                    updateViewVisibilities(visibleType);
+                }
+                mVisibleType = visibleType;
+                updateBackgroundColor(animate);
             }
-            mVisibleType = visibleType;
-            updateBackgroundColor(animate);
+        }
+        if (mForceSelectNextLayout) {
+            forceUpdateVisibilities();
+        }
+    }
+
+    private void forceUpdateVisibilities() {
+        boolean contractedVisible = mVisibleType == VISIBLE_TYPE_CONTRACTED
+                || mTransformationStartVisibleType == VISIBLE_TYPE_CONTRACTED;
+        boolean expandedVisible = mVisibleType == VISIBLE_TYPE_EXPANDED
+                || mTransformationStartVisibleType == VISIBLE_TYPE_EXPANDED;
+        boolean headsUpVisible = mVisibleType == VISIBLE_TYPE_HEADSUP
+                || mTransformationStartVisibleType == VISIBLE_TYPE_HEADSUP;
+        boolean singleLineVisible = mVisibleType == VISIBLE_TYPE_SINGLELINE
+                || mTransformationStartVisibleType == VISIBLE_TYPE_SINGLELINE;
+        if (!contractedVisible) {
+            mContractedChild.setVisibility(View.INVISIBLE);
+        } else {
+            mContractedWrapper.setVisible(true);
+        }
+        if (mExpandedChild != null) {
+            if (!expandedVisible) {
+                mExpandedChild.setVisibility(View.INVISIBLE);
+            } else {
+                mExpandedWrapper.setVisible(true);
+            }
+        }
+        if (mHeadsUpChild != null) {
+            if (!headsUpVisible) {
+                mHeadsUpChild.setVisibility(View.INVISIBLE);
+            } else {
+                mHeadsUpWrapper.setVisible(true);
+            }
+        }
+        if (mSingleLineView != null) {
+            if (!singleLineVisible) {
+                mSingleLineView.setVisibility(View.INVISIBLE);
+            } else {
+                mSingleLineView.setVisible(true);
+            }
         }
     }
 
@@ -558,7 +584,7 @@ public class NotificationContentView extends FrameLayout {
     private void animateToVisibleType(int visibleType) {
         final TransformableView shownView = getTransformableViewForVisibleType(visibleType);
         final TransformableView hiddenView = getTransformableViewForVisibleType(mVisibleType);
-        if (shownView == hiddenView) {
+        if (shownView == hiddenView || hiddenView == null) {
             shownView.setVisible(true);
             return;
         }
@@ -647,8 +673,9 @@ public class NotificationContentView extends FrameLayout {
                 height = mContentHeight;
             }
             int expandedVisualType = getVisualTypeForHeight(height);
-            int collapsedVisualType = getVisualTypeForHeight(
-                    mContainingNotification.getCollapsedHeight());
+            int collapsedVisualType = mIsChildInGroup && !isGroupExpanded()
+                    ? VISIBLE_TYPE_SINGLELINE
+                    : getVisualTypeForHeight(mContainingNotification.getCollapsedHeight());
             return mTransformationStartVisibleType == collapsedVisualType
                     ? expandedVisualType
                     : collapsedVisualType;
@@ -762,7 +789,7 @@ public class NotificationContentView extends FrameLayout {
             mHeadsUpWrapper.notifyContentUpdated(entry.notification);
         }
         updateShowingLegacyBackground();
-        selectLayout(false /* animate */, true /* force */);
+        mForceSelectNextLayout = true;
         setDark(mDark, false /* animate */, 0 /* delay */);
         mPreviousExpandedRemoteInputIntent = null;
         mPreviousHeadsUpRemoteInputIntent = null;
