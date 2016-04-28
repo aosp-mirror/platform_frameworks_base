@@ -815,7 +815,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         dispatchThawSelfOnly(container);
-        handleDataChanged();
     }
 
     class AdapterDataSetObserver extends DataSetObserver {
