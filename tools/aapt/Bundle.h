@@ -55,7 +55,7 @@ public:
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false), mNoVersionVectors(false),
-          mCrunchedOutputDir(NULL), mProguardFile(NULL),
+          mCrunchedOutputDir(NULL), mProguardFile(NULL), mMainDexProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
@@ -139,6 +139,8 @@ public:
     void setCrunchedOutputDir(const char* dir) { mCrunchedOutputDir = dir; }
     const char* getProguardFile() const { return mProguardFile; }
     void setProguardFile(const char* file) { mProguardFile = file; }
+    const char* getMainDexProguardFile() const { return mMainDexProguardFile; }
+    void setMainDexProguardFile(const char* file) { mMainDexProguardFile = file; }
     const android::Vector<const char*>& getResourceSourceDirs() const { return mResourceSourceDirs; }
     void addResourceSourceDir(const char* dir) { mResourceSourceDirs.insertAt(dir,0); }
     const char* getAndroidManifestFile() const { return mAndroidManifestFile; }
@@ -290,6 +292,7 @@ private:
     bool        mNoVersionVectors;
     const char* mCrunchedOutputDir;
     const char* mProguardFile;
+    const char* mMainDexProguardFile;
     const char* mAndroidManifestFile;
     const char* mPublicOutputFile;
     const char* mRClassDir;
