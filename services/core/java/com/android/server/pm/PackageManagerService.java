@@ -2680,14 +2680,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Prepare storage for system user really early during boot,
             // since core system apps like SettingsProvider and SystemUI
             // can't wait for user to start
-            final int storageFlags;
-            if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-                storageFlags = StorageManager.FLAG_STORAGE_DE;
-            } else {
-                storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            }
             reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
-                    storageFlags);
+                    StorageManager.FLAG_STORAGE_DE);
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
@@ -3118,7 +3112,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void checkPackageStartable(String packageName, int userId) {
-        final boolean userKeyUnlocked = isUserKeyUnlocked(userId);
+        final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
 
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -3469,30 +3463,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Return if the user key is currently unlocked.
-     */
-    private boolean isUserKeyUnlocked(int userId) {
-        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-            final IMountService mount = IMountService.Stub
-                    .asInterface(ServiceManager.getService("mount"));
-            if (mount == null) {
-                Slog.w(TAG, "Early during boot, assuming locked");
-                return false;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                return mount.isUserKeyUnlocked(userId);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        } else {
-            return true;
-        }
-    }
-
-    /**
      * Update given flags based on encryption status of current user.
      */
     private int updateFlags(int flags, int userId) {
@@ -3503,7 +3473,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // give them what they want
         } else {
             // Caller expressed no opinion, so match based on user state
-            if (isUserKeyUnlocked(userId)) {
+            if (StorageManager.isUserKeyUnlocked(userId)) {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
             } else {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -16115,7 +16085,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final UserManager um = mContext.getSystemService(UserManager.class);
         final int flags;
-        if (um.isUserUnlocked(userId)) {
+        if (um.isUserUnlockingOrUnlocked(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
         } else if (um.isUserRunning(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE;
@@ -18799,7 +18769,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final UserManager um = mContext.getSystemService(UserManager.class);
         for (UserInfo user : um.getUsers()) {
             final int flags;
-            if (um.isUserUnlocked(user.id)) {
+            if (um.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (um.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
@@ -19113,7 +19083,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-            if (!isUserKeyUnlocked(userId)) {
+            if (!StorageManager.isUserKeyUnlocked(userId)) {
                 throw new RuntimeException(
                         "Yikes, someone asked us to reconcile CE storage while " + userId
                                 + " was still locked; this would have caused massive data loss!");
@@ -19221,7 +19191,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final UserManager um = mContext.getSystemService(UserManager.class);
         for (UserInfo user : um.getUsers()) {
             final int flags;
-            if (um.isUserUnlocked(user.id)) {
+            if (um.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (um.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;

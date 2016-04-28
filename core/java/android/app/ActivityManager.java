@@ -3430,6 +3430,8 @@ public class ActivityManager {
     public static final int FLAG_AND_LOCKED = 1 << 1;
     /** {@hide} */
     public static final int FLAG_AND_UNLOCKED = 1 << 2;
+    /** {@hide} */
+    public static final int FLAG_AND_UNLOCKING_OR_UNLOCKED = 1 << 3;
 
     /**
      * Return whether the given user is actively running.  This means that
@@ -3443,26 +3445,6 @@ public class ActivityManager {
     public boolean isUserRunning(int userId) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public boolean isUserRunningAndLocked(int userId) {
-        try {
-            return ActivityManagerNative.getDefault().isUserRunning(userId,
-                    ActivityManager.FLAG_AND_LOCKED);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    public boolean isUserRunningAndUnlocked(int userId) {
-        try {
-            return ActivityManagerNative.getDefault().isUserRunning(userId,
-                    ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

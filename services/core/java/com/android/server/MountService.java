@@ -2816,17 +2816,19 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
-        // When a user has secure lock screen, require a challenge token to
-        // actually unlock. This check is mostly in place for emulation mode.
-        if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(token)) {
-            throw new IllegalStateException("Token required to unlock secure user " + userId);
-        }
+        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
+            // When a user has secure lock screen, require a challenge token to
+            // actually unlock. This check is mostly in place for emulation mode.
+            if (mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(token)) {
+                throw new IllegalStateException("Token required to unlock secure user " + userId);
+            }
 
-        try {
-            mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
-                    encodeBytes(token), encodeBytes(secret));
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
+            try {
+                mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
+                        encodeBytes(token), encodeBytes(secret));
+            } catch (NativeDaemonConnectorException e) {
+                throw e.rethrowAsParcelableException();
+            }
         }
 
         synchronized (mLock) {
@@ -2852,12 +2854,8 @@ class MountService extends IMountService.Stub
 
     @Override
     public boolean isUserKeyUnlocked(int userId) {
-        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
-            synchronized (mLock) {
-                return ArrayUtils.contains(mLocalUnlockedUsers, userId);
-            }
-        } else {
-            return true;
+        synchronized (mLock) {
+            return ArrayUtils.contains(mLocalUnlockedUsers, userId);
         }
     }
 
