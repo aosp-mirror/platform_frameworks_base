@@ -301,7 +301,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected KeyguardMonitor mKeyguardMonitor;
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
-    FingerprintUnlockController mFingerprintUnlockController;
+    protected FingerprintUnlockController mFingerprintUnlockController;
     LightStatusBarController mLightStatusBarController;
     protected LockscreenWallpaper mLockscreenWallpaper;
 
@@ -344,9 +344,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Keyguard is going away soon.
     private boolean mKeyguardGoingAway;
     // Keyguard is actually fading away now.
-    private boolean mKeyguardFadingAway;
-    private long mKeyguardFadingAwayDelay;
-    private long mKeyguardFadingAwayDuration;
+    protected boolean mKeyguardFadingAway;
+    protected long mKeyguardFadingAwayDelay;
+    protected long mKeyguardFadingAwayDuration;
 
     // RemoteInputView to be activated after unlock
     private View mPendingRemoteInputView;
@@ -469,10 +469,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final Interpolator ALPHA_IN = Interpolators.ALPHA_IN;
     public static final Interpolator ALPHA_OUT = Interpolators.ALPHA_OUT;
 
-    private BackDropView mBackdrop;
-    private ImageView mBackdropFront, mBackdropBack;
-    private PorterDuffXfermode mSrcXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
-    private PorterDuffXfermode mSrcOverXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
+    protected BackDropView mBackdrop;
+    protected ImageView mBackdropFront, mBackdropBack;
+    protected PorterDuffXfermode mSrcXferMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
+    protected PorterDuffXfermode mSrcOverXferMode =
+            new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
     private MediaSessionManager mMediaSessionManager;
     private MediaController mMediaController;
@@ -520,7 +521,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private final ShadeUpdates mShadeUpdates = new ShadeUpdates();
 
     private Runnable mLaunchTransitionEndRunnable;
-    private boolean mLaunchTransitionFadingAway;
+    protected boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
@@ -1992,7 +1993,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * Hide the album artwork that is fading out and release its bitmap.
      */
-    private Runnable mHideBackdropFront = new Runnable() {
+    protected Runnable mHideBackdropFront = new Runnable() {
         @Override
         public void run() {
             if (DEBUG_MEDIA) {
