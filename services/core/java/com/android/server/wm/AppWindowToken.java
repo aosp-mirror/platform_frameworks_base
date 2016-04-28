@@ -390,8 +390,8 @@ class AppWindowToken extends WindowToken {
     }
 
     boolean hasSavedSurface() {
-        for (int i = windows.size() -1; i >= 0; i--) {
-            final WindowState ws = windows.get(i);
+        for (int i = allAppWindows.size() -1; i >= 0; i--) {
+            final WindowState ws = allAppWindows.get(i);
             if (ws.hasSavedSurface()) {
                 return true;
             }
@@ -408,8 +408,8 @@ class AppWindowToken extends WindowToken {
         // Check if we have enough drawn windows to mark allDrawn= true.
         int numInteresting = 0;
         int numDrawn = 0;
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            WindowState w = windows.get(i);
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            WindowState w = allAppWindows.get(i);
             if (w.hasSavedSurface()) {
                 w.restoreSavedSurface();
             }
@@ -429,8 +429,8 @@ class AppWindowToken extends WindowToken {
     }
 
     void destroySavedSurfaces() {
-        for (int i = windows.size() - 1; i >= 0; i--) {
-            WindowState win = windows.get(i);
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            WindowState win = allAppWindows.get(i);
             win.destroySavedSurface();
         }
         mAnimatingWithSavedSurface = false;
