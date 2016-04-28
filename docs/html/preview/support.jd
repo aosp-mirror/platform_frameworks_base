@@ -23,7 +23,7 @@ page.image=images/cards/card-n-support_2x.png
     <div class="col-6of12">
       <p>
         <em>Date: April 2016<br>
-        Builds: NPC91K<br>
+        Builds: NPC91K, NPC91O<br>
         Emulator support: x86 &amp; ARM (32/64-bit)<br>
         Google Play services: 8.4</em>
       </p>
@@ -325,7 +325,7 @@ page.image=images/cards/card-n-support_2x.png
   </dt>
 
   <dd>
-    Playback of Netflix HD content is known to fail on Nexus Player.
+    Playback of Netflix HD content may fail on Nexus Player.
   </dd>
 
   <dd>
