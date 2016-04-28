@@ -186,7 +186,7 @@ void RenderState::assertOnGLThread() {
 
 class DecStrongTask : public renderthread::RenderTask {
 public:
-    DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
+    explicit DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
 
     virtual void run() override {
         mObject->decStrong(nullptr);

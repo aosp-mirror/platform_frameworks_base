@@ -268,7 +268,7 @@ struct RgnIterPair {
     SkRegion            fRgn;   // a copy of the caller's region
     SkRegion::Iterator  fIter;  // an iterator acting upon the copy (fRgn)
 
-    RgnIterPair(const SkRegion& rgn) : fRgn(rgn) {
+    explicit RgnIterPair(const SkRegion& rgn) : fRgn(rgn) {
         // have our iterator reference our copy (fRgn), so we know it will be
         // unchanged for the lifetime of the iterator
         fIter.reset(fRgn);
