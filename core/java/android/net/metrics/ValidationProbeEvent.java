@@ -29,8 +29,13 @@ import com.android.internal.util.MessageUtils;
 @SystemApi
 public final class ValidationProbeEvent extends IpConnectivityEvent implements Parcelable {
 
-    public static final int PROBE_HTTP  = 0;
-    public static final int PROBE_HTTPS = 1;
+    public static final int PROBE_DNS   = 0;
+    public static final int PROBE_HTTP  = 1;
+    public static final int PROBE_HTTPS = 2;
+    public static final int PROBE_PAC   = 3;
+
+    public static final int DNS_FAILURE = 0;
+    public static final int DNS_SUCCESS = 1;
 
     public final int netId;
     public final long durationMs;
@@ -73,6 +78,11 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
         }
     };
 
+    /** @hide */
+    public static String getProbeName(int probeType) {
+        return Decoder.constants.get(probeType, "PROBE_???");
+    }
+
     public static void logEvent(int netId, long durationMs, int probeType, int returnCode) {
         logEvent(new ValidationProbeEvent(netId, durationMs, probeType, returnCode));
     }
@@ -80,7 +90,7 @@ public final class ValidationProbeEvent extends IpConnectivityEvent implements P
     @Override
     public String toString() {
         return String.format("ValidationProbeEvent(%d, %s:%d, %dms)",
-                netId, Decoder.constants.get(probeType), returnCode, durationMs);
+                netId, getProbeName(probeType), returnCode, durationMs);
     }
 
     final static class Decoder {
