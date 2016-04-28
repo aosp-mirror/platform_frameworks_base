@@ -724,6 +724,7 @@ public class DhcpClient extends StateMachine {
                     mOffer = null;
                     Log.d(TAG, "Confirmed lease: " + mDhcpLease);
                     setDhcpLeaseExpiry(packet);
+                    notifySuccess();
                     transitionTo(mConfiguringInterfaceState);
                 }
             } else if (packet instanceof DhcpNakPacket) {
@@ -794,7 +795,6 @@ public class DhcpClient extends StateMachine {
         @Override
         public void enter() {
             super.enter();
-            notifySuccess();
             // TODO: DhcpStateMachine only supported renewing at 50% of the lease time,
             // and did not support rebinding. Now that the legacy DHCP client is gone, fix this.
             scheduleRenew();
@@ -850,6 +850,7 @@ public class DhcpClient extends StateMachine {
             if (!isValidPacket(packet)) return;
             if ((packet instanceof DhcpAckPacket)) {
                 setDhcpLeaseExpiry(packet);
+                notifySuccess();
                 transitionTo(mDhcpBoundState);
             } else if (packet instanceof DhcpNakPacket) {
                 transitionTo(mDhcpInitState);
