@@ -4317,11 +4317,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.top = df.top = of.top = mUnrestrictedScreenTop;
             pf.right = df.right = of.right = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
             pf.bottom = df.bottom = of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
-            cf.bottom = vf.bottom = mStableBottom;
-            // Note: In Phone landscape mode, the button bar should also be excluded.
-            cf.right = vf.right = mStableRight;
-            cf.left = vf.left = mStableLeft;
-            cf.top = vf.top = mStableTop;
+            if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                cf.left = mDockLeft;
+                cf.top = mDockTop;
+                cf.right = mDockRight;
+                cf.bottom = mDockBottom;
+            } else {
+                cf.left = mContentLeft;
+                cf.top = mContentTop;
+                cf.right = mContentRight;
+                cf.bottom = mContentBottom;
+            }
+            if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                vf.left = mCurLeft;
+                vf.top = mCurTop;
+                vf.right = mCurRight;
+                vf.bottom = mCurBottom;
+            } else {
+                vf.set(cf);
+            }
         } else if (win == mStatusBar) {
             pf.left = df.left = of.left = mUnrestrictedScreenLeft;
             pf.top = df.top = of.top = mUnrestrictedScreenTop;
