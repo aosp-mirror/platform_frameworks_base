@@ -7706,6 +7706,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         // when we're finished.
         private int mPmToken;
 
+        // When this is restore-during-install, we need to tell the package manager
+        // whether we actually launched the app, because this affects notifications
+        // around externally-visible state transitions.
+        private boolean mDidLaunch;
+
         // Is this a whole-system restore, i.e. are we establishing a new ancestral
         // dataset to base future restore-at-install operations from?
         private boolean mIsSystemRestore;
@@ -7769,6 +7774,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             mTargetPackage = targetPackage;
             mIsSystemRestore = isFullSystemRestore;
             mFinished = false;
+            mDidLaunch = false;
 
             if (targetPackage != null) {
                 // Single package restore
@@ -8149,6 +8155,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 return;
             }
 
+            // Whatever happens next, we've launched the target app now; remember that.
+            mDidLaunch = true;
+
             // And then finally start the restore on this agent
             try {
                 initiateOneRestore(mCurrentPackage, metaInfo.versionCode);
@@ -8430,6 +8439,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // Now we're really done with this one too
                     IoUtils.closeQuietly(mEnginePipes[0]);
 
+                    // In all cases we want to remember whether we launched
+                    // the target app as part of our work so far.
+                    mDidLaunch = (mEngine.getAgent() != null);
+
                     // If we hit a transport-level error, we are done with everything;
                     // if we hit an agent error we just go back to running the queue.
                     if (status == BackupTransport.TRANSPORT_OK) {
@@ -8522,7 +8535,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             if (mPmToken > 0) {
                 if (MORE_DEBUG) Slog.v(TAG, "finishing PM token " + mPmToken);
                 try {
-                    mPackageManagerBinder.finishPackageInstall(mPmToken);
+                    mPackageManagerBinder.finishPackageInstall(mPmToken, mDidLaunch);
                 } catch (RemoteException e) { /* can't happen */ }
             } else {
                 // We were invoked via an active restore session, not by the Package
@@ -9682,7 +9695,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // Manager to proceed with the post-install handling for this package.
             if (DEBUG) Slog.v(TAG, "Finishing install immediately");
             try {
-                mPackageManagerBinder.finishPackageInstall(token);
+                mPackageManagerBinder.finishPackageInstall(token, false);
             } catch (RemoteException e) { /* can't happen */ }
         }
     }

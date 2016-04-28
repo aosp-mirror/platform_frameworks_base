@@ -222,7 +222,7 @@ interface IPackageManager {
             in String installerPackageName,
             int userId);
 
-    void finishPackageInstall(int token);
+    void finishPackageInstall(int token, boolean didLaunch);
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
 
