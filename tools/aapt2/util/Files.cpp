@@ -18,6 +18,7 @@
 #include "util/Util.h"
 
 #include <algorithm>
+#include <android-base/file.h>
 #include <cerrno>
 #include <cstdio>
 #include <dirent.h>
@@ -188,6 +189,23 @@ Maybe<android::FileMap> mmapPath(const StringPiece& path, std::string* outError)
         return {};
     }
     return std::move(fileMap);
+}
+
+bool appendArgsFromFile(const StringPiece& path, std::vector<std::string>* outArgList,
+                        std::string* outError) {
+    std::string contents;
+    if (!android::base::ReadFileToString(path.toString(), &contents)) {
+        if (outError) *outError = "failed to read argument-list file";
+        return false;
+    }
+
+    for (StringPiece line : util::tokenize<char>(contents, ' ')) {
+        line = util::trimWhitespace(line);
+        if (!line.empty()) {
+            outArgList->push_back(line.toString());
+        }
+    }
+    return true;
 }
 
 bool FileFilter::setPattern(const StringPiece& pattern) {
