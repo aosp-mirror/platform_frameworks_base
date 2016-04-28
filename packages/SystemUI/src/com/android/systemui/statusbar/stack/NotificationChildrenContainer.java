@@ -139,7 +139,9 @@ public class NotificationChildrenContainer extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
             boolean isOverflow = i == overflowIndex;
-            child.setSingleLineWidthIndention(isOverflow ? mOverflowNumber.getMeasuredWidth() : 0);
+            child.setSingleLineWidthIndention(isOverflow && mOverflowNumber != null
+                    ? mOverflowNumber.getMeasuredWidth()
+                    : 0);
             child.measure(widthMeasureSpec, newHeightSpec);
             height += child.getMeasuredHeight();
 
