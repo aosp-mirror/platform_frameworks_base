@@ -2688,20 +2688,20 @@ public final class MediaCodecInfo {
         public static final int VP9Profile3HDR = 0x2000;
 
         // from OMX_VIDEO_VP9LEVELTYPE
-        public static final int VP9Level1  = 0x0;
-        public static final int VP9Level11 = 0x1;
-        public static final int VP9Level2  = 0x2;
-        public static final int VP9Level21 = 0x4;
-        public static final int VP9Level3  = 0x8;
-        public static final int VP9Level31 = 0x10;
-        public static final int VP9Level4  = 0x20;
-        public static final int VP9Level41 = 0x40;
-        public static final int VP9Level5  = 0x80;
-        public static final int VP9Level51 = 0x100;
-        public static final int VP9Level52 = 0x200;
-        public static final int VP9Level6  = 0x400;
-        public static final int VP9Level61 = 0x800;
-        public static final int VP9Level62 = 0x1000;
+        public static final int VP9Level1  = 0x1;
+        public static final int VP9Level11 = 0x2;
+        public static final int VP9Level2  = 0x4;
+        public static final int VP9Level21 = 0x8;
+        public static final int VP9Level3  = 0x10;
+        public static final int VP9Level31 = 0x20;
+        public static final int VP9Level4  = 0x40;
+        public static final int VP9Level41 = 0x80;
+        public static final int VP9Level5  = 0x100;
+        public static final int VP9Level51 = 0x200;
+        public static final int VP9Level52 = 0x400;
+        public static final int VP9Level6  = 0x800;
+        public static final int VP9Level61 = 0x1000;
+        public static final int VP9Level62 = 0x2000;
 
         // from OMX_VIDEO_HEVCPROFILETYPE
         public static final int HEVCProfileMain        = 0x01;
