@@ -171,6 +171,7 @@ class ActivityStarter {
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
+    private boolean mAvoidMoveToFront;
 
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
@@ -207,6 +208,7 @@ class ActivityStarter {
         mMovedToFront = false;
         mNoAnimation = false;
         mKeepCurTransition = false;
+        mAvoidMoveToFront = false;
 
         mVoiceSession = null;
         mVoiceInteractor = null;
@@ -1223,6 +1225,18 @@ class ActivityStarter {
             mDoResume = false;
         }
 
+        if (mOptions != null && mOptions.getLaunchTaskId() != -1 && mOptions.getAvoidMoveToFront()) {
+            final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
+            final ActivityRecord top = task != null ? task.getTopActivity() : null;
+            if (top != null && !top.visible) {
+
+                // The caller specifies that we'd like to be avoided to be moved to the front, so be
+                // it!
+                mDoResume = false;
+                mAvoidMoveToFront = true;
+            }
+        }
+
         mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
 
         mInTask = inTask;
@@ -1419,8 +1433,9 @@ class ActivityStarter {
         ActivityRecord curTop = (focusStack == null)
                 ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
 
-        if (curTop != null && (curTop.task != intentActivity.task ||
-                curTop.task != focusStack.topTask())) {
+        if (curTop != null
+                && (curTop.task != intentActivity.task || curTop.task != focusStack.topTask())
+                && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
                     mSourceStack.topActivity().task == mSourceRecord.task)) {
@@ -1631,7 +1646,7 @@ class ActivityStarter {
             mTargetStack.moveToFront("sourceStackToFront");
         }
         final TaskRecord topTask = mTargetStack.topTask();
-        if (topTask != sourceTask) {
+        if (topTask != sourceTask && !mAvoidMoveToFront) {
             mTargetStack.moveTaskToFrontLocked(sourceTask, mNoAnimation, mOptions,
                     mStartActivity.appTimeTracker, "sourceTaskToFront");
         }

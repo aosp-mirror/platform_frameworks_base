@@ -3508,6 +3508,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
+        final ActivityRecord topActivity = task.getTopActivity();
         if (!task.canGoInDockedStack() || forceNonResizable) {
             // Display a warning toast that we tried to put a non-dockable task in the docked stack.
             mService.mHandler.sendEmptyMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
@@ -3515,9 +3516,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
             moveTasksToFullscreenStackLocked(DOCKED_STACK_ID, actualStackId == DOCKED_STACK_ID);
-        } else if (task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
-            String packageName = task.getTopActivity() != null
-                    ? task.getTopActivity().appInfo.packageName : null;
+        } else if (topActivity != null && topActivity.isNonResizableOrForced()
+                && !topActivity.noDisplay) {
+            String packageName = topActivity.appInfo.packageName;
             mService.mHandler.obtainMessage(NOTIFY_FORCED_RESIZABLE_MSG, task.taskId, 0,
                     packageName).sendToTarget();
         }
