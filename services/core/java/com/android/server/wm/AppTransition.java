@@ -39,6 +39,7 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
+import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -228,6 +229,7 @@ public class AppTransition implements Dump {
 
     private int mLastClipRevealMaxTranslation;
     private boolean mLastHadClipReveal;
+    private boolean mProlongedAnimationsEnded;
 
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
@@ -371,6 +373,22 @@ public class AppTransition implements Dump {
                 topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
                 .notifyAppTransitionStarting(openingApps, closingApps);
+
+        // Prolong the start for the transition when docking a task from recents, unless recents
+        // ended it already then we don't need to wait.
+        if (mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS && !mProlongedAnimationsEnded) {
+            for (int i = openingApps.size() - 1; i >= 0; i--) {
+                final AppWindowAnimator appAnimator = openingApps.valueAt(i).mAppAnimator;
+                appAnimator.startProlongAnimation(PROLONG_ANIMATION_AT_START);
+            }
+        }
+    }
+
+    /**
+     * Let the transitions manager know that the somebody wanted to end the prolonged animations.
+     */
+    void notifyProlongedAnimationsEnded() {
+        mProlongedAnimationsEnded = true;
     }
 
     void clear() {
@@ -380,6 +398,7 @@ public class AppTransition implements Dump {
         mNextAppTransitionAnimationsSpecsFuture = null;
         mDefaultNextAppTransitionAnimationSpec = null;
         mAnimationFinishedCallback = null;
+        mProlongedAnimationsEnded = false;
     }
 
     void freeze() {
@@ -1913,14 +1932,6 @@ public class AppTransition implements Dump {
                 // Opening a new activity always supersedes a close for the anim.
                 setAppTransition(transit);
             }
-        }
-        if (transit != TRANSIT_DOCK_TASK_FROM_RECENTS
-                && mNextAppTransition == TRANSIT_DOCK_TASK_FROM_RECENTS) {
-
-            // Somebody is trying to start another transition while we are waiting for the docking
-            // window to be drawn. Because TRANSIT_DOCK_TASK_FROM_RECENTS starts prolonged
-            // animations, we need to override it or our prolonged animations will never be ended.
-            setAppTransition(transit);
         }
         boolean prepared = prepare();
         if (isTransitionSet()) {

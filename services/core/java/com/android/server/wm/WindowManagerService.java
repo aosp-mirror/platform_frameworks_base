@@ -3950,6 +3950,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     appToken.mAppAnimator.endProlongedAnimation();
                 }
             }
+            mAppTransition.notifyProlongedAnimationsEnded();
         }
     }
 
