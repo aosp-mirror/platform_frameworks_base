@@ -380,7 +380,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < nColorTransforms; i++) {
             supportedColorTransforms[i] = Display.ColorTransform.CREATOR.createFromParcel(source);
         }
-        hdrCapabilities = Display.HdrCapabilities.CREATOR.createFromParcel(source);
+        hdrCapabilities = source.readParcelable(null);
         logicalDensityDpi = source.readInt();
         physicalXDpi = source.readFloat();
         physicalYDpi = source.readFloat();
@@ -424,7 +424,7 @@ public final class DisplayInfo implements Parcelable {
         for (int i = 0; i < supportedColorTransforms.length; i++) {
             supportedColorTransforms[i].writeToParcel(dest, flags);
         }
-        hdrCapabilities.writeToParcel(dest, flags);
+        dest.writeParcelable(hdrCapabilities, flags);
         dest.writeInt(logicalDensityDpi);
         dest.writeFloat(physicalXDpi);
         dest.writeFloat(physicalYDpi);
