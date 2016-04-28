@@ -4456,6 +4456,14 @@ METADATA['en'].collections = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
+  "go/libraries": {
+    "title": "",
+    "resources": [
+      "go/libraries/support-library/index.html",
+      "go/libraries/testing-support-library/index.html",
+      "go/libraries/data-binding/index.html"
+    ]
+  },
   "autolanding": {
     "title": "",
     "resources": [
