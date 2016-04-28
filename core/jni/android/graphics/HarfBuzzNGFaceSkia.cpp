@@ -50,7 +50,7 @@ static const bool kDebugGlyphs = false;
 // calls. See the Harfbuzz source for references about what these callbacks do.
 
 struct HarfBuzzFontData {
-    HarfBuzzFontData(SkPaint* paint) : m_paint(paint) { }
+    explicit HarfBuzzFontData(SkPaint* paint) : m_paint(paint) { }
     SkPaint* m_paint;
 };
 

@@ -168,7 +168,7 @@ void AnimatorManager::endAllStagingAnimators() {
 
 class EndActiveAnimatorsFunctor {
 public:
-    EndActiveAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
+    explicit EndActiveAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
 
     void operator() (sp<BaseRenderNodeAnimator>& animator) {
         animator->forceEndNow(mContext);
