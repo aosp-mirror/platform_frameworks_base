@@ -64,7 +64,7 @@ protected:
     virtual ~Choreographer() = default;
 
 private:
-    Choreographer(const sp<Looper>& looper);
+    explicit Choreographer(const sp<Looper>& looper);
     Choreographer(const Choreographer&) = delete;
 
     virtual void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
