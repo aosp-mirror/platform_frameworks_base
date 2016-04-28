@@ -282,7 +282,12 @@ public class IpManager extends StateMachine {
             }
 
             public Builder withPreDhcpAction() {
-                mConfig.mRequestedPreDhcpAction = true;
+                mConfig.mRequestedPreDhcpActionMs = DEFAULT_TIMEOUT_MS;
+                return this;
+            }
+
+            public Builder withPreDhcpAction(int dhcpActionTimeoutMs) {
+                mConfig.mRequestedPreDhcpActionMs = dhcpActionTimeoutMs;
                 return this;
             }
 
@@ -307,7 +312,7 @@ public class IpManager extends StateMachine {
         }
 
         /* package */ boolean mUsingIpReachabilityMonitor = true;
-        /* package */ boolean mRequestedPreDhcpAction;
+        /* package */ int mRequestedPreDhcpActionMs;
         /* package */ StaticIpConfiguration mStaticIpConfig;
         /* package */ ApfCapabilities mApfCapabilities;
         /* package */ int mProvisioningTimeoutMs = DEFAULT_TIMEOUT_MS;
@@ -316,7 +321,7 @@ public class IpManager extends StateMachine {
 
         public ProvisioningConfiguration(ProvisioningConfiguration other) {
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
-            mRequestedPreDhcpAction = other.mRequestedPreDhcpAction;
+            mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
             mStaticIpConfig = other.mStaticIpConfig;
             mApfCapabilities = other.mApfCapabilities;
             mProvisioningTimeoutMs = other.mProvisioningTimeoutMs;
@@ -326,7 +331,7 @@ public class IpManager extends StateMachine {
         public String toString() {
             return new StringJoiner(", ", getClass().getSimpleName() + "{", "}")
                     .add("mUsingIpReachabilityMonitor: " + mUsingIpReachabilityMonitor)
-                    .add("mRequestedPreDhcpAction: " + mRequestedPreDhcpAction)
+                    .add("mRequestedPreDhcpActionMs: " + mRequestedPreDhcpActionMs)
                     .add("mStaticIpConfig: " + mStaticIpConfig)
                     .add("mApfCapabilities: " + mApfCapabilities)
                     .add("mProvisioningTimeoutMs: " + mProvisioningTimeoutMs)
@@ -346,6 +351,7 @@ public class IpManager extends StateMachine {
     private static final int CMD_UPDATE_HTTP_PROXY = 7;
     private static final int CMD_SET_MULTICAST_FILTER = 8;
     private static final int EVENT_PROVISIONING_TIMEOUT = 9;
+    private static final int EVENT_DHCPACTION_TIMEOUT = 10;
 
     private static final int MAX_LOG_RECORDS = 500;
 
@@ -369,6 +375,7 @@ public class IpManager extends StateMachine {
     private final INetworkManagementService mNwService;
     private final NetlinkTracker mNetlinkTracker;
     private final WakeupMessage mProvisioningTimeoutAlarm;
+    private final WakeupMessage mDhcpActionTimeoutAlarm;
     private final LocalLog mLocalLog;
 
     private NetworkInterface mNetworkInterface;
@@ -445,6 +452,8 @@ public class IpManager extends StateMachine {
 
         mProvisioningTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
                 mTag + ".EVENT_PROVISIONING_TIMEOUT", EVENT_PROVISIONING_TIMEOUT);
+        mDhcpActionTimeoutAlarm = new WakeupMessage(mContext, getHandler(),
+                mTag + ".EVENT_DHCPACTION_TIMEOUT", EVENT_DHCPACTION_TIMEOUT);
 
         // Super simple StateMachine.
         addState(mStoppedState);
@@ -1023,6 +1032,7 @@ public class IpManager extends StateMachine {
         @Override
         public void exit() {
             mProvisioningTimeoutAlarm.cancel();
+            mDhcpActionTimeoutAlarm.cancel();
 
             if (mIpReachabilityMonitor != null) {
                 mIpReachabilityMonitor.stop();
@@ -1040,6 +1050,18 @@ public class IpManager extends StateMachine {
             }
 
             resetLinkProperties();
+        }
+
+        private void startDhcpAction() {
+            mCallback.onPreDhcpAction();
+            final long alarmTime = SystemClock.elapsedRealtime() +
+                    mConfiguration.mRequestedPreDhcpActionMs;
+            mDhcpActionTimeoutAlarm.schedule(alarmTime);
+        }
+
+        private void stopDhcpAction() {
+            mDhcpActionTimeoutAlarm.cancel();
+            mCallback.onPostDhcpAction();
         }
 
         @Override
@@ -1104,10 +1126,14 @@ public class IpManager extends StateMachine {
                     handleProvisioningFailure();
                     break;
 
+                case EVENT_DHCPACTION_TIMEOUT:
+                    stopDhcpAction();
+                    break;
+
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
-                    if (mConfiguration.mRequestedPreDhcpAction) {
-                        mCallback.onPreDhcpAction();
+                    if (mConfiguration.mRequestedPreDhcpActionMs > 0) {
+                        startDhcpAction();
                     } else {
                         sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
                     }
@@ -1123,17 +1149,23 @@ public class IpManager extends StateMachine {
                         mDhcpClient.sendMessage(DhcpClient.EVENT_LINKADDRESS_CONFIGURED);
                     } else {
                         Log.e(mTag, "Failed to set IPv4 address!");
+                        dispatchCallback(ProvisioningChange.LOST_PROVISIONING,
+                                new LinkProperties(mLinkProperties));
                         transitionTo(mStoppingState);
                     }
                     break;
                 }
 
+                // This message is only received when:
+                //
+                //     a) initial address acquisition succeeds,
+                //     b) renew succeeds,
+                //     c) renew fails,
+                //
+                // but never when initial address acquisition fails. The latter
+                // condition is now governed by the provisioning timeout.
                 case DhcpClient.CMD_POST_DHCP_ACTION: {
-                    // Note that onPostDhcpAction() is likely to be
-                    // asynchronous, and thus there is no guarantee that we
-                    // will be able to observe any of its effects here.
-                    if (VDBG) { Log.d(mTag, "onPostDhcpAction()"); }
-                    mCallback.onPostDhcpAction();
+                    stopDhcpAction();
 
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
                     switch (msg.arg1) {
