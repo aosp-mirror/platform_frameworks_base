@@ -387,14 +387,21 @@ toc:
 
 - title: Best Practices
   path: /guide/practices/index.html
-  custom_link_attributes:
-  - de-lang="Bewährte Verfahren"
-  - es-lang="Prácticas recomendadas"
-  - fr-lang="Meilleures pratiques"
-  - it-lang="Best practice"
-  - ja-lang="ベスト プラクティス"
-  - zh-cn-lang="最佳实践"
-  - zh-tw-lang="最佳實務"
+  path_attributes:
+  - name: de-lang
+    value: Bewährte Verfahren
+  - name: es-lang
+    value: Prácticas recomendadas
+  - name: fr-lang
+    value: Meilleures pratiques
+  - name: it-lang
+    value: Best practice
+  - name: ja-lang
+    value: ベスト プラクティス
+  - name: zh-cn-lang
+    value: 最佳实践
+  - name: zh-tw-lang
+    value: 最佳實務
   section:
   - title: Supporting Multiple Screens
     path: /guide/practices/screens_support.html
