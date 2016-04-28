@@ -304,7 +304,7 @@ public class AccountManagerService
     }
 
     private final SparseArray<UserAccounts> mUsers = new SparseArray<>();
-    private final SparseBooleanArray mUnlockedUsers = new SparseBooleanArray();
+    private final SparseBooleanArray mLocalUnlockedUsers = new SparseBooleanArray();
 
     private static AtomicReference<AccountManagerService> sThis = new AtomicReference<>();
     private static final Account[] EMPTY_ACCOUNT_ARRAY = new Account[]{};
@@ -424,7 +424,7 @@ public class AccountManagerService
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "validateAccountsInternal " + accounts.userId
                     + " isCeDatabaseAttached=" + accounts.openHelper.isCeDatabaseAttached()
-                    + " userLocked=" + mUnlockedUsers.get(accounts.userId));
+                    + " userLocked=" + mLocalUnlockedUsers.get(accounts.userId));
         }
         if (invalidateAuthenticatorCache) {
             mAuthenticatorCache.invalidateCache(accounts.userId);
@@ -575,7 +575,7 @@ public class AccountManagerService
                 validateAccounts = true;
             }
             // open CE database if necessary
-            if (!accounts.openHelper.isCeDatabaseAttached() && mUnlockedUsers.get(userId)) {
+            if (!accounts.openHelper.isCeDatabaseAttached() && mLocalUnlockedUsers.get(userId)) {
                 Log.i(TAG, "User " + userId + " is unlocked - opening CE database");
                 synchronized (accounts.cacheLock) {
                     File preNDatabaseFile = new File(getPreNDatabaseName(userId));
@@ -648,8 +648,8 @@ public class AccountManagerService
         synchronized (mUsers) {
             accounts = mUsers.get(userId);
             mUsers.remove(userId);
-            userUnlocked = mUnlockedUsers.get(userId);
-            mUnlockedUsers.delete(userId);
+            userUnlocked = mLocalUnlockedUsers.get(userId);
+            mLocalUnlockedUsers.delete(userId);
         }
         if (accounts != null) {
             synchronized (accounts.cacheLock) {
@@ -686,7 +686,7 @@ public class AccountManagerService
             Log.v(TAG, "onUserUnlocked " + userId);
         }
         synchronized (mUsers) {
-            mUnlockedUsers.put(userId, true);
+            mLocalUnlockedUsers.put(userId, true);
         }
         if (userId < 1) return;
         syncSharedAccounts(userId);
@@ -746,7 +746,7 @@ public class AccountManagerService
         if (account == null) {
             return null;
         }
-        if (!isUserUnlocked(accounts.userId)) {
+        if (!isLocalUnlockedUser(accounts.userId)) {
             Log.w(TAG, "Password is not available - user " + accounts.userId + " data is locked");
             return null;
         }
@@ -828,7 +828,7 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        if (!isUserUnlocked(userId)) {
+        if (!isLocalUnlockedUser(userId)) {
             Log.w(TAG, "User " + userId + " data is locked. callingUid " + callingUid);
             return null;
         }
@@ -1109,7 +1109,7 @@ public class AccountManagerService
         if (account == null) {
             return false;
         }
-        if (!isUserUnlocked(accounts.userId)) {
+        if (!isLocalUnlockedUser(accounts.userId)) {
             Log.w(TAG, "Account " + account + " cannot be added - user " + accounts.userId
                     + " is locked. callingUid=" + callingUid);
             return false;
@@ -1176,9 +1176,9 @@ public class AccountManagerService
         return true;
     }
 
-    private boolean isUserUnlocked(int userId) {
+    private boolean isLocalUnlockedUser(int userId) {
         synchronized (mUsers) {
-            return mUnlockedUsers.get(userId);
+            return mLocalUnlockedUsers.get(userId);
         }
     }
 
@@ -1193,7 +1193,7 @@ public class AccountManagerService
         for (UserInfo user : users) {
             if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
-                if (getUserManager().isUserUnlocked(user.id)) {
+                if (isLocalUnlockedUser(user.id)) {
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
                             MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                 }
@@ -1597,7 +1597,7 @@ public class AccountManagerService
 
     private boolean removeAccountInternal(UserAccounts accounts, Account account, int callingUid) {
         int deleted;
-        boolean userUnlocked = isUserUnlocked(accounts.userId);
+        boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
         if (!userUnlocked) {
             Slog.i(TAG, "Removing account " + account + " while user "+ accounts.userId
                     + " is still locked. CE data will be removed later");
@@ -1792,7 +1792,7 @@ public class AccountManagerService
                     account.type);
             throw new SecurityException(msg);
         }
-        if (!isUserUnlocked(userId)) {
+        if (!isLocalUnlockedUser(userId)) {
             Log.w(TAG, "Authtoken not available - user " + userId + " data is locked. callingUid "
                     + callingUid);
             return null;
@@ -4037,8 +4037,7 @@ public class AccountManagerService
                 return false;
             }
 
-            final ActivityManager am = mContext.getSystemService(ActivityManager.class);
-            if (am.isUserRunningAndLocked(mAccounts.userId)
+            if (!isLocalUnlockedUser(mAccounts.userId)
                     && !authenticatorInfo.componentInfo.directBootAware) {
                 Slog.w(TAG, "Blocking binding to authenticator " + authenticatorInfo.componentName
                         + " which isn't encryption aware");

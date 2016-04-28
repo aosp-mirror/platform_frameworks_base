@@ -270,7 +270,7 @@ final class UserController {
             if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
 
             // Only keep marching forward if user is actually unlocked
-            if (!isUserKeyUnlocked(userId)) return;
+            if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
                 uss.mUnlockProgress.start();
@@ -281,9 +281,29 @@ final class UserController {
                 mUserManager.onBeforeUnlockUser(userId);
                 uss.mUnlockProgress.setProgress(20);
 
-                // Dispatch unlocked to system services
-                mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss.mUnlockProgress)
+                // Dispatch unlocked to system services; when fully dispatched,
+                // that calls through to the next "unlocked" phase
+                mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
                         .sendToTarget();
+            }
+        }
+    }
+
+    /**
+     * Step from {@link UserState#STATE_RUNNING_UNLOCKING} to
+     * {@link UserState#STATE_RUNNING_UNLOCKED}.
+     */
+    void finishUserUnlocked(final UserState uss) {
+        final int userId = uss.mHandle.getIdentifier();
+        synchronized (mService) {
+            // Bail if we ended up with a stale user
+            if (mStartedUsers.get(uss.mHandle.getIdentifier()) != uss) return;
+
+            // Only keep marching forward if user is actually unlocked
+            if (!StorageManager.isUserKeyUnlocked(userId)) return;
+
+            if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
+                uss.mUnlockProgress.finish();
 
                 // Dispatch unlocked to external apps
                 final Intent unlockedIntent = new Intent(Intent.ACTION_USER_UNLOCKED);
@@ -310,27 +330,25 @@ final class UserController {
                     }
                 }
 
-                // Send PRE_BOOT broadcasts if fingerprint changed
+                // Send PRE_BOOT broadcasts if user fingerprint changed; we
+                // purposefully block sending BOOT_COMPLETED until after all
+                // PRE_BOOT receivers are finished to avoid ANR'ing apps
                 final UserInfo info = getUserInfo(userId);
                 if (!Objects.equals(info.lastLoggedInFingerprint, Build.FINGERPRINT)) {
                     new PreBootBroadcaster(mService, userId, null) {
                         @Override
                         public void onFinished() {
-                            finishUserUnlocked(uss);
+                            finishUserUnlockedCompleted(uss);
                         }
                     }.sendNext();
                 } else {
-                    finishUserUnlocked(uss);
+                    finishUserUnlockedCompleted(uss);
                 }
             }
         }
     }
 
-    /**
-     * Step from {@link UserState#STATE_RUNNING_UNLOCKING} to
-     * {@link UserState#STATE_RUNNING_UNLOCKED}.
-     */
-    private void finishUserUnlocked(UserState uss) {
+    private void finishUserUnlockedCompleted(UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -341,39 +359,38 @@ final class UserController {
             }
 
             // Only keep marching forward if user is actually unlocked
-            if (!isUserKeyUnlocked(userId)) return;
+            if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
-            if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
-                // Remember that we logged in
-                mUserManager.onUserLoggedIn(userId);
+            // Remember that we logged in
+            mUserManager.onUserLoggedIn(userId);
 
-                if (!userInfo.isInitialized()) {
-                    if (userId != UserHandle.USER_SYSTEM) {
-                        Slog.d(TAG, "Initializing user #" + userId);
-                        Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
-                        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                        mService.broadcastIntentLocked(null, null, intent, null,
-                                new IIntentReceiver.Stub() {
-                                    @Override
-                                    public void performReceive(Intent intent, int resultCode,
-                                            String data, Bundle extras, boolean ordered,
-                                            boolean sticky, int sendingUser) {
-                                        // Note: performReceive is called with mService lock held
-                                        getUserManager().makeInitialized(userInfo.id);
-                                    }
-                                }, 0, null, null, null, AppOpsManager.OP_NONE,
-                                null, true, false, MY_PID, SYSTEM_UID, userId);
-                    }
+            if (!userInfo.isInitialized()) {
+                if (userId != UserHandle.USER_SYSTEM) {
+                    Slog.d(TAG, "Initializing user #" + userId);
+                    Intent intent = new Intent(Intent.ACTION_USER_INITIALIZE);
+                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                    mService.broadcastIntentLocked(null, null, intent, null,
+                            new IIntentReceiver.Stub() {
+                                @Override
+                                public void performReceive(Intent intent, int resultCode,
+                                        String data, Bundle extras, boolean ordered,
+                                        boolean sticky, int sendingUser) {
+                                    // Note: performReceive is called with mService lock held
+                                    getUserManager().makeInitialized(userInfo.id);
+                                }
+                            }, 0, null, null, null, AppOpsManager.OP_NONE,
+                            null, true, false, MY_PID, SYSTEM_UID, userId);
                 }
-                Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
-                final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
-                bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
-                        | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                mService.broadcastIntentLocked(null, null, bootIntent, null, null, 0, null, null,
-                        new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
             }
+
+            Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
+            final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
+            bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+            bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
+                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+            mService.broadcastIntentLocked(null, null, bootIntent, null, null, 0, null, null,
+                    new String[] { android.Manifest.permission.RECEIVE_BOOT_COMPLETED },
+                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
         }
     }
 
@@ -680,20 +697,6 @@ final class UserController {
         return IMountService.Stub.asInterface(ServiceManager.getService("mount"));
     }
 
-    private boolean isUserKeyUnlocked(int userId) {
-        final IMountService mountService = getMountService();
-        if (mountService != null) {
-            try {
-                return mountService.isUserKeyUnlocked(userId);
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
-        } else {
-            Slog.w(TAG, "Mount service not published; guessing locked state based on property");
-            return !StorageManager.isFileEncryptedNativeOrEmulated();
-        }
-    }
-
     /**
      * Start user, if its not already running.
      * <p>The user will be brought to the foreground, if {@code foreground} parameter is set.
@@ -935,7 +938,7 @@ final class UserController {
             }
         }
 
-        if (!isUserKeyUnlocked(userId)) {
+        if (!StorageManager.isUserKeyUnlocked(userId)) {
             final UserInfo userInfo = getUserInfo(userId);
             final IMountService mountService = getMountService();
             try {
@@ -1321,30 +1324,31 @@ final class UserController {
         if ((flags & ActivityManager.FLAG_OR_STOPPED) != 0) {
             return true;
         }
-
-        final boolean unlocked;
-        switch (state.state) {
-            case UserState.STATE_STOPPING:
-            case UserState.STATE_SHUTDOWN:
-            default:
-                return false;
-
-            case UserState.STATE_BOOTING:
-            case UserState.STATE_RUNNING_LOCKED:
-                unlocked = false;
-                break;
-
-            case UserState.STATE_RUNNING_UNLOCKING:
-            case UserState.STATE_RUNNING_UNLOCKED:
-                unlocked = true;
-                break;
-        }
-
         if ((flags & ActivityManager.FLAG_AND_LOCKED) != 0) {
-            return !unlocked;
+            switch (state.state) {
+                case UserState.STATE_BOOTING:
+                case UserState.STATE_RUNNING_LOCKED:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if ((flags & ActivityManager.FLAG_AND_UNLOCKING_OR_UNLOCKED) != 0) {
+            switch (state.state) {
+                case UserState.STATE_RUNNING_UNLOCKING:
+                case UserState.STATE_RUNNING_UNLOCKED:
+                    return true;
+                default:
+                    return false;
+            }
         }
         if ((flags & ActivityManager.FLAG_AND_UNLOCKED) != 0) {
-            return unlocked;
+            switch (state.state) {
+                case UserState.STATE_RUNNING_UNLOCKED:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         // One way or another, we're running!

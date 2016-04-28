@@ -166,7 +166,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mMonitor = new TextServicesMonitor();
         mMonitor.register(context, null, true);
         final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlocked(userId);
+                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(userId);
         mSettings = new TextServicesSettings(context.getContentResolver(), userId,
                 useCopyOnWriteSettings);
 
@@ -176,7 +176,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private void resetInternalState(@UserIdInt int userId) {
         final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlocked(userId);
+                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(userId);
         mSettings.switchCurrentUser(userId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         unbindServiceLocked();
