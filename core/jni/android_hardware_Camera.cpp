@@ -77,6 +77,7 @@ public:
     virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr,
                           camera_frame_metadata_t *metadata);
     virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void postRecordingFrameHandleTimestamp(nsecs_t timestamp, native_handle_t* handle);
     void postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata);
     void addCallbackBuffer(JNIEnv *env, jbyteArray cbb, int msgType);
     void setCallbackMode(JNIEnv *env, bool installed, bool manualMode);
@@ -347,6 +348,11 @@ void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, con
 {
     // TODO: plumb up to Java. For now, just drop the timestamp
     postData(msgType, dataPtr, NULL);
+}
+
+void JNICameraContext::postRecordingFrameHandleTimestamp(nsecs_t, native_handle_t*) {
+    // This is not needed at app layer. This should not be called because JNICameraContext cannot
+    // start video recording.
 }
 
 void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata)
