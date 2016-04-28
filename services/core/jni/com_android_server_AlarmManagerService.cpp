@@ -74,7 +74,7 @@ protected:
 class AlarmImplAlarmDriver : public AlarmImpl
 {
 public:
-    AlarmImplAlarmDriver(int fd) : AlarmImpl(&fd, 1) { }
+    explicit AlarmImplAlarmDriver(int fd) : AlarmImpl(&fd, 1) { }
 
     int set(int type, struct timespec *ts);
     int setTime(struct timeval *tv);

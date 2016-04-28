@@ -136,7 +136,7 @@ public:
 
 class TessellationCache::TessellationProcessor : public TaskProcessor<VertexBuffer*> {
 public:
-    TessellationProcessor(Caches& caches)
+    explicit TessellationProcessor(Caches& caches)
             : TaskProcessor<VertexBuffer*>(&caches.tasks) {}
     ~TessellationProcessor() {}
 
@@ -150,7 +150,7 @@ public:
 
 class TessellationCache::Buffer {
 public:
-    Buffer(const sp<Task<VertexBuffer*> >& task)
+    explicit Buffer(const sp<Task<VertexBuffer*> >& task)
             : mTask(task)
             , mBuffer(nullptr) {
     }
@@ -270,7 +270,7 @@ void tessellateShadows(
 
 class ShadowProcessor : public TaskProcessor<TessellationCache::vertexBuffer_pair_t> {
 public:
-    ShadowProcessor(Caches& caches)
+    explicit ShadowProcessor(Caches& caches)
             : TaskProcessor<TessellationCache::vertexBuffer_pair_t>(&caches.tasks) {}
     ~ShadowProcessor() {}
 
