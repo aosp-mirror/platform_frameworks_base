@@ -686,6 +686,17 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void onChildDismissed(View v) {
+        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        if (!row.isDismissed()) {
+            handleChildDismissed(v);
+        }
+        ViewGroup transientContainer = row.getTransientContainer();
+        if (transientContainer != null) {
+            transientContainer.removeTransientView(v);
+        }
+    }
+
+    private void handleChildDismissed(View v) {
         if (mDismissAllInProgress) {
             return;
         }
@@ -2058,7 +2069,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         // we only call our internal methods if this is actually a removal and not just a
         // notification which becomes a child notification
         if (!mChildTransferInProgress) {
-            onViewRemovedInternal(child);
+            onViewRemovedInternal(child, this);
         }
     }
 
@@ -2070,24 +2081,30 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private void onViewRemovedInternal(View child) {
+    private void onViewRemovedInternal(View child, ViewGroup transientContainer) {
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
         }
-        ((ExpandableView) child).setOnHeightChangedListener(null);
+        ExpandableView expandableView = (ExpandableView) child;
+        expandableView.setOnHeightChangedListener(null);
         mCurrentStackScrollState.removeViewStateForView(child);
-        updateScrollStateForRemovedChild((ExpandableView) child);
+        updateScrollStateForRemovedChild(expandableView);
         boolean animationGenerated = generateRemoveAnimation(child);
-        if (animationGenerated && !mSwipedOutViews.contains(child)) {
-            // Add this view to an overlay in order to ensure that it will still be temporary
-            // drawn when removed
-            getOverlay().add(child);
+        if (animationGenerated) {
+            if (!mSwipedOutViews.contains(child)) {
+                getOverlay().add(child);
+            } else if (Math.abs(expandableView.getTranslation()) != expandableView.getWidth()) {
+                transientContainer.addTransientView(child, 0);
+                expandableView.setTransientContainer(transientContainer);
+            }
+        } else {
+            mSwipedOutViews.remove(child);
         }
         updateAnimationState(false, child);
 
         // Make sure the clipRect we might have set is removed
-        ((ExpandableView) child).setClipTopOptimization(0);
+        expandableView.setClipTopOptimization(0);
     }
 
     private boolean isChildInGroup(View child) {
@@ -2264,8 +2281,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public void notifyGroupChildRemoved(View row) {
-        onViewRemovedInternal(row);
+    public void notifyGroupChildRemoved(View row, ViewGroup childrenContainer) {
+        onViewRemovedInternal(row, childrenContainer);
     }
 
     public void notifyGroupChildAdded(View row) {
@@ -2472,8 +2489,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             // we need to know the view after this one
             event.viewAfterChangingView = getFirstChildBelowTranlsationY(child.getTranslationY());
             mAnimationEvents.add(event);
+            mSwipedOutViews.remove(child);
         }
-        mSwipedOutViews.clear();
         mChildrenToRemoveAnimated.clear();
     }
 
@@ -2746,8 +2763,22 @@ public class NotificationStackScrollLayout extends ViewGroup
             mOwnScrollY = 0;
             mPhoneStatusBar.resetUserExpandedStates();
 
-            // lets make sure nothing is in the overlay anymore
+            // lets make sure nothing is in the overlay / transient anymore
+            clearTransientViews(this);
+            for (int i = 0; i < getChildCount(); i++) {
+                ExpandableView child = (ExpandableView) getChildAt(i);
+                if (child instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                    clearTransientViews(row.getChildrenContainer());
+                }
+            }
             getOverlay().clear();
+        }
+    }
+
+    private void clearTransientViews(ViewGroup viewGroup) {
+        while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
+            viewGroup.removeTransientView(getTransientView(0));
         }
     }
 
@@ -3573,6 +3604,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         public void dismissChild(final View view, float velocity,
                 boolean useAccelerateInterpolator) {
             super.dismissChild(view, velocity, useAccelerateInterpolator);
+            if (mIsExpanded) {
+                // We don't want to quick-dismiss when it's a heads up as this might lead to closing
+                // of the panel early.
+                handleChildDismissed(view);
+            }
             handleGearCoveredOrDismissed();
         }
 
