@@ -29,7 +29,6 @@
 #include <SkImage.h>
 #include <SkShader.h>
 #include <SkTArray.h>
-#include <SkTLazy.h>
 #include <SkTemplates.h>
 
 #include "VectorDrawable.h"
@@ -352,13 +351,12 @@ int SkiaCanvas::saveLayer(float left, float top, float right, float bottom,
 
 int SkiaCanvas::saveLayerAlpha(float left, float top, float right, float bottom,
         int alpha, SaveFlags::Flags flags) {
-    SkTLazy<SkPaint> alphaPaint;
     if (static_cast<unsigned>(alpha) < 0xFF) {
-        alphaPaint.init()->setAlpha(alpha);
+        SkPaint alphaPaint;
+        alphaPaint.setAlpha(alpha);
+        return this->saveLayer(left, top, right, bottom, &alphaPaint, flags);
     }
-
-    return this->saveLayer(left, top, right, bottom, alphaPaint.getMaybeNull(),
-                           flags);
+    return this->saveLayer(left, top, right, bottom, nullptr, flags);
 }
 
 // ----------------------------------------------------------------------------
