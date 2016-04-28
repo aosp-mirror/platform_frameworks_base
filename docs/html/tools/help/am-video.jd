@@ -1,0 +1,78 @@
+page.title=Video Capture
+parent.title=Android Monitor
+parent.link=android-monitor.html
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the Video tool to make a video of the display on a hardware device.
+page.image=tools/help/thumbnails/am_video.png
+page.article=true
+@jd:body
+
+
+<p>
+  Android Studio lets you record an MP4 video from your hardware device for a maximum of three
+  minutes. You can use the video for your marketing materials as well as for debugging, for
+  example.
+</p>
+<img src="{@docRoot}images/tools/am-video.png" width="230" alt="Device Video" />
+
+
+
+<h2 id="video">
+  Recording a Video from the Screen
+</h2>
+
+<p>
+  To record a video from a hardware device:
+</p>
+<ol>
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
+  </li>
+ <li>Open an app project.
+  </li>
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on
+  a hardware device.
+  </li>
+  <li>
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
+  </li>
+
+  <li>Interact with the display on the hardware device to stage the start of the video.
+  </li>
+
+  <li>Click Screen Record <img src="{@docRoot}images/tools/am-ivideo.png"
+    style="vertical-align:sub;margin:0;height:17px" alt="Screen Record icon" /> in the
+    Android Monitor toolbar.
+  </li>
+  <p>The screenshot appears in a Screenshot Editor window.</p>
+
+  <li>In the <em>Screen Recorder Options</em> dialog, optionally change the recording options:
+  </li>
+<ul>
+  <li>
+    <strong>Bit Rate</strong> - Type a bit rate. The default is 4 Mbps.
+  </li>
+
+  <li>
+    <strong>Resolution</strong> - Type a width and height value in pixels. The value must be a
+    multiple of 16. The default is the resolution of the device.
+  </li>
+</ul>
+  <li>Click <strong>Start Recording</strong> to start the recording.
+  </li>
+
+  <li>Click <strong>Stop Recording</strong> to stop the recording.
+  </li>
+
+  <li>In the <em>Save As</em> dialog, save the MP4 file.
+  </li>
+
+  <li>In the <em>Screen Recorder</em> dialog, click one of the buttons to show the file location,
+  open the recording in a player, or to dismiss the dialog.
+  </li>
+</ol>
+
+
+

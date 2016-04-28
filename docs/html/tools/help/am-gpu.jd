@@ -1,7 +1,12 @@
 page.title=GPU Monitor
 parent.title=Android Monitor
 parent.link=android-monitor.html
-page.tags=monitor
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the GPU Monitor for a visual representation of how much time it takes to render the frames of a UI window. Use this information to optimize the code that displays graphics and conserve memory.
+page.image=tools/help/thumbnails/am-gpumon.png
+page.article=true
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -10,59 +15,6 @@ page.tags=monitor
 <ol>
   <li><a href="#running">Displaying a Running App in the GPU Monitor</a></li>
 </ol>
-
- <h2>See also</h2>
-  <ol>
-    <li>
-        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
-      </li>
-    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-memory.html">Memory Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
-  </ol>
-
-<h2>
-  Dependencies and Prerequisites
-</h2>
-
-<ul>
-  <li>Make sure your development computer detects your hardware device, which often happens
-  automatically when you connect it to a USB port.
-  </li>
-
-  <li>
-    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
-    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
-    <strong>Developer Options</strong> on the device or emulator.
-  </li>
-
-  <li>For Android 5.0 (API level 21) and Android 5.1 (API level 22), in <strong>Developer
-  Options</strong> on the device or emulator, set <strong>Profile GPU rendering</strong> to
-  <strong>In adb shell dumpsys gfxinfo</strong>.
-  </li>
-
-  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
-  <code>build.gradle</code> file (it’s initially set by default).
-  </li>
-
-
-  <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-  <strong>Enable ADB Integration</strong>.
-  </li>
-
-   <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-</ul>
 
 </div>
 </div>
@@ -96,33 +48,34 @@ page.tags=monitor
 </h2>
 
 <p>
-  Follow these steps:
+  To display an app running on a particular device or emulator in the GPU Monitor:
 </p>
 
 <ol>
-  <li>Optionally connect a hardware device.
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
   </li>
-
-  <li>
-    <a href="{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+ <li>Open an app project.
   </li>
-
-  <li>Click the <strong>GPU</strong> tab.
-  </li>
-
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on a hardware device or
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on a hardware device or
   emulator.
   </li>
+  <li>
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
+  </li>
+  <li>Click the <strong>Monitors</strong> tab and <a href=
+  "{@docRoot}tools/help/am-basics.html#rearranging">display the GPU Monitor</a>.
+  </li>
 
-  <li>Enable the GPU Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png" style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect
-  it.
+  <li>Enable the GPU Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png"
+    style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect it.
   </li>
 
   <p>
   Any GPU usage begins to appear in the GPU Monitor:
 </p>
-  <img src="{@docRoot}images/tools/am-gpumon.png" style="vertical-align:sub;margin:0;width:450px" />
+  <img src="{@docRoot}images/tools/am-gpumon2.png" style="vertical-align:sub;margin:0" />
 
 <p>
   The y-axis is the amount of time it takes the GPU to execute, process, prepare, and draw frames,
