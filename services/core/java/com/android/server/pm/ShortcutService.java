@@ -1561,48 +1561,46 @@ public class ShortcutService extends IShortcutService.Stub {
 
     // === House keeping ===
 
-    @VisibleForTesting
-    void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
-        cleanUpPackageLocked(packageName, owningUserId, packageUserId,
-                /* forceForCommandLine= */ false);
+    private void cleanUpPackageForAllLoadedUsers(String packageName, @UserIdInt int packageUserId) {
+        synchronized (mLock) {
+            forEachLoadedUserLocked(user ->
+                    cleanUpPackageLocked(packageName, user.getUserId(), packageUserId));
+        }
     }
 
     /**
      * Remove all the information associated with a package.  This will really remove all the
      * information, including the restore information (i.e. it'll remove packages even if they're
      * shadow).
+     *
+     * This is called when an app is uninstalled, or an app gets "clear data"ed.
      */
-    private void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId,
-            boolean forceForCommandLine) {
-        if (!forceForCommandLine && isPackageInstalled(packageName, packageUserId)) {
-            wtf("Package " + packageName + " is still installed for user " + packageUserId);
-            return;
-        }
-
+    @VisibleForTesting
+    void cleanUpPackageLocked(String packageName, int owningUserId, int packageUserId) {
         final boolean wasUserLoaded = isUserLoadedLocked(owningUserId);
 
-        final ShortcutUser mUser = getUserShortcutsLocked(owningUserId);
+        final ShortcutUser user = getUserShortcutsLocked(owningUserId);
         boolean doNotify = false;
 
         // First, remove the package from the package list (if the package is a publisher).
         if (packageUserId == owningUserId) {
-            if (mUser.removePackage(this, packageName) != null) {
+            if (user.removePackage(this, packageName) != null) {
                 doNotify = true;
             }
         }
 
         // Also remove from the launcher list (if the package is a launcher).
-        mUser.removeLauncher(packageUserId, packageName);
+        user.removeLauncher(packageUserId, packageName);
 
         // Then remove pinned shortcuts from all launchers.
-        final ArrayMap<PackageWithUser, ShortcutLauncher> launchers = mUser.getAllLaunchers();
+        final ArrayMap<PackageWithUser, ShortcutLauncher> launchers = user.getAllLaunchers();
         for (int i = launchers.size() - 1; i >= 0; i--) {
             launchers.valueAt(i).cleanUpPackage(packageName, packageUserId);
         }
         // Now there may be orphan shortcuts because we removed pinned shortucts at the previous
         // step.  Remove them too.
-        for (int i = mUser.getAllPackages().size() - 1; i >= 0; i--) {
-            mUser.getAllPackages().valueAt(i).refreshPinnedFlags(this);
+        for (int i = user.getAllPackages().size() - 1; i >= 0; i--) {
+            user.getAllPackages().valueAt(i).refreshPinnedFlags(this);
         }
 
         scheduleSaveUser(owningUserId);
@@ -1842,6 +1840,11 @@ public class ShortcutService extends IShortcutService.Stub {
         public void onPackageRemoved(String packageName, int uid) {
             handlePackageRemoved(packageName, getChangingUserId());
         }
+
+        @Override
+        public void onPackageDataCleared(String packageName, int uid) {
+            handlePackageDataCleared(packageName, getChangingUserId());
+        }
     };
 
     /**
@@ -1915,16 +1918,15 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, String.format("handlePackageRemoved: %s user=%d", packageName,
                     packageUserId));
         }
-        handlePackageRemovedInner(packageName, packageUserId, /* forceForCommandLine =*/ false);
+        cleanUpPackageForAllLoadedUsers(packageName, packageUserId);
     }
 
-    private void handlePackageRemovedInner(String packageName, @UserIdInt int packageUserId,
-            boolean forceForCommandLine) {
-        synchronized (mLock) {
-            forEachLoadedUserLocked(user ->
-                cleanUpPackageLocked(packageName, user.getUserId(), packageUserId,
-                        forceForCommandLine));
+    private void handlePackageDataCleared(String packageName, int packageUserId) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format("handlePackageDataCleared: %s user=%d", packageName,
+                    packageUserId));
         }
+        cleanUpPackageForAllLoadedUsers(packageName, packageUserId);
     }
 
     // === PackageManager interaction ===
@@ -2390,8 +2392,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             Slog.i(TAG, "cmd: handleClearShortcuts: " + mUserId + ", " + packageName);
 
-            ShortcutService.this.handlePackageRemovedInner(packageName, mUserId,
-                    /* forceForCommandLine= */ true);
+            ShortcutService.this.cleanUpPackageForAllLoadedUsers(packageName, mUserId);
         }
     }
 

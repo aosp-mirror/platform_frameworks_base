@@ -1061,6 +1061,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         i.putExtra(Intent.EXTRA_REPLACING, true);
         return i;
     }
+    private Intent genPackageDataClear(String packageName, int userId) {
+        Intent i = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        i.setData(Uri.parse("package:" + packageName));
+        i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        return i;
+    }
 
     private ShortcutInfo parceled(ShortcutInfo si) {
         Parcel p = Parcel.obtain();
@@ -4157,6 +4163,79 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
         assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+    }
+
+    /** Almost ame as testHandlePackageDelete, except it doesn't uninstall packages. */
+    public void testHandlePackageClearData() {
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+        setCaller(CALLING_PACKAGE_1, USER_0);
+        assertTrue(mManager.addDynamicShortcuts(list(
+                makeShortcutWithIcon("s1", bmp32x32), makeShortcutWithIcon("s2", bmp32x32)
+        )));
+
+        setCaller(CALLING_PACKAGE_2, USER_0);
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        setCaller(CALLING_PACKAGE_3, USER_0);
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        setCaller(CALLING_PACKAGE_1, USER_10);
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        setCaller(CALLING_PACKAGE_2, USER_10);
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        setCaller(CALLING_PACKAGE_3, USER_10);
+        assertTrue(mManager.addDynamicShortcuts(list(makeShortcutWithIcon("s1", bmp32x32))));
+
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageDataClear(CALLING_PACKAGE_1, USER_0));
+
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
+
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageDataClear(CALLING_PACKAGE_2, USER_10));
+
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_0));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "s1", USER_10));
+        assertNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_2, "s1", USER_10));
+        assertNotNull(mService.getPackageShortcutForTest(CALLING_PACKAGE_3, "s1", USER_10));
+
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_0));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_1, USER_10));
+        assertFalse(bitmapDirectoryExists(CALLING_PACKAGE_2, USER_10));
+        assertTrue(bitmapDirectoryExists(CALLING_PACKAGE_3, USER_10));
     }
 
     public void testHandlePackageUpdate() throws Throwable {
