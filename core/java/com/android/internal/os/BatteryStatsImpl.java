@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 142 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 143 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -149,6 +149,13 @@ public class BatteryStatsImpl extends BatteryStats {
         public void batteryPowerChanged(boolean onBattery);
         public void batterySendBroadcast(Intent intent);
     }
+
+    public interface PlatformIdleStateCallback {
+        public String getPlatformLowPowerStats();
+    }
+
+    private final PlatformIdleStateCallback mPlatformIdleStateCallback;
+
 
     final class MyHandler extends Handler {
         public MyHandler(Looper looper) {
@@ -569,6 +576,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDailyFile = null;
         mHandler = null;
         mExternalSync = null;
+        mPlatformIdleStateCallback = null;
         clearHistoryLocked();
     }
 
@@ -2220,6 +2228,12 @@ public class BatteryStatsImpl extends BatteryStats {
                     + cur.eventTag.string);
         }
         if (computeStepDetails) {
+            if (mPlatformIdleStateCallback != null) {
+                mCurHistoryStepDetails.statPlatformIdleState =
+                        mPlatformIdleStateCallback.getPlatformLowPowerStats();
+                if (DEBUG) Slog.i(TAG, "WRITE PlatformIdleState:" +
+                        mCurHistoryStepDetails.statPlatformIdleState);
+            }
             computeHistoryStepDetails(mCurHistoryStepDetails, mLastHistoryStepDetails);
             if (includeStepDetails != 0) {
                 mCurHistoryStepDetails.writeToParcel(dest);
@@ -7372,11 +7386,16 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync) {
-        this(new SystemClocks(), systemDir, handler, externalSync);
+        this(new SystemClocks(), systemDir, handler, externalSync, null);
+    }
+
+    public BatteryStatsImpl(File systemDir, Handler handler, ExternalStatsSync externalSync,
+                            PlatformIdleStateCallback cb) {
+        this(new SystemClocks(), systemDir, handler, externalSync, cb);
     }
 
     public BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
-            ExternalStatsSync externalSync) {
+            ExternalStatsSync externalSync, PlatformIdleStateCallback cb) {
         init(clocks);
 
         if (systemDir != null) {
@@ -7462,6 +7481,7 @@ public class BatteryStatsImpl extends BatteryStats {
         initDischarge();
         clearHistoryLocked();
         updateDailyDeadlineLocked();
+        mPlatformIdleStateCallback = cb;
     }
 
     public BatteryStatsImpl(Parcel p) {
@@ -7477,6 +7497,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mExternalSync = null;
         clearHistoryLocked();
         readFromParcel(p);
+        mPlatformIdleStateCallback = null;
     }
 
     public void setPowerProfile(PowerProfile profile) {
