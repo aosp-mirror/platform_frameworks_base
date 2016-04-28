@@ -232,6 +232,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * animating.
      */
     private boolean mOnlyScrollingInThisMotion;
+    private boolean mDisallowDismissInThisMotion;
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
     private boolean mDisallowScrollingInThisMotion;
@@ -1031,7 +1032,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!mIsBeingDragged
                 && !mExpandingNotification
                 && !mExpandedInThisMotion
-                && !mOnlyScrollingInThisMotion) {
+                && !mOnlyScrollingInThisMotion
+                && !mDisallowDismissInThisMotion) {
             horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
         }
         return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
@@ -2010,7 +2012,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!mIsBeingDragged
                 && !mExpandingNotification
                 && !mExpandedInThisMotion
-                && !mOnlyScrollingInThisMotion) {
+                && !mOnlyScrollingInThisMotion
+                && !mDisallowDismissInThisMotion) {
             swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
         }
         return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
@@ -2038,6 +2041,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mExpandedInThisMotion = false;
             mOnlyScrollingInThisMotion = !mScroller.isFinished();
             mDisallowScrollingInThisMotion = false;
+            mDisallowDismissInThisMotion = false;
             mTouchIsClick = true;
             mInitialTouchX = ev.getX();
             mInitialTouchY = ev.getY();
@@ -2704,6 +2708,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void requestDisallowLongPress() {
         removeLongPressCallback();
+    }
+
+    @Override
+    public void requestDisallowDismiss() {
+        mDisallowDismissInThisMotion = true;
     }
 
     public void removeLongPressCallback() {
