@@ -2169,6 +2169,24 @@ message MetricsEvent {
     // User blacklisted an app for Data Saver mode; action pass package name of app.
     ACTION_DATA_SAVER_BLACKLIST = 396;
 
+    // User opened a remote input view associated with a notification. Passes package name of app
+    // that posted the notification. Note that this can also happen transiently during notification
+    // reinflation.
+    ACTION_REMOTE_INPUT_OPEN = 397;
+
+    // User attempt to send data through a remote input view associated with a notification.
+    // Passes package name of app that posted the notification. May succeed or fail.
+    ACTION_REMOTE_INPUT_SEND = 398;
+
+    // Failed attempt to send data through a remote input view associated with a
+    // notification. Passes package name of app that posted the notification.
+    ACTION_REMOTE_INPUT_FAIL = 399;
+
+    // User closed a remote input view associated with a notification. Passes package name of app
+    // that posted the notification. Note that this can also happen transiently during notification
+    // reinflation.
+    ACTION_REMOTE_INPUT_CLOSE = 400;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
