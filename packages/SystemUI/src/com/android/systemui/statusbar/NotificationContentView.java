@@ -873,7 +873,7 @@ public class NotificationContentView extends FrameLayout {
                     color = mContext.getColor(R.color.default_remote_input_background);
                 }
                 existing.setBackgroundColor(NotificationColorUtil.ensureTextBackgroundColor(color,
-                        mContext.getColor(R.color.remote_input_text),
+                        mContext.getColor(R.color.remote_input_text_enabled),
                         mContext.getColor(R.color.remote_input_hint)));
 
                 if (existingPendingIntent != null || existing.isActive()) {
