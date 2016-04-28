@@ -330,6 +330,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadedOut;
+    private boolean mGroupExpandedForMeasure;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -927,6 +928,30 @@ public class NotificationStackScrollLayout extends ViewGroup
             mMaxScrollAfterExpand = mOwnScrollY;
             mExpandedInThisMotion = true;
         }
+    }
+
+    @Override
+    public int getMaxExpandHeight(ExpandableView view) {
+        int maxContentHeight = view.getMaxContentHeight();
+        if (view.isSummaryWithChildren()) {
+            // Faking a measure with the group expanded to simulate how the group would look if
+            // it was. Doing a calculation here would be highly non-trivial because of the
+            // algorithm
+            mGroupExpandedForMeasure = true;
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            mGroupManager.toggleGroupExpansion(row.getStatusBarNotification());
+            row.setForceUnlocked(true);
+            mAmbientState.setLayoutHeight(mMaxLayoutHeight);
+            mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
+            mAmbientState.setLayoutHeight(getLayoutHeight());
+            mGroupManager.toggleGroupExpansion(
+                    row.getStatusBarNotification());
+            mGroupExpandedForMeasure = false;
+            row.setForceUnlocked(false);
+            int height = mCurrentStackScrollState.getViewStateForView(view).height;
+            return Math.min(height, maxContentHeight);
+        }
+        return maxContentHeight;
     }
 
     public void setScrollingEnabled(boolean enable) {
@@ -1548,6 +1573,24 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @return the child before the given view which has visibility unequal to GONE
+     */
+    public ExpandableView getViewBeforeView(ExpandableView view) {
+        ExpandableView previousView = null;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child == view) {
+                return previousView;
+            }
+            if (child.getVisibility() != View.GONE) {
+                previousView = (ExpandableView) child;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return The first child which has visibility unequal to GONE which is currently below the
      *         given translationY or equal to it.
      */
@@ -1589,14 +1632,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         return count;
-    }
-
-    private int getMaxExpandHeight(View view) {
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            return row.getIntrinsicHeight();
-        }
-        return view.getHeight();
     }
 
     public int getContentHeight() {
@@ -2867,14 +2902,18 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (row.isChildInGroup()) {
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
-                int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
-                        mBottomStackSlowDownHeight + (int) mStackTranslation;
+                int stackEnd = getStackEndPosition();
                 if (endPosition > stackEnd) {
                     mOwnScrollY += endPosition - stackEnd;
                     mDisallowScrollingInThisMotion = true;
                 }
             }
         }
+    }
+
+    private int getStackEndPosition() {
+        return mMaxLayoutHeight - mBottomStackPeekSize - mBottomStackSlowDownHeight
+                + mPaddingBetweenElements + (int) mStackTranslation;
     }
 
     public void setOnHeightChangedListener(
@@ -3357,13 +3396,16 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
-        boolean animated = mAnimationsEnabled && (mIsExpanded || changedRow.isPinned());
+        boolean animated = !mGroupExpandedForMeasure && mAnimationsEnabled
+                && (mIsExpanded || changedRow.isPinned());
         if (animated) {
             mExpandedGroupView = changedRow;
             mNeedsAnimation = true;
         }
         changedRow.setChildrenExpanded(expanded, animated);
-        onHeightChanged(changedRow, false /* needsAnimation */);
+        if (!mGroupExpandedForMeasure) {
+            onHeightChanged(changedRow, false /* needsAnimation */);
+        }
     }
 
     @Override
