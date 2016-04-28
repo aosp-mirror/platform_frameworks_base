@@ -24,10 +24,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.animation.LinearInterpolator;
+import android.view.WindowManagerInternal;
 
 /**
  * Enables animating bounds of objects.
@@ -48,6 +50,32 @@ public class BoundsAnimationController {
 
     // Only accessed on UI thread.
     private ArrayMap<AnimateBoundsUser, BoundsAnimator> mRunningAnimations = new ArrayMap<>();
+
+    private final WindowManagerInternal.AppTransitionListener mAppTransitionNotifier
+        = new WindowManagerInternal.AppTransitionListener() {
+                public void onAppTransitionCancelledLocked() {
+                    animationFinished();
+                }
+                public void onAppTransitionFinishedLocked(IBinder token) {
+                    animationFinished();
+                }
+                private void animationFinished() {
+                    if (mFinishAnimationAfterTransition) {
+                        for (int i = 0; i < mRunningAnimations.size(); i++) {
+                            BoundsAnimator b = mRunningAnimations.valueAt(i);
+                            b.onAnimationEnd(null);
+                        }
+                    }
+                }
+            };
+
+    private final AppTransition mAppTransition;
+    private boolean mFinishAnimationAfterTransition = false;
+
+    BoundsAnimationController(AppTransition transition) {
+        mAppTransition = transition;
+        mAppTransition.registerListenerLocked(mAppTransitionNotifier);
+    }
 
     private final class BoundsAnimator extends ValueAnimator
             implements ValueAnimator.AnimatorUpdateListener, ValueAnimator.AnimatorListener {
@@ -129,6 +157,7 @@ public class BoundsAnimationController {
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mReplacement=" + mReplacement);
+            mFinishAnimationAfterTransition = false;
             // Ensure that we have prepared the target for animation before
             // we trigger any size changes, so it can swap surfaces
             // in to appropriate modes, or do as it wishes otherwise.
@@ -150,10 +179,21 @@ public class BoundsAnimationController {
             if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
                     + " mMoveToFullScreen=" + mMoveToFullScreen + " mWillReplace=" + mWillReplace);
 
-            finishAnimation();
+            // There could be another animation running. For example in the
+            // move to fullscreen case, recents will also be closing while the
+            // previous task will be taking its place in the fullscreen stack.
+            // we have to ensure this is completed before we finish the animation
+            // and take our place in the fullscreen stack.
+            if (mAppTransition.isRunning() && !mFinishAnimationAfterTransition) {
+                mFinishAnimationAfterTransition = true;
+                return;
+            }
+
             if (mMoveToFullScreen && !mWillReplace) {
                 mTarget.moveToFullscreen();
             }
+
+            finishAnimation();
         }
 
         @Override
