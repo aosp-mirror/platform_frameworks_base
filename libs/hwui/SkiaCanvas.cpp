@@ -164,7 +164,7 @@ SkiaCanvas::SkiaCanvas(const SkBitmap& bitmap) {
 
 class ClipCopier : public SkCanvas::ClipVisitor {
 public:
-    ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
+    explicit ClipCopier(SkCanvas* dstCanvas) : m_dstCanvas(dstCanvas) {}
 
     virtual void clipRect(const SkRect& rect, SkRegion::Op op, bool antialias) {
         m_dstCanvas->clipRect(rect, op, antialias);

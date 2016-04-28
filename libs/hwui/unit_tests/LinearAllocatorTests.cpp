@@ -30,7 +30,7 @@ public:
     SignalingDtor() {
         mDestroyed = nullptr;
     }
-    SignalingDtor(bool* destroyedSignal) {
+    explicit SignalingDtor(bool* destroyedSignal) {
         mDestroyed = destroyedSignal;
         *mDestroyed = false;
     }
