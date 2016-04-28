@@ -352,6 +352,10 @@ public final class ContentService extends IContentService.Stub {
         if (DEBUG) Slog.d(TAG, "Notifying update of " + uri + " for user " + userHandle
                 + " from observer " + observer + ", flags " + Integer.toHexString(flags));
 
+        if (uri == null) {
+            throw new NullPointerException("Uri must not be null");
+        }
+
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int callingUserHandle = UserHandle.getCallingUserId();
