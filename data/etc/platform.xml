@@ -172,6 +172,10 @@
          access while in power save mode, even if they aren't in the foreground. -->
     <allow-in-power-save-except-idle package="com.android.providers.downloads" />
 
+    <!-- These are the standard packages that are white-listed to always have internet
+         access while in data mode, even if they aren't in the foreground. -->
+    <allow-in-data-usage-save package="com.android.providers.downloads" />
+
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />
 
