@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -1062,11 +1063,20 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public boolean isUserKeyUnlocked(int userId) {
+    public static boolean isUserKeyUnlocked(int userId) {
+        final IMountService mount = IMountService.Stub
+                .asInterface(ServiceManager.getService("mount"));
+        if (mount == null) {
+            Slog.w(TAG, "Early during boot, assuming locked");
+            return false;
+        }
+        final long token = Binder.clearCallingIdentity();
         try {
-            return mMountService.isUserKeyUnlocked(userId);
+            return mount.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+            throw e.rethrowAsRuntimeException();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
