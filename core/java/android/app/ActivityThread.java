@@ -4617,16 +4617,7 @@ public final class ActivityThread {
             // onConfigurationChanged
             int diff = activity.mCurrentConfig.diff(newConfig);
             if (diff != 0) {
-                // If this activity doesn't handle any of the config changes then don't bother
-                // calling onConfigurationChanged as we're going to destroy it.
-                // Except in the case where the configuration changed on the activity manager side,
-                // but wasn't big enough to cause a resource change so the activity wasn't destroyed.
-                // In this case we still want to change the configuration of the activity but not
-                // report it to the app.
-                if ((~activity.mActivityInfo.getRealConfigChanged() & diff) == 0
-                        || !reportToActivity) {
-                    shouldChangeConfig = true;
-                }
+                shouldChangeConfig = true;
             }
         }
 
