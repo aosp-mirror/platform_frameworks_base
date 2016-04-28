@@ -1,0 +1,220 @@
+page.title=Allocation Tracker
+parent.title=Android Monitor
+parent.link=android-monitor.html
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the Memory Monitor to capture allocation data about your app. The Allocation Tracker displays each method responsible for an allocation, as well as the allocation size and number of instances.
+page.image=tools/help/thumbnails/am_alloctracker.png
+page.article=true
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+<ol>
+      <li><a href="#display">Understanding the Allocation Tracker Display</a></li>
+      <li><a href="#alloc-snapshot">Taking and Displaying a Snapshot of Allocation Data</a></li>
+      <li><a href="#alloc-viewing">Viewing a Saved Allocation Tracking File</a></li>
+      <li><a href="#alloc-sorting">Sorting Allocation Data</a></li>
+      <li><a href="#alloc-source">Displaying Java Source</a></li>
+      <li><a href="#alloc-files">Working with Allocation Tracking Files</a></li>
+</ol>
+
+ <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}training/articles/memory.html">Managing Your App's Memory</a></li>
+    <li><a href="{@docRoot}guide/practices/verifying-apps-art.html#GC_Migration">Addressing Garbage Collection Issues</a></li>
+    <li><a href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+
+
+<p>Android Studio allows you to track memory allocation as it monitors memory use. Tracking memory
+  allocation allows you to monitor where objects are being allocated when you perform certain
+  actions. Knowing these allocations enables you to adjust the method calls related to those actions
+  to optimize app performance and memory use.</p>
+
+<p>The Allocation Tracker does the following:</p>
+<ul>
+<li>Shows when and where your code allocates object types, their size, allocating thread, and stack
+  traces.</li>
+<li>Helps recognize memory churn through recurring allocation/deallocation patterns.</li>
+<li>Helps you track down memory leaks when used in combination with the HPROF Viewer. For example,
+  if you see a bitmap object resident on the heap, you can find its allocation location with
+  Allocation Tracker.</li>
+</ul>
+
+
+<p>However, it takes time and experience to learn to interpret the output from this tool.</p>
+
+<h2 id="display">
+  Understanding the Allocation Tracker Display
+</h2>
+
+<p>
+  The Allocation Tracker looks similar to the following figure:
+</p>
+<img src="{@docRoot}images/tools/am-alloctracker.png" />
+<p>
+
+
+<p>The tool displays the following information: </p>
+
+<table>
+  <tr>
+    <th scope="col">Column</th>
+    <th scope="col">Description</th>
+  </tr>
+
+  <tr>
+    <td><strong>Method</strong></td>
+    <td>The Java method responsible for the allocation.</td>
+  </tr>
+  <tr>
+    <td><strong>Count</strong></td>
+    <td>Total number of instances allocated.</td>
+  </tr>
+  <tr>
+    <td><strong>Size</strong></td>
+    <td>The total amount of allocated memory in bytes.</td>
+  </tr>
+
+</table>
+
+<h2 id="alloc-snapshot">Taking and Displaying a Snapshot of Allocation Data</h2>
+
+<p>To examine allocation data:</p>
+<ol>
+  <li><a href="{@docRoot}tools/help/am-memory.html#displaying">Display a running app in the Memory
+    Monitor</a>.</li>
+<li>Click Start Allocation Tracking
+  <img src="{@docRoot}images/tools/am-ialloctracking.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Start Allocation Tracking icon" />. </li>
+<li>Click Start Allocation Tracking
+  <img src="{@docRoot}images/tools/am-ialloctracking.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Start Allocation Tracking icon" /> again to
+  deselect it and end the snapshot. </li>
+
+  <p>The Memory Monitor displays the period when it took the snapshot. In the following
+    figure, you can see the snapshot period, as shown on the left. By comparison, when you dump the
+    Java heap, the Memory Monitor displays just the point where the heap snapshot was taken, as
+    shown on the right.</p>
+    <img src="{@docRoot}images/tools/am-dumpalloc2.png" />
+
+<p>Android Studio creates the heap snapshot file with the
+  filename <code><em>package_yyyy.mm.dd_hh.mm.ss</em>.alloc</code> using the activity package (or
+  project) name, year, month, day,
+  hour, minute, and second of the capture, for example,
+  <code>com.android.calc_2015.11.17_14.58.48.alloc</code>.</p>
+
+  The Allocation Tracker appears.
+</p>
+
+<li>Optionally click the graphic icon <img src="{@docRoot}images/tools/am-igraphic.png"
+style="vertical-align:sub;margin:0;height:17px"
+  alt="graphic icon" /> to display a visual representation of the data.
+  </li>
+
+
+
+
+<li>Select the Group By menu option you want to display: </li>
+<ul>
+<li><strong>Group by Allocator</strong> </li>
+<li><strong>Group by Method</strong></li>
+</ul>
+
+</ol>
+
+
+<h2 id="alloc-viewing">Viewing a Saved Allocation Tracking File</h2>
+<p>After you capture allocation data, Android Studio automatically stores it so
+you can view it again.</p>
+<p>To view an allocation tracking file in the Allocation Tracker:</p>
+
+
+<ol>
+<li>Click
+<img src="{@docRoot}images/tools/am-icaptures.png"
+style="vertical-align:sub;margin:0;height:17px"
+  alt="Captures icon" /> in the main window.</li>
+
+<p>Or select <strong>View</strong> > <strong>Tools Windows</strong> >
+<strong>Captures</strong>.</p>
+<p>The <em>Captures</em> window appears.</p>
+<li>Open the <strong>Allocation Tracking</strong> folder.</li>
+<li>Double-click the file to view it.</li>
+</ol>
+
+<h2 id="alloc-sorting">Sorting Allocation Data</h2>
+
+<p>To sort allocation data:</p>
+<ul>
+<li>In the Allocation Tracker, click a column heading to sort the table by ascending or
+  descending order. </li>
+</ul>
+
+
+<h2 id="alloc-source">Displaying Java Source</h2>
+<p>For some items displayed in the Allocation Tracker, you can view the Java source.</p>
+<p>To display Java source:</p>
+<ul>
+<li>In the Allocation Tracker, right-click a method and then select <strong>Jump to Source</strong>.
+</li>
+<li>In the Allocation Tracker, select a method and then click Jump to Source
+  <img src="{@docRoot}images/tools/am-ijumptosource.png"
+  style="vertical-align:sub;margin:0;height:17px" alt="Jump to Source icon" />. </li>
+</ul>
+
+<p>The source code appears in the Code Editor.</p>
+
+
+<h2 id="alloc-files">Working with Allocation Tracking Files</h2>
+<p>You can rename, locate, and delete an allocation tracking file from within
+Android Studio.</p>
+
+<h3 id="alloc-renaming">Renaming an allocation tracking file</h3>
+
+<p>If you rename a file from within Android Studio, it continues to appear in the <em>Captures</em>
+  window.</p>
+<p>To rename an allocation tracking file:</p>
+<ol>
+<li>In the <em>Captures</em> window, right-click the file and select <strong>Rename</strong>.</li>
+<li>In the <em>Rename</em> dialog, specify the name of the file and click <strong>OK</strong>.</li>
+</ol>
+
+
+<h3 id="alloc-locating">Locating an allocation tracking file</h3>
+<p>You can quickly discover where Android Studio stored allocation tracking files on disk.</p>
+
+
+<p>To locate an allocation tracking file from Android Studio: </p>
+<ul>
+<li>In the <em>Captures</em> window, right-click allocation file and select
+  <strong>Show</strong> or <strong>Reveal</strong>.</li>
+
+<p>Android Studio opens an operating system file browser displaying the location where the file
+  resides.</p>
+</ul>
+
+<p class="note"><strong>Note:</strong> If you move an allocation tracking file, Android Studio
+  no longer displays it in the <em>Captures</em> window. To display the file, use
+  <strong>File</strong>
+  &gt; <strong>Open</strong>. Also, rename the file from the <em>Captures</em>
+  window and not in the operating system file browser. </p>
+
+<h3 id="alloc-deleting">Deleting an allocation tracking file</h3>
+
+
+<p>To delete an allocation tracking file: </p>
+<ul>
+<li>In the <em>Captures</em> window, right-click an allocation tracking file and select
+  <strong>Delete</strong>.</li>
+
+<p>Android Studio deletes the file from the <em>Captures</em> dialog and from disk. </p>
+</ul>
