@@ -356,10 +356,18 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
                     return mFirstPosition + i;
                 }
             }
-        } 
+        }
         return INVALID_POSITION;
     }
-    
+
+    @Override
+    protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+        super.dispatchRestoreInstanceState(container);
+        // Restores the selected position when Spinner gets restored,
+        // rather than wait until the next measure/layout pass to do it.
+        handleDataChanged();
+    }
+
     static class SavedState extends BaseSavedState {
         long selectedId;
         int position;
