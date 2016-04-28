@@ -715,8 +715,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowAnimator mAnimator;
 
-    private final BoundsAnimationController mBoundsAnimationController =
-            new BoundsAnimationController();
+    private final BoundsAnimationController mBoundsAnimationController;
 
     SparseArray<Task> mTaskIdToTask = new SparseArray<>();
 
@@ -973,6 +972,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAppTransition = new AppTransition(context, this);
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
+
+        mBoundsAnimationController = new BoundsAnimationController(mAppTransition);
 
         mActivityManager = ActivityManagerNative.getDefault();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
