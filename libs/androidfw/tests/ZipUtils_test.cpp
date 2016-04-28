@@ -45,7 +45,7 @@ TEST_F(ZipUtilsTest, ZipTimeConvertSuccess) {
     EXPECT_EQ(2011, t.tm_year + 1900)
             << "Year was improperly converted.";
 
-    EXPECT_EQ(6, t.tm_mon)
+    EXPECT_EQ(5, t.tm_mon)
             << "Month was improperly converted.";
 
     EXPECT_EQ(29, t.tm_mday)
@@ -59,6 +59,11 @@ TEST_F(ZipUtilsTest, ZipTimeConvertSuccess) {
 
     EXPECT_EQ(40, t.tm_sec)
             << "Second was improperly converted.";
+
+    // We don't have enough information to determine timezone related info.
+    EXPECT_EQ(-1, t.tm_isdst);
+    EXPECT_EQ(0, t.tm_gmtoff);
+    EXPECT_EQ(nullptr, t.tm_zone);
 }
 
 }
