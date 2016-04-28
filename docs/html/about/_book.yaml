@@ -16,13 +16,19 @@ toc:
     path: /about/versions/android-5.1.html
   - title: Android 5.0 APIs
     path: /about/versions/android-5.0.html
-    custom_link_attributes:
-    - es-lang="API de Android 5.0"
-    - ja-lang="Android 5.0 API"
-    - ko-lang="Android 5.0 API"
-    - ru-lang="API для Android 5.0"
-    - zh-cn-lang="Android 5.0 API"
-    - zh-tw-lang="Android 5.0 API"
+    path_attributes:
+    - name: es-lang
+      value: API de Android 5.0
+    - name: ja-lang
+      value: Android 5.0 API
+    - name: ko-lang
+      value: Android 5.0 API
+    - name: ru-lang
+      value: API для Android 5.0
+    - name: zh-cn-lang
+      value: Android 5.0 API
+    - name: zh-tw-lang
+      value: Android 5.0 API
   - title: Android 5.0 Changes
     path: /about/versions/android-5.0-changes.html
 
