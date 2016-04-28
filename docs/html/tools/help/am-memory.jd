@@ -1,7 +1,12 @@
 page.title=Memory Monitor
 parent.title=Android Monitor
 parent.link=android-monitor.html
-page.tags=monitor
+meta.tags="android, performance, profiling, tools, monitor"
+page.tags="android", "performance", "profiling", "tools", "monitor"
+page.metaDescription=Use the Memory Monitor to evaluate memory usage and find deallocated objects, locate memory leaks, and track the amount of memory the connected device is using.
+page.image=tools/help/thumbnails/am-memorymon.png
+page.article=true
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -17,31 +22,7 @@ page.tags=monitor
   </li>
   <li><a href="#displaying">Displaying a Running App in the Memory Monitor</a></li>
   <li><a href="#forcing">Forcing a Garbage Collection Event</a></li>
-  <li><a href="#dumping">Dumping and Analyzing the Java Heap</a>
-    <ol>
-      <li><a href="#hprof-snapshot">Taking and displaying a snapshot of the Java heap</a></li>
-      <li><a href="#hprof-diving">Diving into heap dump data in the HPROF Viewer</a></li>
-      <li><a href="#hprof-analyzing">Analyzing heap dump data in the HPROF Analyzer</a></li>
-      <li><a href="#hprof-sorting">Sorting heap dump data</a></li>
-      <li><a href="#hprof-source">Displaying Java source</a></li>
-      <li><a href="#hprof-viewing">Viewing a saved HPROF file</a></li>
-      <li><a href="#hprof-renaming">Renaming an HPROF file</a></li>
-      <li><a href="#hprof-locating">Locating a heap dump file on disk</a></li>
-      <li><a href="#hprof-deleting">Deleting a heap dump file</a></li>
-      <li><a href="#hprof-converting">Converting a heap dump file to standard HPROF format</a></li>
-    </ol>
-    </li>
-  <li><a href="#tracking">Tracking and Analyzing Memory Allocation</a>
-      <ol>
-      <li><a href="#alloc-snapshot">Taking and displaying a snapshot of allocation data</a></li>
-      <li><a href="#alloc-sorting">Sorting allocation data</a></li>
-      <li><a href="#alloc-source">Displaying Java source</a></li>
-      <li><a href="#alloc-viewing">Viewing a saved allocation tracking file</a></li>
-      <li><a href="#alloc-renaming">Renaming an allocation tracking file</a></li>
-      <li><a href="#alloc-locating">Locating an allocation tracking file</a></li>
-      <li><a href="#alloc-deleting">Deleting an allocation tracking file</a></li>
-    </ol>
-    </li>
+  <li><a href="#snapshot">Taking a Snapshot of the Java Heap and Memory Allocation</a></li>
 </ol>
 
  <h2>See also</h2>
@@ -49,52 +30,7 @@ page.tags=monitor
     <li><a href="{@docRoot}training/articles/memory.html">Managing Your App's Memory</a></li>
     <li><a href="{@docRoot}guide/practices/verifying-apps-art.html#GC_Migration">Addressing Garbage Collection Issues</a></li>
     <li><a href="{@docRoot}tools/debugging/debugging-memory.html">Investigating Your RAM Usage</a></li>
-
-    <li>
-        <a href="{@docRoot}tools/help/android-monitor.html">Android Monitor</a>
-      </li>
-    <li><a href="{@docRoot}tools/help/am-logcat.html">logcat Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-cpu.html">CPU Monitor</a>
-      </li>
-
-      <li><a href="{@docRoot}tools/help/am-gpu.html">GPU Monitor</a>
-      </li>
-
-      <li>
-        <a href="{@docRoot}tools/help/am-network.html">Network Monitor</a>
-      </li>
   </ol>
-
-
-<h2>
-  Dependencies and Prerequisites
-</h2>
-
-<ul>
-  <li>
-    Make sure your development computer detects your hardware device, which often happens
-  automatically when you connect it to a USB port.
-  </li>
-<li>
-    <a href="{@docRoot}tools/device.html#device-developer-options">Enable</a> <strong><a href=
-    "{@docRoot}tools/device.html#device-developer-options">USB debugging</a></strong> in
-    <strong>Developer Options</strong> on the device or emulator.
-  </li>
-
-  <li>In your app, set the <code>debuggable</code> property to <code>true</code> in the manifest or
-  <code>build.gradle</code> file (it’s initially set by default).
-  </li>
-
-  <li>Enable ADB integration through <strong>Tools</strong> &gt; <strong>Android</strong> &gt;
-  <strong>Enable ADB Integration</strong>.
-  </li>
-
-   <li>
-    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a> can’t be running.
-  </li>
-</ul>
 
 </div>
 </div>
@@ -107,7 +43,7 @@ page.tags=monitor
 </p>
 
 <ul>
-  <li>Show a graph of available and allocated memory over time.
+  <li>Show a graph of available and allocated Java memory over time.
   </li>
 <li>Show garbage collection (GC) events
   over time.
@@ -227,10 +163,7 @@ page.tags=monitor
 
 <p>
   One way to optimize memory usage is to analyze large arrays. For example, can you reduce the size
-  of individual elements in the array to save memory? Does a dominator object point to
-  an element in the array, preventing it from being garbage-collected? If the dominator object
-  directly points to an element in the array, the dominator is either the contiguous memory
-  representing the underlying data of the array, some part of the array, or the array itself.
+  of individual elements in the array to save memory?
 </p>
 
 <p>
@@ -347,25 +280,26 @@ page.tags=monitor
 </h2>
 
 <p>
-  Follow these steps:
+  To display an app running on a particular device or emulator in the Memory Monitor:
 </p>
 
 <ol>
-  <li>Optionally connect a hardware device.
+  <li>Meet the <a href=
+  "{@docRoot}tools/help/am-basics.html#byb">prerequisites and dependencies</a>.
   </li>
-
+ <li>Open an app project.
+  </li>
+  <li><a href=
+  "{@docRoot}tools/building/building-studio.html#RunningApp">Run the app</a> on a hardware device or
+  emulator.
+  </li>
   <li>
-    <a href=
-    "{@docRoot}tools/help/android-monitor.html#displaying">Display Android Monitor</a>.
+    <a href="{@docRoot}tools/help/am-basics.html#displaying">Display Android Monitor</a>.
+  </li>
+  <li>Click the <strong>Monitors</strong> tab and <a href=
+  "{@docRoot}tools/help/am-basics.html#rearranging">display the Memory Monitor</a>.
   </li>
 
-  <li>Click the <strong>Memory</strong> tab.
-  </li>
-
-  <li>Open an app project and <a href=
-  "{@docRoot}tools/building/building-studio.html#RunningApp">run it</a> on a
-  hardware device or emulator.
-  </li>
 
   <li>Enable the Memory Monitor by clicking Pause <img src="{@docRoot}images/tools/am-ipause.png"
     style="vertical-align:sub;margin:0;height:17px" alt="Pause icon" /> to deselect it.
@@ -389,10 +323,10 @@ page.tags=monitor
   <p>In the following figure, the VM initiated the first garbage collection event, while the
     developer forced the second.
 </p>
-<img src="{@docRoot}images/tools/am-gc.png" />
+<img src="{@docRoot}images/tools/am-gc2.png" />
 
   <li>Interact with your app and watch how it affects memory usage in the Memory Monitor. You can
-  identify garbage collection patterns for your app and determine whether they are healthy and what
+  identify garbage collection patterns for your app and determine whether they're healthy and what
   you expect.
   </li>
 
@@ -452,465 +386,20 @@ page.tags=monitor
   </li>
 </ul>
 
-<h2 id="dumping">
-  Dumping and Analyzing the Java Heap
+<h2 id="snapshot">
+  Taking a Snapshot of the Java Heap and Memory Allocation
 </h2>
 
 <p>
-  When you're monitoring memory usage in Android Studio you can, at the same time, dump the Java
-  heap to a heap snapshot in an Android-specific HPROF binary format file. The HPROF Viewer
-  displays classes, instances of each class, and a reference tree to help you track memory usage
-  and find memory leaks. HPROF is a heap dump format originally supported by J2SE.
-</p>
-<p>The Java heap display does the following:</p>
-
-<ul>
-  <li>Shows snapshots of a number of objects allocated by type.
-  </li>
-
-  <li>Samples data every time a garbage collection event occurs naturally or is triggered by you.
-  </li>
-
-  <li>Helps identify which object types might be involved in memory leaks.
-  </li>
-</ul>
-
-<p>
-  However, you have to look for changes over time yourself by tracking what's happening in the
-  graph.
-</p>
-
-<p>
-  The HPROF Analyzer finds the following potential issues:
+  You can take snapshots while the Memory Monitor is running or paused:
 </p>
 
 <ul>
-  <li>All destroyed activity instances that are reachable from garbage collection roots.
+  <li>To take and display a snapshot of the Java heap, see <a href=
+  "{@docRoot}tools/help/am-hprof.html">HPROF Viewer and Analyzer</a>.
   </li>
-
-  <li>Where the target program has strings that repeat values.
+  <li>To take and display a snapshot of memory allocation, see <a href=
+  "{@docRoot}tools/help/am-allocation.html">Allocation Tracker</a>.
   </li>
 </ul>
 
-<p>
-  A dominator is at the top of a tree. If you remove it, you also remove the branches of the tree
-  it dominates, so it’s a potential way to free memory.
-</p>
-
-<h3 id="hprof-snapshot">
-  Taking and displaying a snapshot of the Java heap
-</h3>
-
-<p>
-  To see a snapshot of the Java heap, follow these steps:
-</p>
-
-<ol>
-  <li>While the Memory Monitor is running, click Dump Java Heap
-    <img src="{@docRoot}images/tools/am-idump.png"
-    style="vertical-align:sub;margin:0;height:17px" alt="Dump Java Heap icon" />.
-  </li>
-
-
-<p>
-  When the icon on the Memory Monitor display changes from
-  <img src="{@docRoot}images/tools/am-idumpstart.png"
-  style="vertical-align:sub;margin:0;height:17px" alt="Dump Java Heap Start icon" /> to
-  <img src="{@docRoot}images/tools/am-idumpend.png" style="vertical-align:sub;margin:0;height:17px"
-  alt="Dump Java Heap End icon" />, the file is ready. Android Studio creates the heap snapshot
-  file with the
-  filename <code>Snapshot_<em>yyyy.mm.dd_hh.mm.ss</em>.hprof</code> using
-  the year, month, day, hour, minute, and second of the capture, for example,
-  <code>Snapshot_2015.11.17_14.58.48.hprof</code>.
-</p>
-
-  <li>Click <strong>Captures</strong> in the main window.
-  </li>
-
-<p>
-  The <em>Captures</em> window appears.
-</p>
-
-  <li>Double-click the file to view it in the HPROF Viewer.
-  </li>
-
-<p>
-  The HPROF Viewer appears:
-</p>
-<img src="{@docRoot}images/tools/am-hprofviewer.png" />
-<p>
-  The tool displays the following information:
-</p>
-
-<table>
-  <tr>
-    <th scope="col">Column</th>
-    <th scope="col">Description</th>
-  </tr>
-
-  <tr>
-    <td><strong>Class Name</strong></td>
-    <td>The Java class responsible for the memory.</td>
-  </tr>
-
-  <tr>
-    <td><strong>Total Count</strong></td>
-    <td>Total number of instances outstanding.</td>
-  </tr>
-  <tr>
-    <td><strong>Heap Count</strong></td>
-    <td>Number of instances in the selected heap.</td>
-  </tr>
-  <tr>
-    <td><strong>Sizeof</strong></td>
-    <td>Size of the instances (currently, 0 if the size is variable).</td>
-  </tr>
-  <tr>
-    <td><strong>Shallow Size</strong></td>
-    <td>Total size of all instances in this heap.</td>
-  </tr>
-  <tr>
-    <td><strong>Retained Size</strong></td>
-    <td>Size of memory that all instances of this class is dominating.</td>
-  </tr>
-  <tr>
-    <td><strong>Instance</strong></td>
-    <td>A specific instance of the class.</td>
-  </tr>
-  <tr>
-    <td><strong>Reference Tree</strong></td>
-    <td>References that point to the selected instance, as well as references pointing to the
-      references.</td>
-  </tr>
-  <tr>
-    <td><strong>Depth</strong></td>
-    <td>The shortest number of hops from any GC root to the selected instance.</td>
-  </tr>
-  <tr>
-    <td><strong>Shallow Size</strong></td>
-    <td>Size of this instance.</td>
-  </tr>
-  <tr>
-    <td><strong>Dominating Size</strong></td>
-    <td>Size of memory that this instance is dominating.</td>
-  </tr>
-</table>
-
-  <li>Select the Heap menu option you want to display:
-    <ul>
-      <li>
-        <strong>App heap</strong> - The heap used by the current app.
-      </li>
-
-      <li><strong>Image heap</strong> - The memory mapped copy of the
-      current app on disk.
-      </li>
-
-
-  <li>
-    <strong>Zygote heap</strong> - The common set of libraries and runtime classes and data that
-    all apps are forked
-    from. The zygote space is created during device startup and is never allocated into.
-  </li>
-
-    </ul>
-
-      <li>Select the View menu option you want to display:
-        <ul>
-          <li>
-            <strong>Class List View</strong>
-          </li>
-
-              <li>
-                <strong>Package Tree View</strong>
-              </li>
-            </ul>
-    </ol>
-
-
-<h3 id="hprof-diving">
-  Diving into heap dump data in the HPROF Viewer
-</h3>
-<p>The following steps outline the typical workflow:</p>
-<ol>
-<li>In the HPROF viewer, select a class name. </li>
-<li>Select an instance of that class.</li>
-<li>Examine the reference tree.</li>
-<li>Right-click an item to <strong>Jump to source</strong> or <strong>Go to instance</strong>,
-  as needed.</li>
-</ol>
-
-
-
-<h3 id="hprof-analyzing">Analyzing heap dump data in the HPROF Analyzer</h3>
-<p>You can detect leaked activities and find duplicate strings with the HPROF Analyzer.
-  Follow these steps: </p>
-<ol>
-<li>In the <em>Captures</em> window, double-click an <code>.hprof</code> file to display it in the
-  HPROF Viewer. </li>
-<li>Click <strong>Capture Analysis</strong> on the right side of the main Android Studio window.</li>
-
-
-<p>The HPROF Analyzer appears to the right of the HPROF Analyzer, by default: </p>
-
-<img src="{@docRoot}images/tools/am-hprofanalyzer.png" />
-
-<li>In the <strong>Analyzer Tasks</strong> list, select the items you want to find.</li>
-<li>Click Perform Analysis <img src="{@docRoot}images/tools/am-iperformanalysis.png"
-  style="vertical-align:sub;margin:0;height:17px" alt="Perform Analysis icon" />.</li>
-<li>Examine the items in <strong>Analysis Results</strong>. Click an item to display it in the
-  HPROF Viewer.</li>
-</ol>
-
-
-
-<h3 id="hprof-sorting">Sorting heap dump data</h3>
-<p>Follow this step:</p>
-<ul>
-<li>In the HPROF Viewer, click a column heading to sort the table by ascending or descending
-  order. </li>
-</ul>
-
-
-<h3 id="hprof-source">Displaying Java source</h3>
-<p>For some items displayed in the HPROF Viewer, you can go straight to its source code.
-  Follow this step:</p>
-<ul>
-<li>In the HPROF Viewer, right-click a class, instance, or item in the reference tree, and then
-  select <strong>Jump to Source</strong>. </li>
-
-
-<p>The source code appears in the Code Editor.</p>
-</ul>
-
-<h3 id="hprof-viewing">Viewing a saved HPROF file</h3>
-<p>After you do a heap dump, Android Studio automatically stores it so you can view it again.
-  Follow these steps:</p>
-
-<ol>
-<li>Click <strong>Captures</strong> in the main window.</li>
-
-<p>The <em>Captures</em> window appears.</p>
-<li>Open the <strong>Heap Snapshot</strong> folder.</li>
-<li>Double-click the file to view it.</li>
-</ol>
-
-
-<h3 id="hprof-renaming">Renaming an HPROF file</h3>
-
-<p>If you rename a file from within Android Studio, it continues to appear in <em>Captures</em>
-  window. Follow these steps:</p>
-<ol>
-<li>In the <em>Captures</em> window, right-click the file and select <strong>Rename</strong>. </li>
-<li>In the dialog, specify the name of the file and click <strong>OK</strong>.</li>
-</ol>
-
-
-<h3 id="hprof-locating">Locating a heap dump file on disk</h3>
-<p>You can quickly discover where Android Studio stored HPROF files on disk.</p>
-
-
-<p>Follow this step in Android Studio: </p>
-<ul>
-<li>In the <em>Captures</em> window, right-click a heap snapshot file and select
-  <strong>Show in files</strong>.</li>
-
-<p>Android Studio opens an operating system file browser displaying the location where the file
-  resides.</p>
-</ul>
-<p class="note"><strong>Note:</strong> If you move an HPROF file, Android Studio no longer
-  displays it in the <em>Captures</em> window. To display it, use
-  <strong>File</strong> &gt; <strong>Open</strong>. Also, if you want to rename the file, do it
-  from the <em>Captures</em> window and not in the operating system file browser. </p>
-
-<h3 id="hprof-deleting">Deleting a heap dump file</h3>
-
-<p>To delete a heap dump file, follow this step: </p>
-<ul>
-<li>In the <em>Captures</em> window, right-click a heap snapshot file and select
-  <strong>Delete</strong>.</li>
-
-<p>Android Studio deletes the file from the <em>Captures</em> dialog and from disk. </p>
-</ul>
-
-<h3 id="hprof-converting">Converting a heap dump file to standard HPROF format</h3>
-<p>You can convert an HPROF file to standard format so you can use it outside of Android Studio with
-  other analysis tools. Follow these steps: </p>
-<ol>
-<li>In the <em>Captures</em> window, right-click a heap snapshot file and select <strong>Export to
-  standard .hprof</strong>.</li>
-<li>In the <em>Convert Android Java Heap Dump</em> dialog, specify a filename and click
-  <strong>OK</strong>.</li>
-
-
-<p>Android Studio creates a binary HPROF file in the location you specified.</p>
-</ol>
-
-<h2 id="tracking">
-  Tracking and Analyzing Memory Allocation
-</h2>
-
-<p>Android Studio allows you to track memory allocation as it monitors memory use. Tracking memory
-  allocation allows you to monitor where objects are being allocated when you perform certain
-  actions. Knowing these allocations enables you to adjust the method calls related to those actions
-  to optimize app performance and memory use.</p>
-
-<p>The Allocation Tracker does the following:</p>
-<ul>
-<li>Shows when and where your code allocates object types, their size, allocating thread, and stack
-  traces.</li>
-<li>Helps recognize memory churn through recurring allocation/deallocation patterns.</li>
-<li>Help you track down memory leaks when used in combination with the HPROF Viewer. For example,
-  if you see a bitmap object resident on the heap, you can find its allocation location with
-  Allocation Tracker.</li>
-</ul>
-
-
-<p>However, it takes time and experience to learn to interpret the output from this tool.</p>
-
-<h3 id="alloc-snapshot">Taking and displaying a snapshot of allocation data</h3>
-
-<p>Follow these steps:</p>
-<ol>
-<li>While the Memory Monitor is running, click Start Allocation Tracking
-  <img src="{@docRoot}images/tools/am-ialloctracking.png"
-  style="vertical-align:sub;margin:0;height:17px" alt="Start Allocation Tracking icon" />. </li>
-<li>Click Start Allocation Tracking
-  <img src="{@docRoot}images/tools/am-ialloctracking.png"
-  style="vertical-align:sub;margin:0;height:17px" alt="Start Allocation Tracking icon" /> again to
-  deselect it and end the snapshot. </li>
-
-  <p>The Memory Monitor displays the period when it took the snapshot. In the following
-    figure, you can see the snapshot period, as shown on the left. By comparison, when you dump the
-    Java heap, the Memory Monitor displays just the point where the heap snapshot was taken, as
-    shown on the right.</p>
-    <img src="{@docRoot}images/tools/am-dumpalloc.png" />
-
-<p>Android Studio creates the heap snapshot file with the
-  filename <code>Allocations_<em>yyyy.mm.dd_hh.mm.ss</em>.alloc</code> using the year, month, day,
-  hour, minute, and second of the capture, for example,
-  <code>Allocations_2015.11.17_14.58.48.alloc</code>.</p>
-<li>Click <strong>Captures</strong> in the main window.</li>
-
-
-<p>The <em>Captures</em> window appears.</p>
-<li>Double-click the file to view it in the Allocation Tracker. </li>
-<li>Optionally click the graphic icon to display a visual representation of the data.
-  </li>
-<p>
-  The Allocation Tracker appears:
-</p>
-<img src="{@docRoot}images/tools/am-alloctracker.png" />
-<p>
-
-
-<p>The tool displays the following information: </p>
-
-<table>
-  <tr>
-    <th scope="col">Column</th>
-    <th scope="col">Description</th>
-  </tr>
-
-  <tr>
-    <td><strong>Method</strong></td>
-    <td>The Java method responsible for the allocation.</td>
-  </tr>
-  <tr>
-    <td><strong>Count</strong></td>
-    <td>Total number of instances allocated.</td>
-  </tr>
-  <tr>
-    <td><strong>Size</strong></td>
-    <td>The total amount of allocated memory in bytes.</td>
-  </tr>
-
-</table>
-
-
-<li>Select the Group By menu option you want to display: </li>
-<ul>
-<li><strong>Group by Allocator</strong> </li>
-<li><strong>Group by Method</strong></li>
-</ul>
-
-</ol>
-
-
-
-<h3 id="alloc-sorting">Sorting allocation data</h3>
-
-<p>Follow this step:</p>
-<ul>
-<li>In the Allocation Tracker, click a column heading to sort the table by ascending or
-  descending order. </li>
-</ul>
-
-
-<h3 id="alloc-source">Displaying Java source</h3>
-<p>For some items displayed in the Allocation Tracker, you can view the Java source. Follow one of
-  these steps:</p>
-<ul>
-<li>In the Allocation Tracker, right-click a method and then select <strong>Jump to Source</strong>.
-</li>
-<li>In the Allocation Tracker, select a method and then click Jump to Source
-  <img src="{@docRoot}images/tools/am-ijumptosource.png"
-  style="vertical-align:sub;margin:0;height:17px" alt="Jump to Source icon" />. </li>
-</ul>
-
-<p>The source code appears in the Code Editor.</p>
-
-<h3 id="alloc-viewing">Viewing a saved allocation tracking file</h3>
-<p>After you monitor allocation tracking, Android Studio automatically stores it so you can view it
-  again. Follow these steps:</p>
-
-
-<ol>
-<li>Click <strong>Captures</strong> in the main window.</li>
-
-
-<p>The <em>Captures</em> window appears.</p>
-<li>Open the <strong>Allocation Tracking</strong> folder.</li>
-<li>Double-click the file to view it.</li>
-</ol>
-
-
-<h3 id="alloc-renaming">Renaming an allocation tracking file</h3>
-
-<p>If you rename a file from within Android Studio, it continues to appear in the <em>Captures</em>
-  window. Follow these steps:</p>
-<ol>
-<li>In the <em>Captures</em> window, right-click the file and select <strong>Rename</strong>.</li>
-<li>In the <em>Rename</em> dialog, specify the name of the file and click <strong>OK</strong>.</li>
-</ol>
-
-
-<h3 id="alloc-locating">Locating an allocation tracking file</h3>
-<p>You can quickly discover where Android Studio stored allocation tracking files on disk.</p>
-
-
-<p>Follow this step in Android Studio: </p>
-<ul>
-<li>In the <em>Captures</em> window, right-click allocation file and select
-  <strong>Show in Files</strong>.</li>
-
-<p>Android Studio opens an operating system file browser displaying the location where the file
-  resides.</p>
-</ul>
-
-<p class="note"><strong>Note:</strong> If you move an allocation tracking file, Android Studio
-  no longer displays it in the <em>Captures</em> window. To display the file, use
-  <strong>File</strong>
-  &gt; <strong>Open</strong>. Also, rename the file from the <em>Captures</em>
-  window and not in the operating system file browser. </p>
-
-<h3 id="alloc-deleting">Deleting an allocation tracking file</h3>
-
-
-<p>Follow this step: </p>
-<ul>
-<li>In the <em>Captures</em> window, right-click an allocation tracking file and select
-  <strong>Delete</strong>.</li>
-
-<p>Android Studio deletes the file from the <em>Captures</em> dialog and from disk. </p>
-</ul>
