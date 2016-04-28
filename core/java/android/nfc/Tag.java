@@ -214,42 +214,6 @@ public final class Tag implements Parcelable {
         return techIntList;
     }
 
-    /**
-     * Signals that you are no longer interested in communicating with this tag
-     * for as long as it remains in range.
-     *
-     * All future attempted communication to this tag will fail with {@link IOException}.
-     * The NFC controller will be put in a low-power polling mode, allowing the device
-     * to save power in cases where it's "attached" to a tag all the time (eg a tag in
-     * car dock).
-     *
-     * Additionally the debounceMs parameter allows you to specify for how long the tag needs
-     * to have gone out of range, before it will be dispatched again.
-     *
-     * Note: the NFC controller typically polls at a pretty slow interval (100 - 500 ms).
-     * This means that if the tag repeatedly goes in and out of range (for example, in
-     * case of a flaky connection), and the controller happens to poll every time the
-     * tag is out of range, it *will* re-dispatch the tag after debounceMs, despite the tag
-     * having been "in range" during the interval.
-     *
-     * Note 2: if a tag with another UID is detected after this API is called, its effect
-     * will be cancelled; if this tag shows up before the amount of time specified in
-     * debounceMs, it will be dispatched again.
-     *
-     * Note 3: some tags have a random UID, in which case this API won't work.
-     *
-     * @param debounceMs minimum amount of time the tag needs to be out of range before being
-     *                   dispatched again.
-     * @return false if the Tag couldn't be found (or has gone out of range), true otherwise
-     */
-    public boolean done(int debounceMs) {
-        try {
-            return mTagService.done(getServiceHandle(), debounceMs);
-        } catch (RemoteException e) {
-            return false;
-        }
-    }
-
     private static HashMap<String, Integer> getTechStringToCodeMap() {
         HashMap<String, Integer> techStringToCodeMap = new HashMap<String, Integer>();
 
