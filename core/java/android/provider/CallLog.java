@@ -824,6 +824,8 @@ public class CallLog {
                 UserHandle user, ContentValues values) {
             final ContentResolver resolver = context.getContentResolver();
 
+            // Since we're doing this operation on behalf of an app, we only
+            // want to use the actual "unlocked" state.
             final Uri uri = ContentProvider.maybeAddUserId(
                     userManager.isUserUnlocked(user) ? CONTENT_URI : SHADOW_CONTENT_URI,
                     user.getIdentifier());

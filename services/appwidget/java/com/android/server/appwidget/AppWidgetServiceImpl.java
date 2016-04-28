@@ -335,7 +335,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Provider provider = installedProviders.get(i);
 
                     final int userId = provider.getUserId();
-                    if (!mUserManager.isUserUnlocked(userId) ||
+                    if (!mUserManager.isUserUnlockingOrUnlocked(userId) ||
                             isProfileWithLockedParent(userId)) {
                         continue;
                     }
@@ -369,7 +369,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onPackageBroadcastReceived(Intent intent, int userId) {
-        if (!mUserManager.isUserUnlocked(userId) ||
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId) ||
                 isProfileWithLockedParent(userId)) {
             return;
         }
@@ -455,7 +455,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * userId must be the group parent.
      */
     private void reloadWidgetsMaskedStateForGroup(int userId) {
-        if (!mUserManager.isUserUnlocked(userId)) {
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             return;
         }
         synchronized (mLock) {
@@ -472,7 +472,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         try {
             UserInfo user  = mUserManager.getUserInfo(userId);
 
-            boolean lockedProfile = !mUserManager.isUserUnlocked(userId);
+            boolean lockedProfile = !mUserManager.isUserUnlockingOrUnlocked(userId);
             boolean quietProfile = user.isQuietModeEnabled();
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -656,7 +656,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void ensureGroupStateLoadedLocked(int userId) {
-        if (!mUserManager.isUserUnlocked(userId)) {
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             throw new IllegalStateException(
                     "User " + userId + " must be unlocked for widgets to be available");
         }
@@ -3363,7 +3363,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (userInfo != null && userInfo.isManagedProfile()) {
                 UserInfo parentInfo = mUserManager.getProfileParent(userId);
                 if (parentInfo != null
-                        && !mUserManager.isUserUnlocked(parentInfo.getUserHandle())) {
+                        && !mUserManager.isUserUnlockingOrUnlocked(parentInfo.getUserHandle())) {
                     return true;
                 }
             }
@@ -3378,7 +3378,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (userInfo != null && userInfo.isManagedProfile()) {
             UserInfo parentInfo = mUserManager.getProfileParent(userId);
             if (parentInfo != null
-                    && mUserManager.isUserUnlocked(parentInfo.getUserHandle())) {
+                    && mUserManager.isUserUnlockingOrUnlocked(parentInfo.getUserHandle())) {
                 return true;
             }
         }

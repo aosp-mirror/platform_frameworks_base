@@ -1020,7 +1020,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // If the system is not ready or the device is not yed unlocked by the user, then we use
         // copy-on-write settings.
         final boolean useCopyOnWriteSettings =
-                !mSystemReady || !mUserManager.isUserUnlocked(newUserId);
+                !mSystemReady || !mUserManager.isUserUnlockingOrUnlocked(newUserId);
         mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
@@ -1077,7 +1077,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSystemReady = true;
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
-                        !mUserManager.isUserUnlocked(currentUserId));
+                        !mUserManager.isUserUnlockingOrUnlocked(currentUserId));
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
