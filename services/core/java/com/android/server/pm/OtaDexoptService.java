@@ -22,9 +22,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IOtaDexopt;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.os.Environment;
 import android.os.RemoteException;
