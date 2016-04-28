@@ -1985,19 +1985,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 artworkDrawable = new BitmapDrawable(mBackdropBack.getResources(), artworkBitmap);
             }
         }
+        boolean allowWhenShade = false;
         if (ENABLE_LOCKSCREEN_WALLPAPER && artworkDrawable == null) {
             Bitmap lockWallpaper = mLockscreenWallpaper.getBitmap();
             if (lockWallpaper != null) {
                 artworkDrawable = new LockscreenWallpaper.WallpaperDrawable(
                         mBackdropBack.getResources(), lockWallpaper);
+                // We're in the SHADE mode on the SIM screen - yet we still need to show
+                // the lockscreen wallpaper in that mode.
+                allowWhenShade = mStatusBarKeyguardViewManager != null
+                        && mStatusBarKeyguardViewManager.isShowing();
             }
         }
 
+        boolean hideBecauseOccluded = mStatusBarKeyguardViewManager != null
+                && mStatusBarKeyguardViewManager.isOccluded();
+
         final boolean hasArtwork = artworkDrawable != null;
 
-        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK) && mState != StatusBarState.SHADE
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
+                && (mState != StatusBarState.SHADE || allowWhenShade)
                 && mFingerprintUnlockController.getMode()
-                        != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING) {
+                        != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                && !hideBecauseOccluded) {
             // time to show some art!
             if (mBackdrop.getVisibility() != View.VISIBLE) {
                 mBackdrop.setVisibility(View.VISIBLE);
@@ -2065,7 +2075,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
                 if (mFingerprintUnlockController.getMode()
-                        == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING) {
+                        == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                        || hideBecauseOccluded) {
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
