@@ -1281,8 +1281,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         // service can't connect to vold, it restarts, and then the new instance
         // does successfully connect.
         final IMountService service = getMountService();
-        String password = service.getPassword();
-        service.clearPassword();
+        String password;
+        long identity = Binder.clearCallingIdentity();
+        try {
+            password = service.getPassword();
+            service.clearPassword();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         if (password == null) {
             return false;
         }
