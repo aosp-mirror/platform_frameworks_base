@@ -18,7 +18,6 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 LOCAL_JAVA_RESOURCE_DIRS := resources
-LOCAL_JAVA_LANGUAGE_VERSION := 1.8
 
 LOCAL_JAVA_LIBRARIES := \
 	layoutlib_api-prebuilt \
