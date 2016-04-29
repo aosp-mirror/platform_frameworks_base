@@ -268,7 +268,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 new Runnable() {
             @Override
             public void run() {
-                if (isFinishing()) {
+                if (isFinishing() || isDestroyed()) {
                     // onPause might have not been able to cancel the job, see PrintActivity#onPause
                     // To be sure, cancel the job again. Double canceling does no harm.
                     mSpoolerProvider.getSpooler().setPrintJobState(mPrintJob.getId(),
@@ -324,7 +324,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
                 // If we are finishing or we are in a state that we do not need any
                 // data from the printing app, then no need to finish.
-                if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
+                if (isFinishing() || isDestroyed() ||
+                        (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
                     return;
                 }
                 setState(STATE_PRINT_CANCELED);
@@ -619,6 +620,17 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mPrintPreviewController != null) {
             mPrintPreviewController.onOrientationChanged();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mPrintedDocument != null) {
+            mPrintedDocument.cancel(true);
+        }
+
+        doFinish();
+
+        super.onDestroy();
     }
 
     @Override
@@ -964,7 +976,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensureProgressUiShown() {
-        if (isFinishing()) {
+        if (isFinishing() || isDestroyed()) {
             return;
         }
         if (mUiState != UI_STATE_PROGRESS) {
@@ -976,7 +988,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensurePreviewUiShown() {
-        if (isFinishing()) {
+        if (isFinishing() || isDestroyed()) {
             return;
         }
         if (mUiState != UI_STATE_PREVIEW) {
@@ -987,7 +999,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void ensureErrorUiShown(CharSequence message, int action) {
-        if (isFinishing()) {
+        if (isFinishing() || isDestroyed()) {
             return;
         }
         if (mUiState != UI_STATE_ERROR) {
@@ -1353,7 +1365,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
-        if (!isFinishing()) {
+        if (!(isFinishing() || isDestroyed())) {
             onLoadFinished(loader, null);
         }
     }
@@ -2036,7 +2048,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mSpoolerProvider.destroy();
         }
 
-        setState(mProgressMessageController.cancel());
+        if (mProgressMessageController != null) {
+            setState(mProgressMessageController.cancel());
+        }
 
         if (mState != STATE_INITIALIZING) {
             mPrintedDocument.finish();
