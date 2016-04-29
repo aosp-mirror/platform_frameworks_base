@@ -3706,7 +3706,7 @@ public class BackupManagerService {
                         result = BackupTransport.TRANSPORT_OK;
                     }
                 } catch (IOException e) {
-                    Slog.e(TAG, "Error backing up " + mPkg.packageName, e);
+                    Slog.e(TAG, "Error backing up " + mPkg.packageName + ": " + e.getMessage());
                     result = BackupTransport.AGENT_ERROR;
                 } finally {
                     try {
@@ -4466,7 +4466,6 @@ public class BackupManagerService {
                             }
                         }
 
-
                         // If we've lost our running criteria, tell the transport to cancel
                         // and roll back this (partial) backup payload; otherwise tell it
                         // that we've reached the clean finish state.
@@ -4484,14 +4483,16 @@ public class BackupManagerService {
                             }
                         }
 
-                        // TRANSPORT_ERROR here means that we've hit an error that the runner
-                        // doesn't know about, so it's still moving data but we're pulling the
+                        // A transport-originated error here means that we've hit an error that the
+                        // runner doesn't know about, so it's still moving data but we're pulling the
                         // rug out from under it.  Don't ask for its result:  we already know better
                         // and we'll hang if we block waiting for it, since it relies on us to
                         // read back the data it's writing into the engine.  Just proceed with
                         // a graceful failure.  The runner/engine mechanism will tear itself
-                        // down cleanly when we close the pipes from this end.
-                        if (backupPackageStatus != BackupTransport.TRANSPORT_ERROR) {
+                        // down cleanly when we close the pipes from this end.  Transport-level
+                        // errors take precedence over agent/app-specific errors for purposes of
+                        // determining our course of action.
+                        if (backupPackageStatus == BackupTransport.TRANSPORT_OK) {
                             // We still could fail in backup runner thread, getting result from there.
                             int backupRunnerResult = backupRunner.getBackupResultBlocking();
                             if (backupRunnerResult != BackupTransport.TRANSPORT_OK) {
@@ -4499,10 +4500,14 @@ public class BackupManagerService {
                                 // not TRANSPORT_ERROR here, overwrite it.
                                 backupPackageStatus = backupRunnerResult;
                             }
+                        } else {
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Transport-level failure; cancelling agent work");
+                            }
                         }
 
                         if (MORE_DEBUG) {
-                            Slog.i(TAG, "Done trying to send backup data: result="
+                            Slog.i(TAG, "Done delivering backup data: result="
                                     + backupPackageStatus);
                         }
 
