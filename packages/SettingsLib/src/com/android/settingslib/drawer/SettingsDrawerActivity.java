@@ -54,7 +54,7 @@ public class SettingsDrawerActivity extends Activity {
     protected static final boolean DEBUG_TIMING = false;
     private static final String TAG = "SettingsDrawerActivity";
 
-    static final String EXTRA_SHOW_MENU = "show_drawer_menu";
+    public static final String EXTRA_SHOW_MENU = "show_drawer_menu";
 
     private static List<DashboardCategory> sDashboardCategories;
     private static HashMap<Pair<String, String>, Tile> sTileCache;
