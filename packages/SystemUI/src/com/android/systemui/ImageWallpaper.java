@@ -158,6 +158,7 @@ public class ImageWallpaper extends WallpaperService {
         private int mLastRequestedHeight = -1;
         private AsyncTask<Void, Void, Bitmap> mLoader;
         private boolean mNeedsDrawAfterLoadingWallpaper;
+        private boolean mSurfaceValid;
 
         public DrawableEngine() {
             super();
@@ -249,11 +250,6 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         @Override
-        public void onTouchEvent(MotionEvent event) {
-            super.onTouchEvent(event);
-        }
-
-        @Override
         public void onOffsetsChanged(float xOffset, float yOffset,
                 float xOffsetStep, float yOffsetStep,
                 int xPixels, int yPixels) {
@@ -288,13 +284,23 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onSurfaceDestroyed(SurfaceHolder holder) {
             super.onSurfaceDestroyed(holder);
+            if (DEBUG) {
+                Log.i(TAG, "onSurfaceDestroyed");
+            }
+
             mLastSurfaceWidth = mLastSurfaceHeight = -1;
+            mSurfaceValid = false;
         }
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
             super.onSurfaceCreated(holder);
+            if (DEBUG) {
+                Log.i(TAG, "onSurfaceCreated");
+            }
+
             mLastSurfaceWidth = mLastSurfaceHeight = -1;
+            mSurfaceValid = true;
         }
 
         @Override
@@ -314,6 +320,9 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         void drawFrame() {
+            if (!mSurfaceValid) {
+                return;
+            }
             try {
                 DisplayInfo displayInfo = getDefaultDisplayInfo();
                 int newRotation = displayInfo.rotation;
