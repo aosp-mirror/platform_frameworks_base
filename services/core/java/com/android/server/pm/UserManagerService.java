@@ -28,6 +28,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -70,6 +71,7 @@ import android.os.storage.StorageManager;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.Log;
@@ -414,7 +416,9 @@ public class UserManagerService extends IUserManager.Stub {
             // user restriction was not a default guest restriction.
             setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
         }
-    }
+
+        maybeInitializeDemoMode(UserHandle.USER_SYSTEM);
+}
 
     @Override
     public String getUserAccount(int userId) {
@@ -2710,6 +2714,8 @@ public class UserManagerService extends IUserManager.Stub {
                 mPm.onBeforeUserStartUninitialized(userId);
             }
         }
+
+        maybeInitializeDemoMode(userId);
     }
 
     /**
@@ -2724,6 +2730,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Make a note of the last started time of a user and do some cleanup.
+     * This is called with ActivityManagerService lock held.
      * @param userId the user that was just foregrounded
      */
     public void onUserLoggedIn(@UserIdInt int userId) {
@@ -2739,6 +2746,24 @@ public class UserManagerService extends IUserManager.Stub {
         }
         userData.info.lastLoggedInFingerprint = Build.FINGERPRINT;
         scheduleWriteUser(userData);
+    }
+
+    private void maybeInitializeDemoMode(int userId) {
+        if (UserManager.isDeviceInDemoMode(mContext)) {
+            String demoLauncher =
+                    mContext.getResources().getString(
+                            com.android.internal.R.string.config_demoModeLauncherComponent);
+            if (!TextUtils.isEmpty(demoLauncher)) {
+                ComponentName componentToEnable = ComponentName.unflattenFromString(demoLauncher);
+                try {
+                    AppGlobals.getPackageManager().setComponentEnabledSetting(componentToEnable,
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, /* flags= */ 0,
+                            /* userId= */ userId);
+                } catch (RemoteException re) {
+                    // Internal, shouldn't happen
+                }
+            }
+        }
     }
 
     /**

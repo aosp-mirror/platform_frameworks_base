@@ -223,6 +223,8 @@ final class UserController {
 
     private void finishUserBoot(UserState uss, IIntentReceiver resultTo) {
         final int userId = uss.mHandle.getIdentifier();
+        boolean deviceInDemoMode = UserManager.isDeviceInDemoMode(mService.mContext);
+        boolean switchToDemoUser = false;
         Slog.d(TAG, "Finishing user boot " + userId);
         synchronized (mService) {
             // Bail if we ended up with a stale user
@@ -259,7 +261,32 @@ final class UserController {
             } else {
                 maybeUnlockUser(userId);
             }
+            if (deviceInDemoMode && mCurrentUserId == UserHandle.USER_SYSTEM) {
+                switchToDemoUser = true;
+            }
         }
+
+        if (switchToDemoUser) {
+            doSwitchToDemoUser();
+        }
+    }
+
+    private void doSwitchToDemoUser() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Remove any demo users first
+                for (UserInfo user: mUserManager.getUsers(true)) {
+                    if (user.isDemo()) {
+                        mUserManager.removeUser(user.id);
+                    }
+                }
+                UserInfo demoUser = mUserManager.createUser("Demo", UserInfo.FLAG_DEMO);
+                if (demoUser != null) {
+                    mService.switchUser(demoUser.id);
+                }
+            }
+        });
     }
 
     /**

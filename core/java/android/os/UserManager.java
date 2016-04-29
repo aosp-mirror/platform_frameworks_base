@@ -1972,6 +1972,10 @@ public class UserManager {
         if (!supportsMultipleUsers()) {
             return false;
         }
+        // If Demo Mode is on, don't show user switcher
+        if (isDeviceInDemoMode(mContext)) {
+            return false;
+        }
         List<UserInfo> users = getUsers(true);
         if (users == null) {
            return false;
@@ -1985,6 +1989,14 @@ public class UserManager {
         final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
                 .getGuestUserDisabled(null);
         return switchableUserCount > 1 || guestEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isDeviceInDemoMode(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
     }
 
     /**

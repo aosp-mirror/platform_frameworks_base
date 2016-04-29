@@ -399,8 +399,7 @@ public class KeyguardViewMediator extends SystemUI {
             sendUserPresentBroadcast();
             synchronized (KeyguardViewMediator.this) {
                 // If system user is provisioned, we might want to lock now to avoid showing launcher
-                if (UserManager.isSplitSystemUser()
-                        && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM) {
+                if (mustNotUnlockCurrentUser()) {
                     doKeyguardLocked(null);
                 }
             }
@@ -599,13 +598,17 @@ public class KeyguardViewMediator extends SystemUI {
                 return KeyguardSecurityView.PROMPT_REASON_WRONG_CREDENTIAL;
             }
 
-
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
     };
 
     public void userActivity() {
         mPM.userActivity(SystemClock.uptimeMillis(), false);
+    }
+
+    boolean mustNotUnlockCurrentUser() {
+        return (UserManager.isSplitSystemUser() || UserManager.isDeviceInDemoMode(mContext))
+                && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM;
     }
 
     private void setupLocked() {
@@ -1176,8 +1179,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         // In split system user mode, we never unlock system user.
-        if (!UserManager.isSplitSystemUser()
-                || KeyguardUpdateMonitor.getCurrentUser() != UserHandle.USER_SYSTEM
+        if (!mustNotUnlockCurrentUser()
                 || !mUpdateMonitor.isDeviceProvisioned()) {
 
             // if the setup wizard hasn't run yet, don't show
@@ -1615,8 +1617,7 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 
-            if (UserManager.isSplitSystemUser()
-                    && KeyguardUpdateMonitor.getCurrentUser() == UserHandle.USER_SYSTEM) {
+            if (mustNotUnlockCurrentUser()) {
                 // In split system user mode, we never unlock system user. The end user has to
                 // switch to another user.
                 // TODO: We should stop it early by disabling the swipe up flow. Right now swipe up
