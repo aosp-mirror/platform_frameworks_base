@@ -592,9 +592,11 @@ public final class FloatingToolbar {
         private void refreshCoordinatesAndOverflowDirection(Rect contentRectOnScreen) {
             refreshViewPort();
 
-            int x = contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2;
-            // Update x so that the toolbar isn't rendered behind the nav bar in landscape.
-            x = Math.max(0, Math.min(x, mViewPortOnScreen.right - mPopupWindow.getWidth()));
+            // Initialize x ensuring that the toolbar isn't rendered behind the nav bar in
+            // landscape.
+            final int x = Math.min(
+                    contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
+                    mViewPortOnScreen.right - mPopupWindow.getWidth());
 
             final int y;
 
@@ -684,7 +686,8 @@ public final class FloatingToolbar {
             int rootViewTopOnWindow = mTmpCoords[1];
             int windowLeftOnScreen = rootViewLeftOnScreen - rootViewLeftOnWindow;
             int windowTopOnScreen = rootViewTopOnScreen - rootViewTopOnWindow;
-            mCoordsOnWindow.set(x - windowLeftOnScreen, y - windowTopOnScreen);
+            mCoordsOnWindow.set(
+                    Math.max(0, x - windowLeftOnScreen), Math.max(0, y - windowTopOnScreen));
         }
 
         /**
