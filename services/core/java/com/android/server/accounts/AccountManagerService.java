@@ -409,7 +409,6 @@ public class AccountManagerService
      */
     public void validateAccounts(int userId) {
         final UserAccounts accounts = getUserAccounts(userId);
-
         // Invalidate user-specific cache to make sure we catch any
         // removed authenticators.
         validateAccountsInternal(accounts, true /* invalidateAuthenticatorCache */);
@@ -426,15 +425,13 @@ public class AccountManagerService
                     + " isCeDatabaseAttached=" + accounts.openHelper.isCeDatabaseAttached()
                     + " userLocked=" + mLocalUnlockedUsers.get(accounts.userId));
         }
+
         if (invalidateAuthenticatorCache) {
             mAuthenticatorCache.invalidateCache(accounts.userId);
         }
 
-        final HashMap<String, Integer> knownAuth = new HashMap<>();
-        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service :
-                mAuthenticatorCache.getAllServices(accounts.userId)) {
-            knownAuth.put(service.type.type, service.uid);
-        }
+        final HashMap<String, Integer> knownAuth = getAuthenticatorTypeAndUIDForUser(
+                mAuthenticatorCache, accounts.userId);
 
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
@@ -452,6 +449,7 @@ public class AccountManagerService
             // Create a list of authenticator type whose previous uid no longer exists
             HashSet<String> obsoleteAuthType = Sets.newHashSet();
             try {
+                SparseBooleanArray knownUids = null;
                 while (metaCursor.moveToNext()) {
                     String type = TextUtils.split(metaCursor.getString(0), META_KEY_DELIMITER)[1];
                     String uid = metaCursor.getString(1);
@@ -466,23 +464,48 @@ public class AccountManagerService
                         // Remove it from the knownAuth list if it's unchanged.
                         knownAuth.remove(type);
                     } else {
-                        // Only add it to the list if it no longer exists or uid different
-                        obsoleteAuthType.add(type);
-                        // And delete it from the TABLE_META
-                        db.delete(
-                                TABLE_META,
-                                META_KEY + "=? AND " + META_VALUE + "=?",
-                                new String[] {
-                                        META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + type,
-                                        uid}
-                                );
+                        /*
+                         * The authenticator is presently not cached and should only be triggered
+                         * when we think an authenticator has been removed (or is being updated).
+                         * But we still want to check if any data with the associated uid is
+                         * around. This is an (imperfect) signal that the package may be updating.
+                         *
+                         * A side effect of this is that an authenticator sharing a uid with
+                         * multiple apps won't get its credentials wiped as long as some app with
+                         * that uid is still on the device. But I suspect that this is a rare case.
+                         * And it isn't clear to me how an attacker could really exploit that
+                         * feature.
+                         *
+                         * The upshot is that we don't have to worry about accounts getting
+                         * uninstalled while the authenticator's package is being updated.
+                         *
+                         */
+                        if (knownUids == null) {
+                            knownUids = getUidsOfInstalledOrUpdatedPackagesAsUser(accounts.userId); 
+                        }
+                        if (!knownUids.get(Integer.parseInt(uid))) {
+                            // The authenticator is not presently available to the cache. And the
+                            // package no longer has a data directory (so we surmise it isn't updating).
+                            // So purge its data from the account databases.
+                            obsoleteAuthType.add(type);
+                            // And delete it from the TABLE_META
+                            db.delete(
+                                    TABLE_META,
+                                    META_KEY + "=? AND " + META_VALUE + "=?",
+                                    new String[] {
+                                            META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + type,
+                                            uid}
+                                    );
+                        }
                     }
                 }
             } finally {
                 metaCursor.close();
             }
 
-            // Add the newly registered authenticator to TABLE_META
+            // Add the newly registered authenticator to TABLE_META. If old authenticators have
+            // been renabled (after being updated for example), then we just overwrite the old
+            // values.
             Iterator<Entry<String, Integer>> iterator = knownAuth.entrySet().iterator();
             while (iterator.hasNext()) {
                 Entry<String, Integer> entry = iterator.next();
@@ -490,7 +513,7 @@ public class AccountManagerService
                 values.put(META_KEY,
                         META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + entry.getKey());
                 values.put(META_VALUE, entry.getValue());
-                db.insert(TABLE_META, null, values);
+                db.insertWithOnConflict(TABLE_META, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             }
 
             Cursor cursor = db.query(TABLE_ACCOUNTS,
@@ -544,10 +567,32 @@ public class AccountManagerService
         }
     }
 
+    private SparseBooleanArray getUidsOfInstalledOrUpdatedPackagesAsUser(int userId) {
+        // Get the UIDs of all apps that might have data on the device. We want
+        // to preserve user data if the app might otherwise be storing data.
+        List<PackageInfo> pkgsWithData =
+                mPackageManager.getInstalledPackagesAsUser(
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+        SparseBooleanArray knownUids = new SparseBooleanArray(pkgsWithData.size());
+        for (PackageInfo pkgInfo : pkgsWithData) {
+            if (pkgInfo.applicationInfo != null
+                    && (pkgInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
+                knownUids.put(pkgInfo.applicationInfo.uid, true);
+            }
+        }
+        return knownUids;
+    }
+
     private static HashMap<String, Integer> getAuthenticatorTypeAndUIDForUser(
             Context context,
             int userId) {
         AccountAuthenticatorCache authCache = new AccountAuthenticatorCache(context);
+        return getAuthenticatorTypeAndUIDForUser(authCache, userId);
+    }
+
+    private static HashMap<String, Integer> getAuthenticatorTypeAndUIDForUser(
+            IAccountAuthenticatorCache authCache,
+            int userId) {
         HashMap<String, Integer> knownAuth = new HashMap<>();
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service : authCache
                 .getAllServices(userId)) {
