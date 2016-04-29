@@ -1441,7 +1441,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void removeNotification(String key, RankingMap ranking) {
         boolean deferRemoval = false;
         if (mHeadsUpManager.isHeadsUp(key)) {
-            deferRemoval = !mHeadsUpManager.removeNotification(key);
+            // A cancel() in repsonse to a remote input shouldn't be delayed, as it makes the
+            // sending look longer than it takes.
+            boolean ignoreEarliestRemovalTime = mRemoteInputController.isSpinning(key)
+                    && !FORCE_REMOTE_INPUT_HISTORY;
+            deferRemoval = !mHeadsUpManager.removeNotification(key,  ignoreEarliestRemovalTime);
         }
         if (key.equals(mMediaNotificationKey)) {
             clearCurrentMediaNotification();
@@ -2368,7 +2372,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (wasHeadsUp) {
             if (!shouldPeek) {
                 // We don't want this to be interrupting anymore, lets remove it
-                mHeadsUpManager.removeNotification(key);
+                mHeadsUpManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
             } else {
                 mHeadsUpManager.updateNotification(entry, alertAgain);
             }
