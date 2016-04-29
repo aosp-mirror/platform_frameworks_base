@@ -188,7 +188,7 @@ public class ActivityInfo extends ComponentInfo
      * See {@link android.R.attr#resizeableActivity}.
      * @hide
      */
-    public int resizeMode;
+    public int resizeMode = RESIZE_MODE_RESIZEABLE;
 
     /**
      * Name of the VrListenerService component to run for this activity.
