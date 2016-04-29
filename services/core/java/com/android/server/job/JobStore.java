@@ -333,6 +333,7 @@ public class JobStore {
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
+            out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -542,6 +543,10 @@ public class JobStore {
                 String val = parser.getAttributeValue(null, "priority");
                 if (val != null) {
                     jobBuilder.setPriority(Integer.parseInt(val));
+                }
+                val = parser.getAttributeValue(null, "flags");
+                if (val != null) {
+                    jobBuilder.setFlags(Integer.parseInt(val));
                 }
                 val = parser.getAttributeValue(null, "sourceUserId");
                 sourceUserId = val == null ? -1 : Integer.parseInt(val);

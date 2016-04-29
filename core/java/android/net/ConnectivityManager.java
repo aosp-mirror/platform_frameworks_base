@@ -774,8 +774,13 @@ public class ConnectivityManager {
      * @hide
      */
     public Network getActiveNetworkForUid(int uid) {
+        return getActiveNetworkForUid(uid, false);
+    }
+
+    /** {@hide} */
+    public Network getActiveNetworkForUid(int uid, boolean ignoreBlocked) {
         try {
-            return mService.getActiveNetworkForUid(uid);
+            return mService.getActiveNetworkForUid(uid, ignoreBlocked);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -836,8 +841,13 @@ public class ConnectivityManager {
      * {@hide}
      */
     public NetworkInfo getActiveNetworkInfoForUid(int uid) {
+        return getActiveNetworkInfoForUid(uid, false);
+    }
+
+    /** {@hide} */
+    public NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked) {
         try {
-            return mService.getActiveNetworkInfoForUid(uid);
+            return mService.getActiveNetworkInfoForUid(uid, ignoreBlocked);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -880,8 +890,13 @@ public class ConnectivityManager {
      *        is not valid.
      */
     public NetworkInfo getNetworkInfo(Network network) {
+        return getNetworkInfoForUid(network, Process.myUid(), false);
+    }
+
+    /** {@hide} */
+    public NetworkInfo getNetworkInfoForUid(Network network, int uid, boolean ignoreBlocked) {
         try {
-            return mService.getNetworkInfoForNetwork(network);
+            return mService.getNetworkInfoForUid(network, uid, ignoreBlocked);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
