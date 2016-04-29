@@ -73,7 +73,7 @@ public:
     // TODO: Texture should probably know and own its target.
     // setFillLayer() forces it to GL_TEXTURE which isn't always correct.
     // Similarly setFillLayer normally forces its own wrap & filter mode
-    GlopBuilder& setFillExternalTexture(Texture& texture);
+    GlopBuilder& setFillExternalTexture(Texture& texture, Matrix4& textureTransform);
 
     GlopBuilder& setTransform(const Snapshot& snapshot, const int transformFlags) {
         return setTransform(*snapshot.transform, transformFlags);
