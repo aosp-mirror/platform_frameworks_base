@@ -55,7 +55,7 @@ system all allow you to focus on building unique and high quality apps.</p>
 
 
 <!-- start studio download modal -->
-<div data-modal="studio_tos" class="dac-modal" id="langform">
+<div data-modal="studio_tos" class="dac-modal" id="studio_tos">
   <div class="dac-modal-container">
     <div class="dac-modal-window">
       <header class="dac-modal-header">
@@ -534,4 +534,3 @@ or AMD processor with support for AMD Virtualization™ (AMD-V™)</li>
 </div>
 
 </section>
-
