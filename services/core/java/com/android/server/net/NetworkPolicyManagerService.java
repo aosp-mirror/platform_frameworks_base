@@ -465,7 +465,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 continue;
             }
             for (int j = 0; j < numberUsers; j++) {
-                final UserInfo user = users.get(i);
+                final UserInfo user = users.get(j);
                 final int uid = UserHandle.getUid(user.id, app.uid);
                 mDefaultRestrictBackgroundWhitelistUids.append(uid, true);
                 if (LOGD) Slog.d(TAG, "revoked whistelist status for uid " + uid + ": "
