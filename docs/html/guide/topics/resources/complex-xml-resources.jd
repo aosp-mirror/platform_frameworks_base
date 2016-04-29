@@ -1,0 +1,117 @@
+page.title=Inline Complex XML Resources
+parent.title=Application Resources
+parent.link=index.html
+@jd:body
+
+<p>Certain resource types are a composition of multiple complex resources represented by XML files.
+One example is an animated vector drawable, which is a drawable resource encapsulating a vector
+drawable and an animation. This requires the use of at least three XML files.</p>
+
+<dl>
+
+<dt><code>res/drawable/avd.xml</code></dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/vectordrawable" &gt;
+    &lt;target
+        android:name="rotationGroup"
+        android:animation="@anim/rotation" /&gt;
+&lt;/animated-vector&gt;
+</pre>
+</dd>
+
+<dt><code>res/drawable/vectordrawable.xml</code></dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="64dp"
+    android:width="64dp"
+    android:viewportHeight="600"
+    android:viewportWidth="600" &gt;
+    &lt;group
+        android:name="rotationGroup"
+        android:pivotX="300.0"
+        android:pivotY="300.0"
+        android:rotation="45.0" &gt;
+        &lt;path
+            android:fillColor="#000000"
+            android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" /&gt;
+    &lt;/group&gt;
+&lt;/vector&gt;
+</pre>
+</dd>
+
+<dt><code>res/anim/rotation.xml</code></dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;objectAnimator xmlns:android="http://schemas.android.com/apk/android"
+    android:duration="6000"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="360" /&gt;
+</pre>
+</dd>
+
+</dl>
+
+<p>There are a lot of files here just to make a single animated vector drawable!
+If the vector drawable and animations are re-used elsewhere, this is the best way to implement an
+animated vector drawable. If they’re only ever used for this animated vector drawable, then there is
+a more compact way to implement them.</p>
+
+<p>Using AAPT’s inline resource format, you can define all three resources in the same XML file.
+Since we’re making an animated vector drawable, we put the file under <code>res/drawable/</code>.</p>
+
+<dl>
+
+<dt><code>res/drawable/avd.xml</code></dt>
+<dd>
+<pre class="stx">
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    <strong>xmlns:aapt="http://schemas.android.com/aapt"</strong> &gt;
+
+    <strong>&lt;aapt:attr name="android:drawable" &gt;</strong>
+        &lt;vector
+            android:height="64dp"
+            android:width="64dp"
+            android:viewportHeight="600"
+            android:viewportWidth="600" &gt;
+            &lt;group
+                android:name="rotationGroup"
+                android:pivotX="300.0"
+                android:pivotY="300.0"
+                android:rotation="45.0" &gt;
+                &lt;path
+                    android:fillColor="#000000"
+                    android:pathData="M300,70 l 0,-70 70,70 0,0 -70,70z" /&gt;
+            &lt;/group&gt;
+        &lt;/vector&gt;
+    <strong>&lt;aapt:attr /&gt;</strong>
+
+    &lt;target
+        android:name="rotationGroup" /&gt;
+        <strong>&lt;aapt:attr name="android:animation" &gt;</strong>
+            &lt;objectAnimator
+                android:duration="6000"
+                android:propertyName="rotation"
+                android:valueFrom="0"
+                android:valueTo="360" /&gt;
+        <strong>&lt;aapt:attr&gt;</strong>
+&lt;/animated-vector&gt;
+</pre>
+</dd>
+
+</dl>
+
+<p>The XML tag <code>&lt;aapt:attr &gt;</code> tells AAPT that the tag’s child shall be treated as a
+resource and extracted into its own resource file. The value in the attribute name specifies where
+to use the inline resource within the parent tag.</p>
+
+<p>AAPT will generate resource files and names for all of the inline resources.
+Applications built using this inline format are compatible with all versions of Android.</p>
+
