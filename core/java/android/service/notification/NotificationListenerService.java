@@ -764,9 +764,9 @@ public abstract class NotificationListenerService extends Service {
         }
         mSystemContext = context;
         INotificationManager noMan = getNotificationInterface();
-        noMan.registerListener(mWrapper, componentName, currentUser);
-        mCurrentUser = currentUser;
         mHandler = new MyHandler(context.getMainLooper());
+        mCurrentUser = currentUser;
+        noMan.registerListener(mWrapper, componentName, currentUser);
     }
 
     /**
