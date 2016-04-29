@@ -255,6 +255,16 @@ import java.util.Map;
  * is loading.
  * </p>
  *
+ * <h3>HTML5 Geolocation API support</h3>
+ *
+ * <p>For applications targeting Android N and later releases
+ * (API level > {@link android.os.Build.VERSION_CODES#M}) the geolocation api is only supported on
+ * secure origins such as https. For such applications requests to geolocation api on non-secure
+ * origins are automatically denied without invoking the corresponding
+ * {@link WebChromeClient#onGeolocationPermissionsShowPrompt(String, GeolocationPermissions.Callback)}
+ * method.
+ * </p>
+ *
  * <h3>Layout size</h3>
  * <p>
  * It is recommended to set the WebView layout height to a fixed value or to
