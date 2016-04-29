@@ -327,7 +327,14 @@ public class StatusBarIconView extends AnimatedImageView {
     public static String contentDescForNotification(Context c, Notification n) {
         Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
         String appName = builder.loadHeaderAppName();
+
+        CharSequence title = n.extras.getString(Notification.EXTRA_TITLE);
         CharSequence ticker = n.tickerText;
-        return c.getString(R.string.accessibility_desc_notification_icon, appName, ticker);
+
+        CharSequence desc = !TextUtils.isEmpty(ticker) ? ticker
+                : !TextUtils.isEmpty(title) ? title : "";
+
+        return c.getString(R.string.accessibility_desc_notification_icon, appName, desc);
     }
+
 }
