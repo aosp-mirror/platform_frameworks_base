@@ -2187,6 +2187,10 @@ message MetricsEvent {
     // reinflation.
     ACTION_REMOTE_INPUT_CLOSE = 400;
 
+    // OPEN: Settings > Accounts > Work profile settings
+    // CATEGORY: SETTINGS
+    ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
