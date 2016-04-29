@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
+import android.widget.RadialTimePickerView.OnValueSelectedListener;
 
 import com.android.internal.R;
 import com.android.internal.widget.NumericTextView;
@@ -48,8 +49,7 @@ import java.util.Calendar;
 /**
  * A delegate implementing the radial clock-based TimePicker.
  */
-class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate implements
-        RadialTimePickerView.OnValueSelectedListener {
+class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     /**
      * Delay in milliseconds before valid but potentially incomplete, for
      * example "1" but not "12", keyboard edits are propagated from the
@@ -88,8 +88,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     private boolean mIsEnabled = true;
     private boolean mAllowAutoAdvance;
-    private int mInitialHourOfDay;
-    private int mInitialMinute;
+    private int mCurrentHour;
+    private int mCurrentMinute;
     private boolean mIs24Hour;
     private boolean mIsAmPmAtStart;
 
@@ -189,8 +189,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
         mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(R.id.radial_picker);
         mRadialTimePickerView.applyAttributes(attrs, defStyleAttr, defStyleRes);
-
-        setupListeners();
+        mRadialTimePickerView.setOnValueSelectedListener(mOnValueSelectedListener);
 
         mAllowAutoAdvance = true;
 
@@ -324,28 +323,24 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     private void initialize(int hourOfDay, int minute, boolean is24HourView, int index) {
-        mInitialHourOfDay = hourOfDay;
-        mInitialMinute = minute;
+        mCurrentHour = hourOfDay;
+        mCurrentMinute = minute;
         mIs24Hour = is24HourView;
         updateUI(index);
     }
 
-    private void setupListeners() {
-        mRadialTimePickerView.setOnValueSelectedListener(this);
-    }
-
     private void updateUI(int index) {
         updateHeaderAmPm();
-        updateHeaderHour(mInitialHourOfDay, false);
+        updateHeaderHour(mCurrentHour, false);
         updateHeaderSeparator();
-        updateHeaderMinute(mInitialMinute, false);
+        updateHeaderMinute(mCurrentMinute, false);
         updateRadialPicker(index);
 
         mDelegator.invalidate();
     }
 
     private void updateRadialPicker(int index) {
-        mRadialTimePickerView.initialize(mInitialHourOfDay, mInitialMinute, mIs24Hour);
+        mRadialTimePickerView.initialize(mCurrentHour, mCurrentMinute, mIs24Hour);
         setCurrentItemShowing(index, false, true);
     }
 
@@ -358,7 +353,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
             setAmPmAtStart(isAmPmAtStart);
 
-            updateAmPmLabelStates(mInitialHourOfDay < 12 ? AM : PM);
+            updateAmPmLabelStates(mCurrentHour < 12 ? AM : PM);
         }
     }
 
@@ -388,15 +383,25 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      */
     @Override
     public void setHour(int hour) {
-        if (mInitialHourOfDay != hour) {
-            mInitialHourOfDay = hour;
-            updateHeaderHour(hour, true);
-            updateHeaderAmPm();
-            mRadialTimePickerView.setCurrentHour(hour);
-            mRadialTimePickerView.setAmOrPm(mInitialHourOfDay < 12 ? AM : PM);
-            mDelegator.invalidate();
-            onTimeChanged();
+        setHourInternal(hour, false, true);
+    }
+
+    private void setHourInternal(int hour, boolean isFromPicker, boolean announce) {
+        if (mCurrentHour == hour) {
+            return;
         }
+
+        mCurrentHour = hour;
+        updateHeaderHour(hour, announce);
+        updateHeaderAmPm();
+
+        if (!isFromPicker) {
+            mRadialTimePickerView.setCurrentHour(hour);
+            mRadialTimePickerView.setAmOrPm(hour < 12 ? AM : PM);
+        }
+
+        mDelegator.invalidate();
+        onTimeChanged();
     }
 
     /**
@@ -421,13 +426,23 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      */
     @Override
     public void setMinute(int minute) {
-        if (mInitialMinute != minute) {
-            mInitialMinute = minute;
-            updateHeaderMinute(minute, true);
-            mRadialTimePickerView.setCurrentMinute(minute);
-            mDelegator.invalidate();
-            onTimeChanged();
+        setMinuteInternal(minute, false);
+    }
+
+    private void setMinuteInternal(int minute, boolean isFromPicker) {
+        if (mCurrentMinute == minute) {
+            return;
         }
+
+        mCurrentMinute = minute;
+        updateHeaderMinute(minute, true);
+
+        if (!isFromPicker) {
+            mRadialTimePickerView.setCurrentMinute(minute);
+        }
+
+        mDelegator.invalidate();
+        onTimeChanged();
     }
 
     /**
@@ -448,7 +463,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     public void setIs24Hour(boolean is24Hour) {
         if (mIs24Hour != is24Hour) {
             mIs24Hour = is24Hour;
-            mInitialHourOfDay = getHour();
+            mCurrentHour = getHour();
 
             updateHourFormat();
             updateUI(mRadialTimePickerView.getCurrentItemShowing());
@@ -563,34 +578,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     /**
-     * Called by the picker for updating the header display.
-     */
-    @Override
-    public void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance) {
-        switch (pickerIndex) {
-            case HOUR_INDEX:
-                if (mAllowAutoAdvance && autoAdvance) {
-                    updateHeaderHour(newValue, false);
-                    setCurrentItemShowing(MINUTE_INDEX, true, false);
-                    mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
-                } else {
-                    updateHeaderHour(newValue, true);
-                }
-                break;
-            case MINUTE_INDEX:
-                updateHeaderMinute(newValue, true);
-                break;
-            case AMPM_INDEX:
-                updateAmPmLabelStates(newValue);
-                break;
-        }
-
-        if (mOnTimeChangedListener != null) {
-            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
-        }
-    }
-
-    /**
      * Converts hour-of-day (0-23) time into a localized hour number.
      * <p>
      * The localized value may be in the range (0-23), (1-24), (0-11), or
@@ -702,11 +689,43 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private void setAmOrPm(int amOrPm) {
         updateAmPmLabelStates(amOrPm);
 
-        if (mRadialTimePickerView.setAmOrPm(amOrPm) && mOnTimeChangedListener != null) {
-            mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
+        if (mRadialTimePickerView.setAmOrPm(amOrPm)) {
+            mCurrentHour = getHour();
+
+            if (mOnTimeChangedListener != null) {
+                mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
+            }
         }
     }
 
+    /** Listener for RadialTimePickerView interaction. */
+    private final OnValueSelectedListener mOnValueSelectedListener = new OnValueSelectedListener() {
+        @Override
+        public void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance) {
+            switch (pickerIndex) {
+                case HOUR_INDEX:
+                    final boolean isTransition = mAllowAutoAdvance && autoAdvance;
+                    setHourInternal(newValue, true, !isTransition);
+                    if (isTransition) {
+                        setCurrentItemShowing(MINUTE_INDEX, true, false);
+                        mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
+                    }
+                    break;
+                case MINUTE_INDEX:
+                    setMinuteInternal(newValue, true);
+                    break;
+                case AMPM_INDEX:
+                    updateAmPmLabelStates(newValue);
+                    break;
+            }
+
+            if (mOnTimeChangedListener != null) {
+                mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
+            }
+        }
+    };
+
+    /** Listener for keyboard interaction. */
     private final OnValueChangedListener mDigitEnteredListener = new OnValueChangedListener() {
         @Override
         public void onValueChanged(NumericTextView view, int value,
