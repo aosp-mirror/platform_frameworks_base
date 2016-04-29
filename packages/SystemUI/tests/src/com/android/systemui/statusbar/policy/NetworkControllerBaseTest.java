@@ -111,6 +111,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(true);
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
+        mNetworkController.handleSetUserSetupComplete(true);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
     }
