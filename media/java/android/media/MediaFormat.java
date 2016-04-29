@@ -46,7 +46,8 @@ import java.util.Map;
  * <tr><td>{@link #KEY_HEIGHT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
  *         for encoders, readable in the output format of decoders</b></td></tr>
- * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td>required for <b>encoders</b>,
+ *         optional for <b>decoders</b></td></tr>
  * <tr><td>{@link #KEY_CAPTURE_RATE}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_INTRA_REFRESH_PERIOD}</td><td>Integer</td><td><b>encoder-only</b>, optional</td></tr>
@@ -197,7 +198,19 @@ public final class MediaFormat {
 
     /**
      * A key describing the frame rate of a video format in frames/sec.
-     * The associated value is an integer or a float.
+     * The associated value is normally an integer when the value is used by the platform,
+     * but video codecs also accept float configuration values.
+     * Specifically, {@link MediaExtractor#getTrackFormat MediaExtractor} provides an integer
+     * value corresponding to the frame rate information of the track if specified and non-zero.
+     * Otherwise, this key is not present. {@link MediaCodec#configure MediaCodec} accepts both
+     * float and integer values. This represents the desired operating frame rate if the
+     * {@link #KEY_OPERATING_RATE} is not present and {@link #KEY_PRIORITY} is {@code 0}
+     * (realtime). For video encoders this value corresponds to the intended frame rate,
+     * although encoders are expected
+     * to support variable frame rate based on {@link MediaCodec.BufferInfo#presentationTimeUs
+     * buffer timestamp}. This key is not used in the {@code MediaCodec}
+     * {@link MediaCodec#getInputFormat input}/{@link MediaCodec#getOutputFormat output} formats,
+     * nor by {@link MediaMuxer#addTrack MediaMuxer}.
      */
     public static final String KEY_FRAME_RATE = "frame-rate";
 
