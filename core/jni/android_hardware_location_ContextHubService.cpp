@@ -44,7 +44,6 @@ static constexpr int HEADER_FIELD_MSG_TYPE=0;
 static constexpr int HEADER_FIELD_HUB_HANDLE=2;
 static constexpr int HEADER_FIELD_APP_INSTANCE=3;
 
-
 namespace android {
 
 namespace {
@@ -164,9 +163,20 @@ static int get_hub_id_for_app_instance(int id) {
     return db.hubInfo.hubs[hubHandle].hub_id;
 }
 
+static int get_app_instance_for_app_id(uint64_t app_id) {
+    auto end = db.appInstances.end();
+    for (auto current = db.appInstances.begin(); current != end; ++current) {
+        if (current->second.appInfo.app_name.id == app_id) {
+            return current->first;
+        }
+    }
+    ALOGD("Cannot find app for app instance %d.", app_id);
+    return -1;
+}
+
 static int set_dest_app(hub_message_t *msg, int id) {
     if (!db.appInstances.count(id)) {
-        ALOGD("%s: Cannod find app for app instance %d", __FUNCTION__, id);
+        ALOGD("%s: Cannot find app for app instance %d", __FUNCTION__, id);
         return -1;
     }
 
@@ -301,7 +311,7 @@ static void initContextHubService() {
     }
 }
 
-static int onMessageReceipt(int *header, int headerLen, char *msg, int msgLen) {
+static int onMessageReceipt(uint32_t *header, size_t headerLen, char *msg, size_t msgLen) {
     JNIEnv *env;
 
     if ((db.jniInfo.vm)->AttachCurrentThread(&env, nullptr) != JNI_OK) {
@@ -396,14 +406,9 @@ static bool sanity_check_cookie(void *cookie, uint32_t hub_id) {
 int context_hub_callback(uint32_t hubId,
                          const struct hub_message_t *msg,
                          void *cookie) {
-    int msgHeader[MSG_HEADER_SIZE];
-
     if (!msg) {
         return -1;
     }
-
-    msgHeader[HEADER_FIELD_MSG_TYPE] = msg->message_type;
-
     if (!sanity_check_cookie(cookie, hubId)) {
         ALOGW("Incorrect cookie %" PRId32 " for cookie %p! Bailing",
               hubId, cookie);
@@ -411,17 +416,22 @@ int context_hub_callback(uint32_t hubId,
         return -1;
     }
 
-    msgHeader[HEADER_FIELD_HUB_HANDLE] = *(uint32_t*)cookie;
+    uint32_t messageType = msg->message_type;
+    uint32_t hubHandle = *(uint32_t*) cookie;
 
-    if (msgHeader[HEADER_FIELD_MSG_TYPE] < CONTEXT_HUB_TYPE_PRIVATE_MSG_BASE &&
-        msgHeader[HEADER_FIELD_MSG_TYPE] != 0 ) {
-        handle_os_message(msgHeader[HEADER_FIELD_MSG_TYPE],
-                          msgHeader[HEADER_FIELD_HUB_HANDLE],
-                          (char *)msg->message,
-                          msg->message_len);
+    if (messageType < CONTEXT_HUB_TYPE_PRIVATE_MSG_BASE) {
+        handle_os_message(messageType, hubHandle, (char*) msg->message, msg->message_len);
     } else {
-        onMessageReceipt(msgHeader, sizeof(msgHeader),
-                         (char *)msg->message, msg->message_len);
+        int appHandle = get_app_instance_for_app_id(msg->app_name.id);
+        if (appHandle < 0) {
+            ALOGE("Filtering out message due to invalid App Instance.");
+        } else {
+            uint32_t msgHeader[MSG_HEADER_SIZE] = {};
+            msgHeader[HEADER_FIELD_MSG_TYPE] = messageType;
+            msgHeader[HEADER_FIELD_HUB_HANDLE] = hubHandle;
+            msgHeader[HEADER_FIELD_APP_INSTANCE] = appHandle;
+            onMessageReceipt(msgHeader, MSG_HEADER_SIZE, (char*) msg->message, msg->message_len);
+        }
     }
 
     return 0;
