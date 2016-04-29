@@ -442,42 +442,51 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      *
      * @return whether any uid has been added to {@link #mRestrictBackgroundWhitelistUids}.
      */
-    boolean addDefaultRestrictBackgroundWhitelistUids() {
-        final SystemConfig sysConfig = SystemConfig.getInstance();
-        final PackageManager pm = mContext.getPackageManager();
+    boolean addDefaultRestrictBackgroundWhitelistUidsLocked() {
         final List<UserInfo> users = mUserManager.getUsers();
         final int numberUsers = users.size();
 
+        boolean changed = false;
+        for (int i = 0; i < numberUsers; i++) {
+            final UserInfo user = users.get(i);
+            changed = addDefaultRestrictBackgroundWhitelistUidsLocked(user.id) || changed;
+        }
+        return changed;
+    }
+
+    private boolean addDefaultRestrictBackgroundWhitelistUidsLocked(int userId) {
+        final SystemConfig sysConfig = SystemConfig.getInstance();
+        final PackageManager pm = mContext.getPackageManager();
         final ArraySet<String> allowDataUsage = sysConfig.getAllowInDataUsageSave();
         boolean changed = false;
         for (int i = 0; i < allowDataUsage.size(); i++) {
             final String pkg = allowDataUsage.valueAt(i);
             if (LOGD)
-                Slog.d(TAG, "checking restricted background whitelisting for package " + pkg);
+                Slog.d(TAG, "checking restricted background whitelisting for package " + pkg
+                        + " and user " + userId);
             final ApplicationInfo app;
             try {
-                app = pm.getApplicationInfo(pkg, PackageManager.MATCH_SYSTEM_ONLY);
+                app = pm.getApplicationInfoAsUser(pkg, PackageManager.MATCH_SYSTEM_ONLY, userId);
             } catch (PackageManager.NameNotFoundException e) {
                 // Should not happen
                 Slog.wtf(TAG, "No ApplicationInfo for package " + pkg);
                 continue;
             }
             if (!app.isPrivilegedApp()) {
-                Slog.w(TAG, "getAllowInDataUsageSave() returned non-privileged app: " + pkg);
+                Slog.wtf(TAG, "pm.getApplicationInfoAsUser() returned non-privileged app: " + pkg);
                 continue;
             }
-            for (int j = 0; j < numberUsers; j++) {
-                final UserInfo user = users.get(j);
-                final int uid = UserHandle.getUid(user.id, app.uid);
-                mDefaultRestrictBackgroundWhitelistUids.append(uid, true);
-                if (LOGD) Slog.d(TAG, "revoked whistelist status for uid " + uid + ": "
+            final int uid = UserHandle.getUid(userId, app.uid);
+            mDefaultRestrictBackgroundWhitelistUids.append(uid, true);
+            if (LOGD)
+                Slog.d(TAG, "Adding uid " + uid + " (user " + userId + ") to default restricted "
+                        + "background whitelist. Revoked status: "
                         + mRestrictBackgroundWhitelistRevokedUids.get(uid));
-                if (!mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
-                    Slog.i(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
-                            + user.id + ") to restrict background whitelist");
-                    mRestrictBackgroundWhitelistUids.append(uid, true);
-                    changed = true;
-                }
+            if (!mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+                Slog.i(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
+                        + userId + ") to restrict background whitelist");
+                mRestrictBackgroundWhitelistUids.append(uid, true);
+                changed = true;
             }
         }
         return changed;
@@ -546,7 +555,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // read policy from disk
             readPolicyLocked();
 
-            if (addDefaultRestrictBackgroundWhitelistUids()) {
+            if (addDefaultRestrictBackgroundWhitelistUidsLocked()) {
                 writePolicyLocked();
             }
 
@@ -734,7 +743,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // Remove any persistable state for the given user; both cleaning up after a
                         // USER_REMOVED, and one last sanity check during USER_ADDED
                         removeUserStateLocked(userId);
-                        // Update global restrict for new user
+                        if (action == ACTION_USER_ADDED) {
+                            // Add apps that are whitelisted by default.
+                            addDefaultRestrictBackgroundWhitelistUidsLocked(userId);
+                        }
+                        // Update global restrict for that user
                         updateRulesForGlobalChangeLocked(true);
                     }
                     break;
@@ -1751,6 +1764,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             writePolicy = true;
         }
+
+        // Remove entries from revoked default restricted background UID whitelist
+        for (int i = mRestrictBackgroundWhitelistRevokedUids.size() - 1; i >= 0; i--) {
+            final int uid = mRestrictBackgroundWhitelistRevokedUids.keyAt(i);
+            if (UserHandle.getUserId(uid) == userId) {
+                mRestrictBackgroundWhitelistRevokedUids.removeAt(i);
+                writePolicy = true;
+            }
+        }
+
         // Remove associated UID policies
         int[] uids = new int[0];
         for (int i = 0; i < mUidPolicy.size(); i++) {
