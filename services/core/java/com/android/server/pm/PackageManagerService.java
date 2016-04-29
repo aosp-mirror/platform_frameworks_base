@@ -437,6 +437,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     private static final int DEFAULT_VERIFICATION_RESPONSE = PackageManager.VERIFICATION_ALLOW;
 
+    static final String PLATFORM_PACKAGE_NAME = "android";
+
     static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
     static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
@@ -9731,7 +9733,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 switch (grant) {
                     case GRANT_INSTALL: {
                         // Revoke this as runtime permission to handle the case of
-                        // a runtime permission being downgraded to an install one. Also in permission review mode we keep dangerous permissions for legacy apps
+                        // a runtime permission being downgraded to an install one.
+                        // Also in permission review mode we keep dangerous permissions
+                        // for legacy apps
                         for (int userId : UserManagerService.getInstance().getUserIds()) {
                             if (origPermissions.getRuntimePermissionState(
                                     bp.name, userId) != null) {
@@ -9779,10 +9783,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     && !appSupportsRuntimePermissions) {
                                 // For legacy apps that need a permission review, every new
                                 // runtime permission is granted but it is pending a review.
-                                if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
-                                    permissionsState.grantRuntimePermission(bp, userId);
-                                    flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
-                                    // We changed the permission and flags, hence have to write.
+                                // We also need to review only platform defined runtime
+                                // permissions as these are the only ones the platform knows
+                                // how to disable the API to simulate revocation as legacy
+                                // apps don't expect to run with revoked permissions.
+                                if (PLATFORM_PACKAGE_NAME.equals(bp.sourcePackage)) {
+                                    if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+                                        flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
+                                        // We changed the flags, hence have to write.
+                                        changedRuntimePermissionUserIds = ArrayUtils.appendInt(
+                                                changedRuntimePermissionUserIds, userId);
+                                    }
+                                }
+                                if (permissionsState.grantRuntimePermission(bp, userId)
+                                        != PermissionsState.PERMISSION_OPERATION_FAILURE) {
+                                    // We changed the permission, hence have to write.
                                     changedRuntimePermissionUserIds = ArrayUtils.appendInt(
                                             changedRuntimePermissionUserIds, userId);
                                 }
