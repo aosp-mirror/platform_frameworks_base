@@ -302,6 +302,10 @@ public final class JobStatus {
         return job.getPriority();
     }
 
+    public int getFlags() {
+        return job.getFlags();
+    }
+
     public boolean hasConnectivityConstraint() {
         return (requiredConstraints&CONSTRAINT_CONNECTIVITY) != 0;
     }
@@ -421,12 +425,12 @@ public final class JobStatus {
         // satisfied).
         // AppNotIdle implicit constraint must be satisfied
         // DeviceNotDozing implicit constraint must be satisfied
-        return (isConstraintsSatisfied()
-                || (!job.isPeriodic()
-                && hasDeadlineConstraint() && (satisfiedConstraints&CONSTRAINT_DEADLINE) != 0)
-                )
-                && (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0
-                && (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0;
+        final boolean deadlineSatisfied = (!job.isPeriodic() && hasDeadlineConstraint()
+                && (satisfiedConstraints & CONSTRAINT_DEADLINE) != 0);
+        final boolean notIdle = (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0;
+        final boolean notDozing = (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0
+                || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        return (isConstraintsSatisfied() || deadlineSatisfied) && notIdle && notDozing;
     }
 
     static final int CONSTRAINTS_OF_INTEREST =
@@ -566,6 +570,10 @@ public final class JobStatus {
             if (job.getPriority() != 0) {
                 pw.print(prefix); pw.print("  Priority: "); pw.println(job.getPriority());
             }
+            if (job.getFlags() != 0) {
+                pw.print(prefix); pw.print("  Flags: ");
+                pw.println(Integer.toHexString(job.getFlags()));
+            }
             pw.print(prefix); pw.print("  Requires: charging=");
             pw.print(job.isRequireCharging()); pw.print(" deviceIdle=");
             pw.println(job.isRequireDeviceIdle());
@@ -617,6 +625,9 @@ public final class JobStatus {
         if (full) {
             pw.print(prefix); pw.print("Satisfied constraints:");
             dumpConstraints(pw, satisfiedConstraints);
+            pw.println();
+            pw.print(prefix); pw.print("Unsatisfied constraints:");
+            dumpConstraints(pw, (requiredConstraints & ~satisfiedConstraints));
             pw.println();
         }
         if (changedAuthorities != null) {

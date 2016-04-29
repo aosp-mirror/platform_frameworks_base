@@ -38,6 +38,9 @@ interface INetworkPolicyManager {
 
     boolean isUidForeground(int uid);
 
+    /** Higher priority listener before general event dispatch */
+    void setConnectivityListener(INetworkPolicyListener listener);
+
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 

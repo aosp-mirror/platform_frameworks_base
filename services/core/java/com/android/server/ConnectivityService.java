@@ -29,8 +29,12 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.RULE_UNKNOWN;
+
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
 import android.app.Notification;
@@ -96,8 +100,10 @@ import android.security.Credentials;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.LocalLog.ReadOnlyLocalLog;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -121,9 +127,9 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.KeepaliveTracker;
-import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
+import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.PermissionMonitor;
@@ -131,8 +137,8 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
+
 import com.google.android.collect.Lists;
-import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -152,11 +158,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * @hide
@@ -202,9 +208,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
     private Object mRulesLock = new Object();
     /** Currently active network rules by UID. */
+    @GuardedBy("mRulesLock")
     private SparseIntArray mUidRules = new SparseIntArray();
     /** Set of ifaces that are costly. */
-    private HashSet<String> mMeteredIfaces = Sets.newHashSet();
+    @GuardedBy("mRulesLock")
+    private ArraySet<String> mMeteredIfaces = new ArraySet<>();
+    /** Flag indicating if background data is restricted. */
+    @GuardedBy("mRulesLock")
+    private boolean mRestrictBackground;
 
     final private Context mContext;
     private int mNetworkPreference;
@@ -651,7 +662,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
         try {
-            mPolicyManager.registerListener(mPolicyListener);
+            mPolicyManager.setConnectivityListener(mPolicyListener);
+            mRestrictBackground = mPolicyManager.getRestrictBackground();
         } catch (RemoteException e) {
             // ouch, no rules updates means some processes may never get network
             loge("unable to register INetworkPolicyListener" + e.toString());
@@ -819,7 +831,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         throw new IllegalStateException("No free netIds");
     }
 
-    private NetworkState getFilteredNetworkState(int networkType, int uid) {
+    private NetworkState getFilteredNetworkState(int networkType, int uid, boolean ignoreBlocked) {
         if (mLegacyTypeTracker.isTypeSupported(networkType)) {
             final NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
             final NetworkState state;
@@ -834,7 +846,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 state = new NetworkState(info, new LinkProperties(), new NetworkCapabilities(),
                         null, null, null);
             }
-            filterNetworkStateForUid(state, uid);
+            filterNetworkStateForUid(state, uid, ignoreBlocked);
             return state;
         } else {
             return NetworkState.EMPTY;
@@ -890,22 +902,36 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Check if UID should be blocked from using the network with the given LinkProperties.
      */
-    private boolean isNetworkWithLinkPropertiesBlocked(LinkProperties lp, int uid) {
-        final boolean networkCostly;
+    private boolean isNetworkWithLinkPropertiesBlocked(LinkProperties lp, int uid,
+            boolean ignoreBlocked) {
+        // Networks aren't blocked when ignoring blocked status
+        if (ignoreBlocked) return false;
+        // Networks are never blocked for system services
+        if (uid < Process.FIRST_APPLICATION_UID) return false;
+
+        final boolean networkMetered;
         final int uidRules;
 
         final String iface = (lp == null ? "" : lp.getInterfaceName());
         synchronized (mRulesLock) {
-            networkCostly = mMeteredIfaces.contains(iface);
-            uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+            networkMetered = mMeteredIfaces.contains(iface);
+            uidRules = mUidRules.get(uid, RULE_UNKNOWN);
         }
 
-        if (uidRules == RULE_REJECT_ALL) {
-            return true;
-        } else if ((uidRules == RULE_REJECT_METERED) && networkCostly) {
-            return true;
-        } else {
-            return false;
+        switch (uidRules) {
+            case RULE_ALLOW_ALL:
+            case RULE_ALLOW_METERED:
+            case RULE_TEMPORARY_ALLOW_METERED:
+                return false;
+            case RULE_REJECT_METERED:
+                return networkMetered;
+            case RULE_REJECT_ALL:
+                return true;
+            case RULE_UNKNOWN:
+            default:
+                // When background data is restricted device-wide, the default
+                // behavior for apps should be like RULE_REJECT_METERED
+                return mRestrictBackground ? networkMetered : false;
         }
     }
 
@@ -930,10 +956,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * on {@link #isNetworkWithLinkPropertiesBlocked}, or
      * {@link NetworkInfo#isMetered()} based on network policies.
      */
-    private void filterNetworkStateForUid(NetworkState state, int uid) {
+    private void filterNetworkStateForUid(NetworkState state, int uid, boolean ignoreBlocked) {
         if (state == null || state.networkInfo == null || state.linkProperties == null) return;
 
-        if (isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid)) {
+        if (isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, ignoreBlocked)) {
             state.networkInfo.setDetailedState(DetailedState.BLOCKED, null, null);
         }
         if (mLockdownTracker != null) {
@@ -962,7 +988,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final NetworkState state = getUnfilteredActiveNetworkState(uid);
-        filterNetworkStateForUid(state, uid);
+        filterNetworkStateForUid(state, uid, false);
         maybeLogBlockedNetworkInfo(state.networkInfo, uid);
         return state.networkInfo;
     }
@@ -970,16 +996,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public Network getActiveNetwork() {
         enforceAccessPermission();
-        return getActiveNetworkForUidInternal(Binder.getCallingUid());
+        return getActiveNetworkForUidInternal(Binder.getCallingUid(), false);
     }
 
     @Override
-    public Network getActiveNetworkForUid(int uid) {
+    public Network getActiveNetworkForUid(int uid, boolean ignoreBlocked) {
         enforceConnectivityInternalPermission();
-        return getActiveNetworkForUidInternal(uid);
+        return getActiveNetworkForUidInternal(uid, ignoreBlocked);
     }
 
-    private Network getActiveNetworkForUidInternal(final int uid) {
+    private Network getActiveNetworkForUidInternal(final int uid, boolean ignoreBlocked) {
         final int user = UserHandle.getUserId(uid);
         int vpnNetId = NETID_UNSET;
         synchronized (mVpns) {
@@ -994,7 +1020,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (nai != null) return nai.network;
         }
         nai = getDefaultNetwork();
-        if (nai != null && isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid)) nai = null;
+        if (nai != null
+                && isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, ignoreBlocked)) {
+            nai = null;
+        }
         return nai != null ? nai.network : null;
     }
 
@@ -1006,10 +1035,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public NetworkInfo getActiveNetworkInfoForUid(int uid) {
+    public NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked) {
         enforceConnectivityInternalPermission();
         final NetworkState state = getUnfilteredActiveNetworkState(uid);
-        filterNetworkStateForUid(state, uid);
+        filterNetworkStateForUid(state, uid, ignoreBlocked);
         return state.networkInfo;
     }
 
@@ -1023,22 +1052,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // getUnfilteredActiveNetworkState.
             final NetworkState state = getUnfilteredActiveNetworkState(uid);
             if (state.networkInfo != null && state.networkInfo.getType() == networkType) {
-                filterNetworkStateForUid(state, uid);
+                filterNetworkStateForUid(state, uid, false);
                 return state.networkInfo;
             }
         }
-        final NetworkState state = getFilteredNetworkState(networkType, uid);
+        final NetworkState state = getFilteredNetworkState(networkType, uid, false);
         return state.networkInfo;
     }
 
     @Override
-    public NetworkInfo getNetworkInfoForNetwork(Network network) {
+    public NetworkInfo getNetworkInfoForUid(Network network, int uid, boolean ignoreBlocked) {
         enforceAccessPermission();
-        final int uid = Binder.getCallingUid();
         final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
         if (nai != null) {
             final NetworkState state = nai.getNetworkState();
-            filterNetworkStateForUid(state, uid);
+            filterNetworkStateForUid(state, uid, ignoreBlocked);
             return state.networkInfo;
         } else {
             return null;
@@ -1063,8 +1091,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public Network getNetworkForType(int networkType) {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
-        NetworkState state = getFilteredNetworkState(networkType, uid);
-        if (!isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid)) {
+        NetworkState state = getFilteredNetworkState(networkType, uid, false);
+        if (!isNetworkWithLinkPropertiesBlocked(state.linkProperties, uid, false)) {
             return state.network;
         }
         return null;
@@ -1381,6 +1409,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (LOGD_RULES) {
                 log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
             }
+
+            synchronized (mRulesLock) {
+                mRestrictBackground = restrictBackground;
+            }
+
             if (restrictBackground) {
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
@@ -1825,6 +1858,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println(value);
         }
         pw.decreaseIndent();
+        pw.println();
+
+        pw.print("Restrict background: ");
+        pw.println(mRestrictBackground);
         pw.println();
 
         pw.println("Network Requests:");
@@ -2768,7 +2805,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // which isn't meant to work on uncreated networks.
             if (!nai.created) return;
 
-            if (isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid)) return;
+            if (isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid, false)) return;
 
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_FORCE_REEVALUATION, uid);
         }
