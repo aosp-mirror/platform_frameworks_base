@@ -18,12 +18,14 @@ package com.android.internal.view;
 
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.IWindowSession;
+import android.view.PointerIcon;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -83,10 +85,17 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void dispatchDragEvent(DragEvent event) {
+        if (event.getAction() == DragEvent.ACTION_DROP) {
+            try {
+                mSession.reportDropResult(this, false);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     @Override
     public void updatePointerIcon(float x, float y) {
+        InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_NOT_SPECIFIED);
     }
 
     @Override
