@@ -626,7 +626,7 @@
     <!-- Title for the capability of an accessibility service to request touch exploration. -->
     <string name="capability_title_canRequestTouchExploration">Turn on Explore by Touch</string>
     <!-- Description for the capability of an accessibility service to request touch exploration. -->
-    <string name="capability_desc_canRequestTouchExploration">Touched items will be spoken aloud
+    <string name="capability_desc_canRequestTouchExploration">Tapped items will be spoken aloud
         and the screen can be explored using gestures.</string>
 
     <!-- Title for the capability of an accessibility service to request enhanced web accessibility. -->
@@ -1708,7 +1708,7 @@
     <string name="keyguard_password_enter_pin_prompt">New PIN code</string>
 
     <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
-    <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to type password</font></string>
+    <string name="keyguard_password_entry_touch_hint"><font size="17">Tap to type password</font></string>
 
     <!-- Instructions telling the user to enter their text password to unlock the keyguard.
          Displayed in one line in a large font.  -->
@@ -2577,7 +2577,7 @@
         is running</string>
     <!-- [CHAR LIMIT=NONE] Stub notification text for an app running a service that has provided
          a bad bad notification for itself. -->
-    <string name="app_running_notification_text">Touch for more information
+    <string name="app_running_notification_text">Tap for more information
         or to stop the app.</string>
 
     <!-- Preference framework strings. -->
@@ -2761,7 +2761,7 @@
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
 
     <!-- Notification details to tell the user that a heavy-weight application is running. -->
-    <string name="heavy_weight_notification_detail">Touch to switch to app</string>
+    <string name="heavy_weight_notification_detail">Tap to switch to app</string>
 
     <!-- Title of dialog prompting whether user wants to switch between heavy-weight apps. -->
     <string name="heavy_weight_switcher_title">Switch apps?</string>
@@ -2782,7 +2782,7 @@
 
     <!-- Notification details to tell the user that a process has exceeded its memory limit. -->
     <string name="dump_heap_notification_detail">Heap dump has been collected;
-        touch to share</string>
+        tap to share</string>
 
     <!-- Title of dialog prompting the user to share a heap dump. -->
     <string name="dump_heap_title">Share heap dump?</string>
@@ -2865,7 +2865,7 @@
     <string name="wifi_no_internet">Wi-Fi has no Internet access</string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
-    <string name="wifi_no_internet_detailed">Touch for options</string>
+    <string name="wifi_no_internet_detailed">Tap for options</string>
 
      <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
      <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
@@ -2887,7 +2887,7 @@
     <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
     <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>
     <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
-    <string name="wifi_p2p_enabled_notification_message">Touch for settings</string>
+    <string name="wifi_p2p_enabled_notification_message">Tap for settings</string>
 
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
@@ -2995,12 +2995,12 @@
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
     <!-- See USB_PREFERENCES. This is the message. -->
-    <string name="usb_notification_message">Touch for more options.</string>
+    <string name="usb_notification_message">Tap for more options.</string>
 
     <!-- Title of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_title">USB debugging connected</string>
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
-    <string name="adb_active_notification_message">Touch to disable USB debugging.</string>
+    <string name="adb_active_notification_message">Tap to disable USB debugging.</string>
 
     <!-- Title of notification shown to indicate that bug report is being collected. -->
     <string name="taking_remote_bugreport_notification_title">Taking bug report\u2026</string>
@@ -3057,12 +3057,12 @@
     <!-- Notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
     <string name="ext_media_unmountable_notification_title">Corrupted <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Touch to fix.</string>
+    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Tap to fix.</string>
 
     <!-- Notification title when external media is unsupported [CHAR LIMIT=30] -->
     <string name="ext_media_unsupported_notification_title">Unsupported <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unsupported [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Touch to set up in a supported format.</string>
+    <string name="ext_media_unsupported_notification_message">This device doesn\u2019t support this <xliff:g id="name" example="SD card">%s</xliff:g>. Tap to set up in a supported format.</string>
 
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
@@ -3148,7 +3148,7 @@
     <string name="permdesc_requestInstallPackages">Allows an application to request installation of packages.</string>
 
     <!-- Shown in the tutorial for tap twice for zoom control. -->
-    <string name="tutorial_double_tap_to_zoom_message_short">Touch twice for zoom control</string>
+    <string name="tutorial_double_tap_to_zoom_message_short">Tap twice for zoom control</string>
 
 
     <!-- Shown in gadget hosts (e.g. the home screen) when there was an error inflating
@@ -3235,9 +3235,9 @@
     <!-- The title of the notification when VPN is active with an application name. -->
     <string name="vpn_title_long">VPN is activated by <xliff:g id="app" example="FooVPN client">%s</xliff:g></string>
     <!-- The text of the notification when VPN is active. -->
-    <string name="vpn_text">Touch to manage the network.</string>
+    <string name="vpn_text">Tap to manage the network.</string>
     <!-- The text of the notification when VPN is active with a session name. -->
-    <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Touch to manage the network.</string>
+    <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Tap to manage the network.</string>
 
     <!-- Notification title when connecting to lockdown VPN. -->
     <string name="vpn_lockdown_connecting">Always-on VPN connecting\u2026</string>
@@ -3246,7 +3246,7 @@
     <!-- Notification title when error connecting to lockdown VPN. -->
     <string name="vpn_lockdown_error">Always-on VPN error</string>
     <!-- Notification body that indicates user can touch to configure lockdown VPN connection. -->
-    <string name="vpn_lockdown_config">Touch to configure</string>
+    <string name="vpn_lockdown_config">Tap to configure</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
@@ -3261,12 +3261,12 @@
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->
     <string name="car_mode_disable_notification_title">Car mode enabled</string>
-    <string name="car_mode_disable_notification_message">Touch to exit car mode.</string>
+    <string name="car_mode_disable_notification_message">Tap to exit car mode.</string>
 
     <!-- Strings for tethered notification -->
     <!-- Shown when the device is tethered -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
-    <string name="tethered_notification_message">Touch to set up.</string>
+    <string name="tethered_notification_message">Tap to set up.</string>
 
     <!--  Strings for possible PreferenceActivity Back/Next buttons -->
     <string name="back_button_label">Back</string>
@@ -3352,7 +3352,7 @@
     <!-- Description of the button to decrease the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrease</string>
     <!-- Description of the tap and hold action to get into scroll mode in NumberPicker. [CHAR LIMIT=NONE] -->
-    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> touch and hold.</string>
+    <string name="number_picker_increment_scroll_mode"><xliff:g id="value" example="3">%s</xliff:g> touch &amp; hold.</string>
     <!-- Description of the scrolling action in NumberPicker. [CHAR LIMIT=NONE] -->
     <string name="number_picker_increment_scroll_action">Slide up to increase and down to decrease.</string>
 
@@ -3470,7 +3470,7 @@
     <!-- Notification title when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_warning_title">Data usage warning</string>
     <!-- Notification body when data usage has exceeded warning threshold. [CHAR LIMIT=32] -->
-    <string name="data_usage_warning_body">Touch to view usage and settings.</string>
+    <string name="data_usage_warning_body">Tap to view usage and settings.</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_title">2G-3G data limit reached</string>
@@ -3497,7 +3497,7 @@
     <!-- Notification title when background data usage is limited. [CHAR LIMIT=32] -->
     <string name="data_usage_restricted_title">Background data restricted</string>
     <!-- Notification body when background data usage is limited. [CHAR LIMIT=32] -->
-    <string name="data_usage_restricted_body">Touch to remove restriction.</string>
+    <string name="data_usage_restricted_body">Tap to remove restriction.</string>
 
     <!-- SSL Certificate dialogs -->
     <!-- Title for an SSL Certificate dialog -->
@@ -4080,9 +4080,9 @@
     <string name="date_picker_day_typeface">sans-serif-medium</string>
 
     <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch and hold Back.</string>
+    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back.</string>
     <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-    <string name="lock_to_app_toast_accessible">To unpin this screen, touch and hold Overview.</string>
+    <string name="lock_to_app_toast_accessible">To unpin this screen, touch &amp; hold Overview.</string>
     <!-- Notify user that they are locked in lock-to-app mode -->
     <string name="lock_to_app_toast_locked">App is pinned: Unpinning isn\'t allowed on this device.</string>
     <!-- Starting lock-to-app indication. -->
