@@ -91,8 +91,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
-                // Check if this was the result of hitting the enter key
                 final boolean isSoftImeEvent = event == null
                         && (actionId == EditorInfo.IME_ACTION_DONE
                         || actionId == EditorInfo.IME_ACTION_NEXT
@@ -102,7 +100,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         && event.getAction() == KeyEvent.ACTION_DOWN;
 
                 if (isSoftImeEvent || isKeyboardEnterKey) {
-                    sendRemoteInput();
+                    if (mEditText.length() > 0) {
+                        sendRemoteInput();
+                    }
+                    // Consume action to prevent IME from closing.
                     return true;
                 }
                 return false;
