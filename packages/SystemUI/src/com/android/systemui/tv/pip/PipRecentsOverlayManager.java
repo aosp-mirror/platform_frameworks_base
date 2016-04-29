@@ -134,7 +134,8 @@ public class PipRecentsOverlayManager {
      */
     public void requestFocus(boolean allowRecentsFocusable) {
         mRecentsView.setVisibility(allowRecentsFocusable ? View.VISIBLE : View.GONE);
-        if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || mIsPipFocusedInRecent) {
+        if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || mIsPipFocusedInRecent
+                || !mPipManager.isPipShown()) {
             return;
         }
         mIsPipFocusedInRecent = true;
@@ -153,7 +154,8 @@ public class PipRecentsOverlayManager {
      * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
      */
     public void clearFocus() {
-        if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || !mIsPipFocusedInRecent) {
+        if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || !mIsPipFocusedInRecent
+                || !mPipManager.isPipShown()) {
             return;
         }
         if (!mRecentsView.hasFocus()) {
