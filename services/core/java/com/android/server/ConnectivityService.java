@@ -730,7 +730,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         //set up the listener for user state for creating user VPNs
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_STARTING);
-        intentFilter.addAction(Intent.ACTION_USER_STOPPING);
+        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         intentFilter.addAction(Intent.ACTION_USER_ADDED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
@@ -3622,7 +3622,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized(mVpns) {
             Vpn userVpn = mVpns.get(userId);
             if (userVpn == null) {
-                loge("Stopping user has no VPN");
+                loge("Stopped user has no VPN");
                 return;
             }
             mVpns.delete(userId);
@@ -3667,7 +3667,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             if (Intent.ACTION_USER_STARTING.equals(action)) {
                 onUserStart(userId);
-            } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
+            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
                 onUserStop(userId);
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 onUserAdded(userId);

@@ -396,8 +396,8 @@ public class SyncManager {
                 onUserRemoved(userId);
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 onUserUnlocked(userId);
-            } else if (Intent.ACTION_USER_STOPPING.equals(action)) {
-                onUserStopping(userId);
+            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                onUserStopped(userId);
             }
         }
     };
@@ -550,7 +550,7 @@ public class SyncManager {
         intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
-        intentFilter.addAction(Intent.ACTION_USER_STOPPING);
+        intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
@@ -1422,7 +1422,7 @@ public class SyncManager {
         }
     }
 
-    private void onUserStopping(int userId) {
+    private void onUserStopped(int userId) {
         updateRunningAccounts(null /* Don't sync any target */);
 
         cancelActiveSync(
