@@ -357,6 +357,7 @@ public class ContextHubInfo {
       retVal += "\n\tPeakMips : " + mPeakMips;
       retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
       retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
+      retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
       retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
       retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
 
@@ -375,6 +376,7 @@ public class ContextHubInfo {
         mStoppedPowerDrawMw = in.readFloat();
         mSleepPowerDrawMw = in.readFloat();
         mPeakPowerDrawMw = in.readFloat();
+        mMaxPacketLengthBytes = in.readInt();
 
         int numSupportedSensors = in.readInt();
         mSupportedSensors = new int[numSupportedSensors];
@@ -398,6 +400,7 @@ public class ContextHubInfo {
         out.writeFloat(mStoppedPowerDrawMw);
         out.writeFloat(mSleepPowerDrawMw);
         out.writeFloat(mPeakPowerDrawMw);
+        out.writeInt(mMaxPacketLengthBytes);
 
         out.writeInt(mSupportedSensors.length);
         out.writeIntArray(mSupportedSensors);
