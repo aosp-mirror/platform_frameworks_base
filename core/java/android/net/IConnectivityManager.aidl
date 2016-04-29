@@ -44,11 +44,11 @@ import com.android.internal.net.VpnProfile;
 interface IConnectivityManager
 {
     Network getActiveNetwork();
-    Network getActiveNetworkForUid(int uid);
+    Network getActiveNetworkForUid(int uid, boolean ignoreBlocked);
     NetworkInfo getActiveNetworkInfo();
-    NetworkInfo getActiveNetworkInfoForUid(int uid);
+    NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked);
     NetworkInfo getNetworkInfo(int networkType);
-    NetworkInfo getNetworkInfoForNetwork(in Network network);
+    NetworkInfo getNetworkInfoForUid(in Network network, int uid, boolean ignoreBlocked);
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();

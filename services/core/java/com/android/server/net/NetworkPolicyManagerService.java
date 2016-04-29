@@ -48,7 +48,6 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
-import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
@@ -348,6 +347,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Foreground at UID granularity. */
     final SparseIntArray mUidState = new SparseIntArray();
+
+    /** Higher priority listener before general event dispatch */
+    private INetworkPolicyListener mConnectivityListener;
 
     private final RemoteCallbackList<INetworkPolicyListener>
             mListeners = new RemoteCallbackList<>();
@@ -1391,12 +1393,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final String tag = in.getName();
                 if (type == START_TAG) {
                     if (TAG_POLICY_LIST.equals(tag)) {
+                        final boolean oldValue = mRestrictBackground;
                         version = readIntAttribute(in, ATTR_VERSION);
                         if (version >= VERSION_ADDED_RESTRICT_BACKGROUND) {
                             mRestrictBackground = readBooleanAttribute(
                                     in, ATTR_RESTRICT_BACKGROUND);
                         } else {
                             mRestrictBackground = false;
+                        }
+                        if (mRestrictBackground != oldValue) {
+                            // Some early services may have read the default value,
+                            // so notify them that it's changed
+                            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED,
+                                    mRestrictBackground ? 1 : 0, 0).sendToTarget();
                         }
 
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
@@ -1766,20 +1775,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public void setConnectivityListener(INetworkPolicyListener listener) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        if (mConnectivityListener != null) {
+            throw new IllegalStateException("Connectivity listener already registered");
+        }
+        mConnectivityListener = listener;
+    }
+
+    @Override
     public void registerListener(INetworkPolicyListener listener) {
         // TODO: create permission for observing network policy
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
         mListeners.register(listener);
-
-        // TODO: consider dispatching existing rules to new listeners
     }
 
     @Override
     public void unregisterListener(INetworkPolicyListener listener) {
         // TODO: create permission for observing network policy
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-
         mListeners.unregister(listener);
     }
 
@@ -2754,8 +2768,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final boolean isBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
         final boolean isWhitelisted = mRestrictBackgroundWhitelistUids.get(uid);
 
-        int newRule = RULE_ALLOW_ALL;
-        final int oldRule = mUidRules.get(uid);
+        int newRule = RULE_UNKNOWN;
+        final int oldRule = mUidRules.get(uid, RULE_UNKNOWN);
 
         // First step: define the new rule based on user restrictions and foreground state.
         if (isForeground) {
@@ -2777,8 +2791,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", oldRule: " + ruleToString(oldRule));
         }
 
-
-        if (newRule == RULE_ALLOW_ALL) {
+        if (newRule == RULE_UNKNOWN) {
             mUidRules.delete(uid);
         } else {
             mUidRules.put(uid, newRule);
@@ -2858,6 +2871,45 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void dispatchUidRulesChanged(INetworkPolicyListener listener, int uid, int uidRules) {
+        if (listener != null) {
+            try {
+                listener.onUidRulesChanged(uid, uidRules);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private void dispatchMeteredIfacesChanged(INetworkPolicyListener listener,
+            String[] meteredIfaces) {
+        if (listener != null) {
+            try {
+                listener.onMeteredIfacesChanged(meteredIfaces);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private void dispatchRestrictBackgroundChanged(INetworkPolicyListener listener,
+            boolean restrictBackground) {
+        if (listener != null) {
+            try {
+                listener.onRestrictBackgroundChanged(restrictBackground);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    private void dispatchRestrictBackgroundWhitelistChanged(INetworkPolicyListener listener,
+            int uid, boolean whitelisted) {
+        if (listener != null) {
+            try {
+                listener.onRestrictBackgroundWhitelistChanged(uid, whitelisted);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -2865,30 +2917,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 case MSG_RULES_CHANGED: {
                     final int uid = msg.arg1;
                     final int uidRules = msg.arg2;
+                    dispatchUidRulesChanged(mConnectivityListener, uid, uidRules);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        if (listener != null) {
-                            try {
-                                listener.onUidRulesChanged(uid, uidRules);
-                            } catch (RemoteException e) {
-                            }
-                        }
+                        dispatchUidRulesChanged(listener, uid, uidRules);
                     }
                     mListeners.finishBroadcast();
                     return true;
                 }
                 case MSG_METERED_IFACES_CHANGED: {
                     final String[] meteredIfaces = (String[]) msg.obj;
+                    dispatchMeteredIfacesChanged(mConnectivityListener, meteredIfaces);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        if (listener != null) {
-                            try {
-                                listener.onMeteredIfacesChanged(meteredIfaces);
-                            } catch (RemoteException e) {
-                            }
-                        }
+                        dispatchMeteredIfacesChanged(listener, meteredIfaces);
                     }
                     mListeners.finishBroadcast();
                     return true;
@@ -2915,15 +2959,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 case MSG_RESTRICT_BACKGROUND_CHANGED: {
                     final boolean restrictBackground = msg.arg1 != 0;
+                    dispatchRestrictBackgroundChanged(mConnectivityListener, restrictBackground);
                     final int length = mListeners.beginBroadcast();
                     for (int i = 0; i < length; i++) {
                         final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        if (listener != null) {
-                            try {
-                                listener.onRestrictBackgroundChanged(restrictBackground);
-                            } catch (RemoteException e) {
-                            }
-                        }
+                        dispatchRestrictBackgroundChanged(listener, restrictBackground);
                     }
                     mListeners.finishBroadcast();
                     final Intent intent =
@@ -2947,18 +2987,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final boolean changed = msg.arg2 == 1;
                     final Boolean whitelisted = (Boolean) msg.obj;
 
+                    // First notify internal listeners...
                     if (whitelisted != null) {
+                        final boolean whitelistedBool = whitelisted.booleanValue();
+                        dispatchRestrictBackgroundWhitelistChanged(mConnectivityListener, uid,
+                                whitelistedBool);
                         final int length = mListeners.beginBroadcast();
                         for (int i = 0; i < length; i++) {
-                            // First notify internal listeners...
                             final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                            if (listener != null) {
-                                try {
-                                    listener.onRestrictBackgroundWhitelistChanged(uid,
-                                            whitelisted.booleanValue());
-                                } catch (RemoteException e) {
-                                }
-                            }
+                            dispatchRestrictBackgroundWhitelistChanged(listener, uid,
+                                    whitelistedBool);
                         }
                         mListeners.finishBroadcast();
                     }

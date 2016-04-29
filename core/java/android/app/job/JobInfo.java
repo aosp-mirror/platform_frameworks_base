@@ -16,6 +16,8 @@
 
 package android.app.job;
 
+import static android.util.TimeUtils.formatDuration;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -24,7 +26,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Log;
-import static android.util.TimeUtils.formatDuration;
 
 import java.util.ArrayList;
 
@@ -154,6 +155,20 @@ public class JobInfo implements Parcelable {
      */
     public static final int PRIORITY_ADJ_ALWAYS_RUNNING = -80;
 
+    /**
+     * Indicates that the implementation of this job will be using
+     * {@link JobService#startForeground(int, android.app.Notification)} to run
+     * in the foreground.
+     * <p>
+     * When set, the internal scheduling of this job will ignore any background
+     * network restrictions for the requesting app. Note that this flag alone
+     * doesn't actually place your {@link JobService} in the foreground; you
+     * still need to post the notification yourself.
+     *
+     * @hide
+     */
+    public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final ComponentName service;
@@ -174,6 +189,7 @@ public class JobInfo implements Parcelable {
     private final long initialBackoffMillis;
     private final int backoffPolicy;
     private final int priority;
+    private final int flags;
 
     /**
      * Unique job id associated with this class. This is assigned to your job by the scheduler.
@@ -199,6 +215,11 @@ public class JobInfo implements Parcelable {
     /** @hide */
     public int getPriority() {
         return priority;
+    }
+
+    /** @hide */
+    public int getFlags() {
+        return flags;
     }
 
     /**
@@ -356,6 +377,7 @@ public class JobInfo implements Parcelable {
         hasEarlyConstraint = in.readInt() == 1;
         hasLateConstraint = in.readInt() == 1;
         priority = in.readInt();
+        flags = in.readInt();
     }
 
     private JobInfo(JobInfo.Builder b) {
@@ -381,6 +403,7 @@ public class JobInfo implements Parcelable {
         hasEarlyConstraint = b.mHasEarlyConstraint;
         hasLateConstraint = b.mHasLateConstraint;
         priority = b.mPriority;
+        flags = b.mFlags;
     }
 
     @Override
@@ -410,6 +433,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(hasEarlyConstraint ? 1 : 0);
         out.writeInt(hasLateConstraint ? 1 : 0);
         out.writeInt(priority);
+        out.writeInt(this.flags);
     }
 
     public static final Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
@@ -504,6 +528,7 @@ public class JobInfo implements Parcelable {
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
         private ComponentName mJobService;
         private int mPriority = PRIORITY_DEFAULT;
+        private int mFlags;
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;
@@ -539,11 +564,15 @@ public class JobInfo implements Parcelable {
             mJobId = jobId;
         }
 
-        /**
-         * @hide
-         */
+        /** @hide */
         public Builder setPriority(int priority) {
             mPriority = priority;
+            return this;
+        }
+
+        /** @hide */
+        public Builder setFlags(int flags) {
+            mFlags = flags;
             return this;
         }
 
