@@ -236,6 +236,8 @@ public:
 
     static const Matrix4& identity();
 
+    void invalidateType() { mType = kTypeUnknown; }
+
 private:
     mutable uint8_t mType;
 
