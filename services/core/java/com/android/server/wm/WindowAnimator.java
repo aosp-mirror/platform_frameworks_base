@@ -261,7 +261,7 @@ public class WindowAnimator {
                     continue;
                 }
                 final WindowStateAnimator winAnimator = win.mWinAnimator;
-                if ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
+                if (mPolicy.isKeyguardShowingAndNotOccluded()) {
                     if (!winAnimator.mAnimating) {
                         if (DEBUG_KEYGUARD) Slog.d(TAG,
                                 "updateWindowsLocked: creating delay animation");
