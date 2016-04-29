@@ -130,6 +130,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     ServiceState mLastServiceState;
+    private boolean mUserSetup;
 
     /**
      * Construct this controller object and register for updates.
@@ -490,6 +491,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 MobileSignalController controller = new MobileSignalController(mContext, mConfig,
                         mHasMobileDataFeature, mPhone, mCallbackHandler,
                         this, subscriptions.get(i), mSubDefaults, mReceiverHandler.getLooper());
+                controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
                     mDefaultSignalController = controller;
@@ -514,6 +516,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // inet condition and airplane mode.
         pushConnectivityToSignals();
         updateAirplaneMode(true /* force */);
+    }
+
+    public void setUserSetupComplete(final boolean userSetup) {
+        mReceiverHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleSetUserSetupComplete(userSetup);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void handleSetUserSetupComplete(boolean userSetup) {
+        mUserSetup = userSetup;
+        for (MobileSignalController controller : mMobileSignalControllers.values()) {
+            controller.setUserSetupComplete(mUserSetup);
+        }
     }
 
     @VisibleForTesting

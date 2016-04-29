@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar.policy;
 
+import android.net.NetworkCapabilities;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
-
 import com.android.settingslib.net.DataUsageController;
 import org.mockito.Mockito;
 
@@ -99,6 +99,29 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
+    public void testDataDisabledIcon() {
+        setupNetworkController();
+        Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
+        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+
+        verifyDataIndicators(TelephonyIcons.ICON_DATA_DISABLED,
+                TelephonyIcons.QS_ICON_DATA_DISABLED);
+    }
+
+    public void testDataDisabledIcon_UserNotSetup() {
+        setupNetworkController();
+        Mockito.when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED, 0);
+        setConnectivity(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
+        mNetworkController.handleSetUserSetupComplete(false);
+
+        // Don't show the X until the device is setup.
+        verifyDataIndicators(0, 0);
+    }
+
     public void test4gDataIconConfigChange() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
@@ -145,7 +168,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, DEFAULT_ICON);
         verifyLastQsMobileDataIndicators(true, DEFAULT_QS_SIGNAL_STRENGTH,
                 DEFAULT_QS_ICON, in, out);
-
     }
 
     private void verifyDataIndicators(int dataIcon, int qsDataIcon) {
