@@ -421,8 +421,6 @@
     <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to Cellular handover</string>
     <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
     <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
-    <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
-    <string name="legacy_dhcp_client">Use legacy DHCP client</string>
     <!-- Setting Checkbox title whether to always keep cellular data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Cellular data always active</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
