@@ -836,6 +836,8 @@ public final class PrintManagerService extends SystemService {
             BackgroundThread.getHandler().post(new Runnable() {
                 @Override
                 public void run() {
+                    if (!mUserManager.isUserUnlockingOrUnlocked(userId)) return;
+
                     UserState userState;
                     synchronized (mLock) {
                         userState = getOrCreateUserStateLocked(userId, true);
