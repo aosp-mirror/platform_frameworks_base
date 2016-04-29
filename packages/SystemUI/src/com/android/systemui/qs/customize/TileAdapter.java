@@ -81,11 +81,16 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private Holder mCurrentDrag;
     private boolean mAccessibilityMoving;
     private int mAccessibilityFromIndex;
+    private QSTileHost mHost;
 
     public TileAdapter(Context context) {
         mContext = context;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mItemTouchHelper = new ItemTouchHelper(mCallbacks);
+    }
+
+    public void setHost(QSTileHost host) {
+        mHost = host;
     }
 
     @Override
@@ -108,7 +113,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             newSpecs.add(mTiles.get(i).spec);
         }
         host.changeTiles(mCurrentSpecs, newSpecs);
-        setTileSpecs(newSpecs);
+        mCurrentSpecs = newSpecs;
     }
 
     public void setTileSpecs(List<String> currentSpecs) {
@@ -285,6 +290,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         move(mAccessibilityFromIndex, position, v);
         notifyItemChanged(mAccessibilityFromIndex);
         notifyItemMoved(mAccessibilityFromIndex, position);
+        saveSpecs(mHost);
     }
 
     private void showAccessibilityDialog(final int position, final View v) {
@@ -373,6 +379,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     fromLabel, (to + 1));
         }
         v.announceForAccessibility(announcement);
+        saveSpecs(mHost);
         return true;
     }
 
