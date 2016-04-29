@@ -170,7 +170,7 @@ static int get_app_instance_for_app_id(uint64_t app_id) {
             return current->first;
         }
     }
-    ALOGD("Cannot find app for app instance %d.", app_id);
+    ALOGD("Cannot find app for app instance %" PRIu64 ".", app_id);
     return -1;
 }
 
