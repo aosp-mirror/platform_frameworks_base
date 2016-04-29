@@ -1441,6 +1441,18 @@ class WindowStateAnimator {
             return;
         }
 
+        // Do not change surface properties of opening apps if we are waiting for the
+        // transition to be ready. transitionGoodToGo could be not ready even after all
+        // opening apps are drawn. It's only waiting on isFetchingAppTransitionsSpecs()
+        // to get the animation spec. (For example, go into Recents and immediately open
+        // the same app again before the app's surface is destroyed or saved, the surface
+        // is always ready in the whole process.) If we go ahead here, the opening app
+        // will be shown with the full size before the correct animation spec arrives.
+        if (mService.mAppTransition.isReady() && isDummyAnimation() &&
+                mService.mOpeningApps.contains(w.mAppToken)) {
+            return;
+        }
+
         boolean displayed = false;
 
         computeShownFrameLocked();
