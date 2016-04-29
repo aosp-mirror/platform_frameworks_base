@@ -330,7 +330,7 @@ def check_emoji_defaults(default_emoji):
         0x2764, # HEAVY BLACK HEART
     }
     assert missing_text_chars == set(), (
-        'Text style version of some emoji characters are missing.')
+        'Text style version of some emoji characters are missing: ' + repr(missing_text_chars))
 
 
 # Setting reverse to true returns a dictionary that maps the values to sets of
@@ -411,6 +411,20 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
 
+    # filter modern pentathlon, as it seems likely to be removed from final spec
+    def is_excluded(n):
+        return n == 0x1f93b
+
+    def contains_excluded(t):
+        if type(t) == int:
+            return is_excluded(t)
+        return any(is_excluded(cp) for cp in t)
+
+    # filter modern pentathlon, as it seems likely to be removed from final spec
+    _emoji_properties['Emoji'] = set(
+        t for t in _emoji_properties['Emoji'] if not contains_excluded(t))
+    _emoji_sequences = dict(
+        (t, v) for (t, v) in _emoji_sequences.items() if not contains_excluded(t))
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
