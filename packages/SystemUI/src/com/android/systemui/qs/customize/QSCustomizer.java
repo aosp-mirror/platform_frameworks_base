@@ -106,6 +106,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void setHost(QSTileHost host) {
         mHost = host;
         mPhoneStatusBar = host.getPhoneStatusBar();
+        mTileAdapter.setHost(host);
     }
 
     public void setContainer(NotificationsQuickSettingsContainer notificationsQsContainer) {
