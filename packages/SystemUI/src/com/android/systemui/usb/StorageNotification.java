@@ -654,8 +654,9 @@ public class StorageNotification extends SystemUI {
         intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
 
         final VolumeInfo vol = mStorageManager.findVolumeByQualifiedUuid(move.volumeUuid);
-        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
-
+        if (vol != null) {
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+        }
         return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
