@@ -389,6 +389,8 @@ public final class ViewRootImpl implements ViewParent,
     /** Set to true once doDie() has been called. */
     private boolean mRemoved;
 
+    private boolean mNeedsHwRendererSetup;
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -915,6 +917,11 @@ public final class ViewRootImpl implements ViewParent,
                 mWindowAttributes.surfaceInsets.set(
                         oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom);
                 mWindowAttributes.hasManualSurfaceInsets = oldHasManualSurfaceInsets;
+            } else if (mWindowAttributes.surfaceInsets.left != oldInsetLeft
+                    || mWindowAttributes.surfaceInsets.top != oldInsetTop
+                    || mWindowAttributes.surfaceInsets.right != oldInsetRight
+                    || mWindowAttributes.surfaceInsets.bottom != oldInsetBottom) {
+                mNeedsHwRendererSetup = true;
             }
 
             applyKeepScreenOnFlag(mWindowAttributes);
@@ -1959,9 +1966,11 @@ public final class ViewRootImpl implements ViewParent,
             if (hardwareRenderer != null && hardwareRenderer.isEnabled()) {
                 if (hwInitialized
                         || mWidth != hardwareRenderer.getWidth()
-                        || mHeight != hardwareRenderer.getHeight()) {
+                        || mHeight != hardwareRenderer.getHeight()
+                        || mNeedsHwRendererSetup) {
                     hardwareRenderer.setup(mWidth, mHeight, mAttachInfo,
                             mWindowAttributes.surfaceInsets);
+                    mNeedsHwRendererSetup = false;
                 }
             }
 
