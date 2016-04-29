@@ -862,7 +862,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_STOPPING);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -871,12 +870,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     onRemoveUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                             UserHandle.USER_NULL));
                 }
-                // TODO: Race condition causing problems when cleaning up on stopping a user.
-                // Comment this out for now.
-                // else if (Intent.ACTION_USER_STOPPING.equals(action)) {
-                //     onStoppingUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                //             UserHandle.USER_NULL));
-                // }
             }
         }, userFilter);
 
