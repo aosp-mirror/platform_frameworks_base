@@ -114,6 +114,11 @@ public class MobileSignalController extends SignalController<
         notifyListenersIfNecessary();
     }
 
+    public void setUserSetupComplete(boolean userSetup) {
+        mCurrentState.userSetup = userSetup;
+        notifyListenersIfNecessary();
+    }
+
     @Override
     public void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
         boolean isValidated = validatedTransports.get(mTransportType);
@@ -204,11 +209,13 @@ public class MobileSignalController extends SignalController<
 
         String contentDescription = getStringIfExists(getContentDescription());
         String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+        final boolean dataDisabled = mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
+                && mCurrentState.userSetup;
 
-        // Show icon in QS when we are connected or need to show roaming.
+        // Show icon in QS when we are connected or need to show roaming or data is disabled.
         boolean showDataIcon = mCurrentState.dataConnected
                 || mCurrentState.iconGroup == TelephonyIcons.ROAMING
-                || mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
+                || dataDisabled;
         IconState statusIcon = new IconState(mCurrentState.enabled && !mCurrentState.airplaneMode,
                 getCurrentIconId(), contentDescription);
 
@@ -230,7 +237,7 @@ public class MobileSignalController extends SignalController<
                         && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault
                 || mCurrentState.iconGroup == TelephonyIcons.ROAMING
-                || mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
+                || dataDisabled;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
@@ -511,6 +518,7 @@ public class MobileSignalController extends SignalController<
         boolean airplaneMode;
         boolean carrierNetworkChangeMode;
         boolean isDefault;
+        boolean userSetup;
 
         @Override
         public void copyFrom(State s) {
@@ -524,6 +532,7 @@ public class MobileSignalController extends SignalController<
             isEmergency = state.isEmergency;
             airplaneMode = state.airplaneMode;
             carrierNetworkChangeMode = state.carrierNetworkChangeMode;
+            userSetup = state.userSetup;
         }
 
         @Override
@@ -537,7 +546,9 @@ public class MobileSignalController extends SignalController<
             builder.append("isDefault=").append(isDefault).append(',');
             builder.append("isEmergency=").append(isEmergency).append(',');
             builder.append("airplaneMode=").append(airplaneMode).append(',');
-            builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode);
+            builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
+                    .append(',');
+            builder.append("userSetup=").append(userSetup);
         }
 
         @Override
@@ -550,6 +561,7 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).isEmergency == isEmergency
                     && ((MobileState) o).airplaneMode == airplaneMode
                     && ((MobileState) o).carrierNetworkChangeMode == carrierNetworkChangeMode
+                    && ((MobileState) o).userSetup == userSetup
                     && ((MobileState) o).isDefault == isDefault;
         }
     }
