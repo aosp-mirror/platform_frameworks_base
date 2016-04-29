@@ -471,18 +471,19 @@ GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture) {
+GlopBuilder& GlopBuilder::setFillExternalTexture(Texture& texture, Matrix4& textureTransform) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage | kRoundRectClipStage);
 
     mOutGlop->fill.texture = { &texture,
             GL_TEXTURE_EXTERNAL_OES, GL_LINEAR, GL_CLAMP_TO_EDGE,
-            nullptr };
+            &textureTransform };
 
     setFill(SK_ColorWHITE, 1.0f, SkXfermode::kSrc_Mode, Blend::ModeOrderSwap::NoSwap,
             nullptr, nullptr);
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
+    mDescription.hasTextureTransform = true;
     return *this;
 }
 

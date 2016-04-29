@@ -101,7 +101,10 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
     sp<Fence> sourceFence;
-    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence);
+    Matrix4 texTransform;
+    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence,
+            texTransform.data);
+    texTransform.invalidateType();
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
         return CopyResult::UnknownError;
@@ -163,8 +166,8 @@ CopyResult Readback::copySurfaceInto(renderthread::RenderThread& renderThread,
         Glop glop;
         GlopBuilder(renderState, caches, &glop)
                 .setRoundRectClipState(nullptr)
-                .setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
-                .setFillExternalTexture(sourceTexture)
+                .setMeshTexturedUnitQuad(nullptr)
+                .setFillExternalTexture(sourceTexture, texTransform)
                 .setTransform(Matrix4::identity(), TransformFlags::None)
                 .setModelViewMapUnitToRect(destRect)
                 .build();
