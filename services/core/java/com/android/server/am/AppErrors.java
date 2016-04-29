@@ -304,6 +304,15 @@ class AppErrors {
      * @param crashInfo describing the failure
      */
     void crashApplication(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            crashApplicationInner(r, crashInfo);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    void crashApplicationInner(ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
         long timeMillis = System.currentTimeMillis();
         String shortMsg = crashInfo.exceptionClassName;
         String longMsg = crashInfo.exceptionMessage;
@@ -317,49 +326,20 @@ class AppErrors {
         AppErrorResult result = new AppErrorResult();
         TaskRecord task;
         synchronized (mService) {
-            if (mService.mController != null) {
-                try {
-                    String name = r != null ? r.processName : null;
-                    int pid = r != null ? r.pid : Binder.getCallingPid();
-                    int uid = r != null ? r.info.uid : Binder.getCallingUid();
-                    if (!mService.mController.appCrashed(name, pid,
-                            shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
-                        if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
-                                && "Native crash".equals(crashInfo.exceptionClassName)) {
-                            Slog.w(TAG, "Skip killing native crashed app " + name
-                                    + "(" + pid + ") during testing");
-                        } else {
-                            Slog.w(TAG, "Force-killing crashed app " + name
-                                    + " at watcher's request");
-                            if (r != null) {
-                                r.kill("crash", true);
-                            } else {
-                                // Huh.
-                                Process.killProcess(pid);
-                                ActivityManagerService.killProcessGroup(uid, pid);
-                            }
-                        }
-                        return;
-                    }
-                } catch (RemoteException e) {
-                    mService.mController = null;
-                    Watchdog.getInstance().setActivityController(null);
-                }
+            /**
+             * If crash is handled by instance of {@link android.app.IActivityController},
+             * finish now and don't show the app error dialog.
+             */
+            if (handleAppCrashInActivityController(r, crashInfo, shortMsg, longMsg, stackTrace,
+                    timeMillis)) {
+                return;
             }
 
-            final long origId = Binder.clearCallingIdentity();
-
-            // If this process is running instrumentation, finish it.
+            /**
+             * If this process was running instrumentation, finish now - it will be handled in
+             * {@link ActivityManagerService#handleAppDiedLocked}.
+             */
             if (r != null && r.instrumentationClass != null) {
-                Slog.w(TAG, "Error in app " + r.processName
-                        + " running instrumentation " + r.instrumentationClass + ":");
-                if (shortMsg != null) Slog.w(TAG, "  " + shortMsg);
-                if (longMsg != null) Slog.w(TAG, "  " + longMsg);
-                Bundle info = new Bundle();
-                info.putString("shortMsg", shortMsg);
-                info.putString("longMsg", longMsg);
-                mService.finishInstrumentationLocked(r, Activity.RESULT_CANCELED, info);
-                Binder.restoreCallingIdentity(origId);
                 return;
             }
 
@@ -375,7 +355,6 @@ class AppErrors {
             // If we can't identify the process or it's already exceeded its crash quota,
             // quit right away without showing a crash dialog.
             if (r == null || !makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, data)) {
-                Binder.restoreCallingIdentity(origId);
                 return;
             }
 
@@ -385,97 +364,90 @@ class AppErrors {
             task = data.task;
             msg.obj = data;
             mService.mUiHandler.sendMessage(msg);
-
-            Binder.restoreCallingIdentity(origId);
         }
 
         int res = result.get();
 
         Intent appErrorIntent = null;
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_CRASH, res);
-            if (res == AppErrorDialog.TIMEOUT) {
-                res = AppErrorDialog.FORCE_QUIT;
-            }
-            if (res == AppErrorDialog.RESET) {
-                String[] packageList = r.getPackageList();
-                if (packageList != null) {
-                    PackageManager pm = mContext.getPackageManager();
-                    final Semaphore s = new Semaphore(0);
-                    for (int i = 0; i < packageList.length; i++) {
-                        if (i < packageList.length - 1) {
-                            pm.deleteApplicationCacheFiles(packageList[i], null);
-                        } else {
-                            pm.deleteApplicationCacheFiles(packageList[i],
-                                    new IPackageDataObserver.Stub() {
-                                        @Override
-                                        public void onRemoveCompleted(String packageName,
-                                                boolean succeeded) {
-                                            s.release();
-                                        }
-                                    });
+        MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_CRASH, res);
+        if (res == AppErrorDialog.TIMEOUT) {
+            res = AppErrorDialog.FORCE_QUIT;
+        }
+        if (res == AppErrorDialog.RESET) {
+            String[] packageList = r.getPackageList();
+            if (packageList != null) {
+                PackageManager pm = mContext.getPackageManager();
+                final Semaphore s = new Semaphore(0);
+                for (int i = 0; i < packageList.length; i++) {
+                    if (i < packageList.length - 1) {
+                        pm.deleteApplicationCacheFiles(packageList[i], null);
+                    } else {
+                        pm.deleteApplicationCacheFiles(packageList[i],
+                                new IPackageDataObserver.Stub() {
+                                    @Override
+                                    public void onRemoveCompleted(String packageName,
+                                                                  boolean succeeded) {
+                                        s.release();
+                                    }
+                                });
 
-                            // Wait until cache has been cleared before we restart.
-                            try {
-                                s.acquire();
-                            } catch (InterruptedException e) {
-                            }
-                        }
-                    }
-                }
-                // If there was nothing to reset, just restart;
-                res = AppErrorDialog.RESTART;
-            }
-            synchronized (mService) {
-                if (res == AppErrorDialog.MUTE) {
-                    stopReportingCrashesLocked(r);
-                }
-                if (res == AppErrorDialog.RESTART) {
-                    mService.removeProcessLocked(r, false, true, "crash");
-                    if (task != null) {
+                        // Wait until cache has been cleared before we restart.
                         try {
-                            mService.startActivityFromRecents(task.taskId,
-                                    ActivityOptions.makeBasic().toBundle());
-                        } catch (IllegalArgumentException e) {
-                            // Hmm, that didn't work, app might have crashed before creating a
-                            // recents entry. Let's see if we have a safe-to-restart intent.
-                            if (task.intent.getCategories().contains(
-                                    Intent.CATEGORY_LAUNCHER)) {
-                                mService.startActivityInPackage(task.mCallingUid,
-                                        task.mCallingPackage, task.intent,
-                                        null, null, null, 0, 0,
-                                        ActivityOptions.makeBasic().toBundle(),
-                                        task.userId, null, null);
-                            }
+                            s.acquire();
+                        } catch (InterruptedException e) {
                         }
                     }
-                }
-                if (res == AppErrorDialog.FORCE_QUIT) {
-                    long orig = Binder.clearCallingIdentity();
-                    try {
-                        // Kill it with fire!
-                        mService.mStackSupervisor.handleAppCrashLocked(r);
-                        if (!r.persistent) {
-                            mService.removeProcessLocked(r, false, false, "crash");
-                            mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                        }
-                    } finally {
-                        Binder.restoreCallingIdentity(orig);
-                    }
-                }
-                if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
-                    appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
-                }
-                if (r != null && !r.isolated && res != AppErrorDialog.RESTART) {
-                    // XXX Can't keep track of crash time for isolated processes,
-                    // since they don't have a persistent identity.
-                    mProcessCrashTimes.put(r.info.processName, r.uid,
-                            SystemClock.uptimeMillis());
                 }
             }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+            // If there was nothing to reset, just restart;
+            res = AppErrorDialog.RESTART;
+        }
+        synchronized (mService) {
+            if (res == AppErrorDialog.MUTE) {
+                stopReportingCrashesLocked(r);
+            }
+            if (res == AppErrorDialog.RESTART) {
+                mService.removeProcessLocked(r, false, true, "crash");
+                if (task != null) {
+                    try {
+                        mService.startActivityFromRecents(task.taskId,
+                                ActivityOptions.makeBasic().toBundle());
+                    } catch (IllegalArgumentException e) {
+                        // Hmm, that didn't work, app might have crashed before creating a
+                        // recents entry. Let's see if we have a safe-to-restart intent.
+                        if (task.intent.getCategories().contains(
+                                Intent.CATEGORY_LAUNCHER)) {
+                            mService.startActivityInPackage(task.mCallingUid,
+                                    task.mCallingPackage, task.intent,
+                                    null, null, null, 0, 0,
+                                    ActivityOptions.makeBasic().toBundle(),
+                                    task.userId, null, null);
+                        }
+                    }
+                }
+            }
+            if (res == AppErrorDialog.FORCE_QUIT) {
+                long orig = Binder.clearCallingIdentity();
+                try {
+                    // Kill it with fire!
+                    mService.mStackSupervisor.handleAppCrashLocked(r);
+                    if (!r.persistent) {
+                        mService.removeProcessLocked(r, false, false, "crash");
+                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(orig);
+                }
+            }
+            if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
+                appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
+            }
+            if (r != null && !r.isolated && res != AppErrorDialog.RESTART) {
+                // XXX Can't keep track of crash time for isolated processes,
+                // since they don't have a persistent identity.
+                mProcessCrashTimes.put(r.info.processName, r.uid,
+                        SystemClock.uptimeMillis());
+            }
         }
 
         if (appErrorIntent != null) {
@@ -485,6 +457,47 @@ class AppErrors {
                 Slog.w(TAG, "bug report receiver dissappeared", e);
             }
         }
+    }
+
+    private boolean handleAppCrashInActivityController(ProcessRecord r,
+                                                       ApplicationErrorReport.CrashInfo crashInfo,
+                                                       String shortMsg, String longMsg,
+                                                       String stackTrace, long timeMillis) {
+        if (mService.mController == null) {
+            return false;
+        }
+
+        try {
+            String name = r != null ? r.processName : null;
+            int pid = r != null ? r.pid : Binder.getCallingPid();
+            int uid = r != null ? r.info.uid : Binder.getCallingUid();
+            if (!mService.mController.appCrashed(name, pid,
+                    shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
+                if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
+                        && "Native crash".equals(crashInfo.exceptionClassName)) {
+                    Slog.w(TAG, "Skip killing native crashed app " + name
+                            + "(" + pid + ") during testing");
+                } else {
+                    Slog.w(TAG, "Force-killing crashed app " + name
+                            + " at watcher's request");
+                    if (r != null) {
+                        if (!makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, null))
+                        {
+                            r.kill("crash", true);
+                        }
+                    } else {
+                        // Huh.
+                        Process.killProcess(pid);
+                        ActivityManagerService.killProcessGroup(uid, pid);
+                    }
+                }
+                return true;
+            }
+        } catch (RemoteException e) {
+            mService.mController = null;
+            Watchdog.getInstance().setActivityController(null);
+        }
+        return false;
     }
 
     private boolean makeAppCrashingLocked(ProcessRecord app,
