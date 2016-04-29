@@ -16,6 +16,7 @@
 
 package com.android.server.job.controllers;
 
+import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -97,7 +98,9 @@ public class ConnectivityController extends StateController implements
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
-        final NetworkInfo info = mConnManager.getActiveNetworkInfoForUid(jobStatus.getSourceUid());
+        final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+        final NetworkInfo info = mConnManager.getActiveNetworkInfoForUid(jobStatus.getSourceUid(),
+                ignoreBlocked);
         final boolean connected = (info != null) && info.isConnected();
         final boolean unmetered = connected && !info.isMetered();
         final boolean notRoaming = connected && !info.isRoaming();
