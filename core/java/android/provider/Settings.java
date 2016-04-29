@@ -6869,14 +6869,6 @@ public final class Settings {
                "hdmi_control_auto_device_off_enabled";
 
        /**
-        * Whether to use the DHCP client from Lollipop and earlier instead of the newer Android DHCP
-        * client.
-        * (0 = false, 1 = true)
-        * @hide
-        */
-       public static final String LEGACY_DHCP_CLIENT = "legacy_dhcp_client";
-
-       /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide
