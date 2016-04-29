@@ -409,6 +409,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (mKeyguardBottomArea != null) {
                     mKeyguardBottomArea.setUserSetupComplete(mUserSetup);
                 }
+                if (mNetworkController != null) {
+                    mNetworkController.setUserSetupComplete(mUserSetup);
+                }
             }
             if (mIconPolicy != null) {
                 mIconPolicy.setCurrentUserSetup(mUserSetup);
@@ -838,6 +841,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         });
         mNetworkController = new NetworkControllerImpl(mContext, mHandlerThread.getLooper());
+        mNetworkController.setUserSetupComplete(mUserSetup);
         mHotspotController = new HotspotControllerImpl(mContext);
         mBluetoothController = new BluetoothControllerImpl(mContext, mHandlerThread.getLooper());
         mSecurityController = new SecurityControllerImpl(mContext);
