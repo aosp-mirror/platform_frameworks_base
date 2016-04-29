@@ -72,8 +72,13 @@ public class FileUtils {
     public static final int S_IWOTH = 00002;
     public static final int S_IXOTH = 00001;
 
-    /** Regular expression for safe filenames: no spaces or metacharacters */
-    private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
+    /** Regular expression for safe filenames: no spaces or metacharacters.
+      *
+      * Use a preload holder so that FileUtils can be compile-time initialized.
+      */
+    private static class NoImagePreloadHolder {
+        public static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
+    }
 
     private static final File[] EMPTY = new File[0];
 
@@ -243,7 +248,7 @@ public class FileUtils {
         // Note, we check whether it matches what's known to be safe,
         // rather than what's known to be unsafe.  Non-ASCII, control
         // characters, etc. are all unsafe by default.
-        return SAFE_FILENAME_PATTERN.matcher(file.getPath()).matches();
+        return NoImagePreloadHolder.SAFE_FILENAME_PATTERN.matcher(file.getPath()).matches();
     }
 
     /**
