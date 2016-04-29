@@ -16,8 +16,6 @@
 LOCAL_PATH := $(my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_JAVA_LANGUAGE_VERSION := 1.8
-
 #
 # Define rules to build temp_layoutlib.jar, which contains a subset of
 # the classes in framework.jar.  The layoutlib_create tool is used to
