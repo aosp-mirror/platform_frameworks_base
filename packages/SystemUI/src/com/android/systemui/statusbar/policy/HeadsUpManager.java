@@ -264,9 +264,9 @@ public class HeadsUpManager implements ViewTreeObserver.OnComputeInternalInsetsL
      * @return true if the notification was removed and false if it still needs to be kept around
      * for a bit since it wasn't shown long enough
      */
-    public boolean removeNotification(String key) {
+    public boolean removeNotification(String key, boolean ignoreEarliestRemovalTime) {
         if (DEBUG) Log.v(TAG, "remove");
-        if (wasShownLongEnough(key)) {
+        if (wasShownLongEnough(key) || ignoreEarliestRemovalTime) {
             releaseImmediately(key);
             return true;
         } else {
