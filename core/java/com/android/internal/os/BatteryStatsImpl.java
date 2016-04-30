@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 143 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 144 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -2089,27 +2089,111 @@ public class BatteryStatsImpl extends BatteryStats {
         tag.poolIdx = index;
     }
 
+    /*
+        The history delta format uses flags to denote further data in subsequent ints in the parcel.
+
+        There is always the first token, which may contain the delta time, or an indicator of
+        the length of the time (int or long) following this token.
+
+        First token: always present,
+        31              23              15               7             0
+        █M|L|K|J|I|H|G|F█E|D|C|B|A|T|T|T█T|T|T|T|T|T|T|T█T|T|T|T|T|T|T|T█
+
+        T: the delta time if it is <= 0x7fffd. Otherwise 0x7fffe indicates an int immediately
+           follows containing the time, and 0x7ffff indicates a long immediately follows with the
+           delta time.
+        A: battery level changed and an int follows with battery data.
+        B: state changed and an int follows with state change data.
+        C: state2 has changed and an int follows with state2 change data.
+        D: wakelock/wakereason has changed and an wakelock/wakereason struct follows.
+        E: event data has changed and an event struct follows.
+        F: battery charge in coulombs has changed and an int with the charge follows.
+        G: state flag denoting that the mobile radio was active.
+        H: state flag denoting that the wifi radio was active.
+        I: state flag denoting that a wifi scan occurred.
+        J: state flag denoting that a wifi full lock was held.
+        K: state flag denoting that the gps was on.
+        L: state flag denoting that a wakelock was held.
+        M: state flag denoting that the cpu was running.
+
+        Time int/long: if T in the first token is 0x7ffff or 0x7fffe, then an int or long follows
+        with the time delta.
+
+        Battery level int: if A in the first token is set,
+        31              23              15               7             0
+        █L|L|L|L|L|L|L|T█T|T|T|T|T|T|T|T█T|V|V|V|V|V|V|V█V|V|V|V|V|V|V|D█
+
+        D: indicates that extra history details follow.
+        V: the battery voltage.
+        T: the battery temperature.
+        L: the battery level (out of 100).
+
+        State change int: if B in the first token is set,
+        31              23              15               7             0
+        █S|S|S|H|H|H|P|P█F|E|D|C|B| | |A█ | | | | | | | █ | | | | | | | █
+
+        A: wifi multicast was on.
+        B: battery was plugged in.
+        C: screen was on.
+        D: phone was scanning for signal.
+        E: audio was on.
+        F: a sensor was active.
+
+        State2 change int: if C in the first token is set,
+        31              23              15               7             0
+        █M|L|K|J|I|H|H|G█F|E|D|C| | | | █ | | | | | | | █ |B|B|B|A|A|A|A█
+
+        A: 4 bits indicating the wifi supplicant state: {@link BatteryStats#WIFI_SUPPL_STATE_NAMES}.
+        B: 3 bits indicating the wifi signal strength: 0, 1, 2, 3, 4.
+        C: a bluetooth scan was active.
+        D: the camera was active.
+        E: bluetooth was on.
+        F: a phone call was active.
+        G: the device was charging.
+        H: 2 bits indicating the device-idle (doze) state: off, light, full
+        I: the flashlight was on.
+        J: wifi was on.
+        K: wifi was running.
+        L: video was playing.
+        M: power save mode was on.
+
+        Wakelock/wakereason struct: if D in the first token is set,
+        TODO(adamlesinski): describe wakelock/wakereason struct.
+
+        Event struct: if E in the first token is set,
+        TODO(adamlesinski): describe the event struct.
+
+        History step details struct: if D in the battery level int is set,
+        TODO(adamlesinski): describe the history step details struct.
+
+        Battery charge int: if F in the first token is set, an int representing the battery charge
+        in coulombs follows.
+     */
+
     // Part of initial delta int that specifies the time delta.
     static final int DELTA_TIME_MASK = 0x7ffff;
     static final int DELTA_TIME_LONG = 0x7ffff;   // The delta is a following long
     static final int DELTA_TIME_INT = 0x7fffe;    // The delta is a following int
     static final int DELTA_TIME_ABS = 0x7fffd;    // Following is an entire abs update.
     // Flag in delta int: a new battery level int follows.
-    static final int DELTA_BATTERY_LEVEL_FLAG   = 0x00080000;
+    static final int DELTA_BATTERY_LEVEL_FLAG               = 0x00080000;
     // Flag in delta int: a new full state and battery status int follows.
-    static final int DELTA_STATE_FLAG           = 0x00100000;
+    static final int DELTA_STATE_FLAG                       = 0x00100000;
     // Flag in delta int: a new full state2 int follows.
-    static final int DELTA_STATE2_FLAG          = 0x00200000;
+    static final int DELTA_STATE2_FLAG                      = 0x00200000;
     // Flag in delta int: contains a wakelock or wakeReason tag.
-    static final int DELTA_WAKELOCK_FLAG        = 0x00400000;
+    static final int DELTA_WAKELOCK_FLAG                    = 0x00400000;
     // Flag in delta int: contains an event description.
-    static final int DELTA_EVENT_FLAG           = 0x00800000;
+    static final int DELTA_EVENT_FLAG                       = 0x00800000;
+    // Flag in delta int: contains a coulomb charge count.
+    static final int DELTA_BATTERY_CHARGE_COULOMBS_FLAG     = 0x01000000;
     // These upper bits are the frequently changing state bits.
-    static final int DELTA_STATE_MASK           = 0xff000000;
+    static final int DELTA_STATE_MASK                       = 0xfe000000;
 
     // These are the pieces of battery state that are packed in to the upper bits of
     // the state int that have been packed in to the first delta int.  They must fit
-    // in DELTA_STATE_MASK.
+    // in STATE_BATTERY_MASK.
+    static final int STATE_BATTERY_MASK         = 0xff000000;
     static final int STATE_BATTERY_STATUS_MASK  = 0x00000007;
     static final int STATE_BATTERY_STATUS_SHIFT = 29;
     static final int STATE_BATTERY_HEALTH_MASK  = 0x00000007;
@@ -2164,6 +2248,12 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         if (cur.eventCode != HistoryItem.EVENT_NONE) {
             firstToken |= DELTA_EVENT_FLAG;
+        }
+
+        final boolean batteryChargeCoulombsChanged = cur.batteryChargeCoulombs
+                != last.batteryChargeCoulombs;
+        if (batteryChargeCoulombsChanged) {
+            firstToken |= DELTA_BATTERY_CHARGE_COULOMBS_FLAG;
         }
         dest.writeInt(firstToken);
         if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
@@ -2247,6 +2337,12 @@ public class BatteryStatsImpl extends BatteryStats {
             mLastHistoryStepDetails = null;
         }
         mLastHistoryStepLevel = cur.batteryLevel;
+
+        if (batteryChargeCoulombsChanged) {
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeCoulombs="
+                    + cur.batteryChargeCoulombs);
+            dest.writeInt(cur.batteryChargeCoulombs);
+        }
     }
 
     private int buildBatteryLevelInt(HistoryItem h) {
@@ -2273,7 +2369,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return ((h.batteryStatus&STATE_BATTERY_STATUS_MASK)<<STATE_BATTERY_STATUS_SHIFT)
                 | ((h.batteryHealth&STATE_BATTERY_HEALTH_MASK)<<STATE_BATTERY_HEALTH_SHIFT)
                 | ((plugType&STATE_BATTERY_PLUG_MASK)<<STATE_BATTERY_PLUG_SHIFT)
-                | (h.states&(~DELTA_STATE_MASK));
+                | (h.states&(~STATE_BATTERY_MASK));
     }
 
     private void computeHistoryStepDetails(final HistoryStepDetails out,
@@ -2412,7 +2508,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if ((firstToken&DELTA_STATE_FLAG) != 0) {
             int stateInt = src.readInt();
-            cur.states = (firstToken&DELTA_STATE_MASK) | (stateInt&(~DELTA_STATE_MASK));
+            cur.states = (firstToken&DELTA_STATE_MASK) | (stateInt&(~STATE_BATTERY_MASK));
             cur.batteryStatus = (byte)((stateInt>>STATE_BATTERY_STATUS_SHIFT)
                     & STATE_BATTERY_STATUS_MASK);
             cur.batteryHealth = (byte)((stateInt>>STATE_BATTERY_HEALTH_SHIFT)
@@ -2438,7 +2534,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     + " batteryPlugType=" + cur.batteryPlugType
                     + " states=0x" + Integer.toHexString(cur.states));
         } else {
-            cur.states = (firstToken&DELTA_STATE_MASK) | (cur.states&(~DELTA_STATE_MASK));
+            cur.states = (firstToken&DELTA_STATE_MASK) | (cur.states&(~STATE_BATTERY_MASK));
         }
 
         if ((firstToken&DELTA_STATE2_FLAG) != 0) {
@@ -2492,6 +2588,10 @@ public class BatteryStatsImpl extends BatteryStats {
             cur.stepDetails.readFromParcel(src);
         } else {
             cur.stepDetails = null;
+        }
+
+        if ((firstToken&DELTA_BATTERY_CHARGE_COULOMBS_FLAG) != 0) {
+            cur.batteryChargeCoulombs = src.readInt();
         }
     }
 
@@ -9210,7 +9310,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public static final int BATTERY_PLUGGED_NONE = 0;
 
     public void setBatteryStateLocked(int status, int health, int plugType, int level,
-            int temp, int volt) {
+            int temp, int volt, int chargeCount) {
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -9254,6 +9354,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mDischargePlugLevel < 0) {
             mDischargePlugLevel = level;
         }
+
         if (onBattery != mOnBattery) {
             mHistoryCur.batteryLevel = (byte)level;
             mHistoryCur.batteryStatus = (byte)status;
@@ -9261,6 +9362,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.batteryPlugType = (byte)plugType;
             mHistoryCur.batteryTemperature = (short)temp;
             mHistoryCur.batteryVoltage = (char)volt;
+            mHistoryCur.batteryChargeCoulombs = chargeCount;
             setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
         } else {
             boolean changed = false;
@@ -9292,6 +9394,11 @@ public class BatteryStatsImpl extends BatteryStats {
             if (volt > (mHistoryCur.batteryVoltage+20)
                     || volt < (mHistoryCur.batteryVoltage-20)) {
                 mHistoryCur.batteryVoltage = (char)volt;
+                changed = true;
+            }
+            if (chargeCount >= (mHistoryCur.batteryChargeCoulombs+10)
+                    || chargeCount <= (mHistoryCur.batteryChargeCoulombs-10)) {
+                mHistoryCur.batteryChargeCoulombs = chargeCount;
                 changed = true;
             }
             long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
