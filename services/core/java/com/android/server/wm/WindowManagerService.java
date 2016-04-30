@@ -7891,6 +7891,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
 
+        public static final int RESTORE_POINTER_ICON = 54;
+
         /**
          * Used to denote that an integer field in a message will not be used.
          */
@@ -8518,6 +8520,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED: {
                     mAmInternal.notifyDockedStackMinimizedChanged(msg.arg1 == 1);
+                }
+                break;
+                case RESTORE_POINTER_ICON: {
+                    synchronized (mWindowMap) {
+                        restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
+                    }
                 }
                 break;
             }
