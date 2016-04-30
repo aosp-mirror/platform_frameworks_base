@@ -73,6 +73,8 @@ import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
 import android.service.wallpaper.WallpaperService;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -224,6 +226,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                         + " whichPending=0x" + Integer.toHexString(wallpaper.whichPending)
                         + " written=" + written);
             }
+
+            if (moved && lockWallpaperChanged) {
+                // We just migrated sys -> lock to preserve imagery for an impending
+                // new system-only wallpaper.  Tell keyguard about it but that's it.
+                if (DEBUG) {
+                    Slog.i(TAG, "Sys -> lock MOVED_TO");
+                }
+                notifyLockWallpaperChanged();
+                return;
+            }
+
             synchronized (mLock) {
                 if (sysWallpaperChanged || lockWallpaperChanged) {
                     notifyCallbacksLocked(wallpaper);
@@ -276,19 +289,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                                     mLockWallpaperMap.remove(wallpaper.userId);
                                 }
                                 // and in any case, tell keyguard about it
-                                final IWallpaperManagerCallback cb = mKeyguardListener;
-                                if (cb != null) {
-                                    try {
-                                        cb.onWallpaperChanged();
-                                    } catch (RemoteException e) {
-                                        // Oh well it went away; no big deal
-                                    }
-                                }
+                                notifyLockWallpaperChanged();
                             }
                             saveSettingsLocked(wallpaper.userId);
                         }
                     }
                 }
+            }
+        }
+    }
+
+    void notifyLockWallpaperChanged() {
+        final IWallpaperManagerCallback cb = mKeyguardListener;
+        if (cb != null) {
+            try {
+                cb.onWallpaperChanged();
+            } catch (RemoteException e) {
+                // Oh well it went away; no big deal
             }
         }
     }
@@ -1334,6 +1351,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (DEBUG) Slog.v(TAG, "setWallpaper which=0x" + Integer.toHexString(which));
             WallpaperData wallpaper;
 
+            /* If we're setting system but not lock, and lock is currently sharing the system
+             * wallpaper, we need to migrate that image over to being lock-only before
+             * the caller here writes new bitmap data.
+             */
+            if (which == FLAG_SYSTEM && mLockWallpaperMap.get(userId) == null) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Migrating system->lock to preserve");
+                }
+                migrateSystemToLockWallpaperLocked(userId);
+            }
+
             wallpaper = getWallpaperSafeLocked(userId, which);
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -1352,6 +1380,38 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+    }
+
+    private void migrateSystemToLockWallpaperLocked(int userId) {
+        WallpaperData sysWP = mWallpaperMap.get(userId);
+        if (sysWP == null) {
+            if (DEBUG) {
+                Slog.i(TAG, "No system wallpaper?  Not tracking for lock-only");
+            }
+            return;
+        }
+
+        // We know a-priori that there is no lock-only wallpaper currently
+        WallpaperData lockWP = new WallpaperData(userId,
+                WALLPAPER_LOCK_ORIG, WALLPAPER_LOCK_CROP);
+        lockWP.wallpaperId = sysWP.wallpaperId;
+        lockWP.cropHint.set(sysWP.cropHint);
+        lockWP.width = sysWP.width;
+        lockWP.height = sysWP.height;
+        lockWP.allowBackup = false;
+
+        // Migrate the bitmap files outright; no need to copy
+        try {
+            Os.rename(sysWP.wallpaperFile.getAbsolutePath(), lockWP.wallpaperFile.getAbsolutePath());
+            Os.rename(sysWP.cropFile.getAbsolutePath(), lockWP.cropFile.getAbsolutePath());
+        } catch (ErrnoException e) {
+            Slog.e(TAG, "Can't migrate system wallpaper: " + e.getMessage());
+            lockWP.wallpaperFile.delete();
+            lockWP.cropFile.delete();
+            return;
+        }
+
+        mLockWallpaperMap.put(userId, lockWP);
     }
 
     ParcelFileDescriptor updateWallpaperBitmapLocked(String name, WallpaperData wallpaper,
