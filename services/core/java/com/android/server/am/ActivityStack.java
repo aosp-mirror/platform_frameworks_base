@@ -74,6 +74,7 @@ import static com.android.server.am.ActivityRecord.STARTING_WINDOW_REMOVED;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.MOVING;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
@@ -219,6 +220,17 @@ final class ActivityStack {
     // Stack is considered visible, but only becuase it has activity that is visible behind other
     // activities and there is a specific combination of stacks.
     static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
+
+    /* The various modes for the method {@link #removeTask}. */
+    // Task is being completely removed from all stacks in the system.
+    static final int REMOVE_TASK_MODE_DESTROYING = 0;
+    // Task is being removed from this stack so we can add it to another stack. In the case we are
+    // moving we don't want to perform some operations on the task like removing it from window
+    // manager or recents.
+    static final int REMOVE_TASK_MODE_MOVING = 1;
+    // Similar to {@link #REMOVE_TASK_MODE_MOVING} and the task will be added to the top of its new
+    // stack and the new stack will be on top of all stacks.
+    static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
     final ActivityManagerService mService;
     final WindowManagerService mWindowManager;
@@ -4920,18 +4932,18 @@ final class ActivityStack {
     }
 
     void removeTask(TaskRecord task, String reason) {
-        removeTask(task, reason, !MOVING);
+        removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
     }
 
     /**
      * Removes the input task from this stack.
      * @param task to remove.
      * @param reason for removal.
-     * @param moving task to another stack. In the case we are moving we don't want to perform
-     *               some operations on the task like removing it from window manager or recents.
+     * @param mode task removal mode. Either {@link #REMOVE_TASK_MODE_DESTROYING},
+     *             {@link #REMOVE_TASK_MODE_MOVING}, {@link #REMOVE_TASK_MODE_MOVING_TO_TOP}.
      */
-    void removeTask(TaskRecord task, String reason, boolean moving) {
-        if (!moving) {
+    void removeTask(TaskRecord task, String reason, int mode) {
+        if (mode == REMOVE_TASK_MODE_DESTROYING) {
             mStackSupervisor.removeLockedTaskLocked(task);
             mWindowManager.removeTask(task.taskId);
             if (!StackId.persistTaskBounds(mStackId)) {
@@ -4957,7 +4969,7 @@ final class ActivityStack {
         mTaskHistory.remove(task);
         updateTaskMovement(task, true);
 
-        if (!moving && task.mActivities.isEmpty()) {
+        if (mode == REMOVE_TASK_MODE_DESTROYING && task.mActivities.isEmpty()) {
             // TODO: VI what about activity?
             final boolean isVoiceSession = task.voiceSession != null;
             if (isVoiceSession) {
@@ -4976,8 +4988,10 @@ final class ActivityStack {
 
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG_STACK, "removeTask: removing stack=" + this);
-            // We only need to adjust focused stack if this stack is in focus.
-            if (isOnHomeDisplay() && mStackSupervisor.isFocusedStack(this)) {
+            // We only need to adjust focused stack if this stack is in focus and we are not in the
+            // process of moving the task to the top of the stack that will be focused.
+            if (isOnHomeDisplay() && mode != REMOVE_TASK_MODE_MOVING_TO_TOP
+                    && mStackSupervisor.isFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (mFullscreen
                         || !adjustFocusToNextFocusableStackLocked(
@@ -5025,7 +5039,7 @@ final class ActivityStack {
     }
 
     void addTask(final TaskRecord task, final boolean toTop, String reason) {
-        final ActivityStack prevStack = preAddTask(task, reason);
+        final ActivityStack prevStack = preAddTask(task, reason, toTop);
 
         task.stack = this;
         if (toTop) {
@@ -5040,7 +5054,7 @@ final class ActivityStack {
     void positionTask(final TaskRecord task, int position) {
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
         final boolean wasResumed = topRunningActivity == task.stack.mResumedActivity;
-        final ActivityStack prevStack = preAddTask(task, "positionTask");
+        final ActivityStack prevStack = preAddTask(task, "positionTask", ON_TOP);
         task.stack = this;
         insertTaskAtPosition(task, position);
         postAddTask(task, prevStack);
@@ -5054,10 +5068,11 @@ final class ActivityStack {
         }
     }
 
-    private ActivityStack preAddTask(TaskRecord task, String reason) {
+    private ActivityStack preAddTask(TaskRecord task, String reason, boolean toTop) {
         final ActivityStack prevStack = task.stack;
         if (prevStack != null && prevStack != this) {
-            prevStack.removeTask(task, reason, MOVING);
+            prevStack.removeTask(task, reason,
+                    toTop ? REMOVE_TASK_MODE_MOVING_TO_TOP : REMOVE_TASK_MODE_MOVING);
         }
         return prevStack;
     }
