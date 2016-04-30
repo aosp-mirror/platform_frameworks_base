@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 #include <SkShader.h>
+#include <SkColorMatrixFilter.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -28,7 +29,7 @@ using namespace android::uirenderer;
  */
 TEST(SkiaBehavior, CreateBitmapShader1x1) {
     SkBitmap origBitmap = TestUtils::createSkBitmap(1, 1);
-    std::unique_ptr<SkShader> s(SkShader::CreateBitmapShader(
+    SkAutoTUnref<SkShader> s(SkShader::CreateBitmapShader(
             origBitmap,
             SkShader::kClamp_TileMode,
             SkShader::kRepeat_TileMode));
@@ -47,4 +48,18 @@ TEST(SkiaBehavior, genIds) {
     uint32_t genId = bitmap.getGenerationID();
     bitmap.notifyPixelsChanged();
     EXPECT_NE(genId, bitmap.getGenerationID());
+}
+
+TEST(SkiaBehavior, lightingColorFilter_simplify) {
+    SkAutoTUnref<SkColorFilter> filter(SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0));
+
+    SkColor observedColor;
+    SkXfermode::Mode observedMode;
+    ASSERT_TRUE(filter->asColorMode(&observedColor, &observedMode));
+    EXPECT_EQ(0xFF223344, observedColor);
+    EXPECT_EQ(SkXfermode::Mode::kModulate_Mode, observedMode);
+
+    SkAutoTUnref<SkColorFilter> failFilter(
+            SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0x1));
+    EXPECT_FALSE(filter->asColorMode(nullptr, nullptr));
 }
