@@ -5611,12 +5611,12 @@ public class BatteryStatsImpl extends BatteryStats {
                 mWifiControllerActivity.reset(false);
             }
 
-            if (mBsi.mBluetoothActivity != null) {
-                mBsi.mBluetoothActivity.reset(false);
+            if (mBluetoothControllerActivity != null) {
+                mBluetoothControllerActivity.reset(false);
             }
 
-            if (mBsi.mModemActivity != null) {
-                mBsi.mModemActivity.reset(false);
+            if (mModemControllerActivity != null) {
+                mModemControllerActivity.reset(false);
             }
 
             mUserCpuTime.reset(false);
