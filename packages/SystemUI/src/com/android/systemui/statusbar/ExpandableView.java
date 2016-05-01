@@ -323,7 +323,7 @@ public abstract class ExpandableView extends FrameLayout {
             if (top >= getActualHeight()) {
                 top = getActualHeight() - 1;
             }
-            mClipRect.set(0, top, getWidth(), getActualHeight());
+            mClipRect.set(0, top, getWidth(), getActualHeight() + getExtraBottomPadding());
             setClipBounds(mClipRect);
         } else {
             setClipBounds(null);
@@ -408,6 +408,28 @@ public abstract class ExpandableView extends FrameLayout {
 
     public ViewGroup getTransientContainer() {
         return mTransientContainer;
+    }
+
+    /**
+     * @return padding used to alter how much of the view is clipped.
+     */
+    public int getExtraBottomPadding() {
+        return 0;
+    }
+
+    /**
+     * @return true if the group's expansion state is changing, false otherwise.
+     */
+    public boolean isGroupExpansionChanging() {
+        return false;
+    }
+
+    public boolean isGroupExpanded() {
+        return false;
+    }
+
+    public boolean isChildInGroup() {
+        return false;
     }
 
     /**

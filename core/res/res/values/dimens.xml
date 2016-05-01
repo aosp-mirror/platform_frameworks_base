@@ -161,6 +161,9 @@
     <!-- height of the content margin on the bottom -->
     <dimen name="notification_content_margin_bottom">16dp</dimen>
 
+	<!-- The height of the background for a notification header on a group -->
+    <dimen name="notification_header_background_height">45.5dp</dimen>
+
     <!-- Height of a small notification in the status bar -->
     <dimen name="notification_min_height">92dp</dimen>
 
