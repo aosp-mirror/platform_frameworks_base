@@ -492,7 +492,7 @@ class ActivityStarter {
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingUid, callingPackage,
                 intent, resolvedType, aInfo, mService.mConfiguration, resultRecord, resultWho,
                 requestCode, componentSpecified, voiceSession != null, mSupervisor, container,
-                options);
+                options, sourceRecord);
         if (outActivity != null) {
             outActivity[0] = r;
         }
