@@ -794,7 +794,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (hasBounds) {
                 bounds = Rect.CREATOR.createFromParcel(data);
             }
-            boolean res = moveTaskToDockedStack(taskId, createMode, toTop, animate, bounds);
+            final boolean moveHomeStackFront = data.readInt() != 0;
+            final boolean res = moveTaskToDockedStack(
+                    taskId, createMode, toTop, animate, bounds, moveHomeStackFront);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -3865,7 +3867,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     @Override
     public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            Rect initialBounds) throws RemoteException
+            Rect initialBounds, boolean moveHomeStackFront) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3880,6 +3882,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+        data.writeInt(moveHomeStackFront ? 1 : 0);
         mRemote.transact(MOVE_TASK_TO_DOCKED_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() > 0;
