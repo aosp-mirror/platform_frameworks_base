@@ -1942,7 +1942,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                         Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
                     }
-                    if (nai.created && !nai.networkCapabilities.equalImmutableCapabilities(
+                    if (nai.everConnected && !nai.networkCapabilities.equalImmutableCapabilities(
                             networkCapabilities)) {
                         Slog.wtf(TAG, "BUG: " + nai + " changed immutable capabilities: "
                                 + nai.networkCapabilities + " -> " + networkCapabilities);
@@ -1953,13 +1953,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED: {
                     if (VDBG) {
                         log("Update of LinkProperties for " + nai.name() +
-                                "; created=" + nai.created);
+                                "; created=" + nai.created +
+                                "; everConnected=" + nai.everConnected);
                     }
                     LinkProperties oldLp = nai.linkProperties;
                     synchronized (nai) {
                         nai.linkProperties = (LinkProperties)msg.obj;
                     }
-                    if (nai.created) updateLinkProperties(nai, oldLp);
+                    if (nai.everConnected) updateLinkProperties(nai, oldLp);
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_INFO_CHANGED: {
@@ -1991,8 +1992,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
-                    if (nai.created && !nai.networkMisc.explicitlySelected) {
-                        loge("ERROR: created network explicitly selected.");
+                    if (nai.everConnected && !nai.networkMisc.explicitlySelected) {
+                        loge("ERROR: already-connected network explicitly selected.");
                     }
                     nai.networkMisc.explicitlySelected = true;
                     nai.networkMisc.acceptUnvalidated = (boolean) msg.obj;
@@ -2277,7 +2278,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // This is whether it is satisfying any NetworkRequests or were it to become validated,
     // would it have a chance of satisfying any NetworkRequests.
     private boolean unneeded(NetworkAgentInfo nai) {
-        if (!nai.created || nai.isVPN() || nai.lingering) return false;
+        if (!nai.everConnected || nai.isVPN() || nai.lingering) return false;
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             // If this Network is already the highest scoring Network for a request, or if
             // there is hope for it to become one if it validated, then it is needed.
@@ -2761,9 +2762,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     ") by " + uid);
         }
         synchronized (nai) {
-            // Validating an uncreated network could result in a call to rematchNetworkAndRequests()
-            // which isn't meant to work on uncreated networks.
-            if (!nai.created) return;
+            // Validating a network that has not yet connected could result in a call to
+            // rematchNetworkAndRequests() which is not meant to work on such networks.
+            if (!nai.everConnected) return;
 
             if (isNetworkWithLinkPropertiesBlocked(nai.linkProperties, uid)) return;
 
@@ -4505,7 +4506,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //               validated) of becoming the highest scoring network.
     private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork,
             ReapUnvalidatedNetworks reapUnvalidatedNetworks) {
-        if (!newNetwork.created) return;
+        if (!newNetwork.everConnected) return;
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
         NetworkAgentInfo oldDefaultNetwork = null;
@@ -4804,7 +4805,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     " to " + state);
         }
 
-        if (state == NetworkInfo.State.CONNECTED && !networkAgent.created) {
+        if (!networkAgent.created
+                && (state == NetworkInfo.State.CONNECTED
+                || (state == NetworkInfo.State.CONNECTING && networkAgent.isVPN()))) {
             try {
                 // This should never fail.  Specifying an already in use NetID will cause failure.
                 if (networkAgent.isVPN()) {
@@ -4824,6 +4827,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return;
             }
             networkAgent.created = true;
+        }
+
+        if (!networkAgent.everConnected && state == NetworkInfo.State.CONNECTED) {
+            networkAgent.everConnected = true;
+
             updateLinkProperties(networkAgent, null);
             notifyIfacesChangedForNetworkStats();
 
