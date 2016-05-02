@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -24,7 +25,6 @@ import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
-import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
@@ -33,7 +33,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
@@ -369,44 +368,31 @@ public class DockedStackDividerController implements DimLayerUser {
      * Notifies the docked stack divider controller of a visibility change that happens without
      * an animation.
      */
-    void notifyAppVisibilityChanged(AppWindowToken wtoken, boolean visible) {
-        final Task task = wtoken.mTask;
-        if (!task.isHomeTask() || !task.isVisibleForUser()) {
-            return;
-        }
-
-        // If the app that having visibility change is not the top visible one in the task,
-        // it does not affect whether the docked stack is minimized, ignore it.
-        if (task.getTopAppToken() == null || task.getTopAppToken() != wtoken) {
-            return;
-        }
-
-        // If the stack is completely offscreen, this might just be an intermediate state when
-        // docking a task/launching recents at the same time, but home doesn't actually get
-        // visible after the state settles in.
-        if (isWithinDisplay(task)
-                && mDisplayContent.getDockedStackVisibleForUserLocked() != null) {
-            setMinimizedDockedStack(visible, false /* animate */);
-        }
+    void notifyAppVisibilityChanged() {
+        checkMinimizeChanged(false /* animate */);
     }
 
-    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps,
-            ArraySet<AppWindowToken> closingApps) {
-        if (containsHomeTaskWithinDisplay(openingApps)) {
-            setMinimizedDockedStack(true /* minimized */, true /* animate */);
-        } else if (containsHomeTaskWithinDisplay(closingApps)) {
-            setMinimizedDockedStack(false /* minimized */, true /* animate */);
-        }
+    void notifyAppTransitionStarting() {
+        checkMinimizeChanged(true /* animate */);
     }
 
-    private boolean containsHomeTaskWithinDisplay(ArraySet<AppWindowToken> apps) {
-        for (int i = apps.size() - 1; i >= 0; i--) {
-            final Task task = apps.valueAt(i).mTask;
-            if (task != null && task.isHomeTask()) {
-                return isWithinDisplay(task);
-            }
+    private void checkMinimizeChanged(boolean animate) {
+        final TaskStack homeStack = mDisplayContent.getHomeStack();
+        if (homeStack == null) {
+            return;
         }
-        return false;
+        final Task homeTask = homeStack.findHomeTask();
+        if (homeTask == null || !isWithinDisplay(homeTask)) {
+            return;
+        }
+        final TaskStack fullscreenStack
+                = mService.mStackIdToStack.get(FULLSCREEN_WORKSPACE_STACK_ID);
+        final ArrayList<Task> homeStackTasks = homeStack.getTasks();
+        final Task topHomeStackTask = homeStackTasks.get(homeStackTasks.size() - 1);
+        final boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
+        final boolean homeBehind = (fullscreenStack != null && fullscreenStack.isVisibleLocked())
+                || (homeStackTasks.size() > 1 && topHomeStackTask != homeTask);
+        setMinimizedDockedStack(homeVisible && !homeBehind, animate);
     }
 
     private boolean isWithinDisplay(Task task) {
