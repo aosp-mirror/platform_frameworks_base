@@ -2975,6 +2975,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Puts the activity in picture-in-picture mode if the activity supports.
+     * @see android.R.attr#supportsPictureInPicture
+     * @hide
+     */
+    @Override
+    public void enterPictureInPictureModeIfPossible() {
+        if (mActivityInfo.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE) {
+            enterPictureInPictureMode();
+        }
+    }
+
+    /**
      * Called to process key events.  You can override this to intercept all
      * key events before they are dispatched to the window.  Be sure to call
      * this implementation for key events that should be handled normally.
