@@ -452,6 +452,30 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
+     * Return the filenames (excluding path names) of icon bitmap files from this package.
+     */
+    public ArraySet<String> getUsedBitmapFiles() {
+        final ArraySet<String> usedFiles = new ArraySet<>(mShortcuts.size());
+
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (si.getBitmapPath() != null) {
+                usedFiles.add(getFileName(si.getBitmapPath()));
+            }
+        }
+        return usedFiles;
+    }
+
+    private static String getFileName(@NonNull String path) {
+        final int sep = path.lastIndexOf(File.separatorChar);
+        if (sep == -1) {
+            return path;
+        } else {
+            return path.substring(sep + 1);
+        }
+    }
+
+    /**
      * Called when the package is updated.  If there are shortcuts with resource icons, update
      * their timestamps.
      */

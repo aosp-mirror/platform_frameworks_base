@@ -116,6 +116,10 @@ class ShortcutUser {
         return mPackages;
     }
 
+    public boolean hasPackage(@NonNull String packageName) {
+        return mPackages.containsKey(packageName);
+    }
+
     public ShortcutPackage removePackage(@NonNull ShortcutService s, @NonNull String packageName) {
         final ShortcutPackage removed = mPackages.remove(packageName);
 

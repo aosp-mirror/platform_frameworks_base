@@ -291,8 +291,9 @@ public class ShortcutService extends IShortcutService.Stub {
         int GET_PACKAGE_INFO_WITH_SIG = 2;
         int GET_APPLICATION_INFO = 3;
         int LAUNCHER_PERMISSION_CHECK = 4;
+        int CLEANUP_DANGLING_BITMAPS = 5;
 
-        int COUNT = LAUNCHER_PERMISSION_CHECK + 1;
+        int COUNT = CLEANUP_DANGLING_BITMAPS + 1;
     }
 
     final Object mStatLock = new Object();
@@ -328,7 +329,7 @@ public class ShortcutService extends IShortcutService.Stub {
     void logDurationStat(int statId, long start) {
         synchronized (mStatLock) {
             mCountStats[statId]++;
-            mDurationStats[statId] += (System.currentTimeMillis() - start);
+            mDurationStats[statId] += (injectElapsedRealtime() - start);
         }
     }
 
@@ -804,7 +805,9 @@ public class ShortcutService extends IShortcutService.Stub {
             return null;
         }
         try {
-            return loadUserInternal(userId, in, /* forBackup= */ false);
+            final ShortcutUser ret =  loadUserInternal(userId, in, /* forBackup= */ false);
+            cleanupDanglingBitmapDirectoriesLocked(userId, ret);
+            return ret;
         } catch (IOException|XmlPullParserException e) {
             Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
             return null;
@@ -998,6 +1001,57 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         if (!(FileUtils.deleteContents(packagePath) && packagePath.delete())) {
             Slog.w(TAG, "Unable to remove directory " + packagePath);
+        }
+    }
+
+    private void cleanupDanglingBitmapDirectoriesLocked(
+            @UserIdInt int userId, @NonNull ShortcutUser user) {
+        if (DEBUG) {
+            Slog.d(TAG, "cleanupDanglingBitmaps: userId=" + userId);
+        }
+        final long start = injectElapsedRealtime();
+
+        final File bitmapDir = getUserBitmapFilePath(userId);
+        final File[] children = bitmapDir.listFiles();
+        if (children == null) {
+            return;
+        }
+        for (File child : children) {
+            if (!child.isDirectory()) {
+                continue;
+            }
+            final String packageName = child.getName();
+            if (DEBUG) {
+                Slog.d(TAG, "cleanupDanglingBitmaps: Found directory=" + packageName);
+            }
+            if (!user.hasPackage(packageName)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing dangling bitmap directory: " + packageName);
+                }
+                cleanupBitmapsForPackage(userId, packageName);
+            } else {
+                cleanupDanglingBitmapFilesLocked(userId, user, packageName, child);
+            }
+        }
+        logDurationStat(Stats.CLEANUP_DANGLING_BITMAPS, start);
+    }
+
+    private void cleanupDanglingBitmapFilesLocked(@UserIdInt int userId, @NonNull ShortcutUser user,
+            @NonNull String packageName, @NonNull File path) {
+        final ArraySet<String> usedFiles =
+                user.getPackageShortcuts(this, packageName).getUsedBitmapFiles();
+
+        for (File child : path.listFiles()) {
+            if (!child.isFile()) {
+                continue;
+            }
+            final String name = child.getName();
+            if (!usedFiles.contains(name)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Removing dangling bitmap file: " + child.getAbsolutePath());
+                }
+                child.delete();
+            }
         }
     }
 
@@ -1596,14 +1650,14 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean hasShortcutHostPermissionInner(@NonNull String callingPackage, int userId) {
         synchronized (mLock) {
-            final long start = System.currentTimeMillis();
+            final long start = injectElapsedRealtime();
 
             final ShortcutUser user = getUserShortcutsLocked(userId);
 
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
 
             // Default launcher from package manager.
-            final long startGetHomeActivitiesAsUser = System.currentTimeMillis();
+            final long startGetHomeActivitiesAsUser = injectElapsedRealtime();
             final ComponentName defaultLauncher = injectPackageManagerInternal()
                     .getHomeActivitiesAsUser(allHomeCandidates, userId);
             logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeActivitiesAsUser);
@@ -2075,7 +2129,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     PackageInfo injectPackageInfo(String packageName, @UserIdInt int userId,
             boolean getSignatures) {
-        final long start = System.currentTimeMillis();
+        final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getPackageInfo(packageName, PACKAGE_MATCH_FLAGS
@@ -2096,7 +2150,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     ApplicationInfo injectApplicationInfo(String packageName, @UserIdInt int userId) {
-        final long start = System.currentTimeMillis();
+        final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getApplicationInfo(packageName, PACKAGE_MATCH_FLAGS, userId);
@@ -2269,6 +2323,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpStatLS(pw, p, Stats.GET_PACKAGE_INFO, "getPackageInfo()");
                 dumpStatLS(pw, p, Stats.GET_PACKAGE_INFO_WITH_SIG, "getPackageInfo(SIG)");
                 dumpStatLS(pw, p, Stats.GET_APPLICATION_INFO, "getApplicationInfo");
+
+                dumpStatLS(pw, p, Stats.CLEANUP_DANGLING_BITMAPS, "cleanupDanglingBitmaps");
             }
 
             for (int i = 0; i < mUsers.size(); i++) {

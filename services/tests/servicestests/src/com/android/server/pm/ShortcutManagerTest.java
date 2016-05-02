@@ -156,6 +156,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private static final boolean DUMP_IN_TEARDOWN = false; // DO NOT SUBMIT WITH true
 
+    private static final String[] EMPTY_STRINGS = new String[0]; // Just for readability.
+
     // public for mockito
     public class BaseContext extends MockContext {
         @Override
@@ -1047,6 +1049,49 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }
     }
 
+    private void assertBitmapDirectories(int userId, String... expectedDirectories) {
+        final Set<String> expected = hashSet(set(expectedDirectories));
+
+        final Set<String> actual = new HashSet<>();
+
+        final File[] files = mService.getUserBitmapFilePath(userId).listFiles();
+        if (files != null) {
+            for (File child : files) {
+                if (child.isDirectory()) {
+                    actual.add(child.getName());
+                }
+            }
+        }
+
+        assertEquals(expected, actual);
+    }
+
+    private void assertBitmapFiles(int userId, String packageName, String... expectedFiles) {
+        final Set<String> expected = hashSet(set(expectedFiles));
+
+        final Set<String> actual = new HashSet<>();
+
+        final File[] files = new File(mService.getUserBitmapFilePath(userId), packageName)
+                .listFiles();
+        if (files != null) {
+            for (File child : files) {
+                if (child.isFile()) {
+                    actual.add(child.getName());
+                }
+            }
+        }
+
+        assertEquals(expected, actual);
+    }
+
+    private String getBitmapFilename(int userId, String packageName, String shortcutId) {
+        final ShortcutInfo si = mService.getPackageShortcutForTest(packageName, shortcutId, userId);
+        if (si == null) {
+            return null;
+        }
+        return new File(si.getBitmapPath()).getName();
+    }
+
     private ShortcutInfo getPackageShortcut(String packageName, String shortcutId) {
         return getPackageShortcut(packageName, shortcutId, getCallingUserId());
     }
@@ -1732,8 +1777,173 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         bmp = pfdToBitmap(
                 mLauncherApps.getShortcutIconFd(CALLING_PACKAGE_1, "bmp32x32", HANDLE_USER_P0));
         assertBitmapSize(128, 128, bmp);
+    }
 
-        // TODO Test the content URI case too.
+    private File makeFile(File baseDirectory, String... paths) {
+        File ret = baseDirectory;
+
+        for (String path : paths) {
+            ret = new File(ret, path);
+        }
+
+        return ret;
+    }
+
+    public void testCleanupDanglingBitmaps() throws Exception {
+        assertBitmapDirectories(USER_0, EMPTY_STRINGS);
+        assertBitmapDirectories(USER_10, EMPTY_STRINGS);
+
+        // Make some shortcuts with bitmap icons.
+        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                getTestContext().getResources(), R.drawable.black_32x32));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("s1", bmp32x32),
+                    makeShortcutWithIcon("s2", bmp32x32),
+                    makeShortcutWithIcon("s3", bmp32x32)
+            ));
+        });
+
+        // Increment the time (which actually we don't have to), which is used for filenames.
+        mInjectedCurrentTimeLillis++;
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("s4", bmp32x32),
+                    makeShortcutWithIcon("s5", bmp32x32),
+                    makeShortcutWithIcon("s6", bmp32x32)
+            ));
+        });
+
+        // Increment the time, which is used for filenames.
+        mInjectedCurrentTimeLillis++;
+
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            mManager.setDynamicShortcuts(list(
+            ));
+        });
+
+        // For USER-10, let's try without updating the times.
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("10s1", bmp32x32),
+                    makeShortcutWithIcon("10s2", bmp32x32),
+                    makeShortcutWithIcon("10s3", bmp32x32)
+            ));
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            mManager.setDynamicShortcuts(list(
+                    makeShortcutWithIcon("10s4", bmp32x32),
+                    makeShortcutWithIcon("10s5", bmp32x32),
+                    makeShortcutWithIcon("10s6", bmp32x32)
+            ));
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
+            mManager.setDynamicShortcuts(list(
+            ));
+        });
+
+        dumpsysOnLogcat();
+
+        // Check files and directories.
+        // Package 3 has no bitmaps, so we don't create a directory.
+        assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2);
+        assertBitmapDirectories(USER_10, CALLING_PACKAGE_1, CALLING_PACKAGE_2);
+
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_1,
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s1"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s2"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s3")
+                );
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_2,
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s4"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s5"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s6")
+        );
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_3,
+                EMPTY_STRINGS
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_1,
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s1"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s2"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s3")
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_2,
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s4"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s5"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s6")
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_3,
+                EMPTY_STRINGS
+        );
+
+        // Then create random directories and files.
+        makeFile(mService.getUserBitmapFilePath(USER_0), "a.b.c").mkdir();
+        makeFile(mService.getUserBitmapFilePath(USER_0), "d.e.f").mkdir();
+        makeFile(mService.getUserBitmapFilePath(USER_0), "d.e.f", "123").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_0), "d.e.f", "456").createNewFile();
+
+        makeFile(mService.getUserBitmapFilePath(USER_0), CALLING_PACKAGE_3).mkdir();
+
+        makeFile(mService.getUserBitmapFilePath(USER_0), CALLING_PACKAGE_1, "1").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_0), CALLING_PACKAGE_1, "2").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_0), CALLING_PACKAGE_1, "3").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_0), CALLING_PACKAGE_1, "4").createNewFile();
+
+        makeFile(mService.getUserBitmapFilePath(USER_10), "10a.b.c").mkdir();
+        makeFile(mService.getUserBitmapFilePath(USER_10), "10d.e.f").mkdir();
+        makeFile(mService.getUserBitmapFilePath(USER_10), "10d.e.f", "123").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_10), "10d.e.f", "456").createNewFile();
+
+        makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "1").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "2").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "3").createNewFile();
+        makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "4").createNewFile();
+
+        assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3,
+                "a.b.c", "d.e.f");
+
+        // Save and load.  When a user is loaded, we do the cleanup.
+        mService.saveDirtyInfo();
+        initService();
+
+        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
+        mService.handleUnlockUser(20); // Make sure the logic will still work for nonexistent user.
+
+        // The below check is the same as above, except this time USER_0 use the CALLING_PACKAGE_3
+        // directory.
+
+        assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3);
+        assertBitmapDirectories(USER_10, CALLING_PACKAGE_1, CALLING_PACKAGE_2);
+
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_1,
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s1"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s2"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_1, "s3")
+        );
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_2,
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s4"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s5"),
+                getBitmapFilename(USER_0, CALLING_PACKAGE_2, "s6")
+        );
+        assertBitmapFiles(USER_0, CALLING_PACKAGE_3,
+                EMPTY_STRINGS
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_1,
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s1"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s2"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_1, "10s3")
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_2,
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s4"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s5"),
+                getBitmapFilename(USER_10, CALLING_PACKAGE_2, "10s6")
+        );
+        assertBitmapFiles(USER_10, CALLING_PACKAGE_3,
+                EMPTY_STRINGS
+        );
     }
 
     private void checkShrinkBitmap(int expectedWidth, int expectedHeight, int resId, int maxSize) {
