@@ -332,7 +332,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(wallpaper.wallpaperFile.getAbsolutePath(), options);
         if (options.outWidth <= 0 || options.outHeight <= 0) {
-            Slog.e(TAG, "Invalid wallpaper data");
+            Slog.w(TAG, "Invalid wallpaper data");
             success = false;
         } else {
             boolean needCrop = false;
