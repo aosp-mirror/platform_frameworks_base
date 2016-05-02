@@ -1468,8 +1468,8 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:bottomRightRadius="<em>integer</em>" /&gt;
     &lt;<a href="#gradient-element">gradient</a>
         android:angle="<em>integer</em>"
-        android:centerX="<em>integer</em>"
-        android:centerY="<em>integer</em>"
+        android:centerX="<em>float</em>"
+        android:centerY="<em>float</em>"
         android:centerColor="<em>integer</em>"
         android:endColor="<em>color</em>"
         android:gradientRadius="<em>integer</em>"
