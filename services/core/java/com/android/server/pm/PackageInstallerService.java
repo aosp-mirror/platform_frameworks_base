@@ -866,8 +866,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
             mAppOps.checkPackage(callingUid, callerPackageName);
             final String installerPackageName = mPm.getInstallerPackageName(packageName);
-            allowSilentUninstall = installerPackageName != null
-                    && installerPackageName.equals(callerPackageName);
+            allowSilentUninstall = mPm.isOrphaned(packageName) ||
+                    (installerPackageName != null
+                            && installerPackageName.equals(callerPackageName));
         }
 
         // Check whether the caller is device owner, in which case we do it silently.
