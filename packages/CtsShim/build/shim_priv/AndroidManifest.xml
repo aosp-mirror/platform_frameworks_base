@@ -16,8 +16,16 @@
 
 <!-- Manifest for the privileged CTS shim -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.cts.priv.ctsshim">
-    <application android:label="CtsShim">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.cts.priv.ctsshim"
+    tools:ignore="MissingVersion" >
+
+    <restrict-upgrade
+        android:hash="__HASH__" />
+
+    <application
+        android:hasCode="false"
+        tools:ignore="AllowBackup,MissingApplicationIcon" >
 
         <!-- These activities don't actually exist; define them just to test the filters !-->
 
