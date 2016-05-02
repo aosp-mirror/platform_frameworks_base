@@ -205,7 +205,7 @@ class TaskPositioner implements DimLayer.DimLayerUser {
                                     : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
                             mService.mActivityManager.moveTaskToDockedStack(
                                     mTask.mTaskId, createMode, true /*toTop*/, true /* animate */,
-                                    null /* initialBounds */);
+                                    null /* initialBounds */, false /* moveHomeStackFront */);
                         }
                     } catch(RemoteException e) {}
 

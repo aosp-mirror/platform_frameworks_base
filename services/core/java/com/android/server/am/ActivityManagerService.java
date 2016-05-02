@@ -9700,7 +9700,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     @Override
     public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
-            Rect initialBounds) {
+            Rect initialBounds, boolean moveHomeStackFront) {
         enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "moveTaskToDockedStack()");
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
@@ -9708,9 +9708,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToDockedStack: moving task=" + taskId
                         + " to createMode=" + createMode + " toTop=" + toTop);
                 mWindowManager.setDockedStackCreateState(createMode, initialBounds);
-                return mStackSupervisor.moveTaskToStackLocked(
-                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS,
-                        "moveTaskToDockedStack", animate);
+                final boolean moved = mStackSupervisor.moveTaskToStackLocked(
+                        taskId, DOCKED_STACK_ID, toTop, !FORCE_FOCUS, "moveTaskToDockedStack",
+                        animate, DEFER_RESUME);
+                if (moved) {
+                    if (moveHomeStackFront) {
+                        mStackSupervisor.moveHomeStackToFront("moveTaskToDockedStack");
+                    }
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                }
+                return moved;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
