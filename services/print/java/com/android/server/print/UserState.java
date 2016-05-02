@@ -555,7 +555,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                     new PrintJobStateChangeListenerRecord(listener, appId) {
                 @Override
                 public void onBinderDied() {
-                    mPrintJobStateChangeListenerRecords.remove(this);
+                    synchronized (mLock) {
+                        if (mPrintJobStateChangeListenerRecords != null) {
+                            mPrintJobStateChangeListenerRecords.remove(this);
+                        }
+                    }
                 }
             });
         }
@@ -639,7 +643,11 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                     new ListenerRecord<IRecommendationsChangeListener>(listener) {
                         @Override
                         public void onBinderDied() {
-                            mPrintServiceRecommendationsChangeListenerRecords.remove(this);
+                            synchronized (mLock) {
+                                if (mPrintServiceRecommendationsChangeListenerRecords != null) {
+                                    mPrintServiceRecommendationsChangeListenerRecords.remove(this);
+                                }
+                            }
                         }
                     });
         }
