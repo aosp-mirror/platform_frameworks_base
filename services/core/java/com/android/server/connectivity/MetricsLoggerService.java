@@ -144,8 +144,13 @@ public class MetricsLoggerService extends SystemService {
 
             boolean dumpSerializedSize = false;
             boolean dumpEvents = false;
+            boolean dumpDebugInfo = false;
             for (String arg : args) {
                 switch (arg) {
+                    case "--debug":
+                        dumpDebugInfo = true;
+                        break;
+
                     case "--events":
                         dumpEvents = true;
                         break;
@@ -155,6 +160,7 @@ public class MetricsLoggerService extends SystemService {
                         break;
 
                     case "--all":
+                        dumpDebugInfo = true;
                         dumpEvents = true;
                         dumpSerializedSize = true;
                         break;
@@ -163,6 +169,7 @@ public class MetricsLoggerService extends SystemService {
 
             synchronized (mEvents) {
                 pw.println("Number of events: " + mEvents.size());
+                pw.println("Counter: " + mEventCounter);
                 if (mEvents.size() > 0) {
                     pw.println("Time span: " +
                             DateUtils.formatElapsedTime(
@@ -171,16 +178,12 @@ public class MetricsLoggerService extends SystemService {
                 }
 
                 if (dumpSerializedSize) {
-                    long dataSize = 0;
                     Parcel p = Parcel.obtain();
                     for (ConnectivityMetricsEvent e : mEvents) {
-                        dataSize += 16; // timestamp and 2 stamps
-
-                        p.writeParcelable(e.data, 0);
+                        p.writeParcelable(e, 0);
                     }
-                    dataSize += p.dataSize();
+                    pw.println("Serialized data size: " + p.dataSize());
                     p.recycle();
-                    pw.println("Serialized data size: " + dataSize);
                 }
 
                 if (dumpEvents) {
@@ -189,6 +192,21 @@ public class MetricsLoggerService extends SystemService {
                     for (ConnectivityMetricsEvent e : mEvents) {
                         pw.println(e.toString());
                     }
+                }
+            }
+
+            if (dumpDebugInfo) {
+                synchronized (mThrottlingCounters) {
+                    pw.println();
+                    for (int i = 0; i < ConnectivityMetricsLogger.NUMBER_OF_COMPONENTS; i++) {
+                        if (mThrottlingCounters[i] > 0) {
+                            pw.println("Throttling Counter #" + i + ": " + mThrottlingCounters[i]);
+                        }
+                    }
+                    pw.println("Throttling Time Remaining: " +
+                            DateUtils.formatElapsedTime(
+                                    (mThrottlingIntervalBoundaryMillis - System.currentTimeMillis())
+                                            / 1000));
                 }
             }
 
