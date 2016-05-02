@@ -88,7 +88,7 @@ public:
     }
 
     void write(SkWStream* stream) {
-        SkAutoTUnref<SkDocument> document(SkDocument::CreatePDF(stream));
+        sk_sp<SkDocument> document = SkDocument::MakePDF(stream);
         for (unsigned i = 0; i < mPages.size(); i++) {
             PageRecord* page =  mPages[i];
 
