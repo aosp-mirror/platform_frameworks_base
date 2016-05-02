@@ -501,7 +501,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     if (status != STATUS_OK) {
                         Slog.w(TAG, "Error stopping keyphrase model: " + model.getHandle());
                     }
-                    model.clearState();
+                    model.setStopped();
+                    model.setRequested(false);
+                    model.clearCallback();
+                    model.setRecognitionConfig(null);
                 }
             }
             internalClearGlobalStateLocked();
