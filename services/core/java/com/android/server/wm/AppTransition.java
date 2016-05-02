@@ -372,7 +372,7 @@ public class AppTransition implements Dump {
                 topOpeningAppAnimator != null ? topOpeningAppAnimator.animation : null,
                 topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
-                .notifyAppTransitionStarting(openingApps, closingApps);
+                .notifyAppTransitionStarting();
 
         // Prolong the start for the transition when docking a task from recents, unless recents
         // ended it already then we don't need to wait.
