@@ -510,7 +510,12 @@ public final class PageContentRepository {
         public void destroy() {
             if (mBoundToService) {
                 mBoundToService = false;
-                mContext.unbindService(AsyncRenderer.this);
+                try {
+                    mContext.unbindService(AsyncRenderer.this);
+                } catch (IllegalArgumentException e) {
+                    // Service might have been forcefully unbound in onDestroy()
+                    Log.e(LOG_TAG, "Cannot unbind service", e);
+                }
             }
 
             mPageContentCache.invalidate();
