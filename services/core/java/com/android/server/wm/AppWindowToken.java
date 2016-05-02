@@ -109,7 +109,6 @@ class AppWindowToken extends WindowToken {
     // Set to true when the token has been removed from the window mgr.
     boolean removed;
 
-    boolean appDied;
     // Information about an application starting window if displayed.
     StartingData startingData;
     WindowState startingWindow;
@@ -458,12 +457,12 @@ class AppWindowToken extends WindowToken {
 
     void removeAllDeadWindows() {
         for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
-                // removeWindowLocked at bottom of loop may remove multiple entries from
-                // allAppWindows if the window to be removed has child windows. It also may
-                // not remove any windows from allAppWindows at all if win is exiting and
-                // currently animating away. This ensures that winNdx is monotonically decreasing
-                // and never beyond allAppWindows bounds.
-                winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
+            // removeWindowLocked at bottom of loop may remove multiple entries from
+            // allAppWindows if the window to be removed has child windows. It also may
+            // not remove any windows from allAppWindows at all if win is exiting and
+            // currently animating away. This ensures that winNdx is monotonically decreasing
+            // and never beyond allAppWindows bounds.
+            winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
             WindowState win = allAppWindows.get(winNdx);
             if (win.mAppDied) {
                 if (DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) {
@@ -474,6 +473,15 @@ class AppWindowToken extends WindowToken {
                 service.removeWindowLocked(win);
             }
         }
+    }
+
+    boolean hasWindowsAlive() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            if (!allAppWindows.get(i).mAppDied) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void setReplacingWindows(boolean animate) {
