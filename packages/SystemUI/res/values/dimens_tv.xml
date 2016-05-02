@@ -52,9 +52,6 @@
     <dimen name="recents_tv_dismiss_icon_bottom_margin">1dip</dimen>
     <dimen name="recents_tv_dismiss_text_size">12sp</dimen>
 
-    <!-- Values for PIP in recents -->
-    <dimen name="recents_tv_pip_controls_margin_top">10dp</dimen>
-
     <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
     <dimen name="tv_pip_bounds_space">3dp</dimen>
 
