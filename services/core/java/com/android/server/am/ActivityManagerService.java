@@ -7340,9 +7340,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + "Picture-In-Picture not supported for r=" + r);
                 }
 
-                // Use the default launch bounds for pinned stack if it doesn't exist yet.
-                final Rect bounds = (mStackSupervisor.getStack(PINNED_STACK_ID) == null)
-                        ? mDefaultPinnedStackBounds : null;
+                // Use the default launch bounds for pinned stack if it doesn't exist yet or use the
+                // current bounds.
+                final ActivityStack pinnedStack = mStackSupervisor.getStack(PINNED_STACK_ID);
+                final Rect bounds = (pinnedStack != null)
+                        ? pinnedStack.mBounds : mDefaultPinnedStackBounds;
 
                 mStackSupervisor.moveActivityToPinnedStackLocked(
                         r, "enterPictureInPictureMode", bounds);
