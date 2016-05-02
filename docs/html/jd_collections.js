@@ -1,3 +1,11 @@
+/*
+ * THIS FILE IS DEPRECATED.
+ *
+ * Please add and edit resource collections in jd_extras_<lang>.js
+ * where lang matches the language code appropriate for the resource.
+ * Last sync'd with jd_extras_<lang>.js on 29 Apr 2016.
+ *
+ */
 var RESOURCE_COLLECTIONS = {
   "index/carousel": {
     "title": "",
