@@ -6974,6 +6974,33 @@ public final class Settings {
        public static final String STORAGE_BENCHMARK_INTERVAL = "storage_benchmark_interval";
 
        /**
+        * Sample validity in seconds to configure for the system DNS resolver.
+        * {@hide}
+        */
+       public static final String DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS =
+               "dns_resolver_sample_validity_seconds";
+
+       /**
+        * Success threshold in percent for use with the system DNS resolver.
+        * {@hide}
+        */
+       public static final String DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT =
+                "dns_resolver_success_threshold_percent";
+
+       /**
+        * Minimum number of samples needed for statistics to be considered meaningful in the
+        * system DNS resolver.
+        * {@hide}
+        */
+       public static final String DNS_RESOLVER_MIN_SAMPLES = "dns_resolver_min_samples";
+
+       /**
+        * Maximum number taken into account for statistics purposes in the system DNS resolver.
+        * {@hide}
+        */
+       public static final String DNS_RESOLVER_MAX_SAMPLES = "dns_resolver_max_samples";
+
+       /**
         * Whether to disable the automatic scheduling of system updates.
         * 1 = system updates won't be automatically scheduled (will always
         * present notification instead).
