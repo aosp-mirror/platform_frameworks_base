@@ -24,6 +24,7 @@ import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.ResultReceiver;
@@ -183,6 +184,7 @@ public class TelephonyManager {
 
     /**
      * Returns the number of phones available.
+     * Returns 0 if none of voice, sms, data is not supported
      * Returns 1 for Single standby mode (Single SIM functionality)
      * Returns 2 for Dual standby mode.(Dual SIM functionality)
      */
@@ -190,7 +192,28 @@ public class TelephonyManager {
         int phoneCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                phoneCount = 1;
+                // if voice or sms or data is supported, return 1 otherwise 0
+                if (isVoiceCapable() || isSmsCapable()) {
+                    phoneCount = 1;
+                } else {
+                    // todo: try to clean this up further by getting rid of the nested conditions
+                    if (mContext == null) {
+                        phoneCount = 1;
+                    } else {
+                        // check for data support
+                        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
+                                Context.CONNECTIVITY_SERVICE);
+                        if (cm == null) {
+                            phoneCount = 1;
+                        } else {
+                            if (cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                                phoneCount = 1;
+                            } else {
+                                phoneCount = 0;
+                            }
+                        }
+                    }
+                }
                 break;
             case DSDS:
             case DSDA:
