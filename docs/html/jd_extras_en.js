@@ -3266,28 +3266,28 @@ METADATA['en'].carousel = {
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
-  "http://www.youtube.com/watch?v=Pms0pcyPbAM": {
+  "https://www.youtube.com/watch?v=Pms0pcyPbAM": {
     "url":"https://www.youtube.com/watch?v=Pms0pcyPbAM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c]",
     "image": "images/distribute/hero-carousel-giftedmom.jpg",
     "title": "Gifted Mom reaches more mothers across Africa with Android",
     "type":"youtube",
     "summary": "Gifted Mom is an app developed in Cameroon which provides users with critical information about pregnancy, breastfeeding and child vaccinations. Hear the creators explain how they built their business and launched on Google Play.",
   },
-  "http://www.youtube.com/watch?v=9m6MoBM-sFI": {
+  "https://www.youtube.com/watch?v=9m6MoBM-sFI": {
     "url":"https://www.youtube.com/watch?v=9m6MoBM-sFI&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=3",
     "image": "images/distribute/hero-carousel-sgn.jpg",
     "title": "SGN increases installs with Store Listing Experiments",
     "type" : "youtube",
     "summary": "Watch mobile game developer SGN talk about how using Store Listing Experiments to test multiple variants across their portfolio of games helped improve their ROI, conversion rates and gamer retention.",
   },
-  "http://www.youtube.com/watch?v=e7t3svG9PTk": {
+  "https://www.youtube.com/watch?v=e7t3svG9PTk": {
     "url":"https://www.youtube.com/watch?v=e7t3svG9PTk&index=2&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-carousel-djit.jpg",
     "title": "DJiT builds higher quality experiences on Android",
     "type" : "youtube",
     "summary": "Learn how Music app developer DJiT create higher quality apps with improved latency on Android Marshmallow, as well as other Android and Google Play features.",
   },
-  "http://www.youtube.com/watch?v=J3IvOfvH1ys": {
+  "https://www.youtube.com/watch?v=J3IvOfvH1ys": {
     "url":"https://www.youtube.com/watch?v=J3IvOfvH1ys&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=1",
     "image": "images/distribute/hero-carousel-wego.jpg",
     "title": "Wego increases user retention with material design",
@@ -3343,10 +3343,10 @@ METADATA['en'].collections = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=9m6MoBM-sFI",
-      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
-      "http://www.youtube.com/watch?v=e7t3svG9PTk",
-      "http://www.youtube.com/watch?v=J3IvOfvH1ys"
+      "https://www.youtube.com/watch?v=9m6MoBM-sFI",
+      "https://www.youtube.com/watch?v=Pms0pcyPbAM",
+      "https://www.youtube.com/watch?v=e7t3svG9PTk",
+      "https://www.youtube.com/watch?v=J3IvOfvH1ys"
     ]
   },
   "index/multiscreen": {
@@ -4594,6 +4594,21 @@ METADATA['en'].collections = {
       "distribute/googleplay/auto.html"
     ]
   },
+  "distribute/stories/games": {
+    "title": "",
+    "resources": [
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
+      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
+    ]
+  },
   "training/testing/overview": {
     "title": "",
     "resources": [
@@ -4628,21 +4643,6 @@ METADATA['en'].collections = {
       "https://codelabs.developers.google.com/codelabs/android-testing/index.html",
       "https://github.com/googlesamples/android-testing-templates",
       "https://google.github.io/android-testing-support-library"
-    ]
-  },
-  "distribute/stories/games": {
-    "title": "",
-    "resources": [
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_Deerhunter2014_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/ConcreteSoftware_PBABowling_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Dragonplay_DragonplaySlots_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Gameloft_Asphalt8_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Glu_EternityWarriors3_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TMSOFT_Compulsive_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
-      "https://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
     ]
   },
   "overview/1": {
@@ -4849,7 +4849,7 @@ METADATA['en'].collections = {
       "preview/features/picture-in-picture.html",
       "preview/features/tv-recording-api.html"
     ]
-  },
+  }
 };
 
 /**
