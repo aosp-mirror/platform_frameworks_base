@@ -80,6 +80,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     boolean mReceiverRegistered;
     private IQSService mService;
     private boolean mUnbindImmediate;
+    private TileChangeListener mChangeListener;
 
     public TileLifecycleManager(Handler handler, Context context, Intent intent, UserHandle user) {
         mContext = context;
@@ -168,7 +169,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     @Override
     public void onServiceDisconnected(ComponentName name) {
         if (DEBUG) Log.d(TAG, "onServiceDisconnected " + name);
-        mWrapper = null;
+        handleDeath();
     }
 
     private void handlePendingMessages() {
@@ -279,6 +280,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mReceiverRegistered = false;
     }
 
+    public void setTileChangeListener(TileChangeListener changeListener) {
+        mChangeListener = changeListener;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (DEBUG) Log.d(TAG, "onReceive: " + intent);
@@ -288,6 +293,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             if (!Objects.equal(pkgName, mIntent.getComponent().getPackageName())) {
                 return;
             }
+        }
+        if (Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction()) && mChangeListener != null) {
+            mChangeListener.onTileChanged(mIntent.getComponent());
         }
         stopPackageListening();
         if (mBound) {
@@ -400,5 +408,9 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     public void binderDied() {
         if (DEBUG) Log.d(TAG, "binderDeath");
         handleDeath();
+    }
+
+    public interface TileChangeListener {
+        void onTileChanged(ComponentName tile);
     }
 }

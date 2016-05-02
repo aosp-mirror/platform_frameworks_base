@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import libcore.util.Objects;
 
 /**
@@ -79,6 +80,10 @@ public class TileServiceManager {
         filter.addDataScheme("package");
         mServices.getContext().registerReceiverAsUser(mUninstallReceiver,
                 new UserHandle(ActivityManager.getCurrentUser()), filter, null, mHandler);
+    }
+
+    public void setTileChangeListener(TileChangeListener changeListener) {
+        mStateManager.setTileChangeListener(changeListener);
     }
 
     public boolean isActiveTile() {
