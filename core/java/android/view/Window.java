@@ -593,6 +593,12 @@ public abstract class Window {
          */
         void exitFreeformMode() throws RemoteException;
 
+        /**
+         * Puts the activity in picture-in-picture mode if the activity supports.
+         * @see android.R.attr#supportsPictureInPicture
+         */
+        void enterPictureInPictureModeIfPossible();
+
         /** Returns the current stack Id for the window. */
         int getWindowStackId() throws RemoteException;
     }
@@ -1254,18 +1260,6 @@ public abstract class Window {
     @Nullable
     public View findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
-    }
-
-    /**
-     * Puts the activity in picture-in-picture mode.
-     * @see android.R.attr#supportsPictureInPicture
-     * @hide
-     */
-    protected void enterPictureInPictureMode() {
-        try {
-            ActivityManagerNative.getDefault().enterPictureInPictureMode(mAppToken);
-        } catch (IllegalArgumentException|RemoteException e) {
-        }
     }
 
     /**
