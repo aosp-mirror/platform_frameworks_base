@@ -1597,9 +1597,6 @@ class ActivityStarter {
     private void setTaskFromReuseOrCreateNewTask(TaskRecord taskToAffiliate) {
         mTargetStack = computeStackFocus(mStartActivity, true, mLaunchBounds, mLaunchFlags,
                 mOptions);
-        if (mDoResume) {
-            mTargetStack.moveToFront("startingNewTask");
-        }
 
         if (mReuseTask == null) {
             final TaskRecord task = mTargetStack.createTaskRecord(
