@@ -159,6 +159,7 @@ public class PackageParser {
     private static final String TAG_SUPPORTS_INPUT = "supports-input";
     private static final String TAG_EAT_COMMENT = "eat-comment";
     private static final String TAG_PACKAGE = "package";
+    private static final String TAG_RESTRICT_UPDATE = "restrict-update";
 
     // These are the tags supported by child packages
     private static final Set<String> CHILD_PACKAGE_TAGS = new ArraySet<>();
@@ -1639,9 +1640,9 @@ public class PackageParser {
     /**
      * This is the common parsing routing for handling parent and child
      * packages in a base APK. The difference between parent and child
-     * parsing is that some targs are not supported by child packages as
+     * parsing is that some tags are not supported by child packages as
      * well as some manifest attributes are ignored. The implementation
-     * assumes the calling code already handled the manifest tag if needed
+     * assumes the calling code has already handled the manifest tag if needed
      * (this applies to the parent only).
      *
      * @param pkg The package which to populate
@@ -2089,6 +2090,29 @@ public class PackageParser {
                     // If parsing a child failed the error is already set
                     return null;
                 }
+
+            } else if (tagName.equals(TAG_RESTRICT_UPDATE)) {
+                if ((flags & PARSE_IS_SYSTEM_DIR) != 0) {
+                    sa = res.obtainAttributes(parser,
+                            com.android.internal.R.styleable.AndroidManifestRestrictUpdate);
+                    final String hash = sa.getNonConfigurationString(
+                            com.android.internal.R.styleable.AndroidManifestRestrictUpdate_hash, 0);
+                    sa.recycle();
+
+                    pkg.restrictUpdateHash = null;
+                    if (hash != null) {
+                        final int hashLength = hash.length();
+                        final byte[] hashBytes = new byte[hashLength / 2];
+                        for (int i = 0; i < hashLength; i += 2){
+                            hashBytes[i/2] = (byte) ((Character.digit(hash.charAt(i), 16) << 4)
+                                    + Character.digit(hash.charAt(i + 1), 16));
+                        }
+                        pkg.restrictUpdateHash = hashBytes;
+                    }
+                }
+
+                XmlUtils.skipCurrentTag(parser);
+
             } else if (RIGID_PARSER) {
                 outError[0] = "Bad element under <manifest>: "
                     + parser.getName();
@@ -4821,6 +4845,8 @@ public class PackageParser {
          * The use32bitAbi attribute is ignored if cpuAbiOverride is also set.
          */
         public boolean use32bitAbi;
+
+        public byte[] restrictUpdateHash;
 
         public Package(String packageName) {
             this.packageName = packageName;
