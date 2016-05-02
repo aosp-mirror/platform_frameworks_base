@@ -16,21 +16,18 @@
 
 package com.android.internal.widget;
 
-import com.android.internal.R;
-
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.text.BoringLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.RemotableViewMethod;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+
+import com.android.internal.R;
 
 /**
  * A TextView that can float around an image on the end.
@@ -96,9 +93,7 @@ public class ImageFloatingTextView extends TextView {
 
     @RemotableViewMethod
     public void setHasImage(boolean hasImage) {
-        mIndentLines = hasImage ? 2 : 0;
-        // The new layout will be automatically created when the text is
-        // set again by the notification.
+        setNumIndentLines(hasImage ? 2 : 0);
     }
 
     /**
