@@ -68,9 +68,7 @@ public final class Ranker extends NotificationRankerService {
                     if (notificationsForPackage == null) {
                         notificationsForPackage = new LinkedHashSet<>();
                     }
-                    if (notificationsForPackage.contains(sbn.getKey())) {
-                        return;
-                    }
+
                     notificationsForPackage.add(sbn.getKey());
                     mUnbundledNotifications.put(sbn.getPackageName(), notificationsForPackage);
 
