@@ -3077,6 +3077,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mInstalledServices.remove(mAccessibilityServiceInfo);
                     userState.mEnabledServices.remove(mComponentName);
                     userState.destroyUiAutomationService();
+                    readConfigurationForUserStateLocked(userState);
                 }
                 if (mId == getMagnificationController().getIdOfLastServiceToMagnify()) {
                     getMagnificationController().resetIfNeeded(true);
