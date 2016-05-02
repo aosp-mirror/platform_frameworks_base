@@ -2327,8 +2327,20 @@ final class ActivityStack {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
                     + " stopped=" + next.stopped + " visible=" + next.visible);
 
+            // If the previous activity is translucent, force a visibility update of
+            // the next activity, so that it's added to WM's opening app list, and
+            // transition animation can be set up properly.
+            // For example, pressing Home button with a translucent activity in focus.
+            // Launcher is already visible in this case. If we don't add it to opening
+            // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
+            // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
+            final boolean lastActivityTranslucent = lastStack != null
+                    && (!lastStack.mFullscreen
+                    || (lastStack.mLastPausedActivity != null
+                    && !lastStack.mLastPausedActivity.fullscreen));
+
             // This activity is now becoming visible.
-            if (!next.visible || next.stopped) {
+            if (!next.visible || next.stopped || lastActivityTranslucent) {
                 mWindowManager.setAppVisibility(next.appToken, true);
             }
 
