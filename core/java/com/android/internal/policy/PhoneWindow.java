@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
@@ -80,6 +81,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -204,6 +206,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     int mPanelChordingKey;
 
+    // This stores if the system supports Picture-in-Picture
+    // to see if KEYCODE_WINDOW should be handled here or not.
+    private boolean mSupportsPictureInPicture;
+
     private ImageView mLeftIconView;
 
     private ImageView mRightIconView;
@@ -313,6 +319,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
         }
+        // Even though the device doesn't support picture-in-picture mode,
+        // an user can force using it through developer options.
+        boolean forceResizable = Settings.Global.getInt(context.getContentResolver(),
+                DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+        mSupportsPictureInPicture = forceResizable || context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 
     @Override
@@ -2004,8 +2016,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             case KeyEvent.KEYCODE_WINDOW: {
-                if (!event.isCanceled()) {
-                    enterPictureInPictureMode();
+                if (mSupportsPictureInPicture && !event.isCanceled()) {
+                    getWindowControllerCallback().enterPictureInPictureModeIfPossible();
                 }
                 return true;
             }
