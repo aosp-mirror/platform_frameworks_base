@@ -310,6 +310,11 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             int taskIndexFromFront = taskViewCount - i - 1;
             TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+
+            if (mStackView.isIgnoredTask(task)) {
+                continue;
+            }
 
             // Animate the tasks down
             AnimationProps taskAnimation;
@@ -386,7 +391,7 @@ public class TaskStackAnimationHelper {
     public void startDeleteTaskAnimation(final TaskView deleteTaskView,
             final ReferenceCountedTrigger postAnimationTrigger) {
         TaskStackViewTouchHandler touchHandler = mStackView.getTouchHandler();
-        touchHandler.onBeginDrag(deleteTaskView);
+        touchHandler.onBeginManualDrag(deleteTaskView);
 
         postAnimationTrigger.increment();
         postAnimationTrigger.addLastDecrementRunnable(() -> {
