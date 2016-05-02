@@ -592,7 +592,7 @@ final class ActivityRecord {
             ActivityRecord _resultTo, String _resultWho, int _reqCode,
             boolean _componentSpecified, boolean _rootVoiceInteraction,
             ActivityStackSupervisor supervisor,
-            ActivityContainer container, ActivityOptions options) {
+            ActivityContainer container, ActivityOptions options, ActivityRecord sourceRecord) {
         service = _service;
         appToken = new Token(this, service);
         info = aInfo;
@@ -705,21 +705,7 @@ final class ActivityRecord {
             noDisplay = ent != null && ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
-            if ((!_componentSpecified || _launchedFromUid == Process.myUid()
-                    || _launchedFromUid == 0) &&
-                    Intent.ACTION_MAIN.equals(_intent.getAction()) &&
-                    _intent.hasCategory(Intent.CATEGORY_HOME) &&
-                    _intent.getCategories().size() == 1 &&
-                    _intent.getData() == null &&
-                    _intent.getType() == null &&
-                    !isResolverActivity()) {
-                // This sure looks like a home activity!
-                mActivityType = HOME_ACTIVITY_TYPE;
-            } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
-                mActivityType = RECENTS_ACTIVITY_TYPE;
-            } else {
-                mActivityType = APPLICATION_ACTIVITY_TYPE;
-            }
+            setActivityType(_componentSpecified, _launchedFromUid, _intent, sourceRecord);
 
             immersive = (aInfo.flags & ActivityInfo.FLAG_IMMERSIVE) != 0;
 
@@ -737,6 +723,36 @@ final class ActivityRecord {
             mActivityType = APPLICATION_ACTIVITY_TYPE;
             immersive = false;
             requestedVrComponent  = null;
+        }
+    }
+
+    private boolean isHomeIntent(Intent intent) {
+        return Intent.ACTION_MAIN.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_HOME)
+                && intent.getCategories().size() == 1
+                && intent.getData() == null
+                && intent.getType() == null;
+    }
+
+    private boolean canLaunchHomeActivity(int uid, ActivityRecord sourceRecord) {
+        if (uid == Process.myUid() || uid == 0) {
+            // System process can launch home activity.
+            return true;
+        }
+        // Resolver activity can launch home activity.
+        return sourceRecord != null && sourceRecord.isResolverActivity();
+    }
+
+    private void setActivityType(boolean componentSpecified,
+            int launchedFromUid, Intent intent, ActivityRecord sourceRecord) {
+        if ((!componentSpecified || canLaunchHomeActivity(launchedFromUid, sourceRecord))
+                && isHomeIntent(intent) && !isResolverActivity()) {
+            // This sure looks like a home activity!
+            mActivityType = HOME_ACTIVITY_TYPE;
+        } else if (realActivity.getClassName().contains(RECENTS_PACKAGE_NAME)) {
+            mActivityType = RECENTS_ACTIVITY_TYPE;
+        } else {
+            mActivityType = APPLICATION_ACTIVITY_TYPE;
         }
     }
 
@@ -1473,7 +1489,7 @@ final class ActivityRecord {
         }
         final ActivityRecord r = new ActivityRecord(service, /*caller*/null, launchedFromUid,
                 launchedFromPackage, intent, resolvedType, aInfo, service.getConfiguration(),
-                null, null, 0, componentSpecified, false, stackSupervisor, null, null);
+                null, null, 0, componentSpecified, false, stackSupervisor, null, null, null);
 
         r.persistentState = persistentState;
         r.taskDescription = taskDescription;
