@@ -2291,4 +2291,14 @@
         <attr name="minimalHeight" format="dimension" />
     </declare-styleable>
 
+    <!-- <code>restrict-update</code> tag restricts system apps from being updated unless the
+        SHA-512 hash equals the specified value.
+        @hide -->
+    <declare-styleable name="AndroidManifestRestrictUpdate" parent="AndroidManifest">
+        <!-- The SHA-512 hash of the only APK that can be used to update a package.
+             <p>NOTE: This is only applicable to system packages.
+             @hide -->
+        <attr name="hash" format="string" />
+    </declare-styleable>
+
 </resources>
