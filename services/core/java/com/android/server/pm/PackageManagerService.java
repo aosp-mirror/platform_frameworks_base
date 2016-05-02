@@ -2676,8 +2676,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Prepare storage for system user really early during boot,
             // since core system apps like SettingsProvider and SystemUI
             // can't wait for user to start
+            final int storageFlags;
+            if (StorageManager.isFileEncryptedNativeOrEmulated()) {
+                storageFlags = StorageManager.FLAG_STORAGE_DE;
+            } else {
+                storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+            }
             reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
-                    StorageManager.FLAG_STORAGE_DE);
+                    storageFlags);
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
@@ -19089,7 +19095,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-            if (!StorageManager.isUserKeyUnlocked(userId)) {
+            if (StorageManager.isFileEncryptedNativeOrEmulated()
+                    && !StorageManager.isUserKeyUnlocked(userId)) {
                 throw new RuntimeException(
                         "Yikes, someone asked us to reconcile CE storage while " + userId
                                 + " was still locked; this would have caused massive data loss!");
