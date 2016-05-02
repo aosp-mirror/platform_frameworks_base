@@ -1395,7 +1395,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         boolean storageManagerIsNonDefaultBlockEncrypted() {
-            return StorageManager.isNonDefaultBlockEncrypted();
+            long identity = Binder.clearCallingIdentity();
+            try {
+                return StorageManager.isNonDefaultBlockEncrypted();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         boolean storageManagerIsEncrypted() {
