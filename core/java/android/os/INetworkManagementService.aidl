@@ -324,6 +324,11 @@ interface INetworkManagementService
     void removeIdleTimer(String iface);
 
     /**
+     * Configure name servers, search paths, and resolver parameters for the given network.
+     */
+    void setDnsConfigurationForNetwork(int netId, in String[] servers, String domains);
+
+    /**
      * Bind name servers to a network in the DNS resolver.
      */
     void setDnsServersForNetwork(int netId, in String[] servers, String domains);
