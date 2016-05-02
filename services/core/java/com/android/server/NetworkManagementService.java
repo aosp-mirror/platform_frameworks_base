@@ -47,6 +47,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.TtyLi
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 import android.annotation.NonNull;
 import android.app.ActivityManagerNative;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
@@ -76,6 +77,7 @@ import android.os.ServiceSpecificException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
@@ -174,6 +176,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int RouteChange               = 616;
         public static final int StrictCleartext           = 617;
     }
+
+    /* Defaults for resolver parameters. */
+    public static final int DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS = 1800;
+    public static final int DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT = 25;
+    public static final int DNS_RESOLVER_DEFAULT_MIN_SAMPLES = 8;
+    public static final int DNS_RESOLVER_DEFAULT_MAX_SAMPLES = 64;
 
     /**
      * String indicating a softap command.
@@ -1924,6 +1932,51 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             throw e.rethrowAsParcelableException();
         }
         return stats;
+    }
+
+    @Override
+    public void setDnsConfigurationForNetwork(int netId, String[] servers, String domains) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
+        ContentResolver resolver = mContext.getContentResolver();
+
+        int sampleValidity = Settings.Global.getInt(resolver,
+                Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
+                DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
+        if (sampleValidity < 0 || sampleValidity > 65535) {
+            Slog.w(TAG, "Invalid sampleValidity=" + sampleValidity + ", using default=" +
+                    DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS);
+            sampleValidity = DNS_RESOLVER_DEFAULT_SAMPLE_VALIDITY_SECONDS;
+        }
+
+        int successThreshold = Settings.Global.getInt(resolver,
+                Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
+                DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
+        if (successThreshold < 0 || successThreshold > 100) {
+            Slog.w(TAG, "Invalid successThreshold=" + successThreshold + ", using default=" +
+                    DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT);
+            successThreshold = DNS_RESOLVER_DEFAULT_SUCCESS_THRESHOLD_PERCENT;
+        }
+
+        int minSamples = Settings.Global.getInt(resolver,
+                Settings.Global.DNS_RESOLVER_MIN_SAMPLES, DNS_RESOLVER_DEFAULT_MIN_SAMPLES);
+        int maxSamples = Settings.Global.getInt(resolver,
+                Settings.Global.DNS_RESOLVER_MAX_SAMPLES, DNS_RESOLVER_DEFAULT_MAX_SAMPLES);
+        if (minSamples < 0 || minSamples > maxSamples || maxSamples > 64) {
+            Slog.w(TAG, "Invalid sample count (min, max)=(" + minSamples + ", " + maxSamples +
+                    "), using default=(" + DNS_RESOLVER_DEFAULT_MIN_SAMPLES + ", " +
+                    DNS_RESOLVER_DEFAULT_MAX_SAMPLES + ")");
+            minSamples = DNS_RESOLVER_DEFAULT_MIN_SAMPLES;
+            maxSamples = DNS_RESOLVER_DEFAULT_MAX_SAMPLES;
+        }
+
+        final String[] domainStrs = domains == null ? new String[0] : domains.split(" ");
+        final int[] params = { sampleValidity, successThreshold, minSamples, maxSamples };
+        try {
+            mNetdService.setResolverConfiguration(netId, servers, domainStrs, params);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
