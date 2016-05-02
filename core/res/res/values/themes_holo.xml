@@ -466,6 +466,9 @@ please see themes_device_defaults.xml.
 
         <item name="editTextColor">?attr/textColorPrimary</item>
         <item name="editTextBackground">@drawable/edit_text_holo_light</item>
+        <item name="textEditSuggestionItemLayout">@layout/text_edit_suggestion_item</item>
+        <item name="textEditSuggestionContainerLayout">@layout/text_edit_suggestion_container</item>
+        <item name="textEditSuggestionHighlightStyle">@style/TextAppearance.Holo.SuggestionHighlight</item>
 
         <item name="candidatesTextStyleSpans">@string/candidates_style</item>
 
