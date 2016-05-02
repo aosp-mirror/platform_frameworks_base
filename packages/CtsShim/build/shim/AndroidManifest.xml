@@ -16,8 +16,13 @@
 
 <!-- Manifest for the system CTS shim -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.cts.system.ctsshim">
-    <application android:label="CtsShim">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.cts.ctsshim"
+    tools:ignore="MissingVersion" >
+
+    <application
+        android:hasCode="false"
+        tools:ignore="AllowBackup,MissingApplicationIcon" >
 
         <!-- These activities don't actually exist; define them just to test the filters !-->
 
