@@ -3789,6 +3789,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
                 mActivityStarter.startHomeActivityLocked(intent, aInfo, reason);
             }
+        } else {
+            Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
         }
 
         return true;
