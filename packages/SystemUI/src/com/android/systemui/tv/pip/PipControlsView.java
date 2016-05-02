@@ -57,9 +57,9 @@ public class PipControlsView extends LinearLayout {
     final PipManager mPipManager = PipManager.getInstance();
     Listener mListener;
 
-    PipControlButtonView mFullButtonView;
-    PipControlButtonView mCloseButtonView;
-    PipControlButtonView mPlayPauseButtonView;
+    private PipControlButtonView mFullButtonView;
+    private PipControlButtonView mCloseButtonView;
+    private PipControlButtonView mPlayPauseButtonView;
 
     private boolean mHasFocus;
     private OnFocusChangeListener mOnChildFocusChangeListener;
