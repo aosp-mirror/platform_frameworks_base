@@ -1263,6 +1263,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPageRangeTitle = (TextView) findViewById(R.id.page_range_title);
         mPageRangeEditText = (EditText) findViewById(R.id.page_range_edittext);
         mPageRangeEditText.setVisibility(View.INVISIBLE);
+        mPageRangeTitle.setVisibility(View.INVISIBLE);
         mPageRangeEditText.setOnFocusChangeListener(mSelectAllOnFocusListener);
         mPageRangeEditText.addTextChangedListener(new RangeTextWatcher());
 
