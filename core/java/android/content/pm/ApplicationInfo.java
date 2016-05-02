@@ -728,7 +728,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * The minimum SDK version this application can run on. It will not run
      * on earlier versions.
      */
-    public String minSdkVersion;
+    public int minSdkVersion;
 
     /**
      * The minimum SDK version this application targets.  It may run on earlier
@@ -965,7 +965,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(deviceProtectedDataDir);
         dest.writeString(credentialProtectedDataDir);
         dest.writeInt(uid);
-        dest.writeString(minSdkVersion);
+        dest.writeInt(minSdkVersion);
         dest.writeInt(targetSdkVersion);
         dest.writeInt(versionCode);
         dest.writeInt(enabled ? 1 : 0);
@@ -1020,7 +1020,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         deviceEncryptedDataDir = deviceProtectedDataDir = source.readString();
         credentialEncryptedDataDir = credentialProtectedDataDir = source.readString();
         uid = source.readInt();
-        minSdkVersion = source.readString();
+        minSdkVersion = source.readInt();
         targetSdkVersion = source.readInt();
         versionCode = source.readInt();
         enabled = source.readInt() != 0;
