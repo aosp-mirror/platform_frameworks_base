@@ -1465,6 +1465,16 @@ public class Editor {
         // sendUpdateSelection knows to avoid sending if the selection did
         // not actually change.
         sendUpdateSelection();
+
+        // Show drag handles if they were blocked by batch edit mode.
+        if (mTextActionMode != null) {
+            final CursorController cursorController = mTextView.hasSelection() ?
+                    getSelectionController() : getInsertionController();
+            if (cursorController != null && !cursorController.isActive()
+                    && !cursorController.isCursorBeingModified()) {
+                cursorController.show();
+            }
+        }
     }
 
     static final int EXTRACT_NOTHING = -2;
