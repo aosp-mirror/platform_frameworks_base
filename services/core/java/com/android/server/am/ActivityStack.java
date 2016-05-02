@@ -3488,11 +3488,10 @@ final class ActivityStack {
         r.state = ActivityState.FINISHING;
 
         if (mode == FINISH_IMMEDIATELY
-                || (mode == FINISH_AFTER_PAUSE && prevState == ActivityState.PAUSED)
+                || (prevState == ActivityState.PAUSED
+                    && (mode == FINISH_AFTER_PAUSE || mStackId == PINNED_STACK_ID))
                 || prevState == ActivityState.STOPPED
                 || prevState == ActivityState.INITIALIZING) {
-            // If this activity is already stopped, we can just finish
-            // it right now.
             r.makeFinishingLocked();
             boolean activityRemoved = destroyActivityLocked(r, true, "finish-imm");
             if (activityRemoved) {
