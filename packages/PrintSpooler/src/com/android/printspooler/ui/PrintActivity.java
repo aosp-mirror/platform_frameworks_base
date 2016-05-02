@@ -288,12 +288,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // the first batch of results which will be delivered
         // after reading historical data. This should be pretty
         // fast, so just wait before showing the UI.
-        mPrinterRegistry = new PrinterRegistry(PrintActivity.this,
-                new Runnable() {
-            @Override
-            public void run() {
-                onPrinterRegistryReady(documentAdapter);
-            }
+        mPrinterRegistry = new PrinterRegistry(PrintActivity.this, () -> {
+            (new Handler(getMainLooper())).post(() -> onPrinterRegistryReady(documentAdapter));
         }, LOADER_ID_PRINT_REGISTRY, LOADER_ID_PRINT_REGISTRY_INT);
     }
 
