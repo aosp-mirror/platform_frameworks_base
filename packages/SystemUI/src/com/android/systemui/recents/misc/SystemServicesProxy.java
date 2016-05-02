@@ -414,8 +414,8 @@ public class SystemServicesProxy {
         }
 
         try {
-            return mIam.moveTaskToDockedStack(
-                    taskId, createMode, true /* onTop */, false /* animate */, initialBounds);
+            return mIam.moveTaskToDockedStack(taskId, createMode, true /* onTop */,
+                    false /* animate */, initialBounds, true /* moveHomeStackFront */ );
         } catch (RemoteException e) {
             e.printStackTrace();
         }
