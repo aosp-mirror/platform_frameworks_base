@@ -1072,6 +1072,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(sample_groups) \
 		-useUpdatedTemplates \
 		-hdf android.hasSamples true \
+		-yaml _book.yaml \
 		-samplesdir $(samples_dir)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
