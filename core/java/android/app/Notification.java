@@ -5486,6 +5486,7 @@ public class Notification implements Parcelable
         private static final String KEY_CUSTOM_CONTENT_HEIGHT = "customContentHeight";
         private static final String KEY_GRAVITY = "gravity";
         private static final String KEY_HINT_SCREEN_TIMEOUT = "hintScreenTimeout";
+        private static final String KEY_DISMISSAL_ID = "dismissalId";
 
         // Flags bitwise-ored to mFlags
         private static final int FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE = 0x1;
@@ -5514,6 +5515,7 @@ public class Notification implements Parcelable
         private int mCustomContentHeight;
         private int mGravity = DEFAULT_GRAVITY;
         private int mHintScreenTimeout;
+        private String mDismissalId;
 
         /**
          * Create a {@link android.app.Notification.WearableExtender} with default
@@ -5550,6 +5552,7 @@ public class Notification implements Parcelable
                 mCustomContentHeight = wearableBundle.getInt(KEY_CUSTOM_CONTENT_HEIGHT);
                 mGravity = wearableBundle.getInt(KEY_GRAVITY, DEFAULT_GRAVITY);
                 mHintScreenTimeout = wearableBundle.getInt(KEY_HINT_SCREEN_TIMEOUT);
+                mDismissalId = wearableBundle.getString(KEY_DISMISSAL_ID);
             }
         }
 
@@ -5600,6 +5603,9 @@ public class Notification implements Parcelable
             if (mHintScreenTimeout != 0) {
                 wearableBundle.putInt(KEY_HINT_SCREEN_TIMEOUT, mHintScreenTimeout);
             }
+            if (mDismissalId != null) {
+                wearableBundle.putString(KEY_DISMISSAL_ID, mDismissalId);
+            }
 
             builder.getExtras().putBundle(EXTRA_WEARABLE_EXTENSIONS, wearableBundle);
             return builder;
@@ -5620,6 +5626,7 @@ public class Notification implements Parcelable
             that.mCustomContentHeight = this.mCustomContentHeight;
             that.mGravity = this.mGravity;
             that.mHintScreenTimeout = this.mHintScreenTimeout;
+            that.mDismissalId = this.mDismissalId;
             return that;
         }
 
@@ -6105,6 +6112,29 @@ public class Notification implements Parcelable
          */
         public boolean getHintContentIntentLaunchesActivity() {
             return (mFlags & FLAG_HINT_CONTENT_INTENT_LAUNCHES_ACTIVITY) != 0;
+        }
+
+        /**
+         * When you post a notification, if you set the dismissal id field, then when that
+         * notification is canceled, notifications on other wearables and the paired Android phone
+         * having that same dismissal id will also be canceled.  Note that this only works if you
+         * have notification bridge mode set to NO_BRIDGING in your Wear app manifest.  See
+         * <a href="{@docRoot}wear/notifications/index.html">Adding Wearable Features to
+         * Notifications</a> for more information on how to use the bridge mode feature.
+         * @param dismissalId the dismissal id of the notification.
+         * @return this object for method chaining
+         */
+        public WearableExtender setDismissalId(String dismissalId) {
+            mDismissalId = dismissalId;
+            return this;
+        }
+
+        /**
+         * Returns the dismissal id of the notification.
+         * @return the dismissal id of the notification or null if it has not been set.
+         */
+        public String getDismissalId() {
+            return mDismissalId;
         }
 
         private void setFlag(int mask, boolean value) {
