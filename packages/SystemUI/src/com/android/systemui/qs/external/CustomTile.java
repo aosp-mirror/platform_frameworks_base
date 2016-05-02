@@ -40,9 +40,11 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import libcore.util.Objects;
 
-public class CustomTile extends QSTile<QSTile.State> {
+public class CustomTile extends QSTile<QSTile.State> implements TileChangeListener {
     public static final String PREFIX = "custom(";
 
     private static final boolean DEBUG = false;
@@ -58,7 +60,7 @@ public class CustomTile extends QSTile<QSTile.State> {
     private final IQSTileService mService;
     private final TileServiceManager mServiceManager;
     private final int mUser;
-    private final android.graphics.drawable.Icon mDefaultIcon;
+    private android.graphics.drawable.Icon mDefaultIcon;
 
     private boolean mListening;
     private boolean mBound;
@@ -71,26 +73,66 @@ public class CustomTile extends QSTile<QSTile.State> {
         mComponent = ComponentName.unflattenFromString(action);
         mServiceManager = host.getTileServices().getTileWrapper(this);
         mService = mServiceManager.getTileService();
+        mServiceManager.setTileChangeListener(this);
         mTile = new Tile(mComponent);
         mUser = ActivityManager.getCurrentUser();
-        android.graphics.drawable.Icon defaultIcon;
-        try {
-            PackageManager pm = mContext.getPackageManager();
-            ServiceInfo info = pm.getServiceInfo(mComponent,
-                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
-            defaultIcon = info.icon != 0 ? android.graphics.drawable.Icon
-                    .createWithResource(mComponent.getPackageName(), info.icon) : null;
-            mTile.setIcon(defaultIcon);
-            mTile.setLabel(info.loadLabel(pm));
-        } catch (Exception e) {
-            defaultIcon = null;
-        }
-        mDefaultIcon = defaultIcon;
+        setTileIcon();
         try {
             mService.setQSTile(mTile);
         } catch (RemoteException e) {
             // Called through wrapper, won't happen here.
         }
+    }
+
+    private void setTileIcon() {
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            ServiceInfo info = pm.getServiceInfo(mComponent,
+                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+            // Update the icon if its not set or is the default icon.
+            boolean updateIcon = mTile.getIcon() == null
+                    || iconEquals(mTile.getIcon(), mDefaultIcon);
+            mDefaultIcon = info.icon != 0 ? android.graphics.drawable.Icon
+                    .createWithResource(mComponent.getPackageName(), info.icon) : null;
+            if (updateIcon) {
+                mTile.setIcon(mDefaultIcon);
+            }
+            // Update the label if there is no label.
+            if (mTile.getLabel() == null) {
+                mTile.setLabel(info.loadLabel(pm));
+            }
+        } catch (Exception e) {
+            mDefaultIcon = null;
+        }
+    }
+
+    /**
+     * Compare two icons, only works for resources.
+     */
+    private boolean iconEquals(android.graphics.drawable.Icon icon1,
+            android.graphics.drawable.Icon icon2) {
+        if (icon1 == icon2) {
+            return true;
+        }
+        if (icon1 == null || icon2 == null) {
+            return false;
+        }
+        if (icon1.getType() != android.graphics.drawable.Icon.TYPE_RESOURCE
+                || icon2.getType() != android.graphics.drawable.Icon.TYPE_RESOURCE) {
+            return false;
+        }
+        if (icon1.getResId() != icon2.getResId()) {
+            return false;
+        }
+        if (!Objects.equal(icon1.getResPackage(), icon2.getResPackage())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onTileChanged(ComponentName tile) {
+        setTileIcon();
     }
 
     @Override
@@ -136,6 +178,8 @@ public class CustomTile extends QSTile<QSTile.State> {
         mListening = listening;
         try {
             if (listening) {
+                setTileIcon();
+                refreshState();
                 if (!mServiceManager.isActiveTile()) {
                     mServiceManager.setBindRequested(true);
                     mService.onStartListening();
