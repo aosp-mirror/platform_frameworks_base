@@ -24,7 +24,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
@@ -33,21 +32,16 @@ public class DocumentsApplication extends Application {
     private static final long PROVIDER_ANR_TIMEOUT = 20 * DateUtils.SECOND_IN_MILLIS;
 
     private RootsCache mRoots;
-    private Point mThumbnailsSize;
-    private ThumbnailCache mThumbnails;
+
+    private ThumbnailCache mThumbnailCache;
 
     public static RootsCache getRootsCache(Context context) {
         return ((DocumentsApplication) context.getApplicationContext()).mRoots;
     }
 
-    public static ThumbnailCache getThumbnailsCache(Context context, Point size) {
+    public static ThumbnailCache getThumbnailCache(Context context) {
         final DocumentsApplication app = (DocumentsApplication) context.getApplicationContext();
-        final ThumbnailCache thumbnails = app.mThumbnails;
-        if (!size.equals(app.mThumbnailsSize)) {
-            thumbnails.evictAll();
-            app.mThumbnailsSize = size;
-        }
-        return thumbnails;
+        return app.mThumbnailCache;
     }
 
     public static ContentProviderClient acquireUnstableProviderOrThrow(
@@ -71,7 +65,7 @@ public class DocumentsApplication extends Application {
         mRoots = new RootsCache(this);
         mRoots.updateAsync(false);
 
-        mThumbnails = new ThumbnailCache(memoryClassBytes / 4);
+        mThumbnailCache = new ThumbnailCache(memoryClassBytes / 4);
 
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -90,11 +84,7 @@ public class DocumentsApplication extends Application {
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
 
-        if (level >= TRIM_MEMORY_MODERATE) {
-            mThumbnails.evictAll();
-        } else if (level >= TRIM_MEMORY_BACKGROUND) {
-            mThumbnails.trimToSize(mThumbnails.size() / 2);
-        }
+        mThumbnailCache.onTrimMemory(level);
     }
 
     private BroadcastReceiver mCacheReceiver = new BroadcastReceiver() {
