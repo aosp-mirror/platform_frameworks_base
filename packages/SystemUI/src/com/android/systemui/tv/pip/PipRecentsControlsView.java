@@ -18,14 +18,15 @@ package com.android.systemui.tv.pip;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 
@@ -34,9 +35,9 @@ import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_PAUSED;
 import static com.android.systemui.tv.pip.PipManager.PLAYBACK_STATE_UNAVAILABLE;
 
 /**
- * An extended version of {@link PipControlsView} that supports animation in Recents.
+ * An FrameLayout that contains {@link PipControlsView} with its scrim.
  */
-public class PipRecentsControlsView extends PipControlsView {
+public class PipRecentsControlsView extends FrameLayout {
     /**
      * An interface to listen user action.
      */
@@ -47,7 +48,11 @@ public class PipRecentsControlsView extends PipControlsView {
         abstract void onBackPressed();
     }
 
-    private AnimatorSet mFocusGainAnimatorSet;
+    final PipManager mPipManager = PipManager.getInstance();
+    private Listener mListener;
+    private PipControlsView mPipControlsView;
+    private View mScrim;
+    private Animator mFocusGainAnimator;
     private AnimatorSet mFocusLoseAnimatorSet;
 
     public PipRecentsControlsView(Context context) {
@@ -71,26 +76,20 @@ public class PipRecentsControlsView extends PipControlsView {
     public void onFinishInflate() {
         super.onFinishInflate();
 
-        int buttonsFocusGainAnim = R.anim.tv_pip_controls_buttons_in_recents_focus_gain_animation;
-        mFocusGainAnimatorSet = new AnimatorSet();
-        mFocusGainAnimatorSet.playTogether(
-                loadAnimator(this, R.anim.tv_pip_controls_in_recents_focus_gain_animation),
-                loadAnimator(mFullButtonView,buttonsFocusGainAnim),
-                loadAnimator(mPlayPauseButtonView, buttonsFocusGainAnim),
-                loadAnimator(mCloseButtonView, buttonsFocusGainAnim));
+        mPipControlsView = (PipControlsView) findViewById(R.id.pip_control_contents);
+        mScrim = findViewById(R.id.scrim);
 
-        int buttonsFocusLoseAnim = R.anim.tv_pip_controls_buttons_in_recents_focus_lose_animation;
+        mFocusGainAnimator = loadAnimator(mPipControlsView,
+                      R.anim.tv_pip_controls_in_recents_focus_gain_animation);
+
         mFocusLoseAnimatorSet = new AnimatorSet();
-        mFocusLoseAnimatorSet.playTogether(
-                loadAnimator(this, R.anim.tv_pip_controls_in_recents_focus_lose_animation),
-                loadAnimator(mFullButtonView, buttonsFocusLoseAnim),
-                loadAnimator(mPlayPauseButtonView, buttonsFocusLoseAnim),
-                loadAnimator(mCloseButtonView, buttonsFocusLoseAnim));
+        mFocusLoseAnimatorSet.playSequentially(
+                loadAnimator(mPipControlsView,
+                        R.anim.tv_pip_controls_in_recents_focus_lose_animation),
+                loadAnimator(mScrim, R.anim.tv_pip_controls_in_recents_scrim_fade_in_animation));
 
         Rect pipBounds = mPipManager.getRecentsFocusedPipBounds();
-        int pipControlsMarginTop = getContext().getResources().getDimensionPixelSize(
-                R.dimen.recents_tv_pip_controls_margin_top);
-        setPadding(0, pipBounds.bottom + pipControlsMarginTop, 0, 0);
+        setPadding(0, pipBounds.bottom, 0, 0);
     }
 
     private Animator loadAnimator(View view, int animatorResId) {
@@ -103,44 +102,53 @@ public class PipRecentsControlsView extends PipControlsView {
      * Starts focus gaining animation.
      */
     public void startFocusGainAnimation() {
-        if (mFocusLoseAnimatorSet.isStarted()) {
-            mFocusLoseAnimatorSet.cancel();
-        }
-        mFocusGainAnimatorSet.start();
+        // Hides the scrim view as soon as possible, before the PIP resize animation starts.
+        // If we don't, PIP will be moved down a bit and a gap between the scrim and PIP will be
+        // shown at the bottom of the PIP.
+        mScrim.setAlpha(0);
+        startAnimator(mFocusGainAnimator, mFocusLoseAnimatorSet);
     }
 
     /**
      * Starts focus losing animation.
      */
     public void startFocusLoseAnimation() {
-        if (mFocusGainAnimatorSet.isStarted()) {
-            mFocusGainAnimatorSet.cancel();
-        }
-        mFocusLoseAnimatorSet.start();
+        startAnimator(mFocusLoseAnimatorSet, mFocusGainAnimator);
     }
 
     /**
      * Resets the view to the initial state. (i.e. end of the focus gain)
      */
     public void reset() {
-        if (mFocusGainAnimatorSet.isStarted()) {
-            mFocusGainAnimatorSet.cancel();
-        }
-        if (mFocusLoseAnimatorSet.isStarted()) {
-            mFocusLoseAnimatorSet.cancel();
-        }
+        cancelAnimator(mFocusGainAnimator);
+        cancelAnimator(mFocusLoseAnimatorSet);
 
         // Reset to initial state (i.e. end of focused)
         requestFocus();
-        setTranslationY(0);
-        setScaleXY(mFullButtonView, 1);
-        setScaleXY(mPlayPauseButtonView, 1);
-        setScaleXY(mCloseButtonView, 1);
+        mPipControlsView.setTranslationY(0);
+        mPipControlsView.setScaleX(1);
+        mPipControlsView.setScaleY(1);
+        mScrim.setAlpha(0);
     }
 
-    private void setScaleXY(View view, float scale) {
-        view.setScaleX(scale);
-        view.setScaleY(scale);
+    private static void startAnimator(Animator animator, Animator previousAnimator) {
+        cancelAnimator(previousAnimator);
+        if (!animator.isStarted()) {
+            animator.start();
+        }
+    }
+
+    private static void cancelAnimator(Animator animator) {
+        if (animator.isStarted()) {
+            animator.cancel();
+        }
+    }
+
+    /**
+     * Sets listeners.
+     */
+    public void setListener(Listener listener) {
+        mPipControlsView.setListener(listener);
     }
 
     @Override
@@ -148,8 +156,8 @@ public class PipRecentsControlsView extends PipControlsView {
         if (!event.isCanceled()
                 && event.getKeyCode() == KeyEvent.KEYCODE_BACK
                 && event.getAction() == KeyEvent.ACTION_UP) {
-            if (mListener != null) {
-                ((PipRecentsControlsView.Listener) mListener).onBackPressed();
+            if (mPipControlsView.mListener != null) {
+                ((PipRecentsControlsView.Listener) mPipControlsView.mListener).onBackPressed();
             }
             return true;
         }
