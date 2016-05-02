@@ -3412,10 +3412,6 @@ public class Notification implements Parcelable
                     validRemoteInput |= hasValidRemoteInput(action);
 
                     final RemoteViews button = generateActionButton(action);
-                    if (i == N - 1) {
-                        button.setViewLayoutWidth(com.android.internal.R.id.action0,
-                                ViewGroup.LayoutParams.MATCH_PARENT);
-                    }
                     big.addView(R.id.actions, button);
                 }
             } else {
