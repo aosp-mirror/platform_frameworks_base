@@ -3724,13 +3724,16 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             checkTime(startTime, "startProcess: done updating pids map");
         } catch (RuntimeException e) {
-            // XXX do better error recovery.
-            app.setPid(0);
-            mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
-            if (app.isolated) {
-                mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
-            }
             Slog.e(TAG, "Failure starting process " + app.processName, e);
+
+            // Something went very wrong while trying to start this process; one
+            // common case is when the package is frozen due to an active
+            // upgrade. To recover, clean up any active bookkeeping related to
+            // starting this process. (We already invoked this method once when
+            // the package was initially frozen through KILL_APPLICATION_MSG, so
+            // it doesn't hurt to use it again.)
+            forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid), false,
+                    false, true, false, false, UserHandle.getUserId(app.userId), "start failure");
         }
     }
 
