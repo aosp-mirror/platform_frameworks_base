@@ -4354,7 +4354,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // doesn't mean that it goes through the normal app transition cycle so we have
                 // to inform the docked controller about visibility change.
                 getDefaultDisplayContentLocked().getDockedDividerController()
-                        .notifyAppVisibilityChanged(wtoken, visible);
+                        .notifyAppVisibilityChanged();
             }
         }
 

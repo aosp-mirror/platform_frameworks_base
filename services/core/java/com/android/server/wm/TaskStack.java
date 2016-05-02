@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -153,6 +154,19 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     ArrayList<Task> getTasks() {
         return mTasks;
+    }
+
+    Task findHomeTask() {
+        if (mStackId != HOME_STACK_ID) {
+            return null;
+        }
+
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            if (mTasks.get(i).isHomeTask()) {
+                return mTasks.get(i);
+            }
+        }
+        return null;
     }
 
     /**
