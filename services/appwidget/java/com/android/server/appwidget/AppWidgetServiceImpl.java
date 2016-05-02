@@ -656,11 +656,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void ensureGroupStateLoadedLocked(int userId) {
-        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+        ensureGroupStateLoadedLocked(userId, /* enforceUserUnlockingOrUnlocked */ true );
+    }
+
+    private void ensureGroupStateLoadedLocked(int userId, boolean enforceUserUnlockingOrUnlocked) {
+        if (enforceUserUnlockingOrUnlocked && !mUserManager.isUserUnlockingOrUnlocked(userId)) {
             throw new IllegalStateException(
                     "User " + userId + " must be unlocked for widgets to be available");
         }
-        if (isProfileWithLockedParent(userId)) {
+        if (enforceUserUnlockingOrUnlocked && isProfileWithLockedParent(userId)) {
             throw new IllegalStateException(
                     "Profile " + userId + " must have unlocked parent");
         }
@@ -3945,7 +3949,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         @Override
         public void run() {
             synchronized (mLock) {
-                ensureGroupStateLoadedLocked(mUserId);
+                // No need to enforce unlocked state when there is no caller. User can be in the
+                // stopping state or removed by the time the message is processed
+                ensureGroupStateLoadedLocked(mUserId, false /* enforceUserUnlockingOrUnlocked */ );
                 saveStateLocked(mUserId);
             }
         }
