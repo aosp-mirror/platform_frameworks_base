@@ -832,6 +832,7 @@ public class DownloadManager {
 
         private long[] mIds = null;
         private Integer mStatusFlags = null;
+        private String mFilterString = null;
         private String mOrderByColumn = Downloads.Impl.COLUMN_LAST_MODIFICATION;
         private int mOrderDirection = ORDER_DESCENDING;
         private boolean mOnlyIncludeVisibleInDownloadsUi = false;
@@ -842,6 +843,17 @@ public class DownloadManager {
          */
         public Query setFilterById(long... ids) {
             mIds = ids;
+            return this;
+        }
+
+        /**
+         *
+         * Include only the downloads that contains the given string in its name.
+         * @return this object
+         * @hide
+         */
+        public Query setFilterByString(@Nullable String filter) {
+            mFilterString = filter;
             return this;
         }
 
@@ -904,9 +916,20 @@ public class DownloadManager {
             List<String> selectionParts = new ArrayList<String>();
             String[] selectionArgs = null;
 
-            if (mIds != null) {
-                selectionParts.add(getWhereClauseForIds(mIds));
-                selectionArgs = getWhereArgsForIds(mIds);
+            int whereArgsCount = (mIds == null) ? 0 : mIds.length;
+            whereArgsCount = (mFilterString == null) ? whereArgsCount : whereArgsCount + 1;
+            selectionArgs = new String[whereArgsCount];
+
+            if (whereArgsCount > 0) {
+                if (mIds != null) {
+                    selectionParts.add(getWhereClauseForIds(mIds));
+                    getWhereArgsForIds(mIds, selectionArgs);
+                }
+
+                if (mFilterString != null) {
+                    selectionParts.add(Downloads.Impl.COLUMN_TITLE + " LIKE ?");
+                    selectionArgs[selectionArgs.length - 1] = "%" + mFilterString + "%";
+                }
             }
 
             if (mStatusFlags != null) {
@@ -1450,11 +1473,21 @@ public class DownloadManager {
      */
     static String[] getWhereArgsForIds(long[] ids) {
         String[] whereArgs = new String[ids.length];
-        for (int i = 0; i < ids.length; i++) {
-            whereArgs[i] = Long.toString(ids[i]);
-        }
-        return whereArgs;
+        return getWhereArgsForIds(ids, whereArgs);
     }
+
+    /**
+     * Get selection args for a clause returned by {@link #getWhereClauseForIds(long[])}
+     * and write it to the supplied args array.
+     */
+    static String[] getWhereArgsForIds(long[] ids, String[] args) {
+        assert(args.length >= ids.length);
+        for (int i = 0; i < ids.length; i++) {
+            args[i] = Long.toString(ids[i]);
+        }
+        return args;
+    }
+
 
     /**
      * This class wraps a cursor returned by DownloadProvider -- the "underlying cursor" -- and

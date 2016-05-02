@@ -72,6 +72,32 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextField(false, query);
     }
 
+    public void testSearchDownloads() throws Exception {
+        initTestFiles();
+        bots.roots.openRoot(ROOT_0_ID);
+
+        bots.directory.copyFilesToClipboard(fileName1, fileName2);
+        device.waitForIdle();
+
+        bots.roots.openRoot("Downloads");
+        bots.directory.pasteFilesFromClipboard();
+
+        //TODO: linben Why do we need to click on Downloads again so this will work?
+        bots.roots.openRoot("Downloads");
+        device.waitForIdle();
+
+        String query = "file12";
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
+
+        device.pressEnter();
+
+        bots.directory.assertDocumentsCountOnList(true, 1);
+        bots.directory.assertDocumentsPresent(fileName2);
+
+        device.pressBack();
+    }
+
     @Suppress
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
         initTestFiles();
@@ -151,4 +177,18 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextFiledAndIcon(false, false);
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        try {
+            // Proper clean up of #testSearchDownloads
+            bots.directory.clickDocument(fileName1 + ".txt");
+            bots.directory.clickDocument(fileName2);
+            device.waitForIdle();
+            bots.main.menuDelete().click();
+            bots.main.findDialogOkButton().click();
+        } catch (Exception e) {
+        } finally {
+            super.tearDown();
+        }
+    }
 }

@@ -30,6 +30,7 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import junit.framework.Assert;
@@ -127,6 +128,17 @@ public class DirectoryListBot extends BaseBot {
         UiObject doc = findDocument(label);
         doc.longClick();
         return doc;
+    }
+
+    public void copyFilesToClipboard(String...labels) throws UiObjectNotFoundException {
+        for (String label: labels) {
+            clickDocument(label);
+        }
+        mDevice.pressKeyCode(KeyEvent.KEYCODE_C, KeyEvent.META_CTRL_ON);
+    }
+
+    public void pasteFilesFromClipboard() {
+        mDevice.pressKeyCode(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON);
     }
 
     public UiObject2 getSnackbar(String message) {
