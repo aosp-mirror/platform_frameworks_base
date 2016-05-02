@@ -451,15 +451,8 @@ public class ResourcesManager {
             }
 
             synchronized (this) {
-                final ActivityResources activityResources =
-                        getOrCreateActivityResourcesStructLocked(
-                                activityToken);
-
-                if (overrideConfig != null) {
-                    activityResources.overrideConfig.setTo(overrideConfig);
-                } else {
-                    activityResources.overrideConfig.setToDefaults();
-                }
+                // Force the creation of an ActivityResourcesStruct.
+                getOrCreateActivityResourcesStructLocked(activityToken);
             }
 
             // Update any existing Activity Resources references.
