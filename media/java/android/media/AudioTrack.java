@@ -233,9 +233,9 @@ public class AudioTrack extends PlayerBase
      */
     private final Object mPlayStateLock = new Object();
     /**
-     * Sizes of the native audio buffer.
+     * Sizes of the audio buffer.
      * These values are set during construction and can be stale.
-     * To obtain the current native audio buffer frame count use {@link #getBufferSizeInFrames()}.
+     * To obtain the current audio buffer frame count use {@link #getBufferSizeInFrames()}.
      */
     private int mNativeBufferSizeInBytes = 0;
     private int mNativeBufferSizeInFrames = 0;
@@ -342,20 +342,22 @@ public class AudioTrack extends PlayerBase
      *   {@link AudioFormat#ENCODING_PCM_8BIT},
      *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
      * @param bufferSizeInBytes the total size (in bytes) of the internal buffer where audio data is
-     *   read from for playback. This should be a multiple of the frame size in bytes.
+     *   read from for playback. This should be a nonzero multiple of the frame size in bytes.
      *   <p> If the track's creation mode is {@link #MODE_STATIC},
      *   this is the maximum length sample, or audio clip, that can be played by this instance.
      *   <p> If the track's creation mode is {@link #MODE_STREAM},
      *   this should be the desired buffer size
      *   for the <code>AudioTrack</code> to satisfy the application's
-     *   natural latency requirements.
+     *   latency requirements.
      *   If <code>bufferSizeInBytes</code> is less than the
-     *   minimum buffer size for the output sink, it is automatically increased to the minimum
+     *   minimum buffer size for the output sink, it is increased to the minimum
      *   buffer size.
      *   The method {@link #getBufferSizeInFrames()} returns the
-     *   actual size in frames of the native buffer created, which
-     *   determines the frequency to write
+     *   actual size in frames of the buffer created, which
+     *   determines the minimum frequency to write
      *   to the streaming <code>AudioTrack</code> to avoid underrun.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the estimated minimum buffer size
+     *   for an AudioTrack instance in streaming mode.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @throws java.lang.IllegalArgumentException
      */
@@ -392,13 +394,24 @@ public class AudioTrack extends PlayerBase
      *   See {@link AudioFormat#ENCODING_PCM_16BIT} and
      *   {@link AudioFormat#ENCODING_PCM_8BIT},
      *   and {@link AudioFormat#ENCODING_PCM_FLOAT}.
-     * @param bufferSizeInBytes the total size (in bytes) of the buffer where audio data is read
-     *   from for playback. If using the AudioTrack in streaming mode, you can write data into
-     *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
-     *   this is the maximum size of the sound that will be played for this instance.
-     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
-     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
-     *   smaller than getMinBufferSize() will result in an initialization failure.
+     * @param bufferSizeInBytes the total size (in bytes) of the internal buffer where audio data is
+     *   read from for playback. This should be a nonzero multiple of the frame size in bytes.
+     *   <p> If the track's creation mode is {@link #MODE_STATIC},
+     *   this is the maximum length sample, or audio clip, that can be played by this instance.
+     *   <p> If the track's creation mode is {@link #MODE_STREAM},
+     *   this should be the desired buffer size
+     *   for the <code>AudioTrack</code> to satisfy the application's
+     *   latency requirements.
+     *   If <code>bufferSizeInBytes</code> is less than the
+     *   minimum buffer size for the output sink, it is increased to the minimum
+     *   buffer size.
+     *   The method {@link #getBufferSizeInFrames()} returns the
+     *   actual size in frames of the buffer created, which
+     *   determines the minimum frequency to write
+     *   to the streaming <code>AudioTrack</code> to avoid underrun.
+     *   You can write data into this buffer in smaller chunks than this size.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the estimated minimum buffer size
+     *   for an AudioTrack instance in streaming mode.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}
      * @param sessionId Id of audio session the AudioTrack must be attached to
      * @throws java.lang.IllegalArgumentException
@@ -425,13 +438,23 @@ public class AudioTrack extends PlayerBase
      * @param format a non-null {@link AudioFormat} instance describing the format of the data
      *     that will be played through this AudioTrack. See {@link AudioFormat.Builder} for
      *     configuring the audio format parameters such as encoding, channel mask and sample rate.
-     * @param bufferSizeInBytes the total size (in bytes) of the buffer where audio data is read
-     *   from for playback. If using the AudioTrack in streaming mode, you can write data into
-     *   this buffer in smaller chunks than this size. If using the AudioTrack in static mode,
-     *   this is the maximum size of the sound that will be played for this instance.
-     *   See {@link #getMinBufferSize(int, int, int)} to determine the minimum required buffer size
-     *   for the successful creation of an AudioTrack instance in streaming mode. Using values
-     *   smaller than getMinBufferSize() will result in an initialization failure.
+     * @param bufferSizeInBytes the total size (in bytes) of the internal buffer where audio data is
+     *   read from for playback. This should be a nonzero multiple of the frame size in bytes.
+     *   <p> If the track's creation mode is {@link #MODE_STATIC},
+     *   this is the maximum length sample, or audio clip, that can be played by this instance.
+     *   <p> If the track's creation mode is {@link #MODE_STREAM},
+     *   this should be the desired buffer size
+     *   for the <code>AudioTrack</code> to satisfy the application's
+     *   latency requirements.
+     *   If <code>bufferSizeInBytes</code> is less than the
+     *   minimum buffer size for the output sink, it is increased to the minimum
+     *   buffer size.
+     *   The method {@link #getBufferSizeInFrames()} returns the
+     *   actual size in frames of the buffer created, which
+     *   determines the minimum frequency to write
+     *   to the streaming <code>AudioTrack</code> to avoid underrun.
+     *   See {@link #getMinBufferSize(int, int, int)} to determine the estimated minimum buffer size
+     *   for an AudioTrack instance in streaming mode.
      * @param mode streaming or static buffer. See {@link #MODE_STATIC} and {@link #MODE_STREAM}.
      * @param sessionId ID of audio session the AudioTrack must be attached to, or
      *   {@link AudioManager#AUDIO_SESSION_ID_GENERATE} if the session isn't known at construction
@@ -662,9 +685,8 @@ public class AudioTrack extends PlayerBase
          * If using the {@link AudioTrack} in streaming mode
          * (see {@link AudioTrack#MODE_STREAM}, you can write data into this buffer in smaller
          * chunks than this size. See {@link #getMinBufferSize(int, int, int)} to determine
-         * the minimum required buffer size for the successful creation of an AudioTrack instance
-         * in streaming mode. Using values smaller than <code>getMinBufferSize()</code> will result
-         * in an exception when trying to build the <code>AudioTrack</code>.
+         * the estimated minimum buffer size for the creation of an AudioTrack instance
+         * in streaming mode.
          * <br>If using the <code>AudioTrack</code> in static mode (see
          * {@link AudioTrack#MODE_STATIC}), this is the maximum size of the sound that will be
          * played by this instance.
@@ -1106,7 +1128,7 @@ public class AudioTrack extends PlayerBase
      * size and capacity may enlarge to accommodate.
      * <p> If the <code>AudioTrack</code> encoding indicates compressed data,
      * e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
-     * the size of the native <code>AudioTrack</code> buffer in bytes.
+     * the size of the <code>AudioTrack</code> buffer in bytes.
      * <p> See also {@link AudioManager#getProperty(String)} for key
      * {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      * @return current size in frames of the <code>AudioTrack</code> buffer.
@@ -1120,7 +1142,7 @@ public class AudioTrack extends PlayerBase
      * Limits the effective size of the <code>AudioTrack</code> buffer
      * that the application writes to.
      * <p> A write to this AudioTrack will not fill the buffer beyond this limit.
-     * If a blocking write is used then the write will block until the the data
+     * If a blocking write is used then the write will block until the data
      * can fit within this limit.
      * <p>Changing this limit modifies the latency associated with
      * the buffer for this track. A smaller size will give lower latency
@@ -1134,7 +1156,7 @@ public class AudioTrack extends PlayerBase
      * <p>This method is only supported for PCM audio.
      * It is not supported for compressed audio tracks.
      *
-     * @param bufferSizeInFrames requested buffer size
+     * @param bufferSizeInFrames requested buffer size in frames
      * @return the actual buffer size in frames or an error code,
      *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
      * @throws IllegalStateException if track is not initialized.
@@ -1150,19 +1172,19 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     *  Returns the maximum size of the native <code>AudioTrack</code> buffer.
+     *  Returns the maximum size of the <code>AudioTrack</code> buffer in frames.
      *  <p> If the track's creation mode is {@link #MODE_STATIC},
      *  it is equal to the specified bufferSizeInBytes on construction, converted to frame units.
-     *  A static track's native frame count will not change.
+     *  A static track's frame count will not change.
      *  <p> If the track's creation mode is {@link #MODE_STREAM},
      *  it is greater than or equal to the specified bufferSizeInBytes converted to frame units.
      *  For streaming tracks, this value may be rounded up to a larger value if needed by
      *  the target output sink, and
-     *  if the track is subsequently routed to a different output sink, the native
+     *  if the track is subsequently routed to a different output sink, the
      *  frame count may enlarge to accommodate.
      *  <p> If the <code>AudioTrack</code> encoding indicates compressed data,
      *  e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
-     *  the size of the native <code>AudioTrack</code> buffer in bytes.
+     *  the size of the <code>AudioTrack</code> buffer in bytes.
      *  <p> See also {@link AudioManager#getProperty(String)} for key
      *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
      *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
@@ -1252,8 +1274,10 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     * Returns the minimum buffer size required for the successful creation of an AudioTrack
-     * object to be created in the {@link #MODE_STREAM} mode. Note that this size doesn't
+     * Returns the estimated minimum buffer size required for an AudioTrack
+     * object to be created in the {@link #MODE_STREAM} mode.
+     * The size is an estimate because it does not consider either the route or the sink,
+     * since neither is known yet.  Note that this size doesn't
      * guarantee a smooth playback under load, and higher values should be chosen according to
      * the expected frequency at which the buffer will be refilled with additional data to play.
      * For example, if you intend to dynamically set the source sample rate of an AudioTrack
