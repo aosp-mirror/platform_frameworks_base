@@ -17525,6 +17525,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    public boolean isOrphaned(String packageName) {
+        // reader
+        synchronized (mPackages) {
+            return mSettings.isOrphaned(packageName);
+        }
+    }
+
     @Override
     public int getApplicationEnabledSetting(String packageName, int userId) {
         if (!sUserManager.exists(userId)) return COMPONENT_ENABLED_STATE_DISABLED;
