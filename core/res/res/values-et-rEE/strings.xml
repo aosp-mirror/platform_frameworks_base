@@ -263,7 +263,8 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Akna sisu toomine"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Tutvuge kasutatava akna sisuga."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Puudutusega sirvimise sisselülitamine"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Puudutatud üksuste nimesid esitatakse häälega ning ekraani saab sirvida puudutustega."</string>
+    <!-- no translation found for capability_desc_canRequestTouchExploration (7543249041581408313) -->
+    <skip />
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Veebi täiustatud juurdepääsu sisselülitamine"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Rakenduse sisu kättesaadavamaks muutmiseks võidakse installida skripte."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Sisestatud teksti jälgimine"</string>
@@ -662,7 +663,8 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Sisestage PUK-kood ja uus PIN-kood"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kood"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Uus PIN-kood"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Puudutage parooli sisestamiseks"</font></string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (2644215452200037944) -->
+    <skip />
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Avamiseks sisestage parool"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Avamiseks sisestage PIN-kood"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Vale PIN-kood."</string>
@@ -859,14 +861,38 @@
       <item quantity="one">1 tund</item>
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"praegu"</string>
-    <!-- no translation found for duration_minutes_shortest (598436407511890455) -->
-    <!-- no translation found for duration_hours_shortest (8300234116089026299) -->
-    <!-- no translation found for duration_days_shortest (1363973360381363510) -->
-    <!-- no translation found for duration_years_shortest (5695219816552469904) -->
-    <!-- no translation found for duration_minutes_shortest_future (5490504140297028823) -->
-    <!-- no translation found for duration_hours_shortest_future (4920064985170702118) -->
-    <!-- no translation found for duration_days_shortest_future (8024455442260783986) -->
-    <!-- no translation found for duration_years_shortest_future (5677783230118952251) -->
+    <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+    </plurals>
+    <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
+    </plurals>
+    <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> p</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> p</item>
+    </plurals>
+    <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
+    </plurals>
+    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min pärast</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min pärast</item>
+    </plurals>
+    <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h pärast</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h pärast</item>
+    </plurals>
+    <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> p pärast</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> p pärast</item>
+    </plurals>
+    <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a pärast</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a pärast</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Probleem videoga"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"See video ei sobi voogesituseks selles seadmes."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Videot ei saa esitada."</string>
@@ -898,7 +924,8 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> töötab"</string>
-    <string name="app_running_notification_text" msgid="4653586947747330058">"Puudutage lisateabe saamiseks või rakenduse peatamiseks."</string>
+    <!-- no translation found for app_running_notification_text (1197581823314971177) -->
+    <skip />
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Tühista"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -972,7 +999,8 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Rakenduste käivitamine."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Käivitamise lõpuleviimine."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> töötab"</string>
-    <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Puudutage rakendusele lülitumiseks"</string>
+    <!-- no translation found for heavy_weight_notification_detail (867643381388543170) -->
+    <skip />
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Kas lülituda teisele rakendusele?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Teine rakendus juba töötab ja see tuleb peatada, et saaksite uue käivitada."</string>
     <string name="old_app_action" msgid="493129172238566282">"Tagasi rakendusse <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -980,7 +1008,8 @@
     <string name="new_app_action" msgid="5472756926945440706">"Käivitage rakendus <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Peatage vana rakendus salvestamata."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Protsess <xliff:g id="PROC">%1$s</xliff:g> ületas mälupiirangu"</string>
-    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Mälutõmmis salvestati; puudutage jagamiseks"</string>
+    <!-- no translation found for dump_heap_notification_detail (6901391084243999274) -->
+    <skip />
     <string name="dump_heap_title" msgid="5864292264307651673">"Kas jagada mälutõmmist?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Protsess <xliff:g id="PROC">%1$s</xliff:g> ületas protsessi mälupiirangu <xliff:g id="SIZE">%2$s</xliff:g>. Saate mälutõmmist jagada selle arendajaga. Olge ettevaatlik: see mälutõmmis võib sisaldada teie isiklikke andmeid, millele rakendusel on juurdepääs."</string>
     <string name="sendText" msgid="5209874571959469142">"Valige teksti jaoks toiming"</string>
@@ -1016,7 +1045,8 @@
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"WiFi-l pole juurdepääsu Internetile"</string>
-    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Puudutage valikute nägemiseks"</string>
+    <!-- no translation found for wifi_no_internet_detailed (8083079241212301741) -->
+    <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" on halb Interneti-ühendus."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Kas lubada ühendus?"</string>
@@ -1026,7 +1056,8 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/leviala."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"WiFi otseühenduse käivitamine ebaõnnestus."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"WiFi Direct on sees"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Puuted seadete jaoks"</string>
+    <!-- no translation found for wifi_p2p_enabled_notification_message (8064677407830620023) -->
+    <skip />
     <string name="accept" msgid="1645267259272829559">"Nõustu"</string>
     <string name="decline" msgid="2112225451706137894">"Keeldu"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Kutse on saadetud"</string>
@@ -1078,9 +1109,11 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB fotode edastamiseks"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI jaoks"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ühendatud USB-lisaseadmega"</string>
-    <string name="usb_notification_message" msgid="7347368030849048437">"Puudutage rohkemate valikute kuvamiseks."</string>
+    <!-- no translation found for usb_notification_message (3370903770828407960) -->
+    <skip />
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-silumine ühendatud"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"Puudutage USB-silumise keelamiseks."</string>
+    <!-- no translation found for adb_active_notification_message (4948470599328424059) -->
+    <skip />
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Veaaruande võtmine …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Kas jagada veaaruannet?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Veaaruande jagamine …"</string>
@@ -1100,9 +1133,11 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Tuvastati uus üksus <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Fotode ja meedia ülekandmiseks"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Rikutud <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Üksus <xliff:g id="NAME">%s</xliff:g> on rikutud. Parandamiseks puudutage."</string>
+    <!-- no translation found for ext_media_unmountable_notification_message (2343202057122495773) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Toetamata <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"See seade ei toeta üksust <xliff:g id="NAME">%s</xliff:g>. Puudutage toetatud vormingus seadistamiseks."</string>
+    <!-- no translation found for ext_media_unsupported_notification_message (6121601473787888589) -->
+    <skip />
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Üksus <xliff:g id="NAME">%s</xliff:g> eemaldati ootamatult"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Andmekao vältimiseks lahutage üksus <xliff:g id="NAME">%s</xliff:g> enne eemaldamist"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Üksus <xliff:g id="NAME">%s</xliff:g> on eemaldatud"</string>
@@ -1138,7 +1173,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"installipakettide taotlemine"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Võimaldab rakendusel pakettide installimist taotleda."</string>
-    <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Suumi kasutamiseks koputage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Otsing"</string>
@@ -1169,20 +1204,23 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Märguannete tähtsuse määramise teenus"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN on aktiveeritud"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN-i aktiveeris <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="vpn_text" msgid="3011306607126450322">"Võrgu haldamiseks puudutage."</string>
-    <string name="vpn_text_long" msgid="6407351006249174473">"Ühendatud seansiga <xliff:g id="SESSION">%s</xliff:g>. Võrgu haldamiseks puudutage."</string>
+    <string name="vpn_text" msgid="1610714069627824309">"Koputage võrgu haldamiseks."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Ühendatud seansiga <xliff:g id="SESSION">%s</xliff:g>. Koputage võrgu haldamiseks"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Ühendamine alati sees VPN-iga …"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Ühendatud alati sees VPN-iga"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Alati sees VPN-i viga"</string>
-    <string name="vpn_lockdown_config" msgid="6415899150671537970">"Puudutage seadistamiseks"</string>
+    <!-- no translation found for vpn_lockdown_config (4655589351146766608) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Valige fail"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ühtegi faili pole valitud"</string>
     <string name="reset" msgid="2448168080964209908">"Lähtesta"</string>
     <string name="submit" msgid="1602335572089911941">"Saada"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Autorežiim lubatud"</string>
-    <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Autorežiimist väljumiseks puudutage."</string>
+    <!-- no translation found for car_mode_disable_notification_message (6301524980144350051) -->
+    <skip />
     <string name="tethered_notification_title" msgid="3146694234398202601">"Jagamine või tööpunkt on aktiivne"</string>
-    <string name="tethered_notification_message" msgid="6857031760103062982">"Seadistamiseks puudutage."</string>
+    <!-- no translation found for tethered_notification_message (2113628520792055377) -->
+    <skip />
     <string name="back_button_label" msgid="2300470004503343439">"Tagasi"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Järgmine"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Jäta vahele"</string>
@@ -1215,7 +1253,8 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Lisa konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Suurendamine"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Vähendamine"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="3073101067441638428">"<xliff:g id="VALUE">%s</xliff:g> puudutage ja hoidke."</string>
+    <!-- no translation found for number_picker_increment_scroll_mode (5259126567490114216) -->
+    <skip />
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Suurendamiseks lohistage üles, vähendamiseks alla."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Minutite suurendamine"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Minutite vähendamine"</string>
@@ -1259,7 +1298,8 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-mäluseade"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Andmete kasutamise hoiatus"</string>
-    <string name="data_usage_warning_body" msgid="2814673551471969954">"Kasutuse/sätete vaat. puudutage."</string>
+    <!-- no translation found for data_usage_warning_body (6660692274311972007) -->
+    <skip />
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-, 3G-andmeside limiit on täis"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-andmeside limiit on täis"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiilse andmes. limiit on täis"</string>
@@ -1271,7 +1311,8 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"WiFi-andmete piir on ületatud"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> üle määratud piirmäära."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Taustandmed on piiratud"</string>
-    <string name="data_usage_restricted_body" msgid="6741521330997452990">"Piirangu eemaldamiseks puudut."</string>
+    <!-- no translation found for data_usage_restricted_body (469866376337242726) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Turvasertifikaat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"See sertifikaat on kehtiv."</string>
     <string name="issued_to" msgid="454239480274921032">"Väljastatud subjektile:"</string>
@@ -1487,8 +1528,10 @@
     <string name="select_year" msgid="7952052866994196170">"Aasta valimine"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> on kustutatud"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="4921623036476880316">"Ekraani vabastamiseks puudutage pikalt nuppu Tagasi."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ekraanikuva vabastamiseks puudutage pikalt nuppu Ülevaade."</string>
+    <!-- no translation found for lock_to_app_toast (1420543809500606964) -->
+    <skip />
+    <!-- no translation found for lock_to_app_toast_accessible (2302154926850846096) -->
+    <skip />
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Rakendus on kinnitatud: vabastamine pole selles seadmes lubatud."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekraan on kinnitatud"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekraan on vabastatud"</string>
