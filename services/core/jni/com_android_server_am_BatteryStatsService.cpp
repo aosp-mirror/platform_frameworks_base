@@ -234,8 +234,9 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
         for (int i = 0; i < num_modes; i++) {
             int added;
 
-            added = snprintf(offset, remaining, "%s_time=%" PRIu64 " %s_count=%" PRIu64 " ",
-                    list[i].name, list[i].residency_in_msec_since_boot, list[i].name,
+            added = snprintf(offset, remaining,
+                    "state_%d name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                    i + 1, list[i].name, list[i].residency_in_msec_since_boot,
                     list[i].total_transitions);
             if (added < 0) {
                 break;
@@ -248,10 +249,10 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
             total_added += added;
 
             for (unsigned int j = 0; j < list[i].number_of_voters; j++) {
-                added = snprintf(offset, remaining, "%s_time=%" PRIu64 " %s_count=%" PRIu64 " ",
-                        list[i].voters[j].name,
+                added = snprintf(offset, remaining,
+                        "voter_%d name=%s time=%" PRIu64 " count=%" PRIu64 " ",
+                        j + 1, list[i].voters[j].name,
                         list[i].voters[j].total_time_in_msec_voted_for_since_boot,
-                        list[i].voters[j].name,
                         list[i].voters[j].total_number_of_times_voted_since_boot);
                 if (added < 0) {
                     break;
