@@ -118,7 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ma’lumot uzatish signali to‘liq."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ulangan: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
-    <string name="accessibility_cast_name" msgid="4026393061247081201">"Ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX tarmog‘i yo‘q."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Bitta ustunli WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Ikkita ustunli WiMAX."</string>
@@ -420,7 +420,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
-    <string name="screen_pinning_description" msgid="7238941806855968768">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” tugmasini bosing va ushlab turing."</string>
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” tugmasini bosib turing."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
@@ -632,7 +632,7 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi o‘chirildi"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi endi <xliff:g id="POSITION">%2$d</xliff:g>-joyni egallanmoqda"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Tezkor sozlamalar muharriri"</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-bildirishnoma: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> bildirishnomasi: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Ilova ekranni ikkiga bo‘lish rejimini qo‘llab-quvvatlamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Sozlamalarni ochish."</string>
