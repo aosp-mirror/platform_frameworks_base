@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाई-फ़ाई वर्बोस प्रवेश सक्षम करें"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"वाई-फ़ाई से सेल्यूलर पर बलपूर्वक हस्तांतरण"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"हमेशा वाई-फ़ाई रोम स्कैन करने दें"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"लीगेसी DHCP क्‍लाइंट"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"सेल्युलर डेटा हमेशा सक्रिय"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"पूर्ण वॉल्यूम अक्षम करें"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>

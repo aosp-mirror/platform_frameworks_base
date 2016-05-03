@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose лог-г идэвхжүүлэх"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Үүрэн шилжүүлэг рүү идэвхтэй Wi‑Fi"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Роум сканыг байнга зөвшөөрөх"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Хуучин DHCP харилцагчийг хэрэглэх"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Үүрэн холбооны датаг үргэлж идэвхтэй байлгана"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Үнэмлэхүй дууны түвшинг идэвхгүй болгох"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>

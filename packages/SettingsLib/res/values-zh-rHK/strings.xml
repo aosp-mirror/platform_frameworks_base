@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細記錄"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"加強 Wi-Fi 至流動數據轉換"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"永遠允許 Wi-Fi 漫遊掃瞄"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"使用舊的 DHCP 用戶端"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"經常啟用流動數據"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用絕對音量功能"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
