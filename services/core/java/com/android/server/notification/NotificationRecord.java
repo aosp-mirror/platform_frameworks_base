@@ -176,6 +176,9 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
+        if(previous.sbn.getOverrideGroupKey() != null) {
+            sbn.setOverrideGroupKey(previous.sbn.getOverrideGroupKey());
+        }
         // Don't copy importance information or mGlobalSortKey, recompute them.
     }
 
