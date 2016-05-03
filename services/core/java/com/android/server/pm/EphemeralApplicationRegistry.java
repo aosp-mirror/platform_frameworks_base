@@ -36,6 +36,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -60,6 +61,8 @@ import java.util.Set;
  */
 class EphemeralApplicationRegistry {
     private static final boolean DEBUG = false;
+
+    private static final boolean ENABLED = false;
 
     private static final String LOG_TAG = "EphemeralAppRegistry";
 
@@ -92,6 +95,9 @@ class EphemeralApplicationRegistry {
     }
 
     public byte[] getEphemeralApplicationCookieLPw(String packageName, int userId) {
+        if (!ENABLED) {
+            return EmptyArray.BYTE;
+        }
         pruneUninstalledEphemeralAppsLPw(userId);
 
         File cookieFile = peekEphemeralCookieFile(packageName, userId);
@@ -107,6 +113,9 @@ class EphemeralApplicationRegistry {
 
     public boolean setEphemeralApplicationCookieLPw(String packageName,
             byte[] cookie, int userId) {
+        if (!ENABLED) {
+            return false;
+        }
         pruneUninstalledEphemeralAppsLPw(userId);
 
         PackageParser.Package pkg = mService.mPackages.get(packageName);
@@ -138,6 +147,9 @@ class EphemeralApplicationRegistry {
     }
 
     public Bitmap getEphemeralApplicationIconLPw(String packageName, int userId) {
+        if (!ENABLED) {
+            return null;
+        }
         pruneUninstalledEphemeralAppsLPw(userId);
 
         File iconFile = new File(getEphemeralApplicationDir(packageName, userId),
@@ -149,6 +161,9 @@ class EphemeralApplicationRegistry {
     }
 
     public List<EphemeralApplicationInfo> getEphemeralApplicationsLPw(int userId) {
+        if (!ENABLED) {
+            return Collections.emptyList();
+        }
         pruneUninstalledEphemeralAppsLPw(userId);
 
         List<EphemeralApplicationInfo> result = getInstalledEphemeralApplicationsLPr(userId);
@@ -157,6 +172,9 @@ class EphemeralApplicationRegistry {
     }
 
     public void onPackageInstalledLPw(PackageParser.Package pkg) {
+        if (!ENABLED) {
+            return;
+        }
         PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return;
@@ -210,6 +228,9 @@ class EphemeralApplicationRegistry {
     }
 
     public void onPackageUninstalledLPw(PackageParser.Package pkg) {
+        if (!ENABLED) {
+            return;
+        }
         if (pkg == null) {
             return;
         }
@@ -235,6 +256,9 @@ class EphemeralApplicationRegistry {
     }
 
     public void onUserRemovedLPw(int userId) {
+        if (!ENABLED) {
+            return;
+        }
         if (mUninstalledEphemeralApps != null) {
             mUninstalledEphemeralApps.remove(userId);
         }
