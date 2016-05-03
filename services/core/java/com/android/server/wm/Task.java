@@ -322,6 +322,32 @@ class Task implements DimLayer.DimLayerUser {
         mPreparedFrozenBounds.set(mBounds);
     }
 
+    /**
+     * Align the task to the adjusted bounds.
+     *
+     * @param adjustedBounds Adjusted bounds to which the task should be aligned.
+     * @param tempInsetBounds Insets bounds for the task.
+     * @param alignBottom True if the task's bottom should be aligned to the adjusted
+     *                    bounds's bottom; false if the task's top should be aligned
+     *                    the adjusted bounds's top.
+     */
+    void alignToAdjustedBounds(
+            Rect adjustedBounds, Rect tempInsetBounds, boolean alignBottom) {
+        if (!isResizeable() || mOverrideConfig == Configuration.EMPTY) {
+            return;
+        }
+
+        getBounds(mTmpRect2);
+        if (alignBottom) {
+            int offsetY = adjustedBounds.bottom - mTmpRect2.bottom;
+            mTmpRect2.offset(0, offsetY);
+        } else {
+            mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
+        }
+        setTempInsetBounds(tempInsetBounds);
+        resizeLocked(mTmpRect2, mOverrideConfig, false /* forced */);
+    }
+
     void resetScrollLocked() {
         if (mScrollValid) {
             mScrollValid = false;
