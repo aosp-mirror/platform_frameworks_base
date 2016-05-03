@@ -103,7 +103,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // Whether we have ANY recognition (keyphrase or generic) running.
     private boolean mRecognitionRunning = false;
 
-    private boolean mRecognitionAborted = false;
     private PowerSaveModeListener mPowerSaveModeListener;
 
     SoundTriggerHelper(Context context) {
@@ -415,10 +414,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             IRecognitionStatusCallback currentCallback = modelData.getCallback();
-            if (modelData == null || currentCallback == null || !modelData.isModelStarted()) {
+            if (modelData == null || currentCallback == null ||
+                    (!modelData.isRequested() && !modelData.isModelStarted())) {
                 // startGenericRecognition hasn't been called or it failed.
-                Slog.w(TAG, "Attempting stopGenericRecognition without a successful" +
-                        " startGenericRecognition");
+                Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
                 return STATUS_ERROR;
             }
 
@@ -499,7 +498,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     int status = stopRecognitionLocked(model,
                             false /* do not notify for synchronous calls */);
                     if (status != STATUS_OK) {
-                        Slog.w(TAG, "Error stopping keyphrase model: " + model.getHandle());
+                        Slog.w(TAG, "Error stopping model: " + model.getHandle());
                     }
                     model.setStopped();
                     model.setRequested(false);
@@ -591,28 +590,26 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         if (!(event instanceof KeyphraseRecognitionEvent) &&
                 !(event instanceof GenericRecognitionEvent)) {
-            Slog.w(TAG, "Invalid recognition event type (not one of generic or keyphrase) !");
+            Slog.w(TAG, "Invalid recognition event type (not one of generic or keyphrase)!");
             return;
         }
 
         if (DBG) Slog.d(TAG, "onRecognition: " + event);
         synchronized (mLock) {
             switch (event.status) {
-                // Fire aborts/failures to all listeners since it's not tied to a keyphrase.
                 case SoundTrigger.RECOGNITION_STATUS_ABORT:
-                    onRecognitionAbortLocked();
+                    onRecognitionAbortLocked(event);
                     break;
                 case SoundTrigger.RECOGNITION_STATUS_FAILURE:
+                    // Fire failures to all listeners since it's not tied to a keyphrase.
                     onRecognitionFailureLocked();
                     break;
                 case SoundTrigger.RECOGNITION_STATUS_SUCCESS:
-
                     if (isKeyphraseRecognitionEvent(event)) {
                         onKeyphraseRecognitionSuccessLocked((KeyphraseRecognitionEvent) event);
                     } else {
                         onGenericRecognitionSuccessLocked((GenericRecognitionEvent) event);
                     }
-
                     break;
             }
         }
@@ -657,7 +654,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         model.setRequested(config.allowMultipleTriggers);
         // TODO: Remove this block if the lower layer supports multiple triggers.
-        if (model.getRequested()) {
+        if (model.isRequested()) {
             updateRecognitionLocked(model, isRecognitionAllowed() /* isAllowed */,
                     true /* notify */);
         }
@@ -723,12 +720,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         updateAllRecognitionsLocked(true /* notify */);
     }
 
-    private void onRecognitionAbortLocked() {
+    private void onRecognitionAbortLocked(RecognitionEvent event) {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
-        // If abort has been called, the hardware has already stopped recognition, so we shouldn't
-        // call it again when we process the state change.
-        mRecognitionAborted = true;
+        ModelData modelData = getModelDataForLocked(event.soundModelHandle);
+        if (modelData != null) {
+            modelData.setStopped();
+        }
     }
 
     private void onRecognitionFailureLocked() {
@@ -789,7 +787,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             modelData.setRequested(config.allowMultipleTriggers);
         }
         // TODO: Remove this block if the lower layer supports multiple triggers.
-        if (modelData.getRequested()) {
+        if (modelData.isRequested()) {
             updateRecognitionLocked(modelData, isRecognitionAllowed(), true /* notify */);
         }
     }
@@ -803,7 +801,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int updateRecognitionLocked(ModelData model, boolean isAllowed,
         boolean notify) {
-        boolean start = model.getRequested() && isAllowed;
+        boolean start = model.isRequested() && isAllowed;
         if (start == model.isModelStarted()) {
             // No-op.
             return STATUS_OK;
@@ -1026,19 +1024,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private int stopRecognitionLocked(ModelData modelData, boolean notify) {
         IRecognitionStatusCallback callback = modelData.getCallback();
 
-        // Stop recognition (only if we haven't been aborted).
+        // Stop recognition.
         int status = STATUS_OK;
 
-        // This logic for "recognition aborted" now works for both generic and keyphrase models.
-        // The idea here is to "skip" the stopRecognition() call if the lower layer has
-        // aborted recognition. Also we "consume" the abort state as well, so if there is another
-        // stopRecognition() request, it will go through -- this seems to have been the previously
-        // intended design.
-        if (!mRecognitionAborted) {
-            status = mModule.stopRecognition(modelData.getHandle());
-        } else {
-            mRecognitionAborted = false;
-        }
+        status = mModule.stopRecognition(modelData.getHandle());
+
         if (status != SoundTrigger.STATUS_OK) {
             Slog.w(TAG, "stopRecognition call failed with " + status);
             MetricsLogger.count(mContext, "sth_stop_recognition_error", 1);
@@ -1221,7 +1211,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         // Whether a start recognition was requested.
-        synchronized boolean getRequested() {
+        synchronized boolean isRequested() {
             return mRequested;
         }
 
