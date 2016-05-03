@@ -93,12 +93,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mHost = host;
     }
 
-    @Override
-    public long getItemId(int position) {
-        return mTiles.get(position) != null ? mAllTiles.indexOf(mTiles.get(position))
-                : position == mEditIndex ? EDIT_ID : DIVIDER_ID;
-    }
-
     public ItemTouchHelper getItemTouchHelper() {
         return mItemTouchHelper;
     }
@@ -147,8 +141,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mTiles.add(tile);
             }
         }
+        mTileDividerIndex = mTiles.size();
         if (mOtherTiles.size() != 0) {
-            mTileDividerIndex = mTiles.size();
             mTiles.add(null);
         }
         mTiles.addAll(mOtherTiles);
@@ -201,7 +195,13 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     @Override
-    public void onBindViewHolder(final Holder holder, final int position) {
+    public boolean onFailedToRecycleView(Holder holder) {
+        holder.clearDrag();
+        return true;
+    }
+
+    @Override
+    public void onBindViewHolder(final Holder holder, int position) {
         if (holder.getItemViewType() == TYPE_DIVIDER) {
             return;
         }
@@ -222,7 +222,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             holder.mTileView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selectPosition(position, v);
+                    selectPosition(holder.getAdapterPosition(), v);
                 }
             });
             if (mNeedsFocus) {
@@ -267,6 +267,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 holder.mTileView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        int position = holder.getAdapterPosition();
                         if (mAccessibilityMoving) {
                             selectPosition(position, v);
                         } else {
@@ -288,8 +289,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mTiles.remove(mEditIndex--);
         mAccessibilityMoving = false;
         move(mAccessibilityFromIndex, position, v);
-        notifyItemChanged(mAccessibilityFromIndex);
-        notifyItemMoved(mAccessibilityFromIndex, position);
         saveSpecs(mHost);
     }
 
@@ -330,7 +329,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private boolean move(int from, int to, View v) {
-        if (to > mEditIndex) {
+        if (to >= mEditIndex) {
             if (from >= mEditIndex) {
                 return false;
             }
@@ -352,8 +351,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         CharSequence fromLabel = mTiles.get(from).state.label;
         move(from, to, mTiles);
-        notifyItemChanged(from);
-        notifyItemMoved(from, to);
         updateDividerLocations();
         CharSequence announcement;
         if (to >= mEditIndex) {
@@ -399,7 +396,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         if (mTiles.size() - 1 == mTileDividerIndex) {
             mTiles.remove(mTiles.size() - 1);
-            notifyItemRemoved(mTiles.size() - 1);
+            notifyItemRemoved(mTiles.size());
         }
     }
 
@@ -415,6 +412,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private <T> void move(int from, int to, List<T> list) {
         list.add(from > to ? to : to + 1, list.get(from));
         list.remove(from > to ? from + 1 : from);
+        notifyItemMoved(from, to);
+        notifyItemChanged(to);
     }
 
     public class Holder extends ViewHolder {
@@ -427,6 +426,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 mTileView.setBackground(null);
                 mTileView.getIcon().disableAnimation();
             }
+        }
+
+        public void clearDrag() {
+            itemView.clearAnimation();
+            mTileView.findViewById(R.id.tile_label).clearAnimation();
+            mTileView.findViewById(R.id.tile_label).setAlpha(1);
+            mTileView.getAppLabel().clearAnimation();
+            mTileView.getAppLabel().setAlpha(.6f);
         }
 
         public void startDrag() {
