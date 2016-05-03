@@ -194,15 +194,21 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.println("Batt.");
         pw.println("Stable power: " + mChargeTracker.isOnStablePower());
         Iterator<JobStatus> it = mTrackedTasks.iterator();
         if (it.hasNext()) {
-            pw.print(String.valueOf(it.next().hashCode()));
+            JobStatus jobStatus = it.next();
+            if (jobStatus.shouldDump(filterUid)) {
+                pw.print(String.valueOf(jobStatus.hashCode()));
+            }
         }
         while (it.hasNext()) {
-            pw.print("," + String.valueOf(it.next().hashCode()));
+            JobStatus jobStatus = it.next();
+            if (jobStatus.shouldDump(filterUid)) {
+                pw.print("," + String.valueOf(jobStatus.hashCode()));
+            }
         }
         pw.println();
     }

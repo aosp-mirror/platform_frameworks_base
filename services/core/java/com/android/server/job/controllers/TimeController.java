@@ -275,7 +275,7 @@ public class TimeController extends StateController {
     };
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         final long nowElapsed = SystemClock.elapsedRealtime();
         pw.println("Alarms (" + SystemClock.elapsedRealtime() + ")");
         pw.println(
@@ -284,6 +284,9 @@ public class TimeController extends StateController {
                 + "s");
         pw.println("Tracking:");
         for (JobStatus ts : mTrackedJobs) {
+            if (!ts.shouldDump(filterUid)) {
+                continue;
+            }
             pw.println(String.valueOf(ts.getJobId() + "," + ts.getUid())
                     + ": (" + (ts.hasTimingDelayConstraint() ? ts.getEarliestRunTime() : "N/A")
                     + ", " + (ts.hasDeadlineConstraint() ?ts.getLatestRunTimeElapsed() : "N/A")
