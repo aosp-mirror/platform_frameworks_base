@@ -322,11 +322,15 @@ public class ContentObserverController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.println("Content.");
         boolean printed = false;
         Iterator<JobStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
+            JobStatus js = it.next();
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
             if (!printed) {
                 pw.print("  ");
                 printed = true;
@@ -343,13 +347,24 @@ public class ContentObserverController extends StateController {
             pw.println("  Observers:");
             for (int i = 0; i < N; i++) {
                 ObserverInstance obs = mObservers.valueAt(i);
+                int M = obs.mJobs.size();
+                boolean shouldDump = false;
+                for (int j=0; j<M; j++) {
+                    JobInstance inst = obs.mJobs.valueAt(j);
+                    if (inst.mJobStatus.shouldDump(filterUid)) {
+                        shouldDump = true;
+                        break;
+                    }
+                }
+                if (!shouldDump) {
+                    continue;
+                }
                 pw.print("    ");
                 pw.print(mObservers.keyAt(i));
                 pw.print(" (");
                 pw.print(System.identityHashCode(obs));
                 pw.println("):");
                 pw.println("      Jobs:");
-                int M = obs.mJobs.size();
                 for (int j=0; j<M; j++) {
                     JobInstance inst = obs.mJobs.valueAt(j);
                     pw.print("        ");

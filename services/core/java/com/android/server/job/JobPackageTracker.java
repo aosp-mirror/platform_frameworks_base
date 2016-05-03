@@ -33,6 +33,28 @@ public final class JobPackageTracker {
     // Number of historical data sets we keep.
     static final int NUM_HISTORY = 5;
 
+    private static final int EVENT_BUFFER_SIZE = 50;
+
+    public static final int EVENT_NULL = 0;
+    public static final int EVENT_START_JOB = 1;
+    public static final int EVENT_STOP_JOB = 2;
+
+    private int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
+    private long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
+    private int[] mEventUids = new int[EVENT_BUFFER_SIZE];
+    private String[] mEventTags = new String[EVENT_BUFFER_SIZE];
+
+    public void addEvent(int cmd, int uid, String tag) {
+        System.arraycopy(mEventCmds, 0, mEventCmds, 1, EVENT_BUFFER_SIZE - 1);
+        System.arraycopy(mEventTimes, 0, mEventTimes, 1, EVENT_BUFFER_SIZE - 1);
+        System.arraycopy(mEventUids, 0, mEventUids, 1, EVENT_BUFFER_SIZE - 1);
+        System.arraycopy(mEventTags, 0, mEventTags, 1, EVENT_BUFFER_SIZE - 1);
+        mEventCmds[0] = cmd;
+        mEventTimes[0] = SystemClock.elapsedRealtime();
+        mEventUids[0] = uid;
+        mEventTags[0] = tag;
+    }
+
     DataSet mCurDataSet = new DataSet();
     DataSet[] mLastDataSets = new DataSet[NUM_HISTORY];
 
@@ -240,7 +262,8 @@ public final class JobPackageTracker {
             }
         }
 
-        void dump(PrintWriter pw, String header, String prefix, long now, long nowEllapsed) {
+        void dump(PrintWriter pw, String header, String prefix, long now, long nowEllapsed,
+                int filterUid) {
             final long period = getTotalTime(now);
             pw.print(prefix); pw.print(header); pw.print(" at ");
             pw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", mStartClockTime).toString());
@@ -251,12 +274,16 @@ public final class JobPackageTracker {
             pw.println(":");
             final int NE = mEntries.size();
             for (int i = 0; i < NE; i++) {
+                int uid = mEntries.keyAt(i);
+                if (filterUid != -1 && filterUid != UserHandle.getAppId(uid)) {
+                    continue;
+                }
                 ArrayMap<String, PackageEntry> uidMap = mEntries.valueAt(i);
                 final int NP = uidMap.size();
                 for (int j = 0; j < NP; j++) {
                     PackageEntry pe = uidMap.valueAt(j);
                     pw.print(prefix); pw.print("  ");
-                    UserHandle.formatUid(pw, mEntries.keyAt(i));
+                    UserHandle.formatUid(pw, uid);
                     pw.print(" / "); pw.print(uidMap.keyAt(j));
                     pw.print(":");
                     printDuration(pw, period, pe.getPendingTime(now), "pending");
@@ -309,6 +336,7 @@ public final class JobPackageTracker {
         } else {
             mCurDataSet.incActive(job.getSourceUid(), job.getSourcePackageName(), now);
         }
+        addEvent(EVENT_START_JOB, job.getSourceUid(), job.getBatteryName());
     }
 
     public void noteInactive(JobStatus job) {
@@ -319,6 +347,7 @@ public final class JobPackageTracker {
             mCurDataSet.decActive(job.getSourceUid(), job.getSourcePackageName(), now);
         }
         rebatchIfNeeded(now);
+        addEvent(EVENT_STOP_JOB, job.getSourceUid(), job.getBatteryName());
     }
 
     public float getLoadFactor(JobStatus job) {
@@ -339,7 +368,7 @@ public final class JobPackageTracker {
         return time / (float)period;
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix, int filterUid) {
         final long now = SystemClock.uptimeMillis();
         final long nowEllapsed = SystemClock.elapsedRealtime();
         final DataSet total;
@@ -352,10 +381,43 @@ public final class JobPackageTracker {
         mCurDataSet.addTo(total, now);
         for (int i = 1; i < mLastDataSets.length; i++) {
             if (mLastDataSets[i] != null) {
-                mLastDataSets[i].dump(pw, "Historical stats", prefix, now, nowEllapsed);
+                mLastDataSets[i].dump(pw, "Historical stats", prefix, now, nowEllapsed, filterUid);
                 pw.println();
             }
         }
-        total.dump(pw, "Current stats", prefix, now, nowEllapsed);
+        total.dump(pw, "Current stats", prefix, now, nowEllapsed, filterUid);
+    }
+
+    public boolean dumpHistory(PrintWriter pw, String prefix, int filterUid) {
+        if (mEventCmds[0] == EVENT_NULL) {
+            return false;
+        }
+        pw.println("  Job history:");
+        long now = SystemClock.elapsedRealtime();
+        for (int i=EVENT_BUFFER_SIZE-1; i>=0; i--) {
+            int uid = mEventUids[i];
+            if (filterUid != -1 && filterUid != UserHandle.getAppId(filterUid)) {
+                continue;
+            }
+            int cmd = mEventCmds[i];
+            if (cmd == EVENT_NULL) {
+                continue;
+            }
+            String label;
+            switch (mEventCmds[i]) {
+                case EVENT_START_JOB:           label = "START"; break;
+                case EVENT_STOP_JOB:            label = " STOP"; break;
+                default:                        label = "   ??"; break;
+            }
+            pw.print(prefix);
+            TimeUtils.formatDuration(mEventTimes[i]-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+            pw.print(" ");
+            pw.print(label);
+            pw.print(": ");
+            UserHandle.formatUid(pw, uid);
+            pw.print(" ");
+            pw.println(mEventTags[i]);
+        }
+        return true;
     }
 }
