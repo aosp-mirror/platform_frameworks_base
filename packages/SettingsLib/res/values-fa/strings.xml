@@ -26,7 +26,7 @@
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیرفعال شد"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏پیکربندی IP انجام نشد"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"‏اتصال Wi-Fi برقرار نشد"</string>
-    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"مشکل تأیید اعتبار"</string>
+    <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"مشکل احراز هویت"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"در محدوده نیست"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"دسترسی به اینترنت شناسایی نشد، به صورت خودکار وصل نمی‌شود."</string>
     <string name="saved_network" msgid="4352716707126620811">"ذخیره‌شده توسط <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"‏Wi‑Fi فعال برای واگذاری به شبکه سلولی"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏اسکن‌های رومینگ Wi‑Fi همیشه مجاز است"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"‏استفاده از کلاینت DHCP قدیمی"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"داده سلولی همیشه فعال"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
