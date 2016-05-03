@@ -23,10 +23,8 @@ import android.util.Slog;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
-import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 /**
  * Controls when apps are considered idle and if jobs pertaining to those apps should
@@ -123,11 +121,15 @@ public class AppIdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(final PrintWriter pw) {
+    public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
         pw.println("AppIdle");
         pw.println("Parole On: " + mAppIdleParoleOn);
         mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
             @Override public void process(JobStatus jobStatus) {
+                // Skip printing details if the caller requested a filter
+                if (!jobStatus.shouldDump(filterUid)) {
+                    return;
+                }
                 pw.print("  ");
                 pw.print(jobStatus.getSourcePackageName());
                 pw.print(": runnable=");
