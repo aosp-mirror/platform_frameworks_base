@@ -120,44 +120,45 @@ public:
     AppFuse(JNIEnv* env, jobject self) :
         env_(env), self_(self), handle_counter_(0) {}
 
-    bool handle_fuse_request(int fd, FuseRequest* req) {
+    void handle_fuse_request(int fd, FuseRequest* req) {
         ALOGV("Request op=%d", req->header().opcode);
         switch (req->header().opcode) {
             // TODO: Handle more operations that are enough to provide seekable
             // FD.
             case FUSE_LOOKUP:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_lookup);
-                return true;
+                return;
+            case FUSE_FORGET:
+                // Return without replying.
+                return;
             case FUSE_INIT:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_init);
-                return true;
+                return;
             case FUSE_GETATTR:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_getattr);
-                return true;
-            case FUSE_FORGET:
-                return false;
+                return;
             case FUSE_OPEN:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_open);
-                return true;
+                return;
             case FUSE_READ:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_read);
-                return true;
+                return;
             case FUSE_WRITE:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_write);
-                return true;
+                return;
             case FUSE_RELEASE:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_release);
-                return true;
+                return;
             case FUSE_FLUSH:
                 invoke_handler(fd, req, &AppFuse::handle_fuse_flush);
-                return true;
+                return;
             default: {
                 ALOGV("NOTIMPL op=%d uniq=%" PRIx64 " nid=%" PRIx64 "\n",
                       req->header().opcode,
                       req->header().unique,
                       req->header().nodeid);
                 fuse_reply(fd, req->header().unique, -ENOSYS, NULL, 0);
-                return true;
+                return;
             }
         }
     }
@@ -445,8 +446,7 @@ private:
     }
 };
 
-jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
-        JNIEnv* env, jobject self, jint jfd) {
+void com_android_mtp_AppFuse_start_app_fuse_loop(JNIEnv* env, jobject self, jint jfd) {
     ScopedFd fd(static_cast<int>(jfd));
     AppFuse appfuse(env, self);
 
@@ -458,8 +458,8 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
                 read(fd, request.buffer, sizeof(request.buffer)));
         if (result < 0) {
             if (errno == ENODEV) {
-                ALOGE("Someone stole our marbles!\n");
-                return JNI_FALSE;
+                ALOGV("AppFuse was unmounted.\n");
+                return;
             }
             ALOGE("Failed to read bytes from FD: errno=%d\n", errno);
             continue;
@@ -477,16 +477,14 @@ jboolean com_android_mtp_AppFuse_start_app_fuse_loop(
             continue;
         }
 
-        if (!appfuse.handle_fuse_request(fd, &request)) {
-            return JNI_TRUE;
-        }
+        appfuse.handle_fuse_request(fd, &request);
     }
 }
 
 static const JNINativeMethod gMethods[] = {
     {
         "native_start_app_fuse_loop",
-        "(I)Z",
+        "(I)V",
         (void *) com_android_mtp_AppFuse_start_app_fuse_loop
     }
 };
