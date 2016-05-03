@@ -207,6 +207,30 @@ public class EnabledComponentsObserver implements SettingChangeListener {
         }
     }
 
+    /**
+     * Return all VrListenerService components installed for this user.
+     *
+     * @param userId ID of the user to check.
+     * @return a set of {@link ComponentName}s.
+     */
+    public ArraySet<ComponentName> getInstalled(int userId) {
+        synchronized (mLock) {
+            return mInstalledSet.get(userId);
+        }
+    }
+
+    /**
+     * Return all VrListenerService components enabled for this user.
+     *
+     * @param userId ID of the user to check.
+     * @return a set of {@link ComponentName}s.
+     */
+    public ArraySet<ComponentName> getEnabled(int userId) {
+        synchronized (mLock) {
+            return mEnabledSet.get(userId);
+        }
+    }
+
     private int[] getCurrentProfileIds() {
         UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         if (userManager == null) {
