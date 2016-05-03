@@ -157,8 +157,11 @@ public class ImageReader implements AutoCloseable {
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.
-        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(width, height, format,
-                maxImages);
+        // Only include memory for 1 buffer, since actually accounting for the memory used is
+        // complex, and 1 buffer is enough for the VM to treat the ImageReader as being of some
+        // size.
+        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(
+                width, height, format, /*buffer count*/ 1);
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
