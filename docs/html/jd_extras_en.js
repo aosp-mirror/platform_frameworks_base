@@ -3195,7 +3195,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "timestamp": 1462292883,
     "image": "images/cards/android-studio_2x.png",
     "title": "Download Android Studio and SDK Tools",
-    "summary": "Get the official Android IDE and developer tools to build apps for Android."],
+    "summary": "Get the official Android IDE and developer tools to build apps for Android.",
     "type": "develop",
     "category": "studio"
   },
