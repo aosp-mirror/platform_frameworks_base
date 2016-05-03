@@ -23,7 +23,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.os.ParcelFileDescriptor;
-import android.os.UserHandle;
 
 import java.util.List;
 
@@ -68,4 +67,10 @@ public abstract class ShortcutServiceInternal {
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage);
+
+    /**
+     * Called by AM when the system locale changes *within the AM lock*.  ABSOLUTELY do not take
+     * any locks in this method.
+     */
+    public abstract void onSystemLocaleChangedNoLock();
 }
