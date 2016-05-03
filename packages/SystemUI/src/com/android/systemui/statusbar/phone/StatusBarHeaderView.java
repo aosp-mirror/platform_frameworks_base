@@ -504,7 +504,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
     public void setUserInfoController(UserInfoController userInfoController) {
         userInfoController.addListener(new UserInfoController.OnUserInfoChangedListener() {
             @Override
-            public void onUserInfoChanged(String name, Drawable picture) {
+            public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
                 mMultiUserAvatar.setImageDrawable(picture);
             }
         });
