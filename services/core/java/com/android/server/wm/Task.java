@@ -125,9 +125,9 @@ class Task implements DimLayer.DimLayerUser {
         mHomeTask = homeTask;
     }
 
-    private boolean hasAppTokensAlive() {
+    private boolean hasWindowsAlive() {
         for (int i = mAppTokens.size() - 1; i >= 0; i--) {
-            if (!mAppTokens.get(i).appDied) {
+            if (mAppTokens.get(i).hasWindowsAlive()) {
                 return true;
             }
         }
@@ -135,7 +135,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void removeLocked() {
-        if (hasAppTokensAlive() && mStack.isAnimating()) {
+        if (hasWindowsAlive() && mStack.isAnimating()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
