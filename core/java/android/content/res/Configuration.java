@@ -744,7 +744,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     private void fixUpLocaleList() {
         if ((locale == null && !mLocaleList.isEmpty()) ||
                 (locale != null && !locale.equals(mLocaleList.get(0)))) {
-            mLocaleList = new LocaleList(locale);
+            mLocaleList = locale == null ? LocaleList.getEmptyLocaleList() : new LocaleList(locale);
         }
     }
 
@@ -1481,7 +1481,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @param loc The locale. Can be null.
      */
     public void setLocale(@Nullable Locale loc) {
-        setLocales(new LocaleList(loc));
+        setLocales(loc == null ? LocaleList.getEmptyLocaleList() : new LocaleList(loc));
     }
 
     /**
