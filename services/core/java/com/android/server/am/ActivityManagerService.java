@@ -10320,9 +10320,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void checkTime(long startTime, String where) {
-        long now = SystemClock.elapsedRealtime();
-        if ((now-startTime) > 1000) {
-            // If we are taking more than a second, log about it.
+        long now = SystemClock.uptimeMillis();
+        if ((now-startTime) > 50) {
+            // If we are taking more than 50ms, log about it.
             Slog.w(TAG, "Slow operation: " + (now-startTime) + "ms so far, now at " + where);
         }
     }
@@ -10334,7 +10334,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ProviderInfo cpi = null;
 
         synchronized(this) {
-            long startTime = SystemClock.elapsedRealtime();
+            long startTime = SystemClock.uptimeMillis();
 
             ProcessRecord r = null;
             if (caller != null) {
