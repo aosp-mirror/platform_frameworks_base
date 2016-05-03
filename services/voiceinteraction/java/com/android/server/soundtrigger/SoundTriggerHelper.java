@@ -482,34 +482,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         return status;
     }
 
-    /**
-     * Stops all recognitions active currently and clears the internal state.
-     */
-    void stopAllRecognitions() {
-        synchronized (mLock) {
-            MetricsLogger.count(mContext, "sth_stop_all_recognitions", 1);
-            if (mModuleProperties == null || mModule == null) {
-                return;
-            }
-
-            // Stop all recognition models.
-            for (ModelData model : mModelDataMap.values()) {
-                if (model.isModelStarted()) {
-                    int status = stopRecognitionLocked(model,
-                            false /* do not notify for synchronous calls */);
-                    if (status != STATUS_OK) {
-                        Slog.w(TAG, "Error stopping model: " + model.getHandle());
-                    }
-                    model.setStopped();
-                    model.setRequested(false);
-                    model.clearCallback();
-                    model.setRecognitionConfig(null);
-                }
-            }
-            internalClearGlobalStateLocked();
-        }
-    }
-
     public ModuleProperties getModuleProperties() {
         return mModuleProperties;
     }
