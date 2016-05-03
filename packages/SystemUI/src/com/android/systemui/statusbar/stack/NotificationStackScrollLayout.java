@@ -36,8 +36,10 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -331,6 +333,19 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadedOut;
     private boolean mGroupExpandedForMeasure;
+    private float mBackgroundFadeAmount = 1.0f;
+    private static final Property<NotificationStackScrollLayout, Float> BACKGROUND_FADE =
+            new FloatProperty<NotificationStackScrollLayout>("backgroundFade") {
+                @Override
+                public void setValue(NotificationStackScrollLayout object, float value) {
+                    object.setBackgroundFadeAmount(value);
+                }
+
+                @Override
+                public Float get(NotificationStackScrollLayout object) {
+                    return object.getBackgroundFadeAmount();
+                }
+            };
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -406,14 +421,18 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void updateBackgroundDimming() {
         float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
+        alpha *= mBackgroundFadeAmount;
         // We need to manually blend in the background color
         int scrimColor = mScrimController.getScrimBehindColor();
         // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
         float alphaInv = 1 - alpha;
         int color = Color.argb((int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
-                (int) (Color.red(mBgColor) + alphaInv * Color.red(scrimColor)),
-                (int) (Color.green(mBgColor) + alphaInv * Color.green(scrimColor)),
-                (int) (Color.blue(mBgColor) + alphaInv * Color.blue(scrimColor)));
+                (int) (mBackgroundFadeAmount * Color.red(mBgColor)
+                        + alphaInv * Color.red(scrimColor)),
+                (int) (mBackgroundFadeAmount * Color.green(mBgColor)
+                        + alphaInv * Color.green(scrimColor)),
+                (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
+                        + alphaInv * Color.blue(scrimColor)));
         mBackgroundPaint.setColor(color);
         invalidate();
     }
@@ -2602,6 +2621,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             AnimationEvent ev = new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK);
             ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
+            startBackgroundFadeIn();
         }
         mDarkNeedsAnimation = false;
     }
@@ -3101,6 +3121,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDarkNeedsAnimation = true;
             mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation =  true;
+            setBackgroundFadeAmount(0.0f);
+        } else if (!dark) {
+            setBackgroundFadeAmount(1.0f);
         }
         requestChildrenUpdate();
         if (dark) {
@@ -3109,8 +3132,33 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             updateBackground();
             setWillNotDraw(false);
-            // TODO: fade in background
         }
+    }
+
+    private void setBackgroundFadeAmount(float fadeAmount) {
+        mBackgroundFadeAmount = fadeAmount;
+        updateBackgroundDimming();
+    }
+
+    public float getBackgroundFadeAmount() {
+        return mBackgroundFadeAmount;
+    }
+
+    private void startBackgroundFadeIn() {
+        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, BACKGROUND_FADE, 0f, 1f);
+        int maxLength;
+        if (mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE
+                || mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW) {
+            maxLength = getNotGoneChildCount() - 1;
+        } else {
+            maxLength = Math.max(mDarkAnimationOriginIndex,
+                    getNotGoneChildCount() - mDarkAnimationOriginIndex - 1);
+        }
+        long delay = maxLength * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_DARK;
+        fadeAnimator.setStartDelay(delay);
+        fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
+        fadeAnimator.start();
     }
 
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
