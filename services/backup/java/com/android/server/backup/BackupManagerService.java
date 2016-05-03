@@ -2516,7 +2516,7 @@ public class BackupManagerService {
 
     void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback) {
         if (MORE_DEBUG) Slog.v(TAG, "starting timeout: token=" + Integer.toHexString(token)
-                + " interval=" + interval);
+                + " interval=" + interval + " callback=" + callback);
         synchronized (mCurrentOpLock) {
             mCurrentOperations.put(token, new Operation(OP_PENDING, callback));
 
@@ -2568,16 +2568,26 @@ public class BackupManagerService {
                         + " but no op found");
             }
             int state = (op != null) ? op.state : OP_TIMEOUT;
-            if (state == OP_PENDING) {
+            if (state == OP_ACKNOWLEDGED) {
+                // The operation finished cleanly, so we have nothing more to do.
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "handleTimeout() after success; cleanup happens now");
+                }
+                op = null;
+                mCurrentOperations.delete(token);
+            } else if (state == OP_PENDING) {
                 if (DEBUG) Slog.v(TAG, "TIMEOUT: token=" + Integer.toHexString(token));
                 op.state = OP_TIMEOUT;
-                mCurrentOperations.put(token, op);
+                // Leaves the object in place for later ack
             }
             mCurrentOpLock.notifyAll();
         }
 
         // If there's a TimeoutHandler for this event, call it
         if (op != null && op.callback != null) {
+            if (MORE_DEBUG) {
+                Slog.v(TAG, "   Invoking timeout on " + op.callback);
+            }
             op.callback.handleTimeout();
         }
     }
@@ -3521,6 +3531,11 @@ public class BackupManagerService {
     }
 
     void tearDownAgentAndKill(ApplicationInfo app) {
+        if (app == null) {
+            // Null means the system package, so just quietly move on.  :)
+            return;
+        }
+
         try {
             // unbind and tidy up even on timeout or failure, just in case
             mActivityManager.unbindBackupAgent(app);
@@ -3561,6 +3576,7 @@ public class BackupManagerService {
     class FullBackupEngine {
         OutputStream mOutput;
         FullBackupPreflight mPreflightHook;
+        BackupRestoreTask mTimeoutMonitor;
         IBackupAgent mAgent;
         File mFilesDir;
         File mManifestFile;
@@ -3620,7 +3636,8 @@ public class BackupManagerService {
                     }
 
                     if (DEBUG) Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
-                    prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL, null);
+                    prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL,
+                            mTimeoutMonitor /* in parent class */);
                     mAgent.doFullBackup(mPipe, mToken, mBackupManagerBinder);
                 } catch (IOException e) {
                     Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
@@ -3636,11 +3653,12 @@ public class BackupManagerService {
         }
 
         FullBackupEngine(OutputStream output, FullBackupPreflight preflightHook, PackageInfo pkg,
-                         boolean alsoApks) {
+                         boolean alsoApks, BackupRestoreTask timeoutMonitor) {
             mOutput = output;
             mPreflightHook = preflightHook;
             mPkg = pkg;
             mIncludeApks = alsoApks;
+            mTimeoutMonitor = timeoutMonitor;
             mFilesDir = new File("/data/system");
             mManifestFile = new File(mFilesDir, BACKUP_MANIFEST_FILENAME);
             mMetadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
@@ -3867,10 +3885,7 @@ public class BackupManagerService {
 
         private void tearDown() {
             if (mPkg != null) {
-                final ApplicationInfo app = mPkg.applicationInfo;
-                if (app != null) {
-                    tearDownAgentAndKill(app);
-                }
+                tearDownAgentAndKill(mPkg.applicationInfo);
             }
         }
     }
@@ -4236,7 +4251,7 @@ public class BackupManagerService {
                     final boolean isSharedStorage =
                             pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
 
-                    mBackupEngine = new FullBackupEngine(out, null, pkg, mIncludeApks);
+                    mBackupEngine = new FullBackupEngine(out, null, pkg, mIncludeApks, null);
                     sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
                     // Don't need to check preflight result as there is no preflight hook.
                     mBackupEngine.backupOnePackage();
@@ -4555,6 +4570,7 @@ public class BackupManagerService {
                                 BackupManager.ERROR_AGENT_FAILURE);
                         Slog.w(TAG, "Application failure for package: " + packageName);
                         EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName);
+                        tearDownAgentAndKill(currentPackage.applicationInfo);
                         // Do nothing, clean up, and continue looping.
                     } else if (backupPackageStatus != BackupTransport.TRANSPORT_OK) {
                         sendBackupOnPackageResult(mBackupObserver, packageName,
@@ -4593,7 +4609,6 @@ public class BackupManagerService {
                 synchronized (mQueueLock) {
                     mRunningFullBackupTask = null;
                 }
-
 
                 mLatch.countDown();
 
@@ -4657,7 +4672,7 @@ public class BackupManagerService {
                     // now wait to get our result back
                     mLatch.await();
                     long totalSize = mResult.get();
-                    // If preflight timeouted, mResult will contain error code as int.
+                    // If preflight timed out, mResult will contain error code as int.
                     if (totalSize < 0) {
                         return (int) totalSize;
                     }
@@ -4716,7 +4731,7 @@ public class BackupManagerService {
             }
         }
 
-        class SinglePackageBackupRunner implements Runnable {
+        class SinglePackageBackupRunner implements Runnable, BackupRestoreTask {
             final ParcelFileDescriptor mOutput;
             final PackageInfo mTarget;
             final FullBackupPreflight mPreflight;
@@ -4740,7 +4755,7 @@ public class BackupManagerService {
             @Override
             public void run() {
                 FileOutputStream out = new FileOutputStream(mOutput.getFileDescriptor());
-                mEngine = new FullBackupEngine(out, mPreflight, mTarget, false);
+                mEngine = new FullBackupEngine(out, mPreflight, mTarget, false, this);
                 try {
                     try {
                         mPreflightResult = mEngine.preflightCheck();
@@ -4789,6 +4804,23 @@ public class BackupManagerService {
                 } catch (InterruptedException e) {
                     return BackupTransport.AGENT_ERROR;
                 }
+            }
+
+
+            // BackupRestoreTask interface: specifically, timeout detection
+
+            @Override
+            public void execute() { /* intentionally empty */ }
+
+            @Override
+            public void operationComplete(long result) { /* intentionally empty */ }
+
+            @Override
+            public void handleTimeout() {
+                if (DEBUG) {
+                    Slog.w(TAG, "Full backup timeout of " + mTarget.packageName);
+                }
+                tearDownAgentAndKill(mTarget.applicationInfo);
             }
         }
     }
@@ -5150,6 +5182,9 @@ public class BackupManagerService {
 
     // Full restore engine, used by both adb restore and transport-based full restore
     class FullRestoreEngine extends RestoreEngine {
+        // Task in charge of monitoring timeouts
+        BackupRestoreTask mMonitorTask;
+
         // Dedicated observer, if any
         IFullBackupRestoreObserver mObserver;
 
@@ -5231,8 +5266,9 @@ public class BackupManagerService {
             }
         }
 
-        public FullRestoreEngine(IFullBackupRestoreObserver observer, PackageInfo onlyPackage,
-                boolean allowApks, boolean allowObbs) {
+        public FullRestoreEngine(BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
+                PackageInfo onlyPackage, boolean allowApks, boolean allowObbs) {
+            mMonitorTask = monitorTask;
             mObserver = observer;
             mOnlyPackage = onlyPackage;
             mAllowApks = allowApks;
@@ -5434,7 +5470,9 @@ public class BackupManagerService {
                             long toCopy = info.size;
                             final int token = generateToken();
                             try {
-                                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, null);
+                                prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL,
+                                        mMonitorTask);
+
                                 if (info.domain.equals(FullBackup.OBB_TREE_TOKEN)) {
                                     if (DEBUG) Slog.d(TAG, "Restoring OBB file for " + pkg
                                             + " : " + info.path);
@@ -5495,7 +5533,8 @@ public class BackupManagerService {
                                         try {
                                             pipe.write(mBuffer, 0, nRead);
                                         } catch (IOException e) {
-                                            Slog.e(TAG, "Failed to write to restore pipe", e);
+                                            Slog.e(TAG, "Failed to write to restore pipe: "
+                                                    + e.getMessage());
                                             pipeOkay = false;
                                         }
                                     }
@@ -5548,7 +5587,7 @@ public class BackupManagerService {
                     }
                 }
             } catch (IOException e) {
-                if (DEBUG) Slog.w(TAG, "io exception on restore socket read", e);
+                if (DEBUG) Slog.w(TAG, "io exception on restore socket read: " + e.getMessage());
                 setResult(RestoreEngine.TRANSPORT_FAILURE);
                 info = null;
             }
@@ -5590,6 +5629,12 @@ public class BackupManagerService {
                 tearDownAgentAndKill(app);
                 mAgent = null;
             }
+        }
+
+        void handleTimeout() {
+            tearDownPipes();
+            setResult(RestoreEngine.TARGET_FAILURE);
+            setRunning(false);
         }
 
         class RestoreInstallObserver extends PackageInstallObserver {
@@ -8331,9 +8376,10 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
         }
 
-        class StreamFeederThread extends RestoreEngine implements Runnable {
+        class StreamFeederThread extends RestoreEngine implements Runnable, BackupRestoreTask {
             final String TAG = "StreamFeederThread";
             FullRestoreEngine mEngine;
+            EngineThread mEngineThread;
 
             // pipe through which we read data from the transport. [0] read, [1] write
             ParcelFileDescriptor[] mTransportPipes;
@@ -8355,8 +8401,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 EventLog.writeEvent(EventLogTags.FULL_RESTORE_PACKAGE,
                         mCurrentPackage.packageName);
 
-                mEngine = new FullRestoreEngine(null, mCurrentPackage, false, false);
-                EngineThread eThread = new EngineThread(mEngine, mEnginePipes[0]);
+                mEngine = new FullRestoreEngine(this, null, mCurrentPackage, false, false);
+                mEngineThread = new EngineThread(mEngine, mEnginePipes[0]);
 
                 ParcelFileDescriptor eWriteEnd = mEnginePipes[1];
                 ParcelFileDescriptor tReadEnd = mTransportPipes[0];
@@ -8368,7 +8414,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 FileInputStream transportIn = new FileInputStream(tReadEnd.getFileDescriptor());
 
                 // spin up the engine and start moving data to it
-                new Thread(eThread, "unified-restore-engine").start();
+                new Thread(mEngineThread, "unified-restore-engine").start();
 
                 try {
                     while (status == BackupTransport.TRANSPORT_OK) {
@@ -8434,12 +8480,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     IoUtils.closeQuietly(mTransportPipes[0]);
                     IoUtils.closeQuietly(mTransportPipes[1]);
 
-                    // Don't proceed until the engine has finished
-                    eThread.waitForResult();
-
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "engine thread finished; proceeding");
-                    }
+                    // Don't proceed until the engine has wound up operations
+                    mEngineThread.waitForResult();
 
                     // Now we're really done with this one too
                     IoUtils.closeQuietly(mEnginePipes[0]);
@@ -8484,6 +8526,27 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
             }
 
+            // BackupRestoreTask interface, specifically for timeout handling
+
+            @Override
+            public void execute() { /* intentionally empty */ }
+
+            @Override
+            public void operationComplete(long result) { /* intentionally empty */ }
+
+            // The app has timed out handling a restoring file
+            @Override
+            public void handleTimeout() {
+                if (DEBUG) {
+                    Slog.w(TAG, "Full-data restore target timed out; shutting down");
+                }
+                mEngineThread.handleTimeout();
+
+                IoUtils.closeQuietly(mEnginePipes[1]);
+                mEnginePipes[1] = null;
+                IoUtils.closeQuietly(mEnginePipes[0]);
+                mEnginePipes[0] = null;
+            }
         }
 
         class EngineThread implements Runnable {
@@ -8506,10 +8569,19 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             @Override
             public void run() {
-                while (mEngine.isRunning()) {
-                    // Tell it to be sure to leave the agent instance up after finishing
-                    mEngine.restoreOneFile(mEngineStream, false);
+                try {
+                    while (mEngine.isRunning()) {
+                        // Tell it to be sure to leave the agent instance up after finishing
+                        mEngine.restoreOneFile(mEngineStream, false);
+                    }
+                } finally {
+                    IoUtils.closeQuietly(mEngineStream);
                 }
+            }
+
+            public void handleTimeout() {
+                IoUtils.closeQuietly(mEngineStream);
+                mEngine.handleTimeout();
             }
         }
 
@@ -9772,7 +9844,14 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         synchronized (mCurrentOpLock) {
             op = mCurrentOperations.get(token);
             if (op != null) {
-                op.state = OP_ACKNOWLEDGED;
+                if (op.state == OP_TIMEOUT) {
+                    // The operation already timed out, and this is a late response.  Tidy up
+                    // and ignore it; we've already dealt with the timeout.
+                    op = null;
+                    mCurrentOperations.delete(token);
+                } else {
+                    op.state = OP_ACKNOWLEDGED;
+                }
             }
             mCurrentOpLock.notifyAll();
         }
