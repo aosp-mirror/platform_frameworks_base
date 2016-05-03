@@ -3188,6 +3188,18 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "category": "distribute"
   },
   {
+    "lang": "en",
+    "group": "",
+    "tags": ["studio,sdk"],
+    "url": "studio/index.html",
+    "timestamp": 1462292883,
+    "image": "images/cards/android-studio_2x.png",
+    "title": "Download Android Studio and SDK Tools",
+    "summary": "Get the official Android IDE and developer tools to build apps for Android."],
+    "type": "develop",
+    "category": "studio"
+  },
+  {
     "url":"panel1",
     "image": "",
     "title": "",
@@ -3337,7 +3349,7 @@ METADATA['en'].collections = {
     "resources": [
       "training/building-wearables.html",
       "training/material/index.html",
-      "sdk/index.html"
+      "studio/index.html"
     ]
   },
   "index/secondary/carousel": {
