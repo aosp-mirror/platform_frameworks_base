@@ -47,7 +47,7 @@ public class Paint {
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+                Paint.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
     }
 
     /**

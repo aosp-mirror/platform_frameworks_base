@@ -133,7 +133,7 @@ public final class Bitmap implements Parcelable {
             nativeSize += getByteCount();
         }
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
-            nativeGetNativeFinalizer(), nativeSize);
+            Bitmap.class.getClassLoader(), nativeGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(this, nativeBitmap);
     }
 

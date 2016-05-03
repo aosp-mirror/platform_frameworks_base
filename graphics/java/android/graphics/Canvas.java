@@ -94,7 +94,7 @@ public class Canvas {
     // Use a Holder to allow static initialization of Canvas in the boot image.
     private static class NoImagePreloadHolder {
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+                Canvas.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
     }
 
     // This field is used to finalize the native Canvas properly
