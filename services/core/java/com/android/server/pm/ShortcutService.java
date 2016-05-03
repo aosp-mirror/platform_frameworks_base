@@ -19,9 +19,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.IUidObserver;
 import android.content.ComponentName;
-import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -39,11 +40,9 @@ import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.RectF;
 import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -56,16 +55,18 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Time;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.util.Xml;
 
@@ -73,6 +74,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -102,6 +104,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -124,12 +127,13 @@ public class ShortcutService extends IShortcutService.Stub {
 
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
+    static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
 
     @VisibleForTesting
-    static final long DEFAULT_RESET_INTERVAL_SEC = 60 * 60; // 1 hour
+    static final long DEFAULT_RESET_INTERVAL_SEC = 24 * 60 * 60; // 1 day
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 2;
+    static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 10;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 5;
@@ -162,6 +166,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private static final String TAG_ROOT = "root";
     private static final String TAG_LAST_RESET_TIME = "last_reset_time";
+    private static final String TAG_LOCALE_CHANGE_SEQUENCE_NUMBER = "locale_seq_no";
 
     private static final String ATTR_VALUE = "value";
 
@@ -256,7 +261,22 @@ public class ShortcutService extends IShortcutService.Stub {
     private final UserManager mUserManager;
 
     @GuardedBy("mLock")
+    final SparseIntArray mUidState = new SparseIntArray();
+
+    @GuardedBy("mLock")
+    final SparseLongArray mUidLastForegroundElapsedTime = new SparseLongArray();
+
+    @GuardedBy("mLock")
     private List<Integer> mDirtyUserIds = new ArrayList<>();
+
+    /**
+     * A counter that increments every time the system locale changes.  We keep track of it to reset
+     * throttling counters on the first call from each package after the last locale change.
+     *
+     * We need this mechanism because we can't do much in the locale change callback, which is
+     * {@link ShortcutServiceInternal#onSystemLocaleChangedNoLock()}.
+     */
+    private final AtomicLong mLocaleChangeSequenceNumber = new AtomicLong();
 
     private static final int PACKAGE_MATCH_FLAGS =
             PackageManager.MATCH_DIRECT_BOOT_AWARE
@@ -283,6 +303,9 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mStatLock")
     private final long[] mDurationStats = new long[Stats.COUNT];
 
+    private static final int PROCESS_STATE_FOREGROUND_THRESHOLD =
+            ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+
     public ShortcutService(Context context) {
         this(context, BackgroundThread.get().getLooper());
     }
@@ -297,6 +320,9 @@ public class ShortcutService extends IShortcutService.Stub {
         mUserManager = context.getSystemService(UserManager.class);
 
         mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
+
+        injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
+                | ActivityManager.UID_OBSERVER_GONE);
     }
 
     void logDurationStat(int statId, long start) {
@@ -304,6 +330,59 @@ public class ShortcutService extends IShortcutService.Stub {
             mCountStats[statId]++;
             mDurationStats[statId] += (System.currentTimeMillis() - start);
         }
+    }
+
+    public long getLocaleChangeSequenceNumber() {
+        return mLocaleChangeSequenceNumber.get();
+    }
+
+    final private IUidObserver mUidObserver = new IUidObserver.Stub() {
+        @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+            handleOnUidStateChanged(uid, procState);
+        }
+
+        @Override public void onUidGone(int uid) throws RemoteException {
+            handleOnUidStateChanged(uid, ActivityManager.MAX_PROCESS_STATE);
+        }
+
+        @Override public void onUidActive(int uid) throws RemoteException {
+        }
+
+        @Override public void onUidIdle(int uid) throws RemoteException {
+        }
+    };
+
+    void handleOnUidStateChanged(int uid, int procState) {
+        if (DEBUG_PROCSTATE) {
+            Slog.d(TAG, "onUidStateChanged: uid=" + uid + " state=" + procState);
+        }
+        synchronized (mLock) {
+            mUidState.put(uid, procState);
+
+            // We need to keep track of last time an app comes to foreground.
+            // See ShortcutPackage.getApiCallCount() for how it's used.
+            // It doesn't have to be persisted, but it needs to be the elapsed time.
+            if (isProcessStateForeground(procState)) {
+                mUidLastForegroundElapsedTime.put(uid, injectElapsedRealtime());
+            }
+        }
+    }
+
+    private boolean isProcessStateForeground(int processState) {
+        return processState <= PROCESS_STATE_FOREGROUND_THRESHOLD;
+    }
+
+    boolean isUidForegroundLocked(int uid) {
+        if (uid == Process.SYSTEM_UID) {
+            // IUidObserver doesn't report the state of SYSTEM, but it always has bound services,
+            // so it's foreground anyway.
+            return true;
+        }
+        return isProcessStateForeground(mUidState.get(uid, ActivityManager.MAX_PROCESS_STATE));
+    }
+
+    long getUidLastForegroundElapsedTimeLocked(int uid) {
+        return mUidLastForegroundElapsedTime.get(uid);
     }
 
     /**
@@ -596,6 +675,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Body.
             writeTagValue(out, TAG_LAST_RESET_TIME, mRawLastResetTime);
+            writeTagValue(out, TAG_LOCALE_CHANGE_SEQUENCE_NUMBER,
+                    mLocaleChangeSequenceNumber.get());
 
             // Epilogue.
             out.endTag(null, TAG_ROOT);
@@ -639,6 +720,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 switch (tag) {
                     case TAG_LAST_RESET_TIME:
                         mRawLastResetTime = parseLongAttribute(parser, ATTR_VALUE);
+                        break;
+                    case TAG_LOCALE_CHANGE_SEQUENCE_NUMBER:
+                        mLocaleChangeSequenceNumber.set(parseLongAttribute(parser, ATTR_VALUE));
                         break;
                     default:
                         Slog.e(TAG, "Invalid tag: " + tag);
@@ -993,20 +1077,6 @@ public class ShortcutService extends IShortcutService.Stub {
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
                     }
-                    case Icon.TYPE_URI: {
-                        final Uri uri = ContentProvider.maybeAddUserId(icon.getUri(), userId);
-
-                        try (InputStream is = mContext.getContentResolver().openInputStream(uri)) {
-
-                            bitmapToRecycle = BitmapFactory.decodeStream(is);
-                            bitmap = bitmapToRecycle;
-
-                        } catch (IOException e) {
-                            Slog.e(TAG, "Unable to load icon from " + uri);
-                            return;
-                        }
-                        break;
-                    }
                     default:
                         // This shouldn't happen because we've already validated the icon, but
                         // just in case.
@@ -1120,6 +1190,24 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void enforceSystem() {
         Preconditions.checkState(isCallerSystem(), "Caller must be system");
+    }
+
+    private void enforceResetThrottlingPermission() {
+        if (isCallerSystem()) {
+            return;
+        }
+        injectEnforceCallingPermission(
+                android.Manifest.permission.RESET_SHORTCUT_MANAGER_THROTTLING, null);
+    }
+
+    /**
+     * Somehow overriding ServiceContext.enforceCallingPermission() in the unit tests would confuse
+     * mockito.  So instead we extracted it here and override it in the tests.
+     */
+    @VisibleForTesting
+    void injectEnforceCallingPermission(
+            @NonNull String permission, @Nullable String message) {
+        mContext.enforceCallingPermission(permission, message);
     }
 
     private void verifyCaller(@NonNull String packageName, @UserIdInt int userId) {
@@ -1481,6 +1569,23 @@ public class ShortcutService extends IShortcutService.Stub {
         Slog.i(TAG, "ShortcutManager: throttling counter reset for all users");
     }
 
+    void resetPackageThrottling(String packageName, int userId) {
+        synchronized (mLock) {
+            getPackageShortcutsLocked(packageName, userId)
+                    .resetRateLimitingForCommandLineNoSaving();
+            saveUserLocked(userId);
+        }
+    }
+
+    @Override
+    public void onApplicationActive(String packageName, int userId) {
+        if (DEBUG) {
+            Slog.d(TAG, "onApplicationActive: package=" + packageName + "  userid=" + userId);
+        }
+        enforceResetThrottlingPermission();
+        resetPackageThrottling(packageName, userId);
+    }
+
     // We override this method in unit tests to do a simpler check.
     boolean hasShortcutHostPermission(@NonNull String callingPackage, int userId) {
         return hasShortcutHostPermissionInner(callingPackage, userId);
@@ -1593,15 +1698,11 @@ public class ShortcutService extends IShortcutService.Stub {
         user.removeLauncher(packageUserId, packageName);
 
         // Then remove pinned shortcuts from all launchers.
-        final ArrayMap<PackageWithUser, ShortcutLauncher> launchers = user.getAllLaunchers();
-        for (int i = launchers.size() - 1; i >= 0; i--) {
-            launchers.valueAt(i).cleanUpPackage(packageName, packageUserId);
-        }
-        // Now there may be orphan shortcuts because we removed pinned shortucts at the previous
+        user.forAllLaunchers(l -> l.cleanUpPackage(packageName, packageUserId));
+
+        // Now there may be orphan shortcuts because we removed pinned shortcuts at the previous
         // step.  Remove them too.
-        for (int i = user.getAllPackages().size() - 1; i >= 0; i--) {
-            user.getAllPackages().valueAt(i).refreshPinnedFlags(this);
-        }
+        user.forAllPackages(p -> p.refreshPinnedFlags(this));
 
         scheduleSaveUser(owningUserId);
 
@@ -1644,13 +1745,12 @@ public class ShortcutService extends IShortcutService.Stub {
                             callingPackage, packageName, shortcutIds, changedSince,
                             componentName, queryFlags, userId, ret, cloneFlag);
                 } else {
-                    final ArrayMap<String, ShortcutPackage> packages =
-                            getUserShortcutsLocked(userId).getAllPackages();
-                    for (int i = packages.size() - 1; i >= 0; i--) {
+                    final List<String> shortcutIdsF = shortcutIds;
+                    getUserShortcutsLocked(userId).forAllPackages(p -> {
                         getShortcutsInnerLocked(launcherUserId,
-                                callingPackage, packages.keyAt(i), shortcutIds, changedSince,
+                                callingPackage, p.getPackageName(), shortcutIdsF, changedSince,
                                 componentName, queryFlags, userId, ret, cloneFlag);
-                    }
+                    });
                 }
             }
             return ret;
@@ -1818,6 +1918,29 @@ public class ShortcutService extends IShortcutService.Stub {
         public boolean hasShortcutHostPermission(int launcherUserId,
                 @NonNull String callingPackage) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId);
+        }
+
+        /**
+         * Called by AM when the system locale changes *within the AM lock.  ABSOLUTELY do not take
+         * any locks in this method.
+         */
+        @Override
+        public void onSystemLocaleChangedNoLock() {
+            // DO NOT HOLD ANY LOCKS HERE.
+
+            // We want to reset throttling for all packages for all users.  But we can't just do so
+            // here because:
+            // - We can't load/save users that are locked.
+            // - Even for loaded users, resetting the counters would require us to hold mLock.
+            //
+            // So we use a "pull" model instead.  In here, we just increment the "locale change
+            // sequence number".  Each ShortcutUser has the "last known locale change sequence".
+            //
+            // This allows ShortcutUser's to detect the system locale change, so they can reset
+            // counters.
+
+            mLocaleChangeSequenceNumber.incrementAndGet();
+            postToHandler(() -> scheduleSaveBaseState());
         }
     }
 
@@ -2087,11 +2210,11 @@ public class ShortcutService extends IShortcutService.Stub {
                     + android.Manifest.permission.DUMP);
             return;
         }
-        dumpInner(pw);
+        dumpInner(pw, args);
     }
 
     @VisibleForTesting
-    void dumpInner(PrintWriter pw) {
+    void dumpInner(PrintWriter pw, String[] args) {
         synchronized (mLock) {
             final long now = injectCurrentTimeMillis();
             pw.print("Now: [");
@@ -2115,6 +2238,9 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print(next);
             pw.print("] ");
             pw.print(formatTime(next));
+
+            pw.print("  Locale change seq#: ");
+            pw.print(mLocaleChangeSequenceNumber.get());
             pw.println();
 
             pw.print("  Config:");
@@ -2148,6 +2274,24 @@ public class ShortcutService extends IShortcutService.Stub {
             for (int i = 0; i < mUsers.size(); i++) {
                 pw.println();
                 mUsers.valueAt(i).dump(this, pw, "  ");
+            }
+
+            pw.println();
+            pw.println("  UID state:");
+
+            for (int i = 0; i < mUidState.size(); i++) {
+                final int uid = mUidState.keyAt(i);
+                final int state = mUidState.valueAt(i);
+                pw.print("    UID=");
+                pw.print(uid);
+                pw.print(" state=");
+                pw.print(state);
+                if (isProcessStateForeground(state)) {
+                    pw.print("  [FG]");
+                }
+                pw.print("  last FG=");
+                pw.print(mUidLastForegroundElapsedTime.get(uid));
+                pw.println();
             }
         }
     }
@@ -2316,10 +2460,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             Slog.i(TAG, "cmd: handleResetPackageThrottling: " + packageName);
 
-            synchronized (mLock) {
-                getPackageShortcutsLocked(packageName, mUserId).resetRateLimitingForCommandLine();
-                saveUserLocked(mUserId);
-            }
+            resetPackageThrottling(packageName, mUserId);
         }
 
         private void handleOverrideConfig() throws CommandException {
@@ -2404,6 +2545,11 @@ public class ShortcutService extends IShortcutService.Stub {
         return System.currentTimeMillis();
     }
 
+    @VisibleForTesting
+    long injectElapsedRealtime() {
+        return SystemClock.elapsedRealtime();
+    }
+
     // Injection point.
     @VisibleForTesting
     int injectBinderCallingUid() {
@@ -2448,6 +2594,14 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean injectIsLowRamDevice() {
         return ActivityManager.isLowRamDeviceStatic();
+    }
+
+    @VisibleForTesting
+    void injectRegisterUidObserver(IUidObserver observer, int which) {
+        try {
+            ActivityManagerNative.getDefault().registerUidObserver(observer, which);
+        } catch (RemoteException shouldntHappen) {
+        }
     }
 
     @VisibleForTesting
@@ -2500,7 +2654,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutUser user = mUsers.get(userId);
             if (user == null) return null;
 
-            final ShortcutPackage pkg = user.getAllPackages().get(packageName);
+            final ShortcutPackage pkg = user.getAllPackagesForTest().get(packageName);
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
