@@ -64,5 +64,5 @@ public abstract class StateController {
     public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
     }
 
-    public abstract void dumpControllerStateLocked(PrintWriter pw);
+    public abstract void dumpControllerStateLocked(PrintWriter pw, int filterUid);
 }

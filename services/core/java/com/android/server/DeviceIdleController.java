@@ -309,8 +309,8 @@ public class DeviceIdleController extends SystemService
     private static final int EVENT_DEEP_IDLE = 4;
     private static final int EVENT_DEEP_MAINTENANCE = 5;
 
-    private int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
-    private long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
+    private final int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
+    private final long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
 
     private void addEvent(int cmd) {
         if (mEventCmds[0] != cmd) {

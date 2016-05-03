@@ -182,14 +182,16 @@ public class ConnectivityController extends StateController implements
     };
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.println("Conn.");
         for (int i = 0; i < mTrackedJobs.size(); i++) {
             final JobStatus js = mTrackedJobs.get(i);
-            pw.println(String.valueOf(js.getJobId() + "," + js.getUid())
-                    + ": C=" + js.hasConnectivityConstraint()
-                    + ", UM=" + js.hasUnmeteredConstraint()
-                    + ", NR=" + js.hasNotRoamingConstraint());
+            if (js.shouldDump(filterUid)) {
+                pw.println(String.valueOf(js.getJobId() + "," + js.getUid())
+                        + ": C=" + js.hasConnectivityConstraint()
+                        + ", UM=" + js.hasUnmeteredConstraint()
+                        + ", NR=" + js.hasNotRoamingConstraint());
+            }
         }
     }
 }

@@ -190,12 +190,15 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Idle: ");
         pw.println(mIdleTracker.isIdle() ? "true" : "false");
         pw.println(mTrackedTasks.size());
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.get(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
             pw.print("  ");
             pw.print(String.valueOf(js.getJobId() + "," + js.getUid()));
             pw.println("..");
