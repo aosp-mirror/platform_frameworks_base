@@ -50,7 +50,7 @@ public class LocaleSpan extends MetricAffectingSpan implements ParcelableSpan {
      * @see #LocaleSpan(LocaleList)
      */
     public LocaleSpan(@Nullable Locale locale) {
-        mLocales = new LocaleList(locale);
+        mLocales = locale == null ? LocaleList.getEmptyLocaleList() : new LocaleList(locale);
     }
 
     /**
