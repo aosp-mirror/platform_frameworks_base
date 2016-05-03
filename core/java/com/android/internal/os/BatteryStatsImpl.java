@@ -2185,8 +2185,8 @@ public class BatteryStatsImpl extends BatteryStats {
     static final int DELTA_WAKELOCK_FLAG                    = 0x00400000;
     // Flag in delta int: contains an event description.
     static final int DELTA_EVENT_FLAG                       = 0x00800000;
-    // Flag in delta int: contains a coulomb charge count.
-    static final int DELTA_BATTERY_CHARGE_COULOMBS_FLAG     = 0x01000000;
+    // Flag in delta int: contains the battery charge count in uAh.
+    static final int DELTA_BATTERY_CHARGE_FLAG              = 0x01000000;
     // These upper bits are the frequently changing state bits.
     static final int DELTA_STATE_MASK                       = 0xfe000000;
 
@@ -2250,10 +2250,9 @@ public class BatteryStatsImpl extends BatteryStats {
             firstToken |= DELTA_EVENT_FLAG;
         }
 
-        final boolean batteryChargeCoulombsChanged = cur.batteryChargeCoulombs
-                != last.batteryChargeCoulombs;
-        if (batteryChargeCoulombsChanged) {
-            firstToken |= DELTA_BATTERY_CHARGE_COULOMBS_FLAG;
+        final boolean batteryChargeChanged = cur.batteryChargeUAh != last.batteryChargeUAh;
+        if (batteryChargeChanged) {
+            firstToken |= DELTA_BATTERY_CHARGE_FLAG;
         }
         dest.writeInt(firstToken);
         if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
@@ -2338,10 +2337,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         mLastHistoryStepLevel = cur.batteryLevel;
 
-        if (batteryChargeCoulombsChanged) {
-            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeCoulombs="
-                    + cur.batteryChargeCoulombs);
-            dest.writeInt(cur.batteryChargeCoulombs);
+        if (batteryChargeChanged) {
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryChargeUAh=" + cur.batteryChargeUAh);
+            dest.writeInt(cur.batteryChargeUAh);
         }
     }
 
@@ -2590,8 +2588,8 @@ public class BatteryStatsImpl extends BatteryStats {
             cur.stepDetails = null;
         }
 
-        if ((firstToken&DELTA_BATTERY_CHARGE_COULOMBS_FLAG) != 0) {
-            cur.batteryChargeCoulombs = src.readInt();
+        if ((firstToken&DELTA_BATTERY_CHARGE_FLAG) != 0) {
+            cur.batteryChargeUAh = src.readInt();
         }
     }
 
@@ -9310,7 +9308,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public static final int BATTERY_PLUGGED_NONE = 0;
 
     public void setBatteryStateLocked(int status, int health, int plugType, int level,
-            int temp, int volt, int chargeCount) {
+            int temp, int volt, int chargeUAh) {
         final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
         final long uptime = mClocks.uptimeMillis();
         final long elapsedRealtime = mClocks.elapsedRealtime();
@@ -9362,7 +9360,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mHistoryCur.batteryPlugType = (byte)plugType;
             mHistoryCur.batteryTemperature = (short)temp;
             mHistoryCur.batteryVoltage = (char)volt;
-            mHistoryCur.batteryChargeCoulombs = chargeCount;
+            mHistoryCur.batteryChargeUAh = chargeUAh;
             setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
         } else {
             boolean changed = false;
@@ -9396,9 +9394,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistoryCur.batteryVoltage = (char)volt;
                 changed = true;
             }
-            if (chargeCount >= (mHistoryCur.batteryChargeCoulombs+10)
-                    || chargeCount <= (mHistoryCur.batteryChargeCoulombs-10)) {
-                mHistoryCur.batteryChargeCoulombs = chargeCount;
+            if (chargeUAh >= (mHistoryCur.batteryChargeUAh+10)
+                    || chargeUAh <= (mHistoryCur.batteryChargeUAh-10)) {
+                mHistoryCur.batteryChargeUAh = chargeUAh;
                 changed = true;
             }
             long modeBits = (((long)mInitStepMode) << STEP_LEVEL_INITIAL_MODE_SHIFT)
