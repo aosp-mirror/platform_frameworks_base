@@ -2000,11 +2000,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
-            if (atoken != null && atoken.appDied) {
-                Slog.d(TAG_WM, "App is now revived: " + atoken);
-                atoken.appDied = false;
-            }
-
             mPolicy.adjustWindowParamsLw(win.mAttrs);
             win.setShowToOwnerOnlyLocked(mPolicy.checkShowToOwnerOnly(attrs));
 
@@ -2260,6 +2255,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void removeWindowLocked(WindowState win) {
+        removeWindowLocked(win, false);
+    }
+
+    void removeWindowLocked(WindowState win, boolean keepVisibleDeadWindow) {
         win.mWindowRemovalAllowed = true;
         if (DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "removeWindowLocked: " + win + " callers=" + Debug.getCallers(4));
@@ -2317,7 +2316,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are not currently running the exit animation, we need to see about starting one
             wasVisible = win.isWinVisibleLw();
 
-            if (win.shouldKeepVisibleDeadAppWindow()) {
+            if (keepVisibleDeadWindow) {
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                         "Not removing " + win + " because app died while it's visible");
 
@@ -4408,12 +4407,11 @@ public class WindowManagerService extends IWindowManager.Stub
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
 
-            if (!visible && wtoken.appDied) {
-                // This app is dead while it was visible, we kept its dead window on screen.
+            if (!visible) {
+                // If the app is dead while it was visible, we kept its dead window on screen.
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
-                wtoken.appDied = false;
-                wtoken.removeAllWindows();
+                wtoken.removeAllDeadWindows();
             } else if (visible) {
                 if (!mAppTransition.isTransitionSet() && mAppTransition.isReady()) {
                     // Add the app mOpeningApps if transition is unset but ready. This means
