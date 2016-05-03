@@ -28,9 +28,12 @@ import android.support.v7.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.settingslib.R;
+
+import java.util.Objects;
 
 public class AccessPointPreference extends Preference {
 
@@ -108,6 +111,7 @@ public class AccessPointPreference extends Preference {
             mTitleView.setCompoundDrawablePadding(mBadgePadding);
         }
         view.itemView.setContentDescription(mContentDescription);
+        view.itemView.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
     protected void updateIcon(int level, Context context) {
@@ -148,6 +152,7 @@ public class AccessPointPreference extends Preference {
      * Updates the title and summary; may indirectly call notifyChanged().
      */
     public void refresh() {
+        boolean updated = false;
         if (mForSavedNetworks) {
             setTitle(mAccessPoint.getConfigName());
         } else {
@@ -159,20 +164,27 @@ public class AccessPointPreference extends Preference {
         if (level != mLevel) {
             mLevel = level;
             updateIcon(mLevel, context);
-            notifyChanged();
+            updated = true;
         }
         updateBadge(context);
 
         setSummary(mForSavedNetworks ? mAccessPoint.getSavedNetworkSummary()
                 : mAccessPoint.getSettingsSummary());
 
-        mContentDescription = getTitle();
+        CharSequence contentDescription = getTitle();
         if (getSummary() != null) {
-            mContentDescription = TextUtils.concat(mContentDescription, ",", getSummary());
+            contentDescription = TextUtils.concat(contentDescription, ",", getSummary());
         }
         if (level >= 0 && level < WIFI_CONNECTION_STRENGTH.length) {
-            mContentDescription = TextUtils.concat(mContentDescription, ",",
+            contentDescription = TextUtils.concat(contentDescription, ",",
                     getContext().getString(WIFI_CONNECTION_STRENGTH[level]));
+        }
+        if (!Objects.equals(contentDescription, mContentDescription)) {
+            mContentDescription = contentDescription;
+            updated = true;
+        }
+        if (updated) {
+            notifyChanged();
         }
     }
 
