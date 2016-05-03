@@ -1477,17 +1477,45 @@ public final class JobSchedulerService extends com.android.server.SystemService
         return s.toString();
     }
 
+    static void dumpHelp(PrintWriter pw) {
+        pw.println("Job Scheduler (jobscheduler) dump options:");
+        pw.println("  [-h] [package] ...");
+        pw.println("    -h: print this help");
+        pw.println("  [package] is an optional package name to limit the output to.");
+    }
+
     void dumpInternal(final PrintWriter pw, String[] args) {
         int filterUid = -1;
         if (!ArrayUtils.isEmpty(args)) {
-            try {
-                filterUid = getContext().getPackageManager().getPackageUid(args[0],
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES);
-            } catch (NameNotFoundException ignored) {
+            int opti = 0;
+            while (opti < args.length) {
+                String arg = args[opti];
+                if ("-h".equals(arg)) {
+                    dumpHelp(pw);
+                    return;
+                } else if ("-a".equals(arg)) {
+                    // Ignore, we always dump all.
+                } else if (arg.length() > 0 && arg.charAt(0) == '-') {
+                    pw.println("Unknown option: " + arg);
+                    return;
+                } else {
+                    break;
+                }
+                opti++;
+            }
+            if (opti < args.length) {
+                String pkg = args[opti];
+                try {
+                    filterUid = getContext().getPackageManager().getPackageUid(pkg,
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                } catch (NameNotFoundException ignored) {
+                    pw.println("Invalid package: " + pkg);
+                    return;
+                }
             }
         }
 
-        final int filterUidFinal = filterUid;
+        final int filterUidFinal = UserHandle.getAppId(filterUid);
         final long now = SystemClock.elapsedRealtime();
         synchronized (mLock) {
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
@@ -1502,8 +1530,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         pw.println(job.toShortString());
 
                         // Skip printing details if the caller requested a filter
-                        if (filterUidFinal != -1 && job.getUid() != filterUidFinal
-                                && job.getSourceUid() != filterUidFinal) {
+                        if (!job.shouldDump(filterUidFinal)) {
                             return;
                         }
 
@@ -1526,17 +1553,23 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i=0; i<mControllers.size(); i++) {
                 pw.println();
-                mControllers.get(i).dumpControllerStateLocked(pw);
+                mControllers.get(i).dumpControllerStateLocked(pw, filterUidFinal);
             }
             pw.println();
             pw.println("Uid priority overrides:");
             for (int i=0; i< mUidPriorityOverride.size(); i++) {
-                pw.print("  "); pw.print(UserHandle.formatUid(mUidPriorityOverride.keyAt(i)));
-                pw.print(": "); pw.println(mUidPriorityOverride.valueAt(i));
+                int uid = mUidPriorityOverride.keyAt(i);
+                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
+                    pw.print("  "); pw.print(UserHandle.formatUid(uid));
+                    pw.print(": "); pw.println(mUidPriorityOverride.valueAt(i));
+                }
             }
             pw.println();
-            mJobPackageTracker.dump(pw, "");
+            mJobPackageTracker.dump(pw, "", filterUidFinal);
             pw.println();
+            if (mJobPackageTracker.dumpHistory(pw, "", filterUidFinal)) {
+                pw.println();
+            }
             pw.println("Pending queue:");
             for (int i=0; i<mPendingJobs.size(); i++) {
                 JobStatus job = mPendingJobs.get(i);
@@ -1571,10 +1604,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                 }
             }
-            pw.println();
-            pw.print("mReadyToRock="); pw.println(mReadyToRock);
-            pw.print("mReportedActive="); pw.println(mReportedActive);
-            pw.print("mMaxActiveJobs="); pw.println(mMaxActiveJobs);
+            if (filterUid == -1) {
+                pw.println();
+                pw.print("mReadyToRock="); pw.println(mReadyToRock);
+                pw.print("mReportedActive="); pw.println(mReportedActive);
+                pw.print("mMaxActiveJobs="); pw.println(mMaxActiveJobs);
+            }
         }
         pw.println();
     }
