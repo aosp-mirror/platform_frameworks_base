@@ -420,6 +420,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
+     * Returns the touch handler for this task stack.
+     */
+    public TaskStackViewTouchHandler getTouchHandler() {
+        return mTouchHandler;
+    }
+
+    /**
      * Adds a task to the ignored set.
      */
     void addIgnoreTask(Task task) {
@@ -1664,7 +1671,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // Stop any scrolling
-        mTouchHandler.finishAnimations();
+        mTouchHandler.cancelNonDismissTaskAnimations();
         mStackScroller.stopScroller();
         mStackScroller.stopBoundScrollAnimation();
         cancelDeferredTaskViewLayoutAnimation();
@@ -1722,8 +1729,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 R.string.accessibility_recents_item_dismissed, event.task.title));
 
         // Remove the task from the stack
-        mStack.removeTask(event.task, new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN), false /* fromDockGesture */);
+        mStack.removeTask(event.task, event.animation, false /* fromDockGesture */);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
 
         MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS,
@@ -1938,7 +1944,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(final MultiWindowStateChangedEvent event) {
-        if (event.inMultiWindow) {
+        if (event.inMultiWindow || !event.showDeferredAnimation) {
             setTasks(event.stack, true /* allowNotifyStackChanges */);
         } else {
             // Reset the launch state before handling the multiwindow change
