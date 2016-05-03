@@ -1267,6 +1267,16 @@ public final class Settings {
     public static final String ACTION_VR_LISTENER_SETTINGS
             = "android.settings.VR_LISTENER_SETTINGS";
 
+    /**
+     * Activity Action: Allows user to select current webview implementation.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WEBVIEW_SETTINGS = "android.settings.WEBVIEW_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
