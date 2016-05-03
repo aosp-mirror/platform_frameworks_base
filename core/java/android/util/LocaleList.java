@@ -169,8 +169,8 @@ public final class LocaleList implements Parcelable {
      * @throws NullPointerException if any of the input locales is <code>null</code>.
      * @throws IllegalArgumentException if any of the input locales repeat.
      */
-    public LocaleList(@Nullable Locale... list) {
-        if (list == null || list.length == 0) {
+    public LocaleList(@NonNull Locale... list) {
+        if (list.length == 0) {
             mList = sEmptyList;
             mStringRepresentation = "";
         } else {
