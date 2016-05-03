@@ -138,11 +138,14 @@ public class ImageWriter implements AutoCloseable {
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.
+        // Only include memory for 1 buffer, since actually accounting for the memory used is
+        // complex, and 1 buffer is enough for the VM to treat the ImageWriter as being of some
+        // size.
         Size surfSize = SurfaceUtils.getSurfaceSize(surface);
         int format = SurfaceUtils.getSurfaceFormat(surface);
         mEstimatedNativeAllocBytes =
                 ImageUtils.getEstimatedNativeAllocBytes(surfSize.getWidth(),surfSize.getHeight(),
-                        format, maxImages);
+                        format, /*buffer count*/ 1);
         VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
