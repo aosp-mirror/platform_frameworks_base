@@ -392,7 +392,7 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
-    <string name="device_owned_footer" msgid="3802752663326030053">"Das Gerät wird möglicherweise überwacht."</string>
+    <string name="device_owned_footer" msgid="3802752663326030053">"Aktivität auf dem Gerät kann vom Eigentümer protokolliert werden"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird möglicherweise überwacht."</string>
     <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird möglicherweise überwacht."</string>
     <string name="monitoring_title_device_owned" msgid="7121079311903859610">"Geräteüberwachung"</string>
