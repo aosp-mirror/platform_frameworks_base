@@ -59,12 +59,13 @@ import com.android.server.utils.ManagedApplicationService.BinderChecker;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.StringBuilder;
-import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Service tracking whether VR mode is active, and notifying listening services of state changes.
@@ -93,6 +94,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     public static final String VR_MANAGER_BINDER_SERVICE = "vrmanager";
 
     private static final int PENDING_STATE_DELAY_MS = 300;
+    private static final int EVENT_LOG_SIZE = 32;
 
     private static native void initializeNative();
     private static native void setVrModeNative(boolean enabled);
@@ -117,6 +119,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     private String mPreviousCoarseLocationPackage;
     private String mPreviousManageOverlayPackage;
     private VrState mPendingState;
+    private final ArrayDeque<VrState> mLoggingDeque = new ArrayDeque<>(EVENT_LOG_SIZE);
 
     private static final int MSG_VR_STATE_CHANGE = 0;
     private static final int MSG_PENDING_VR_STATE_CHANGE = 1;
@@ -154,6 +157,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         final int userId;
         final ComponentName targetPackageName;
         final ComponentName callingPackage;
+        final long timestamp;
+        final boolean defaultPermissionsGranted;
 
         VrState(boolean enabled, ComponentName targetPackageName, int userId,
                 ComponentName callingPackage) {
@@ -161,8 +166,20 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             this.userId = userId;
             this.targetPackageName = targetPackageName;
             this.callingPackage = callingPackage;
+            this.defaultPermissionsGranted = false;
+            this.timestamp = System.currentTimeMillis();
         }
-    };
+
+        VrState(boolean enabled, ComponentName targetPackageName, int userId,
+            ComponentName callingPackage, boolean defaultPermissionsGranted) {
+            this.enabled = enabled;
+            this.userId = userId;
+            this.targetPackageName = targetPackageName;
+            this.callingPackage = callingPackage;
+            this.defaultPermissionsGranted = defaultPermissionsGranted;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
 
     private static final BinderChecker sBinderChecker = new BinderChecker() {
         @Override
@@ -235,22 +252,42 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                         + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
                 return;
             }
-            pw.print("mVrModeEnabled=");
-            pw.println(mVrModeEnabled);
-            pw.print("mCurrentVrModeUser=");
-            pw.println(mCurrentVrModeUser);
-            pw.print("mRemoteCallbacks=");
+            pw.println("********* Dump of VrManagerService *********");
+            pw.println("Previous state transitions:\n");
+            String tab = "  ";
+            dumpStateTransitions(pw);
+            pw.println("\n\nRemote Callbacks:");
             int i=mRemoteCallbacks.beginBroadcast(); // create the broadcast item array
             while(i-->0) {
+                pw.print(tab);
                 pw.print(mRemoteCallbacks.getBroadcastItem(i));
-                if (i>0) pw.print(", ");
+                if (i>0) pw.println(",");
             }
             mRemoteCallbacks.finishBroadcast();
-            pw.println();
-            pw.print("mCurrentVrService=");
-            pw.println(mCurrentVrService != null ? mCurrentVrService.getComponent() : "(none)");
-            pw.print("mCurrentVrModeComponent=");
-            pw.println(mCurrentVrModeComponent);
+            pw.println("\n");
+            pw.println("Installed VrListenerService components:");
+            int userId = mCurrentVrModeUser;
+            ArraySet<ComponentName> installed = mComponentObserver.getInstalled(userId);
+            if (installed == null || installed.size() == 0) {
+                pw.println("None");
+            } else {
+                for (ComponentName n : installed) {
+                    pw.print(tab);
+                    pw.println(n.flattenToString());
+                }
+            }
+            pw.println("Enabled VrListenerService components:");
+            ArraySet<ComponentName> enabled = mComponentObserver.getEnabled(userId);
+            if (enabled == null || enabled.size() == 0) {
+                pw.println("None");
+            } else {
+                for (ComponentName n : enabled) {
+                    pw.print(tab);
+                    pw.println(n.flattenToString());
+                }
+            }
+            pw.println("\n");
+            pw.println("********* End of VrManagerService Dump *********");
         }
 
     };
@@ -486,6 +523,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
             boolean validUserComponent = (mComponentObserver.isValid(component, userId) ==
                     EnabledComponentsObserver.NO_ERROR);
+            if (!mVrModeEnabled && !enabled) {
+                return validUserComponent; // Disabled -> Disabled transition does nothing.
+            }
 
             // Always send mode change events.
             changeVrModeLocked(enabled, (enabled && validUserComponent) ? component : null);
@@ -539,6 +579,7 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     }
                 });
             }
+            logStateLocked();
 
             return validUserComponent;
         } finally {
@@ -824,6 +865,50 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     mPendingState.targetPackageName, mPendingState.userId,
                     mPendingState.callingPackage);
             mPendingState = null;
+        }
+    }
+
+    private void logStateLocked() {
+        ComponentName currentBoundService = (mCurrentVrService == null) ? null :
+            mCurrentVrService.getComponent();
+        VrState current = new VrState(mVrModeEnabled, currentBoundService, mCurrentVrModeUser,
+            mCurrentVrModeComponent, mWasDefaultGranted);
+        if (mLoggingDeque.size() == EVENT_LOG_SIZE) {
+            mLoggingDeque.removeFirst();
+        }
+        mLoggingDeque.add(current);
+    }
+
+    private void dumpStateTransitions(PrintWriter pw) {
+        SimpleDateFormat d = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+        String tab = "  ";
+        if (mLoggingDeque.size() == 0) {
+            pw.print(tab);
+            pw.println("None");
+        }
+        for (VrState state : mLoggingDeque) {
+            pw.print(d.format(new Date(state.timestamp)));
+            pw.print(tab);
+            pw.print("State changed to:");
+            pw.print(tab);
+            pw.println((state.enabled) ? "ENABLED" : "DISABLED");
+            if (state.enabled) {
+                pw.print(tab);
+                pw.print("User=");
+                pw.println(state.userId);
+                pw.print(tab);
+                pw.print("Current VR Activity=");
+                pw.println((state.callingPackage == null) ?
+                    "None" : state.callingPackage.flattenToString());
+                pw.print(tab);
+                pw.print("Bound VrListenerService=");
+                pw.println((state.targetPackageName == null) ?
+                    "None" : state.targetPackageName.flattenToString());
+                if (state.defaultPermissionsGranted) {
+                    pw.print(tab);
+                    pw.println("Default permissions granted to the bound VrListenerService.");
+                }
+            }
         }
     }
 
