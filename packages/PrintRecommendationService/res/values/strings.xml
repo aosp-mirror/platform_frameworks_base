@@ -27,4 +27,5 @@
     <string name="plugin_vendor_epson">Epson</string>
     <string name="plugin_vendor_konika_minolta">Konika Minolta</string>
     <string name="plugin_vendor_fuji">Fuji</string>
+    <string name="plugin_vendor_morpia">Mopria</string>
 </resources>
