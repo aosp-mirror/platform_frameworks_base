@@ -58,7 +58,7 @@ class TestWindowContext::TestWindowData {
 
 public:
 
-    TestWindowData(SkISize size) : mSize(size) {
+    explicit TestWindowData(SkISize size) : mSize(size) {
         android::BufferQueue::createBufferQueue(&mProducer, &mConsumer);
         mCpuConsumer = new android::CpuConsumer(mConsumer, 1);
         mCpuConsumer->setName(android::String8("TestWindowContext"));

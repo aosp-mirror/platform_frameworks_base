@@ -80,7 +80,7 @@ void onRenderNodeRemoved(JNIEnv* env, RenderNode* node);
 
 class ScopedRemovedRenderNodeObserver : public TreeObserver {
 public:
-    ScopedRemovedRenderNodeObserver(JNIEnv* env) : mEnv(env) {}
+    explicit ScopedRemovedRenderNodeObserver(JNIEnv* env) : mEnv(env) {}
     ~ScopedRemovedRenderNodeObserver() {
         for (auto& node : mMaybeRemovedNodes) {
             if (node->hasParents()) continue;

@@ -494,7 +494,7 @@ struct ImpliedFeature {
 
 struct Feature {
     Feature() : required(false), version(-1) {}
-    Feature(bool required, int32_t version = -1) : required(required), version(version) {}
+    explicit Feature(bool required, int32_t version = -1) : required(required), version(version) {}
 
     /**
      * Whether the feature is required.

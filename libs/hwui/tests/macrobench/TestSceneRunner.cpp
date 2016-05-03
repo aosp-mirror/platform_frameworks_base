@@ -41,7 +41,7 @@ public:
 template<class T>
 class ModifiedMovingAverage {
 public:
-    ModifiedMovingAverage(int weight) : mWeight(weight) {}
+    explicit ModifiedMovingAverage(int weight) : mWeight(weight) {}
 
     T add(T today) {
         if (!mHasValue) {

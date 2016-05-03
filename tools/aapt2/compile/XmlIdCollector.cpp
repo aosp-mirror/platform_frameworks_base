@@ -35,7 +35,7 @@ struct IdCollector : public xml::Visitor {
 
     std::vector<SourcedResourceName>* mOutSymbols;
 
-    IdCollector(std::vector<SourcedResourceName>* outSymbols) : mOutSymbols(outSymbols) {
+    explicit IdCollector(std::vector<SourcedResourceName>* outSymbols) : mOutSymbols(outSymbols) {
     }
 
     void visit(xml::Element* element) override {

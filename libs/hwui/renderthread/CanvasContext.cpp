@@ -762,7 +762,7 @@ void CanvasContext::waitOnFences() {
 
 class CanvasContext::FuncTaskProcessor : public TaskProcessor<bool> {
 public:
-    FuncTaskProcessor(Caches& caches)
+    explicit FuncTaskProcessor(Caches& caches)
             : TaskProcessor<bool>(&caches.tasks) {}
 
     virtual void onProcess(const sp<Task<bool> >& task) override {

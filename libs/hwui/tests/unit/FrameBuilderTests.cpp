@@ -1919,7 +1919,7 @@ static void testProperty(std::function<void(RenderProperties&)> propSetupCallbac
         std::function<void(const RectOp&, const BakedOpState&)> opValidateCallback) {
     class PropertyTestRenderer : public TestRendererBase {
     public:
-        PropertyTestRenderer(std::function<void(const RectOp&, const BakedOpState&)> callback)
+        explicit PropertyTestRenderer(std::function<void(const RectOp&, const BakedOpState&)> callback)
                 : mCallback(callback) {}
         void onRectOp(const RectOp& op, const BakedOpState& state) override {
             EXPECT_EQ(mIndex++, 0);
@@ -2040,7 +2040,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
         std::function<void(RenderProperties&)> propSetupCallback) {
     class SaveLayerAlphaClipTestRenderer : public TestRendererBase {
     public:
-        SaveLayerAlphaClipTestRenderer(SaveLayerAlphaData* outData)
+        explicit SaveLayerAlphaClipTestRenderer(SaveLayerAlphaData* outData)
                 : mOutData(outData) {}
 
         OffscreenBuffer* startTemporaryLayer(uint32_t width, uint32_t height) override {

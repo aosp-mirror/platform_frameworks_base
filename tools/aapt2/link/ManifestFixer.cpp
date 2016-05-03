@@ -220,7 +220,7 @@ class FullyQualifiedClassNameVisitor : public xml::Visitor {
 public:
     using xml::Visitor::visit;
 
-    FullyQualifiedClassNameVisitor(const StringPiece16& package) : mPackage(package) {
+    explicit FullyQualifiedClassNameVisitor(const StringPiece16& package) : mPackage(package) {
     }
 
     void visit(xml::Element* el) override {

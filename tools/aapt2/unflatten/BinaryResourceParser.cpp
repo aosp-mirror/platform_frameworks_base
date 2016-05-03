@@ -47,7 +47,7 @@ private:
 public:
     using ValueVisitor::visit;
 
-    ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceName>* mapping) :
+    explicit ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceName>* mapping) :
             mMapping(mapping) {
         assert(mMapping);
     }

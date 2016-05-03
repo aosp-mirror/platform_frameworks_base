@@ -40,7 +40,7 @@ static ConfigDescription copyWithoutDensity(const ConfigDescription& config) {
  */
 class SplitValueSelector {
 public:
-    SplitValueSelector(const SplitConstraints& constraints) {
+    explicit SplitValueSelector(const SplitConstraints& constraints) {
         for (const ConfigDescription& config : constraints.configs) {
             if (config.density == 0) {
                 mDensityIndependentConfigs.insert(config);

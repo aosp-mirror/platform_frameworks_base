@@ -55,7 +55,7 @@ TEST(RenderNode, hasParents) {
 TEST(RenderNode, releasedCallback) {
     class DecRefOnReleased : public GlFunctorLifecycleListener {
     public:
-        DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
+        explicit DecRefOnReleased(int* refcnt) : mRefCnt(refcnt) {}
         void onGlFunctorReleased(Functor* functor) override {
             *mRefCnt -= 1;
         }
