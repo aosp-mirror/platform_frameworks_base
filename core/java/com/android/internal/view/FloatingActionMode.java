@@ -173,7 +173,8 @@ public class FloatingActionMode extends ActionMode {
         final ViewParent parent = mOriginatingView.getParent();
         if (parent instanceof ViewGroup) {
             ((ViewGroup) parent).getChildVisibleRect(
-                    mOriginatingView, mContentRectOnScreen, null /* offset */);
+                    mOriginatingView, mContentRectOnScreen,
+                    null /* offset */, true /* forceParentCheck */);
             mContentRectOnScreen.offset(mRootViewPositionOnScreen[0], mRootViewPositionOnScreen[1]);
         } else {
             mContentRectOnScreen.offset(mViewPositionOnScreen[0], mViewPositionOnScreen[1]);
