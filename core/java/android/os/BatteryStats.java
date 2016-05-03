@@ -1158,7 +1158,8 @@ public abstract class BatteryStats implements Parcelable {
         public short batteryTemperature;
         public char batteryVoltage;
 
-        public int batteryChargeCoulombs;
+        // The charge of the battery in micro-Ampere-hours.
+        public int batteryChargeUAh;
         
         // Constants from SCREEN_BRIGHTNESS_*
         public static final int STATE_BRIGHTNESS_SHIFT = 0;
@@ -1356,7 +1357,7 @@ public abstract class BatteryStats implements Parcelable {
             bat = (((int)batteryTemperature)&0xffff)
                     | ((((int)batteryVoltage)<<16)&0xffff0000);
             dest.writeInt(bat);
-            dest.writeInt(batteryChargeCoulombs);
+            dest.writeInt(batteryChargeUAh);
             dest.writeInt(states);
             dest.writeInt(states2);
             if (wakelockTag != null) {
@@ -1385,7 +1386,7 @@ public abstract class BatteryStats implements Parcelable {
             int bat2 = src.readInt();
             batteryTemperature = (short)(bat2&0xffff);
             batteryVoltage = (char)((bat2>>16)&0xffff);
-            batteryChargeCoulombs = src.readInt();
+            batteryChargeUAh = src.readInt();
             states = src.readInt();
             states2 = src.readInt();
             if ((bat&0x10000000) != 0) {
@@ -1425,7 +1426,7 @@ public abstract class BatteryStats implements Parcelable {
             batteryPlugType = 0;
             batteryTemperature = 0;
             batteryVoltage = 0;
-            batteryChargeCoulombs = 0;
+            batteryChargeUAh = 0;
             states = 0;
             states2 = 0;
             wakelockTag = null;
@@ -1453,7 +1454,7 @@ public abstract class BatteryStats implements Parcelable {
             batteryPlugType = o.batteryPlugType;
             batteryTemperature = o.batteryTemperature;
             batteryVoltage = o.batteryVoltage;
-            batteryChargeCoulombs = o.batteryChargeCoulombs;
+            batteryChargeUAh = o.batteryChargeUAh;
             states = o.states;
             states2 = o.states2;
             if (o.wakelockTag != null) {
@@ -1485,7 +1486,7 @@ public abstract class BatteryStats implements Parcelable {
                     && batteryPlugType == o.batteryPlugType
                     && batteryTemperature == o.batteryTemperature
                     && batteryVoltage == o.batteryVoltage
-                    && batteryChargeCoulombs == o.batteryChargeCoulombs
+                    && batteryChargeUAh == o.batteryChargeUAh
                     && states == o.states
                     && states2 == o.states2
                     && currentTime == o.currentTime;
@@ -4536,7 +4537,7 @@ public abstract class BatteryStats implements Parcelable {
         int oldPlug = -1;
         int oldTemp = -1;
         int oldVolt = -1;
-        int oldCharge = -1;
+        int oldChargeMAh = -1;
         long lastTime = -1;
 
         void reset() {
@@ -4547,7 +4548,7 @@ public abstract class BatteryStats implements Parcelable {
             oldPlug = -1;
             oldTemp = -1;
             oldVolt = -1;
-            oldCharge = -1;
+            oldChargeMAh = -1;
         }
 
         public void printNextItem(PrintWriter pw, HistoryItem rec, long baseTime, boolean checkin,
@@ -4709,10 +4710,11 @@ public abstract class BatteryStats implements Parcelable {
                     pw.print(checkin ? ",Bv=" : " volt=");
                     pw.print(oldVolt);
                 }
-                if (oldCharge != rec.batteryChargeCoulombs) {
-                    oldCharge = rec.batteryChargeCoulombs;
+                final int chargeMAh = rec.batteryChargeUAh / 1000;
+                if (oldChargeMAh != chargeMAh) {
+                    oldChargeMAh = chargeMAh;
                     pw.print(checkin ? ",Bcc=" : " charge=");
-                    pw.print(oldCharge);
+                    pw.print(oldChargeMAh);
                 }
                 printBitDescriptions(pw, oldState, rec.states, rec.wakelockTag,
                         HISTORY_STATE_DESCRIPTIONS, !checkin);
