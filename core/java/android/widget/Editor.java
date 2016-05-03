@@ -2888,6 +2888,7 @@ public class Editor {
         private boolean mPositionHasChanged = true;
         // Absolute position of the TextView with respect to its parent window
         private int mPositionX, mPositionY;
+        private int mPositionXOnScreen, mPositionYOnScreen;
         private int mNumberOfListeners;
         private boolean mScrollHasChanged;
         final int[] mTempCoords = new int[2];
@@ -2937,6 +2938,14 @@ public class Editor {
             return mPositionY;
         }
 
+        public int getPositionXOnScreen() {
+            return mPositionXOnScreen;
+        }
+
+        public int getPositionYOnScreen() {
+            return mPositionYOnScreen;
+        }
+
         @Override
         public boolean onPreDraw() {
             updatePosition();
@@ -2962,6 +2971,11 @@ public class Editor {
 
             mPositionX = mTempCoords[0];
             mPositionY = mTempCoords[1];
+
+            mTextView.getLocationOnScreen(mTempCoords);
+
+            mPositionXOnScreen = mTempCoords[0];
+            mPositionYOnScreen = mTempCoords[1];
         }
 
         public void onScrollChanged() {
@@ -3998,6 +4012,8 @@ public class Editor {
         private float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
+        // Parent's (TextView) previous position on screen
+        private int mLastParentXOnScreen, mLastParentYOnScreen;
         // Previous text character offset
         protected int mPreviousOffset = -1;
         // Previous text character offset
@@ -4236,6 +4252,7 @@ public class Editor {
             return (int) (getHorizontal(layout, offset) - 0.5f);
         }
 
+        @Override
         public void updatePosition(int parentPositionX, int parentPositionY,
                 boolean parentPositionChanged, boolean parentScrolled) {
             positionAtCursorOffset(getCurrentCursorOffset(), parentScrolled);
@@ -4312,24 +4329,30 @@ public class Editor {
             switch (ev.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     startTouchUpFilter(getCurrentCursorOffset());
-                    mTouchToWindowOffsetX = ev.getRawX() - mPositionX;
-                    mTouchToWindowOffsetY = ev.getRawY() - mPositionY;
 
                     final PositionListener positionListener = getPositionListener();
                     mLastParentX = positionListener.getPositionX();
                     mLastParentY = positionListener.getPositionY();
+                    mLastParentXOnScreen = positionListener.getPositionXOnScreen();
+                    mLastParentYOnScreen = positionListener.getPositionYOnScreen();
+
+                    final float xInWindow = ev.getRawX() - mLastParentXOnScreen + mLastParentX;
+                    final float yInWindow = ev.getRawY() - mLastParentYOnScreen + mLastParentY;
+                    mTouchToWindowOffsetX = xInWindow - mPositionX;
+                    mTouchToWindowOffsetY = yInWindow - mPositionY;
+
                     mIsDragging = true;
                     mPreviousLineTouched = UNSET_LINE;
                     break;
                 }
 
                 case MotionEvent.ACTION_MOVE: {
-                    final float rawX = ev.getRawX();
-                    final float rawY = ev.getRawY();
+                    final float xInWindow = ev.getRawX() - mLastParentXOnScreen + mLastParentX;
+                    final float yInWindow = ev.getRawY() - mLastParentYOnScreen + mLastParentY;
 
                     // Vertical hysteresis: vertical down movement tends to snap to ideal offset
                     final float previousVerticalOffset = mTouchToWindowOffsetY - mLastParentY;
-                    final float currentVerticalOffset = rawY - mPositionY - mLastParentY;
+                    final float currentVerticalOffset = yInWindow - mPositionY - mLastParentY;
                     float newVerticalOffset;
                     if (previousVerticalOffset < mIdealVerticalOffset) {
                         newVerticalOffset = Math.min(currentVerticalOffset, mIdealVerticalOffset);
@@ -4341,8 +4364,8 @@ public class Editor {
                     mTouchToWindowOffsetY = newVerticalOffset + mLastParentY;
 
                     final float newPosX =
-                            rawX - mTouchToWindowOffsetX + mHotspotX + getHorizontalOffset();
-                    final float newPosY = rawY - mTouchToWindowOffsetY + mTouchOffsetY;
+                            xInWindow - mTouchToWindowOffsetX + mHotspotX + getHorizontalOffset();
+                    final float newPosY = yInWindow - mTouchToWindowOffsetY + mTouchOffsetY;
 
                     updatePosition(newPosX, newPosY);
                     break;
