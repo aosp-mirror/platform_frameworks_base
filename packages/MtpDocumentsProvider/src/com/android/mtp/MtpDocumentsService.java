@@ -74,13 +74,10 @@ public class MtpDocumentsService extends Service {
             final String title = getResources().getString(
                     R.string.accessing_notification_title,
                     record.name);
-            final String description = getResources().getString(
-                    R.string.accessing_notification_description);
             notificationId = record.deviceId;
             notification = new Notification.Builder(this)
                     .setLocalOnly(true)
                     .setContentTitle(title)
-                    .setContentText(description)
                     .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .setPriority(Notification.PRIORITY_LOW)
