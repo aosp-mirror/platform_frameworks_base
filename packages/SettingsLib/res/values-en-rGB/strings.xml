@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Enable Wi‑Fi verbose logging"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Aggressive Wi‑Fi to Mobile handover"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Always allow Wi‑Fi Roam Scans"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Use legacy DHCP client"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobile data always active"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disable absolute volume"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Show options for wireless display certification"</string>

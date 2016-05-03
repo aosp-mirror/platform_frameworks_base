@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ထိရောက်သည့် Wi‑Fi မှ ဆယ်လူလာ လွှဲပြောင်းမှု"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi ရွမ်းရှာဖွေမှုကို အမြဲတမ်း ခွင့်ပြုမည်"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"DHCP ကလိုင်းယင့် အဟောင်းအားသုံးရန်"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ဆဲလ်လူလာဒေတာ အမြဲတမ်းဖွင့်ထားသည်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>

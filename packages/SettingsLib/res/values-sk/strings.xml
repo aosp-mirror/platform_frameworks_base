@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné denníky Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Agres. odovzdávať Wi-Fi na mobilnú sieť"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povoliť funkciu Wi-Fi Roam Scans"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Použiť starý klient DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilné dáta vždy aktívne"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zakázať absolútnu hlasitosť"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
