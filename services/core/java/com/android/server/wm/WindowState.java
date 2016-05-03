@@ -1620,6 +1620,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    void applyAdjustForImeIfNeeded() {
+        final Task task = getTask();
+        if (task != null && task.mStack != null && task.mStack.isAdjustedForIme()) {
+            task.mStack.applyAdjustForImeIfNeeded(task);
+        }
+    }
+
     int getTouchableRegion(Region region, int flags) {
         final boolean modal = (flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
         if (modal && mAppToken != null) {
