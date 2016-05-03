@@ -164,6 +164,7 @@ import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
+import android.net.INetworkPolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -243,6 +244,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
@@ -16168,6 +16170,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private void resetNetworkPolicies(int userId) {
+        LocalServices.getService(NetworkPolicyManagerInternal.class).resetUserState(userId);
+    }
+
     /**
      * Reverts user permission state changes (permissions and flags).
      *
@@ -16658,10 +16664,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void resetApplicationPreferences(int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS, null);
+        final long identity = Binder.clearCallingIdentity();
         // writer
-        synchronized (mPackages) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
+        try {
+            synchronized (mPackages) {
                 clearPackagePreferredActivitiesLPw(null, userId);
                 mSettings.applyDefaultPreferredAppsLPw(this, userId);
                 // TODO: We have to reset the default SMS and Phone. This requires
@@ -16673,9 +16679,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 primeDomainVerificationsLPw(userId);
                 resetUserChangesToRuntimePermissionsAndFlagsLPw(userId);
                 scheduleWritePackageRestrictionsLocked(userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
+            resetNetworkPolicies(userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
