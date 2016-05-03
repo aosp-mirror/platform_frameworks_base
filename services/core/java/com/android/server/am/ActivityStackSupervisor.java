@@ -167,6 +167,7 @@ import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 import static com.android.server.am.ActivityStack.STACK_VISIBLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
@@ -1785,7 +1786,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (targetStack != null && isFocusedStack(targetStack)) {
             return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
-        mFocusedStack.resumeTopActivityUncheckedLocked(null, null);
+        final ActivityRecord r = mFocusedStack.topRunningActivityLocked();
+        if (r == null || r.state != RESUMED) {
+            mFocusedStack.resumeTopActivityUncheckedLocked(null, null);
+        }
         return false;
     }
 
@@ -2134,8 +2138,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 for (int i = 0; i < size; i++) {
                     moveTaskToStackLocked(tasks.get(i).taskId,
                             FULLSCREEN_WORKSPACE_STACK_ID, onTop, onTop /*forceFocus*/,
-                            "moveTasksToFullscreenStack", ANIMATE);
+                            "moveTasksToFullscreenStack", ANIMATE, DEFER_RESUME);
                 }
+
+                ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+                resumeFocusedStackTopActivityLocked();
             } else {
                 for (int i = size - 1; i >= 0; i--) {
                     positionTaskInStackLocked(tasks.get(i).taskId,
@@ -2338,7 +2345,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             // Remove current stack association, so we can re-associate the task with the
             // right stack below.
-            task.stack.removeTask(task, "restoreRecentTaskLocked", MOVING);
+            task.stack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
         }
 
         final ActivityStack stack =
@@ -2381,7 +2388,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     + "support multi-window task=" + task + " to stackId=" + stackId);
         }
 
-        final ActivityRecord r = task.getTopActivity();
+        final ActivityRecord r = task.topRunningActivityLocked();
         final ActivityStack prevStack = task.stack;
         final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
         final boolean wasResumed = prevStack.mResumedActivity == r;
