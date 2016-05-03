@@ -140,38 +140,9 @@ public class RecentsTaskLoadPlan {
             lastStackActiveTime = 0;
         }
         long newLastStackActiveTime = -1;
-        long prevLastActiveTime = lastStackActiveTime;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
-
-            /*
-             * Affiliated tasks are returned in a specific order from ActivityManager but without a
-             * lastActiveTime since it hasn't yet been started. However, we later sort the task list
-             * by lastActiveTime, which rearranges the tasks. For now, we need to workaround this
-             * by updating the lastActiveTime of this task to the lastActiveTime of the task it is
-             * affiliated with, in the same order that we encounter it in the original list (just
-             * its index in the task group for the task it is affiliated with).
-             *
-             * If the parent task is not available, then we will use the last active time of the
-             * previous task as a base point (since the task itself may not have an active time)
-             * for the entire affiliated group.
-             */
-            if (t.persistentId != t.affiliatedTaskId) {
-                Task.TaskKey parentTask = affiliatedTasks.get(t.affiliatedTaskId);
-                long parentTaskLastActiveTime = parentTask != null
-                        ? parentTask.lastActiveTime
-                        : prevLastActiveTime;
-                if (RecentsDebugFlags.Static.EnableAffiliatedTaskGroups) {
-                    t.lastActiveTime = parentTaskLastActiveTime +
-                            affiliatedTaskCounts.get(t.affiliatedTaskId, 0) + 1;
-                } else {
-                    if (t.lastActiveTime == 0) {
-                        t.lastActiveTime = parentTaskLastActiveTime -
-                                affiliatedTaskCounts.get(t.affiliatedTaskId, 0) - 1;
-                    }
-                }
-            }
 
             // Compose the task key
             Task.TaskKey taskKey = new Task.TaskKey(t.persistentId, t.stackId, t.baseIntent,
@@ -180,9 +151,14 @@ public class RecentsTaskLoadPlan {
             // This task is only shown in the stack if it statisfies the historical time or min
             // number of tasks constraints. Freeform tasks are also always shown.
             boolean isFreeformTask = SystemServicesProxy.isFreeformStack(t.stackId);
-            boolean isStackTask = isFreeformTask || (!isHistoricalTask(t) ||
-                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS)));
+            boolean isStackTask = isFreeformTask || !isHistoricalTask(t) ||
+                    (t.lastActiveTime >= lastStackActiveTime && i >= (taskCount - MIN_NUM_TASKS));
             boolean isLaunchTarget = taskKey.id == runningTaskId;
+
+            // The last stack active time is the baseline for which we show visible tasks.  Since
+            // the system will store all the tasks, we don't want to show the tasks prior to the
+            // last visible ones, otherwise, as you dismiss them, the previous tasks may satisfy
+            // the other stack-task constraints.
             if (isStackTask && newLastStackActiveTime < 0) {
                 newLastStackActiveTime = t.lastActiveTime;
             }
@@ -211,7 +187,6 @@ public class RecentsTaskLoadPlan {
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
             affiliatedTasks.put(taskKey.id, taskKey);
-            prevLastActiveTime = t.lastActiveTime;
         }
         if (newLastStackActiveTime != -1) {
             Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,

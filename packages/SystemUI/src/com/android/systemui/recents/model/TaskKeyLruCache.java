@@ -76,7 +76,8 @@ public class TaskKeyLruCache<V> {
     final V getAndInvalidateIfModified(Task.TaskKey key) {
         Task.TaskKey lastKey = mKeys.get(key.id);
         if (lastKey != null) {
-            if ((lastKey.stackId != key.stackId) || (lastKey.lastActiveTime < key.lastActiveTime)) {
+            if ((lastKey.stackId != key.stackId) ||
+                    (lastKey.lastActiveTime != key.lastActiveTime)) {
                 // The task has updated (been made active since the last time it was put into the
                 // LRU cache) or the stack id for the task has changed, invalidate that cache item
                 remove(key);
