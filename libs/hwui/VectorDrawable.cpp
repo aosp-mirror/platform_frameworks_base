@@ -456,7 +456,7 @@ bool Group::GroupProperties::isValidProperty(int propertyId) {
     return propertyId >= 0 && propertyId < static_cast<int>(Property::count);
 }
 
-void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
+int Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
         const SkRect& bounds, bool needsMirroring, bool canReuseCache) {
     // The imageView can scale the canvas in different ways, in order to
     // avoid blurry scaling, we have to draw into a bitmap with exact pixel
@@ -478,7 +478,7 @@ void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
     scaledHeight = std::min(Tree::MAX_CACHED_BITMAP_SIZE, scaledHeight);
 
     if (scaledWidth <= 0 || scaledHeight <= 0) {
-        return;
+        return 0;
     }
 
     mStagingProperties.setScaledSize(scaledWidth, scaledHeight);
@@ -500,6 +500,7 @@ void Tree::draw(Canvas* outCanvas, SkColorFilter* colorFilter,
     mStagingProperties.setBounds(tmpBounds);
     outCanvas->drawVectorDrawable(this);
     outCanvas->restoreToCount(saveCount);
+    return scaledWidth * scaledHeight;
 }
 
 void Tree::drawStaging(Canvas* outCanvas) {
