@@ -29,10 +29,8 @@ import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
-import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -175,10 +173,13 @@ public class DeviceIdleJobsController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(final PrintWriter pw) {
+    public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
         pw.println("DeviceIdleJobsController");
         mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
             @Override public void process(JobStatus jobStatus) {
+                if (!jobStatus.shouldDump(filterUid)) {
+                    return;
+                }
                 pw.print("  ");
                 pw.print(jobStatus.getSourcePackageName());
                 pw.print(": runnable=");
