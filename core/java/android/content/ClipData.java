@@ -44,9 +44,9 @@ import java.util.List;
 /**
  * Representation of a clipped data on the clipboard.
  *
- * <p>ClippedData is a complex type containing one or Item instances,
+ * <p>ClipData is a complex type containing one or more Item instances,
  * each of which can hold one or more representations of an item of data.
- * For display to the user, it also has a label and iconic representation.</p>
+ * For display to the user, it also has a label.</p>
  *
  * <p>A ClipData contains a {@link ClipDescription}, which describes
  * important meta-data about the clip.  In particular, its
@@ -71,7 +71,7 @@ import java.util.List;
  * <a name="ImplementingPaste"></a>
  * <h3>Implementing Paste or Drop</h3>
  *
- * <p>To implement a paste or drop of a ClippedData object into an application,
+ * <p>To implement a paste or drop of a ClipData object into an application,
  * the application must correctly interpret the data for its use.  If the {@link Item}
  * it contains is simple text or an Intent, there is little to be done: text
  * can only be interpreted as text, and an Intent will typically be used for
@@ -85,7 +85,7 @@ import java.util.List;
  * since any clip item can always be converted to a string.
  *
  * <p>More complicated exchanges will be done through URIs, in particular
- * "content:" URIs.  A content URI allows the recipient of a ClippedData item
+ * "content:" URIs.  A content URI allows the recipient of a ClipData item
  * to interact closely with the ContentProvider holding the data in order to
  * negotiate the transfer of that data.  The clip must also be filled in with
  * the available MIME types; {@link #newUri(ContentResolver, CharSequence, Uri)}
@@ -116,7 +116,7 @@ import java.util.List;
  * <a name="ImplementingCopy"></a>
  * <h3>Implementing Copy or Drag</h3>
  *
- * <p>To be the source of a clip, the application must construct a ClippedData
+ * <p>To be the source of a clip, the application must construct a ClipData
  * object that any recipient can interpret best for their context.  If the clip
  * is to contain a simple text, Intent, or URI, this is easy: an {@link Item}
  * containing the appropriate data type can be constructed and used.
@@ -163,13 +163,13 @@ public class ClipData implements Parcelable {
         ClipDescription.MIMETYPE_TEXT_INTENT };
 
     final ClipDescription mClipDescription;
-    
+
     final Bitmap mIcon;
 
     final ArrayList<Item> mItems;
 
     /**
-     * Description of a single item in a ClippedData.
+     * Description of a single item in a ClipData.
      *
      * <p>The types than an individual item can currently contain are:</p>
      *
@@ -351,7 +351,7 @@ public class ClipData implements Parcelable {
 
                 } catch (IOException e) {
                     // Something bad has happened.
-                    Log.w("ClippedData", "Failure loading text", e);
+                    Log.w("ClipData", "Failure loading text", e);
                     return e.toString();
 
                 } finally {
@@ -534,7 +534,7 @@ public class ClipData implements Parcelable {
 
                     } catch (IOException e) {
                         // Something bad has happened.
-                        Log.w("ClippedData", "Failure loading text", e);
+                        Log.w("ClipData", "Failure loading text", e);
                         return Html.escapeHtml(e.toString());
 
                     } finally {
