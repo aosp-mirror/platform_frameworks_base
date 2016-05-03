@@ -62,12 +62,16 @@ import java.util.List;
  * <h3>Rate limiting</h3>
  *
  * Calls to {@link #setDynamicShortcuts(List)}, {@link #addDynamicShortcuts(List)},
- * and {@link #updateShortcuts(List)} will be
+ * and {@link #updateShortcuts(List)} from <b>background applications</b> will be
  * rate-limited.  An application can call these methods at most
  * {@link #getRemainingCallCount()} times until the rate-limiting counter is reset,
- * which happens every hour.
+ * which happens at a certain time every day.
  *
  * <p>An application can use {@link #getRateLimitResetTime()} to get the next reset time.
+ *
+ * <p>Foreground applications (i.e. ones with a foreground activity or a foreground services)
+ * will not be throttled. Also, when an application comes to foreground,
+ * {@link #getRemainingCallCount()} will be reset to the initial value.
  *
  * <p>For testing purposes, use "Developer Options" (found in the Settings menu) to reset the
  * internal rate-limiting counter.  Automated tests can use the following ADB shell command to
