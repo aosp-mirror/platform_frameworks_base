@@ -178,6 +178,8 @@
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS" />
     <protected-broadcast
+        android:name="android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
     <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
