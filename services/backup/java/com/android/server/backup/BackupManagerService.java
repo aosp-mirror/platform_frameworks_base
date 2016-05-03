@@ -5245,6 +5245,10 @@ public class BackupManagerService {
             return mAgent;
         }
 
+        public byte[] getWidgetData() {
+            return mWidgetData;
+        }
+
         public boolean restoreOneFile(InputStream instream, boolean mustKillAgent) {
             if (!isRunning()) {
                 Slog.w(TAG, "Restore engine used after halting");
@@ -7676,6 +7680,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     void restoreWidgetData(String packageName, byte[] widgetData) {
         // Apply the restored widget state and generate the ID update for the app
         // TODO: http://b/22388012
+        if (MORE_DEBUG) {
+            Slog.i(TAG, "Incorporating restored widget data");
+        }
         AppWidgetBackupBridge.restoreWidgetState(packageName, widgetData, UserHandle.USER_SYSTEM);
     }
 
@@ -8457,6 +8464,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                         // the engine bound the target's agent, so recover that binding
                         // to use for the callback.
                         mAgent = mEngine.getAgent();
+
+                        // and the restored widget data, if any
+                        mWidgetData = mEngine.getWidgetData();
                     } else {
                         // Something went wrong somewhere.  Whether it was at the transport
                         // level is immaterial; we need to tell the transport to bail
