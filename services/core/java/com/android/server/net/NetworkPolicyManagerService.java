@@ -406,6 +406,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mAppOps = context.getSystemService(AppOpsManager.class);
 
         mPackageMonitor = new MyPackageMonitor();
+
+        // Expose private service for system components to use.
+        LocalServices.addService(NetworkPolicyManagerInternal.class,
+                new NetworkPolicyManagerInternalImpl());
     }
 
     public void bindConnectivityManager(IConnectivityManager connManager) {
@@ -742,7 +746,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     synchronized (mRulesLock) {
                         // Remove any persistable state for the given user; both cleaning up after a
                         // USER_REMOVED, and one last sanity check during USER_ADDED
-                        removeUserStateLocked(userId);
+                        removeUserStateLocked(userId, true);
                         if (action == ACTION_USER_ADDED) {
                             // Add apps that are whitelisted by default.
                             addDefaultRestrictBackgroundWhitelistUidsLocked(userId);
@@ -1742,12 +1746,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Remove any persistable state associated with given {@link UserHandle}, persisting
-     * if any changes are made.
+     * Removes any persistable state associated with given {@link UserHandle}, persisting
+     * if any changes that are made.
      */
-    void removeUserStateLocked(int userId) {
+    boolean removeUserStateLocked(int userId, boolean writePolicy) {
+
         if (LOGV) Slog.v(TAG, "removeUserStateLocked()");
-        boolean writePolicy = false;
+        boolean changed = false;
 
         // Remove entries from restricted background UID whitelist
         int[] wlUids = new int[0];
@@ -1762,7 +1767,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int uid : wlUids) {
                 removeRestrictBackgroundWhitelistedUidLocked(uid, false, false);
             }
-            writePolicy = true;
+            changed = true;
         }
 
         // Remove entries from revoked default restricted background UID whitelist
@@ -1770,7 +1775,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int uid = mRestrictBackgroundWhitelistRevokedUids.keyAt(i);
             if (UserHandle.getUserId(uid) == userId) {
                 mRestrictBackgroundWhitelistRevokedUids.removeAt(i);
-                writePolicy = true;
+                changed = true;
             }
         }
 
@@ -1787,14 +1792,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int uid : uids) {
                 mUidPolicy.delete(uid);
             }
-            writePolicy = true;
+            changed = true;
         }
 
         updateRulesForGlobalChangeLocked(true);
 
-        if (writePolicy) {
+        if (writePolicy && changed) {
             writePolicyLocked();
         }
+        return changed;
     }
 
     @Override
@@ -3292,6 +3298,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (LOGV) Slog.v(TAG, "onPackageRemoved: " + packageName + " ->" + uid);
             synchronized (mRulesLock) {
                 removeRestrictBackgroundWhitelistedUidLocked(uid, true, true);
+            }
+        }
+    }
+
+    private class NetworkPolicyManagerInternalImpl extends NetworkPolicyManagerInternal {
+
+        @Override
+        public void resetUserState(int userId) {
+            synchronized (mRulesLock) {
+                boolean changed = removeUserStateLocked(userId, false);
+                changed = addDefaultRestrictBackgroundWhitelistUidsLocked(userId) || changed;
+                if (changed) {
+                    writePolicyLocked();
+                }
             }
         }
     }
