@@ -75,7 +75,7 @@ public class AppFuse {
     void close() {
         try {
             // Remote side of ParcelFileDescriptor is tracking the close of mDeviceFd, and unmount
-            // the corresponding fuse file system. The mMessageThread will receive FUSE_FORGET, and
+            // the corresponding fuse file system. The mMessageThread will receive ENODEV, and
             // then terminate itself.
             mDeviceFd.close();
             mMessageThread.join();
@@ -236,7 +236,7 @@ public class AppFuse {
         }
     }
 
-    private native boolean native_start_app_fuse_loop(int fd);
+    private native void native_start_app_fuse_loop(int fd);
 
     private class AppFuseMessageThread extends Thread {
         /**
