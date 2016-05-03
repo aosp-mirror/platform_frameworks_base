@@ -451,11 +451,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         TaskStack stack = loadPlan.getTaskStack();
         int numStackTasks = stack.getStackTaskCount();
+        boolean showDeferredAnimation = numStackTasks > 0;
 
         EventBus.getDefault().send(new ConfigurationChangedEvent(true /* fromMultiWindow */,
                 false /* fromDeviceOrientationChange */, false /* fromDisplayDensityChange */,
                 numStackTasks > 0));
-        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode, stack));
+        EventBus.getDefault().send(new MultiWindowStateChangedEvent(isInMultiWindowMode,
+                showDeferredAnimation, stack));
     }
 
     @Override

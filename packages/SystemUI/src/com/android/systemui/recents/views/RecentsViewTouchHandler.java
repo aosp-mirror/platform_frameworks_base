@@ -193,7 +193,7 @@ public class RecentsViewTouchHandler {
     }
 
     public final void onBusEvent(ConfigurationChangedEvent event) {
-        if (event.fromDisplayDensityChange) {
+        if (event.fromDisplayDensityChange || event.fromDeviceOrientationChange) {
             updateSnapAlgorithm();
         }
     }
