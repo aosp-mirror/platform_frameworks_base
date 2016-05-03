@@ -4208,7 +4208,7 @@ public final class ActivityThread {
                 }
                 IBinder wtoken = v.getWindowToken();
                 if (r.activity.mWindowAdded) {
-                    if (r.onlyLocalRequest || r.mPreserveWindow) {
+                    if (r.mPreserveWindow) {
                         // Hold off on removing this until the new activity's
                         // window is being added.
                         r.mPendingRemoveWindow = r.window;
@@ -4443,14 +4443,19 @@ public final class ActivityThread {
         // be replaced and defer requests to destroy or hide them. This way we can achieve
         // visual continuity. It's important that we do this here prior to pause and destroy
         // as that is when we may hide or remove the child views.
+        //
+        // There is another scenario, if we have decided locally to relaunch the app from a
+        // call to recreate, then none of the windows will be prepared for replacement or
+        // preserved by the server, so we want to notify it that we are preparing to replace
+        // everything
         try {
-            if (r.mPreserveWindow) {
-                WindowManagerGlobal.getWindowSession().prepareToReplaceChildren(r.token);
+            if (r.mPreserveWindow || r.onlyLocalRequest) {
+                WindowManagerGlobal.getWindowSession().prepareToReplaceWindows(
+                        r.token, !r.onlyLocalRequest);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
 
         // Need to ensure state is saved.
         if (!r.paused) {
