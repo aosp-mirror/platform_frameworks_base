@@ -1990,6 +1990,11 @@
     <permission android:name="android.permission.UPDATE_CONFIG"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows the system to reset throttling in shortcut manager.
+         @hide -->
+    <permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING"
+        android:protectionLevel="signature" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
