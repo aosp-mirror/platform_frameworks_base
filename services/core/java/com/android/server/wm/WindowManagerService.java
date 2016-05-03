@@ -2077,6 +2077,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // we need to update this new window's scroll position when it's added.
             win.applyScrollIfNeeded();
 
+            // If the window is being added to a stack that's currently adjusted for IME,
+            // make sure to apply the same adjust to this new window.
+            win.applyAdjustForImeIfNeeded();
+
             if (type == TYPE_DOCK_DIVIDER) {
                 getDefaultDisplayContentLocked().getDockedDividerController().setWindow(win);
             }
