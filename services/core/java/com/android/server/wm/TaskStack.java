@@ -240,7 +240,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         Rect insetBounds = null;
         if (adjusted && isAdjustedForMinimizedDock()) {
             insetBounds = mBounds;
-        } else if (adjusted && isAdjustedForIme()) {
+        } else if (adjusted && mAdjustedForIme) {
             if (mImeGoingAway) {
                 insetBounds = mBounds;
             } else {
@@ -264,16 +264,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 task.resizeLocked(null, null, false /* forced */);
                 task.getBounds(mTmpRect2);
                 task.scrollLocked(mTmpRect2);
-            } else if (task.isResizeable() && task.mOverrideConfig != Configuration.EMPTY) {
-                task.getBounds(mTmpRect2);
-                if (mAdjustedForIme && getDockSide() == DOCKED_TOP) {
-                    int offsetY = adjustedBounds.bottom - mTmpRect2.bottom;
-                    mTmpRect2.offset(0, offsetY);
-                } else {
-                    mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
-                }
-                task.setTempInsetBounds(tempInsetBounds);
-                task.resizeLocked(mTmpRect2, task.mOverrideConfig, false /* forced */);
+            } else {
+                final boolean alignBottom = mAdjustedForIme && getDockSide() == DOCKED_TOP;
+                task.alignToAdjustedBounds(adjustedBounds, tempInsetBounds, alignBottom);
             }
         }
     }
@@ -868,7 +861,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     boolean isAdjustedForIme() {
-        return mAdjustedForIme || mImeGoingAway;
+        return mAdjustedForIme;
     }
 
     boolean isAnimatingForIme() {
@@ -1083,7 +1076,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /**
      * Updates the adjustment depending on it's current state.
      */
-    void updateAdjustedBounds() {
+    private void updateAdjustedBounds() {
         boolean adjust = false;
         if (mMinimizeAmount != 0f) {
             adjust = adjustForMinimizedDockedStack(mMinimizeAmount);
@@ -1101,6 +1094,16 @@ public class TaskStack implements DimLayer.DimLayerUser,
                     * IME_ADJUST_DIM_AMOUNT;
             mService.setResizeDimLayer(true, mStackId, alpha);
         }
+    }
+
+    void applyAdjustForImeIfNeeded(Task task) {
+        if (mMinimizeAmount != 0f || !mAdjustedForIme || mAdjustedBounds.isEmpty()) {
+            return;
+        }
+
+        final Rect insetBounds = mImeGoingAway ? mBounds : mFullyAdjustedImeBounds;
+        task.alignToAdjustedBounds(mAdjustedBounds, insetBounds, getDockSide() == DOCKED_TOP);
+        mDisplayContent.layoutNeeded = true;
     }
 
     boolean isAdjustedForMinimizedDockedStack() {
