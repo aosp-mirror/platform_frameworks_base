@@ -30,7 +30,7 @@ class ReferenceIdToNameVisitor : public ValueVisitor {
 public:
     using ValueVisitor::visit;
 
-    ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceNameRef>* mapping) :
+    explicit ReferenceIdToNameVisitor(const std::map<ResourceId, ResourceNameRef>* mapping) :
             mMapping(mapping) {
         assert(mMapping);
     }
