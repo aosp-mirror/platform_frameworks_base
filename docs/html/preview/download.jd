@@ -371,6 +371,15 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
     </td>
   </tr>
 
+  <tr id="xperia">
+    <td>Sony Xperia Z3 <br> (D6603 and D6653)</td>
+    <td>Download: <a class="external-link"
+      href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
+      For more information, see <a class="external-link"
+      href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">Try Android N Developer Preview for Xperia Z3</a>.
+    </td>
+  </tr>
+
 </table>
 
 <h3 id="revertDevice">Uninstalling the Preview from a device</h3>
