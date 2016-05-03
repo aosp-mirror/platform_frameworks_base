@@ -438,7 +438,7 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дакраніцеся, каб уключыць гук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Дакраніцеся, каб уключыць вібрацыю. Можа быць адключаны гук службаў спецыяльных магчымасцей."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дакраніцеся, каб адключыць гук. Можа быць адключаны гук службаў спецыяльных магчымасцей."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Паказваецца наступная колькасць рэгулятараў гучнасці: %s. Правядзіце пальцам, каб закрыць іх."</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Паказваецца наступная колькасць рэгулятараў гучнасці: %s. Правядзіце пальцам уверх, каб закрыць іх."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Рэгулятары гучнасці схаваны"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Наладка сістэмнага інтэрфейсу карыстальніка"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Паказваць працэнт зараду акумулятара"</string>
