@@ -909,8 +909,8 @@ public final class FloatingToolbar {
                     mOverflowPanel.setX(0);  // align left
                 } else {
                     mContentContainer.setX(  // align right
-                            mMarginHorizontal +
-                                    mMainPanelSize.getWidth() - containerSize.getWidth());
+                            mPopupWindow.getWidth() -
+                                    containerSize.getWidth() - mMarginHorizontal);
                     mMainPanel.setX(-mContentContainer.getX());  // align right
                     mOverflowButton.setX(0);  // align left
                     mOverflowPanel.setX(0);  // align left
@@ -949,7 +949,9 @@ public final class FloatingToolbar {
                         mOverflowButton.setX(0);  // align left
                         mOverflowPanel.setX(0);  // align left
                     } else {
-                        mContentContainer.setX(mMarginHorizontal);  // align left
+                        mContentContainer.setX(  // align right
+                                mPopupWindow.getWidth() -
+                                        containerSize.getWidth() - mMarginHorizontal);
                         mMainPanel.setX(0);  // align left
                         mOverflowButton.setX(  // align right
                                 containerSize.getWidth() - mOverflowButtonSize.getWidth());
