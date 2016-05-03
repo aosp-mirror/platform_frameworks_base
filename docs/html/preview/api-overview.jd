@@ -37,6 +37,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#launcher_shortcuts">Launcher shortcuts</a></li>
         <li><a href="#print_svc">Print service enhancements</a></li>
+        <li><a href="#virtual_files">Virtual Files</a></li>
       </ol>
 </div>
 </div>
@@ -852,4 +853,87 @@ $ adb shell dumpsys shortcut
 <p>
   For more information about these methods, see the downloadable <a href=
   "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+</p>
+
+<h2 id="virtual_files">Virtual Files</h2>
+
+<p>
+  In previous versions of Android, your app could use the Storage Access
+  Framework to allow users to select files from their cloud storage accounts,
+  such as Google Drive. However, there was no way to represent files that did
+  not have a direct bytecode representation; every file was required to provide
+  an input stream.
+</p>
+
+<p>
+  Android N adds the concept of <em>virtual files</em> to the Storage Access
+  Framework. The virtual files feature allows your
+  {@link android.provider.DocumentsProvider} to return document URIs that can be
+  used with an {@link android.content.Intent#ACTION_VIEW} intent even if they
+  don't have a direct bytecode representation. Android N also allows you to
+  provide alternate formats for user files, virtual or otherwise.
+</p>
+
+<p>
+  To get a URI for a virtual document in your app, first you create an
+  {@link android.content.Intent} to open the file picker UI. Since an app
+  cannot directly open a virtual file by using the
+  {@link android.content.ContentResolver#openInputStream(Uri) openInputStream()}
+  method, your app does not receive any virtual files if you include the
+  {@link android.content.Intent#CATEGORY_OPENABLE} category.
+</p>
+
+<p>
+  After the user has made a selection, the system calls the
+  {@link android.app.Activity#onActivityResult onActivityResult()} method.
+  Your app can retrieve the URI of the virtual file and get an input stream, as
+  demonstrated in the code snippet below.
+</p>
+
+<pre>
+  // Other Activity code ...
+
+  final static private int REQUEST_CODE = 64;
+
+  // We listen to the OnActivityResult event to respond to the user's selection.
+  &#64;Override
+  public void onActivityResult(int requestCode, int resultCode,
+    Intent resultData) {
+      try {
+        if (requestCode == REQUEST_CODE &amp;&amp;
+            resultCode == Activity.RESULT_OK) {
+
+            Uri uri = null;
+
+            if (resultData != null) {
+                uri = resultData.getData();
+
+                ContentResolver resolver = getContentResolver();
+
+                // Before attempting to coerce a file into a MIME type,
+                // check to see what alternative MIME types are available to
+                // coerce this file into.
+                String[] streamTypes =
+                  resolver.getStreamTypes(uri, "*/*");
+
+                AssetFileDescriptor descriptor =
+                    resolver.openTypedAssetFileDescriptor(
+                        uri,
+                        streamTypes[0],
+                        null);
+
+                // Retrieve a stream to the virtual file.
+                InputStream inputStream = descriptor.createInputStream();
+            }
+        }
+      } catch (Exception ex) {
+        Log.e("EXCEPTION", "ERROR: ", ex);
+      }
+  }
+</pre>
+
+<p>
+  For more information about accessing user files, see the
+  <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
+  Access Frameworks guide</a>.
 </p>
