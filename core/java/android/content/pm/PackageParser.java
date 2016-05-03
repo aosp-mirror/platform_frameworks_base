@@ -79,7 +79,6 @@ import libcore.io.IoUtils;
 
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
@@ -120,6 +119,7 @@ public class PackageParser {
     private static final boolean DEBUG_PARSER = false;
     private static final boolean DEBUG_BACKUP = false;
 
+    private static final boolean MULTI_PACKAGE_APK_ENABLED = false;
     private static final int MAX_PACKAGES_PER_APK = 5;
 
     public static final int APK_SIGNING_UNKNOWN = 0;
@@ -2087,6 +2087,10 @@ public class PackageParser {
                 continue;
 
             } else if (tagName.equals(TAG_PACKAGE)) {
+                if (!MULTI_PACKAGE_APK_ENABLED) {
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                }
                 if (!parseBaseApkChild(pkg, res, parser, flags, outError)) {
                     // If parsing a child failed the error is already set
                     return null;
