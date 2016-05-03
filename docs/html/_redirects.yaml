@@ -1,3 +1,5 @@
+# For information about this file's format, see
+# https://developers.google.com/internal/publishing/redirects
 redirects:
 - from: /about/versions/index.html
   to: /about/index.html
@@ -22,11 +24,11 @@ redirects:
 - from: /tools/debugging/debugging-projects-cmdline.html
   to: /studio/tools/debugging/index.html
 - from: /sdk/compatibility-library.html
-  to: /go/libraries/support-library/index.html
+  to: /topic/libraries/support-library/index.html
 - from: /tools/extras/support-library.html
-  to: /go/libraries/support-library/index.html
+  to: /topic/libraries/support-library/index.html
 - from: /training/basics/fragments/support-lib.html
-  to: /go/libraries/support-library/setup.html
+  to: /topic/libraries/support-library/setup.html
 - from: /sdk/eclipse-adt.html
   to: /studio/tools/sdk/eclipse-adt.html
 - from: /sdk/RELEASENOTES.html
@@ -70,7 +72,7 @@ redirects:
 - from: /tools/publishing/app-signing-eclipse.html
   to: /studio/tools/help/adt.html
 - from: /tools/help/uiautomator/...
-  to: /go/libraries/testing-support-library/
+  to: /topic/libraries/testing-support-library/
 - from: /tools/testing/testing_ui.html
   to: /training/testing/ui-testing/index.html
 - from: /tools/testing/activity_test.html
@@ -846,16 +848,16 @@ redirects:
 - from: /downloads/
   to: https://commondatastorage.googleapis.com/androiddevelopers/
 
-# Redirects for the new go/libraries/ area
+# Redirects for the new [dac]/topic/libraries/ area
 
 - from: /tools/support-library
-  to: /go/libraries/support-library
+  to: /topic/libraries/support-library
 
 - from: /tools/data-binding/...
-  to: /go/libraries/data-binding
+  to: /topic/libraries/data-binding
 
 - from: /tools/testing-support-library
-  to: /go/libraries/testing-support-library
+  to: /topic/libraries/testing-support-library
 
 # GCM redirects
 - from: /reference/com/google/...
