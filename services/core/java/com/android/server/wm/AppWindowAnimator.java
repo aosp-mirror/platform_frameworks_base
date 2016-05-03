@@ -224,6 +224,12 @@ public class AppWindowAnimator {
         if (transferWinAnimator != null) {
             mAllAppWinAnimators.remove(transferWinAnimator);
             toAppAnimator.mAllAppWinAnimators.add(transferWinAnimator);
+            toAppAnimator.hasTransformation = transferWinAnimator.mAppAnimator.hasTransformation;
+            if (toAppAnimator.hasTransformation) {
+                toAppAnimator.transformation.set(transferWinAnimator.mAppAnimator.transformation);
+            } else {
+                toAppAnimator.transformation.clear();
+            }
             transferWinAnimator.mAppAnimator = toAppAnimator;
         }
     }
