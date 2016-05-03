@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"បើក​កំណត់ហេតុ​រៀបរាប់​វ៉ាយហ្វាយ"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"វ៉ាយហ្វាយ​បង្ខំ​ទៅ​ការ​បញ្ជូន​ចល័ត"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"តែងតែ​អនុញ្ញាត​​​ការវិភាគ​រ៉ូម​វ៉ាយហ្វាយ"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"ប្រើម៉ាស៊ីនកូន DHCP ចាស់"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ទិន្នន័យចល័តសកម្មជានិច្ច"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>

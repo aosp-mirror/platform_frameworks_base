@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući opširnu prijavu na Wi-Fi"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Aktivni prijelaz s Wi‑Fi na mob. mrežu"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopusti slobodno traženje Wi-Fi mreže"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"Upotrebljavaj stari DHCP klijent"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilni podaci uvijek aktivni"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogući apsolutnu glasnoću"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaži opcije za certifikaciju bežičnog prikaza"</string>
