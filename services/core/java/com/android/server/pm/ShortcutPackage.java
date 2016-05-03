@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -95,18 +94,31 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     private long mLastResetTime;
 
-    private ShortcutPackage(int packageUserId, String packageName, ShortcutPackageInfo spi) {
-        super(packageUserId, packageName, spi != null ? spi : ShortcutPackageInfo.newEmpty());
+    private final int mPackageUid;
+
+    private long mLastKnownForegroundElapsedTime;
+
+    private ShortcutPackage(ShortcutService s, ShortcutUser shortcutUser,
+            int packageUserId, String packageName, ShortcutPackageInfo spi) {
+        super(shortcutUser, packageUserId, packageName,
+                spi != null ? spi : ShortcutPackageInfo.newEmpty());
+
+        mPackageUid = s.injectGetPackageUid(packageName, packageUserId);
     }
 
-    public ShortcutPackage(int packageUserId, String packageName) {
-        this(packageUserId, packageName, null);
+    public ShortcutPackage(ShortcutService s, ShortcutUser shortcutUser,
+            int packageUserId, String packageName) {
+        this(s, shortcutUser, packageUserId, packageName, null);
     }
 
     @Override
     public int getOwnerUserId() {
         // For packages, always owner user == package user.
         return getPackageUserId();
+    }
+
+    public int getPackageUid() {
+        return mPackageUid;
     }
 
     /**
@@ -274,18 +286,12 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
-        final ArrayMap<ShortcutUser.PackageWithUser, ShortcutLauncher> launchers =
-                s.getUserShortcutsLocked(getPackageUserId()).getAllLaunchers();
-
-        for (int l = launchers.size() - 1; l >= 0; l--) {
-            // Note even if a launcher that hasn't been installed can still pin shortcuts.
-
-            final ShortcutLauncher launcherShortcuts = launchers.valueAt(l);
+        s.getUserShortcutsLocked(getPackageUserId()).forAllLaunchers(launcherShortcuts -> {
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
                     getPackageName(), getPackageUserId());
 
             if (pinned == null || pinned.size() == 0) {
-                continue;
+                return;
             }
             for (int i = pinned.size() - 1; i >= 0; i--) {
                 final String id = pinned.valueAt(i);
@@ -299,7 +305,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 }
                 si.addFlags(ShortcutInfo.FLAG_PINNED);
             }
-        }
+        });
 
         // Lastly, remove the ones that are no longer pinned nor dynamic.
         removeOrphans(s);
@@ -307,8 +313,28 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     /**
      * Number of calls that the caller has made, since the last reset.
+     *
+     * <p>This takes care of the resetting the counter for foreground apps as well as after
+     * locale changes.
      */
     public int getApiCallCount(@NonNull ShortcutService s) {
+        mShortcutUser.resetThrottlingIfNeeded(s);
+
+        // Reset the counter if:
+        // - the package is in foreground now.
+        // - the package is *not* in foreground now, but was in foreground at some point
+        // since the previous time it had been.
+        if (s.isUidForegroundLocked(mPackageUid)
+                || mLastKnownForegroundElapsedTime
+                    < s.getUidLastForegroundElapsedTimeLocked(mPackageUid)) {
+            mLastKnownForegroundElapsedTime = s.injectElapsedRealtime();
+            resetRateLimiting(s);
+        }
+
+        // Note resetThrottlingIfNeeded() and resetRateLimiting() will set 0 to mApiCallCount,
+        // but we just can't return 0 at this point, because we may have to update
+        // mLastResetTime.
+
         final long last = s.getLastResetTimeLocked();
 
         final long now = s.injectCurrentTimeMillis();
@@ -335,16 +361,30 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * If the caller app hasn't been throttled yet, increment {@link #mApiCallCount}
      * and return true.  Otherwise just return false.
+     *
+     * <p>This takes care of the resetting the counter for foreground apps as well as after
+     * locale changes, which is done internally by {@link #getApiCallCount}.
      */
     public boolean tryApiCall(@NonNull ShortcutService s) {
         if (getApiCallCount(s) >= s.mMaxUpdatesPerInterval) {
             return false;
         }
         mApiCallCount++;
+        s.scheduleSaveUser(getOwnerUserId());
         return true;
     }
 
-    public void resetRateLimitingForCommandLine() {
+    public void resetRateLimiting(@NonNull ShortcutService s) {
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, "resetRateLimiting: " + getPackageName());
+        }
+        if (mApiCallCount > 0) {
+            mApiCallCount = 0;
+            s.scheduleSaveUser(getOwnerUserId());
+        }
+    }
+
+    public void resetRateLimitingForCommandLineNoSaving() {
         mApiCallCount = 0;
         mLastResetTime = 0;
     }
@@ -451,12 +491,21 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(prefix);
         pw.print("Package: ");
         pw.print(getPackageName());
+        pw.print("  UID: ");
+        pw.print(mPackageUid);
         pw.println();
 
         pw.print(prefix);
         pw.print("  ");
         pw.print("Calls: ");
         pw.print(getApiCallCount(s));
+        pw.println();
+
+        // getApiCallCount() may have updated mLastKnownForegroundElapsedTime.
+        pw.print(prefix);
+        pw.print("  ");
+        pw.print("Last known FG: ");
+        pw.print(mLastKnownForegroundElapsedTime);
         pw.println();
 
         // This should be after getApiCallCount(), which may update it.
@@ -571,14 +620,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         out.endTag(null, TAG_SHORTCUT);
     }
 
-    public static ShortcutPackage loadFromXml(ShortcutService s, XmlPullParser parser,
-            int ownerUserId, boolean fromBackup)
+    public static ShortcutPackage loadFromXml(ShortcutService s, ShortcutUser shortcutUser,
+            XmlPullParser parser, boolean fromBackup)
             throws IOException, XmlPullParserException {
 
         final String packageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_NAME);
 
-        final ShortcutPackage ret = new ShortcutPackage(ownerUserId, packageName);
+        final ShortcutPackage ret = new ShortcutPackage(s, shortcutUser,
+                shortcutUser.getUserId(), packageName);
 
         ret.mDynamicShortcutCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_DYNAMIC_COUNT);
@@ -602,7 +652,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                         ret.getPackageInfo().loadFromXml(parser, fromBackup);
                         continue;
                     case TAG_SHORTCUT:
-                        final ShortcutInfo si = parseShortcut(parser, packageName, ownerUserId);
+                        final ShortcutInfo si = parseShortcut(parser, packageName,
+                                shortcutUser.getUserId());
 
                         // Don't use addShortcut(), we don't need to save the icon.
                         ret.mShortcuts.put(si.getId(), si);
