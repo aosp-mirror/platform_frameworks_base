@@ -29,6 +29,7 @@ LOCAL_MODULE_CLASS := APPS
 LOCAL_BUILT_MODULE_STEM := package.apk
 # Make sure the build system doesn't try to resign the APK
 LOCAL_CERTIFICATE := PRESIGNED
+LOCAL_DEX_PREOPT := false
 
 LOCAL_SRC_FILES := CtsShimPriv.apk
 
@@ -46,6 +47,7 @@ LOCAL_MODULE_CLASS := APPS
 LOCAL_BUILT_MODULE_STEM := package.apk
 # Make sure the build system doesn't try to resign the APK
 LOCAL_CERTIFICATE := PRESIGNED
+LOCAL_DEX_PREOPT := false
 
 LOCAL_SRC_FILES := CtsShim.apk
 
