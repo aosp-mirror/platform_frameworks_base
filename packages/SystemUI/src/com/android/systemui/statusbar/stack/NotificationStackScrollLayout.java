@@ -723,6 +723,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                     performDismiss(groupSummary);
                 }
             }
+            row.setDismissed(true);
         }
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE) {
