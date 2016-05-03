@@ -19,6 +19,7 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -309,6 +310,11 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             int taskIndexFromFront = taskViewCount - i - 1;
             TaskView tv = taskViews.get(i);
+            Task task = tv.getTask();
+
+            if (mStackView.isIgnoredTask(task)) {
+                continue;
+            }
 
             // Animate the tasks down
             AnimationProps taskAnimation;
@@ -384,29 +390,29 @@ public class TaskStackAnimationHelper {
      */
     public void startDeleteTaskAnimation(final TaskView deleteTaskView,
             final ReferenceCountedTrigger postAnimationTrigger) {
-        Resources res = mStackView.getResources();
-        TaskStackLayoutAlgorithm stackLayout = mStackView.getStackAlgorithm();
+        TaskStackViewTouchHandler touchHandler = mStackView.getTouchHandler();
+        touchHandler.onBeginManualDrag(deleteTaskView);
 
-        int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
+        postAnimationTrigger.increment();
+        postAnimationTrigger.addLastDecrementRunnable(() -> {
+            touchHandler.onChildDismissed(deleteTaskView);
+        });
 
-        // Disabling clipping with the stack while the view is animating away, this will get
-        // restored when the task is next picked up from the view pool
-        deleteTaskView.setClipViewInStack(false);
-
-        // Compose the new animation and transform and star the animation
-        AnimationProps taskAnimation = new AnimationProps(DISMISS_TASK_DURATION,
-                Interpolators.ALPHA_OUT, new AnimatorListenerAdapter() {
+        final float dismissSize = touchHandler.getScaledDismissSize();
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(400);
+        animator.addUpdateListener((animation) -> {
+            float progress = (Float) animation.getAnimatedValue();
+            deleteTaskView.setTranslationX(progress * dismissSize);
+            touchHandler.updateSwipeProgress(deleteTaskView, true, progress);
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 postAnimationTrigger.decrement();
             }
         });
-        postAnimationTrigger.increment();
-
-        mTmpTransform.fillIn(deleteTaskView);
-        mTmpTransform.alpha = 0f;
-        mTmpTransform.rect.offset(offscreenXOffset, 0);
-        mStackView.updateTaskViewToTransform(deleteTaskView, mTmpTransform, taskAnimation);
+        animator.start();
     }
 
     /**
@@ -419,7 +425,6 @@ public class TaskStackAnimationHelper {
         int offscreenXOffset = mStackView.getMeasuredWidth() - stackLayout.mTaskRect.left;
 
         int taskViewCount = taskViews.size();
-
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             int taskIndexFromFront = taskViewCount - i - 1;

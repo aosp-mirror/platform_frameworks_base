@@ -388,7 +388,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         dismissEvent.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
-                EventBus.getDefault().send(new TaskViewDismissedEvent(mTask, tv));
+                EventBus.getDefault().send(new TaskViewDismissedEvent(mTask, tv,
+                        new AnimationProps(TaskStackView.DEFAULT_SYNC_STACK_DURATION,
+                                Interpolators.FAST_OUT_SLOW_IN)));
             }
         });
         EventBus.getDefault().send(dismissEvent);

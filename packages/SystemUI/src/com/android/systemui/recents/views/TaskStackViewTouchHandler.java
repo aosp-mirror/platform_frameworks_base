@@ -32,7 +32,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewParent;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -189,15 +188,30 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     }
 
     /**
-     * Finishes all scroll-fling and swipe animations currently running.
+     * Finishes all scroll-fling and non-dismissing animations currently running.
      */
-    public void finishAnimations() {
+    public void cancelNonDismissTaskAnimations() {
         Utilities.cancelAnimationWithoutCallbacks(mScrollFlingAnimator);
-        ArrayMap<View, Animator> existingAnimators = new ArrayMap<>(mSwipeHelperAnimations);
-        for (int i = 0; i < existingAnimators.size(); i++) {
-            existingAnimators.get(existingAnimators.keyAt(i)).end();
+        if (!mSwipeHelperAnimations.isEmpty()) {
+            // For the non-dismissing tasks, freeze the position into the task overrides
+            List<TaskView> taskViews = mSv.getTaskViews();
+            for (int i = taskViews.size() - 1; i >= 0; i--) {
+                TaskView tv = taskViews.get(i);
+
+                if (mSv.isIgnoredTask(tv.getTask())) {
+                    continue;
+                }
+
+                tv.cancelTransformAnimation();
+                mSv.getStackAlgorithm().addUnfocusedTaskOverride(tv, mTargetStackScroll);
+            }
+            mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
+            // Update the scroll to the final scroll position from onBeginDrag()
+            mSv.getScroller().setStackScroll(mTargetStackScroll, null);
+
+            mSwipeHelperAnimations.clear();
         }
-        mSwipeHelperAnimations.clear();
+        mActiveTaskView = null;
     }
 
     private boolean handleTouchEvent(MotionEvent ev) {
@@ -210,6 +224,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
+                // Stop the current scroll if it is still flinging
+                mScroller.stopScroller();
+                mScroller.stopBoundScrollAnimation();
+                mScroller.resetDeltaScroll();
+                cancelNonDismissTaskAnimations();
+                mSv.cancelDeferredTaskViewLayoutAnimation();
+
                 // Save the touch down info
                 mDownX = (int) ev.getX();
                 mDownY = (int) ev.getY();
@@ -217,13 +238,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 mDownScrollP = mScroller.getStackScroll();
                 mActivePointerId = ev.getPointerId(0);
                 mActiveTaskView = findViewAtPoint(mDownX, mDownY);
-
-                // Stop the current scroll if it is still flinging
-                mSv.cancelDeferredTaskViewLayoutAnimation();
-                mScroller.stopScroller();
-                mScroller.stopBoundScrollAnimation();
-                mScroller.resetDeltaScroll();
-                finishAnimations();
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
@@ -431,8 +445,18 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     public boolean canChildBeDismissed(View v) {
         // Disallow dismissing an already dismissed task
         TaskView tv = (TaskView) v;
+        Task task = tv.getTask();
         return !mSwipeHelperAnimations.containsKey(v) &&
-                (mSv.getStack().indexOfStackTask(tv.getTask()) != -1);
+                (mSv.getStack().indexOfStackTask(task) != -1);
+    }
+
+    /**
+     * Starts a manual drag that goes through the same swipe helper path.
+     */
+    public void onBeginManualDrag(TaskView v) {
+        mActiveTaskView = v;
+        mSwipeHelperAnimations.put(v, null);
+        onBeginDrag(v);
     }
 
     @Override
@@ -453,7 +477,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mSv.addIgnoreTask(tv.getTask());
 
         // Determine if we are animating the other tasks while dismissing this task
-        mCurrentTasks = mSv.getStack().getStackTasks();
+        mCurrentTasks = new ArrayList<Task>(mSv.getStack().getStackTasks());
         MutableBoolean isFrontMostTask = new MutableBoolean(false);
         Task anchorTask = mSv.findAnchorTask(mCurrentTasks, isFrontMostTask);
         TaskStackLayoutAlgorithm layoutAlgorithm = mSv.getStackAlgorithm();
@@ -513,7 +537,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     @Override
     public boolean updateSwipeProgress(View v, boolean dismissable, float swipeProgress) {
-        updateTaskViewTransforms(Interpolators.FAST_OUT_SLOW_IN.getInterpolation(swipeProgress));
+        // Only update the swipe progress for the surrounding tasks if the dismiss animation was not
+        // preempted from a call to cancelNonDismissTaskAnimations
+        if (mActiveTaskView == v || mSwipeHelperAnimations.containsKey(v)) {
+            updateTaskViewTransforms(
+                    Interpolators.FAST_OUT_SLOW_IN.getInterpolation(swipeProgress));
+        }
         return true;
     }
 
@@ -528,15 +557,24 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
-        // Remove the task view from the stack
-        EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
-        // Update the scroll to the final scroll position from onBeginDrag()
-        mSv.getScroller().setStackScroll(mTargetStackScroll, null);
-        // Update the focus state to the final focus state
-        mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
-        mSv.getStackAlgorithm().clearUnfocusedTaskOverrides();
-        // Stop tracking this deletion animation
-        mSwipeHelperAnimations.remove(v);
+        // Remove the task view from the stack, ignoring the animation if we've started dragging
+        // again
+        EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv,
+                mSwipeHelperAnimations.containsKey(v)
+                    ? new AnimationProps(TaskStackView.DEFAULT_SYNC_STACK_DURATION,
+                        Interpolators.FAST_OUT_SLOW_IN)
+                    : null));
+        // Only update the final scroll and layout state (set in onBeginDrag()) if the dismiss
+        // animation was not preempted from a call to cancelNonDismissTaskAnimations
+        if (mSwipeHelperAnimations.containsKey(v)) {
+            // Update the scroll to the final scroll position
+            mSv.getScroller().setStackScroll(mTargetStackScroll, null);
+            // Update the focus state to the final focus state
+            mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
+            mSv.getStackAlgorithm().clearUnfocusedTaskOverrides();
+            // Stop tracking this deletion animation
+            mSwipeHelperAnimations.remove(v);
+        }
         // Keep track of deletions by keyboard
         MetricsLogger.histogram(tv.getContext(), "overview_task_dismissed_source",
                 Constants.Metrics.DismissSourceSwipeGesture);
@@ -631,7 +669,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /**
      * Returns the scaled size used to calculate the dismiss fraction.
      */
-    private float getScaledDismissSize() {
+    public float getScaledDismissSize() {
         return 1.5f * Math.max(mSv.getWidth(), mSv.getHeight());
     }
 }

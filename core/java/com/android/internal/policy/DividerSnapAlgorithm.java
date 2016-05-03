@@ -86,7 +86,7 @@ public class DividerSnapAlgorithm {
         return new DividerSnapAlgorithm(ctx.getResources(),
                 displayInfo.logicalWidth, displayInfo.logicalHeight,
                 dividerWindowWidth - 2 * dividerInsets,
-                ctx.getResources().getConfiguration().orientation
+                ctx.getApplicationContext().getResources().getConfiguration().orientation
                         == Configuration.ORIENTATION_PORTRAIT,
                 insets);
     }
