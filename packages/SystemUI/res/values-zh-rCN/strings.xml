@@ -71,8 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在保存屏幕截图..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"正在保存屏幕截图。"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"已抓取屏幕截图。"</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"点按即可查看您的屏幕截图。"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"无法抓取屏幕截图。"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"保存屏幕截图时出现问题。"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"由于存储空间有限，无法保存屏幕截图。"</string>
@@ -119,7 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"数据信号满格。"</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"已连接到<xliff:g id="WIFI">%s</xliff:g>。"</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"已连接到<xliff:g id="BLUETOOTH">%s</xliff:g>。"</string>
-    <string name="accessibility_cast_name" msgid="4026393061247081201">"已连接到<xliff:g id="CAST">%s</xliff:g>。"</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"已连接到 <xliff:g id="CAST">%s</xliff:g>。"</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"无 WiMAX 信号。"</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX 信号强度为一格。"</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX 信号强度为两格。"</string>
@@ -157,7 +156,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"没有 SIM 卡。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"运营商网络正在更改。"</string>
-    <string name="accessibility_battery_details" msgid="7645516654955025422">"开启“电量详情”图标"</string>
+    <string name="accessibility_battery_details" msgid="7645516654955025422">"打开电量详情"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"电池电量为百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"正在充电，已完成百分之<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>。"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"系统设置。"</string>
@@ -197,7 +196,7 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"勿扰模式已开启，仅限优先打扰。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"勿扰模式已开启，完全静音。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"勿扰模式已开启，仅限闹钟。"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"请勿打扰。"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"勿扰。"</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"勿扰模式关闭。"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"已关闭勿扰模式。"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"已开启勿扰模式。"</string>
@@ -419,8 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展开"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"收起"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"已固定屏幕"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”即可取消固定屏幕。"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"要隐藏“<xliff:g id="TILE_LABEL">%1$s</xliff:g>”吗？"</string>
@@ -430,8 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"允许"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒绝"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已用作音量控制对话框"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"点按即可恢复原始设置。"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您当前正在使用工作资料"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。点按即可取消静音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。点按即可设为振动，但可能会同时将无障碍服务设为静音。"</string>
@@ -636,14 +633,14 @@
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"应用可能无法在分屏模式下正常运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"应用不支持分屏。"</string>
-    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"开启设置。"</string>
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"打开设置。"</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"开启快捷设置。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"关闭快捷设置。"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"已设置闹钟。"</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"目前登录的用户名为<xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"未连接到互联网。"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"打开详情页面。"</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"开启<xliff:g id="ID_1">%s</xliff:g>设置。"</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"打开<xliff:g id="ID_1">%s</xliff:g>设置。"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"修改设置顺序。"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"第 <xliff:g id="ID_1">%1$d</xliff:g> 页，共 <xliff:g id="ID_2">%2$d</xliff:g> 页"</string>
 </resources>

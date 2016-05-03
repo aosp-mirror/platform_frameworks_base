@@ -71,8 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Скриншотты сақтауда…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сақталуда."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот сақталды."</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Скриншотты көру үшін түртіңіз."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот жасалмады."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Скриншотты сақтау кезінде мәселе туындады."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Жадтағы шектеулі бос орынға байланысты скриншотты сақтау мүмкін емес."</string>
@@ -201,7 +200,7 @@
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Мазаламау режимі өшірулі"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Мазаламау режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Мазаламау режимі қосылды."</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth өшірулі."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth қосулы."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth қосылуда."</string>
@@ -267,7 +266,7 @@
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Жұптасқан құрылғылар жоқ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Жарықтығы"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматты түрде бұру"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Авто айналатын экран"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Автоматты айналатын экран"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> мәніне орнату"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Бұру бекітілген"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Портрет"</string>
@@ -419,8 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Жаю"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Жию"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран түйрелді"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Бұл оны босатылғанға дейін көрсетіп тұрады. Босату үшін \"Кері\" түймесін басып тұрыңыз."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Түсіндім"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Жоқ, рақмет"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> жасыру керек пе?"</string>
@@ -430,14 +428,13 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Рұқсат беру"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Өшіру"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> — көлем диалогтық терезесі"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Бастапқы қалпына келтіру үшін түртіңіз."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Сіз жұмыс профиліңізді пайдаланып жатырсыз"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Дыбысын қосу үшін түртіңіз."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Діріл режимін орнату үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Дыбысын өшіру үшін түртіңіз. Арнайы мүмкіндік қызметтерінің дыбысы өшуі мүмкін."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s дыбыстың басқару элементтері көрсетулі. Сырғыту арқылы жабыңыз."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Дыбыстың басқару элементтері жасырын"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s дыбысты басқару элементтері көрсетулі. Сырғыту арқылы жабыңыз."</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Дыбысты басқару элементтері жасырын"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Жүйелік пайдаланушылық интерфейс тюнері"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ендірілген батарея пайыздық шамасын көрсету"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Зарядталмай тұрғанда, күй жолағы белгішесінің ішінде батарея деңгейінің пайыздық шамасын көрсетеді"</string>
@@ -633,12 +630,12 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> жойылды"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g> орнына жылжытылды"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Жылдам параметрлер өңдегіші."</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> хабарландыру: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> хабарландыруы: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Қолданба бөлінген экранда жұмыс істемеуі мүмкін."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Қодланба бөлінген экранды қолдамайды."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Параметрлерді ашу."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Жылдам параметрлерді ашу."</string>
-    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Жылдам параметрлерді жабу"</string>
+    <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Жылдам параметрлерді жабу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Дабыл орнатылды."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> ретінде кірдіңіз"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Интернет жоқ."</string>

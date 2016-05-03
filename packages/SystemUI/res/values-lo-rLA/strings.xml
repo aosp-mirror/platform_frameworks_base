@@ -71,8 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ກຳລັງບັນທຶກພາບໜ້າຈໍ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"ກຳລັງບັນທຶກພາບໜ້າຈໍ."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ຖ່າຍຮູບໜ້າຈໍແລ້ວ"</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"ແຕະເພື່ອເບິ່ງພາບຖ່າຍໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ເກີດບັນຫາໃນການບັນທຶກພາບໜ້າຈໍຂອງທ່ານ."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ."</string>
@@ -419,8 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ຂະຫຍາຍ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ຫຍໍ້ລົງ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"ນີ້ຈະເຮັດໃຫ້ມັນຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະຍົກເລີກປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ບໍ່, ຂອບໃຈ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>
@@ -430,8 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ອະນຸຍາດ"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ປະຕິເສດ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"ແຕະເພື່ອກູ້ຕົ້ນສະບັບຄືນມາ."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ທ່ານກຳລັງໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ແຕະເພື່ອເຊົາປິດສຽງ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ແຕະເພື່ອຕັ້ງເປັນສັ່ນ. ບໍລິການຊ່ວຍເຂົ້າເຖິງອາດຖືກປິດສຽງໄວ້."</string>
