@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ভারবোস লগিং সক্ষম করুন"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Wi‑Fi থেকে সেলুলারে তৎপর পরিবর্তন"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"লেগাসি DHCP ক্লায়েন্ট ব্যবহার করুন"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"সেলুলার ডেটা সর্বদাই সক্রিয় থাকে"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>

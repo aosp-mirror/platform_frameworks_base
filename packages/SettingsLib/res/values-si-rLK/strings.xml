@@ -167,7 +167,6 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"විස්තරාත්මක Wi‑Fi ලොග් කිරීම සබල කරන්න"</string>
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ආක්‍රමණික Wi‑Fi සිට සෙලියුලර් බාර දීම"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
-    <string name="legacy_dhcp_client" msgid="694426978909127287">"ලෙගසි DHCP සේවාලාභියා භාවිත කරන්න"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"සෙලියුලර් දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>

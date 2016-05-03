@@ -50,12 +50,12 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Ne jamais vérifier"</item>
-    <item msgid="6042769699089883931">"Vérifier le contenu GDN uniquement"</item>
+    <item msgid="6042769699089883931">"Vérifier le contenu DRM uniquement"</item>
     <item msgid="9174900380056846820">"Toujours vérifier"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"Ne jamais utiliser la vérification HDCP"</item>
-    <item msgid="3878793616631049349">"Utiliser la vérification HDCP uniquement pour le contenu GDN"</item>
+    <item msgid="3878793616631049349">"Utiliser la vérification HDCP uniquement pour le contenu DRM"</item>
     <item msgid="45075631231212732">"Toujours utiliser la vérification HDCP"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
