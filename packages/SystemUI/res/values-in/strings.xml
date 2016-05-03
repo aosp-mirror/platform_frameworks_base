@@ -267,7 +267,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Kecerahan"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotasi otomatis"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Putar layar otomatis"</string>
-    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Setel menjadi <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Setel ke <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotasi terkunci"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Potret"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Lanskap"</string>

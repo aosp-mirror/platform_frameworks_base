@@ -632,7 +632,7 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"Kendu da <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> <xliff:g id="POSITION">%2$d</xliff:g>. posiziora eraman da"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Ezarpen bizkorren editorea."</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> zerbitzuko jakinarazpena: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> zerbitzuaren jakinarazpena: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Baliteke aplikazioak ez funtzionatzea pantaila zatituan."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikazioak ez du onartzen pantaila zatitua"</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Ireki ezarpenak."</string>
