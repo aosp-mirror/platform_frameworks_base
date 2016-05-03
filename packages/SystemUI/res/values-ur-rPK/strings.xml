@@ -71,8 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"اسکرین شاٹ محفوظ ہو رہا ہے…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"اسکرین شاٹ محفوظ کیا جا رہا ہے۔"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"اسکرین شاٹ کیپچر کیا گیا۔"</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"اپنا اسکرین شاٹ دیکھنے کیلئے تھپتھپائیں۔"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"اسکرین شاٹ کیپچر نہیں کر سکے۔"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"اسکرین شاٹ محفوظ کرتے وقت مسئلہ پیش آ گیا۔"</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"محدود اسٹوریج جگہ کی وجہ سے اسکرین شاٹس نہیں لئے جا سکتے۔"</string>
@@ -419,8 +418,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"سکیڑیں"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"یہ اسے اس وقت تک نظر میں رکھتا ہے جب تک آپ اس سے پن ہٹا نہیں دیتے۔ پن ہٹانے کیلئے پیچھے بٹن کو ٹچ کریں اور دبائے رکھیں۔"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"سمجھ آ گئی"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"نہیں شکریہ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> کو چھپائیں؟"</string>
@@ -430,8 +428,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"اجازت دیں"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"مسترد کریں"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"اصل بحال کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"آپ اپنا دفتری پروفائل استعمال کر رہے ہیں۔"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ Accessibility سروسز شاید خاموش ہوں۔"</string>

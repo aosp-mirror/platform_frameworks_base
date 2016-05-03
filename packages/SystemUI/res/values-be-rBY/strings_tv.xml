@@ -24,8 +24,8 @@
     <string name="pip_play" msgid="674145557658227044">"Прайграць"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Прыпыніць"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"Утрым. "<b>"HOME"</b>" для кір. PIP"</string>
-    <string name="pip_onboarding_title" msgid="7850436557670253991">"Малюнак у малюнку"</string>
-    <string name="pip_onboarding_description" msgid="4028124563309465267">"Гэта дазваляе захоўваць ваша відэа ў полі зроку, пакуль вы не пачнеце прайграванне іншага. Націсніце і ўтрымлівайце "<b>"HOME"</b>" для кіравання."</string>
+    <string name="pip_onboarding_title" msgid="7850436557670253991">"Відарыс у відарысе"</string>
+    <string name="pip_onboarding_description" msgid="4028124563309465267">"Гэта дазваляе захоўваць ваша відэа ў полі зроку, пакуль вы не пачняце прайграванне іншага. Націсніце і ўтрымлівайце "<b>"HOME"</b>" для кіравання."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Зразумела"</string>
     <string name="recents_tv_dismiss" msgid="3555093879593377731">"Адхіліць"</string>
 </resources>

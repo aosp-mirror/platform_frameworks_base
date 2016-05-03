@@ -73,8 +73,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Probíhá ukládání snímku obrazovky."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Snímek obrazovky Snímek obrazovky pořízen."</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Klepnutím zobrazíte snímek obrazovky."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Snímek obrazovky se nepodařilo zachytit."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Při ukládání snímku obrazovky došlo k problému."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Snímek obrazovky nelze pořídit kvůli nedostatku místa v úložišti."</string>
@@ -423,8 +422,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozbalit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sbalit"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Zpět."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, děkuji"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skrýt <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
@@ -434,8 +432,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Povolit"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odmítnout"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je dialog hlasitosti"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Klepnutím obnovíte původní nastavení."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Používáte pracovní profil"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Klepnutím zapnete zvuk."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Klepnutím aktivujete režim vibrací. Služby přístupnosti mohou být ztlumeny."</string>

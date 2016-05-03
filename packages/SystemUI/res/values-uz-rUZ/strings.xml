@@ -71,8 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skrinshot saqlanmoqda."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skrinshot saqlandi."</string>
-    <!-- no translation found for screenshot_saved_text (2685605830386712477) -->
-    <skip />
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Skrinshotni ko‘rish uchun bosing."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skrinshot saqlanmadi."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Skrinshotni saqlashda muammo yuz berdi."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Xotirada joy kamligi uchun skrinshotni saqlab bo‘lmadi."</string>
@@ -119,7 +118,7 @@
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ma’lumot uzatish signali to‘liq."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ulangan: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
-    <string name="accessibility_cast_name" msgid="4026393061247081201">"Ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
+    <string name="accessibility_cast_name" msgid="4026393061247081201">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX tarmog‘i yo‘q."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Bitta ustunli WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Ikkita ustunli WiMAX."</string>
@@ -421,8 +420,7 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Yoyish"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Yig‘ish"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran qadaldi"</string>
-    <!-- no translation found for screen_pinning_description (7238941806855968768) -->
-    <skip />
+    <string name="screen_pinning_description" msgid="7238941806855968768">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” tugmasini bosib turing."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Yo‘q, kerakmas"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
@@ -432,8 +430,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Ruxsat berish"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Rad etish"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
-    <!-- no translation found for volumeui_notification_text (8819536904234337445) -->
-    <skip />
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Aslini tiklash uchun bosing."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ovozini yoqish uchun ustiga bosing."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tebranishni yoqish uchun ustiga bosing. Maxsus imkoniyatlar ishlamasligi mumkin."</string>
@@ -635,7 +632,7 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi o‘chirildi"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"“<xliff:g id="TILE_NAME">%1$s</xliff:g>” tugmasi endi <xliff:g id="POSITION">%2$d</xliff:g>-joyni egallanmoqda"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Tezkor sozlamalar muharriri"</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-bildirishnoma: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g> bildirishnomasi: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Ilova ekranni ikkiga bo‘lish rejimini qo‘llab-quvvatlamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Sozlamalarni ochish."</string>
