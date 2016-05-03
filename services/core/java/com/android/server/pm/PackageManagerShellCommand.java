@@ -260,35 +260,6 @@ class PackageManagerShellCommand extends ShellCommand {
         String compilationReason = null;
         String checkProfilesRaw = null;
 
-        if (peekNextArg() == null) {
-            // No arguments, show help.
-            pw.println("Usage: cmd package compile [-c] [-f] [--reset] [-m mode] " +
-                    "[-r reason] [-a|pkg]");
-            pw.println();
-            pw.println("  -c                Clear profile data");
-            pw.println("  -f                Force compilation");
-            pw.println("  --check-prof val  Look at profiles when doing dexopt.");
-            pw.println("                    Overrides dalvik.vm.usejitprofiles to true of false");
-            pw.println("  --reset           Reset package");
-            pw.println("  -m mode           Compilation mode, one of the dex2oat compiler filters");
-            pw.println("                      verify-none");
-            pw.println("                      verify-at-runtime");
-            pw.println("                      verify-profile");
-            pw.println("                      interpret-only");
-            pw.println("                      space-profile");
-            pw.println("                      space");
-            pw.println("                      speed-profile");
-            pw.println("                      speed");
-            pw.println("                      everything");
-            pw.println("  -r reason  Compiler reason, one of the package manager reasons");
-            for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
-                pw.println("               " +
-                        PackageManagerServiceCompilerMapping.REASON_STRINGS[i]);
-            }
-            pw.println("  -a         Apply to all packages");
-            return 1;
-        }
-
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
@@ -307,7 +278,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "-r":
                     compilationReason = getNextArgRequired();
                     break;
-                case "-check-prof":
+                case "--check-prof":
                     checkProfilesRaw = getNextArgRequired();
                     break;
                 case "--reset":
@@ -345,25 +316,12 @@ class PackageManagerShellCommand extends ShellCommand {
 
         String targetCompilerFilter;
         if (compilerFilter != null) {
-            // Specially recognize default and reset. Otherwise, only accept valid modes.
-            if ("default".equals(compilerFilter)) {
-                // Use the default mode for background dexopt.
-                targetCompilerFilter =
-                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerService.REASON_BACKGROUND_DEXOPT);
-            } else if ("reset".equals(compilerFilter)) {
-                // Use the default mode for install.
-                targetCompilerFilter =
-                        PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                                PackageManagerService.REASON_INSTALL);
-            } else {
-                if (!DexFile.isValidCompilerFilter(compilerFilter)) {
-                    pw.println("Error: \"" + compilerFilter +
-                            "\" is not a valid compilation filter.");
-                    return 1;
-                }
-                targetCompilerFilter = compilerFilter;
+            if (!DexFile.isValidCompilerFilter(compilerFilter)) {
+                pw.println("Error: \"" + compilerFilter +
+                        "\" is not a valid compilation filter.");
+                return 1;
             }
+            targetCompilerFilter = compilerFilter;
         } else {
             int reason = -1;
             for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
@@ -1428,17 +1386,31 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
-        pw.println("  compile [-m MODE] [-f] [-c] [--reset] (-a | TARGET-PACKAGE)");
+        pw.println("  compile [-m MODE | -r REASON] [-f] [-c]");
+        pw.println("          [--reset] [--check-prof (true | false)] (-a | TARGET-PACKAGE)");
         pw.println("    Trigger compilation of TARGET-PACKAGE or all packages if \"-a\".");
         pw.println("    Options:");
         pw.println("      -a: compile all packages");
         pw.println("      -c: clear profile data before compiling");
         pw.println("      -f: force compilation even if not needed");
         pw.println("      -m: select compilation mode");
-        pw.println("          MODE can be one of \"default\", \"full\", \"profile\"," +
-                   " and \"extract\"");
+        pw.println("          MODE is one of the dex2oat compiler filters:");
+        pw.println("            verify-none");
+        pw.println("            verify-at-runtime");
+        pw.println("            verify-profile");
+        pw.println("            interpret-only");
+        pw.println("            space-profile");
+        pw.println("            space");
+        pw.println("            speed-profile");
+        pw.println("            speed");
+        pw.println("            everything");
+        pw.println("      -r: select compilation reason");
+        pw.println("          REASON is one of:");
+        for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
+            pw.println("            " + PackageManagerServiceCompilerMapping.REASON_STRINGS[i]);
+        }
         pw.println("      --reset: restore package to its post-install state");
-        pw.println("          shorthand for \"-c -f -m extract\"");
+        pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");
