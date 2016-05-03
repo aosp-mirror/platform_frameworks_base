@@ -1740,10 +1740,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
-                        if (win.mAppToken != null && !win.mAppToken.clientHidden) {
-                            win.mAppToken.appDied = true;
-                        }
-                        mService.removeWindowLocked(win);
+                        mService.removeWindowLocked(win, shouldKeepVisibleDeadAppWindow());
                         if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
                             // The owner of the docked divider died :( We reset the docked stack,
                             // just in case they have the divider at an unstable position. Better
@@ -1761,8 +1758,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     }
                 }
             } catch (IllegalArgumentException ex) {
-                // This will happen if the window has already been
-                // removed.
+                // This will happen if the window has already been removed.
             }
         }
     }
@@ -1773,7 +1769,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * interacts with it.
      */
     boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isWinVisibleLw() || mAppToken == null || !mAppToken.appDied) {
+        if (!isWinVisibleLw() || mAppToken == null || mAppToken.clientHidden) {
             // Not a visible app window or the app isn't dead.
             return false;
         }
