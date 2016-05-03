@@ -455,7 +455,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param pinned whether it is pinned
      */
     public void setPinned(boolean pinned) {
+        int intrinsicHeight = getIntrinsicHeight();
         mIsPinned = pinned;
+        if (intrinsicHeight != getIntrinsicHeight()) {
+            notifyHeightChanged(false);
+        }
         if (pinned) {
             setIconAnimationRunning(true);
             mExpandedWhenPinned = false;
