@@ -553,12 +553,12 @@
     <attr name="immersive" format="boolean" />
 
     <!-- Flag declaring that this activity will be run in VR mode, and specifying
-         the component of the VrListenerService that should be bound while this
-         Activity is visible if installed and enabled on this device. This is
-         equivalent to calling {@link android.app.Activity#setVrModeEnabled} with the
-         the given component name within this Activity. Declaring this will prevent
-         the system from leaving VR mode during an Activity transtion one VR activity
-         to another. -->
+         the component of the {@link android.service.vr.VrListenerService} that should be
+         bound while this Activity is visible if it is installed and enabled on this device.
+         This is equivalent to calling {@link android.app.Activity#setVrModeEnabled} with the
+         the given component name within the Activity that this attribute is set for.
+         Declaring this will prevent the system from leaving VR mode during an Activity
+         transtion from one VR activity to another. -->
     <attr name="enableVrMode" format="string" />
 
     <!-- Specify the order in which content providers hosted by a process

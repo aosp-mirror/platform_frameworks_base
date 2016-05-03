@@ -44,11 +44,17 @@ import android.os.Message;
  * &lt;/service>
  * </pre>
  *
- * <p>
- * This service is bound when the system enters VR mode and is unbound when the system leaves VR
- * mode.
- * {@see android.app.Activity#setVrMode(boolean)}
- * </p>
+ * <p>This service is bound when the system enters VR mode and is unbound when the system leaves VR
+ * mode.</p>
+ * <p>The system will enter VR mode when an application that has previously called
+ * {@link android.app.Activity#setVrModeEnabled} gains user focus.  The system will only start this
+ * service if the VR application has specifically targeted this service by specifying
+ * its {@link ComponentName} in the call to {@link android.app.Activity#setVrModeEnabled} and if
+ * this service is installed and enabled in the current user's settings.</p>
+ *
+ * @see android.provider.Settings#ACTION_VR_LISTENER_SETTINGS
+ * @see android.app.Activity#setVrModeEnabled
+ * @see android.R.attr#enableVrMode
  */
 public abstract class VrListenerService extends Service {
 
@@ -94,25 +100,40 @@ public abstract class VrListenerService extends Service {
     }
 
     /**
-     * Called when the current activity using VR mode is changed.
-     * <p/>
-     * This will be called immediately when this service is initially bound, but is
-     * not guaranteed to be called before onUnbind.
+     * Called when the current activity using VR mode has changed.
      *
-     * @param component the {@link ComponentName} of the new current VR activity.
+     * <p>This will be called when this service is initially bound, but is not
+     * guaranteed to be called before onUnbind.  In general, this is intended to be used to
+     * determine when user focus has transitioned between two VR activities.  If both activities
+     * have declared {@link android.R.attr#enableVrMode} with this service (and this
+     * service is present and enabled), this service will not be unbound during the activity
+     * transition.</p>
+     *
+     * @param component the {@link ComponentName} of the VR activity that the system has
+     *    switched to.
+     *
+     * @see android.app.Activity#setVrModeEnabled
+     * @see android.R.attr#enableVrMode
      */
     public void onCurrentVrActivityChanged(ComponentName component) {
         // Override to implement
     }
 
     /**
-     * Check if the given package is available to be enabled/disabled in VR mode settings.
+     * Checks if the given component is enabled in user settings.
+     *
+     * <p>If this component is not enabled in the user's settings, it will not be started when
+     * the system enters VR mode.  The user interface for enabling VrListenerService components
+     * can be started by sending the {@link android.provider.Settings#ACTION_VR_LISTENER_SETTINGS}
+     * intent.</p>
      *
      * @param context the {@link Context} to use for looking up the requested component.
      * @param requestedComponent the name of the component that implements
      * {@link android.service.vr.VrListenerService} to check.
      *
-     * @return {@code true} if this package is enabled in settings.
+     * @return {@code true} if this component is enabled in settings.
+     *
+     * @see android.provider.Settings#ACTION_VR_LISTENER_SETTINGS
      */
     public static final boolean isVrModePackageEnabled(@NonNull Context context,
             @NonNull ComponentName requestedComponent) {
