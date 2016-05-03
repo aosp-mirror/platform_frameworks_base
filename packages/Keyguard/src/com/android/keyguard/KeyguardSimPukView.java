@@ -326,7 +326,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                             if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
                                 KeyguardUpdateMonitor.getInstance(getContext())
                                         .reportSimUnlocked(mSubId);
-                                mCallback.dismiss(true);
+                                mCallback.dismiss(true, KeyguardUpdateMonitor.getCurrentUser());
                             } else {
                                 if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {
                                     if (attemptsRemaining <= 2) {
