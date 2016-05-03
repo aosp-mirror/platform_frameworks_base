@@ -623,6 +623,24 @@ public class TaskStackLayoutAlgorithm {
         }
     }
 
+    /**
+     * Adds and override task progress for the given task when transitioning from focused to
+     * unfocused state.
+     */
+    public void addUnfocusedTaskOverride(TaskView taskView, float stackScroll) {
+        mFocusedRange.offset(stackScroll);
+        mUnfocusedRange.offset(stackScroll);
+
+        Task task = taskView.getTask();
+        int top = taskView.getTop() - mTaskRect.top;
+        float focusedRangeX = getNormalizedXFromFocusedY(top, FROM_TOP);
+        float unfocusedRangeX = getNormalizedXFromUnfocusedY(top, FROM_TOP);
+        float unfocusedTaskProgress = stackScroll + mUnfocusedRange.getAbsoluteX(unfocusedRangeX);
+        if (Float.compare(focusedRangeX, unfocusedRangeX) != 0) {
+            mTaskIndexOverrideMap.put(task.key.id, unfocusedTaskProgress);
+        }
+    }
+
     public void clearUnfocusedTaskOverrides() {
         mTaskIndexOverrideMap.clear();
     }
