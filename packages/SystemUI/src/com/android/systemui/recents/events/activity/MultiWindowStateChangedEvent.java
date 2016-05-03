@@ -25,10 +25,14 @@ import com.android.systemui.recents.model.TaskStack;
 public class MultiWindowStateChangedEvent extends EventBus.AnimatedEvent {
 
     public final boolean inMultiWindow;
+    // This flag is only used when undocking a task
+    public final boolean showDeferredAnimation;
     public final TaskStack stack;
 
-    public MultiWindowStateChangedEvent(boolean inMultiWindow, TaskStack stack) {
+    public MultiWindowStateChangedEvent(boolean inMultiWindow, boolean showDeferredAnimation,
+            TaskStack stack) {
         this.inMultiWindow = inMultiWindow;
+        this.showDeferredAnimation = showDeferredAnimation;
         this.stack = stack;
     }
 }
