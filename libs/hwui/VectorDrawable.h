@@ -542,7 +542,9 @@ public:
     Tree(Group* rootNode) : mRootNode(rootNode) {
         mRootNode->setPropertyChangedListener(&mPropertyChangedListener);
     }
-    void draw(Canvas* outCanvas, SkColorFilter* colorFilter,
+    // Draws the VD onto a bitmap cache, then the bitmap cache will be rendered onto the input
+    // canvas. Returns the number of pixels needed for the bitmap cache.
+    int draw(Canvas* outCanvas, SkColorFilter* colorFilter,
             const SkRect& bounds, bool needsMirroring, bool canReuseCache);
     void drawStaging(Canvas* canvas);
 

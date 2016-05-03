@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
+import dalvik.system.VMRuntime;
+
 /**
  * This lets you create a drawable based on an XML vector graphic.
  * <p/>
@@ -299,9 +301,33 @@ public class VectorDrawable extends Drawable {
         final long colorFilterNativeInstance = colorFilter == null ? 0 :
                 colorFilter.native_instance;
         boolean canReuseCache = mVectorState.canReuseCache();
-        nDraw(mVectorState.getNativeRenderer(), canvas.getNativeCanvasWrapper(),
+        int pixelCount = nDraw(mVectorState.getNativeRenderer(), canvas.getNativeCanvasWrapper(),
                 colorFilterNativeInstance, mTmpBounds, needMirroring(),
                 canReuseCache);
+        if (pixelCount == 0) {
+            // Invalid canvas matrix or drawable bounds. This would not affect existing bitmap
+            // cache, if any.
+            return;
+        }
+
+        int deltaInBytes;
+        // Track different bitmap cache based whether the canvas is hw accelerated. By doing so,
+        // we don't over count bitmap cache allocation: if the input canvas is always of the same
+        // type, only one bitmap cache is allocated.
+        if (canvas.isHardwareAccelerated()) {
+            // Each pixel takes 4 bytes.
+            deltaInBytes = (pixelCount - mVectorState.mLastHWCachePixelCount) * 4;
+            mVectorState.mLastHWCachePixelCount = pixelCount;
+        } else {
+            // Each pixel takes 4 bytes.
+            deltaInBytes = (pixelCount - mVectorState.mLastSWCachePixelCount) * 4;
+            mVectorState.mLastSWCachePixelCount = pixelCount;
+        }
+        if (deltaInBytes > 0) {
+            VMRuntime.getRuntime().registerNativeAllocation(deltaInBytes);
+        } else if (deltaInBytes < 0) {
+            VMRuntime.getRuntime().registerNativeFree(-deltaInBytes);
+        }
     }
 
 
@@ -537,11 +563,16 @@ public class VectorDrawable extends Drawable {
         if (mVectorState.mRootGroup != null || mVectorState.mNativeTree != null) {
             // This VD has been used to display other VD resource content, clean up.
             if (mVectorState.mRootGroup != null) {
+                // Subtract the native allocation for all the nodes.
+                VMRuntime.getRuntime().registerNativeFree(mVectorState.mRootGroup.getNativeSize());
                 // Remove child nodes' reference to tree
                 mVectorState.mRootGroup.setTree(null);
             }
             mVectorState.mRootGroup = new VGroup();
             if (mVectorState.mNativeTree != null) {
+                // Subtract the native allocation for the tree wrapper, which contains root node
+                // as well as rendering related data.
+                VMRuntime.getRuntime().registerNativeFree(mVectorState.NATIVE_ALLOCATION_SIZE);
                 mVectorState.mNativeTree.release();
             }
             mVectorState.createNativeTree(mVectorState.mRootGroup);
@@ -558,6 +589,7 @@ public class VectorDrawable extends Drawable {
         state.mCacheDirty = true;
         inflateChildElements(r, parser, attrs, theme);
 
+        state.onTreeConstructionFinished();
         // Update local properties.
         updateLocalState(r);
     }
@@ -750,6 +782,16 @@ public class VectorDrawable extends Drawable {
         boolean mCachedAutoMirrored;
         boolean mCacheDirty;
 
+        // Since sw canvas and hw canvas uses different bitmap caches, we track the allocation of
+        // these bitmaps separately.
+        int mLastSWCachePixelCount = 0;
+        int mLastHWCachePixelCount = 0;
+
+        // This tracks the total native allocation for all the nodes.
+        private int mAllocationOfAllNodes = 0;
+
+        private static final int NATIVE_ALLOCATION_SIZE = 316;
+
         // Deep copy for mutate() or implicitly mutate.
         public VectorDrawableState(VectorDrawableState copy) {
             if (copy != null) {
@@ -771,12 +813,20 @@ public class VectorDrawable extends Drawable {
                 if (copy.mRootName != null) {
                     mVGTargetsMap.put(copy.mRootName, this);
                 }
+                onTreeConstructionFinished();
             }
         }
 
         private void createNativeTree(VGroup rootGroup) {
             mNativeTree = new VirtualRefBasePtr(nCreateTree(rootGroup.mNativePtr));
+            // Register tree size
+            VMRuntime.getRuntime().registerNativeAllocation(NATIVE_ALLOCATION_SIZE);
+        }
+
+        void onTreeConstructionFinished() {
             mRootGroup.setTree(mNativeTree);
+            mAllocationOfAllNodes = mRootGroup.getNativeSize();
+            VMRuntime.getRuntime().registerNativeAllocation(mAllocationOfAllNodes);
         }
 
         long getNativeRenderer() {
@@ -881,6 +931,14 @@ public class VectorDrawable extends Drawable {
             return mRootGroup.onStateChange(stateSet);
         }
 
+        @Override
+        public void finalize() throws Throwable {
+            super.finalize();
+            int bitmapCacheSize = mLastHWCachePixelCount * 4 + mLastSWCachePixelCount * 4;
+            VMRuntime.getRuntime().registerNativeFree(NATIVE_ALLOCATION_SIZE
+                    + mAllocationOfAllNodes + bitmapCacheSize);
+        }
+
         /**
          * setAlpha() and getAlpha() are used mostly for animation purpose. Return true if alpha
          * has changed.
@@ -904,6 +962,8 @@ public class VectorDrawable extends Drawable {
         private static final int TRANSLATE_X_INDEX = 5;
         private static final int TRANSLATE_Y_INDEX = 6;
         private static final int TRANSFORM_PROPERTY_COUNT = 7;
+
+        private static final int NATIVE_ALLOCATION_SIZE = 100;
 
         private static final HashMap<String, Integer> sPropertyMap =
                 new HashMap<String, Integer>() {
@@ -1070,6 +1130,16 @@ public class VectorDrawable extends Drawable {
         @Override
         public boolean isStateful() {
             return mIsStateful;
+        }
+
+        @Override
+        int getNativeSize() {
+            // Return the native allocation needed for the subtree.
+            int size = NATIVE_ALLOCATION_SIZE;
+            for (int i = 0; i < mChildren.size(); i++) {
+                size += mChildren.get(i).getNativeSize();
+            }
+            return size;
         }
 
         @Override
@@ -1240,6 +1310,7 @@ public class VectorDrawable extends Drawable {
      */
     private static class VClipPath extends VPath {
         private final long mNativePtr;
+        private static final int NATIVE_ALLOCATION_SIZE = 120;
 
         public VClipPath() {
             mNativePtr = nCreateClipPath();
@@ -1283,6 +1354,11 @@ public class VectorDrawable extends Drawable {
             return false;
         }
 
+        @Override
+        int getNativeSize() {
+            return NATIVE_ALLOCATION_SIZE;
+        }
+
         private void updateStateFromTypedArray(TypedArray a) {
             // Account for any configuration changes.
             mChangingConfigurations |= a.getChangingConfigurations();
@@ -1319,6 +1395,7 @@ public class VectorDrawable extends Drawable {
         private static final int FILL_TYPE_INDEX = 11;
         private static final int TOTAL_PROPERTY_COUNT = 12;
 
+        private static final int NATIVE_ALLOCATION_SIZE = 264;
         // Property map for animatable attributes.
         private final static HashMap<String, Integer> sPropertyMap
                 = new HashMap<String, Integer> () {
@@ -1393,6 +1470,11 @@ public class VectorDrawable extends Drawable {
         @Override
         public boolean isStateful() {
             return mStrokeColors != null || mFillColors != null;
+        }
+
+        @Override
+        int getNativeSize() {
+            return NATIVE_ALLOCATION_SIZE;
         }
 
         @Override
@@ -1688,6 +1770,7 @@ public class VectorDrawable extends Drawable {
         abstract void applyTheme(Theme t);
         abstract boolean onStateChange(int[] state);
         abstract boolean isStateful();
+        abstract int getNativeSize();
     }
 
     private static native long nCreateTree(long rootGroupPtr);
@@ -1697,7 +1780,7 @@ public class VectorDrawable extends Drawable {
     private static native float nGetRootAlpha(long rendererPtr);
     private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
 
-    private static native void nDraw(long rendererPtr, long canvasWrapperPtr,
+    private static native int nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache);
     private static native long nCreateFullPath();
     private static native long nCreateFullPath(long nativeFullPathPtr);

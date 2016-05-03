@@ -92,14 +92,14 @@ static void setAllowCaching(JNIEnv*, jobject, jlong treePtr, jboolean allowCachi
 /**
  * Draw
  */
-static void draw(JNIEnv* env, jobject, jlong treePtr, jlong canvasPtr,
+static int draw(JNIEnv* env, jobject, jlong treePtr, jlong canvasPtr,
         jlong colorFilterPtr, jobject jrect, jboolean needsMirroring, jboolean canReuseCache) {
     VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     SkRect rect;
     GraphicsJNI::jrect_to_rect(env, jrect, &rect);
     SkColorFilter* colorFilter = reinterpret_cast<SkColorFilter*>(colorFilterPtr);
-    tree->draw(canvas, colorFilter, rect, needsMirroring, canReuseCache);
+    return tree->draw(canvas, colorFilter, rect, needsMirroring, canReuseCache);
 }
 
 /**
@@ -349,7 +349,7 @@ static const JNINativeMethod gMethods[] = {
         {"nGetRootAlpha", "!(J)F", (void*)getRootAlpha},
         {"nSetAllowCaching", "!(JZ)V", (void*)setAllowCaching},
 
-        {"nDraw", "(JJJLandroid/graphics/Rect;ZZ)V", (void*)draw},
+        {"nDraw", "(JJJLandroid/graphics/Rect;ZZ)I", (void*)draw},
         {"nCreateFullPath", "!()J", (void*)createEmptyFullPath},
         {"nCreateFullPath", "!(J)J", (void*)createFullPath},
         {"nUpdateFullPathProperties", "!(JFIFIFFFFFIII)V", (void*)updateFullPathPropertiesAndStrokeStyles},
