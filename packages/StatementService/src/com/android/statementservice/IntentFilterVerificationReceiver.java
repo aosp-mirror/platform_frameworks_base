@@ -24,6 +24,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -90,8 +91,6 @@ public final class IntentFilterVerificationReceiver extends BroadcastReceiver {
                 String packageName = inputExtras.getString(
                         PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME);
 
-                Log.i(TAG, "Verify IntentFilter for " + hosts);
-
                 Bundle extras = new Bundle();
                 extras.putString(DirectStatementService.EXTRA_RELATION, HANDLE_ALL_URLS_RELATION);
 
@@ -103,6 +102,7 @@ public final class IntentFilterVerificationReceiver extends BroadcastReceiver {
                     return;
                 }
 
+                ArrayList<String> finalHosts = new ArrayList<String>(hostList.length);
                 try {
                     ArrayList<String> sourceAssets = new ArrayList<String>();
                     for (String host : hostList) {
@@ -111,6 +111,7 @@ public final class IntentFilterVerificationReceiver extends BroadcastReceiver {
                             host = host.substring(2);
                         }
                         sourceAssets.add(createWebAssetString(scheme, host));
+                        finalHosts.add(host);
                     }
                     extras.putStringArrayList(DirectStatementService.EXTRA_SOURCE_ASSET_DESCRIPTORS,
                             sourceAssets);
@@ -131,12 +132,24 @@ public final class IntentFilterVerificationReceiver extends BroadcastReceiver {
                         new IsAssociatedResultReceiver(
                                 new Handler(), context.getPackageManager(), verificationId));
 
+                // Required for CTS: log a few details of the validcation operation to be performed
+                logValidationParametersForCTS(verificationId, scheme, finalHosts, packageName);
+
                 serviceIntent.putExtras(extras);
                 context.startService(serviceIntent);
             }
         } else {
             Log.w(TAG, "Intent action not supported: " + action);
         }
+    }
+
+    // CTS requirement: logging of the validation parameters in a specific format
+    private static final String CTS_LOG_FORMAT =
+            "Verifying IntentFilter. verificationId:%d scheme:\"%s\" hosts:\"%s\" package:\"%s\".";
+    private void logValidationParametersForCTS(int verificationId, String scheme,
+            ArrayList<String> finalHosts, String packageName) {
+        String hostString = TextUtils.join(" ", finalHosts.toArray());
+        Log.i(TAG, String.format(CTS_LOG_FORMAT, verificationId, scheme, hostString, packageName));
     }
 
     private String createAndroidAssetString(Context context, String packageName)
