@@ -5473,6 +5473,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
+        return getChildVisibleRect(child, r, offset, false);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getChildVisibleRect(
+            View child, Rect r, android.graphics.Point offset, boolean forceParentCheck) {
         // It doesn't make a whole lot of sense to call this on a view that isn't attached,
         // but for some simple tests it can be useful. If we don't have attach info this
         // will allocate memory.
@@ -5512,20 +5520,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             rectIsVisible = rect.intersect(0, 0, width, height);
         }
 
-        if (rectIsVisible && (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
+        if ((forceParentCheck || rectIsVisible)
+                && (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
             // Clip to padding.
             rectIsVisible = rect.intersect(mPaddingLeft, mPaddingTop,
                     width - mPaddingRight, height - mPaddingBottom);
         }
 
-        if (rectIsVisible && mClipBounds != null) {
+        if ((forceParentCheck || rectIsVisible) && mClipBounds != null) {
             // Clip to clipBounds.
             rectIsVisible = rect.intersect(mClipBounds.left, mClipBounds.top, mClipBounds.right,
                     mClipBounds.bottom);
         }
         r.set((int) Math.floor(rect.left), (int) Math.floor(rect.top),
                 (int) Math.ceil(rect.right), (int) Math.ceil(rect.bottom));
-        if (rectIsVisible && mParent != null) {
+
+        if ((forceParentCheck || rectIsVisible) && mParent != null) {
             rectIsVisible = mParent.getChildVisibleRect(this, r, offset);
         }
         return rectIsVisible;
