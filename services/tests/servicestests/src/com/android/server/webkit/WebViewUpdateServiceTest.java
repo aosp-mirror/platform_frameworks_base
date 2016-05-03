@@ -828,49 +828,61 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
     }
 
     public void testLowerPackageVersionNotValid() {
-        checkPackageVersions(new int[]{100} /* system version */, 50 /* non-system version */,
-                false /*expected validity*/);
+        checkPackageVersions(new int[]{200000} /* system version */, 100000/* candidate version */,
+                false /* expected validity */);
     }
 
     public void testEqualPackageVersionValid() {
-        checkPackageVersions(new int[]{100} /* system version */, 100 /* non-system version */,
-                true /*expected validity*/);
+        checkPackageVersions(new int[]{100000} /* system version */, 100000 /* candidate version */,
+                true /* expected validity */);
     }
 
     public void testGreaterPackageVersionValid() {
-        checkPackageVersions(new int[]{100} /* system versions */, 200 /* non-system version */,
-                true /*expected validity*/);
+        checkPackageVersions(new int[]{100000} /* system versions */, 200000 /* candidate version */,
+                true /* expected validity */);
     }
 
-    public void testMinimumSystemVersionUsedTwoDefaultsNonSystemValid() {
-        checkPackageVersions(new int[]{300, 100} /* system versions */,
-                150 /* non-system version */, true /*expected validity*/);
+    public void testLastFiveDigitsIgnored() {
+        checkPackageVersions(new int[]{654321} /* system version */, 612345 /* candidate version */,
+                true /* expected validity */);
     }
 
-    public void testMinimumSystemVersionUsedTwoDefaultsNonSystemInvalid() {
-        checkPackageVersions(new int[]{300, 100} /* system versions */,
-                 80 /* non-system version */, false /*expected validity*/);
+    public void testMinimumSystemVersionUsedTwoDefaultsCandidateValid() {
+        checkPackageVersions(new int[]{300000, 100000} /* system versions */,
+                200000 /* candidate version */, true /* expected validity */);
     }
 
-    public void testMinimumSystemVersionUsedSeveralDefaultsNonSystemValid() {
-        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
-                50 /* non-system version */, true /*expected validity*/);
+    public void testMinimumSystemVersionUsedTwoDefaultsCandidateInvalid() {
+        checkPackageVersions(new int[]{300000, 200000} /* system versions */,
+                 100000 /* candidate version */, false /* expected validity */);
     }
 
-    public void testMinimumSystemVersionUsedSeveralDefaultsNonSystemInvalid() {
-        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
-                49 /* non-system version */, false /*expected validity*/);
+    public void testMinimumSystemVersionUsedSeveralDefaultsCandidateValid() {
+        checkPackageVersions(new int[]{100000, 200000, 300000, 400000, 500000} /* system versions */,
+                100000 /* candidate version */, true /* expected validity */);
+    }
+
+    public void testMinimumSystemVersionUsedSeveralDefaultsCandidateInvalid() {
+        checkPackageVersions(new int[]{200000, 300000, 400000, 500000, 600000} /* system versions */,
+                100000 /* candidate version */, false /* expected validity */);
     }
 
     public void testMinimumSystemVersionUsedFallbackIgnored() {
-        checkPackageVersions(new int[]{100, 300, 120, 50, 700} /* system versions */,
-                49 /* non-system version */, false /*expected validity*/, true /* add fallback */,
-                5 /* fallback version */);
+        checkPackageVersions(new int[]{300000, 400000, 500000, 600000, 700000} /* system versions */,
+                200000 /* candidate version */, false /* expected validity */, true /* add fallback */,
+                100000 /* fallback version */, false /* expected validity of fallback */);
     }
 
-    private void checkPackageVersions(int[] systemVersions, int nonSystemVersion,
-            boolean nonSystemShouldBeValid) {
-        checkPackageVersions(systemVersions, nonSystemVersion, nonSystemShouldBeValid, false, 0);
+    public void testFallbackValid() {
+        checkPackageVersions(new int[]{300000, 400000, 500000, 600000, 700000} /* system versions */,
+                200000/* candidate version */, false /* expected validity */, true /* add fallback */,
+                300000 /* fallback version */, true /* expected validity of fallback */);
+    }
+
+    private void checkPackageVersions(int[] systemVersions, int candidateVersion,
+            boolean candidateShouldBeValid) {
+        checkPackageVersions(systemVersions, candidateVersion, candidateShouldBeValid,
+                false, 0, false);
     }
 
     /**
@@ -878,12 +890,13 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
      * I.e. that a package with lower version than the system-default is not valid and that a
      * package with greater than or equal version code is considered valid.
      */
-    private void checkPackageVersions(int[] systemVersions, int nonSystemVersion,
-            boolean nonSystemShouldBeValid, boolean addFallback, int fallbackVersion) {
+    private void checkPackageVersions(int[] systemVersions, int candidateVersion,
+            boolean candidateShouldBeValid, boolean addFallback, int fallbackVersion,
+            boolean fallbackShouldBeValid) {
         int numSystemPackages = systemVersions.length;
         int numFallbackPackages = (addFallback ? 1 : 0);
         int numPackages = systemVersions.length + 1 + numFallbackPackages;
-        String nonSystemPackage = "nonSystemPackage";
+        String candidatePackage = "candidatePackage";
         String systemPackage = "systemPackage";
         String fallbackPackage = "fallbackPackage";
 
@@ -893,11 +906,11 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
             Base64.encodeToString(signature.toByteArray(), Base64.DEFAULT);
 
         // Set up config
-        // 1. nonSystemPackage
+        // 1. candidatePackage
         // 2-N. default available non-fallback packages
         // N+1. default available fallback package
         WebViewProviderInfo[] packages = new WebViewProviderInfo[numPackages];
-        packages[0] = new WebViewProviderInfo(nonSystemPackage, "",
+        packages[0] = new WebViewProviderInfo(candidatePackage, "",
                 false /* available by default */, false /* fallback */,
                 new String[]{encodedSignatureString});
         for(int n = 1; n < numSystemPackages + 1; n++) {
@@ -916,12 +929,14 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
 
         // Set package infos
         mTestSystemImpl.setPackageInfo(
-                createPackageInfo(nonSystemPackage, true /* enabled */, true /* valid */,
-                    new Signature[]{signature}, nonSystemVersion, false /* isSystemApp */));
+                createPackageInfo(candidatePackage, true /* enabled */, true /* valid */,
+                    new Signature[]{signature}, candidateVersion,
+                    false /* isSystemApp */));
         for(int n = 1; n < numSystemPackages + 1; n++) {
             mTestSystemImpl.setPackageInfo(
                     createPackageInfo(systemPackage + n, true /* enabled */, true /* valid */,
-                        new Signature[]{signature}, systemVersions[n-1], true /* isSystemApp */));
+                        new Signature[]{signature}, systemVersions[n-1],
+                        true /* isSystemApp */));
         }
         if (addFallback) {
             mTestSystemImpl.setPackageInfo(
@@ -930,26 +945,37 @@ public class WebViewUpdateServiceTest extends AndroidTestCase {
         }
 
         WebViewProviderInfo[] validPackages = mWebViewUpdateServiceImpl.getValidWebViewPackages();
-        if (nonSystemShouldBeValid) {
-            assertEquals(numSystemPackages + 1 + numFallbackPackages, validPackages.length);
+        int expectedNumValidPackages = numSystemPackages;
+        if (candidateShouldBeValid) {
+            expectedNumValidPackages++;
         } else {
-            assertEquals(numSystemPackages + numFallbackPackages, validPackages.length);
-            // Ensure the non-system package is not one of the valid packages
+            // Ensure the candidate package is not one of the valid packages
             for(int n = 0; n < validPackages.length; n++) {
-                assertFalse(nonSystemPackage.equals(validPackages[n].packageName));
+                assertFalse(candidatePackage.equals(validPackages[n].packageName));
             }
         }
+
+        if (fallbackShouldBeValid) {
+            expectedNumValidPackages += numFallbackPackages;
+        } else {
+            // Ensure the fallback package is not one of the valid packages
+            for(int n = 0; n < validPackages.length; n++) {
+                assertFalse(fallbackPackage.equals(validPackages[n].packageName));
+            }
+        }
+
+        assertEquals(expectedNumValidPackages, validPackages.length);
 
         mWebViewUpdateServiceImpl.prepareWebViewInSystemServer();
 
         // The non-system package is not available by default so it shouldn't be used here
         checkPreparationPhasesForPackage(systemPackage + "1", 1);
 
-        // Try explicitly switching to the non-system package
-        String packageChange = mWebViewUpdateServiceImpl.changeProviderAndSetting(nonSystemPackage);
-        if (nonSystemShouldBeValid) {
-            assertEquals(nonSystemPackage, packageChange);
-            checkPreparationPhasesForPackage(nonSystemPackage, 1);
+        // Try explicitly switching to the candidate package
+        String packageChange = mWebViewUpdateServiceImpl.changeProviderAndSetting(candidatePackage);
+        if (candidateShouldBeValid) {
+            assertEquals(candidatePackage, packageChange);
+            checkPreparationPhasesForPackage(candidatePackage, 1);
         } else {
             assertEquals(systemPackage + "1", packageChange);
             // We didn't change package so the webview preparation won't run here
