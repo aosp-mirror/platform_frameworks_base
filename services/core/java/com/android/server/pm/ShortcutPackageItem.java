@@ -34,8 +34,12 @@ abstract class ShortcutPackageItem {
 
     private final ShortcutPackageInfo mPackageInfo;
 
-    protected ShortcutPackageItem(int packageUserId, @NonNull String packageName,
+    protected final ShortcutUser mShortcutUser;
+
+    protected ShortcutPackageItem(@NonNull ShortcutUser shortcutUser,
+            int packageUserId, @NonNull String packageName,
             @NonNull ShortcutPackageInfo packageInfo) {
+        mShortcutUser = shortcutUser;
         mPackageUserId = packageUserId;
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
         mPackageInfo = Preconditions.checkNotNull(packageInfo);

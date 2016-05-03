@@ -56,11 +56,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.IUidObserver;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -94,6 +97,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.test.InstrumentationTestCase;
+import android.test.MoreAsserts;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -225,6 +229,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     /** ShortcutService with injection override methods. */
     private final class ShortcutServiceTestable extends ShortcutService {
         final ServiceContext mContext;
+        IUidObserver mUidObserver;
 
         public ShortcutServiceTestable(ServiceContext context, Looper looper) {
             super(context, looper);
@@ -265,6 +270,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        long injectElapsedRealtime() {
+            // TODO This should be kept separately from mInjectedCurrentTimeLillis, since
+            // this should increase even if we rewind mInjectedCurrentTimeLillis in some tests.
+            return mInjectedCurrentTimeLillis - START_TIME;
+        }
+
+        @Override
         int injectBinderCallingUid() {
             return mInjectedCallingUid;
         }
@@ -295,6 +307,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        void injectRegisterUidObserver(IUidObserver observer, int which) {
+            mUidObserver = observer;
+        }
+
+        @Override
         PackageManagerInternal injectPackageManagerInternal() {
             return mMockPackageManagerInternal;
         }
@@ -321,6 +338,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             final long token = mContext.injectClearCallingIdentity();
             r.run();
             mContext.injectRestoreCallingIdentity(token);
+        }
+
+        @Override
+        void injectEnforceCallingPermission(String permission, String message) {
+            if (!mCallerPermissions.contains(permission)) {
+                throw new SecurityException("Missing permission: " + permission);
+            }
         }
 
         @Override
@@ -493,6 +517,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private static final ShortcutQuery QUERY_ALL = new ShortcutQuery();
 
+    private final ArrayList<String> mCallerPermissions = new ArrayList<>();
+
     static {
         QUERY_ALL.setQueryFlags(
                 ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
@@ -561,6 +587,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         initService();
         setCaller(CALLING_PACKAGE_1);
+
+        // In order to complicate the situation, we set mLocaleChangeSequenceNumber to 1 by
+        // calling this.  Running test with mLocaleChangeSequenceNumber == 0 might make us miss
+        // some edge cases.
+        mInternal.onSystemLocaleChangedNoLock();
     }
 
     private static UserInfo withProfileGroupId(UserInfo in, int groupId) {
@@ -761,7 +792,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final PrintWriter pw = new PrintWriter(out);
-        mService.dumpInner(pw);
+        mService.dumpInner(pw, null);
         pw.close();
 
         Log.e(TAG, "Dumping ShortcutService: " + message);
@@ -3546,17 +3577,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // Check the registered packages.
         dumpsysOnLogcat();
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3578,17 +3609,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // No changes.
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_1", "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3609,17 +3640,17 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_0, USER_0);
 
         assertEquals(set(CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_10, LAUNCHER_1),
                         PackageWithUser.of(USER_10, LAUNCHER_2)),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3640,16 +3671,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked(LAUNCHER_1, USER_10, USER_10);
 
         assertEquals(set(CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1, CALLING_PACKAGE_2),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_10, LAUNCHER_2)),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3668,16 +3699,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked(CALLING_PACKAGE_2, USER_10, USER_10);
 
         assertEquals(set(CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_10, LAUNCHER_2)),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3696,16 +3727,16 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked(LAUNCHER_2, USER_10, USER_10);
 
         assertEquals(set(CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(CALLING_PACKAGE_1),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(
                 set(),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -3724,15 +3755,15 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.cleanUpPackageLocked(CALLING_PACKAGE_1, USER_10, USER_10);
 
         assertEquals(set(CALLING_PACKAGE_2),
-                hashSet(user0.getAllPackages().keySet()));
+                hashSet(user0.getAllPackagesForTest().keySet()));
         assertEquals(set(),
-                hashSet(user10.getAllPackages().keySet()));
+                hashSet(user10.getAllPackagesForTest().keySet()));
         assertEquals(
                 set(PackageWithUser.of(USER_0, LAUNCHER_1),
                         PackageWithUser.of(USER_0, LAUNCHER_2)),
-                hashSet(user0.getAllLaunchers().keySet()));
+                hashSet(user0.getAllLaunchersForTest().keySet()));
         assertEquals(set(),
-                hashSet(user10.getAllLaunchers().keySet()));
+                hashSet(user10.getAllLaunchersForTest().keySet()));
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_1, USER_0),
                 "s0_2");
         assertShortcutIds(getLauncherPinnedShortcuts(LAUNCHER_2, USER_0),
@@ -4654,19 +4685,19 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private void checkBackupAndRestore_success() {
         // Make sure non-system user is not restored.
         final ShortcutUser userP0 = mService.getUserShortcutsLocked(USER_P0);
-        assertEquals(0, userP0.getAllPackages().size());
-        assertEquals(0, userP0.getAllLaunchers().size());
+        assertEquals(0, userP0.getAllPackagesForTest().size());
+        assertEquals(0, userP0.getAllLaunchersForTest().size());
 
         // Make sure only "allowBackup" apps are restored, and are shadow.
         final ShortcutUser user0 = mService.getUserShortcutsLocked(USER_0);
-        assertExistsAndShadow(user0.getAllPackages().get(CALLING_PACKAGE_1));
-        assertExistsAndShadow(user0.getAllPackages().get(CALLING_PACKAGE_2));
-        assertExistsAndShadow(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_1)));
-        assertExistsAndShadow(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_2)));
+        assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_1));
+        assertExistsAndShadow(user0.getAllPackagesForTest().get(CALLING_PACKAGE_2));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_1)));
+        assertExistsAndShadow(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_2)));
 
-        assertNull(user0.getAllPackages().get(CALLING_PACKAGE_3));
-        assertNull(user0.getAllLaunchers().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
-        assertNull(user0.getAllLaunchers().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
+        assertNull(user0.getAllPackagesForTest().get(CALLING_PACKAGE_3));
+        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
+        assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
 
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
@@ -5285,6 +5316,361 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
     }
 
+    public void testThrottling_localeChanges() {
+        prepareCrossProfileDataSet();
+
+        dumpsysOnLogcat("Before save & load");
+
+        mService.saveDirtyInfo();
+        initService();
+
+        final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
+
+        mInternal.onSystemLocaleChangedNoLock();
+
+        assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
+
+        // Note at this point only user-0 is loaded, and the counters are reset for this user,
+        // but it will work for other users too, because we persist when
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+
+        mService.saveDirtyInfo();
+        initService();
+
+        // Make sure the counter is persisted.
+        assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
+    }
+
+    public void testThrottling_foreground() throws Exception {
+        prepareCrossProfileDataSet();
+
+        dumpsysOnLogcat("Before save & load");
+
+        mService.saveDirtyInfo();
+        initService();
+
+        // We need to update the current time from time to time, since some of the internal checks
+        // rely on the time being correctly incremented.
+        mInjectedCurrentTimeLillis++;
+
+        // First, all packages have less than 3 (== initial value) remaining calls.
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mInjectedCurrentTimeLillis++;
+
+        // State changed, but not foreground, so no resetting.
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mInjectedCurrentTimeLillis++;
+
+        // State changed, package1 foreground, reset.
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_1, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+
+        mInjectedCurrentTimeLillis++;
+
+        // Different app comes to foreground briefly, and goes back to background.
+        // Now, make sure package 2's counter is reset, even in this case.
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mInjectedCurrentTimeLillis++;
+
+        // Do the same thing one more time.  This would catch the bug with mixuing up
+        // the current time and the elapsed time.
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            mManager.updateShortcuts(list(makeShortcut("s")));
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        mService.mUidObserver.onUidStateChanged(
+                CALLING_UID_2, ActivityManager.PROCESS_STATE_TOP_SLEEPING);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mInjectedCurrentTimeLillis++;
+
+        // Package 1 on user-10 comes to foreground.
+        // Now, also try calling some APIs and make sure foreground apps don't get throttled.
+        mService.mUidObserver.onUidStateChanged(
+                UserHandle.getUid(USER_10, CALLING_UID_1),
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(0, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(0, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(0, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(0, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(0, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+            mManager.setDynamicShortcuts(list(makeShortcut("s")));
+
+            assertEquals(3, mManager.getRemainingCallCount()); // Still 3!
+        });
+    }
+
+
+    public void testThrottling_resetByInternalCall() throws Exception {
+        prepareCrossProfileDataSet();
+
+        dumpsysOnLogcat("Before save & load");
+
+        mService.saveDirtyInfo();
+        initService();
+
+        // First, all packages have less than 3 (== initial value) remaining calls.
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        // Simulate a call from sys UI.
+        mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
+        mService.onApplicationActive(CALLING_PACKAGE_1, USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mService.onApplicationActive(CALLING_PACKAGE_3, USER_0);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+
+        mService.onApplicationActive(CALLING_PACKAGE_1, USER_10);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
+            MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertEquals(3, mManager.getRemainingCallCount());
+        });
+    }
+
+    public void testOnApplicationActive_permission() {
+        assertExpectException(SecurityException.class, "Missing permission", () ->
+            mService.onApplicationActive(CALLING_PACKAGE_1, USER_0));
+
+        // Has permission, now it should pass.
+        mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
+        mService.onApplicationActive(CALLING_PACKAGE_1, USER_0);
+    }
+
     // ShortcutInfo tests
 
     public void testShortcutInfoMissingMandatoryFields() {
@@ -5324,7 +5710,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         si = new ShortcutInfo.Builder(getTestContext())
                 .setId("id")
                 .setActivityComponent(new ComponentName("a", "b"))
-                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setIcon(Icon.createWithResource(mClientContext, 123))
                 .setTitle("title")
                 .setText("text")
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
@@ -5341,7 +5727,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(getTestContext().getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
-        assertEquals("content://a.b.c/", si.getIcon().getUriString());
+        assertEquals(123, si.getIcon().getResId());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
@@ -5363,7 +5749,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivityComponent(new ComponentName("a", "b"))
-                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setIcon(Icon.createWithResource(mClientContext, 123))
                 .setTitle("title")
                 .setText("text")
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
@@ -5382,7 +5768,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(mClientContext.getPackageName(), si.getPackageName());
         assertEquals("id", si.getId());
         assertEquals(new ComponentName("a", "b"), si.getActivityComponent());
-        assertEquals("content://a.b.c/", si.getIcon().getUriString());
+        assertEquals(123, si.getIcon().getResId());
         assertEquals("title", si.getTitle());
         assertEquals("text", si.getText());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
@@ -5498,7 +5884,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         ShortcutInfo sorig = new ShortcutInfo.Builder(getTestContext())
                 .setId("id")
                 .setActivityComponent(new ComponentName("a", "b"))
-                .setIcon(Icon.createWithContentUri("content://a.b.c/"))
+                .setIcon(Icon.createWithResource(mClientContext, 123))
                 .setTitle("title")
                 .setText("text")
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
@@ -5520,9 +5906,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setIcon(Icon.createWithContentUri("content://x.y.z/")).build());
+                .setIcon(Icon.createWithResource(mClientContext, 456)).build());
         assertEquals("text", si.getText());
-        assertEquals("content://x.y.z/", si.getIcon().getUriString());
+        assertEquals(456, si.getIcon().getResId());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
