@@ -57,15 +57,18 @@ class ShortcutLauncher extends ShortcutPackageItem {
      */
     final private ArrayMap<PackageWithUser, ArraySet<String>> mPinnedShortcuts = new ArrayMap<>();
 
-    private ShortcutLauncher(@UserIdInt int ownerUserId, @NonNull String packageName,
+    private ShortcutLauncher(@NonNull ShortcutUser shortcutUser,
+            @UserIdInt int ownerUserId, @NonNull String packageName,
             @UserIdInt int launcherUserId, ShortcutPackageInfo spi) {
-        super(launcherUserId, packageName, spi != null ? spi : ShortcutPackageInfo.newEmpty());
+        super(shortcutUser, launcherUserId, packageName,
+                spi != null ? spi : ShortcutPackageInfo.newEmpty());
         mOwnerUserId = ownerUserId;
     }
 
-    public ShortcutLauncher(@UserIdInt int ownerUserId, @NonNull String packageName,
+    public ShortcutLauncher(@NonNull ShortcutUser shortcutUser,
+            @UserIdInt int ownerUserId, @NonNull String packageName,
             @UserIdInt int launcherUserId) {
-        this(ownerUserId, packageName, launcherUserId, null);
+        this(shortcutUser, ownerUserId, packageName, launcherUserId, null);
     }
 
     @Override
@@ -179,8 +182,8 @@ class ShortcutLauncher extends ShortcutPackageItem {
     /**
      * Load.
      */
-    public static ShortcutLauncher loadFromXml(XmlPullParser parser, int ownerUserId,
-            boolean fromBackup) throws IOException, XmlPullParserException {
+    public static ShortcutLauncher loadFromXml(XmlPullParser parser, ShortcutUser shortcutUser,
+            int ownerUserId, boolean fromBackup) throws IOException, XmlPullParserException {
         final String launcherPackageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_PACKAGE_NAME);
 
@@ -189,8 +192,8 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 fromBackup ? ownerUserId
                 : ShortcutService.parseIntAttribute(parser, ATTR_LAUNCHER_USER_ID, ownerUserId);
 
-        final ShortcutLauncher ret = new ShortcutLauncher(launcherUserId, launcherPackageName,
-                launcherUserId);
+        final ShortcutLauncher ret = new ShortcutLauncher(shortcutUser, launcherUserId,
+                launcherPackageName, launcherUserId);
 
         ArraySet<String> ids = null;
         final int outerDepth = parser.getDepth();
