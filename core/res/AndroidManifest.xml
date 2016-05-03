@@ -138,6 +138,7 @@
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REPLY" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.device.action.SDP_RECORD" />
     <protected-broadcast android:name="android.bluetooth.devicepicker.action.LAUNCH" />
     <protected-broadcast android:name="android.bluetooth.devicepicker.action.DEVICE_SELECTED" />
     <protected-broadcast
