@@ -6599,7 +6599,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 try {
                     mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
                 } catch (InstallerException e) {
-                    Slog.e(TAG, "Unable to mark boot complete for abi: " + abi, e);
+                    Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
+                            e.getMessage() +")");
                 }
                 completedIsas.add(instructionSet);
             }
