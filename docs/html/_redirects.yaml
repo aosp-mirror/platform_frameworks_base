@@ -703,8 +703,18 @@ redirects:
   to: /training/location/index.html
 - from: /google/gcm/adv.html
   to: /google/gcm/gcm.html
-- from: /work
-  to: /training/enterprise/index.html
+- from: /training/enterprise/index.html
+  to: /work/index.html
+- from: /training/enterprise/app-compatibility.html
+  to: /work/managed-profiles.html
+- from: /training/enterprise/app-restrictions.html
+  to: /work/app-restrictions.html
+- from: /training/enterprise/cosu.html
+  to: /work/cosu.html
+- from: /training/enterprise/device-management-policy.html
+  to: /work/device-management-policy.html
+- from: /training/enterprise/work-policy-ctrl.html
+  to: https://developers.google.com/android/work/build-dpc
 - from: /distribute/tools/promote/badge-files.html
   to: https://play.google.com/intl/en_us/badges/
 - from: /google/gcm/...

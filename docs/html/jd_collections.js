@@ -365,7 +365,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://www.android.com/work/",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "training/enterprise/index.html"
+      "work/index.html"
     ]
   },
   "distribute/essentials": {
@@ -1749,26 +1749,6 @@ var RESOURCE_COLLECTIONS = {
       "training/monitoring-device-state/index.html"
     ]
   },
-  "training/work/apps": {
-    "title": "",
-    "resources": [
-      "training/enterprise/app-compatibility.html",
-      "training/enterprise/app-restrictions.html",
-      "training/enterprise/cosu.html",
-      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "samples/AppRestrictionSchema/index.html",
-      "https://www.youtube.com/watch?v=dH41OutAMNM",
-      "samples/AppRestrictionEnforcer/index.html"
-    ]
-  },
-  "training/work/admin": {
-    "title": "",
-    "resources": [
-      "training/enterprise/work-policy-ctrl.html",
-      "samples/BasicManagedProfile/index.html",
-      "https://www.youtube.com/watch?v=j3QC6hcpy90"
-    ]
-  },
 "tools/help/log": {
     "title": "",
     "resources": [
@@ -1887,4 +1867,45 @@ var RESOURCE_COLLECTIONS = {
     "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
-}
+  "work/landing/primary": {
+    "title": "",
+    "resources": [
+      "work/overview.html",
+      "work/guide.html",
+      "https://connect.googleforwork.com/community/applicants/android/isv",
+      "work/app-restrictions.html",
+      "work/cosu.html",
+      "work/managed-profiles.html"
+    ]
+  },
+  "work/landing/resources": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/",
+      "https://www.google.com/work/android/",
+      "https://developers.google.com/android/work/build-dpc",
+      "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX"
+    ]
+  },
+  "work/apps": {
+    "title": "",
+    "resources": [
+      "work/managed-profiles.html",
+      "work/app-restrictions.html",
+      "work/cosu.html",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "samples/AppRestrictionSchema/index.html",
+      "samples/AppRestrictionEnforcer/index.html"
+    ]
+  },
+  "work/admin": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/build-dpc",
+      "samples/BasicManagedProfile/index.html",
+      "https://www.youtube.com/watch?v=j3QC6hcpy90"
+    ]
+  }
+};

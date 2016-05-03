@@ -754,18 +754,6 @@ toc:
     - name: description
       value: How to use DHU to test Auto apps.
 
-- title: Building Apps for Work
-  path: /training/enterprise/index.html
-  section:
-  - title: Ensuring Compatibility with Managed Profiles
-    path: /training/enterprise/app-compatibility.html
-  - title: Implementing App Restrictions
-    path: /training/enterprise/app-restrictions.html
-  - title: Building a Device Policy Controller
-    path: /training/enterprise/work-policy-ctrl.html
-  - title: Configuring Corporate-Owned, Single-Use Devices
-    path: /training/enterprise/cosu.html
-
 - title: Best Practices for Interaction & Engagement
   path: /training/best-ux.html
   section:
@@ -1386,7 +1374,7 @@ toc:
     - name: description
       value: How to use the SafetyNet service to analyze a device where your app is running and get information about its compatibility with your app.
   - title: Enhancing Security with Device Management Policies
-    path: /training/enterprise/device-management-policy.html
+    path: /work/device-management-policy.html
     path_attributes:
     - name: description
       value: How to create an application that enforces security policies on devices.
