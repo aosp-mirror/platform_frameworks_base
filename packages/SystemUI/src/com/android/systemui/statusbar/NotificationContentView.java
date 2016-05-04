@@ -454,6 +454,7 @@ public class NotificationContentView extends FrameLayout {
             endColor = NotificationUtils.interpolateColors(startColor, endColor,
                     transformationAmount);
         }
+        mContainingNotification.updateBackgroundAlpha(transformationAmount);
         mContainingNotification.setContentBackground(endColor, false, this);
     }
 
@@ -586,6 +587,7 @@ public class NotificationContentView extends FrameLayout {
 
     public void updateBackgroundColor(boolean animate) {
         int customBackgroundColor = getBackgroundColor(mVisibleType);
+        mContainingNotification.resetBackgroundAlpha();
         mContainingNotification.setContentBackground(customBackgroundColor, animate, this);
     }
 
