@@ -250,10 +250,12 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
             return;
         }
         final boolean isRtl = mParent.isLayoutRtl();
-
-        // TODO No need to cast to float here once b/28050538 is fixed.
-        final float left = (float) (isRtl ? -(mParent.getWidth() - mHorizSpaceForGear) : 0);
-        final float right = (float) (isRtl ? 0 : (mParent.getWidth() - mHorizSpaceForGear));
+        final float left = isRtl
+                ? -(mParent.getWidth() - mHorizSpaceForGear)
+                : 0;
+        final float right = isRtl
+                ? 0
+                : mParent.getWidth() - mHorizSpaceForGear;
         final float centerX = ((mHorizSpaceForGear - mGearIcon.getWidth()) / 2);
         setTranslationX(onLeft ? left + centerX : right + centerX);
         mOnLeft = onLeft;
