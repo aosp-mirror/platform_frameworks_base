@@ -724,18 +724,46 @@ specify how user CAs should be trusted.</p>
 
 <h2 id="apk_signature_v2">APK signature scheme v2</h2>
 
-<p>The PackageManager class now supports verifying apps using the APK
-signature scheme v2. The APK signature scheme v2 is a whole-file signature scheme
-that significantly improves verification speed and strengthens integrity
-  guarantees by detecting any unauthorized changes to APK files.</p>
+<p>
+  Android N introduces APK Signature Scheme v2, a new app-signing scheme that
+  offers faster app install times and better protection against unauthorized
+  alterations to APK files. Android Studio 2.2 and Gradle provide built-in
+  support for APK Signature Scheme v2.
+</p>
 
-<p>To maintain backward-compatibility, an APK must be signed with the v1 signature
-scheme (JAR signature scheme) before being signed with the v2 signature scheme.
-With the v2 signature scheme, verification fails if you sign the APK with an
-  additional certificate after signing with the v2 scheme. </p>
+<p>
+  Although we recommend applying APK Signature Scheme v2 to your app, the new
+  scheme is not mandatory. If your app doesn't build properly when using the
+  APK Signature Scheme v2, you can use the traditional signing scheme—which
+  uses JAR signing—instead. To use the traditional scheme, open the
+  module-level <code>build.gradle</code> file and add the
+  <code>v2SigningEnabled</code> parameter to your release signing
+  configuration, setting this parameter's value to <code>false</code>:
+</p>
 
-<p>APK signature scheme v2 support will be available later in the N Developer
-Preview.</p>
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p>
+  For more information, see the following guides, which describe how to <a href=
+  "{@docRoot}studio/tools/publishing/app-signing.html#release-mode"> sign an app
+  in Android Studio</a> and how to <a href=
+  "{@docRoot}studio/tools/building/configuring-gradle.html#signing"> configure
+  the Gradle build file for signing apps</a>.
+</p>
 
 <h2 id="scoped_directory_access">Scoped directory access</h2>
 
