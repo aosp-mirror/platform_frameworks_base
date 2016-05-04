@@ -898,6 +898,8 @@ redirects:
   to: /studio/tools/debugging/improving-w-lint.html
 - from: /tools/debugging/index.html
   to: /studio/tools/debugging/debugging-studio.html
+- from: /tools/help/project-mgmt.html
+  to: /studio/tools/projects/index.html
 
 # Handle the rest of the tool pages that moved into /studio
 - from: /tools/...
