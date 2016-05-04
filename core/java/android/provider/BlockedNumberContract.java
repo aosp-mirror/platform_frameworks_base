@@ -136,9 +136,9 @@ import android.os.Bundle;
  * <p>
  * Apps must use the method {@link #canCurrentUserBlockNumbers(Context)} before performing any
  * operation on the blocked number provider. If {@link #canCurrentUserBlockNumbers(Context)} returns
- * {@code false}, all operations on the provider will fail with an
- * {@link UnsupportedOperationException}. The platform will block calls, and messages from numbers
- * in the provider independent of the current user.
+ * {@code false}, all operations on the provider will fail with a {@link SecurityException}. The
+ * platform will block calls, and messages from numbers in the provider independent of the current
+ * user.
  * </p>
  */
 public class BlockedNumberContract {
@@ -236,7 +236,7 @@ public class BlockedNumberContract {
      * {@code phoneNumber} with the {@link BlockedNumbers#COLUMN_E164_NUMBER} column.
      *
      * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
-     * context {@code context}, this method will throw an {@link UnsupportedOperationException}.
+     * context {@code context}, this method will throw a {@link SecurityException}.
      */
     @WorkerThread
     public static boolean isBlocked(Context context, String phoneNumber) {
@@ -260,7 +260,7 @@ public class BlockedNumberContract {
      * {@link BlockedNumbers#CONTENT_URI} URI.
      *
      * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
-     * context {@code context}, this method will throw an {@link UnsupportedOperationException}.
+     * context {@code context}, this method will throw a {@link SecurityException}.
      */
     @WorkerThread
     public static int unblock(Context context, String phoneNumber) {
