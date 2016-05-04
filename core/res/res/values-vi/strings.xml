@@ -862,36 +862,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"bây giờ"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>phút</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>phút</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> phút</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> phút</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>giờ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>giờ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> giờ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> giờ</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ngày</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ngày</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ngày</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ngày</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>năm</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>năm</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> năm</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> năm</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
       <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>ph</item>
       <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>ph</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>gi</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>gi</item>
+      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>ng</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>ng</item>
+      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g> ngày</item>
+      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g> ngày</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>năm</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>năm</item>
+      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g> năm</item>
+      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g> năm</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Sự cố video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Video này không hợp lệ để phát trực tuyến đến thiết bị này."</string>

@@ -862,36 +862,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"қазір"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>м</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>м</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> м.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> м.</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>с</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>с</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> с.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> с.</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>к</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>к</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> к.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> к.</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ж</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ж</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ж.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ж.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>м</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>м</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> м.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> м.</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>с</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>с</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> с.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> с.</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>к</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>к</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> к.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> к.</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ж</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ж</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ж.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ж.</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Бейне ақаулығы"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Бұл бейне осы құрылғыға ағынын жіберуге жарамсыз."</string>

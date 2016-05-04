@@ -263,8 +263,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Retrieve window content"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspect the content of a window that you\'re interacting with."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Turn on Explore by Touch"</string>
-    <!-- no translation found for capability_desc_canRequestTouchExploration (7543249041581408313) -->
-    <skip />
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Tapped items will be spoken aloud and the screen can be explored using gestures."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Turn on enhanced web accessibility"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Scripts may be installed to make app content more accessible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observe text that you type"</string>
@@ -663,8 +662,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Type PUK and new PIN code"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK code"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"New PIN Code"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (2644215452200037944) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Tap to type password"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Type password to unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Type PIN to unlock"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Incorrect PIN code."</string>
@@ -924,8 +922,7 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Some system functions may not work"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Not enough storage for the system. Make sure that you have 250 MB of free space and restart."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> is running"</string>
-    <!-- no translation found for app_running_notification_text (1197581823314971177) -->
-    <skip />
+    <string name="app_running_notification_text" msgid="1197581823314971177">"Tap for more information or to stop the app."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel"</string>
     <string name="yes" msgid="5362982303337969312">"OK"</string>
@@ -999,8 +996,7 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Starting apps."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Finishing boot."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
-    <!-- no translation found for heavy_weight_notification_detail (867643381388543170) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Tap to switch to app"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Switch apps?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Another app is already running that must be stopped before you can start a new one."</string>
     <string name="old_app_action" msgid="493129172238566282">"Return to <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
@@ -1008,8 +1004,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Stop the old app without saving."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> exceeded memory limit"</string>
-    <!-- no translation found for dump_heap_notification_detail (6901391084243999274) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Heap dump has been collected; tap to share"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Share heap dump?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"The process <xliff:g id="PROC">%1$s</xliff:g> has exceeded its process memory limit of <xliff:g id="SIZE">%2$s</xliff:g>. A heap dump is available for you to share with its developer. Be careful: this heap dump can contain any of your personal information that the application has access to."</string>
     <string name="sendText" msgid="5209874571959469142">"Choose an action for text"</string>
@@ -1045,8 +1040,7 @@
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi has no Internet access"</string>
-    <!-- no translation found for wifi_no_internet_detailed (8083079241212301741) -->
-    <skip />
+    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap for options"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Couldn\'t connect to Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" has a poor Internet connection."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Allow connection?"</string>
@@ -1056,8 +1050,7 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Couldn\'t start Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct is on"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_message (8064677407830620023) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tap for settings"</string>
     <string name="accept" msgid="1645267259272829559">"Accept"</string>
     <string name="decline" msgid="2112225451706137894">"Decline"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Invitation sent"</string>
@@ -1109,11 +1102,9 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB for photo transfer"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB for MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connected to a USB accessory"</string>
-    <!-- no translation found for usb_notification_message (3370903770828407960) -->
-    <skip />
+    <string name="usb_notification_message" msgid="3370903770828407960">"Tap for more options."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
-    <!-- no translation found for adb_active_notification_message (4948470599328424059) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Tap to disable USB debugging."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Taking bug report…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Share bug report?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Sharing bug report…"</string>
@@ -1133,11 +1124,9 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"New <xliff:g id="NAME">%s</xliff:g> detected"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For transferring photos and media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Corrupted <xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (2343202057122495773) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> is corrupt. Tap to fix."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Unsupported <xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (6121601473787888589) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"This device doesn’t support this <xliff:g id="NAME">%s</xliff:g>. Tap to set up in a supported format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> unexpectedly removed"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Unmount <xliff:g id="NAME">%s</xliff:g> before removing to avoid data loss"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Removed <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1209,18 +1198,15 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Always-on VPN connecting…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Always-on VPN connected"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Always-on VPN error"</string>
-    <!-- no translation found for vpn_lockdown_config (4655589351146766608) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Tap to configure"</string>
     <string name="upload_file" msgid="2897957172366730416">"Choose file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No file chosen"</string>
     <string name="reset" msgid="2448168080964209908">"Reset"</string>
     <string name="submit" msgid="1602335572089911941">"Submit"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Car mode enabled"</string>
-    <!-- no translation found for car_mode_disable_notification_message (6301524980144350051) -->
-    <skip />
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Tap to exit car mode."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering or hotspot active"</string>
-    <!-- no translation found for tethered_notification_message (2113628520792055377) -->
-    <skip />
+    <string name="tethered_notification_message" msgid="2113628520792055377">"Tap to set up."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Back"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Next"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Skip"</string>
@@ -1253,8 +1239,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Add account"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Increase"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Decrease"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (5259126567490114216) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> touch &amp; hold."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Slide up to increase and down to decrease."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Increase minute"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Decrease minute"</string>
@@ -1298,8 +1283,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Edit"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Data usage warning"</string>
-    <!-- no translation found for data_usage_warning_body (6660692274311972007) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"Tap to view usage and settings."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G data limit reached"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G data limit reached"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobile data limit reached"</string>
@@ -1311,8 +1295,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi data limit exceeded"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> over specified limit."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Background data restricted"</string>
-    <!-- no translation found for data_usage_restricted_body (469866376337242726) -->
-    <skip />
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"Tap to remove restriction."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Security certificate"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"This certificate is valid."</string>
     <string name="issued_to" msgid="454239480274921032">"Issued to:"</string>
@@ -1528,10 +1511,8 @@
     <string name="select_year" msgid="7952052866994196170">"Select year"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> deleted"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Work <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1420543809500606964) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (2302154926850846096) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1420543809500606964">"To unpin this screen, touch &amp; hold Back."</string>
+    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"To unpin this screen, touch &amp; hold Overview."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"App is pinned: unpinning isn\'t allowed on this device."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Screen pinned"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Screen unpinned"</string>
