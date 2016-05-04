@@ -2693,52 +2693,26 @@ public final class ActivityThread {
                     !r.activity.mFinished && !r.startsNotResumed, r.lastProcessedSeq, reason);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
-                // The activity manager actually wants this one to start out
-                // paused, because it needs to be visible but isn't in the
-                // foreground.  We accomplish this by going through the
-                // normal startup (because activities expect to go through
-                // onResume() the first time they run, before their window
-                // is displayed), and then pausing it.  However, in this case
-                // we do -not- need to do the full pause cycle (of freezing
-                // and such) because the activity manager assumes it can just
-                // retain the current state it has.
-                try {
-                    r.activity.mCalled = false;
-                    mInstrumentation.callActivityOnPause(r.activity);
-                    EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                            r.activity.getComponentName().getClassName(), reason);
-                    // We need to keep around the original state, in case
-                    // we need to be created again.  But we only do this
-                    // for pre-Honeycomb apps, which always save their state
-                    // when pausing, so we can not have them save their state
-                    // when restarting from a paused state.  For HC and later,
-                    // we want to (and can) let the state be saved as the normal
-                    // part of stopping the activity.
-                    if (r.isPreHoneycomb()) {
-                        r.state = oldState;
-                    }
-                    if (!r.activity.mCalled) {
-                        throw new SuperNotCalledException(
-                            "Activity " + r.intent.getComponent().toShortString() +
-                            " did not call through to super.onPause()");
-                    }
+                // The activity manager actually wants this one to start out paused, because it
+                // needs to be visible but isn't in the foreground. We accomplish this by going
+                // through the normal startup (because activities expect to go through onResume()
+                // the first time they run, before their window is displayed), and then pausing it.
+                // However, in this case we do -not- need to do the full pause cycle (of freezing
+                // and such) because the activity manager assumes it can just retain the current
+                // state it has.
+                performPauseActivityIfNeeded(r, reason);
 
-                } catch (SuperNotCalledException e) {
-                    throw e;
-
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to pause activity "
-                                + r.intent.getComponent().toShortString()
-                                + ": " + e.toString(), e);
-                    }
+                // We need to keep around the original state, in case we need to be created again.
+                // But we only do this for pre-Honeycomb apps, which always save their state when
+                // pausing, so we can not have them save their state when restarting from a paused
+                // state. For HC and later, we want to (and can) let the state be saved as the
+                // normal part of stopping the activity.
+                if (r.isPreHoneycomb()) {
+                    r.state = oldState;
                 }
-                r.paused = true;
             }
         } else {
-            // If there was an error, for any reason, tell the activity
-            // manager to stop us.
+            // If there was an error, for any reason, tell the activity manager to stop us.
             try {
                 ActivityManagerNative.getDefault()
                     .finishActivity(r.token, Activity.RESULT_CANCELED, null,
@@ -3679,34 +3653,13 @@ public final class ActivityThread {
         if (finished) {
             r.activity.mFinished = true;
         }
-        try {
-            // Next have the activity save its current state and managed dialogs...
-            if (!r.activity.mFinished && saveState) {
-                callCallActivityOnSaveInstanceState(r);
-            }
-            // Now we are idle.
-            r.activity.mCalled = false;
-            mInstrumentation.callActivityOnPause(r.activity);
-            EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                    r.activity.getComponentName().getClassName(), reason);
-            if (!r.activity.mCalled) {
-                throw new SuperNotCalledException(
-                    "Activity " + r.intent.getComponent().toShortString() +
-                    " did not call through to super.onPause()");
-            }
 
-        } catch (SuperNotCalledException e) {
-            throw e;
-
-        } catch (Exception e) {
-            if (!mInstrumentation.onException(r.activity, e)) {
-                throw new RuntimeException(
-                        "Unable to pause activity "
-                        + r.intent.getComponent().toShortString()
-                        + ": " + e.toString(), e);
-            }
+        // Next have the activity save its current state and managed dialogs...
+        if (!r.activity.mFinished && saveState) {
+            callCallActivityOnSaveInstanceState(r);
         }
-        r.paused = true;
+
+        performPauseActivityIfNeeded(r, reason);
 
         // Notify any outstanding on paused listeners
         ArrayList<OnActivityPausedListener> listeners;
@@ -3719,6 +3672,32 @@ public final class ActivityThread {
         }
 
         return !r.activity.mFinished && saveState ? r.state : null;
+    }
+
+    private void performPauseActivityIfNeeded(ActivityClientRecord r, String reason) {
+        if (r.paused) {
+            // You are already paused silly...
+            return;
+        }
+
+        try {
+            r.activity.mCalled = false;
+            mInstrumentation.callActivityOnPause(r.activity);
+            EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
+                    r.activity.getComponentName().getClassName(), reason);
+            if (!r.activity.mCalled) {
+                throw new SuperNotCalledException("Activity " + safeToComponentShortString(r.intent)
+                        + " did not call through to super.onPause()");
+            }
+        } catch (SuperNotCalledException e) {
+            throw e;
+        } catch (Exception e) {
+            if (!mInstrumentation.onException(r.activity, e)) {
+                throw new RuntimeException("Unable to pause activity "
+                        + safeToComponentShortString(r.intent) + ": " + e.toString(), e);
+            }
+        }
+        r.paused = true;
     }
 
     final void performStopActivity(IBinder token, boolean saveState, String reason) {
@@ -3797,6 +3776,9 @@ public final class ActivityThread {
                 Slog.e(TAG, r.getStateString());
             }
 
+            // One must first be paused before stopped...
+            performPauseActivityIfNeeded(r, reason);
+
             if (info != null) {
                 try {
                     // First create a thumbnail for the activity...
@@ -3836,8 +3818,6 @@ public final class ActivityThread {
                 EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), reason);
             }
-
-            r.paused = true;
         }
     }
 
@@ -4110,29 +4090,9 @@ public final class ActivityThread {
             if (finishing) {
                 r.activity.mFinished = true;
             }
-            if (!r.paused) {
-                try {
-                    r.activity.mCalled = false;
-                    mInstrumentation.callActivityOnPause(r.activity);
-                    EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                            r.activity.getComponentName().getClassName(), "destroy");
-                    if (!r.activity.mCalled) {
-                        throw new SuperNotCalledException(
-                            "Activity " + safeToComponentShortString(r.intent)
-                            + " did not call through to super.onPause()");
-                    }
-                } catch (SuperNotCalledException e) {
-                    throw e;
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to pause activity "
-                                + safeToComponentShortString(r.intent)
-                                + ": " + e.toString(), e);
-                    }
-                }
-                r.paused = true;
-            }
+
+            performPauseActivityIfNeeded(r, "destroy");
+
             if (!r.stopped) {
                 try {
                     r.activity.performStop(r.mPreserveWindow);
