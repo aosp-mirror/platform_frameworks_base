@@ -103,6 +103,16 @@ public class RecentsTvTransitionHelper {
             EventBus.getDefault().send(new LaunchTaskFailedEvent());
         }
 
+        Rect taskRect = taskView.getFocusedThumbnailRect();
+        // Check both the rect and the thumbnail for null. The rect can be null if the user
+        // decides to disallow animations, so automatic scrolling does not happen properly.
+
+        // The thumbnail can be null if the app was partially launched on TV. In this case
+        // we do not override the transition.
+        if (taskRect == null || task.thumbnail == null) {
+            return;
+        }
+
         IRemoteCallback.Stub callback = null;
         if (animStartedListener != null) {
             callback = new IRemoteCallback.Stub() {
@@ -120,14 +130,11 @@ public class RecentsTvTransitionHelper {
             };
         }
         try {
-            Rect taskRect = taskView.getFocusedThumbnailRect();
-            if (taskRect != null) {
-                Bitmap thumbnail = Bitmap.createScaledBitmap(task.thumbnail, taskRect.width(),
-                        taskRect.height(), false);
-                WindowManagerGlobal.getWindowManagerService()
-                        .overridePendingAppTransitionAspectScaledThumb(thumbnail, taskRect.left,
-                                taskRect.top, taskRect.width(), taskRect.height(), callback, true);
-            }
+            Bitmap thumbnail = Bitmap.createScaledBitmap(task.thumbnail, taskRect.width(),
+                    taskRect.height(), false);
+            WindowManagerGlobal.getWindowManagerService()
+                    .overridePendingAppTransitionAspectScaledThumb(thumbnail, taskRect.left,
+                            taskRect.top, taskRect.width(), taskRect.height(), callback, true);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to override transition: " + e);
         }
