@@ -1239,6 +1239,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 || !mSensitiveHiddenInGeneral) ? View.VISIBLE : View.GONE);
     }
 
+    public void makeActionsVisibile() {
+        setUserExpanded(true, true);
+        if (isChildInGroup()) {
+            mGroupManager.setGroupExpanded(mStatusBarNotification, true);
+        }
+        notifyHeightChanged(false);
+    }
+
     public void setChildrenExpanded(boolean expanded, boolean animate) {
         mChildrenExpanded = expanded;
         if (mNotificationHeader != null) {
