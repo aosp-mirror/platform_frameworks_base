@@ -26,7 +26,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.printservice.recommendation.PrintServicePlugin;
-import com.android.printservice.recommendation.util.MDNSUtils;
+import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
 import com.android.printservice.recommendation.util.NsdResolveQueue;
 
 import java.util.HashSet;
@@ -81,7 +81,7 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
             @NonNull CharSequence packageName, @NonNull List<String> mDNSNames) {
         mContext = Preconditions.checkNotNull(context, "context");
         mName = mContext.getResources().getIdentifier(Preconditions.checkStringNotEmpty(name,
-                "name"), null, mContext.getPackageName());
+                "name"), null, "com.android.printservice.recommendation");
         mPackageName = Preconditions.checkStringNotEmpty(packageName);
         mMDNSNames = new HashSet<>(Preconditions
                 .checkCollectionNotEmpty(Preconditions.checkCollectionElementsNotNull(mDNSNames,
@@ -107,8 +107,7 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
     public void start(@NonNull PrinterDiscoveryCallback callback) throws Exception {
         mCallback = callback;
 
-        getNDSManager().discoverServices(PRINTER_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD,
-                this);
+        DiscoveryListenerMultiplexer.addListener(getNDSManager(), PRINTER_SERVICE_TYPE, this);
     }
 
     @Override
@@ -121,7 +120,7 @@ public class MDNSFilterPlugin implements PrintServicePlugin, NsdManager.Discover
         mCallback.onChanged(0);
         mCallback = null;
 
-        getNDSManager().stopServiceDiscovery(this);
+        DiscoveryListenerMultiplexer.removeListener(getNDSManager(), this);
     }
 
     @Override
