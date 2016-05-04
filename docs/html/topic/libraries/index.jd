@@ -7,7 +7,7 @@ included with the Android Framework.</p>
 
 <div class="dynamic-grid">
   <div class="resource-widget resource-flow-layout landing col-12"
-    data-query="collection:go/libraries"
+    data-query="collection:topic/libraries"
     data-cardSizes="6x6"
     data-maxResults="6">
   </div>
