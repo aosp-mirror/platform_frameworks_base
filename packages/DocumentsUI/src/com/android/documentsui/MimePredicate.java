@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import android.annotation.Nullable;
+import android.provider.DocumentsContract.Document;
 
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
@@ -98,5 +99,9 @@ public class MimePredicate implements Predicate<DocumentInfo> {
 
     public static boolean isApkType(@Nullable String mimeType) {
         return APK_TYPE.equals(mimeType);
+    }
+
+    public static boolean isDirectoryType(@Nullable String mimeType) {
+        return Document.MIME_TYPE_DIR.equals(mimeType);
     }
 }

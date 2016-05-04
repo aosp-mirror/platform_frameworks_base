@@ -63,7 +63,6 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.DragEvent;
 import android.view.GestureDetector;
@@ -91,6 +90,7 @@ import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.Metrics;
+import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentsLoader;
 import com.android.documentsui.RootsCache;
@@ -105,6 +105,7 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
+
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -112,7 +113,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -460,13 +460,17 @@ public class DirectoryFragment extends Fragment
      * ActionMode when there is a selection, canceling it when there is no selection,
      * and clearing selection when action mode is explicitly exited by the user.
      */
-    private final class SelectionModeListener
-            implements MultiSelectManager.Callback, ActionMode.Callback {
+    private final class SelectionModeListener implements MultiSelectManager.Callback,
+            ActionMode.Callback, FragmentTuner.SelectionDetails {
 
         private Selection mSelected = new Selection();
-        private int mNoCopyCount = 0;
+
+        // Partial files are files that haven't been fully downloaded.
+        private int mPartialCount = 0;
+        private int mDirectoryCount = 0;
         private int mNoDeleteCount = 0;
-        private int mNoRenameCount = -1;
+        private int mNoRenameCount = 0;
+
         private Menu mMenu;
 
         @Override
@@ -508,14 +512,19 @@ public class DirectoryFragment extends Fragment
             // TODO: Should this be happening in onSelectionChanged? Technically this callback is
             // triggered on "silent" selection updates (i.e. we might be reacting to unfinalized
             // selection changes here)
+            final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            if (MimePredicate.isDirectoryType(mimeType)) {
+                mDirectoryCount += selected ? 1 : -1;
+            }
+
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
             if ((docFlags & Document.FLAG_PARTIAL) != 0) {
-                mNoCopyCount += selected ? 1 : -1;
+                mPartialCount += selected ? 1 : -1;
             }
             if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
             }
-            if ((docFlags & Document.FLAG_SUPPORTS_RENAME) != 0) {
+            if ((docFlags & Document.FLAG_SUPPORTS_RENAME) == 0) {
                 mNoRenameCount += selected ? 1 : -1;
             }
         }
@@ -554,8 +563,11 @@ public class DirectoryFragment extends Fragment
             // clear selection
             mSelectionManager.clearSelection();
             mSelected.clear();
+
+            mDirectoryCount = 0;
+            mPartialCount = 0;
             mNoDeleteCount = 0;
-            mNoRenameCount = -1;
+            mNoRenameCount = 0;
 
             // Re-enable TalkBack for the toolbars, as they are no longer covered by action mode.
             final Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
@@ -603,24 +615,29 @@ public class DirectoryFragment extends Fragment
             return true;
         }
 
-        boolean canCopySelection() {
-            return mNoCopyCount == 0;
+        @Override
+        public boolean containsDirectories() {
+            return mDirectoryCount > 0;
         }
 
-        boolean canDeleteSelection() {
+        @Override
+        public boolean containsPartialFiles() {
+            return mPartialCount > 0;
+        }
+
+        @Override
+        public boolean canDelete() {
             return mNoDeleteCount == 0;
         }
 
-        boolean canRenameSelection() {
+        @Override
+        public boolean canRename() {
             return mNoRenameCount == 0 && mSelectionManager.getSelection().size() == 1;
         }
 
         private void updateActionMenu() {
             assert(mMenu != null);
-
-            // Delegate update logic to our owning action, since specialized logic is desired.
-            mTuner.updateActionMenu(
-                    mMenu, mType, canCopySelection(), canDeleteSelection(), canRenameSelection());
+            mTuner.updateActionMenu(mMenu, this);
             Menus.disableHiddenItems(mMenu);
         }
 
@@ -1224,8 +1241,10 @@ public class DirectoryFragment extends Fragment
             view.setOnDragListener(mOnDragListener);
         }
 
-        // Make all items draggable.
-        view.setOnLongClickListener(onLongClickListener);
+        if (mTuner.dragAndDropEnabled()) {
+            // Make all items draggable.
+            view.setOnLongClickListener(onLongClickListener);
+        }
     }
 
     private View.OnDragListener mOnDragListener = new View.OnDragListener() {
@@ -1817,7 +1836,7 @@ public class DirectoryFragment extends Fragment
                         mRoot.authority, mRoot.rootId, mQuery)
                         : DocumentsContract.buildChildDocumentsUri(
                                 mDocument.authority, mDocument.documentId);
-                if (mTuner.enableManagedMode()) {
+                if (mTuner.managedModeEnabled()) {
                     contentsUri = DocumentsContract.setManageMode(contentsUri);
                 }
                 return new DirectoryLoader(
