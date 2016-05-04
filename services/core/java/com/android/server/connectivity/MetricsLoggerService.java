@@ -106,11 +106,13 @@ public class MetricsLoggerService extends SystemService {
     }
 
     private void resetThrottlingCounters(long currentTimeMillis) {
-        for (int i = 0; i < mThrottlingCounters.length; i++) {
-            mThrottlingCounters[i] = 0;
+        synchronized (mThrottlingCounters) {
+            for (int i = 0; i < mThrottlingCounters.length; i++) {
+                mThrottlingCounters[i] = 0;
+            }
+            mThrottlingIntervalBoundaryMillis =
+                    currentTimeMillis + THROTTLING_TIME_INTERVAL_MILLIS;
         }
-        mThrottlingIntervalBoundaryMillis =
-                currentTimeMillis + THROTTLING_TIME_INTERVAL_MILLIS;
     }
 
     private void addEvent(ConnectivityMetricsEvent e) {
