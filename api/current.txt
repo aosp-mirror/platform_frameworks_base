@@ -15651,11 +15651,8 @@ package android.icu.text {
     method public abstract int next();
     method public int preceding(int);
     method public abstract int previous();
-    method public static java.lang.Object registerInstance(android.icu.text.BreakIterator, java.util.Locale, int);
-    method public static java.lang.Object registerInstance(android.icu.text.BreakIterator, android.icu.util.ULocale, int);
     method public void setText(java.lang.String);
     method public abstract void setText(java.text.CharacterIterator);
-    method public static boolean unregister(java.lang.Object);
     field public static final int DONE = -1; // 0xffffffff
     field public static final int KIND_CHARACTER = 0; // 0x0
     field public static final int KIND_LINE = 2; // 0x2
@@ -15740,13 +15737,10 @@ package android.icu.text {
     method public abstract int getVariableTop();
     method public abstract android.icu.util.VersionInfo getVersion();
     method public boolean isFrozen();
-    method public static final java.lang.Object registerFactory(android.icu.text.Collator.CollatorFactory);
-    method public static final java.lang.Object registerInstance(android.icu.text.Collator, android.icu.util.ULocale);
     method public void setDecomposition(int);
     method public android.icu.text.Collator setMaxVariable(int);
     method public void setReorderCodes(int...);
     method public void setStrength(int);
-    method public static final boolean unregister(java.lang.Object);
     field public static final int CANONICAL_DECOMPOSITION = 17; // 0x11
     field public static final int FULL_DECOMPOSITION = 15; // 0xf
     field public static final int IDENTICAL = 15; // 0xf
@@ -15755,16 +15749,6 @@ package android.icu.text {
     field public static final int QUATERNARY = 3; // 0x3
     field public static final int SECONDARY = 1; // 0x1
     field public static final int TERTIARY = 2; // 0x2
-  }
-
-  public static abstract class Collator.CollatorFactory {
-    ctor protected Collator.CollatorFactory();
-    method public android.icu.text.Collator createCollator(android.icu.util.ULocale);
-    method public android.icu.text.Collator createCollator(java.util.Locale);
-    method public java.lang.String getDisplayName(java.util.Locale, java.util.Locale);
-    method public java.lang.String getDisplayName(android.icu.util.ULocale, android.icu.util.ULocale);
-    method public abstract java.util.Set<java.lang.String> getSupportedLocaleIDs();
-    method public boolean visible();
   }
 
   public static abstract interface Collator.ReorderCodes {
@@ -16626,7 +16610,6 @@ package android.icu.text {
     method public java.lang.Number parse(java.lang.String) throws java.text.ParseException;
     method public android.icu.util.CurrencyAmount parseCurrency(java.lang.CharSequence, java.text.ParsePosition);
     method public final java.lang.Object parseObject(java.lang.String, java.text.ParsePosition);
-    method public static java.lang.Object registerFactory(android.icu.text.NumberFormat.NumberFormatFactory);
     method public void setContext(android.icu.text.DisplayContext);
     method public void setCurrency(android.icu.util.Currency);
     method public void setGroupingUsed(boolean);
@@ -16637,7 +16620,6 @@ package android.icu.text {
     method public void setParseIntegerOnly(boolean);
     method public void setParseStrict(boolean);
     method public void setRoundingMode(int);
-    method public static boolean unregister(java.lang.Object);
     field public static final int ACCOUNTINGCURRENCYSTYLE = 7; // 0x7
     field public static final int CASHCURRENCYSTYLE = 8; // 0x8
     field public static final int CURRENCYSTYLE = 1; // 0x1
@@ -16664,28 +16646,6 @@ package android.icu.text {
     field public static final android.icu.text.NumberFormat.Field PERCENT;
     field public static final android.icu.text.NumberFormat.Field PERMILLE;
     field public static final android.icu.text.NumberFormat.Field SIGN;
-  }
-
-  public static abstract class NumberFormat.NumberFormatFactory {
-    ctor protected NumberFormat.NumberFormatFactory();
-    method public android.icu.text.NumberFormat createFormat(android.icu.util.ULocale, int);
-    method public android.icu.text.NumberFormat createFormat(java.util.Locale, int);
-    method public abstract java.util.Set<java.lang.String> getSupportedLocaleNames();
-    method public boolean visible();
-    field public static final int FORMAT_CURRENCY = 1; // 0x1
-    field public static final int FORMAT_INTEGER = 4; // 0x4
-    field public static final int FORMAT_NUMBER = 0; // 0x0
-    field public static final int FORMAT_PERCENT = 2; // 0x2
-    field public static final int FORMAT_SCIENTIFIC = 3; // 0x3
-  }
-
-  public static abstract class NumberFormat.SimpleNumberFormatFactory extends android.icu.text.NumberFormat.NumberFormatFactory {
-    ctor public NumberFormat.SimpleNumberFormatFactory(java.util.Locale);
-    ctor public NumberFormat.SimpleNumberFormatFactory(java.util.Locale, boolean);
-    ctor public NumberFormat.SimpleNumberFormatFactory(android.icu.util.ULocale);
-    ctor public NumberFormat.SimpleNumberFormatFactory(android.icu.util.ULocale, boolean);
-    method public final java.util.Set<java.lang.String> getSupportedLocaleNames();
-    method public final boolean visible();
   }
 
   public class NumberingSystem {
@@ -17616,8 +17576,6 @@ package android.icu.util {
     method public java.lang.String getSymbol(java.util.Locale);
     method public java.lang.String getSymbol(android.icu.util.ULocale);
     method public static boolean isAvailable(java.lang.String, java.util.Date, java.util.Date);
-    method public static java.lang.Object registerInstance(android.icu.util.Currency, android.icu.util.ULocale);
-    method public static boolean unregister(java.lang.Object);
     field public static final int LONG_NAME = 1; // 0x1
     field public static final int PLURAL_LONG_NAME = 2; // 0x2
     field public static final int SYMBOL_NAME = 0; // 0x0
