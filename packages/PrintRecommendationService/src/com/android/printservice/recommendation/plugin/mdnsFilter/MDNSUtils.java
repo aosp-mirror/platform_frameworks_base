@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.android.printservice.recommendation.util;
+package com.android.printservice.recommendation.plugin.mdnsFilter;
 
 import android.annotation.NonNull;
 import android.net.nsd.NsdServiceInfo;
@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * Utils for dealing with mDNS attributes
  */
-public class MDNSUtils {
+class MDNSUtils {
     public static final String ATTRIBUTE_TY = "ty";
     public static final String ATTRIBUTE_PRODUCT = "product";
     public static final String ATTRIBUTE_USB_MFG = "usb_mfg";
