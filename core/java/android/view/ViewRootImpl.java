@@ -1679,6 +1679,7 @@ public final class ViewRootImpl implements ViewParent,
 
         boolean insetsPending = false;
         int relayoutResult = 0;
+        boolean updatedConfiguration = false;
 
         final int surfaceGenerationId = mSurface.getGenerationId();
 
@@ -1741,6 +1742,7 @@ public final class ViewRootImpl implements ViewParent,
                             + mPendingConfiguration);
                     updateConfiguration(new Configuration(mPendingConfiguration), !mFirst);
                     mPendingConfiguration.seq = 0;
+                    updatedConfiguration = true;
                 }
 
                 final boolean overscanInsetsChanged = !mPendingOverscanInsets.equals(
@@ -1978,7 +1980,8 @@ public final class ViewRootImpl implements ViewParent,
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                         (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
-                        || mHeight != host.getMeasuredHeight() || contentInsetsChanged) {
+                        || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||
+                        updatedConfiguration) {
                     int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                     int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
 
