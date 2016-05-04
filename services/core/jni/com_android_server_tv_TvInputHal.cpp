@@ -54,7 +54,6 @@ static struct {
     jmethodID maxWidth;
     jmethodID maxHeight;
     jmethodID generation;
-    jmethodID flags;
     jmethodID build;
 } gTvStreamConfigBuilderClassInfo;
 
@@ -240,7 +239,7 @@ public:
 
     int addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface);
     int removeStream(int deviceId, int streamId);
-    const tv_stream_config_ext_t* getStreamConfigs(int deviceId, int* numConfigs);
+    const tv_stream_config_t* getStreamConfigs(int deviceId, int* numConfigs);
 
     void onDeviceAvailable(const tv_input_device_info_t& info);
     void onDeviceUnavailable(int deviceId);
@@ -289,15 +288,10 @@ private:
     sp<Looper> mLooper;
 
     KeyedVector<int, KeyedVector<int, Connection> > mConnections;
-
-    tv_stream_config_ext_t* mConfigBuffer;
-    int mConfigBufferSize;
 };
 
 JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device,
-        const sp<Looper>& looper)
-    : mConfigBuffer(NULL),
-      mConfigBufferSize(0) {
+        const sp<Looper>& looper) {
     mThiz = env->NewWeakGlobalRef(thiz);
     mDevice = device;
     mCallback.notify = &JTvInputHal::notify;
@@ -312,10 +306,6 @@ JTvInputHal::~JTvInputHal() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteWeakGlobalRef(mThiz);
     mThiz = NULL;
-
-    if (mConfigBuffer != NULL) {
-        delete[] mConfigBuffer;
-    }
 }
 
 JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper) {
@@ -364,14 +354,15 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
     if (connection.mSourceHandle == NULL && connection.mThread == NULL) {
         // Need to configure stream
         int numConfigs = 0;
-        const tv_stream_config_ext_t* configs = getStreamConfigs(deviceId, &numConfigs);
-        if (configs == NULL) {
+        const tv_stream_config_t* configs = NULL;
+        if (mDevice->get_stream_configurations(
+                mDevice, deviceId, &numConfigs, &configs) != 0) {
             ALOGE("Couldn't get stream configs");
             return UNKNOWN_ERROR;
         }
         int configIndex = -1;
         for (int i = 0; i < numConfigs; ++i) {
-            if (configs[i].config.stream_id == streamId) {
+            if (configs[i].stream_id == streamId) {
                 configIndex = i;
                 break;
             }
@@ -380,13 +371,13 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
             ALOGE("Cannot find a config with given stream ID: %d", streamId);
             return BAD_VALUE;
         }
-        connection.mStreamType = configs[configIndex].config.type;
+        connection.mStreamType = configs[configIndex].type;
 
         tv_stream_t stream;
-        stream.stream_id = configs[configIndex].config.stream_id;
+        stream.stream_id = configs[configIndex].stream_id;
         if (connection.mStreamType == TV_STREAM_TYPE_BUFFER_PRODUCER) {
-            stream.buffer_producer.width = configs[configIndex].config.max_video_width;
-            stream.buffer_producer.height = configs[configIndex].config.max_video_height;
+            stream.buffer_producer.width = configs[configIndex].max_video_width;
+            stream.buffer_producer.height = configs[configIndex].max_video_height;
         }
         if (mDevice->open_stream(mDevice, deviceId, &stream) != 0) {
             ALOGE("Couldn't add stream");
@@ -440,33 +431,12 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
     return NO_ERROR;
 }
 
-const tv_stream_config_ext_t* JTvInputHal::getStreamConfigs(int deviceId, int* numConfigs) {
-    const tv_stream_config_ext_t* configs = NULL;
-    if (mDevice->common.version >= TV_INPUT_DEVICE_API_VERSION_0_2) {
-        if (mDevice->get_stream_configurations_ext(
-                mDevice, deviceId, numConfigs, &configs) != 0) {
-            ALOGE("Couldn't get stream configs");
-            return NULL;
-        }
-    } else {
-        const tv_stream_config_t* oldConfigs;
-        if (mDevice->get_stream_configurations(
-                mDevice, deviceId, numConfigs, &oldConfigs) != 0) {
-            ALOGE("Couldn't get stream configs");
-            return NULL;
-        }
-        if (mConfigBufferSize < *numConfigs) {
-            mConfigBufferSize = (*numConfigs / 16 + 1) * 16;
-            if (mConfigBuffer != NULL) {
-                delete[] mConfigBuffer;
-            }
-            mConfigBuffer = new tv_stream_config_ext_t[mConfigBufferSize];
-        }
-        for (int i = 0; i < *numConfigs; ++i) {
-            mConfigBuffer[i].config = oldConfigs[i];
-            mConfigBuffer[i].flags = 0;
-        }
-        configs = mConfigBuffer;
+const tv_stream_config_t* JTvInputHal::getStreamConfigs(int deviceId, int* numConfigs) {
+    const tv_stream_config_t* configs = NULL;
+    if (mDevice->get_stream_configurations(
+            mDevice, deviceId, numConfigs, &configs) != 0) {
+        ALOGE("Couldn't get stream configs");
+        return NULL;
     }
     return configs;
 }
@@ -659,7 +629,7 @@ static jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
         jlong ptr, jint deviceId, jint generation) {
     JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
     int numConfigs = 0;
-    const tv_stream_config_ext_t* configs = tvInputHal->getStreamConfigs(deviceId, &numConfigs);
+    const tv_stream_config_t* configs = tvInputHal->getStreamConfigs(deviceId, &numConfigs);
 
     jobjectArray result = env->NewObjectArray(numConfigs, gTvStreamConfigClassInfo.clazz, NULL);
     for (int i = 0; i < numConfigs; ++i) {
@@ -667,20 +637,15 @@ static jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
                 gTvStreamConfigBuilderClassInfo.clazz,
                 gTvStreamConfigBuilderClassInfo.constructor);
         env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.streamId, configs[i].config.stream_id);
+                builder, gTvStreamConfigBuilderClassInfo.streamId, configs[i].stream_id);
         env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.type, configs[i].config.type);
+                builder, gTvStreamConfigBuilderClassInfo.type, configs[i].type);
         env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.maxWidth,
-                configs[i].config.max_video_width);
+                builder, gTvStreamConfigBuilderClassInfo.maxWidth, configs[i].max_video_width);
         env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.maxHeight,
-                configs[i].config.max_video_height);
+                builder, gTvStreamConfigBuilderClassInfo.maxHeight, configs[i].max_video_height);
         env->CallObjectMethod(
                 builder, gTvStreamConfigBuilderClassInfo.generation, generation);
-        env->CallObjectMethod(
-                builder, gTvStreamConfigBuilderClassInfo.flags,
-                configs[i].flags);
 
         jobject config = env->CallObjectMethod(builder, gTvStreamConfigBuilderClassInfo.build);
 
@@ -771,10 +736,6 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
             gTvStreamConfigBuilderClassInfo.generation,
             gTvStreamConfigBuilderClassInfo.clazz,
             "generation", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
-    GET_METHOD_ID(
-            gTvStreamConfigBuilderClassInfo.flags,
-            gTvStreamConfigBuilderClassInfo.clazz,
-            "flags", "(I)Landroid/media/tv/TvStreamConfig$Builder;");
     GET_METHOD_ID(
             gTvStreamConfigBuilderClassInfo.build,
             gTvStreamConfigBuilderClassInfo.clazz,
