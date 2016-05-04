@@ -44,9 +44,14 @@ class Texture;
 
 namespace VertexAttribFlags {
     enum {
+        // Mesh is pure x,y vertex pairs
         None = 0,
+        // Mesh has texture coordinates embedded. Note that texture can exist without this flag
+        // being set, if coordinates passed to sampler are determined another way.
         TextureCoord = 1 << 0,
+        // Mesh has color embedded (to export to varying)
         Color = 1 << 1,
+        // Mesh has alpha embedded (to export to varying)
         Alpha = 1 << 2,
     };
 };
