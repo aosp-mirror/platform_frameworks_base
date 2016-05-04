@@ -28,15 +28,8 @@ import android.util.Log;
 public class TvStreamConfig implements Parcelable {
     static final String TAG = TvStreamConfig.class.getSimpleName();
 
-    // Must be in sync with tv_input.h
     public final static int STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE = 1;
     public final static int STREAM_TYPE_BUFFER_PRODUCER = 2;
-    /**
-     * A flag indicating whether the HAL is sure about signal at this stream. Note that
-     * value of 0 here does not necessarily mean no signal. It just means that it may not have
-     * signal and the underlying layer is not sure.
-     */
-    public static final int FLAG_MASK_SIGNAL_DETECTION = 0x1;
 
     private int mStreamId;
     private int mType;
@@ -48,10 +41,6 @@ public class TvStreamConfig implements Parcelable {
      * via tv_input_device::get_stream_configurations().
      */
     private int mGeneration;
-    /**
-     * Flags for stream status. See FLAG_MASK_* for details.
-     */
-    private int mFlags;
 
     public static final Parcelable.Creator<TvStreamConfig> CREATOR =
             new Parcelable.Creator<TvStreamConfig>() {
@@ -63,8 +52,7 @@ public class TvStreamConfig implements Parcelable {
                         type(source.readInt()).
                         maxWidth(source.readInt()).
                         maxHeight(source.readInt()).
-                        generation(source.readInt()).
-                        flags(source.readInt()).build();
+                        generation(source.readInt()).build();
             } catch (Exception e) {
                 Log.e(TAG, "Exception creating TvStreamConfig from parcel", e);
                 return null;
@@ -99,10 +87,6 @@ public class TvStreamConfig implements Parcelable {
         return mGeneration;
     }
 
-    public int getFlags() {
-        return mFlags;
-    }
-
     @Override
     public String toString() {
         return "TvStreamConfig {mStreamId=" + mStreamId + ";" + "mType=" + mType + ";mGeneration="
@@ -122,7 +106,6 @@ public class TvStreamConfig implements Parcelable {
         dest.writeInt(mMaxWidth);
         dest.writeInt(mMaxHeight);
         dest.writeInt(mGeneration);
-        dest.writeInt(mFlags);
     }
 
     /**
@@ -134,7 +117,6 @@ public class TvStreamConfig implements Parcelable {
         private Integer mMaxWidth;
         private Integer mMaxHeight;
         private Integer mGeneration;
-        private int mFlags = 0;
 
         public Builder() {
         }
@@ -164,11 +146,6 @@ public class TvStreamConfig implements Parcelable {
             return this;
         }
 
-        public Builder flags(int flag) {
-            mFlags = flag;
-            return this;
-        }
-
         public TvStreamConfig build() {
             if (mStreamId == null || mType == null || mMaxWidth == null || mMaxHeight == null
                     || mGeneration == null) {
@@ -181,7 +158,6 @@ public class TvStreamConfig implements Parcelable {
             config.mMaxWidth = mMaxWidth;
             config.mMaxHeight = mMaxHeight;
             config.mGeneration = mGeneration;
-            config.mFlags = mFlags;
             return config;
         }
     }
@@ -196,7 +172,6 @@ public class TvStreamConfig implements Parcelable {
             && config.mStreamId == mStreamId
             && config.mType == mType
             && config.mMaxWidth == mMaxWidth
-            && config.mMaxHeight == mMaxHeight
-            && config.mFlags == mFlags;
+            && config.mMaxHeight == mMaxHeight;
     }
 }
