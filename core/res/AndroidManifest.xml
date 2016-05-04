@@ -1023,7 +1023,8 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to send SMS to premium shortcodes without user permission.
-         <p>Not for use by third-party applications. -->
+         <p>Not for use by third-party applications.
+         @hide -->
     <permission android:name="android.permission.SEND_SMS_NO_CONFIRMATION"
         android:protectionLevel="signature|privileged" />
 
@@ -1034,7 +1035,8 @@
 
     <!-- @SystemApi Allows an application to receive emergency cell broadcast messages,
          to record or display them to the user.
-         <p>Not for use by third-party applications. -->
+         <p>Not for use by third-party applications.
+         @hide -->
     <permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST"
         android:protectionLevel="signature|privileged" />
 
