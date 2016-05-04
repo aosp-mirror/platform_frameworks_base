@@ -31,8 +31,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMEN
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.DO_TRAVERSAL;
@@ -131,6 +133,12 @@ class WindowSurfacePlacer {
 
     private boolean mSustainedPerformanceModeEnabled = false;
     private boolean mSustainedPerformanceModeCurrent = false;
+
+    // Following variables are for debugging screen wakelock only.
+    // Last window that requires screen wakelock
+    WindowState mHoldScreenWindow = null;
+    // Last window that obscures all windows below
+    WindowState mObsuringWindow = null;
 
     private static final class LayerAndToken {
         public int layer;
@@ -288,6 +296,8 @@ class WindowSurfacePlacer {
         }
 
         mHoldScreen = null;
+        mHoldScreenWindow = null;
+        mObsuringWindow = null;
         mScreenBrightness = -1;
         mButtonBrightness = -1;
         mUserActivityTimeout = -1;
@@ -1425,12 +1435,21 @@ class WindowSurfacePlacer {
             // This window completely covers everything behind it,
             // so we want to leave all of them as undimmed (for
             // performance reasons).
+            if (!mObscured) {
+                mObsuringWindow = w;
+            }
+
             mObscured = true;
         }
 
         if (w.mHasSurface) {
             if ((attrFlags&FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
+                mHoldScreenWindow = w;
+            } else if (DEBUG_KEEP_SCREEN_ON && w == mService.mLastWakeLockHoldingWindow) {
+                Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked: " + w + " was holding "
+                        + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!! called by"
+                        + Debug.getCallers(10));
             }
             if (!mSyswin && w.mAttrs.screenBrightness >= 0
                     && mScreenBrightness < 0) {
@@ -1686,5 +1705,7 @@ class WindowSurfacePlacer {
 
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mTraversalScheduled="); pw.println(mTraversalScheduled);
+        pw.print(prefix); pw.print("mHoldScreenWindow="); pw.println(mHoldScreenWindow);
+        pw.print(prefix); pw.print("mObsuringWindow="); pw.println(mObsuringWindow);
     }
 }
