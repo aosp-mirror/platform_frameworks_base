@@ -179,6 +179,7 @@ public class CallLog {
          * <li>{@link #VOICEMAIL_TYPE}</li>
          * <li>{@link #REJECTED_TYPE}</li>
          * <li>{@link #BLOCKED_TYPE}</li>
+         * <li>{@link #ANSWERED_EXTERNALLY_TYPE}</li>
          * </ul>
          * </p>
          */
@@ -200,7 +201,6 @@ public class CallLog {
          * Call log type for a call which was answered on another device.  Used in situations where
          * a call rings on multiple devices simultaneously and it ended up being answered on a
          * device other than the current one.
-         * @hide
          */
         public static final int ANSWERED_EXTERNALLY_TYPE = 7;
 
@@ -214,10 +214,7 @@ public class CallLog {
         /** Call had video. */
         public static final int FEATURES_VIDEO = 0x1;
 
-        /**
-         * Call was pulled externally.
-         * @hide
-         */
+        /** Call was pulled externally. */
         public static final int FEATURES_PULLED_EXTERNALLY = 0x2;
 
         /**

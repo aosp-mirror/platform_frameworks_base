@@ -95,7 +95,6 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param connectionProperties The new properties of the {@code RemoteConnection}.
-         * @hide
          */
         public void onConnectionPropertiesChanged(
                 RemoteConnection connection,
@@ -230,7 +229,6 @@ public final class RemoteConnection {
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param event The connection event.
          * @param extras Extras associated with the event.
-         * @hide
          */
         public void onConnectionEvent(RemoteConnection connection, String event, Bundle extras) {}
     }
@@ -738,7 +736,6 @@ public final class RemoteConnection {
      *
      * @return A bitmask of the properties of the {@code RemoteConnection}, as defined in the
      *         {@code PROPERTY_*} constants in class {@link Connection}.
-     * @hide
      */
     public int getConnectionProperties() {
         return mConnectionProperties;
@@ -993,7 +990,6 @@ public final class RemoteConnection {
      * Instructs this {@link RemoteConnection} to pull itself to the local device.
      * <p>
      * See {@link Call#pullExternalCall()} for more information.
-     * @hide
      */
     public void pullExternalCall() {
         try {

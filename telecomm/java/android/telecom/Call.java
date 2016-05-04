@@ -104,7 +104,6 @@ public final class Call {
      * An {@link InCallService} will only see this state if it has the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true} in its
      * manifest.
-     * @hide
      */
     public static final int STATE_PULLING_CALL = 11;
 
@@ -252,7 +251,6 @@ public final class Call {
          * <p>
          * See {@link Connection#CAPABILITY_CAN_PULL_CALL} and
          * {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
-         * @hide
          */
         public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
@@ -305,7 +303,6 @@ public final class Call {
          * in its manifest.
          * <p>
          * See {@link Connection#PROPERTY_IS_EXTERNAL_CALL}.
-         * @hide
          */
         public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
 
@@ -786,7 +783,6 @@ public final class Call {
          * @param call The {@code Call} receiving the event.
          * @param event The event.
          * @param extras Extras associated with the connection event.
-         * @hide
          */
         public void onConnectionEvent(Call call, String event, Bundle extras) {}
     }
@@ -965,7 +961,6 @@ public final class Call {
      * An {@link InCallService} will only see calls which support this method if it has the
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
      * in its manifest.
-     * @hide
      */
     public void pullExternalCall() {
         // If this isn't an external call, ignore the request.
@@ -988,7 +983,6 @@ public final class Call {
      *
      * @param event The connection event.
      * @param extras Bundle containing extra information associated with the event.
-     * @hide
      */
     public void sendCallEvent(String event, Bundle extras) {
         mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
@@ -1002,7 +996,6 @@ public final class Call {
      * extras.  Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
      *
      * @param extras The extras to add.
-     * @hide
      */
     public final void putExtras(Bundle extras) {
         if (extras == null) {
@@ -1065,7 +1058,6 @@ public final class Call {
      * Removes extras from this {@code Connection}.
      *
      * @param keys The keys of the extras to remove.
-     * @hide
      */
     public final void removeExtras(List<String> keys) {
         if (mExtras != null) {
