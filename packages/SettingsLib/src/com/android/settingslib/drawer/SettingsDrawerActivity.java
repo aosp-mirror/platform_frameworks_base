@@ -277,6 +277,13 @@ public class SettingsDrawerActivity extends Activity {
         }
     }
 
+    public HashMap<Pair<String, String>, Tile> getTileCache() {
+        if (sTileCache == null) {
+            getDashboardCategories();
+        }
+        return sTileCache;
+    }
+
     public void onProfileTileOpen() {
         finish();
     }
