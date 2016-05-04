@@ -2470,8 +2470,8 @@ public class AudioTrack extends PlayerBase
     //--------------------
     /**
      * The list of AudioRouting.OnRoutingChangedListener interfaces added (with
-     * {@link AudioRecord#addOnRoutingChangedListener} by an app to receive
-     * (re)routing notifications.
+     * {@link #addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, Handler)}
+     * by an app to receive (re)routing notifications.
      */
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
