@@ -1,27 +1,27 @@
 <?cs
-set:studio.version='2.1.0.9' ?><?cs
-set:studio.release.date='April 26, 2016' ?><?cs
+set:studio.version='2.1.1.0' ?><?cs
+set:studio.release.date='May 11, 2016' ?><?cs
 
 
-set:studio.linux_bundle_download='android-studio-ide-143.2790544-linux.zip' ?><?cs
-set:studio.linux_bundle_bytes='298122012' ?><?cs
-set:studio.linux_bundle_checksum='45dad9b76ad0506c354483aaa67ea0e2468d03a5' ?><?cs
+set:studio.linux_bundle_download='android-studio-ide-143.2821654-linux.zip' ?><?cs
+set:studio.linux_bundle_bytes='298125051' ?><?cs
+set:studio.linux_bundle_checksum='55d69ad2da0068d818718b26ba43550fbcbeb7e9' ?><?cs
 
-set:studio.mac_bundle_download='android-studio-ide-143.2790544-mac.dmg' ?><?cs
-set:studio.mac_bundle_bytes='298589307' ?><?cs
-set:studio.mac_bundle_checksum='d667d93ae2e4e0f3fc1b95743329a46222dbf11d' ?><?cs
+set:studio.mac_bundle_download='android-studio-ide-143.2821654-mac.dmg' ?><?cs
+set:studio.mac_bundle_bytes='298597716' ?><?cs
+set:studio.mac_bundle_checksum='4a7ca7532a95c65ee59ed50193c0e976f0272472' ?><?cs
 
-set:studio.win_bundle_download='android-studio-ide-143.2790544-windows.zip' ?><?cs
-set:studio.win_bundle_bytes='300627540' ?><?cs
-set:studio.win_bundle_checksum='9689ba415e5f09e2dcf5263ea302e7b1d98a8fc6' ?><?cs
+set:studio.win_bundle_download='android-studio-ide-143.2821654-windows.zip' ?><?cs
+set:studio.win_bundle_bytes='300630577' ?><?cs
+set:studio.win_bundle_checksum='9bec4905e40f0ac16ac7fde63a50f3fbc1eec4d9' ?><?cs
 
-set:studio.win_bundle_exe_download='android-studio-bundle-143.2790544-windows.exe' ?><?cs
-set:studio.win_bundle_exe_bytes='1238568304' ?><?cs
-set:studio.win_bundle_exe_checksum='c6abe7980dbb7d1d9887f7341a2942c9e506f891' ?><?cs
+set:studio.win_bundle_exe_download='android-studio-bundle-143.2821654-windows.exe' ?><?cs
+set:studio.win_bundle_exe_bytes='1238569296' ?><?cs
+set:studio.win_bundle_exe_checksum='6f7fcdc30800bd8b3fbd5a14c2b9857243144650' ?><?cs
 
-set:studio.win_notools_exe_download='android-studio-ide-143.2790544-windows.exe' ?><?cs
-set:studio.win_notools_exe_bytes='283804056' ?><?cs
-set:studio.win_notools_exe_checksum='a2065ba737ddcfb96f4921fee6a038278f46d2a7' ?><?cs
+set:studio.win_notools_exe_download='android-studio-ide-143.2821654-windows.exe' ?><?cs
+set:studio.win_notools_exe_bytes='283805040' ?><?cs
+set:studio.win_notools_exe_checksum='d8cb3968814b6155f4effe727baf23b18b9f8360' ?><?cs
 
 
 

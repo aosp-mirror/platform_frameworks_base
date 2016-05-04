@@ -53,6 +53,18 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content open">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>Android Studio v2.1.1</a> <em>(May 2016)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Security release update.</p>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/styles/disclosure_down.png" class="toggle-content-img"
       alt=""/>Android Studio v2.1.0</a> <em>(April 2016)</em>
   </p>
   <div class="toggle-content-toggleme">
