@@ -134,7 +134,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             TileRecord tile = mTiles.get(i);
             if (mPages.get(index).isFull()) {
                 if (++index == mPages.size()) {
-                    if (DEBUG) Log.d(TAG, "Adding page for " + tile.tile.getClass().getSimpleName());
+                    if (DEBUG) Log.d(TAG, "Adding page for "
+                            + tile.tile.getClass().getSimpleName());
                     mPages.add((TilePage) LayoutInflater.from(mContext)
                             .inflate(R.layout.qs_paged_page, this, false));
                 }
@@ -145,7 +146,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         if (mNumPages != index + 1) {
             mNumPages = index + 1;
+            while (mPages.size() > mNumPages) {
+                mPages.remove(mPages.size() - 1);
+            }
+            if (DEBUG) Log.d(TAG, "Size: " + mNumPages);
             mPageIndicator.setNumPages(mNumPages);
+            setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
             setCurrentItem(0, false);
         }
@@ -231,7 +237,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private final PagerAdapter mAdapter = new PagerAdapter() {
         public void destroyItem(ViewGroup container, int position, Object object) {
             if (DEBUG) Log.d(TAG, "Destantiating " + position);
-            // TODO: Find way to clean up the extra pages.
             container.removeView((View) object);
         }
 
