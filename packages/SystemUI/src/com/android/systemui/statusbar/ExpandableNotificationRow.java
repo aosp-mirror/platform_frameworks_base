@@ -669,6 +669,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mRemoved = removed;
     }
 
+    public NotificationChildrenContainer getChildrenContainer() {
+        return mChildrenContainer;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
