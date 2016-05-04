@@ -26,6 +26,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:baselineAligned="false"
+    android:clickable="false"
     >
 
     <LinearLayout
@@ -64,7 +65,7 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/ripple_drawable"
                 android:src="@drawable/ic_settings"
-                android:contentDescription="@string/accessibility_desc_settings" />
+                android:contentDescription="@string/accessibility_quick_settings_settings" />
             <com.android.systemui.statusbar.AlphaOptimizedImageView android:id="@+id/tuner_icon"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -102,7 +103,8 @@
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
         android:text="@*android:string/emergency_calls_only"
         android:singleLine="true"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        android:focusable="true" />
 
     <LinearLayout
         android:id="@+id/date_time_alarm_group"
@@ -118,7 +120,8 @@
             android:id="@+id/date_time_group"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:focusable="true" >
 
             <include layout="@layout/split_clock_view"
                 android:layout_width="wrap_content"
@@ -176,7 +179,11 @@
         android:layout_marginEnd="12dp"
         android:layout_alignParentEnd="true"
         android:clipChildren="false"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:importantForAccessibility="yes"
+        android:focusable="true"
+        android:accessibilityTraversalAfter="@id/date_time_group"
+        android:accessibilityTraversalBefore="@id/expand_indicator" />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
