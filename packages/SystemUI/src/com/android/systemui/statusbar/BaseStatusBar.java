@@ -457,9 +457,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
             row.setUserExpanded(true);
 
-            if (isLockscreenPublicMode() && !mAllowLockscreenRemoteInput) {
-                onLockedRemoteInput(row, view);
-                return true;
+            if (!mAllowLockscreenRemoteInput) {
+                if (isLockscreenPublicMode()) {
+                    onLockedRemoteInput(row, view);
+                    return true;
+                }
+                final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
+                if (mUserManager.getUserInfo(userId).isManagedProfile()
+                        && mKeyguardManager.isDeviceLocked(userId)) {
+                    onLockedWorkRemoteInput(userId, row, view);
+                    return true;
+                }
             }
 
             riv.setVisibility(View.VISIBLE);
@@ -540,16 +548,21 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else if (WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION.equals(action)) {
                 final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
                 final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
-                try {
-                    mContext.startIntentSender(intentSender, null, 0, 0, 0);
-                } catch (IntentSender.SendIntentException e) {
-                    /* ignore */
+                if (intentSender != null) {
+                    try {
+                        mContext.startIntentSender(intentSender, null, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+                        /* ignore */
+                    }
                 }
-                try {
-                    mBarService.onNotificationClick(notificationKey);
-                } catch (RemoteException e) {
-                    /* ignore */
+                if (notificationKey != null) {
+                    try {
+                        mBarService.onNotificationClick(notificationKey);
+                    } catch (RemoteException e) {
+                        /* ignore */
+                    }
                 }
+                onWorkChallengeUnlocked();
             }
         }
     };
@@ -1389,6 +1402,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         return mLockscreenPublicMode;
     }
 
+    protected void onWorkChallengeUnlocked() {}
+
     /**
      * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
      * "public" (secure & locked) mode?
@@ -1497,6 +1512,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void onLockedNotificationImportanceChange(OnDismissAction dismissAction) {}
 
     protected void onLockedRemoteInput(ExpandableNotificationRow row, View clickedView) {}
+
+    protected void onLockedWorkRemoteInput(int userId, ExpandableNotificationRow row,
+            View clicked) {}
 
     @Override
     public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
@@ -1925,39 +1943,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             }, afterKeyguardGone);
         }
 
-        public boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
-                String notificationKey) {
-            final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
-                    null, userId);
-            if (newIntent == null) {
-                return false;
-            }
-            final Intent callBackIntent = new Intent(
-                    WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION);
-            callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
-            callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
-            callBackIntent.setPackage(mContext.getPackageName());
-
-            PendingIntent callBackPendingIntent = PendingIntent.getBroadcast(
-                    mContext,
-                    0,
-                    callBackIntent,
-                    PendingIntent.FLAG_CANCEL_CURRENT |
-                            PendingIntent.FLAG_ONE_SHOT |
-                            PendingIntent.FLAG_IMMUTABLE
-            );
-            newIntent.putExtra(
-                    Intent.EXTRA_INTENT,
-                    callBackPendingIntent.getIntentSender()
-            );
-            try {
-                ActivityManagerNative.getDefault().startConfirmDeviceCredentialIntent(newIntent);
-            } catch (RemoteException ex) {
-                // ignore
-            }
-            return true;
-        }
-
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
             Notification notification = sbn.getNotification();
             if (notification.contentIntent != null || notification.fullScreenIntent != null) {
@@ -1982,6 +1967,37 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Log.w(TAG, "Error overriding app transition: " + e);
             }
         }
+    }
+
+    protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
+            String notificationKey) {
+        final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
+                null, userId);
+        if (newIntent == null) {
+            return false;
+        }
+        final Intent callBackIntent = new Intent(
+                WORK_CHALLENGE_UNLOCKED_NOTIFICATION_ACTION);
+        callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
+        callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
+        callBackIntent.setPackage(mContext.getPackageName());
+
+        PendingIntent callBackPendingIntent = PendingIntent.getBroadcast(
+                mContext,
+                0,
+                callBackIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT |
+                        PendingIntent.FLAG_ONE_SHOT |
+                        PendingIntent.FLAG_IMMUTABLE);
+        newIntent.putExtra(
+                Intent.EXTRA_INTENT,
+                callBackPendingIntent.getIntentSender());
+        try {
+            ActivityManagerNative.getDefault().startConfirmDeviceCredentialIntent(newIntent);
+        } catch (RemoteException ex) {
+            // ignore
+        }
+        return true;
     }
 
     protected Bundle getActivityOptions() {
