@@ -18,13 +18,11 @@ package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
 
-import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.StrictMode;
 import android.text.Html;
 import android.text.Spannable;
@@ -742,20 +740,15 @@ public class ClipData implements Parcelable {
         if ("content".equals(uri.getScheme())) {
             String realType = resolver.getType(uri);
             mimeTypes = resolver.getStreamTypes(uri, "*/*");
-            if (mimeTypes == null) {
-                if (realType != null) {
-                    mimeTypes = new String[] { realType, ClipDescription.MIMETYPE_TEXT_URILIST };
-                }
-            } else {
-                String[] tmp = new String[mimeTypes.length + (realType != null ? 2 : 1)];
-                int i = 0;
-                if (realType != null) {
+            if (realType != null) {
+                if (mimeTypes == null) {
+                    mimeTypes = new String[] { realType };
+                } else {
+                    String[] tmp = new String[mimeTypes.length + 1];
                     tmp[0] = realType;
-                    i++;
+                    System.arraycopy(mimeTypes, 0, tmp, 1, mimeTypes.length);
+                    mimeTypes = tmp;
                 }
-                System.arraycopy(mimeTypes, 0, tmp, i, mimeTypes.length);
-                tmp[i + mimeTypes.length] = ClipDescription.MIMETYPE_TEXT_URILIST;
-                mimeTypes = tmp;
             }
         }
         if (mimeTypes == null) {
@@ -787,9 +780,14 @@ public class ClipData implements Parcelable {
     public ClipDescription getDescription() {
         return mClipDescription;
     }
-    
+
     /**
      * Add a new Item to the overall ClipData container.
+     * <p> This method will <em>not</em> update the list of available MIME types in the
+     * {@link ClipDescription}. It should be used only when adding items which do not add new
+     * MIME types to this clip. If this is not the case, {@link #ClipData(CharSequence, String[],
+     * Item)} should be used with a complete list of MIME types.
+     * @param item Item to be added.
      */
     public void addItem(Item item) {
         if (item == null) {
