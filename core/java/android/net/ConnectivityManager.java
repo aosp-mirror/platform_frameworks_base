@@ -797,14 +797,16 @@ public class ConnectivityManager {
      * @param userId The identifier of the user to set an always-on VPN for.
      * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
      *                   to remove an existing always-on VPN configuration.
-
+     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
+     *        {@code false} otherwise.
      * @return {@code true} if the package is set as always-on VPN controller;
      *         {@code false} otherwise.
      * @hide
      */
-    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage) {
+    public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
+            boolean lockdownEnabled) {
         try {
-            return mService.setAlwaysOnVpnPackage(userId, vpnPackage);
+            return mService.setAlwaysOnVpnPackage(userId, vpnPackage, lockdownEnabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
