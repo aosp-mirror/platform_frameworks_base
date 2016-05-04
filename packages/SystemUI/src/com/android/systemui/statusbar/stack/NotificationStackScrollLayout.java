@@ -36,8 +36,10 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -331,6 +333,20 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadedOut;
+    private boolean mGroupExpandedForMeasure;
+    private float mBackgroundFadeAmount = 1.0f;
+    private static final Property<NotificationStackScrollLayout, Float> BACKGROUND_FADE =
+            new FloatProperty<NotificationStackScrollLayout>("backgroundFade") {
+                @Override
+                public void setValue(NotificationStackScrollLayout object, float value) {
+                    object.setBackgroundFadeAmount(value);
+                }
+
+                @Override
+                public Float get(NotificationStackScrollLayout object) {
+                    return object.getBackgroundFadeAmount();
+                }
+            };
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -406,14 +422,18 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void updateBackgroundDimming() {
         float alpha = BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
+        alpha *= mBackgroundFadeAmount;
         // We need to manually blend in the background color
         int scrimColor = mScrimController.getScrimBehindColor();
         // SRC_OVER blending Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc
         float alphaInv = 1 - alpha;
         int color = Color.argb((int) (alpha * 255 + alphaInv * Color.alpha(scrimColor)),
-                (int) (Color.red(mBgColor) + alphaInv * Color.red(scrimColor)),
-                (int) (Color.green(mBgColor) + alphaInv * Color.green(scrimColor)),
-                (int) (Color.blue(mBgColor) + alphaInv * Color.blue(scrimColor)));
+                (int) (mBackgroundFadeAmount * Color.red(mBgColor)
+                        + alphaInv * Color.red(scrimColor)),
+                (int) (mBackgroundFadeAmount * Color.green(mBgColor)
+                        + alphaInv * Color.green(scrimColor)),
+                (int) (mBackgroundFadeAmount * Color.blue(mBgColor)
+                        + alphaInv * Color.blue(scrimColor)));
         mBackgroundPaint.setColor(color);
         invalidate();
     }
@@ -928,6 +948,30 @@ public class NotificationStackScrollLayout extends ViewGroup
             mMaxScrollAfterExpand = mOwnScrollY;
             mExpandedInThisMotion = true;
         }
+    }
+
+    @Override
+    public int getMaxExpandHeight(ExpandableView view) {
+        int maxContentHeight = view.getMaxContentHeight();
+        if (view.isSummaryWithChildren()) {
+            // Faking a measure with the group expanded to simulate how the group would look if
+            // it was. Doing a calculation here would be highly non-trivial because of the
+            // algorithm
+            mGroupExpandedForMeasure = true;
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            mGroupManager.toggleGroupExpansion(row.getStatusBarNotification());
+            row.setForceUnlocked(true);
+            mAmbientState.setLayoutHeight(mMaxLayoutHeight);
+            mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
+            mAmbientState.setLayoutHeight(getLayoutHeight());
+            mGroupManager.toggleGroupExpansion(
+                    row.getStatusBarNotification());
+            mGroupExpandedForMeasure = false;
+            row.setForceUnlocked(false);
+            int height = mCurrentStackScrollState.getViewStateForView(view).height;
+            return Math.min(height, maxContentHeight);
+        }
+        return maxContentHeight;
     }
 
     public void setScrollingEnabled(boolean enable) {
@@ -1559,6 +1603,24 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @return the child before the given view which has visibility unequal to GONE
+     */
+    public ExpandableView getViewBeforeView(ExpandableView view) {
+        ExpandableView previousView = null;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child == view) {
+                return previousView;
+            }
+            if (child.getVisibility() != View.GONE) {
+                previousView = (ExpandableView) child;
+            }
+        }
+        return null;
+    }
+
+    /**
      * @return The first child which has visibility unequal to GONE which is currently below the
      *         given translationY or equal to it.
      */
@@ -1600,14 +1662,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         return count;
-    }
-
-    private int getMaxExpandHeight(View view) {
-        if (view instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-            return row.getIntrinsicHeight();
-        }
-        return view.getHeight();
     }
 
     public int getContentHeight() {
@@ -2580,6 +2634,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             AnimationEvent ev = new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK);
             ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
             mAnimationEvents.add(ev);
+            startBackgroundFadeIn();
         }
         mDarkNeedsAnimation = false;
     }
@@ -2885,14 +2940,18 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (row.isChildInGroup()) {
                     endPosition += row.getNotificationParent().getTranslationY();
                 }
-                int stackEnd = mMaxLayoutHeight - mBottomStackPeekSize -
-                        mBottomStackSlowDownHeight + (int) mStackTranslation;
+                int stackEnd = getStackEndPosition();
                 if (endPosition > stackEnd) {
                     mOwnScrollY += endPosition - stackEnd;
                     mDisallowScrollingInThisMotion = true;
                 }
             }
         }
+    }
+
+    private int getStackEndPosition() {
+        return mMaxLayoutHeight - mBottomStackPeekSize - mBottomStackSlowDownHeight
+                + mPaddingBetweenElements + (int) mStackTranslation;
     }
 
     public void setOnHeightChangedListener(
@@ -3080,6 +3139,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDarkNeedsAnimation = true;
             mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation =  true;
+            setBackgroundFadeAmount(0.0f);
+        } else if (!dark) {
+            setBackgroundFadeAmount(1.0f);
         }
         requestChildrenUpdate();
         if (dark) {
@@ -3088,8 +3150,33 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             updateBackground();
             setWillNotDraw(false);
-            // TODO: fade in background
         }
+    }
+
+    private void setBackgroundFadeAmount(float fadeAmount) {
+        mBackgroundFadeAmount = fadeAmount;
+        updateBackgroundDimming();
+    }
+
+    public float getBackgroundFadeAmount() {
+        return mBackgroundFadeAmount;
+    }
+
+    private void startBackgroundFadeIn() {
+        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, BACKGROUND_FADE, 0f, 1f);
+        int maxLength;
+        if (mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE
+                || mDarkAnimationOriginIndex == AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW) {
+            maxLength = getNotGoneChildCount() - 1;
+        } else {
+            maxLength = Math.max(mDarkAnimationOriginIndex,
+                    getNotGoneChildCount() - mDarkAnimationOriginIndex - 1);
+        }
+        long delay = maxLength * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_DARK;
+        fadeAnimator.setStartDelay(delay);
+        fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
+        fadeAnimator.start();
     }
 
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
@@ -3375,13 +3462,16 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
-        boolean animated = mAnimationsEnabled && (mIsExpanded || changedRow.isPinned());
+        boolean animated = !mGroupExpandedForMeasure && mAnimationsEnabled
+                && (mIsExpanded || changedRow.isPinned());
         if (animated) {
             mExpandedGroupView = changedRow;
             mNeedsAnimation = true;
         }
         changedRow.setChildrenExpanded(expanded, animated);
-        onHeightChanged(changedRow, false /* needsAnimation */);
+        if (!mGroupExpandedForMeasure) {
+            onHeightChanged(changedRow, false /* needsAnimation */);
+        }
     }
 
     @Override
