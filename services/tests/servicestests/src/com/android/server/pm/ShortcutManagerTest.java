@@ -115,6 +115,8 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -583,7 +585,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         }).when(mMockUserManager).getUserInfo(eq(USER_P0));
 
         // User 0 is always running.
-        when(mMockUserManager.isUserRunning(eq(USER_0))).thenReturn(true);
+        when(mMockUserManager.isUserRunning(eq(USER_0))).thenAnswer(new AnswerIsUserRunning(true));
 
         initService();
         setCaller(CALLING_PACKAGE_1);
@@ -592,6 +594,24 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // calling this.  Running test with mLocaleChangeSequenceNumber == 0 might make us miss
         // some edge cases.
         mInternal.onSystemLocaleChangedNoLock();
+    }
+
+    /**
+     * Returns a boolean but also checks if the current UID is SYSTEM_UID.
+     */
+    private class AnswerIsUserRunning implements Answer<Boolean> {
+        private final boolean mAnswer;
+
+        private AnswerIsUserRunning(boolean answer) {
+            mAnswer = answer;
+        }
+
+        @Override
+        public Boolean answer(InvocationOnMock invocation) throws Throwable {
+            assertEquals("isUserRunning() must be called on SYSTEM UID.",
+                    Process.SYSTEM_UID, mInjectedCallingUid);
+            return mAnswer;
+        }
     }
 
     private static UserInfo withProfileGroupId(UserInfo in, int groupId) {
@@ -866,6 +886,18 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private ShortcutInfo makeShortcutWithTimestamp(String id, long timestamp) {
         final ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+        s.setTimestamp(timestamp);
+        return s;
+    }
+
+    /**
+     * Make a shortcut with an ID, a timestamp and an activity component
+     */
+    private ShortcutInfo makeShortcutWithTimestampWithActivity(String id, long timestamp,
+            ComponentName activity) {
+        final ShortcutInfo s = makeShortcut(
+                id, "Title-" + id, activity, /* icon =*/ null,
                 makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
         s.setTimestamp(timestamp);
         return s;
@@ -2014,8 +2046,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         setCaller(CALLING_PACKAGE_2);
         final ShortcutInfo s2_2 = makeShortcutWithTimestamp("s2", 1500);
-        final ShortcutInfo s2_3 = makeShortcutWithTimestamp("s3", 3000);
-        final ShortcutInfo s2_4 = makeShortcutWithTimestamp("s4", 500);
+        final ShortcutInfo s2_3 = makeShortcutWithTimestampWithActivity("s3", 3000,
+                makeComponent(ShortcutActivity2.class));
+        final ShortcutInfo s2_4 = makeShortcutWithTimestampWithActivity("s4", 500,
+                makeComponent(ShortcutActivity.class));
         assertTrue(mManager.setDynamicShortcuts(list(s2_2, s2_3, s2_4)));
 
         setCaller(CALLING_PACKAGE_3);
@@ -2055,6 +2089,15 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                         ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY),
                         getCallingUser())),
                 "s2", "s3"))));
+
+        // Filter by activity
+        assertAllDynamic(assertAllHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
+                assertAllNotKeyFieldsOnly(mLauncherApps.getShortcuts(buildQuery(
+                        /* time =*/ 0, CALLING_PACKAGE_2,
+                        new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
+                        ShortcutQuery.FLAG_GET_PINNED | ShortcutQuery.FLAG_GET_DYNAMIC),
+                        getCallingUser())),
+                "s2", "s4"))));
 
         // With ID.
         assertAllDynamic(assertAllNotHaveTitle(assertAllNotHaveIntents(assertShortcutIds(
@@ -2115,7 +2158,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     /* activity =*/ null, /* flags */ 0), getCallingUser());
         });
 
-        // TODO More tests: pinned but dynamic, filter by activity
+        // TODO More tests: pinned but dynamic.
     }
 
     public void testGetShortcutInfo() {
@@ -3302,9 +3345,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertCallbackNotReceived(c11_1);
 
         // Work profile, now running.
-
-        when(mMockUserManager.isUserRunning(anyInt())).thenReturn(false);
-        when(mMockUserManager.isUserRunning(eq(USER_P0))).thenReturn(true);
+        doAnswer(new AnswerIsUserRunning(false)).when(mMockUserManager).isUserRunning(anyInt());
+        doAnswer(new AnswerIsUserRunning(true)).when(mMockUserManager).isUserRunning(eq(USER_P0));
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
@@ -3323,8 +3365,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         // Normal secondary user.
 
-        when(mMockUserManager.isUserRunning(anyInt())).thenReturn(false);
-        when(mMockUserManager.isUserRunning(eq(USER_10))).thenReturn(true);
+        doAnswer(new AnswerIsUserRunning(false)).when(mMockUserManager).isUserRunning(anyInt());
+        doAnswer(new AnswerIsUserRunning(true)).when(mMockUserManager).isUserRunning(eq(USER_10));
 
         resetAll(all);
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
@@ -4377,7 +4419,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         // notification to the launcher.
         mInjectedCurrentTimeLillis = START_TIME + 200;
 
-        when(mMockUserManager.isUserRunning(eq(USER_10))).thenReturn(true);
+        doAnswer(new AnswerIsUserRunning(true)).when(mMockUserManager).isUserRunning(eq(USER_10));
 
         reset(c0);
         reset(c10);

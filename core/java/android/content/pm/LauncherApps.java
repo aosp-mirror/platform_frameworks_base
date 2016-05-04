@@ -243,7 +243,9 @@ public class LauncherApps {
         }
 
         /**
-         * If non-null, returns only shortcuts associated with the activity.
+         * If non-null, returns only shortcuts associated with the activity, which are
+         * {@link ShortcutInfo}s that have null {@link ShortcutInfo#getActivityComponent()}, or
+         * {@link ShortcutInfo#getActivityComponent()} equals to {@code activity}.
          */
         public void setActivity(@Nullable ComponentName activity) {
             mActivity = activity;

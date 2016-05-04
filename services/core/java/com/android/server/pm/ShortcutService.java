@@ -1256,8 +1256,13 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     private void notifyListeners(@NonNull String packageName, @UserIdInt int userId) {
-        if (!mUserManager.isUserRunning(userId)) {
-            return;
+        final long token = injectClearCallingIdentity();
+        try {
+            if (!mUserManager.isUserRunning(userId)) {
+                return;
+            }
+        } finally {
+            injectRestoreCallingIdentity(token);
         }
         postToHandler(() -> {
             final ArrayList<ShortcutChangeListener> copy;
@@ -1771,9 +1776,11 @@ public class ShortcutService extends IShortcutService.Stub {
                         if (ids != null && !ids.contains(si.getId())) {
                             return false;
                         }
-                        if (componentName != null
-                                && !componentName.equals(si.getActivityComponent())) {
-                            return false;
+                        if (componentName != null) {
+                            if (si.getActivityComponent() != null
+                                    && !si.getActivityComponent().equals(componentName)) {
+                                return false;
+                            }
                         }
                         final boolean matchDynamic =
                                 ((queryFlags & ShortcutQuery.FLAG_GET_DYNAMIC) != 0)
