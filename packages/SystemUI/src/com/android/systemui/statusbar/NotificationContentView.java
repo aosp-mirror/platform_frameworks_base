@@ -392,6 +392,9 @@ public class NotificationContentView extends FrameLayout {
             mVisibleType = visibleType;
             updateBackgroundColor(true /* animate */);
         }
+        if (mForceSelectNextLayout) {
+            forceUpdateVisibilities();
+        }
         if (mTransformationStartVisibleType != UNDEFINED
                 && mVisibleType != mTransformationStartVisibleType
                 && getViewForVisibleType(mTransformationStartVisibleType) != null) {
@@ -507,9 +510,6 @@ public class NotificationContentView extends FrameLayout {
                 mVisibleType = visibleType;
                 updateBackgroundColor(animate);
             }
-        }
-        if (mForceSelectNextLayout) {
-            forceUpdateVisibilities();
         }
     }
 
