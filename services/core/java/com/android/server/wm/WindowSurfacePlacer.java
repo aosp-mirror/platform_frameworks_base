@@ -19,7 +19,6 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -70,6 +69,8 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
+
+import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1052,7 +1053,7 @@ class WindowSurfacePlacer {
         mService.mSkipAppTransitionAnimation = false;
         mService.mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mService.mH.removeMessages(APP_TRANSITION_TIMEOUT);
+        mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
         mService.rebuildAppWindowListLocked();
 
