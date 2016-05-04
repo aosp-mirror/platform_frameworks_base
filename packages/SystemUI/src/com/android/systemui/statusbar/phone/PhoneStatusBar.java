@@ -967,6 +967,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         inflateEmptyShadeView();
         updateEmptyShadeView();
         inflateOverflowContainer();
+        mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
     }
 
     private void inflateSignalClusters() {
