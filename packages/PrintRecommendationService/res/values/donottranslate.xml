@@ -15,4 +15,25 @@
 -->
 <resources>
     <string name="app_label">Print Service Recommendation Service</string>
+
+    <!-- HP / Mopria plugin -->
+    <string-array name="known_print_vendor_info_for_mopria" translatable="false">
+        <item>org.mopria.printplugin</item>
+        <item>WFDS</item>
+        <!-- no specific mDNS values to list -->
+    </string-array>
+
+    <string-array name="known_print_vendor_info_for_hp" translatable="false">
+        <item>com.hp.android.printservice</item>
+        <item>HP</item>
+        <!-- HP has used these values in mDNS records over the years -->
+        <item>HP</item>
+        <item>Hewlett-Packard</item>
+        <item>Hewlett Packard</item>
+    </string-array>
+
+    <array name="known_print_plugin_vendors" translatable="false">
+        <item>@array/known_print_vendor_info_for_mopria</item>
+        <item>@array/known_print_vendor_info_for_hp</item>
+    </array>
 </resources>
