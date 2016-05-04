@@ -298,7 +298,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     // indices
     meshState().bindIndicesBuffer(indices.bufferObject);
 
-    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
+    // texture
+    if (fill.texture.texture != nullptr) {
         const Glop::Fill::TextureData& texture = fill.texture;
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
@@ -311,13 +312,16 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
             texture.texture->setFilter(texture.filter, false, false, texture.target);
         }
 
-        meshState().enableTexCoordsVertexArray();
-        meshState().bindTexCoordsVertexPointer(vertices.texCoord, vertices.stride);
-
         if (texture.textureTransform) {
             glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1,
                     GL_FALSE, &texture.textureTransform->data[0]);
         }
+    }
+
+    // vertex attributes (tex coord, color, alpha)
+    if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
+        meshState().enableTexCoordsVertexArray();
+        meshState().bindTexCoordsVertexPointer(vertices.texCoord, vertices.stride);
     } else {
         meshState().disableTexCoordsVertexArray();
     }

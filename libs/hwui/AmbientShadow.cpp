@@ -43,9 +43,7 @@
 /**
  * Other constants:
  */
-// For the edge of the penumbra, the opacity is 0. After transform (1 - alpha),
-// it is 1.
-#define TRANSFORMED_OUTER_OPACITY (1.0f)
+#define OUTER_ALPHA (0.0f)
 
 // Once the alpha difference is greater than this threshold, we will allocate extra
 // edge vertices.
@@ -79,17 +77,6 @@ inline Vector2 getNormalFromVertices(const Vector3* vertices, int current, int n
 // The output must be ranged from 0 to 1.
 inline float getAlphaFromFactoredZ(float factoredZ) {
     return 1.0 / (1 + std::max(factoredZ, 0.0f));
-}
-
-// The shader is using gaussian function e^-(1-x)*(1-x)*4, therefore, we transform
-// the alpha value to (1 - alpha)
-inline float getTransformedAlphaFromAlpha(float alpha) {
-    return 1.0f - alpha;
-}
-
-// The output is ranged from 0 to 1.
-inline float getTransformedAlphaFromFactoredZ(float factoredZ) {
-    return getTransformedAlphaFromAlpha(getAlphaFromFactoredZ(factoredZ));
 }
 
 inline int getEdgeExtraAndUpdateSpike(Vector2* currentSpike,
@@ -225,9 +212,9 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         if (!isCasterOpaque) {
             umbraVertices[umbraIndex++] = vertexBufferIndex;
         }
-        AlphaVertex::set(&shadowVertices[vertexBufferIndex++], casterVertices[i].x,
-                casterVertices[i].y,
-                getTransformedAlphaFromAlpha(currentAlpha));
+        AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
+                casterVertices[i].x, casterVertices[i].y,
+                currentAlpha);
 
         const Vector3& innerStart = casterVertices[i];
 
@@ -249,7 +236,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             indexBuffer[indexBufferIndex++] = currentInnerVertexIndex;
             AlphaVertex::set(&shadowVertices[vertexBufferIndex++], outerVertex.x,
-                    outerVertex.y, TRANSFORMED_OUTER_OPACITY);
+                    outerVertex.y, OUTER_ALPHA);
 
             if (j == 0) {
                 outerStart = outerVertex;
@@ -285,7 +272,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
                     (outerLast * startWeight + outerNext * k) / extraVerticesNumber;
                 indexBuffer[indexBufferIndex++] = vertexBufferIndex;
                 AlphaVertex::set(&shadowVertices[vertexBufferIndex++], currentOuter.x,
-                        currentOuter.y, TRANSFORMED_OUTER_OPACITY);
+                        currentOuter.y, OUTER_ALPHA);
 
                 if (!isCasterOpaque) {
                     umbraVertices[umbraIndex++] = vertexBufferIndex;
@@ -295,7 +282,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
                 indexBuffer[indexBufferIndex++] = vertexBufferIndex;
                 AlphaVertex::set(&shadowVertices[vertexBufferIndex++], currentInner.x,
                         currentInner.y,
-                        getTransformedAlphaFromFactoredZ(currentInner.z * heightFactor));
+                        getAlphaFromFactoredZ(currentInner.z * heightFactor));
             }
         }
         currentAlpha = nextAlpha;
@@ -307,7 +294,7 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     if (!isCasterOpaque) {
         // Add the centroid as the last one in the vertex buffer.
         float centroidOpacity =
-            getTransformedAlphaFromFactoredZ(centroid3d.z * heightFactor);
+            getAlphaFromFactoredZ(centroid3d.z * heightFactor);
         int centroidIndex = vertexBufferIndex;
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid3d.x,
                 centroid3d.y, centroidOpacity);
