@@ -1781,6 +1781,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
 
+        if (mAttrs.token != mClient.asBinder()) {
+            // The window was add by a client using another client's app token. We don't want to
+            // keep the dead window around for this case since this is meant for 'real' apps.
+            return false;
+        }
+
         if (mAttrs.type == TYPE_APPLICATION_STARTING) {
             // We don't keep starting windows since they were added by the window manager before
             // the app even launched.
