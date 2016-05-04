@@ -1536,8 +1536,8 @@ public class InputMethodService extends AbstractInputMethodService {
                 // mode at this point.
                 return false;
             }
-            Configuration config = getResources().getConfiguration();
-            if (config.keyboard != Configuration.KEYBOARD_NOKEYS) {
+            if (!mSettingsObserver.shouldShowImeWithHardKeyboard() &&
+                    getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
                 // And if the device has a hard keyboard, even if it is
                 // currently hidden, don't show the input method implicitly.
                 // These kinds of devices don't need it that much.
