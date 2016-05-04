@@ -1835,8 +1835,9 @@ public class NotificationStackScrollLayout extends ViewGroup
      * Update the background bounds to the new desired bounds
      */
     private void updateBackgroundBounds() {
-        mBackgroundBounds.left = (int) getX();
-        mBackgroundBounds.right = (int) (getX() + getWidth());
+        getLocationInWindow(mTempInt2);
+        mBackgroundBounds.left = mTempInt2[0];
+        mBackgroundBounds.right = mTempInt2[0] + getWidth();
         if (!mIsExpanded) {
             mBackgroundBounds.top = 0;
             mBackgroundBounds.bottom = 0;
