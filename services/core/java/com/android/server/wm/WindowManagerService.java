@@ -221,6 +221,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEYGUARD;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
@@ -240,6 +241,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
@@ -508,6 +510,10 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mForceDisplayEnabled = false;
     boolean mShowingBootMessages = false;
     boolean mBootAnimationStopped = false;
+
+    // Following variables are for debugging screen wakelock only.
+    WindowState mLastWakeLockHoldingWindow = null;
+    WindowState mLastWakeLockObscuringWindow = null;
 
     /** Dump of the windows and app tokens at the time of the last ANR. Cleared after
      * LAST_ANR_LIFETIME_DURATION_MSECS */
@@ -9275,9 +9281,21 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean state = mHoldingScreenWakeLock.isHeld();
         if (hold != state) {
             if (hold) {
+                if (DEBUG_KEEP_SCREEN_ON) {
+                    Slog.d(TAG_KEEP_SCREEN_ON, "Acquiring screen wakelock due to " +
+                            mWindowPlacerLocked.mHoldScreenWindow);
+                }
+                mLastWakeLockHoldingWindow = mWindowPlacerLocked.mHoldScreenWindow;
+                mLastWakeLockObscuringWindow = null;
                 mHoldingScreenWakeLock.acquire();
                 mPolicy.keepScreenOnStartedLw();
             } else {
+                if (DEBUG_KEEP_SCREEN_ON) {
+                    Slog.d(TAG_KEEP_SCREEN_ON, "Releasing screen wakelock, obscured by " +
+                            mWindowPlacerLocked.mObsuringWindow);
+                }
+                mLastWakeLockHoldingWindow = null;
+                mLastWakeLockObscuringWindow = mWindowPlacerLocked.mObsuringWindow;
                 mPolicy.keepScreenOnStoppedLw();
                 mHoldingScreenWakeLock.release();
             }
@@ -10207,6 +10225,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" due to ");
                     pw.print(mLastFinishedFreezeSource);
                 }
+                pw.println();
+        pw.print("  mLastWakeLockHoldingWindow=");pw.print(mLastWakeLockHoldingWindow);
+                pw.print(" mLastWakeLockObscuringWindow="); pw.print(mLastWakeLockObscuringWindow);
                 pw.println();
 
         mInputMonitor.dump(pw, "  ");

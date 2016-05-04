@@ -562,6 +562,11 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 attrs = mWindowAttributes;
                 setTag();
+
+                if ((mClientWindowLayoutFlags&WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0
+                        && (attrs.flags&WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) == 0) {
+                    Slog.d(mTag, "setView: FLAG_KEEP_SCREEN_ON changed from true to false!!!");
+                }
                 // Keep track of the actual window flags supplied by the client.
                 mClientWindowLayoutFlags = attrs.flags;
 
@@ -889,6 +894,10 @@ public final class ViewRootImpl implements ViewParent,
             final int oldInsetBottom = mWindowAttributes.surfaceInsets.bottom;
             final int oldSoftInputMode = mWindowAttributes.softInputMode;
             final boolean oldHasManualSurfaceInsets = mWindowAttributes.hasManualSurfaceInsets;
+            if ((mClientWindowLayoutFlags&WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0
+                    && (attrs.flags&WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) == 0) {
+                Slog.d(mTag, "setLayoutParams: FLAG_KEEP_SCREEN_ON from true to false!!!");
+            }
 
             // Keep track of the actual window flags supplied by the client.
             mClientWindowLayoutFlags = attrs.flags;

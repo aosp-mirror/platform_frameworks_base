@@ -73,4 +73,7 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
     static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
+
+    static final String TAG_KEEP_SCREEN_ON = "DebugKeepScreenOn";
+    static final boolean DEBUG_KEEP_SCREEN_ON = true;
 }
