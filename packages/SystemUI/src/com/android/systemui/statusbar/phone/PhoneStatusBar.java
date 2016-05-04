@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -89,6 +90,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.animation.AccelerateInterpolator;
@@ -348,6 +350,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // RemoteInputView to be activated after unlock
     private View mPendingRemoteInputView;
+    private View mPendingWorkRemoteInputView;
 
     int mMaxAllowedKeyguardNotifications;
 
@@ -4298,6 +4301,92 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLeaveOpenOnKeyguardHide = true;
         showBouncer();
         mPendingRemoteInputView = clicked;
+    }
+
+    @Override
+    protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
+            String notificationKey) {
+        // Clear pending remote view, as we do not want to trigger pending remote input view when
+        // it's called by other code
+        mPendingWorkRemoteInputView = null;
+        return super.startWorkChallengeIfNecessary(userId, intendSender, notificationKey);
+    }
+
+    @Override
+    protected void onLockedWorkRemoteInput(int userId, ExpandableNotificationRow row,
+            View clicked) {
+        // Collapse notification and show work challenge
+        animateCollapsePanels();
+        startWorkChallengeIfNecessary(userId, null, null);
+        // Add pending remote input view after starting work challenge, as starting work challenge
+        // will clear all previous pending review view
+        mPendingWorkRemoteInputView = clicked;
+    }
+
+    @Override
+    protected void onWorkChallengeUnlocked() {
+        if (mPendingWorkRemoteInputView != null) {
+            final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
+            // Expand notification panel and the notification row, then click on remote input view
+            final Runnable clickPendingViewRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (mPendingWorkRemoteInputView != null) {
+                        final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
+                        ViewParent p = pendingWorkRemoteInputView.getParent();
+                        while (p != null) {
+                            if (p instanceof ExpandableNotificationRow) {
+                                final ExpandableNotificationRow row = (ExpandableNotificationRow) p;
+                                ViewParent viewParent = row.getParent();
+                                if (viewParent instanceof NotificationStackScrollLayout) {
+                                    final NotificationStackScrollLayout scrollLayout =
+                                            (NotificationStackScrollLayout) viewParent;
+                                    row.makeActionsVisibile();
+                                    row.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            final Runnable finishScrollingCallback = new Runnable()
+                                            {
+                                                @Override
+                                                public void run() {
+                                                    mPendingWorkRemoteInputView.callOnClick();
+                                                    mPendingWorkRemoteInputView = null;
+                                                    scrollLayout.setFinishScrollingCallback(null);
+                                                }
+                                            };
+                                            if (scrollLayout.scrollTo(row)) {
+                                                // It scrolls! So call it when it's finished.
+                                                scrollLayout.setFinishScrollingCallback(
+                                                        finishScrollingCallback);
+                                            } else {
+                                                // It does not scroll, so call it now!
+                                                finishScrollingCallback.run();
+                                            }
+                                        }
+                                    });
+                                }
+                                break;
+                            }
+                            p = p.getParent();
+                        }
+                    }
+                }
+            };
+            mNotificationPanel.getViewTreeObserver().addOnGlobalLayoutListener(
+                    new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            if (mNotificationPanel.mStatusBar.getStatusBarWindow()
+                                    .getHeight() != mNotificationPanel.mStatusBar
+                                            .getStatusBarHeight()) {
+                                mNotificationPanel.getViewTreeObserver()
+                                        .removeOnGlobalLayoutListener(this);
+                                mNotificationPanel.post(clickPendingViewRunnable);
+                            }
+                        }
+                    });
+            instantExpandNotificationsPanel();
+        }
     }
 
     @Override
