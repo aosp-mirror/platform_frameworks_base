@@ -1718,11 +1718,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (isTransformedTouchPointInView(x, y, child, point)) {
                     final PointerIcon pointerIcon = child.getPointerIcon(event, point.x, point.y);
                     if (pointerIcon != null) {
+                        if (preorderedList != null) preorderedList.clear();
                         return pointerIcon;
                     }
                     break;
                 }
             }
+            if (preorderedList != null) preorderedList.clear();
         }
 
         // The pointer is not a child or the child has no preferences, returning the default
@@ -3028,6 +3030,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         final ViewStructure cstructure = structure.newChild(i);
                         child.dispatchProvideStructure(cstructure);
                     }
+                    if (preorderedList != null) preorderedList.clear();
                 }
             }
         }
@@ -3619,6 +3622,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (mPreSortedChildren == null) {
             mPreSortedChildren = new ArrayList<>(childrenCount);
         } else {
+            // callers should clear, so clear shouldn't be necessary, but for safety...
+            mPreSortedChildren.clear();
             mPreSortedChildren.ensureCapacity(childrenCount);
         }
 
