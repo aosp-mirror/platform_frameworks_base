@@ -169,7 +169,7 @@ public class BaseBundle {
         }
 
         if (b.mMap != null) {
-            mMap = new ArrayMap<String, Object>(b.mMap);
+            mMap = new ArrayMap<>(b.mMap);
         } else {
             mMap = null;
         }
@@ -226,56 +226,62 @@ public class BaseBundle {
      * using the currently assigned class loader.
      */
     /* package */ synchronized void unparcel() {
-        if (mParcelledData == null) {
-            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
-                    + ": no parcelled data");
-            return;
-        }
-
-        if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
-            Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
-                    + "clobber all data inside!", new Throwable());
-        }
-
-        if (isEmptyParcel()) {
-            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
-                    + ": empty");
-            if (mMap == null) {
-                mMap = new ArrayMap<String, Object>(1);
-            } else {
-                mMap.erase();
+        synchronized (this) {
+            final Parcel parcelledData = mParcelledData;
+            if (parcelledData == null) {
+                if (DEBUG) Log.d(TAG, "unparcel "
+                        + Integer.toHexString(System.identityHashCode(this))
+                        + ": no parcelled data");
+                return;
             }
-            mParcelledData = null;
-            return;
-        }
 
-        int N = mParcelledData.readInt();
-        if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
-                + ": reading " + N + " maps");
-        if (N < 0) {
-            return;
-        }
-        if (mMap == null) {
-            mMap = new ArrayMap<String, Object>(N);
-        } else {
-            mMap.erase();
-            mMap.ensureCapacity(N);
-        }
-        try {
-            mParcelledData.readArrayMapInternal(mMap, N, mClassLoader);
-        } catch (BadParcelableException e) {
-            if (sShouldDefuse) {
-                Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
-                mMap.erase();
-            } else {
-                throw e;
+            if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
+                Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
+                        + "clobber all data inside!", new Throwable());
             }
-        } finally {
-            mParcelledData.recycle();
-            mParcelledData = null;
+
+            if (isEmptyParcel()) {
+                if (DEBUG) Log.d(TAG, "unparcel "
+                        + Integer.toHexString(System.identityHashCode(this)) + ": empty");
+                if (mMap == null) {
+                    mMap = new ArrayMap<>(1);
+                } else {
+                    mMap.erase();
+                }
+                mParcelledData = null;
+                return;
+            }
+
+            int N = parcelledData.readInt();
+            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
+                    + ": reading " + N + " maps");
+            if (N < 0) {
+                return;
+            }
+            ArrayMap<String, Object> map = mMap;
+            if (map == null) {
+                map = new ArrayMap<>(N);
+            } else {
+                map.erase();
+                map.ensureCapacity(N);
+            }
+            try {
+                parcelledData.readArrayMapInternal(map, N, mClassLoader);
+            } catch (BadParcelableException e) {
+                if (sShouldDefuse) {
+                    Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
+                    map.erase();
+                } else {
+                    throw e;
+                }
+            } finally {
+                mMap = map;
+                parcelledData.recycle();
+                mParcelledData = null;
+            }
+            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
+                    + " final map: " + mMap);
         }
-        if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
-                + " final map: " + mMap);
     }
 
     /**
@@ -1375,14 +1381,18 @@ public class BaseBundle {
     void writeToParcelInner(Parcel parcel, int flags) {
         // Keep implementation in sync with writeToParcel() in
         // frameworks/native/libs/binder/PersistableBundle.cpp.
-        if (mParcelledData != null) {
+        final Parcel parcelledData;
+        synchronized (this) {
+            parcelledData = mParcelledData;
+        }
+        if (parcelledData != null) {
             if (isEmptyParcel()) {
                 parcel.writeInt(0);
             } else {
-                int length = mParcelledData.dataSize();
+                int length = parcelledData.dataSize();
                 parcel.writeInt(length);
                 parcel.writeInt(BUNDLE_MAGIC);
-                parcel.appendFrom(mParcelledData, 0, length);
+                parcel.appendFrom(parcelledData, 0, length);
             }
         } else {
             // Special case for empty bundles.
