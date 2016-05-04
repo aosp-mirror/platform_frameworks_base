@@ -2648,6 +2648,9 @@ class MountService extends IMountService.Stub
      */
     @Override
     public int getPasswordType() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.STORAGE_INTERNAL,
+            "no permission to access the crypt keeper");
+
         waitForReady();
 
         final NativeDaemonEvent event;
