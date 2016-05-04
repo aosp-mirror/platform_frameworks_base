@@ -302,7 +302,7 @@ public class TileUtils {
         return false;
     }
 
-    private static final Comparator<Tile> TILE_COMPARATOR =
+    public static final Comparator<Tile> TILE_COMPARATOR =
             new Comparator<Tile>() {
         @Override
         public int compare(Tile lhs, Tile rhs) {
