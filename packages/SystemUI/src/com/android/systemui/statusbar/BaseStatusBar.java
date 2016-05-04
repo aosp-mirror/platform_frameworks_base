@@ -2181,7 +2181,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 entry.row.setOnKeyguard(false);
                 entry.row.setSystemExpanded(visibleNotifications == 0 && !childNotification);
             }
-            boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(entry.notification);
+            boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
+                    entry.notification) && !entry.row.isRemoved();
             boolean childWithVisibleSummary = childNotification
                     && mGroupManager.getGroupSummary(entry.notification).getVisibility()
                     == View.VISIBLE;
