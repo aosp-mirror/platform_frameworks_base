@@ -6152,6 +6152,14 @@ public final class Settings {
         public static final int VR_DISPLAY_MODE_OFF = 1;
 
         /**
+         * Whether parent user can access remote contact in managed profile.
+         *
+         * @hide
+         */
+        public static final String MANAGED_PROFILE_CONTACT_REMOTE_SEARCH =
+                "managed_profile_contact_remote_search";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
