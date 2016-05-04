@@ -78,7 +78,9 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
 
     @Override
     public void toggleRecents(int growTarget) throws RemoteException {
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_TOGGLE_RECENTS, growTarget));
+        SomeArgs args = SomeArgs.obtain();
+        args.argi1 = growTarget;
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_TOGGLE_RECENTS, args));
     }
 
     @Override
@@ -111,6 +113,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
 
         @Override
         public void handleMessage(Message msg) {
+            SomeArgs args;
             switch (msg.what) {
                 case MSG_PRELOAD_RECENTS:
                     mImpl.preloadRecents();
@@ -119,7 +122,7 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
                     mImpl.cancelPreloadingRecents();
                     break;
                 case MSG_SHOW_RECENTS:
-                    SomeArgs args = (SomeArgs) msg.obj;
+                    args = (SomeArgs) msg.obj;
                     mImpl.showRecents(args.argi1 != 0, args.argi2 != 0, args.argi3 != 0,
                             args.argi4 != 0, args.argi5 != 0, args.argi6);
                     break;
@@ -127,7 +130,8 @@ public class RecentsImplProxy extends IRecentsNonSystemUserCallbacks.Stub {
                     mImpl.hideRecents(msg.arg1 != 0, msg.arg2 != 0);
                     break;
                 case MSG_TOGGLE_RECENTS:
-                    mImpl.toggleRecents(msg.arg1);
+                    args = (SomeArgs) msg.obj;
+                    mImpl.toggleRecents(args.argi1);
                     break;
                 case MSG_ON_CONFIGURATION_CHANGED:
                     mImpl.onConfigurationChanged();
