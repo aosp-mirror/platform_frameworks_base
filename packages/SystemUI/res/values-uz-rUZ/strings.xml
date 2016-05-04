@@ -309,9 +309,9 @@
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Fonar"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobil internet"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Trafik sarfi"</string>
-    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Qolayotgan ma\'lumot"</string>
+    <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Qolgan trafik"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limitdan oshgan"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> foydalanilgan"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ishlatilgan"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Ish rejimi"</string>
