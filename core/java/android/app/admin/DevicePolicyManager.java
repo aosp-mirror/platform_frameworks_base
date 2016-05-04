@@ -2998,6 +2998,19 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device or profile owner to configure an always-on VPN connection through a
+     * specific application for the current user.
+     *
+     * @deprecated this version only exists for compability with previous developer preview builds.
+     *             TODO: delete once there are no longer any live references.
+     * @hide
+     */
+    public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
+            throws NameNotFoundException, UnsupportedOperationException {
+        setAlwaysOnVpnPackage(admin, vpnPackage, /* lockdownEnabled */ true);
+    }
+
+    /**
+     * Called by a device or profile owner to configure an always-on VPN connection through a
      * specific application for the current user. This connection is automatically granted and
      * persisted after a reboot.
      * <p>
@@ -3006,7 +3019,10 @@ public class DevicePolicyManager {
      * fail.
      *
      * @param vpnPackage The package name for an installed VPN app on the device, or {@code null} to
-     *            remove an existing always-on VPN configuration.
+     *        remove an existing always-on VPN configuration.
+     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
+     *        {@code false} otherwise. This carries the risk that any failure of the VPN provider
+     *        could break networking for all apps. This has no effect when clearing.
      * @return {@code true} if the package is set as always-on VPN controller; {@code false}
      *         otherwise.
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
@@ -3014,12 +3030,13 @@ public class DevicePolicyManager {
      * @throws UnsupportedOperationException if {@code vpnPackage} exists but does not support being
      *         set as always-on, or if always-on VPN is not available.
      */
-    public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
+    public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage,
+            boolean lockdownEnabled)
             throws NameNotFoundException, UnsupportedOperationException {
         throwIfParentInstance("setAlwaysOnVpnPackage");
         if (mService != null) {
             try {
-                if (!mService.setAlwaysOnVpnPackage(admin, vpnPackage)) {
+                if (!mService.setAlwaysOnVpnPackage(admin, vpnPackage, lockdownEnabled)) {
                     throw new NameNotFoundException(vpnPackage);
                 }
             } catch (RemoteException e) {

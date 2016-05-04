@@ -4459,7 +4459,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @throws UnsupportedException if the package does not support being set as always-on.
      */
     @Override
-    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage)
+    public boolean setAlwaysOnVpnPackage(ComponentName admin, String vpnPackage, boolean lockdown)
             throws SecurityException {
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -4473,7 +4473,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             ConnectivityManager connectivityManager = (ConnectivityManager)
                     mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (!connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage)) {
+            if (!connectivityManager.setAlwaysOnVpnPackageForUser(userId, vpnPackage, lockdown)) {
                 throw new UnsupportedOperationException();
             }
         } finally {
