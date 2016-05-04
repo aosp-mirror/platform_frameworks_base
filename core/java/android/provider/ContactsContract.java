@@ -8759,21 +8759,34 @@ public final class ContactsContract {
          * android.service.voice.VoiceInteractionSession#startVoiceActivity}.
          * <p>
          * When the action was not initiated by Voice Assistant or when the receiving activity does
-         * not support {@link android.content.Intent#CATEGORY_VOICE}, the activity should confirm
+         * not support {@link android.content.Intent#CATEGORY_VOICE}, the activity must confirm
          * with the user before sending the message (because in this case it is unknown which app
          * sent the intent, it could be malicious).
          * <p>
          * To allow the Voice Assistant to help users with contacts disambiguation, the messaging
-         * app may choose to integrate with the Contacts Provider. The following convention should
-         * be met when creating Data table for such integration:
+         * app may choose to integrate with the Contacts Provider. You will need to specify a new
+         * MIME type in order to store your app’s unique contact IDs and optional human readable
+         * labels in the Data table. The Voice Assistant needs to know this MIME type and {@link
+         * RawContacts#ACCOUNT_TYPE} that you are using in order to provide the smooth contact
+         * disambiguation user experience. The following convention should be met when performing
+         * such integration:
          * <ul>
-         * <li>Column {@link DataColumns#DATA1} should store the unique contact ID as understood by
-         * the app. This value will be used in the {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID}.</li>
-         * <li>Optionally, column {@link DataColumns#DATA3} could store a human readable label for
-         * the ID. For example it could be phone number or human readable username/user_id like
-         * "a_super_cool_user_name". This label may be shown below the Contact Name by the Voice
-         * Assistant as the user completes the voice action. If DATA3 is empty, the ID in DATA1 may
-         * be shown instead.</li>
+         * <li>This activity should have a string meta-data field associated with it, {@link
+         * #METADATA_ACCOUNT_TYPE}, which defines {@link RawContacts#ACCOUNT_TYPE} for your Contacts
+         * Provider implementation. The account type should be globally unique, for example you can
+         * use your app package name as the account type.</li>
+         * <li>This activity should have a string meta-data field associated with it, {@link
+         * #METADATA_MIMETYPE}, which defines {@link DataColumns#MIMETYPE} for your Contacts
+         * Provider implementation. For example, you can use
+         * "vnd.android.cursor.item/vnd.{$app_package_name}.profile" as MIME type.</li>
+         * <li>When filling Data table row for METADATA_MIMETYPE, column {@link DataColumns#DATA1}
+         * should store the unique contact ID as understood by the app. This value will be used in
+         * the {@link #EXTRA_RECIPIENT_CONTACT_CHAT_ID}.</li>
+         * <li>Optionally, when filling Data table row for METADATA_MIMETYPE, column {@link
+         * DataColumns#DATA3} could store a human readable label for the ID. For example it could be
+         * phone number or human readable username/user_id like "a_super_cool_user_name". This label
+         * may be shown below the Contact Name by the Voice Assistant as the user completes the
+         * voice action. If DATA3 is empty, the ID in DATA1 may be shown instead.</li>
          * <li><em>Note: Do not use DATA3 to store the Contact Name. The Voice Assistant will
          * already get the Contact Name from the RawContact’s display_name.</em></li>
          * <li><em>Note: Some apps may choose to use phone number as the unique contact ID in DATA1.
@@ -8789,6 +8802,9 @@ public final class ContactsContract {
          * Doing this will allow Voice Assistant to bias speech recognition to contacts frequently
          * contacted, this is particularly useful for contact names that are hard to pronounce.</li>
          * </ul>
+         * If the app chooses not to integrate with the Contacts Provider (in particular, when
+         * either METADATA_ACCOUNT_TYPE or METADATA_MIMETYPE field is missing), Voice Assistant
+         * will use existing phone number entries as contact ID's for such app.
          * <p>
          * Input: {@link android.content.Intent#getType} is the MIME type of the data being sent.
          * The intent sender will always put the concrete mime type in the intent type, like
@@ -8814,6 +8830,8 @@ public final class ContactsContract {
          * @see #EXTRA_RECIPIENT_CONTACT_URI
          * @see #EXTRA_RECIPIENT_CONTACT_CHAT_ID
          * @see #EXTRA_RECIPIENT_CONTACT_NAME
+         * @see #METADATA_ACCOUNT_TYPE
+         * @see #METADATA_MIMETYPE
          */
         public static final String ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS =
                 "android.provider.action.VOICE_SEND_MESSAGE_TO_CONTACTS";
@@ -8845,8 +8863,10 @@ public final class ContactsContract {
          * recipient is absent, it will be set to null.
          * <p>
          * The value of the elements comes from the {@link DataColumns#DATA1} column in Contacts
-         * Provider, and should be the unambiguous contact endpoint. This value is app-specific, it
-         * could be a phone number or some proprietary ID.
+         * Provider with {@link DataColumns#MIMETYPE} from {@link #METADATA_MIMETYPE} (if both
+         * {@link #METADATA_ACCOUNT_TYPE} and {@link #METADATA_MIMETYPE} are specified by the app;
+         * otherwise, the value will be a phone number), and should be the unambiguous contact
+         * endpoint. This value is app-specific, it could be some proprietary ID or a phone number.
          */
         public static final String EXTRA_RECIPIENT_CONTACT_CHAT_ID =
                 "android.provider.extra.RECIPIENT_CONTACT_CHAT_ID";
@@ -8865,6 +8885,20 @@ public final class ContactsContract {
          */
         public static final String EXTRA_RECIPIENT_CONTACT_NAME =
                 "android.provider.extra.RECIPIENT_CONTACT_NAME";
+
+        /**
+         * A string associated with an {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} activity
+         * describing {@link RawContacts#ACCOUNT_TYPE} for the corresponding Contacts Provider
+         * implementation.
+         */
+        public static final String METADATA_ACCOUNT_TYPE = "android.provider.account_type";
+
+        /**
+         * A string associated with an {@link #ACTION_VOICE_SEND_MESSAGE_TO_CONTACTS} activity
+         * describing {@link DataColumns#MIMETYPE} for the corresponding Contacts Provider
+         * implementation.
+         */
+        public static final String METADATA_MIMETYPE = "android.provider.mimetype";
 
         /**
          * Starts an Activity that lets the user select the multiple phones from a
