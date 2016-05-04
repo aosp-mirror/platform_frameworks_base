@@ -44,6 +44,7 @@ public class ExpandHelper implements Gefingerpoken {
         void setUserExpandedChild(View v, boolean userExpanded);
         void setUserLockedChild(View v, boolean userLocked);
         void expansionStateChanged(boolean isExpanding);
+        int getMaxExpandHeight(ExpandableView view);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -144,7 +145,7 @@ public class ExpandHelper implements Gefingerpoken {
             return mView.getActualHeight();
         }
         public int getNaturalHeight() {
-            return mView.getMaxContentHeight();
+            return mCallback.getMaxExpandHeight(mView);
         }
     }
 
