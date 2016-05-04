@@ -896,15 +896,13 @@ public class LockSettingsService extends ILockSettings.Stub {
             // get credential from keystore when managed profile has unified lock
             try {
                 savedCredential = getDecryptedPasswordForTiedProfile(userId);
+            } catch (FileNotFoundException e) {
+                Slog.i(TAG, "Child profile key not found");
             } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
                     | NoSuchAlgorithmException | NoSuchPaddingException
                     | InvalidAlgorithmParameterException | IllegalBlockSizeException
                     | BadPaddingException | CertificateException | IOException e) {
-                if (e instanceof FileNotFoundException) {
-                    Slog.i(TAG, "Child profile key not found");
-                } else {
-                    Slog.e(TAG, "Failed to decrypt child profile key", e);
-                }
+                Slog.e(TAG, "Failed to decrypt child profile key", e);
             }
         } else {
             if (currentHandle == null) {
