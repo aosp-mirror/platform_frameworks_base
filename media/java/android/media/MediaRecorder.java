@@ -206,13 +206,34 @@ public class MediaRecorder
         /** Microphone audio source */
         public static final int MIC = 1;
 
-        /** Voice call uplink (Tx) audio source */
+        /** Voice call uplink (Tx) audio source.
+         * <p>
+         * Capturing from <code>VOICE_UPLINK</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_UPLINK = 2;
 
-        /** Voice call downlink (Rx) audio source */
+        /** Voice call downlink (Rx) audio source.
+         * <p>
+         * Capturing from <code>VOICE_DOWNLINK</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_DOWNLINK = 3;
 
-        /** Voice call uplink + downlink audio source */
+        /** Voice call uplink + downlink audio source
+         * <p>
+         * Capturing from <code>VOICE_CALL</code> source requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
+         * </p>
+         */
         public static final int VOICE_CALL = 4;
 
         /** Microphone audio source with same orientation as camera if available, the main
