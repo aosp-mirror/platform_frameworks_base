@@ -221,6 +221,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
         MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
+            mTriggeredExpand = false;
             closeDetail();
         } else {
             logTiles();
