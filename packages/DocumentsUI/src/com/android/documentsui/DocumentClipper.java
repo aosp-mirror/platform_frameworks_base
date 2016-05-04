@@ -35,7 +35,9 @@ import com.android.documentsui.services.FileOperationService.OpType;
 import libcore.io.IoUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -124,6 +126,7 @@ public final class DocumentClipper {
      */
     public @Nullable ClipData getClipDataForDocuments(List<DocumentInfo> docs, @OpType int opType) {
         final ContentResolver resolver = mContext.getContentResolver();
+        final String[] mimeTypes = getMimeTypes(resolver, docs);
         ClipData clipData = null;
         for (DocumentInfo doc : docs) {
             assert(doc != null);
@@ -132,7 +135,7 @@ public final class DocumentClipper {
                 // TODO: figure out what this string should be.
                 // Currently it is not displayed anywhere in the UI, but this might change.
                 final String clipLabel = "";
-                clipData = ClipData.newUri(resolver, clipLabel, doc.derivedUri);
+                clipData = new ClipData(clipLabel, mimeTypes, new ClipData.Item(doc.derivedUri));
                 PersistableBundle bundle = new PersistableBundle();
                 bundle.putInt(OP_TYPE_KEY, opType);
                 clipData.getDescription().setExtras(bundle);
@@ -142,6 +145,23 @@ public final class DocumentClipper {
             }
         }
         return clipData;
+    }
+
+    private static String[] getMimeTypes(ContentResolver resolver, List<DocumentInfo> docs) {
+        final HashSet<String> mimeTypes = new HashSet<>();
+        for (DocumentInfo doc : docs) {
+            assert(doc != null);
+            assert(doc.derivedUri != null);
+            final Uri uri = doc.derivedUri;
+            if ("content".equals(uri.getScheme())) {
+                mimeTypes.add(resolver.getType(uri));
+                final String[] streamTypes = resolver.getStreamTypes(uri, "*/*");
+                if (streamTypes != null) {
+                    mimeTypes.addAll(Arrays.asList(streamTypes));
+                }
+            }
+        }
+        return mimeTypes.toArray(new String[0]);
     }
 
     /**
