@@ -696,19 +696,19 @@ redirects:
 - from: /r/studio-ui/am-network.html
   to: /tools/help/am-network.html
 - from: /r/studio-ui/am-hprof.html
-  to: /tools/help/am-memory.html
+  to: /tools/help/am-hprof.html
 - from: /r/studio-ui/am-allocation.html
-  to: /tools/help/am-memory.html
+  to: /tools/help/am-allocation.html
 - from: /r/studio-ui/am-methodtrace.html
-  to: /tools/help/am-cpu.html
+  to: /tools/help/am-methodtrace.html
 - from: /r/studio-ui/am-sysinfo.html
-  to: /tools/help/android-monitor.html
+  to: /tools/help/am-sysinfo.html
 - from: /r/studio-ui/am-screenshot.html
-  to: /tools/help/android-monitor.html
+  to: /tools/help/am-screenshot.html
 - from: /r/studio-ui/am-video.html
-  to: /tools/help/android-monitor.html
+  to: /tools/help/am-video.html
 - from: /r/studio-ui/avd-manager.html
-  to: /tools/help/avd-manager.html
+  to: /tools/devices/managing-avds.html
 - from: /r/studio-ui/rundebugconfig.html
   to: /tools/devices/emulator.html
 - from: /r/studio-ui/devicechooser.html
