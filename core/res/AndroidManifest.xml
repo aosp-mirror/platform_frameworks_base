@@ -2417,7 +2417,10 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to delete packages.
-    <p>Not for use by third-party applications. -->
+         <p>Not for use by third-party applications.
+         <p>Starting in {@link android.os.Build.VERSION_CODES#N}, user confirmation is requested
+         when the application deleting the package is not the same application that installed the
+         package. -->
     <permission android:name="android.permission.DELETE_PACKAGES"
         android:protectionLevel="signature|privileged" />
 
