@@ -927,32 +927,30 @@ final class UserController {
 
     boolean unlockUserCleared(final int userId, byte[] token, byte[] secret,
             IProgressListener listener) {
-        final UserState uss;
         synchronized (mService) {
             // Bail if user isn't actually running, otherwise register the given
             // listener to watch for unlock progress
-            uss = mStartedUsers.get(userId);
+            final UserState uss = mStartedUsers.get(userId);
             if (uss == null) {
                 notifyFinished(userId, listener);
                 return false;
             } else {
                 uss.mUnlockProgress.addListener(listener);
             }
-        }
 
-        if (!StorageManager.isUserKeyUnlocked(userId)) {
-            final UserInfo userInfo = getUserInfo(userId);
-            final IMountService mountService = getMountService();
-            try {
-                mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
-            } catch (RemoteException | RuntimeException e) {
-                Slog.w(TAG, "Failed to unlock: " + e.getMessage());
-                notifyFinished(userId, listener);
-                return false;
+            // TODO Move this block outside of synchronized if it causes lock contention
+            if (!StorageManager.isUserKeyUnlocked(userId)) {
+                final UserInfo userInfo = getUserInfo(userId);
+                final IMountService mountService = getMountService();
+                try {
+                    mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+                } catch (RemoteException | RuntimeException e) {
+                    Slog.w(TAG, "Failed to unlock: " + e.getMessage());
+                    notifyFinished(userId, listener);
+                    return false;
+                }
             }
-        }
 
-        synchronized (mService) {
             finishUserUnlocking(uss);
 
             // We just unlocked a user, so let's now attempt to unlock any
