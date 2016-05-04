@@ -16,6 +16,74 @@ page.image=images/cards/card-n-support_2x.png
 <p>To discuss issues or ideas with other developers working with Android N, join the
 <a href="{@docRoot}preview/dev-community">Developer Preview Google+ community</a>.</p>
 
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: April 2016<br>
+        Builds: TODO<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: TODO</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="new">New in DP3</h3>
+
+<ul>
+  <li>TODO</li>
+</ul>
+
+<h4 id="dp2-fixes">Fixes for issues reported by developers</h4>
+
+<p>
+  A number of issues reported by developers have been fixed, including:
+</p>
+
+<ul>
+  <li>TODO</li>
+</ul>
+
+<h3 id="general">General advisories</h3>
+
+<p>
+  This Developer Preview release is for <strong>app developers only</strong>
+  and is designed for use in compatibility testing and early development only.
+  Please be aware of these general notes about the release:
+</p>
+
+<ul>
+
+  <li>TODO</li>
+</ul>
+
+<h3 id="ki">Known Issues</h3>
+
+<p>TODO</p>
+
+<h4>Device-specific issues</h4>
+
+<p>TODO</p>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+<!-- DP2 Release Notes Archive -->
+
 <h2 id="dp2">Developer Preview 2</h2>
 
 <div class="wrap">
@@ -31,7 +99,7 @@ page.image=images/cards/card-n-support_2x.png
   </div>
 </div>
 
-<h3 id="new">New in DP2</h3>
+<h3 id="dp2-new">New in DP2</h3>
 
 <ul>
   <li>Platform support for Vulkan, a new 3D rendering API that provides
@@ -87,7 +155,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h3 id="general">General advisories</h3>
+<h3 id="dp2-general">General advisories</h3>
 
 <p>
   This Developer Preview release is for <strong>app developers only</strong>
@@ -145,7 +213,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h3 id="ki">Known Issues</h3>
+<h3 id="dp2-ki">Known Issues</h3>
 
 <h4>Performance and battery</h4>
 
@@ -393,7 +461,7 @@ page.image=images/cards/card-n-support_2x.png
 
 <h3 id="dp1-platform">Platform Issues</h3>
 
-<h4 id="performance">Performance and battery</h4>
+<h4>Performance and battery</h4>
 
 <ul>
   <li>System and app performance is known to be <strong>periodically slow /
@@ -416,7 +484,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="microphone">Microphone</h4>
+<h4>Microphone</h4>
 
 <ul>
    <li>The system may incorrect persists the microphone mute state across apps and reboots. If you mute the microphone in an app and the state is persisted, open any app that has microphone mute controls and unmute the microphone.</li>
@@ -552,19 +620,20 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="keyboard">Keyboard</h4>
+<h4 >Keyboard</h4>
 
 <ul>
-<li>Bluetooth pairing between keyboards and Android devices may be unstable. </li>
+  <li>Bluetooth pairing between keyboards and Android devices may be unstable.
+  </li>
 </ul>
 
-<h4 id="video">Video</h4>
+<h4 >Video</h4>
 
 <ul>
 <li>Video playback may lag and show interruptions.</li>
 </ul>
 
-<h4 id="wifi">Wi-Fi</h4>
+<h4>Wi-Fi</h4>
 
 <ul>
   <li>Wi-Fi has undergone some refactoring which may change API corner case
@@ -577,7 +646,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="direct">Direct boot</h4>
+<h4>Direct boot</h4>
 
 <ul>
   <li>NFC doesn't function until first unlock.
@@ -607,7 +676,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="pip">Picture-in-picture for Android TV</h4>
+<h4>Picture-in-picture for Android TV</h4>
 
 <ul>
   <li>The PIP integration in the Recents UI is not finalized, and is subject to
@@ -624,7 +693,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="bugs">Bug reports</h4>
+<h4>Bug reports</h4>
 
 <ul>
   <li>Bug reports do not always complete successfully (as a workaround,
@@ -633,7 +702,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="split">Split-screen Multi-window</h4>
+<h4>Split-screen Multi-window</h4>
 
 <ul>
   <li>Apps may experience crashes and unexpected UI behavior when put into
@@ -656,7 +725,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-<h4 id="ime">Input method</h4>
+<h4>Input method</h4>
 
 <ul>
   <li>Google Keyboard unexpectedly falls back to the generic Google keyboard
@@ -670,26 +739,31 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
-
-<h4 id="accessibility">Accessibility</h4>
+<h4>Accessibility</h4>
 
 <ul>
-   <li>TalkBack exhibits issues with features including Notifications, Quick Settings Tiles and Multi-window display that may cause system crashing or lack of spoken feedback from TalkBack. Future releases of the preview will address these issues.</li>
+  <li>TalkBack exhibits issues with features including Notifications, Quick
+  Settings Tiles and Multi-window display that may cause system crashing or
+  lack of spoken feedback from TalkBack. Future releases of the preview will
+  address these issues.
+  </li>
 </ul>
 
-<h3 id="device-sp">Device-Specific Notes and Issues</h3>
+<h3 id="dp1-device-sp">Device-Specific Notes and Issues</h3>
 
-<h4 id="player">Nexus Player</h4>
+<h4>Nexus Player</h4>
 <ul>
-<li>Video playback, app compatibility and stability issues are expected on Nexus Player in this release of the Preview.</li>
+  <li>Video playback, app compatibility and stability issues are expected on
+  Nexus Player in this release of the Preview.
+  </li>
 </ul>
 
-<h4 id="pixelc">Pixel C</h4>
+<h4>Pixel C</h4>
 <ul>
 <li>Multi-window resizing may cause crashing.</li>
 </ul>
 
-<h4 id="n9">Nexus 9</h4>
+<h4>Nexus 9</h4>
 <ul>
 <li>Nexus 9 devices may not start after receiving an over-the-air (OTA) update
   via the Android Beta Program. To recover from this issue, you can try
