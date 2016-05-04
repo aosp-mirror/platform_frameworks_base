@@ -58,9 +58,6 @@ public abstract class FragmentTuner {
         }
     }
 
-    public abstract void updateActionMenu(
-            Menu menu, @ResultType int dirType,
-            boolean canCopy, boolean canDelete, boolean canRename);
 
     // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
     // A folder is enabled such that it may be double clicked, even in settings
@@ -73,18 +70,23 @@ public abstract class FragmentTuner {
         return true;
     }
 
-    abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
-
     /**
      * When managed mode is enabled, active downloads will be visible in the UI.
      * Presumably this should only be true when in the downloads directory.
      */
-    abstract boolean enableManagedMode();
+    boolean managedModeEnabled() {
+        return false;
+    }
 
     /**
      * Whether drag n' drop is allowed in this context
      */
-    abstract boolean allowDragNDrop();
+    boolean dragAndDropEnabled() {
+        return false;
+    }
+
+    abstract void updateActionMenu(Menu menu, SelectionDetails selection);
+    abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
 
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
@@ -105,7 +107,7 @@ public abstract class FragmentTuner {
                 return false;
             }
 
-            if (isDirectory(docMimeType)) {
+            if (MimePredicate.isDirectoryType(docMimeType)) {
                 return false;
             }
 
@@ -121,9 +123,9 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public boolean isDocumentEnabled(String docMimeType, int docFlags) {
+        public boolean isDocumentEnabled(String mimeType, int docFlags) {
             // Directories are always enabled.
-            if (isDirectory(docMimeType)) {
+            if (MimePredicate.isDirectoryType(mimeType)) {
                 return true;
             }
 
@@ -141,13 +143,11 @@ public abstract class FragmentTuner {
                     }
             }
 
-            return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
+            return MimePredicate.mimeMatches(mState.acceptMimes, mimeType);
         }
 
         @Override
-        public void updateActionMenu(
-                Menu menu, @ResultType int dirType,
-                boolean canCopy, boolean canDelete, boolean canRename) {
+        public void updateActionMenu(Menu menu, SelectionDetails selection) {
 
             MenuItem open = menu.findItem(R.id.menu_open);
             MenuItem share = menu.findItem(R.id.menu_share);
@@ -155,8 +155,8 @@ public abstract class FragmentTuner {
             MenuItem rename = menu.findItem(R.id.menu_rename);
             MenuItem selectAll = menu.findItem(R.id.menu_select_all);
 
-            open.setVisible(mState.action == ACTION_GET_CONTENT ||
-                    mState.action == ACTION_OPEN);
+            open.setVisible(mState.action == ACTION_GET_CONTENT
+                    || mState.action == ACTION_OPEN);
             share.setVisible(false);
             delete.setVisible(false);
             rename.setVisible(false);
@@ -191,16 +191,6 @@ public abstract class FragmentTuner {
             }
             mModelPreviousLoaded = true;
         }
-
-        @Override
-        public boolean enableManagedMode() {
-            return false;
-        }
-
-        @Override
-        public boolean allowDragNDrop() {
-            return false;
-        }
     }
 
     /**
@@ -217,29 +207,39 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public void updateActionMenu(
-                Menu menu, @ResultType int dirType,
-                boolean canCopy, boolean canDelete, boolean canRename) {
+        public void updateActionMenu(Menu menu, SelectionDetails selection) {
 
+            menu.findItem(R.id.menu_open).setVisible(false);  // "open" is never used in Files.
+
+            // Commands accessible only via keyboard...
             MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
             MenuItem paste = menu.findItem(R.id.menu_paste_from_clipboard);
-            copy.setEnabled(canCopy);
 
+            // Commands visible in the UI...
             MenuItem rename = menu.findItem(R.id.menu_rename);
             MenuItem moveTo = menu.findItem(R.id.menu_move_to);
             MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
+            MenuItem share = menu.findItem(R.id.menu_share);
+            MenuItem delete = menu.findItem(R.id.menu_delete);
 
+            // copy is not visible, keyboard only
+            copy.setEnabled(!selection.containsPartialFiles());
+
+            // Commands usually on action-bar, so we always manage visibility.
+            share.setVisible(!selection.containsDirectories() && !selection.containsPartialFiles());
+            delete.setVisible(selection.canDelete());
+
+            share.setEnabled(!selection.containsDirectories() && !selection.containsPartialFiles());
+            delete.setEnabled(selection.canDelete());
+
+            // Commands always in overflow, so we don't bother showing/hiding...
             copyTo.setVisible(true);
             moveTo.setVisible(true);
             rename.setVisible(true);
 
-            copyTo.setEnabled(canCopy);
-            moveTo.setEnabled(canCopy && canDelete);
-            rename.setEnabled(canRename);
-
-            menu.findItem(R.id.menu_share).setVisible(true);
-            menu.findItem(R.id.menu_delete).setVisible(canDelete);
-            menu.findItem(R.id.menu_open).setVisible(false);
+            copyTo.setEnabled(!selection.containsPartialFiles());
+            moveTo.setEnabled(!selection.containsPartialFiles() && selection.canDelete());
+            rename.setEnabled(!selection.containsPartialFiles() && selection.canRename());
 
             Menus.disableHiddenItems(menu, copy, paste);
         }
@@ -256,7 +256,7 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public boolean enableManagedMode() {
+        public boolean managedModeEnabled() {
             // When in downloads top level directory, we also show active downloads.
             // And while we don't allow folders in Downloads, we do allow Zip files in
             // downloads that themselves can be opened and viewed like directories.
@@ -267,12 +267,21 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public boolean allowDragNDrop() {
+        public boolean dragAndDropEnabled() {
             return true;
         }
     }
 
-    private static boolean isDirectory(String mimeType) {
-        return Document.MIME_TYPE_DIR.equals(mimeType);
+    /**
+     * Access to meta data about the selection.
+     */
+    interface SelectionDetails {
+        boolean containsDirectories();
+        boolean containsPartialFiles();
+
+        // TODO: Update these to express characteristics instead of answering concrete questions,
+        // since the answer to those questions is (or can be) activity specific.
+        boolean canDelete();
+        boolean canRename();
     }
 }
