@@ -651,6 +651,8 @@ public class DirectoryFragment extends Fragment
 
                 case R.id.menu_share:
                     shareDocuments(selection);
+                    // TODO: Only finish selection if share action is completed.
+                    mode.finish();
                     return true;
 
                 case R.id.menu_delete:
@@ -661,6 +663,9 @@ public class DirectoryFragment extends Fragment
 
                 case R.id.menu_copy_to:
                     transferDocuments(selection, FileOperationService.OPERATION_COPY);
+                    // TODO: Only finish selection mode if copy-to is not canceled.
+                    // Need to plum down into handling the way we do with deleteDocuments.
+                    mode.finish();
                     return true;
 
                 case R.id.menu_move_to:
