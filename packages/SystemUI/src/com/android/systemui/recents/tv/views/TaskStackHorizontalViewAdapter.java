@@ -42,6 +42,7 @@ public class TaskStackHorizontalViewAdapter extends
     private static final String TAG = "TaskStackViewAdapter";
     private List<Task> mTaskList;
     private TaskStackHorizontalGridView mGridView;
+    private boolean mResetAddedCards;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TaskCardView mTaskCardView;
@@ -126,6 +127,13 @@ public class TaskStackHorizontalViewAdapter extends
     }
 
     @Override
+    public void onViewAttachedToWindow(ViewHolder holder) {
+        if (mResetAddedCards) {
+            holder.mTaskCardView.reset();
+        }
+    }
+
+    @Override
     public void onViewDetachedFromWindow(ViewHolder holder) {
         // We only want to reset on view detach if this is the last task being dismissed.
         // This is so that we do not reset when shifting to apps etc, as it is not needed.
@@ -170,5 +178,9 @@ public class TaskStackHorizontalViewAdapter extends
     public void addTaskAt(Task task, int position) {
         mTaskList.add(position, task);
         notifyItemInserted(position);
+    }
+
+    public void setResetAddedCards(boolean reset) {
+        mResetAddedCards = reset;
     }
 }
