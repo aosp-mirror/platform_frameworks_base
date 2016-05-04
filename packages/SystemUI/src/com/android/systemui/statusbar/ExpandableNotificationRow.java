@@ -156,6 +156,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             }
         }
     };
+    private boolean mForceUnlocked;
     private boolean mDismissed;
     private boolean mKeepInParent;
     private boolean mRemoved;
@@ -454,7 +455,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @param pinned whether it is pinned
      */
     public void setPinned(boolean pinned) {
+        int intrinsicHeight = getIntrinsicHeight();
         mIsPinned = pinned;
+        if (intrinsicHeight != getIntrinsicHeight()) {
+            notifyHeightChanged(false);
+        }
         if (pinned) {
             setIconAnimationRunning(true);
             mExpandedWhenPinned = false;
@@ -643,6 +648,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             row.setIsChildInGroup(false, null);
         }
         onChildrenCountChanged();
+    }
+
+    public void setForceUnlocked(boolean forceUnlocked) {
+        mForceUnlocked = forceUnlocked;
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren = getNotificationChildren();
+            for (ExpandableNotificationRow child : notificationChildren) {
+                child.setForceUnlocked(forceUnlocked);
+            }
+        }
     }
 
     public void setDismissed(boolean dismissed) {
@@ -1017,7 +1032,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public boolean isUserLocked() {
-        return mUserLocked;
+        return mUserLocked && !mForceUnlocked;
     }
 
     public void setUserLocked(boolean userLocked) {
