@@ -263,8 +263,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री पुनर्प्राप्त करा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"आपण परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
-    <!-- no translation found for capability_desc_canRequestTouchExploration (7543249041581408313) -->
-    <skip />
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"टॅप केलेले आयटम मोठ्‍याने बोलले जातील आणि जेश्चरचा वापर करून स्क्रीन एक्सप्लोर केली जाऊ शकते."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"वर्धित केलेली वेब प्रवेशयोग्यता चालू करा"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"अ‍ॅप सामग्री अधिक प्रवेशयोग्‍य बनविण्‍यासाठी कदाचित स्‍क्रिप्‍ट स्‍थापित केली जाऊ शकतात."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"आपण टाइप करता त्या मजकुराचे निरीक्षण करा"</string>
@@ -663,8 +662,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK आणि नवीन पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"नवीन पिन कोड"</string>
-    <!-- no translation found for keyguard_password_entry_touch_hint (2644215452200037944) -->
-    <skip />
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"संकेतशब्द टाइप करण्यासाठी टॅप करा"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य पिन कोड."</string>
@@ -924,8 +922,7 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चालत आहे"</string>
-    <!-- no translation found for app_running_notification_text (1197581823314971177) -->
-    <skip />
+    <string name="app_running_notification_text" msgid="1197581823314971177">"अधिक माहितीसाठी किंवा अ‍ॅप थांबविण्यासाठी टॅप करा."</string>
     <string name="ok" msgid="5970060430562524910">"ठीक"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करा"</string>
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
@@ -999,8 +996,7 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
-    <!-- no translation found for heavy_weight_notification_detail (867643381388543170) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"अॅपवर स्विच करण्यासाठी टॅप करा"</string>
     <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"अॅप्स स्विच करायचे?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"आपण एक नवीन प्रारंभ करण्यापूर्वी आधीपासून चालणारा दुसरा अॅप थांबविणे आवश्यक आहे."</string>
     <string name="old_app_action" msgid="493129172238566282">"<xliff:g id="OLD_APP">%1$s</xliff:g> कडे परत"</string>
@@ -1008,8 +1004,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> प्रारंभ करा"</string>
     <string name="new_app_description" msgid="1932143598371537340">"जतन न करता जुना अॅप थांबवा."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
-    <!-- no translation found for dump_heap_notification_detail (6901391084243999274) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हीप डंप संकलित केला गेला आहे; सामायिक करण्यासाठी टॅप करा"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी आपल्याकरिता हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अनुप्रयोग प्रवेश करू शकतो."</string>
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
@@ -1045,8 +1040,7 @@
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"वाय-फाय मध्‍ये इंटरनेट प्रवेश नाही"</string>
-    <!-- no translation found for wifi_no_internet_detailed (8083079241212301741) -->
-    <skip />
+    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाय-फाय ला कनेक्ट करू शकलो नाही"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" खराब इंटरनेट कनेक्शन आहे."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"कनेक्शनला अनुमती द्यायची?"</string>
@@ -1056,8 +1050,7 @@
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाय-फाय थेट प्रारंभ करा. हे वाय-फाय क्लायंट/हॉटस्पॉट बंद करेल."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"वाय-फाय थेट प्रारंभ करू शकलो नाही."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"वाय-फाय थेट चालू आहे"</string>
-    <!-- no translation found for wifi_p2p_enabled_notification_message (8064677407830620023) -->
-    <skip />
+    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"सेटिंग्जसाठी टॅप करा"</string>
     <string name="accept" msgid="1645267259272829559">"स्वीकार करा"</string>
     <string name="decline" msgid="2112225451706137894">"नकार द्या"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"आमंत्रण पाठविले"</string>
@@ -1109,11 +1102,9 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फोटो स्थानांतरणासाठी USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI साठी USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB उपसाधनावर कनेक्ट केले"</string>
-    <!-- no translation found for usb_notification_message (3370903770828407960) -->
-    <skip />
+    <string name="usb_notification_message" msgid="3370903770828407960">"अधिक पर्यायांसाठी टॅप करा."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग करणे कनेक्‍ट केले"</string>
-    <!-- no translation found for adb_active_notification_message (4948470599328424059) -->
-    <skip />
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB डीबग करणे अक्षम करण्यासाठी टॅप करा."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"दोष अहवाल घेत आहे..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग अहवाल सामायिक करायचा?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"दोष अहवाल सामायिक करीत आहे..."</string>
@@ -1133,11 +1124,9 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नवीन <xliff:g id="NAME">%s</xliff:g> आढळले"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"फोटो आणि मीडिया स्थानांतरित करण्‍यासाठी"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> दूषित झालेले"</string>
-    <!-- no translation found for ext_media_unmountable_notification_message (2343202057122495773) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> दूषित आहे. निराकरण करण्यासाठी टॅप करा."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> असमर्थित"</string>
-    <!-- no translation found for ext_media_unsupported_notification_message (6121601473787888589) -->
-    <skip />
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला समर्थन देत नाही. समर्थित स्वरूपनामध्ये सेट करण्यासाठी टॅप करा."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> अनपेक्षितरित्या काढले"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"डेटा गमावणे टाळण्‍यासाठी काढण्‍यापूर्वी <xliff:g id="NAME">%s</xliff:g> अनमाउंट करा"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> काढले"</string>
@@ -1212,18 +1201,15 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN कनेक्ट करणे नेहमी-चालू…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN कनेक्ट केलेले नेहमी-चालू"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"VPN त्रुटी नेहमी-चालू"</string>
-    <!-- no translation found for vpn_lockdown_config (4655589351146766608) -->
-    <skip />
+    <string name="vpn_lockdown_config" msgid="4655589351146766608">"कॉन्फिगर करण्यासाठी टॅप करा"</string>
     <string name="upload_file" msgid="2897957172366730416">"फाईल निवडा"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"फाईल निवडली नाही"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>
     <string name="submit" msgid="1602335572089911941">"सबमिट करा"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"कार मोड सक्षम केला"</string>
-    <!-- no translation found for car_mode_disable_notification_message (6301524980144350051) -->
-    <skip />
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"कार मोडमधून बाहेर पडण्यासाठी टॅप करा."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"टिथरिंग किंवा हॉटस्पॉट सक्रिय"</string>
-    <!-- no translation found for tethered_notification_message (2113628520792055377) -->
-    <skip />
+    <string name="tethered_notification_message" msgid="2113628520792055377">"सेट करण्यासाठी टॅप करा."</string>
     <string name="back_button_label" msgid="2300470004503343439">"परत"</string>
     <string name="next_button_label" msgid="1080555104677992408">"पुढील"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"वगळा"</string>
@@ -1256,8 +1242,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"खाते जोडा"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"वाढवा"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"कमी करा"</string>
-    <!-- no translation found for number_picker_increment_scroll_mode (5259126567490114216) -->
-    <skip />
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> स्पर्श करा आणि धरुन ठेवा."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"वाढवण्यासाठी वर आणि कमी करण्यासाठी खाली स्लाइड करा."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"मिनिट वाढवा"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"मिनिट कमी करा"</string>
@@ -1301,8 +1286,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB संचयन"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"संपादित करा"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"डेटा वापर चेतावणी"</string>
-    <!-- no translation found for data_usage_warning_body (6660692274311972007) -->
-    <skip />
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"वापर आणि सेटिंग्ज पाहण्यासाठी टॅप करा."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G डेटा मर्यादा गाठली"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G डेटा मर्यादा गाठली"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"सेल्‍युलर डेटा मर्यादा गाठली"</string>
@@ -1314,8 +1298,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"वाय-फाय डेटा मर्यादा ओलांडली"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"निर्दिष्ट केलेल्या मर्यादेबाहेर <xliff:g id="SIZE">%s</xliff:g>."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"पार्श्वभूमी डेटा प्रतिबंधित केला"</string>
-    <!-- no translation found for data_usage_restricted_body (469866376337242726) -->
-    <skip />
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"प्रतिबंध काढण्यासाठी टॅप करा."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"सुरक्षितता प्रमाणपत्र"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"हे प्रमाणपत्र वैध आहे."</string>
     <string name="issued_to" msgid="454239480274921032">"यावर जारी केले:"</string>
@@ -1531,10 +1514,8 @@
     <string name="select_year" msgid="7952052866994196170">"वर्ष निवडा"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटविली"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for lock_to_app_toast (1420543809500606964) -->
-    <skip />
-    <!-- no translation found for lock_to_app_toast_accessible (2302154926850846096) -->
-    <skip />
+    <string name="lock_to_app_toast" msgid="1420543809500606964">"ही स्क्रीन अनपिन करण्यासाठी, परत ला स्पर्श करा आणि धरून ठेवा."</string>
+    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अॅप पिन केलेला आहे: या डिव्हाइसवर अनपिन करण्यास अनुमती नाही."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>

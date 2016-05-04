@@ -878,8 +878,8 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> yil</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> daq.dan keyin</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> daq.dan keyin</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> daq. keyin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> daq. keyin</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> soatdan keyin</item>

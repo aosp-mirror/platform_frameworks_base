@@ -878,20 +878,20 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 年</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 分钟内</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 分钟内</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 分钟后</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 分钟后</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 小时内</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 小时内</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 小时后</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 小时后</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 天内</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 天内</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 天后</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 天后</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 年内</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 年内</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 年后</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 年后</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"视频问题"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"抱歉，该视频不适合在此设备上播放。"</string>
