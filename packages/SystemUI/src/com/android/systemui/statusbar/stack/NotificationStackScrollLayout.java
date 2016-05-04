@@ -94,7 +94,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
     private static final float RUBBER_BAND_FACTOR_ON_PANEL_EXPAND = 0.21f;
-
     /**
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
      */
@@ -116,6 +115,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private VelocityTracker mVelocityTracker;
     private OverScroller mScroller;
+    private Runnable mFinishScrollingCallback;
     private int mTouchSlop;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
@@ -922,17 +922,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScrollingEnabled = enable;
     }
 
-    public void scrollTo(View v) {
+    public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
         int positionInLinearLayout = getPositionInLinearLayout(v);
-
-        int targetScroll = positionInLinearLayout + expandableView.getActualHeight() +
+        int targetScroll = positionInLinearLayout + expandableView.getIntrinsicHeight() +
                 getImeInset() - getHeight() + getTopPadding();
+
         if (mOwnScrollY < targetScroll) {
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
             mDontReportNextOverScroll = true;
             postInvalidateOnAnimation();
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -1289,6 +1291,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    public void setFinishScrollingCallback(Runnable runnable) {
+        mFinishScrollingCallback = runnable;
+    }
+
     @Override
     public void computeScroll() {
         if (mScroller.computeScrollOffset()) {
@@ -1319,6 +1325,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             postInvalidateOnAnimation();
         } else {
             mDontClampNextScroll = false;
+            if (mFinishScrollingCallback != null) {
+                mFinishScrollingCallback.run();
+            }
         }
     }
 

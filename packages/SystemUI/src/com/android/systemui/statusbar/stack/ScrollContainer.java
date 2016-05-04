@@ -31,8 +31,9 @@ public interface ScrollContainer {
 
     /**
      * Request that the view is made visible by scrolling to it.
+     * Return true if it scrolls.
      */
-    void scrollTo(View v);
+    boolean scrollTo(View v);
 
     /**
      * Request that the view does not dismiss for the current touch.
