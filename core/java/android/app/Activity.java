@@ -29,6 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
 import android.annotation.SystemApi;
+import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.content.ComponentCallbacks2;
@@ -1272,6 +1273,12 @@ public class Activity extends ContextThemeWrapper
     }
 
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+        if (mVoiceInteractor != null) {
+            for (Request activeRequest: mVoiceInteractor.getActiveRequests()) {
+                activeRequest.cancel();
+                activeRequest.clear();
+            }
+        }
         if (voiceInteractor == null) {
             mVoiceInteractor = null;
         } else {
