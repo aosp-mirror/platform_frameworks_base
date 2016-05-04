@@ -17,7 +17,6 @@
 package com.android.server.tv;
 
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
-import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
 import android.content.BroadcastReceiver;
@@ -110,6 +109,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private int mCurrentIndex = 0;
     private int mCurrentMaxIndex = 0;
 
+    // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
     private final List<Message> mPendingHdmiDeviceEvents = new LinkedList<>();
 
@@ -213,7 +213,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             String inputId = mHardwareInputIdMap.get(deviceId);
             if (inputId != null) {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        obtainStateFromConfigs(configs), 0, inputId).sendToTarget();
+                        convertConnectedToState(configs.length > 0), 0, inputId).sendToTarget();
             }
             ITvInputHardwareCallback callback = connection.getCallbackLocked();
             if (callback != null) {
@@ -263,13 +263,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 || connectionCallingUid != callingUid || connectionResolvedUserId != resolvedUserId;
     }
 
-    private int obtainStateFromConfigs(TvStreamConfig[] configs) {
-        for (TvStreamConfig config : configs) {
-            if ((config.getFlags() & TvStreamConfig.FLAG_MASK_SIGNAL_DETECTION) != 0) {
-                return INPUT_STATE_CONNECTED;
-            }
+    private int convertConnectedToState(boolean connected) {
+        if (connected) {
+            return INPUT_STATE_CONNECTED;
+        } else {
+            return INPUT_STATE_DISCONNECTED;
         }
-        return (configs.length > 0) ? INPUT_STATE_CONNECTED_STANDBY : INPUT_STATE_DISCONNECTED;
     }
 
     public void addHardwareInput(int deviceId, TvInputInfo info) {
@@ -294,14 +293,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 }
                 String inputId = mHardwareInputIdMap.get(hardwareInfo.getDeviceId());
                 if (inputId != null && inputId.equals(info.getId())) {
-                    // No HDMI hotplug does not necessarily mean disconnected, as old devices may
-                    // not report hotplug state correctly. Using INPUT_STATE_CONNECTED_STANDBY to
-                    // denote unknown state.
-                    int state = mHdmiStateMap.valueAt(i)
-                            ? INPUT_STATE_CONNECTED
-                            : INPUT_STATE_CONNECTED_STANDBY;
-                    mHandler.obtainMessage(
-                            ListenerHandler.STATE_CHANGED, state, 0, inputId).sendToTarget();
+                    mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                            convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
+                            inputId).sendToTarget();
                     return;
                 }
             }
@@ -309,7 +303,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             Connection connection = mConnections.get(deviceId);
             if (connection != null) {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
-                        obtainStateFromConfigs(connection.getConfigsLocked()), 0,
+                        convertConnectedToState(connection.getConfigsLocked().length > 0), 0,
                         info.getId()).sendToTarget();
             }
         }
@@ -1199,14 +1193,8 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (inputId == null) {
                     return;
                 }
-                // No HDMI hotplug does not necessarily mean disconnected, as old devices may
-                // not report hotplug state correctly. Using INPUT_STATE_CONNECTED_STANDBY to
-                // denote unknown state.
-                int state = event.isConnected()
-                        ? INPUT_STATE_CONNECTED
-                        : INPUT_STATE_CONNECTED_STANDBY;
-                mHandler.obtainMessage(
-                        ListenerHandler.STATE_CHANGED, state, 0, inputId).sendToTarget();
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(event.isConnected()), 0, inputId).sendToTarget();
             }
         }
     }

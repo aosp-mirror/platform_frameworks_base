@@ -223,9 +223,10 @@ public final class TvInputManager {
      * State for {@link #getInputState(String)} and
      * {@link TvInputCallback#onInputStateChanged(String, int)}: The input source is connected.
      *
-     * <p>This state indicates that a source device is connected to the input port and in the normal
-     * operation mode. It is mostly relevant to hardware inputs such as HDMI input.
-     * Non-hardware inputs are considered connected all the time.
+     * <p>This state indicates that a source device is connected to the input port and is in the
+     * normal operation mode. It is mostly relevant to hardware inputs such as HDMI input. This is
+     * the default state for any hardware inputs where their states are unknown. Non-hardware inputs
+     * are considered connected all the time.
      */
     public static final int INPUT_STATE_CONNECTED = 0;
 
@@ -234,9 +235,8 @@ public final class TvInputManager {
      * {@link TvInputCallback#onInputStateChanged(String, int)}: The input source is connected but
      * in standby mode.
      *
-     * <p>This state indicates that a source device is connected to the input port and in standby or
-     * low power mode. It is mostly relevant to hardware inputs such as HDMI inputs and Component
-     * inputs.
+     * <p>This state indicates that a source device is connected to the input port but is in standby
+     * mode. It is mostly relevant to hardware inputs such as HDMI input.
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
 
