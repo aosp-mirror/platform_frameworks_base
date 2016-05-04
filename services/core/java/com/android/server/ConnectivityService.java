@@ -741,7 +741,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         //set up the listener for user state for creating user VPNs
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_USER_STARTING);
+        intentFilter.addAction(Intent.ACTION_USER_STARTED);
         intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         intentFilter.addAction(Intent.ACTION_USER_ADDED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
@@ -3699,7 +3699,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
             if (userId == UserHandle.USER_NULL) return;
 
-            if (Intent.ACTION_USER_STARTING.equals(action)) {
+            if (Intent.ACTION_USER_STARTED.equals(action)) {
                 onUserStart(userId);
             } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
                 onUserStop(userId);

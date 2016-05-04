@@ -449,8 +449,7 @@ public class Vpn {
             mNetworkCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         }
 
-        mNetworkInfo.setIsAvailable(true);
-        mNetworkInfo.setDetailedState(DetailedState.CONNECTED, null, null);
+        mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
 
         NetworkMisc networkMisc = new NetworkMisc();
         networkMisc.allowBypass = mConfig.allowBypass;
@@ -485,6 +484,9 @@ public class Vpn {
             }
         }
         mNetworkAgent.addUidRanges(mVpnUsers.toArray(new UidRange[mVpnUsers.size()]));
+
+        mNetworkInfo.setIsAvailable(true);
+        updateState(DetailedState.CONNECTED, "agentConnect");
     }
 
     private boolean canHaveRestrictedProfile(int userId) {
