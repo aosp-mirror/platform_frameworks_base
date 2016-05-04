@@ -53,7 +53,7 @@ public class RecommendationServiceImpl extends RecommendationService
                 }
             }
         } catch (IOException | XmlPullParserException e) {
-            new RuntimeException("Could not parse vendorconfig", e);
+            throw new RuntimeException("Could not parse vendorconfig", e);
         }
 
         final int numPlugins = mPlugins.size();
