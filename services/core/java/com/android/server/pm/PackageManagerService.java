@@ -18838,9 +18838,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 continue;
             }
 
-            sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
-            synchronized (mInstallLock) {
-                reconcileAppsDataLI(volumeUuid, user.id, flags);
+            try {
+                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
+                synchronized (mInstallLock) {
+                    reconcileAppsDataLI(volumeUuid, user.id, flags);
+                }
+            } catch (IllegalStateException e) {
+                // Device was probably ejected, and we'll process that event momentarily
+                Slog.w(TAG, "Failed to prepare storage: " + e);
             }
         }
 
