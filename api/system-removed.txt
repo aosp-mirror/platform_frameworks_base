@@ -366,6 +366,10 @@ package android.provider {
     field public static final java.lang.String VOLUME_VOICE = "volume_voice";
   }
 
+  public static final class Telephony.Sms.Intents {
+    field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
 }
 
 package android.test.mock {
