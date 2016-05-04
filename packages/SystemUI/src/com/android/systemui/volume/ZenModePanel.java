@@ -579,14 +579,27 @@ public class ZenModePanel extends LinearLayout {
         if (DEBUG) Log.d(mTag, "Selecting a default");
         final int favoriteIndex = mPrefs.getMinuteIndex();
         if (favoriteIndex == -1 || !mCountdownConditionSupported) {
-            foreverTag.rb.setChecked(true);
+            setChecked(foreverTag.rb, true);
         } else {
             mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
                     MINUTE_BUCKETS[favoriteIndex], ActivityManager.getCurrentUser());
             mBucketIndex = favoriteIndex;
             bind(mTimeCondition, mZenConditions.getChildAt(COUNTDOWN_CONDITION_INDEX),
                     COUNTDOWN_CONDITION_INDEX);
-            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
+            setChecked(getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb, true);
+        }
+    }
+
+    private void setChecked(RadioButton rb, boolean checked) {
+        final int N = getVisibleConditions();
+        for (int i = 0; i < N; i++) {
+            final ConditionTag tag = getConditionTagAt(i);
+            if (tag != null && tag.rb.isChecked() && !Objects.equals(tag.rb, rb)) {
+                tag.rb.setChecked(false);
+            }
+        }
+        if (rb.isChecked() != checked) {
+            rb.setChecked(checked);
         }
     }
 
@@ -617,13 +630,8 @@ public class ZenModePanel extends LinearLayout {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (mExpanded && isChecked) {
+                    setChecked(tag.rb, isChecked);
                     if (DEBUG) Log.d(mTag, "onCheckedChanged " + conditionId);
-                    final int N = getVisibleConditions();
-                    for (int i = 0; i < N; i++) {
-                        final ConditionTag childTag = getConditionTagAt(i);
-                        if (childTag == null || childTag == tag) continue;
-                        childTag.rb.setChecked(false);
-                    }
                     MetricsLogger.action(mContext, MetricsEvent.QS_DND_CONDITION_SELECT);
                     select(tag.condition);
                     announceConditionSelection(tag);
@@ -673,7 +681,7 @@ public class ZenModePanel extends LinearLayout {
         tag.lines.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                tag.rb.setChecked(true);
+                setChecked(tag.rb, true);
             }
         });
 
@@ -762,7 +770,7 @@ public class ZenModePanel extends LinearLayout {
         }
         mTimeCondition = newCondition;
         bind(mTimeCondition, row, rowId);
-        tag.rb.setChecked(true);
+        setChecked(tag.rb, true);
         select(mTimeCondition);
         announceConditionSelection(tag);
     }
