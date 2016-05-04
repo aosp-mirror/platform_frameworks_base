@@ -231,9 +231,8 @@ const char* gFS_Main_ModulateColor =
 const char* gFS_Main_ApplyVertexAlphaLinearInterp =
         "    fragColor *= alpha;\n";
 const char* gFS_Main_ApplyVertexAlphaShadowInterp =
-        // Use a gaussian function for the shadow fall off. Note that alpha here
-        // is actually (1.0 - alpha) for saving computation.
-        "    fragColor *= exp(- alpha * alpha * 4.0) - 0.018;\n";
+        // map alpha through shadow alpha sampler
+        "    fragColor *= texture2D(baseSampler, vec2(alpha, 0.5)).a;\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
         "    fragColor = texture2D(baseSampler, outTexCoords);\n",
@@ -565,7 +564,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gFS_Uniforms_Color);
         if (!singleColor) modulateOp = MODULATE_OP_MODULATE;
     }
-    if (description.hasTexture) {
+    if (description.hasTexture || description.useShadowAlphaInterp) {
         shader.append(gFS_Uniforms_TextureSampler);
     } else if (description.hasExternalTexture) {
         shader.append(gFS_Uniforms_ExternalTextureSampler);
