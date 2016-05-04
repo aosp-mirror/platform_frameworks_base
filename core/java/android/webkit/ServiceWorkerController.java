@@ -21,6 +21,19 @@ import android.annotation.Nullable;
 
 /**
  * Manages Service Workers used by WebView.
+ *
+ * <p>Example usage:
+ * <pre class="prettyprint">
+ * ServiceWorkerController swController = ServiceWorkerController.getInstance();
+ * swController.setServiceWorkerClient(new ServiceWorkerClient() {
+ *   {@literal @}Override
+ *   public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+ *     // Capture request here and generate response or allow pass-through
+ *     // by returning null.
+ *     return null;
+ *   }
+ * });
+ * </pre></p>
  */
 public abstract class ServiceWorkerController {
 
@@ -29,7 +42,7 @@ public abstract class ServiceWorkerController {
      * only one ServiceWorkerController instance for all WebView instances,
      * however this restriction may be relaxed in the future.
      *
-     * @return The default ServiceWorkerController instance.
+     * @return the default ServiceWorkerController instance
      */
      @NonNull
      public static ServiceWorkerController getInstance() {
@@ -39,13 +52,17 @@ public abstract class ServiceWorkerController {
     /**
      * Gets the settings for all service workers.
      *
-     * @return The current ServiceWorkerWebSettings
+     * @return the current ServiceWorkerWebSettings
      */
     @NonNull
     public abstract ServiceWorkerWebSettings getServiceWorkerWebSettings();
 
     /**
      * Sets the client to capture service worker related callbacks.
+     *
+     * A {@link ServiceWorkerClient} should be set before any service workers are
+     * active, e.g. a safe place is before any WebView instances are created or
+     * pages loaded.
      */
     public abstract void setServiceWorkerClient(@Nullable ServiceWorkerClient client);
 }
