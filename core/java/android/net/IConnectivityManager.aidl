@@ -122,7 +122,7 @@ interface IConnectivityManager
     VpnInfo[] getAllVpnInfo();
 
     boolean updateLockdownVpn();
-    boolean setAlwaysOnVpnPackage(int userId, String packageName);
+    boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown);
     String getAlwaysOnVpnPackage(int userId);
 
     int checkMobileProvisioning(int suggestedTimeOutMs);
