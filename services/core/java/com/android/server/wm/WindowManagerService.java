@@ -415,6 +415,13 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<>();
 
     /**
+     * List of window tokens that have finished drawing their own windows and
+     * no longer need to show any saved surfaces. Windows that's still showing
+     * saved surfaces will be cleaned up after next animation pass.
+     */
+    final ArrayList<AppWindowToken> mFinishedEarlyAnim = new ArrayList<>();
+
+    /**
      * List of app window tokens that are waiting for replacing windows. If the
      * replacement doesn't come in time the stale windows needs to be disposed of.
      */
@@ -2327,6 +2334,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 // animation.
                 win.mAnimatingExit = true;
                 win.mReplacingRemoveRequested = true;
+                Binder.restoreCallingIdentity(origId);
+                return;
+            }
+
+            if (win.isAnimatingWithSavedSurface() && !appToken.allDrawnExcludingSaved) {
+                // We started enter animation early with a saved surface, now the app asks to remove
+                // this window. If we remove it now and the app is not yet drawn, we'll show a
+                // flicker. Delay the removal now until it's really drawn.
+                if (DEBUG_ADD_REMOVE) {
+                    Slog.d(TAG_WM, "removeWindowLocked: delay removal of " + win
+                            + " due to early animation");
+                }
+                // Do not set mAnimatingExit to true here, it will cause the surface to be hidden
+                // immediately after the enter animation is done. If the app is not yet drawn then
+                // it will show up as a flicker.
+                win.mRemoveOnExit = true;
+                win.mWindowRemovalAllowed = true;
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
@@ -8557,6 +8581,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         mDestroyPreservedSurface.clear();
     }
+
+    void stopUsingSavedSurfaceLocked() {
+        for (int i = mFinishedEarlyAnim.size() - 1; i >= 0 ; i--) {
+            final AppWindowToken wtoken = mFinishedEarlyAnim.get(i);
+            wtoken.stopUsingSavedSurfaceLocked();
+        }
+        mFinishedEarlyAnim.clear();
+    }
+
     // -------------------------------------------------------------
     // IWindowManager API
     // -------------------------------------------------------------
