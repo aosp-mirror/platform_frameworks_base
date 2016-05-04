@@ -3347,7 +3347,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public boolean setAlwaysOnVpnPackage(int userId, String packageName) {
+    public boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown) {
         enforceConnectivityInternalPermission();
         enforceCrossUserPermission(userId);
 
