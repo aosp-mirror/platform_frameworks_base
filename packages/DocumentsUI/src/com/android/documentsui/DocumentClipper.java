@@ -32,7 +32,9 @@ import com.android.documentsui.model.DocumentInfo;
 import libcore.io.IoUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -125,20 +127,37 @@ public final class DocumentClipper {
      */
     public @Nullable ClipData getClipDataForDocuments(List<DocumentInfo> docs) {
         final ContentResolver resolver = mContext.getContentResolver();
+        final String[] mimeTypes = getMimeTypes(resolver, docs);
         ClipData clipData = null;
         for (DocumentInfo doc : docs) {
-            final Uri uri = DocumentsContract.buildDocumentUri(doc.authority, doc.documentId);
             if (clipData == null) {
                 // TODO: figure out what this string should be.
                 // Currently it is not displayed anywhere in the UI, but this might change.
                 final String label = "";
-                clipData = ClipData.newUri(resolver, label, uri);
+                clipData = new ClipData(label, mimeTypes, new ClipData.Item(doc.derivedUri));
             } else {
                 // TODO: update list of mime types in ClipData.
-                clipData.addItem(new ClipData.Item(uri));
+                clipData.addItem(new ClipData.Item(doc.derivedUri));
             }
         }
         return clipData;
+    }
+
+    private static String[] getMimeTypes(ContentResolver resolver, List<DocumentInfo> docs) {
+        final HashSet<String> mimeTypes = new HashSet<>();
+        for (DocumentInfo doc : docs) {
+            assert(doc != null);
+            assert(doc.derivedUri != null);
+            final Uri uri = doc.derivedUri;
+            if ("content".equals(uri.getScheme())) {
+                mimeTypes.add(resolver.getType(uri));
+                final String[] streamTypes = resolver.getStreamTypes(uri, "*/*");
+                if (streamTypes != null) {
+                    mimeTypes.addAll(Arrays.asList(streamTypes));
+                }
+            }
+        }
+        return mimeTypes.toArray(new String[0]);
     }
 
     public void clipDocuments(List<DocumentInfo> docs) {
