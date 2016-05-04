@@ -51,14 +51,14 @@ public:
     GlopBuilder& setMeshUnitQuad();
     GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper);
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
-    GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
+    GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer);
     GlopBuilder& setMeshIndexedQuads(Vertex* vertexData, int quadCount);
     GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: delete
     GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
     GlopBuilder& setMeshPatchQuads(const Patch& patch);
 
-    GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
+    GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale, bool shadowInterp = false); // TODO: avoid boolean with default
     GlopBuilder& setFillTexturePaint(Texture& texture, const int textureFillFlags,
             const SkPaint* paint, float alphaScale);
     GlopBuilder& setFillPathTexturePaint(PathTexture& texture,

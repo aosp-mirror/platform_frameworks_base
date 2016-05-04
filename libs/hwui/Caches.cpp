@@ -74,6 +74,7 @@ bool Caches::init() {
 
     mPixelBufferState = new PixelBufferState();
     mTextureState = new TextureState();
+    mTextureState->constructTexture(*this);
 
     return true;
 }

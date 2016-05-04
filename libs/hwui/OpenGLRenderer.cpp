@@ -1697,8 +1697,8 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
     Glop glop;
     GlopBuilder(mRenderState, mCaches, &glop)
             .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-            .setMeshVertexBuffer(vertexBuffer, shadowInterp)
-            .setFillPaint(*paint, currentSnapshot()->alpha)
+            .setMeshVertexBuffer(vertexBuffer)
+            .setFillPaint(*paint, currentSnapshot()->alpha, shadowInterp)
             .setTransform(*currentSnapshot(), transformFlags)
             .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
             .build();
