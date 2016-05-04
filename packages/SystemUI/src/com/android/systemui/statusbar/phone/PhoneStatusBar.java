@@ -1495,6 +1495,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHeadsUpEntriesToRemoveOnSwitch.add(mHeadsUpManager.getEntry(key));
             return;
         }
+        // Let's remove the children if this was a summary
+        handleGroupSummaryRemoved(key, ranking);
         StatusBarNotification old = removeNotificationViews(key, ranking);
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
@@ -1509,6 +1511,40 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
         setAreThereNotifications();
+    }
+
+    /**
+     * Ensures that the group children are cancelled immediately when the group summary is cancelled
+     * instead of waiting for the notification manager to send all cancels. Otherwise this could
+     * lead to flickers.
+     *
+     * This also ensures that the animation looks nice and only consists of a single disappear
+     * animation instead of multiple.
+     *
+     * @param key the key of the notification was removed
+     * @param ranking the current ranking
+     */
+    private void handleGroupSummaryRemoved(String key,
+            RankingMap ranking) {
+        Entry entry = mNotificationData.get(key);
+        if (entry != null && entry.row != null
+                && entry.row.isSummaryWithChildren()) {
+            if (entry.notification.getOverrideGroupKey() != null && !entry.row.isDismissed()) {
+                // We don't want to remove children for autobundled notifications as they are not
+                // always cancelled. We only remove them if they were dismissed by the user.
+                return;
+            }
+            entry.row.setRemoved(true);
+            List<ExpandableNotificationRow> notificationChildren =
+                    entry.row.getNotificationChildren();
+            ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>(notificationChildren);
+            for (int i = 0; i < toRemove.size(); i++) {
+                toRemove.get(i).setKeepInParent(true);
+            }
+            for (int i = 0; i < toRemove.size(); i++) {
+                removeNotification(toRemove.get(i).getStatusBarNotification().getKey(), ranking);
+            }
+        }
     }
 
     @Override
@@ -1700,7 +1736,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             if (children != null) {
                 toRemove.clear();
                 for (ExpandableNotificationRow childRow : children) {
-                    if (orderedChildren == null || !orderedChildren.contains(childRow)) {
+                    if ((orderedChildren == null
+                            || !orderedChildren.contains(childRow))
+                            && !childRow.keepInParent()) {
                         toRemove.add(childRow);
                     }
                 }
