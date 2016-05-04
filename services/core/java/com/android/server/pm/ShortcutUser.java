@@ -16,6 +16,7 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.text.format.Formatter;
@@ -87,6 +88,8 @@ class ShortcutUser {
         }
     }
 
+    final ShortcutService mService;
+
     @UserIdInt
     private final int mUserId;
 
@@ -97,11 +100,12 @@ class ShortcutUser {
     private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
     /** Default launcher that can access the launcher apps APIs. */
-    private ComponentName mLauncherComponent;
+    private ComponentName mDefaultLauncherComponent;
 
     private long mKnownLocaleChangeSequenceNumber;
 
-    public ShortcutUser(int userId) {
+    public ShortcutUser(ShortcutService service, int userId) {
+        mService = service;
         mUserId = userId;
     }
 
@@ -120,10 +124,10 @@ class ShortcutUser {
         return mPackages.containsKey(packageName);
     }
 
-    public ShortcutPackage removePackage(@NonNull ShortcutService s, @NonNull String packageName) {
+    public ShortcutPackage removePackage(@NonNull String packageName) {
         final ShortcutPackage removed = mPackages.remove(packageName);
 
-        s.cleanupBitmapsForPackage(mUserId, packageName);
+        mService.cleanupBitmapsForPackage(mUserId, packageName);
 
         return removed;
     }
@@ -140,23 +144,33 @@ class ShortcutUser {
                 launcher.getPackageName()), launcher);
     }
 
+    @Nullable
     public ShortcutLauncher removeLauncher(
             @UserIdInt int packageUserId, @NonNull String packageName) {
         return mLaunchers.remove(PackageWithUser.of(packageUserId, packageName));
     }
 
-    public ShortcutPackage getPackageShortcuts(ShortcutService s, @NonNull String packageName) {
-        ShortcutPackage ret = mPackages.get(packageName);
-        if (ret == null) {
-            ret = new ShortcutPackage(s, this, mUserId, packageName);
-            mPackages.put(packageName, ret);
-        } else {
-            ret.attemptToRestoreIfNeededAndSave(s);
+    @Nullable
+    public ShortcutPackage getPackageShortcutsIfExists(@NonNull String packageName) {
+        final ShortcutPackage ret = mPackages.get(packageName);
+        if (ret != null) {
+            ret.attemptToRestoreIfNeededAndSave();
         }
         return ret;
     }
 
-    public ShortcutLauncher getLauncherShortcuts(ShortcutService s, @NonNull String packageName,
+    @NonNull
+    public ShortcutPackage getPackageShortcuts(@NonNull String packageName) {
+        ShortcutPackage ret = getPackageShortcutsIfExists(packageName);
+        if (ret == null) {
+            ret = new ShortcutPackage(this, mUserId, packageName);
+            mPackages.put(packageName, ret);
+        }
+        return ret;
+    }
+
+    @NonNull
+    public ShortcutLauncher getLauncherShortcuts(@NonNull String packageName,
             @UserIdInt int launcherUserId) {
         final PackageWithUser key = PackageWithUser.of(launcherUserId, packageName);
         ShortcutLauncher ret = mLaunchers.get(key);
@@ -164,7 +178,7 @@ class ShortcutUser {
             ret = new ShortcutLauncher(this, mUserId, packageName, launcherUserId);
             mLaunchers.put(key, ret);
         } else {
-            ret.attemptToRestoreIfNeededAndSave(s);
+            ret.attemptToRestoreIfNeededAndSave();
         }
         return ret;
     }
@@ -201,8 +215,8 @@ class ShortcutUser {
     /**
      * Reset all throttling counters for all packages, if there has been a system locale change.
      */
-    public void resetThrottlingIfNeeded(ShortcutService s) {
-        final long currentNo = s.getLocaleChangeSequenceNumber();
+    public void resetThrottlingIfNeeded() {
+        final long currentNo = mService.getLocaleChangeSequenceNumber();
         if (mKnownLocaleChangeSequenceNumber < currentNo) {
             if (ShortcutService.DEBUG) {
                 Slog.d(TAG, "LocaleChange detected for user " + mUserId);
@@ -210,31 +224,35 @@ class ShortcutUser {
 
             mKnownLocaleChangeSequenceNumber = currentNo;
 
-            forAllPackages(p -> p.resetRateLimiting(s));
+            forAllPackages(p -> p.resetRateLimiting());
 
-            s.scheduleSaveUser(mUserId);
+            mService.scheduleSaveUser(mUserId);
         }
     }
 
     /**
      * Called when a package is updated.
      */
-    public void handlePackageUpdated(ShortcutService s, @NonNull String packageName,
+    public void handlePackageUpdated(@NonNull String packageName,
             int newVersionCode) {
         if (!mPackages.containsKey(packageName)) {
             return;
         }
-        getPackageShortcuts(s, packageName).handlePackageUpdated(s, newVersionCode);
+        final ShortcutPackage p = getPackageShortcutsIfExists(packageName);
+        if (p == null) {
+            return; // No need to instantiate ShortcutPackage.
+        }
+        p.handlePackageUpdated(newVersionCode);
     }
 
     public void attemptToRestoreIfNeededAndSave(ShortcutService s, @NonNull String packageName,
             @UserIdInt int packageUserId) {
         forPackageItem(packageName, packageUserId, spi -> {
-            spi.attemptToRestoreIfNeededAndSave(s);
+            spi.attemptToRestoreIfNeededAndSave();
         });
     }
 
-    public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
+    public void saveToXml(XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException {
         out.startTag(null, TAG_ROOT);
 
@@ -242,29 +260,29 @@ class ShortcutUser {
                 mKnownLocaleChangeSequenceNumber);
 
         ShortcutService.writeTagValue(out, TAG_LAUNCHER,
-                mLauncherComponent);
+                mDefaultLauncherComponent);
 
         // Can't use forEachPackageItem due to the checked exceptions.
         {
             final int size = mLaunchers.size();
             for (int i = 0; i < size; i++) {
-                saveShortcutPackageItem(s, out, mLaunchers.valueAt(i), forBackup);
+                saveShortcutPackageItem(out, mLaunchers.valueAt(i), forBackup);
             }
         }
         {
             final int size = mPackages.size();
             for (int i = 0; i < size; i++) {
-                saveShortcutPackageItem(s, out, mPackages.valueAt(i), forBackup);
+                saveShortcutPackageItem(out, mPackages.valueAt(i), forBackup);
             }
         }
 
         out.endTag(null, TAG_ROOT);
     }
 
-    private void saveShortcutPackageItem(ShortcutService s, XmlSerializer out,
+    private void saveShortcutPackageItem(XmlSerializer out,
             ShortcutPackageItem spi, boolean forBackup) throws IOException, XmlPullParserException {
         if (forBackup) {
-            if (!s.shouldBackupApp(spi.getPackageName(), spi.getPackageUserId())) {
+            if (!mService.shouldBackupApp(spi.getPackageName(), spi.getPackageUserId())) {
                 return; // Don't save.
             }
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
@@ -276,7 +294,7 @@ class ShortcutUser {
 
     public static ShortcutUser loadFromXml(ShortcutService s, XmlPullParser parser, int userId,
             boolean fromBackup) throws IOException, XmlPullParserException {
-        final ShortcutUser ret = new ShortcutUser(userId);
+        final ShortcutUser ret = new ShortcutUser(s, userId);
 
         ret.mKnownLocaleChangeSequenceNumber = ShortcutService.parseLongAttribute(parser,
                 ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER);
@@ -294,7 +312,7 @@ class ShortcutUser {
             if (depth == outerDepth + 1) {
                 switch (tag) {
                     case TAG_LAUNCHER: {
-                        ret.mLauncherComponent = ShortcutService.parseComponentNameAttribute(
+                        ret.mDefaultLauncherComponent = ShortcutService.parseComponentNameAttribute(
                                 parser, ATTR_VALUE);
                         continue;
                     }
@@ -319,16 +337,16 @@ class ShortcutUser {
         return ret;
     }
 
-    public ComponentName getLauncherComponent() {
-        return mLauncherComponent;
+    public ComponentName getDefaultLauncherComponent() {
+        return mDefaultLauncherComponent;
     }
 
-    public void setLauncherComponent(ShortcutService s, ComponentName launcherComponent) {
-        if (Objects.equal(mLauncherComponent, launcherComponent)) {
+    public void setDefaultLauncherComponent(ComponentName launcherComponent) {
+        if (Objects.equal(mDefaultLauncherComponent, launcherComponent)) {
             return;
         }
-        mLauncherComponent = launcherComponent;
-        s.scheduleSaveUser(mUserId);
+        mDefaultLauncherComponent = launcherComponent;
+        mService.scheduleSaveUser(mUserId);
     }
 
     public void resetThrottling() {
@@ -337,7 +355,7 @@ class ShortcutUser {
         }
     }
 
-    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.print(prefix);
         pw.print("User: ");
         pw.print(mUserId);
@@ -349,24 +367,24 @@ class ShortcutUser {
 
         pw.print(prefix);
         pw.print("Default launcher: ");
-        pw.print(mLauncherComponent);
+        pw.print(mDefaultLauncherComponent);
         pw.println();
 
         for (int i = 0; i < mLaunchers.size(); i++) {
-            mLaunchers.valueAt(i).dump(s, pw, prefix);
+            mLaunchers.valueAt(i).dump(pw, prefix);
         }
 
         for (int i = 0; i < mPackages.size(); i++) {
-            mPackages.valueAt(i).dump(s, pw, prefix);
+            mPackages.valueAt(i).dump(pw, prefix);
         }
 
         pw.println();
         pw.print(prefix);
         pw.println("Bitmap directories: ");
-        dumpDirectorySize(s, pw, prefix + "  ", s.getUserBitmapFilePath(mUserId));
+        dumpDirectorySize(pw, prefix + "  ", mService.getUserBitmapFilePath(mUserId));
     }
 
-    private void dumpDirectorySize(@NonNull ShortcutService s, @NonNull PrintWriter pw,
+    private void dumpDirectorySize(@NonNull PrintWriter pw,
             @NonNull String prefix, File path) {
         int numFiles = 0;
         long size = 0;
@@ -377,7 +395,7 @@ class ShortcutUser {
                     numFiles++;
                     size += child.length();
                 } else if (child.isDirectory()) {
-                    dumpDirectorySize(s, pw, prefix + "  ", child);
+                    dumpDirectorySize(pw, prefix + "  ", child);
                 }
             }
         }
@@ -389,7 +407,7 @@ class ShortcutUser {
         pw.print(" files, size=");
         pw.print(size);
         pw.print(" (");
-        pw.print(Formatter.formatFileSize(s.mContext, size));
+        pw.print(Formatter.formatFileSize(mService.mContext, size));
         pw.println(")");
     }
 }

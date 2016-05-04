@@ -3698,8 +3698,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertEquals(2, mManager.getRemainingCallCount());
         });
 
-        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setLauncherComponent(
-                mService, new ComponentName("pkg1", "class"));
+        mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM).setDefaultLauncherComponent(
+                new ComponentName("pkg1", "class"));
 
         // Restore.
         mService.saveDirtyInfo();
@@ -3732,7 +3732,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         });
 
         assertEquals("pkg1", mService.getShortcutsForTest().get(UserHandle.USER_SYSTEM)
-                .getLauncherComponent().getPackageName());
+                .getDefaultLauncherComponent().getPackageName());
 
         // Start another user
         mService.handleUnlockUser(USER_10);
@@ -3748,7 +3748,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
             assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
         });
-        assertNull(mService.getShortcutsForTest().get(USER_10).getLauncherComponent());
+        assertNull(mService.getShortcutsForTest().get(USER_10).getDefaultLauncherComponent());
 
         // Try stopping the user
         mService.handleCleanupUser(USER_10);
@@ -5578,8 +5578,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
 
+        // onSystemLocaleChangedNoLock before boot completed will be ignored.
         mInternal.onSystemLocaleChangedNoLock();
+        assertEquals(origSequenceNumber, mService.getLocaleChangeSequenceNumber());
 
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        mInternal.onSystemLocaleChangedNoLock();
         assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
 
         // Note at this point only user-0 is loaded, and the counters are reset for this user,
@@ -5930,6 +5934,10 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 IllegalArgumentException.class,
                 "ID must be provided",
                 () -> new ShortcutInfo.Builder(getTestContext()).build());
+        assertExpectException(
+                NullPointerException.class,
+                "Intent action must be set",
+                () -> new ShortcutInfo.Builder(getTestContext()).setIntent(new Intent()));
         assertExpectException(
                 IllegalArgumentException.class,
                 "title must be provided",
