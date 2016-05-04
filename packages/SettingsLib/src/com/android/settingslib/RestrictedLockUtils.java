@@ -272,6 +272,29 @@ public class RestrictedLockUtils {
         return null;
     }
 
+    /**
+     * @param context
+     * @param userId user id of a managed profile.
+     * @return is remote contacts search disallowed.
+     */
+    public static EnforcedAdmin checkIfRemoteContactSearchDisallowed(Context context, int userId) {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
+        EnforcedAdmin admin = getProfileOwner(context, userId);
+        if (admin == null) {
+            return null;
+        }
+        UserHandle userHandle = UserHandle.of(userId);
+        if (dpm.getCrossProfileContactsSearchDisabled(userHandle)
+                && dpm.getCrossProfileCallerIdDisabled(userHandle)) {
+            return admin;
+        }
+        return null;
+    }
+
     public static EnforcedAdmin checkIfAccessibilityServiceDisallowed(Context context,
             String packageName, int userId) {
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
@@ -532,6 +555,22 @@ public class RestrictedLockUtils {
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnAnyUser();
         if (adminComponent != null) {
             return new EnforcedAdmin(adminComponent, dpm.getDeviceOwnerUserId());
+        }
+        return null;
+    }
+
+    private static EnforcedAdmin getProfileOwner(Context context, int userId) {
+        if (userId == UserHandle.USER_NULL) {
+            return null;
+        }
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
+        ComponentName adminComponent = dpm.getProfileOwnerAsUser(userId);
+        if (adminComponent != null) {
+            return new EnforcedAdmin(adminComponent, userId);
         }
         return null;
     }
