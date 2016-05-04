@@ -21,8 +21,10 @@ import android.printservice.recommendation.RecommendationInfo;
 import android.printservice.recommendation.RecommendationService;
 import android.printservice.PrintService;
 import android.util.Log;
+import com.android.printservice.recommendation.plugin.hp.HPRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.MDNSFilterPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.VendorConfig;
+import com.android.printservice.recommendation.plugin.mopria.MopriaRecommendationPlugin;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -54,6 +56,22 @@ public class RecommendationServiceImpl extends RecommendationService
             }
         } catch (IOException | XmlPullParserException e) {
             new RuntimeException("Could not parse vendorconfig", e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(new HPRecommendationPlugin(this), this,
+                    false));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_hp) + " plugin",
+                    e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(new MopriaRecommendationPlugin(this), this,
+                    true));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_morpia) +
+                    " plugin", e);
         }
 
         final int numPlugins = mPlugins.size();
