@@ -11471,10 +11471,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // List of package names for whom the suspended state is not set as requested in this
         // method.
         List<String> unactionedPackages = new ArrayList<>(packageNames.length);
-        for (int i = 0; i < packageNames.length; i++) {
-            String packageName = packageNames[i];
-            long callingId = Binder.clearCallingIdentity();
-            try {
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            for (int i = 0; i < packageNames.length; i++) {
+                String packageName = packageNames[i];
                 boolean changed = false;
                 final int appId;
                 synchronized (mPackages) {
@@ -11502,9 +11502,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     killApplication(packageName, UserHandle.getUid(userId, appId),
                             "suspending package");
                 }
-            } finally {
-                Binder.restoreCallingIdentity(callingId);
             }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
 
         if (!changedPackages.isEmpty()) {
@@ -11529,11 +11529,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    /**
-     * TODO: cache and disallow blocking the active dialer.
-     *
-     * @see also DefaultPermissionGrantPolicy#grantDefaultSystemHandlerPermissions
-     */
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
@@ -11560,10 +11555,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
 
-        final PackageParser.Package pkg = mPackages.get(packageName);
-        if (pkg != null && isPrivilegedApp(pkg)) {
+        if (packageName.equals(getDefaultDialerPackageName(userId))) {
             Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
-                    + "\": is a privileged app");
+                    + "\": is the default dialer");
             return false;
         }
 
@@ -11580,6 +11574,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 userId);
 
         return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
+    }
+
+    private String getDefaultDialerPackageName(int userId) {
+        synchronized (mPackages) {
+            return mSettings.getDefaultDialerPackageNameLPw(userId);
+        }
     }
 
     @Override
@@ -20332,6 +20332,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public void grantDefaultPermissionsToDefaultDialerApp(String packageName, int userId) {
             synchronized (mPackages) {
+                mSettings.setDefaultDialerPackageNameLPw(packageName, userId);
                 mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultDialerAppLPr(
                         packageName, userId);
             }
