@@ -285,10 +285,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private void selectPosition(int position, View v) {
         // Remove the placeholder.
-        notifyItemRemoved(mEditIndex);
-        mTiles.remove(mEditIndex--);
         mAccessibilityMoving = false;
         move(mAccessibilityFromIndex, position, v);
+        mTiles.remove(mEditIndex);
+        notifyItemRemoved(mEditIndex - 1);
+        updateDividerLocations();
         saveSpecs(mHost);
     }
 
@@ -321,7 +322,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityFromIndex = position;
         // Add placeholder for last slot.
         mTiles.add(mEditIndex++, null);
-        notifyItemInserted(mEditIndex - 1);
+        notifyDataSetChanged();
     }
 
     public SpanSizeLookup getSizeLookup() {
