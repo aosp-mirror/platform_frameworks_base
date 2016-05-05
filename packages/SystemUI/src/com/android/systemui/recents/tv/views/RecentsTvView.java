@@ -140,7 +140,8 @@ public class RecentsTvView extends FrameLayout {
     private void launchTaskFomRecents(final Task task, boolean animate) {
         if (!animate) {
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+            ssp.startActivityFromRecents(getContext(), task.key, task.title, null,
+                    INVALID_STACK_ID);
             return;
         }
         mTaskStackHorizontalView.requestFocus();
@@ -164,7 +165,8 @@ public class RecentsTvView extends FrameLayout {
                             // task with no animation.
                             Log.e(TAG, "Card view for task : " + task + ", returned null.");
                             SystemServicesProxy ssp = Recents.getSystemServices();
-                            ssp.startActivityFromRecents(getContext(), task.key, task.title, null);
+                            ssp.startActivityFromRecents(getContext(), task.key, task.title, null,
+                                    INVALID_STACK_ID);
                         }
                         mTaskStackHorizontalView.removeOnScrollListener(mScrollListener);
                     }

@@ -149,7 +149,8 @@ public class RecentsTransitionHelper {
         if (taskView == null) {
             // If there is no task view, then we do not need to worry about animating out occluding
             // task views, and we can launch immediately
-            startTaskActivity(stack, task, taskView, opts, transitionFuture, animStartedListener);
+            startTaskActivity(stack, task, taskView, opts, transitionFuture, animStartedListener,
+                    destinationStack);
         } else {
             LaunchTaskStartedEvent launchStartedEvent = new LaunchTaskStartedEvent(taskView,
                     screenPinningRequested);
@@ -158,14 +159,14 @@ public class RecentsTransitionHelper {
                     @Override
                     public void run() {
                         startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                                animStartedListener);
+                                animStartedListener, destinationStack);
                     }
                 });
                 EventBus.getDefault().send(launchStartedEvent);
             } else {
                 EventBus.getDefault().send(launchStartedEvent);
                 startTaskActivity(stack, task, taskView, opts, transitionFuture,
-                        animStartedListener);
+                        animStartedListener, destinationStack);
             }
         }
         Recents.getSystemServices().sendCloseSystemWindows(
@@ -194,12 +195,13 @@ public class RecentsTransitionHelper {
      *
      * @param taskView this is the {@link TaskView} that we are launching from. This can be null if
      *                 we are toggling recents and the launch-to task is now offscreen.
+     * @param destinationStack id of the stack to put the task into.
      */
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskView taskView,
             ActivityOptions opts, IAppTransitionAnimationSpecsFuture transitionFuture,
-            final ActivityOptions.OnAnimationStartedListener animStartedListener) {
+            final OnAnimationStartedListener animStartedListener, int destinationStack) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts)) {
+        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts, destinationStack)) {
             // Keep track of the index of the task launch
             int taskIndexFromFront = 0;
             int taskIndex = stack.indexOfStackTask(task);

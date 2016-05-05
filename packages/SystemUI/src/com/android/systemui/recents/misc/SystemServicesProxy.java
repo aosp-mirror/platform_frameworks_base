@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 
@@ -940,7 +941,7 @@ public class SystemServicesProxy {
 
     /** Starts an activity from recents. */
     public boolean startActivityFromRecents(Context context, Task.TaskKey taskKey, String taskName,
-            ActivityOptions options) {
+            ActivityOptions options, int stackId) {
         if (mIam != null) {
             try {
                 if (taskKey.stackId == DOCKED_STACK_ID) {
@@ -950,6 +951,11 @@ public class SystemServicesProxy {
                         options = ActivityOptions.makeBasic();
                     }
                     options.setLaunchStackId(FULLSCREEN_WORKSPACE_STACK_ID);
+                } else if (stackId != INVALID_STACK_ID){
+                    if (options == null) {
+                        options = ActivityOptions.makeBasic();
+                    }
+                    options.setLaunchStackId(stackId);
                 }
                 mIam.startActivityFromRecents(
                         taskKey.id, options == null ? null : options.toBundle());
