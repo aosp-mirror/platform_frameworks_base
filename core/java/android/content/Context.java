@@ -2249,10 +2249,10 @@ public abstract class Context {
 
     /**
      * Request that a given application service be started.  The Intent
-     * should contain either contain the complete class name of a specific service
-     * implementation to start or a specific package name to target.  If the
-     * Intent is less specified, it log a warning about this and which of the
-     * multiple matching services it finds and uses will be undefined.  If this service
+     * should either contain the complete class name of a specific service
+     * implementation to start, or a specific package name to target.  If the
+     * Intent is less specified, it logs a warning about this.  In this case any of the
+     * multiple matching services may be used.  If this service
      * is not already running, it will be instantiated and started (creating a
      * process for it if needed); if it is running then it remains running.
      *
@@ -2266,7 +2266,7 @@ public abstract class Context {
      * managed by {@link #bindService}: it requires the service to remain
      * running until {@link #stopService} is called, regardless of whether
      * any clients are connected to it.  Note that calls to startService()
-     * are not nesting: no matter how many times you call startService(),
+     * do not nest: no matter how many times you call startService(),
      * a single call to {@link #stopService} will stop it.
      *
      * <p>The system attempts to keep running services around as much as
