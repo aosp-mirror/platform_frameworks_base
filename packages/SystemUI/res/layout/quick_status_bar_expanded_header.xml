@@ -138,17 +138,13 @@
                 android:gravity="top"
                 systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
-            <com.android.systemui.statusbar.AlphaOptimizedButton
+            <com.android.systemui.statusbar.AlphaOptimizedImageView
                 android:id="@+id/alarm_status_collapsed"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawablePadding="6dp"
-                android:drawableStart="@drawable/ic_access_alarms_small"
-                android:textColor="#64ffffff"
-                android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_access_alarms_small"
                 android:paddingStart="6dp"
-                android:gravity="top"
-                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"
                 android:visibility="gone" />
         </LinearLayout>
 
