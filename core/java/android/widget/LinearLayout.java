@@ -730,7 +730,6 @@ public class LinearLayout extends ViewGroup {
         final int baselineChildIndex = mBaselineAlignedChildIndex;        
         final boolean useLargestChild = mUseLargestChild;
 
-        int lastWeightedChildIndex = -1;
         int largestChildHeight = Integer.MIN_VALUE;
         int consumedExcessSpace = 0;
 
@@ -755,10 +754,8 @@ public class LinearLayout extends ViewGroup {
             }
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (lp.weight > 0) {
-                totalWeight += lp.weight;
-                lastWeightedChildIndex = i;
-            }
+
+            totalWeight += lp.weight;
 
             final boolean useExcessSpace = lp.height == 0 && lp.weight > 0;
             if (heightMode == MeasureSpec.EXACTLY && useExcessSpace) {
@@ -912,13 +909,7 @@ public class LinearLayout extends ViewGroup {
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 final float childWeight = lp.weight;
                 if (childWeight > 0) {
-                    final int share;
-                    if (i == lastWeightedChildIndex) {
-                        share = remainingExcess;
-                    } else {
-                        share = (int) (childWeight * remainingExcess / remainingWeightSum);
-                    }
-
+                    final int share = (int) (childWeight * remainingExcess / remainingWeightSum);
                     remainingExcess -= share;
                     remainingWeightSum -= childWeight;
 
@@ -1079,7 +1070,6 @@ public class LinearLayout extends ViewGroup {
         
         final boolean isExactly = widthMode == MeasureSpec.EXACTLY;
 
-        int lastWeightedChildIndex = -1;
         int largestChildWidth = Integer.MIN_VALUE;
         int usedExcessSpace = 0;
 
@@ -1104,10 +1094,8 @@ public class LinearLayout extends ViewGroup {
             }
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (lp.weight > 0) {
-                totalWeight += lp.weight;
-                lastWeightedChildIndex = i;
-            }
+
+            totalWeight += lp.weight;
 
             final boolean useExcessSpace = lp.width == 0 && lp.weight > 0;
             if (widthMode == MeasureSpec.EXACTLY && useExcessSpace) {
@@ -1306,13 +1294,7 @@ public class LinearLayout extends ViewGroup {
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 final float childWeight = lp.weight;
                 if (childWeight > 0) {
-                    final int share;
-                    if (i == lastWeightedChildIndex) {
-                        share = remainingExcess;
-                    } else {
-                        share = (int) (childWeight * remainingExcess / remainingWeightSum);
-                    }
-
+                    final int share = (int) (childWeight * remainingExcess / remainingWeightSum);
                     remainingExcess -= share;
                     remainingWeightSum -= childWeight;
 
