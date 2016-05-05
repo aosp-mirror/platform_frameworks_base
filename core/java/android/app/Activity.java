@@ -6229,17 +6229,59 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Enable or disable virtual reality (VR) mode.
+     * Enable or disable virtual reality (VR) mode for this Activity.
      *
-     * <p>VR mode is a hint to Android system services to switch to a mode optimized for
-     * high-performance stereoscopic rendering.  This mode will be enabled while this Activity has
-     * focus.</p>
+     * <p>VR mode is a hint to Android system to switch to a mode optimized for VR applications
+     * while this Activity has user focus.</p>
+     *
+     * <p>It is recommended that applications additionally declare
+     * {@link android.R.attr#enableVrMode} in their manifest to allow for smooth activity
+     * transitions when switching between VR activities.</p>
+     *
+     * <p>If the requested {@link android.service.vr.VrListenerService} component is not available,
+     * VR mode will not be started.  Developers can handle this case as follows:</p>
+     *
+     * <pre>
+     * String servicePackage = "com.whatever.app";
+     * String serviceClass = "com.whatever.app.MyVrListenerService";
+     *
+     * // Name of the component of the VrListenerService to start.
+     * ComponentName serviceComponent = new ComponentName(servicePackage, serviceClass);
+     *
+     * try {
+     *    setVrModeEnabled(true, myComponentName);
+     * } catch (PackageManager.NameNotFoundException e) {
+     *        List&lt;ApplicationInfo> installed = getPackageManager().getInstalledApplications(0);
+     *        boolean isInstalled = false;
+     *        for (ApplicationInfo app : installed) {
+     *            if (app.packageName.equals(servicePackage)) {
+     *                isInstalled = true;
+     *                break;
+     *            }
+     *        }
+     *        if (isInstalled) {
+     *            // Package is installed, but not enabled in Settings.  Let user enable it.
+     *            startActivity(new Intent(Settings.ACTION_VR_LISTENER_SETTINGS));
+     *        } else {
+     *            // Package is not installed.  Send an intent to download this.
+     *            sentIntentToLaunchAppStore(servicePackage);
+     *        }
+     * }
+     * </pre>
      *
      * @param enabled {@code true} to enable this mode.
      * @param requestedComponent the name of the component to use as a
      *        {@link android.service.vr.VrListenerService} while VR mode is enabled.
      *
-     * @throws android.content.pm.PackageManager.NameNotFoundException;
+     * @throws android.content.pm.PackageManager.NameNotFoundException if the given component
+     *    to run as a {@link android.service.vr.VrListenerService} is not installed, or has
+     *    not been enabled in user settings.
+     *
+     * @see android.content.pm.PackageManager#FEATURE_VR_MODE
+     * @see android.content.pm.PackageManager#FEATURE_VR_MODE_HIGH_PERFORMANCE
+     * @see android.service.vr.VrListenerService
+     * @see android.provider.Settings#ACTION_VR_LISTENER_SETTINGS
+     * @see android.R.attr#enableVrMode
      */
     public void setVrModeEnabled(boolean enabled, @NonNull ComponentName requestedComponent)
           throws PackageManager.NameNotFoundException {
