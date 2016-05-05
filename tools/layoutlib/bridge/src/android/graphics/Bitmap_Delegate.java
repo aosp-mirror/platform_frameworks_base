@@ -303,6 +303,13 @@ public final class Bitmap_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static Bitmap nativeCopyAshmemConfig(long nativeSrcBitmap, int nativeConfig) {
+        // Unused method; no implementation provided.
+        assert false;
+        return null;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static long nativeGetNativeFinalizer() {
         synchronized (Bitmap_Delegate.class) {
             if (sFinalizer == -1) {
