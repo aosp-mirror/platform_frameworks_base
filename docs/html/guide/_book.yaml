@@ -367,6 +367,8 @@ toc:
 
 - title: Libraries
   path: /topic/libraries/index.html
+  section:
+  - include: /topic/libraries/_book.yaml
 
 - title: Administration
   path: /guide/topics/admin/index.html
