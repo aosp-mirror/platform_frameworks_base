@@ -21,8 +21,8 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-
     android:paddingStart="8dip"
+    android:paddingEnd="16dip"
     android:paddingTop="6dip"
     android:paddingBottom="6dip"
     >
@@ -38,21 +38,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:layout_marginEnd="8dip"
         >
         <TextView android:id="@+id/message"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
-
-            android:gravity="center_vertical"
+            android:layout_gravity="top|start"
+            android:gravity="center_vertical|start"
             android:textAppearance="?android:attr/textAppearanceLarge"
             />
         <TextView android:id="@+id/status"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="bottom|start"
             android:minHeight="26dp"
-
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
     </LinearLayout>
