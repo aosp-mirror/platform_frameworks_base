@@ -1091,7 +1091,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  [--daily] [--reset] [--write] [--new-daily] [--read-daily] [-h] [<package.name>]");
         pw.println("  --checkin: generate output for a checkin report; will write (and clear) the");
         pw.println("             last old completed stats when they had been reset.");
-        pw.println("  --c: write the current stats in checkin format.");
+        pw.println("  -c: write the current stats in checkin format.");
         pw.println("  --history: show only history data.");
         pw.println("  --history-start <num>: show only history data starting at given time offset.");
         pw.println("  --charged: only output data since last charged.");
