@@ -530,16 +530,12 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private ValueAnimator getFlingAnimator(int position, final SnapTarget snapTarget,
             final long endDelay) {
+        final boolean taskPositionSameAtEnd = snapTarget.flag == SnapTarget.FLAG_NONE;
         ValueAnimator anim = ValueAnimator.ofInt(position, snapTarget.position);
-        anim.addUpdateListener(new AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                resizeStack((Integer) animation.getAnimatedValue(),
-                        animation.getAnimatedFraction() == 1f
-                                ? TASK_POSITION_SAME
-                                : snapTarget.position, snapTarget);
-            }
-        });
+        anim.addUpdateListener(animation -> resizeStack((Integer) animation.getAnimatedValue(),
+                taskPositionSameAtEnd && animation.getAnimatedFraction() == 1f
+                        ? TASK_POSITION_SAME
+                        : snapTarget.position, snapTarget));
         Runnable endAction = () -> {
             commitSnapFlags(snapTarget);
             mWindowManagerProxy.setResizing(false);
@@ -919,10 +915,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private int restrictDismissingTaskPosition(int taskPosition, int dockSide,
             SnapTarget snapTarget) {
         if (snapTarget.flag == SnapTarget.FLAG_DISMISS_START && dockSideTopLeft(dockSide)) {
-            return mSnapAlgorithm.getFirstSplitTarget().position;
+            return Math.max(mSnapAlgorithm.getFirstSplitTarget().position, mStartPosition);
         } else if (snapTarget.flag == SnapTarget.FLAG_DISMISS_END
                 && dockSideBottomRight(dockSide)) {
-            return mSnapAlgorithm.getLastSplitTarget().position;
+            return Math.min(mSnapAlgorithm.getLastSplitTarget().position, mStartPosition);
         } else {
             return taskPosition;
         }
