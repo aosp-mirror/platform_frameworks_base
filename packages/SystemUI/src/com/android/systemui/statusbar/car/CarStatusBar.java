@@ -212,7 +212,8 @@ public class CarStatusBar extends PhoneStatusBar implements
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo runningTaskInfo = ssp.getRunningTask();
             if (runningTaskInfo != null && runningTaskInfo.baseActivity != null) {
-                mController.taskChanged(runningTaskInfo.baseActivity.getPackageName());
+                mController.taskChanged(runningTaskInfo.baseActivity.getPackageName(),
+                        runningTaskInfo.stackId);
             }
         }
     }
