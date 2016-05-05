@@ -256,6 +256,9 @@
         <item name="numColumns">3</item>
     </style>
 
+    <style name="AutoSizingList">
+        <item name="enableAutoSizing">true</item>
+    </style>
     <style name="Theme.AlertDialogHost" parent="android:Theme.DeviceDefault">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

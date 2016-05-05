@@ -32,6 +32,7 @@ import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
@@ -40,7 +41,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  */
 public class MultiUserSwitch extends FrameLayout implements View.OnClickListener {
 
-    private QSPanel mQsPanel;
+    protected QSPanel mQsPanel;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private boolean mKeyguardMode;
     private UserSwitcherController.BaseUserAdapter mUserListener;
@@ -49,7 +50,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     private final int[] mTmpInt2 = new int[2];
 
-    private UserSwitcherController mUserSwitcherController;
+    protected UserSwitcherController mUserSwitcherController;
 
     public MultiUserSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -126,7 +127,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
                 mTmpInt2[1] += center.getHeight() / 2;
 
                 mQsPanel.showDetailAdapter(true,
-                        mUserSwitcherController.userDetailAdapter,
+                        getUserDetailAdapter(),
                         mTmpInt2);
             }
         } else {
@@ -182,4 +183,7 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         return false;
     }
 
+    protected QSTile.DetailAdapter getUserDetailAdapter() {
+        return mUserSwitcherController.userDetailAdapter;
+    }
 }

@@ -397,7 +397,7 @@ public class UserSwitcherController {
         mExitGuestDialog.show();
     }
 
-    private void showAddUserDialog() {
+    public void showAddUserDialog() {
         if (mAddUserDialog != null && mAddUserDialog.isShowing()) {
             mAddUserDialog.cancel();
         }

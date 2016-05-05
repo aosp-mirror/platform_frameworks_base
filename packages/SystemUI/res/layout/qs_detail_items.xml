@@ -28,7 +28,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        sysui:itemHeight="@dimen/qs_detail_item_height" />
+        sysui:itemHeight="@dimen/qs_detail_item_height"
+        style="@style/AutoSizingList" />
 
     <LinearLayout
         android:id="@android:id/empty"

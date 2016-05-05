@@ -54,7 +54,7 @@ public class QSDetail extends LinearLayout {
 
     protected View mQsDetailHeader;
     protected TextView mQsDetailHeaderTitle;
-    private Switch mQsDetailHeaderSwitch;
+    protected Switch mQsDetailHeaderSwitch;
     private ImageView mQsDetailHeaderProgress;
 
     protected QSTileHost mHost;
