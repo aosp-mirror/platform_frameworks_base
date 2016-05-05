@@ -3092,6 +3092,7 @@
                 android:excludeFromRecents="true"
                 android:documentLaunchMode="never"
                 android:relinquishTaskIdentity="true"
+                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
