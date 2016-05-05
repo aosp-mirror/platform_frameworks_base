@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.util.ArraySet;
@@ -103,6 +104,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_SWITCH_USER = 9;
     private static final int MSG_SET_DEVICE_LOCKED = 10;
     private static final int MSG_FLUSH_TRUST_USUALLY_MANAGED = 11;
+    private static final int MSG_UNLOCK_USER = 12;
 
     private static final int TRUST_USUALLY_MANAGED_FLUSH_DELAY = 2 * 60 * 1000;
 
@@ -253,6 +255,7 @@ public class TrustManagerService extends SystemService {
             if (userInfo == null || userInfo.partial || !userInfo.isEnabled()
                     || userInfo.guestToRemove) continue;
             if (!userInfo.supportsSwitchToByUser()) continue;
+            if (!StorageManager.isUserKeyUnlocked(userInfo.id)) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
             if (!mStrongAuthTracker.canAgentsRunForUser(userInfo.id)) continue;
@@ -527,7 +530,8 @@ public class TrustManagerService extends SystemService {
 
     private List<ResolveInfo> resolveAllowedTrustAgents(PackageManager pm, int userId) {
         List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(TRUST_AGENT_INTENT,
-                0 /* flags */, userId);
+                PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                userId);
         ArrayList<ResolveInfo> allowedAgents = new ArrayList<>(resolveInfos.size());
         for (ResolveInfo resolveInfo : resolveInfos) {
             if (resolveInfo.serviceInfo == null) continue;
@@ -662,6 +666,11 @@ public class TrustManagerService extends SystemService {
     @Override
     public void onSwitchUser(int userId) {
         mHandler.obtainMessage(MSG_SWITCH_USER, userId, 0, null).sendToTarget();
+    }
+
+    @Override
+    public void onUnlockUser(int userId) {
+        mHandler.obtainMessage(MSG_UNLOCK_USER, userId, 0, null).sendToTarget();
     }
 
     // Plumbing
@@ -896,6 +905,7 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_START_USER:
                 case MSG_CLEANUP_USER:
+                case MSG_UNLOCK_USER:
                     refreshAgentList(msg.arg1);
                     break;
                 case MSG_SWITCH_USER:
@@ -918,6 +928,7 @@ public class TrustManagerService extends SystemService {
                             mLockPatternUtils.setTrustUsuallyManaged(value, userId);
                         }
                     }
+                    break;
             }
         }
     };
