@@ -68,13 +68,11 @@ public abstract class SoundTriggerInternal {
      */
     public abstract int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener);
 
-    /**
-     * Stops all recognitions active currently and clears the internal state.
-     */
-    public abstract void stopAllRecognitions();
-
     public abstract ModuleProperties getModuleProperties();
 
+    /**
+     * Unloads (and stops if running) the given keyphraseId
+     */
     public abstract int unloadKeyphraseModel(int keyphaseId);
 
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
