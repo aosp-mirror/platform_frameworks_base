@@ -352,6 +352,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
+    public void onDensityOrFontScaleChanged() {
+        mBouncer.hide(true /* destroyView */);
+    }
+
     private void animateScrimControllerKeyguardFadingOut(long delay, long duration,
             boolean skipFirstFrame) {
         animateScrimControllerKeyguardFadingOut(delay, duration, null /* endRunnable */,
