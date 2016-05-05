@@ -74,12 +74,23 @@ public abstract class AuthenticationClient extends ClientMonitor {
         } else {
             result = true; // client not listening
         }
-        if (fingerId == 0) {
+        if (!authenticated) {
             if (receiver != null) {
                 FingerprintUtils.vibrateFingerprintError(getContext());
             }
             // allow system-defined limit of number of attempts before giving up
-            result |= handleFailedAttempt();
+            boolean inLockoutMode =  handleFailedAttempt();
+            // send lockout event in case driver doesn't enforce it.
+            if (inLockoutMode) {
+                try {
+                    Slog.w(TAG, "Forcing lockout (fp driver code should do this!)");
+                    receiver.onError(getHalDeviceId(),
+                            FingerprintManager.FINGERPRINT_ERROR_LOCKOUT);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to notify lockout:", e);
+                }
+            }
+            result |= inLockoutMode;
         } else {
             if (receiver != null) {
                 FingerprintUtils.vibrateFingerprintSuccess(getContext());
