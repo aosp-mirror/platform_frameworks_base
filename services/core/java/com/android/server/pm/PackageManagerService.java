@@ -226,6 +226,8 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.os.SomeArgs;
@@ -7162,37 +7164,70 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
         }
 
-        int curr = 0;
-        int total = pkgs.size();
+        int numberOfPackagesVisited = 0;
+        int numberOfPackagesOptimized = 0;
+        int numberOfPackagesSkipped = 0;
+        int numberOfPackagesFailed = 0;
+        final int numberOfPackagesToDexopt = pkgs.size();
+        final long startTime = System.nanoTime();
+
         for (PackageParser.Package pkg : pkgs) {
-            curr++;
+            numberOfPackagesVisited++;
 
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping update of of non-optimizable app " + pkg.packageName);
                 }
+                numberOfPackagesSkipped++;
                 continue;
             }
 
             if (DEBUG_DEXOPT) {
-                Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
+                Log.i(TAG, "Updating app " + numberOfPackagesVisited + " of " +
+                        numberOfPackagesToDexopt + ": " + pkg.packageName);
             }
 
             if (!isFirstBoot()) {
                 try {
                     ActivityManagerNative.getDefault().showBootMessage(
                             mContext.getResources().getString(R.string.android_upgrading_apk,
-                                    curr, total), true);
+                                    numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
                 }
             }
 
-            performDexOpt(pkg.packageName,
+            int dexOptStatus = performDexOptTraced(pkg.packageName,
                     null /* instructionSet */,
                     true /* checkProfiles */,
-                    causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT,
+                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
                     false /* force */);
+            switch (dexOptStatus) {
+                case PackageDexOptimizer.DEX_OPT_PERFORMED:
+                    numberOfPackagesOptimized++;
+                    break;
+                case PackageDexOptimizer.DEX_OPT_SKIPPED:
+                    numberOfPackagesSkipped++;
+                    break;
+                case PackageDexOptimizer.DEX_OPT_FAILED:
+                    numberOfPackagesFailed++;
+                    break;
+                default:
+                    Log.e(TAG, "Unexpected dexopt return code " + dexOptStatus);
+                    break;
+            }
         }
+
+        final int elapsedTime = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+        MetricsLogger.action(mContext,
+                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_DEXOPTED, numberOfPackagesOptimized);
+        MetricsLogger.action(mContext,
+                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_SKIPPED, numberOfPackagesSkipped);
+        MetricsLogger.action(mContext,
+                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_FAILED, numberOfPackagesFailed);
+        MetricsLogger.action(mContext,
+                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_TOTAL, getOptimizablePackages().size());
+        MetricsLogger.action(mContext,
+                MetricsEvent.OPTIMIZING_APPS_TOTAL_TIME_MS, elapsedTime);
     }
 
     @Override
@@ -7209,25 +7244,28 @@ public class PackageManagerService extends IPackageManager.Stub {
     // TODO: this is not used nor needed. Delete it.
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        return performDexOptTraced(packageName, instructionSet, false /* checkProfiles */,
-                getFullCompilerFilter(), false /* force */);
+        int dexOptStatus = performDexOptTraced(packageName, instructionSet,
+                false /* checkProfiles */, getFullCompilerFilter(), false /* force */);
+        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
     public boolean performDexOpt(String packageName, String instructionSet,
             boolean checkProfiles, int compileReason, boolean force) {
-        return performDexOptTraced(packageName, instructionSet, checkProfiles,
+        int dexOptStatus = performDexOptTraced(packageName, instructionSet, checkProfiles,
                 getCompilerFilterForReason(compileReason), force);
+        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
     public boolean performDexOptMode(String packageName, String instructionSet,
             boolean checkProfiles, String targetCompilerFilter, boolean force) {
-        return performDexOptTraced(packageName, instructionSet, checkProfiles,
+        int dexOptStatus = performDexOptTraced(packageName, instructionSet, checkProfiles,
                 targetCompilerFilter, force);
+        return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
-    private boolean performDexOptTraced(String packageName, String instructionSet,
+    private int performDexOptTraced(String packageName, String instructionSet,
                 boolean checkProfiles, String targetCompilerFilter, boolean force) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
@@ -7240,14 +7278,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
     // if the package can now be considered up to date for the given filter.
-    private boolean performDexOptInternal(String packageName, String instructionSet,
+    private int performDexOptInternal(String packageName, String instructionSet,
                 boolean checkProfiles, String targetCompilerFilter, boolean force) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
             if (p == null) {
-                return false;
+                // Package could not be found. Report failure.
+                return PackageDexOptimizer.DEX_OPT_FAILED;
             }
             mPackageUsage.write(false);
 
@@ -7258,9 +7297,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
-                int result = performDexOptInternalWithDependenciesLI(p, instructionSets,
-                        checkProfiles, targetCompilerFilter, force);
-                return result != PackageDexOptimizer.DEX_OPT_FAILED;
+                return performDexOptInternalWithDependenciesLI(p, instructionSets, checkProfiles,
+                        targetCompilerFilter, force);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
