@@ -2529,6 +2529,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (isProfileWithLockedParent(userId)) {
             return;
         }
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            Slog.w(TAG, "User " + userId + " is no longer unlocked - exiting");
+            return;
+        }
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
             reloadWidgetsMaskedStateForGroup(mSecurityPolicy.getGroupParent(userId));
