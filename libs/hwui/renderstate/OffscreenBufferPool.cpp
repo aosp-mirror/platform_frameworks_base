@@ -20,6 +20,7 @@
 #include "Properties.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
+#include "utils/TraceUtils.h"
 
 #include <utils/Log.h>
 
@@ -41,6 +42,7 @@ OffscreenBuffer::OffscreenBuffer(RenderState& renderState, Caches& caches,
         , texture(caches) {
     uint32_t width = computeIdealDimension(viewportWidth);
     uint32_t height = computeIdealDimension(viewportHeight);
+    ATRACE_FORMAT("Allocate %ux%u HW Layer", width, height);
     caches.textureState().activateTexture(0);
     texture.resize(width, height, GL_RGBA);
     texture.blend = true;
@@ -101,6 +103,7 @@ uint32_t OffscreenBuffer::computeIdealDimension(uint32_t dimension) {
 }
 
 OffscreenBuffer::~OffscreenBuffer() {
+    ATRACE_FORMAT("Destroy %ux%u HW Layer", texture.width(), texture.height());
     texture.deleteTexture();
     renderState.meshState().deleteMeshBuffer(vbo);
     elementCount = 0;

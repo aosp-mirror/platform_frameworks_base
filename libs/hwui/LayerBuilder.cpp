@@ -336,7 +336,13 @@ void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
 
 void LayerBuilder::replayBakedOpsImpl(void* arg,
         BakedOpReceiver* unmergedReceivers, MergedOpReceiver* mergedReceivers) const {
-    ATRACE_NAME("flush drawing commands");
+    if (renderNode) {
+        ATRACE_FORMAT_BEGIN("Issue HW Layer DisplayList %s %ux%u",
+                renderNode->getName(), width, height);
+    } else {
+        ATRACE_BEGIN("flush drawing commands");
+    }
+
     for (const BatchBase* batch : mBatches) {
         size_t size = batch->getOps().size();
         if (size > 1 && batch->isMerging()) {
@@ -355,6 +361,7 @@ void LayerBuilder::replayBakedOpsImpl(void* arg,
             }
         }
     }
+    ATRACE_END();
 }
 
 void LayerBuilder::clear() {
