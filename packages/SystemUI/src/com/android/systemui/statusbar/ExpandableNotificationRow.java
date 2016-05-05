@@ -156,6 +156,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             }
         }
     };
+    private boolean mDismissed;
+    private boolean mKeepInParent;
+    private boolean mRemoved;
 
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
@@ -632,11 +635,38 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         ArrayList<ExpandableNotificationRow> clonedList = new ArrayList<>(notificationChildren);
         for (int i = 0; i < clonedList.size(); i++) {
             ExpandableNotificationRow row = clonedList.get(i);
+            if (row.keepInParent()) {
+                continue;
+            }
             mChildrenContainer.removeNotification(row);
             mHeaderUtil.restoreNotificationHeader(row);
             row.setIsChildInGroup(false, null);
         }
         onChildrenCountChanged();
+    }
+
+    public void setDismissed(boolean dismissed) {
+        mDismissed = dismissed;
+    }
+
+    public boolean isDismissed() {
+        return mDismissed;
+    }
+
+    public boolean keepInParent() {
+        return mKeepInParent;
+    }
+
+    public void setKeepInParent(boolean keepInParent) {
+        mKeepInParent = keepInParent;
+    }
+
+    public boolean isRemoved() {
+        return mRemoved;
+    }
+
+    public void setRemoved(boolean removed) {
+        mRemoved = removed;
     }
 
     public interface ExpansionLogger {
