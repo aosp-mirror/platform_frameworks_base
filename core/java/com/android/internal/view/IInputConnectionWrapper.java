@@ -71,6 +71,8 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private Object mLock = new Object();
     @GuardedBy("mLock")
     private boolean mFinished = false;
+    @GuardedBy("mLock")
+    private String mInputMethodId;
 
     static class SomeArgs {
         Object arg1;
@@ -109,6 +111,18 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         }
     }
 
+    public String getInputMethodId() {
+        synchronized (mLock) {
+            return mInputMethodId;
+        }
+    }
+
+    public void setInputMethodId(final String inputMethodId) {
+        synchronized (mLock) {
+            mInputMethodId = inputMethodId;
+        }
+    }
+
     abstract protected boolean isActive();
 
     /**
@@ -119,9 +133,11 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     /**
      * Called when the input method started or stopped full-screen mode.
-     *
+     * @param enabled {@code true} if the input method starts full-screen mode.
+     * @param calledInBackground {@code true} if this input connection is in a state when incoming
+     * events are usually ignored.
      */
-    abstract protected void onReportFullscreenMode(boolean enabled);
+    abstract protected void onReportFullscreenMode(boolean enabled, boolean calledInBackground);
 
     public void getTextAfterCursor(int length, int flags, int seq, IInputContextCallback callback) {
         dispatchMessage(obtainMessageIISC(DO_GET_TEXT_AFTER_CURSOR, length, flags, seq, callback));
@@ -464,13 +480,19 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             }
             case DO_REPORT_FULLSCREEN_MODE: {
                 InputConnection ic = getInputConnection();
-                if (ic == null) {
+                boolean isBackground = false;
+                if (ic == null || !isActive()) {
                     Log.w(TAG, "reportFullscreenMode on inexistent InputConnection");
-                    return;
+                    isBackground = true;
                 }
                 final boolean enabled = msg.arg1 == 1;
-                ic.reportFullscreenMode(enabled);
-                onReportFullscreenMode(enabled);
+                if (!isBackground) {
+                    ic.reportFullscreenMode(enabled);
+                }
+                // Due to the nature of asynchronous event handling, currently InputMethodService
+                // has relied on the fact that #reportFullscreenMode() can be handled even when the
+                // InputConnection is inactive.  We have to notify this event to InputMethodManager.
+                onReportFullscreenMode(enabled, isBackground);
                 return;
             }
             case DO_PERFORM_PRIVATE_COMMAND: {
