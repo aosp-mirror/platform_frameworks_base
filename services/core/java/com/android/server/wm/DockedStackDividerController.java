@@ -44,6 +44,7 @@ import android.view.animation.PathInterpolator;
 import com.android.server.wm.DimLayer.DimLayerUser;
 import com.android.server.wm.WindowManagerService.H;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -691,5 +692,17 @@ public class DockedStackDividerController implements DimLayerUser {
 
     WindowState getWindow() {
         return mWindow;
+    }
+
+    void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + "DockedStackDividerController");
+        pw.println(prefix + "  mLastVisibility=" + mLastVisibility);
+        pw.println(prefix + "  mMinimizedDock=" + mMinimizedDock);
+        pw.println(prefix + "  mAdjustedForIme=" + mAdjustedForIme);
+        pw.println(prefix + "  mAdjustedForDivider=" + mAdjustedForDivider);
+        if (mDimLayer.isDimming()) {
+            pw.println(prefix + "  Dim layer is dimming: ");
+            mDimLayer.printTo(prefix + "    ", pw);
+        }
     }
 }
