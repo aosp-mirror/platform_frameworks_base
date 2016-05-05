@@ -30,6 +30,9 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * Controls the docked stack divider.
  */
@@ -132,6 +135,13 @@ public class Divider extends SystemUI {
 
     private void updateTouchable() {
         mWindowManager.setTouchable(!mMinimized && !mAdjustedForIme);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("  mVisible="); pw.println(mVisible);
+        pw.print("  mMinimized="); pw.println(mMinimized);
+        pw.print("  mAdjustedForIme="); pw.println(mAdjustedForIme);
     }
 
     class DockDividerVisibilityListener extends IDockedStackListener.Stub {
