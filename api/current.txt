@@ -47607,6 +47607,8 @@ package java.lang {
     method public static byte parseByte(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static byte parseByte(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.String toString(byte);
+    method public static int toUnsignedInt(byte);
+    method public static long toUnsignedLong(byte);
     method public static java.lang.Byte valueOf(byte);
     method public static java.lang.Byte valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Byte valueOf(java.lang.String) throws java.lang.NumberFormatException;
@@ -48432,7 +48434,9 @@ package java.lang {
     method public static int bitCount(int);
     method public static int compare(int, int);
     method public int compareTo(java.lang.Integer);
+    method public static int compareUnsigned(int, int);
     method public static java.lang.Integer decode(java.lang.String) throws java.lang.NumberFormatException;
+    method public static int divideUnsigned(int, int);
     method public double doubleValue();
     method public float floatValue();
     method public static java.lang.Integer getInteger(java.lang.String);
@@ -48449,6 +48453,9 @@ package java.lang {
     method public static int numberOfTrailingZeros(int);
     method public static int parseInt(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static int parseInt(java.lang.String) throws java.lang.NumberFormatException;
+    method public static int parseUnsignedInt(java.lang.String, int) throws java.lang.NumberFormatException;
+    method public static int parseUnsignedInt(java.lang.String) throws java.lang.NumberFormatException;
+    method public static int remainderUnsigned(int, int);
     method public static int reverse(int);
     method public static int reverseBytes(int);
     method public static int rotateLeft(int, int);
@@ -48460,6 +48467,9 @@ package java.lang {
     method public static java.lang.String toOctalString(int);
     method public static java.lang.String toString(int, int);
     method public static java.lang.String toString(int);
+    method public static long toUnsignedLong(int);
+    method public static java.lang.String toUnsignedString(int, int);
+    method public static java.lang.String toUnsignedString(int);
     method public static java.lang.Integer valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Integer valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Integer valueOf(int);
@@ -48500,7 +48510,9 @@ package java.lang {
     method public static int bitCount(long);
     method public static int compare(long, long);
     method public int compareTo(java.lang.Long);
+    method public static int compareUnsigned(long, long);
     method public static java.lang.Long decode(java.lang.String) throws java.lang.NumberFormatException;
+    method public static long divideUnsigned(long, long);
     method public double doubleValue();
     method public float floatValue();
     method public static java.lang.Long getLong(java.lang.String);
@@ -48517,6 +48529,9 @@ package java.lang {
     method public static int numberOfTrailingZeros(long);
     method public static long parseLong(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static long parseLong(java.lang.String) throws java.lang.NumberFormatException;
+    method public static long parseUnsignedLong(java.lang.String, int) throws java.lang.NumberFormatException;
+    method public static long parseUnsignedLong(java.lang.String) throws java.lang.NumberFormatException;
+    method public static long remainderUnsigned(long, long);
     method public static long reverse(long);
     method public static long reverseBytes(long);
     method public static long rotateLeft(long, int);
@@ -48528,6 +48543,8 @@ package java.lang {
     method public static java.lang.String toOctalString(long);
     method public static java.lang.String toString(long, int);
     method public static java.lang.String toString(long);
+    method public static java.lang.String toUnsignedString(long, int);
+    method public static java.lang.String toUnsignedString(long);
     method public static java.lang.Long valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Long valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Long valueOf(long);
@@ -48890,6 +48907,8 @@ package java.lang {
     method public static short parseShort(java.lang.String) throws java.lang.NumberFormatException;
     method public static short reverseBytes(short);
     method public static java.lang.String toString(short);
+    method public static int toUnsignedInt(short);
+    method public static long toUnsignedLong(short);
     method public static java.lang.Short valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Short valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Short valueOf(short);
