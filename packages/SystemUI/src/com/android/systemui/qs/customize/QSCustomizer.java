@@ -127,6 +127,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(true);
+            announceForAccessibility(mContext.getString(
+                    R.string.accessibility_desc_quick_settings_edit));
         }
     }
 
@@ -140,6 +142,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(false);
+            announceForAccessibility(mContext.getString(
+                    R.string.accessibility_desc_quick_settings));
         }
     }
 
