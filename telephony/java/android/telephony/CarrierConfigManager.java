@@ -600,6 +600,13 @@ public class CarrierConfigManager {
     public static final String KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL =
             "broadcast_emergency_call_state_changes_bool";
 
+    /**
+     * Cell broadcast additional channels enbled by the carrier
+     * @hide
+     */
+    public static final String KEY_CARRIER_ADDITIONAL_CBS_CHANNELS_STRINGS =
+            "carrier_additional_cbs_channels_strings";
+
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
