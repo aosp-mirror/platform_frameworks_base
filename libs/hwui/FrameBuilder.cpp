@@ -82,6 +82,9 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
         // removed during a dropped frame, but layers may still remain scheduled so
         // as not to lose info on what portion is damaged
         if (CC_LIKELY(layerNode->getLayer() != nullptr)) {
+            ATRACE_FORMAT("Optimize HW Layer DisplayList %s %ux%u",
+                    layerNode->getName(), layerNode->getWidth(), layerNode->getHeight());
+
             const Rect& layerDamage = layers.entries()[i].damage;
             layerNode->computeOrdering();
 
