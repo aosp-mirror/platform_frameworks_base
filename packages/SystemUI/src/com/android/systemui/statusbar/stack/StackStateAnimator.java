@@ -865,8 +865,12 @@ public class StackStateAnimator {
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
                 // A race condition can trigger the view to be added to the overlay even though
-                // it is swiped out. So let's remove it
+                // it was fully swiped out. So let's remove it
                 mHostLayout.getOverlay().remove(changingView);
+                if (Math.abs(changingView.getTranslation()) == changingView.getWidth()
+                        && changingView.getTransientContainer() != null) {
+                    changingView.getTransientContainer().removeTransientView(changingView);
+                }
             } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_GROUP_EXPANSION_CHANGED) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.changingView;
