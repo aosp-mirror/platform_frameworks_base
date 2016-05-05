@@ -36,6 +36,12 @@ public interface ScrollContainer {
     boolean scrollTo(View v);
 
     /**
+     * Like {@link #scrollTo(View)}, but keeps the scroll locked until the user
+     * scrolls, or {@param v} loses focus or is detached.
+     */
+    void lockScrollTo(View v);
+
+    /**
      * Request that the view does not dismiss for the current touch.
      */
     void requestDisallowDismiss();

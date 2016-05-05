@@ -41,6 +41,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
+    private View mActionsContainer;
+
+    private int mContentHeight;
+    private int mMinHeightHint;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -123,6 +127,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             // It's still a viewstub
             mProgressBar = null;
         }
+        mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
     }
 
     @Override
@@ -224,5 +229,22 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                 (int) (rSource * (1f - t) + rTarget * t),
                 (int) (gSource * (1f - t) + gTarget * t),
                 (int) (bSource * (1f - t) + bTarget * t));
+    }
+
+    @Override
+    public void setContentHeight(int contentHeight, int minHeightHint) {
+        super.setContentHeight(contentHeight, minHeightHint);
+
+        mContentHeight = contentHeight;
+        mMinHeightHint = minHeightHint;
+        updateActionOffset();
+    }
+
+    private void updateActionOffset() {
+        if (mActionsContainer != null) {
+            // We should never push the actions higher than they are in the headsup view.
+            int constrainedContentHeight = Math.max(mContentHeight, mMinHeightHint);
+            mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight());
+        }
     }
 }
