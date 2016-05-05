@@ -157,6 +157,18 @@ public final class TvInputManagerService extends SystemService {
         mTvInputHardwareManager.onBootPhase(phase);
     }
 
+    @Override
+    public void onUnlockUser(int userHandle) {
+        if (DEBUG) Slog.d(TAG, "onUnlockUser(userHandle=" + userHandle + ")");
+        synchronized (mLock) {
+            if (mCurrentUserId != userHandle) {
+                return;
+            }
+            buildTvInputListLocked(mCurrentUserId, null);
+            buildTvContentRatingSystemListLocked(mCurrentUserId);
+        }
+    }
+
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             private void buildTvInputList(String[] packages) {
