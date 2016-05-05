@@ -69,6 +69,7 @@ import com.android.server.UiThread;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * SystemService that publishes an IVoiceInteractionManagerService.
@@ -81,6 +82,7 @@ public class VoiceInteractionManagerService extends SystemService {
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
     final ActivityManagerInternal mAmInternal;
+    final TreeSet<Integer> mLoadedKeyphraseIds;
     SoundTriggerInternal mSoundTriggerInternal;
 
     public VoiceInteractionManagerService(Context context) {
@@ -90,6 +92,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mLoadedKeyphraseIds = new TreeSet<Integer>();
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -394,7 +397,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
-                    mSoundTriggerInternal.stopAllRecognitions();
+                    unloadAllKeyphraseModels();
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
                     }
@@ -785,6 +788,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         if (mImpl != null && mImpl.mService != null) {
                             mImpl.notifySoundModelsChangedLocked();
                         }
+                        mLoadedKeyphraseIds.remove(keyphraseId);
                     }
                 }
                 Binder.restoreCallingIdentity(caller);
@@ -865,6 +869,11 @@ public class VoiceInteractionManagerService extends SystemService {
                     Slog.w(TAG, "No matching sound model found in startRecognition");
                     return SoundTriggerInternal.STATUS_ERROR;
                 } else {
+                    // Regardless of the status of the start recognition, we need to make sure
+                    // that we unload this model if needed later.
+                    synchronized (this) {
+                        mLoadedKeyphraseIds.add(keyphraseId);
+                    }
                     return mSoundTriggerInternal.startRecognition(
                             keyphraseId, soundModel, callback, recognitionConfig);
                 }
@@ -891,6 +900,21 @@ public class VoiceInteractionManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(caller);
             }
+        }
+
+        private synchronized void unloadAllKeyphraseModels() {
+            for (int keyphraseId : mLoadedKeyphraseIds) {
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    int status = mSoundTriggerInternal.unloadKeyphraseModel(keyphraseId);
+                    if (status != SoundTriggerInternal.STATUS_OK) {
+                        Slog.w(TAG, "Failed to unload keyphrase " + keyphraseId + ":" + status);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+            mLoadedKeyphraseIds.clear();
         }
 
         @Override
@@ -1078,7 +1102,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     // The user is force stopping our current interactor/recognizer.
                     // Clear the current settings and restore default state.
                     synchronized (VoiceInteractionManagerService.this) {
-                        mSoundTriggerInternal.stopAllRecognitions();
+                        unloadAllKeyphraseModels();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
                             mImpl = null;
