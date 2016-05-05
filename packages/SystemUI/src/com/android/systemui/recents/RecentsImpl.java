@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.View.MeasureSpec;
 
 import android.app.ActivityManager;
@@ -443,7 +444,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key, toTask.title, launchOpts);
+        ssp.startActivityFromRecents(
+                mContext, toTask.key, toTask.title, launchOpts, INVALID_STACK_ID);
     }
 
     /**
@@ -515,7 +517,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         MetricsLogger.count(mContext, "overview_affiliated_task_launch", 1);
 
         // Launch the task
-        ssp.startActivityFromRecents(mContext, toTask.key, toTask.title, launchOpts);
+        ssp.startActivityFromRecents(
+                mContext, toTask.key, toTask.title, launchOpts, INVALID_STACK_ID);
     }
 
     public void showNextAffiliatedTask() {

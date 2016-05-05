@@ -34,6 +34,8 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 
 public class RecentsTvTransitionHelper {
     private static final String TAG = "RecentsTvTransitionHelper";
@@ -90,7 +92,7 @@ public class RecentsTvTransitionHelper {
     private void startTaskActivity(TaskStack stack, Task task, @Nullable TaskCardView taskView,
             ActivityOptions opts,final ActivityOptions.OnAnimationStartedListener animStartedListener) {
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts)) {
+        if (ssp.startActivityFromRecents(mContext, task.key, task.title, opts, INVALID_STACK_ID)) {
             // Keep track of the index of the task launch
             int taskIndexFromFront = 0;
             int taskIndex = stack.indexOfStackTask(task);

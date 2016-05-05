@@ -600,10 +600,7 @@ public class TaskViewHeader extends FrameLayout
                     Constants.Metrics.DismissSourceHeaderButton);
         } else if (v == mMoveTaskButton) {
             TaskView tv = Utilities.findParent(this, TaskView.class);
-            Rect bounds = mMoveTaskTargetStackId == FREEFORM_WORKSPACE_STACK_ID
-                    ? new Rect(mTaskViewRect)
-                    : new Rect();
-            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, bounds,
+            EventBus.getDefault().send(new LaunchTaskEvent(tv, mTask, null,
                     mMoveTaskTargetStackId, false));
         } else if (v == mAppInfoView) {
             EventBus.getDefault().send(new ShowApplicationInfoEvent(mTask));
