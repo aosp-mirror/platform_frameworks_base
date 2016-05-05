@@ -233,7 +233,7 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void prepareToReplaceChildren(IBinder appToken) {
+    public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
         // pass for now.
     }
 
