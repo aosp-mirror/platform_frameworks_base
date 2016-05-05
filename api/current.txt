@@ -14273,7 +14273,6 @@ package android.icu.lang {
 
   public static abstract interface UCharacter.BidiPairedBracketType {
     field public static final int CLOSE = 2; // 0x2
-    field public static final int COUNT = 3; // 0x3
     field public static final int NONE = 0; // 0x0
     field public static final int OPEN = 1; // 0x1
   }
@@ -14282,7 +14281,6 @@ package android.icu.lang {
     field public static final int CANONICAL = 1; // 0x1
     field public static final int CIRCLE = 3; // 0x3
     field public static final int COMPAT = 2; // 0x2
-    field public static final int COUNT = 18; // 0x12
     field public static final int FINAL = 4; // 0x4
     field public static final int FONT = 5; // 0x5
     field public static final int FRACTION = 6; // 0x6
@@ -14302,7 +14300,6 @@ package android.icu.lang {
 
   public static abstract interface UCharacter.EastAsianWidth {
     field public static final int AMBIGUOUS = 1; // 0x1
-    field public static final int COUNT = 6; // 0x6
     field public static final int FULLWIDTH = 3; // 0x3
     field public static final int HALFWIDTH = 2; // 0x2
     field public static final int NARROW = 4; // 0x4
@@ -14312,7 +14309,6 @@ package android.icu.lang {
 
   public static abstract interface UCharacter.GraphemeClusterBreak {
     field public static final int CONTROL = 1; // 0x1
-    field public static final int COUNT = 13; // 0xd
     field public static final int CR = 2; // 0x2
     field public static final int EXTEND = 3; // 0x3
     field public static final int L = 4; // 0x4
@@ -14328,7 +14324,6 @@ package android.icu.lang {
   }
 
   public static abstract interface UCharacter.HangulSyllableType {
-    field public static final int COUNT = 6; // 0x6
     field public static final int LEADING_JAMO = 1; // 0x1
     field public static final int LVT_SYLLABLE = 5; // 0x5
     field public static final int LV_SYLLABLE = 4; // 0x4
@@ -14344,7 +14339,6 @@ package android.icu.lang {
     field public static final int BEH = 4; // 0x4
     field public static final int BETH = 5; // 0x5
     field public static final int BURUSHASKI_YEH_BARREE = 54; // 0x36
-    field public static final int COUNT = 86; // 0x56
     field public static final int DAL = 6; // 0x6
     field public static final int DALATH_RISH = 7; // 0x7
     field public static final int E = 8; // 0x8
@@ -14429,7 +14423,6 @@ package android.icu.lang {
   }
 
   public static abstract interface UCharacter.JoiningType {
-    field public static final int COUNT = 6; // 0x6
     field public static final int DUAL_JOINING = 2; // 0x2
     field public static final int JOIN_CAUSING = 1; // 0x1
     field public static final int LEFT_JOINING = 3; // 0x3
@@ -14452,7 +14445,6 @@ package android.icu.lang {
     field public static final int COMPLEX_CONTEXT = 24; // 0x18
     field public static final int CONDITIONAL_JAPANESE_STARTER = 37; // 0x25
     field public static final int CONTINGENT_BREAK = 7; // 0x7
-    field public static final int COUNT = 40; // 0x28
     field public static final int EXCLAMATION = 11; // 0xb
     field public static final int GLUE = 12; // 0xc
     field public static final int H2 = 31; // 0x1f
@@ -14484,7 +14476,6 @@ package android.icu.lang {
   }
 
   public static abstract interface UCharacter.NumericType {
-    field public static final int COUNT = 4; // 0x4
     field public static final int DECIMAL = 1; // 0x1
     field public static final int DIGIT = 2; // 0x2
     field public static final int NONE = 0; // 0x0
@@ -14494,7 +14485,6 @@ package android.icu.lang {
   public static abstract interface UCharacter.SentenceBreak {
     field public static final int ATERM = 1; // 0x1
     field public static final int CLOSE = 2; // 0x2
-    field public static final int COUNT = 15; // 0xf
     field public static final int CR = 11; // 0xb
     field public static final int EXTEND = 12; // 0xc
     field public static final int FORMAT = 3; // 0x3
@@ -14637,7 +14627,6 @@ package android.icu.lang {
     field public static final android.icu.lang.UCharacter.UnicodeBlock COPTIC_EPACT_NUMBERS;
     field public static final int COPTIC_EPACT_NUMBERS_ID = 223; // 0xdf
     field public static final int COPTIC_ID = 132; // 0x84
-    field public static final int COUNT = 263; // 0x107
     field public static final android.icu.lang.UCharacter.UnicodeBlock COUNTING_ROD_NUMERALS;
     field public static final int COUNTING_ROD_NUMERALS_ID = 154; // 0x9a
     field public static final android.icu.lang.UCharacter.UnicodeBlock CUNEIFORM;
@@ -15051,7 +15040,6 @@ package android.icu.lang {
 
   public static abstract interface UCharacter.WordBreak {
     field public static final int ALETTER = 1; // 0x1
-    field public static final int COUNT = 17; // 0x11
     field public static final int CR = 8; // 0x8
     field public static final int DOUBLE_QUOTE = 16; // 0x10
     field public static final int EXTEND = 9; // 0x9
@@ -15082,7 +15070,6 @@ package android.icu.lang {
   }
 
   public static abstract interface UCharacterEnums.ECharacterCategory {
-    field public static final byte CHAR_CATEGORY_COUNT = 30; // 0x1e
     field public static final byte COMBINING_SPACING_MARK = 8; // 0x8
     field public static final byte CONNECTOR_PUNCTUATION = 22; // 0x16
     field public static final byte CONTROL = 15; // 0xf
@@ -15122,7 +15109,6 @@ package android.icu.lang {
     field public static final int ARABIC_NUMBER = 5; // 0x5
     field public static final int BLOCK_SEPARATOR = 7; // 0x7
     field public static final int BOUNDARY_NEUTRAL = 18; // 0x12
-    field public static final int CHAR_DIRECTION_COUNT = 23; // 0x17
     field public static final int COMMON_NUMBER_SEPARATOR = 6; // 0x6
     field public static final byte DIRECTIONALITY_ARABIC_NUMBER = 5; // 0x5
     field public static final byte DIRECTIONALITY_BOUNDARY_NEUTRAL = 18; // 0x12
@@ -15175,7 +15161,6 @@ package android.icu.lang {
     field public static final int BIDI_MIRRORING_GLYPH = 16385; // 0x4001
     field public static final int BIDI_PAIRED_BRACKET = 16397; // 0x400d
     field public static final int BIDI_PAIRED_BRACKET_TYPE = 4117; // 0x1015
-    field public static final int BINARY_LIMIT = 57; // 0x39
     field public static final int BINARY_START = 0; // 0x0
     field public static final int BLOCK = 4097; // 0x1001
     field public static final int CANONICAL_COMBINING_CLASS = 4098; // 0x1002
@@ -15194,7 +15179,6 @@ package android.icu.lang {
     field public static final int DEFAULT_IGNORABLE_CODE_POINT = 5; // 0x5
     field public static final int DEPRECATED = 6; // 0x6
     field public static final int DIACRITIC = 7; // 0x7
-    field public static final int DOUBLE_LIMIT = 12289; // 0x3001
     field public static final int DOUBLE_START = 12288; // 0x3000
     field public static final int EAST_ASIAN_WIDTH = 4100; // 0x1004
     field public static final int EXTENDER = 8; // 0x8
@@ -15213,7 +15197,6 @@ package android.icu.lang {
     field public static final int IDS_TRINARY_OPERATOR = 19; // 0x13
     field public static final int ID_CONTINUE = 15; // 0xf
     field public static final int ID_START = 16; // 0x10
-    field public static final int INT_LIMIT = 4118; // 0x1016
     field public static final int INT_START = 4096; // 0x1000
     field public static final int JOINING_GROUP = 4102; // 0x1006
     field public static final int JOINING_TYPE = 4103; // 0x1007
@@ -15223,7 +15206,6 @@ package android.icu.lang {
     field public static final int LOGICAL_ORDER_EXCEPTION = 21; // 0x15
     field public static final int LOWERCASE = 22; // 0x16
     field public static final int LOWERCASE_MAPPING = 16388; // 0x4004
-    field public static final int MASK_LIMIT = 8193; // 0x2001
     field public static final int MASK_START = 8192; // 0x2000
     field public static final int MATH = 23; // 0x17
     field public static final int NAME = 16389; // 0x4005
@@ -15238,7 +15220,6 @@ package android.icu.lang {
     field public static final int NONCHARACTER_CODE_POINT = 24; // 0x18
     field public static final int NUMERIC_TYPE = 4105; // 0x1009
     field public static final int NUMERIC_VALUE = 12288; // 0x3000
-    field public static final int OTHER_PROPERTY_LIMIT = 28673; // 0x7001
     field public static final int OTHER_PROPERTY_START = 28672; // 0x7000
     field public static final int PATTERN_SYNTAX = 42; // 0x2a
     field public static final int PATTERN_WHITE_SPACE = 43; // 0x2b
@@ -15258,7 +15239,6 @@ package android.icu.lang {
     field public static final int SIMPLE_TITLECASE_MAPPING = 16392; // 0x4008
     field public static final int SIMPLE_UPPERCASE_MAPPING = 16393; // 0x4009
     field public static final int SOFT_DOTTED = 27; // 0x1b
-    field public static final int STRING_LIMIT = 16398; // 0x400e
     field public static final int STRING_START = 16384; // 0x4000
     field public static final int S_TERM = 35; // 0x23
     field public static final int TERMINAL_PUNCTUATION = 28; // 0x1c
@@ -15275,7 +15255,6 @@ package android.icu.lang {
   }
 
   public static abstract interface UProperty.NameChoice {
-    field public static final int COUNT = 2; // 0x2
     field public static final int LONG = 1; // 0x1
     field public static final int SHORT = 0; // 0x0
   }
@@ -15320,7 +15299,6 @@ package android.icu.lang {
     field public static final int CHAM = 66; // 0x42
     field public static final int CHEROKEE = 6; // 0x6
     field public static final int CIRTH = 67; // 0x43
-    field public static final int CODE_LIMIT = 167; // 0xa7
     field public static final int COMMON = 0; // 0x0
     field public static final int COPTIC = 7; // 0x7
     field public static final int CUNEIFORM = 101; // 0x65
@@ -15673,11 +15651,8 @@ package android.icu.text {
     method public abstract int next();
     method public int preceding(int);
     method public abstract int previous();
-    method public static java.lang.Object registerInstance(android.icu.text.BreakIterator, java.util.Locale, int);
-    method public static java.lang.Object registerInstance(android.icu.text.BreakIterator, android.icu.util.ULocale, int);
     method public void setText(java.lang.String);
     method public abstract void setText(java.text.CharacterIterator);
-    method public static boolean unregister(java.lang.Object);
     field public static final int DONE = -1; // 0xffffffff
     field public static final int KIND_CHARACTER = 0; // 0x0
     field public static final int KIND_LINE = 2; // 0x2
@@ -15715,7 +15690,6 @@ package android.icu.text {
 
   public final class CollationKey implements java.lang.Comparable {
     ctor public CollationKey(java.lang.String, byte[]);
-    ctor public CollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public int compareTo(android.icu.text.CollationKey);
     method public boolean equals(android.icu.text.CollationKey);
     method public android.icu.text.CollationKey getBound(int, int);
@@ -15725,7 +15699,6 @@ package android.icu.text {
   }
 
   public static final class CollationKey.BoundMode {
-    field public static final int COUNT = 3; // 0x3
     field public static final int LOWER = 0; // 0x0
     field public static final int UPPER = 1; // 0x1
     field public static final int UPPER_LONG = 2; // 0x2
@@ -15757,7 +15730,6 @@ package android.icu.text {
     method public static final java.lang.String[] getKeywordValuesForLocale(java.lang.String, android.icu.util.ULocale, boolean);
     method public static final java.lang.String[] getKeywords();
     method public int getMaxVariable();
-    method public abstract android.icu.text.RawCollationKey getRawCollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public int[] getReorderCodes();
     method public int getStrength();
     method public android.icu.text.UnicodeSet getTailoredSet();
@@ -15765,13 +15737,10 @@ package android.icu.text {
     method public abstract int getVariableTop();
     method public abstract android.icu.util.VersionInfo getVersion();
     method public boolean isFrozen();
-    method public static final java.lang.Object registerFactory(android.icu.text.Collator.CollatorFactory);
-    method public static final java.lang.Object registerInstance(android.icu.text.Collator, android.icu.util.ULocale);
     method public void setDecomposition(int);
     method public android.icu.text.Collator setMaxVariable(int);
     method public void setReorderCodes(int...);
     method public void setStrength(int);
-    method public static final boolean unregister(java.lang.Object);
     field public static final int CANONICAL_DECOMPOSITION = 17; // 0x11
     field public static final int FULL_DECOMPOSITION = 15; // 0xf
     field public static final int IDENTICAL = 15; // 0xf
@@ -15782,22 +15751,11 @@ package android.icu.text {
     field public static final int TERTIARY = 2; // 0x2
   }
 
-  public static abstract class Collator.CollatorFactory {
-    ctor protected Collator.CollatorFactory();
-    method public android.icu.text.Collator createCollator(android.icu.util.ULocale);
-    method public android.icu.text.Collator createCollator(java.util.Locale);
-    method public java.lang.String getDisplayName(java.util.Locale, java.util.Locale);
-    method public java.lang.String getDisplayName(android.icu.util.ULocale, android.icu.util.ULocale);
-    method public abstract java.util.Set<java.lang.String> getSupportedLocaleIDs();
-    method public boolean visible();
-  }
-
   public static abstract interface Collator.ReorderCodes {
     field public static final int CURRENCY = 4099; // 0x1003
     field public static final int DEFAULT = -1; // 0xffffffff
     field public static final int DIGIT = 4100; // 0x1004
     field public static final int FIRST = 4096; // 0x1000
-    field public static final int LIMIT = 4101; // 0x1005
     field public static final int NONE = 103; // 0x67
     field public static final int OTHERS = 103; // 0x67
     field public static final int PUNCTUATION = 4097; // 0x1001
@@ -15910,7 +15868,6 @@ package android.icu.text {
     field public static final int DOW_LOCAL_FIELD = 19; // 0x13
     field public static final int ERA_FIELD = 0; // 0x0
     field public static final int EXTENDED_YEAR_FIELD = 20; // 0x14
-    field public static final int FIELD_COUNT = 36; // 0x24
     field public static final int FRACTIONAL_SECOND_FIELD = 8; // 0x8
     field public static final int FULL = 0; // 0x0
     field public static final java.lang.String GENERIC_TZ = "vvvv";
@@ -16154,7 +16111,6 @@ package android.icu.text {
     field public static final int MONTH = 3; // 0x3
     field public static final int QUARTER = 2; // 0x2
     field public static final int SECOND = 13; // 0xd
-    field public static final int TYPE_LIMIT = 16; // 0x10
     field public static final int WEEKDAY = 6; // 0x6
     field public static final int WEEK_OF_MONTH = 5; // 0x5
     field public static final int WEEK_OF_YEAR = 4; // 0x4
@@ -16654,7 +16610,6 @@ package android.icu.text {
     method public java.lang.Number parse(java.lang.String) throws java.text.ParseException;
     method public android.icu.util.CurrencyAmount parseCurrency(java.lang.CharSequence, java.text.ParsePosition);
     method public final java.lang.Object parseObject(java.lang.String, java.text.ParsePosition);
-    method public static java.lang.Object registerFactory(android.icu.text.NumberFormat.NumberFormatFactory);
     method public void setContext(android.icu.text.DisplayContext);
     method public void setCurrency(android.icu.util.Currency);
     method public void setGroupingUsed(boolean);
@@ -16665,7 +16620,6 @@ package android.icu.text {
     method public void setParseIntegerOnly(boolean);
     method public void setParseStrict(boolean);
     method public void setRoundingMode(int);
-    method public static boolean unregister(java.lang.Object);
     field public static final int ACCOUNTINGCURRENCYSTYLE = 7; // 0x7
     field public static final int CASHCURRENCYSTYLE = 8; // 0x8
     field public static final int CURRENCYSTYLE = 1; // 0x1
@@ -16692,28 +16646,6 @@ package android.icu.text {
     field public static final android.icu.text.NumberFormat.Field PERCENT;
     field public static final android.icu.text.NumberFormat.Field PERMILLE;
     field public static final android.icu.text.NumberFormat.Field SIGN;
-  }
-
-  public static abstract class NumberFormat.NumberFormatFactory {
-    ctor protected NumberFormat.NumberFormatFactory();
-    method public android.icu.text.NumberFormat createFormat(android.icu.util.ULocale, int);
-    method public android.icu.text.NumberFormat createFormat(java.util.Locale, int);
-    method public abstract java.util.Set<java.lang.String> getSupportedLocaleNames();
-    method public boolean visible();
-    field public static final int FORMAT_CURRENCY = 1; // 0x1
-    field public static final int FORMAT_INTEGER = 4; // 0x4
-    field public static final int FORMAT_NUMBER = 0; // 0x0
-    field public static final int FORMAT_PERCENT = 2; // 0x2
-    field public static final int FORMAT_SCIENTIFIC = 3; // 0x3
-  }
-
-  public static abstract class NumberFormat.SimpleNumberFormatFactory extends android.icu.text.NumberFormat.NumberFormatFactory {
-    ctor public NumberFormat.SimpleNumberFormatFactory(java.util.Locale);
-    ctor public NumberFormat.SimpleNumberFormatFactory(java.util.Locale, boolean);
-    ctor public NumberFormat.SimpleNumberFormatFactory(android.icu.util.ULocale);
-    ctor public NumberFormat.SimpleNumberFormatFactory(android.icu.util.ULocale, boolean);
-    method public final java.util.Set<java.lang.String> getSupportedLocaleNames();
-    method public final boolean visible();
   }
 
   public class NumberingSystem {
@@ -16783,14 +16715,6 @@ package android.icu.text {
     method public static final android.icu.text.PluralRules.PluralType[] values();
     enum_constant public static final android.icu.text.PluralRules.PluralType CARDINAL;
     enum_constant public static final android.icu.text.PluralRules.PluralType ORDINAL;
-  }
-
-  public final class RawCollationKey extends android.icu.util.ByteArrayWrapper {
-    ctor public RawCollationKey();
-    ctor public RawCollationKey(int);
-    ctor public RawCollationKey(byte[]);
-    ctor public RawCollationKey(byte[], int);
-    method public int compareTo(android.icu.text.RawCollationKey);
   }
 
   public final class RelativeDateTimeFormatter {
@@ -16876,7 +16800,6 @@ package android.icu.text {
     method public android.icu.text.CollationKey getCollationKey(java.lang.String);
     method public void getContractionsAndExpansions(android.icu.text.UnicodeSet, android.icu.text.UnicodeSet, boolean) throws java.lang.Exception;
     method public boolean getNumericCollation();
-    method public android.icu.text.RawCollationKey getRawCollationKey(java.lang.String, android.icu.text.RawCollationKey);
     method public java.lang.String getRules();
     method public java.lang.String getRules(boolean);
     method public android.icu.util.VersionInfo getUCAVersion();
@@ -17371,19 +17294,6 @@ package android.icu.util {
     field public static final int BE = 0; // 0x0
   }
 
-  public class ByteArrayWrapper implements java.lang.Comparable {
-    ctor public ByteArrayWrapper();
-    ctor public ByteArrayWrapper(byte[], int);
-    ctor public ByteArrayWrapper(java.nio.ByteBuffer);
-    method public final android.icu.util.ByteArrayWrapper append(byte[], int, int);
-    method public int compareTo(android.icu.util.ByteArrayWrapper);
-    method public android.icu.util.ByteArrayWrapper ensureCapacity(int);
-    method public final byte[] releaseBytes();
-    method public final android.icu.util.ByteArrayWrapper set(byte[], int, int);
-    field public byte[] bytes;
-    field public int size;
-  }
-
    abstract class CECalendar extends android.icu.util.Calendar {
     ctor protected CECalendar();
     ctor protected CECalendar(android.icu.util.TimeZone);
@@ -17666,8 +17576,6 @@ package android.icu.util {
     method public java.lang.String getSymbol(java.util.Locale);
     method public java.lang.String getSymbol(android.icu.util.ULocale);
     method public static boolean isAvailable(java.lang.String, java.util.Date, java.util.Date);
-    method public static java.lang.Object registerInstance(android.icu.util.Currency, android.icu.util.ULocale);
-    method public static boolean unregister(java.lang.Object);
     field public static final int LONG_NAME = 1; // 0x1
     field public static final int PLURAL_LONG_NAME = 2; // 0x2
     field public static final int SYMBOL_NAME = 0; // 0x0
