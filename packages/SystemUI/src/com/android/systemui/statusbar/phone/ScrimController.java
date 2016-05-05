@@ -344,8 +344,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                 if (mOnAnimationFinished != null) {
                     mOnAnimationFinished.run();
                     mOnAnimationFinished = null;
-                    mKeyguardFadingOutInProgress = false;
                 }
+                mKeyguardFadingOutInProgress = false;
                 scrim.setTag(TAG_KEY_ANIM, null);
                 scrim.setTag(TAG_KEY_ANIM_TARGET, null);
             }
@@ -384,10 +384,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     private void endAnimateKeyguardFadingOut(boolean force) {
         mAnimateKeyguardFadingOut = false;
-        if ((force || (!isAnimating(mScrimInFront) && !isAnimating(mScrimBehind)))
-                && mOnAnimationFinished != null) {
-            mOnAnimationFinished.run();
-            mOnAnimationFinished = null;
+        if (force || (!isAnimating(mScrimInFront) && !isAnimating(mScrimBehind))) {
+            if (mOnAnimationFinished != null) {
+                mOnAnimationFinished.run();
+                mOnAnimationFinished = null;
+            }
             mKeyguardFadingOutInProgress = false;
         }
     }
