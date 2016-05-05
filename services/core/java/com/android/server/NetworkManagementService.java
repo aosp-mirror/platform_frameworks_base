@@ -1539,29 +1539,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void setAccessPoint(WifiConfiguration wifiConfig, String wlanIface) {
-        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
-        Object[] args;
-        String logMsg = "startAccessPoint Error setting up softap";
-        try {
-            if (wifiConfig == null) {
-                args = new Object[] {"set", wlanIface};
-            } else {
-                // TODO: understand why this is set to "6" instead of
-                // Integer.toString(wifiConfig.apChannel) as in startAccessPoint
-                // TODO: should startAccessPoint call this instead of repeating code?
-                args = new Object[] {"set", wlanIface, wifiConfig.SSID,
-                        "broadcast", "6",
-                        getSecurityType(wifiConfig), new SensitiveArg(wifiConfig.preSharedKey)};
-            }
-            executeOrLogWithMessage(SOFT_AP_COMMAND, args, NetdResponseCode.SoftapStatusResult,
-                    SOFT_AP_COMMAND_SUCCESS, logMsg);
-        } catch (NativeDaemonConnectorException e) {
-            throw e.rethrowAsParcelableException();
-        }
-    }
-
-    @Override
     public void addIdleTimer(String iface, int timeout, final int type) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
