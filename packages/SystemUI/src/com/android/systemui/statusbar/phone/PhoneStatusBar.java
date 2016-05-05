@@ -1747,7 +1747,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     if (mNotificationData.get(remove.getStatusBarNotification().getKey()) == null) {
                         // We only want to add an animation if the view is completely removed
                         // otherwise it's just a transfer
-                        mStackScroller.notifyGroupChildRemoved(remove);
+                        mStackScroller.notifyGroupChildRemoved(remove,
+                                parent.getChildrenContainer());
                     }
                 }
             }

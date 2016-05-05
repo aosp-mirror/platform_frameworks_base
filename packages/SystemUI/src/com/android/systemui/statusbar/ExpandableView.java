@@ -44,6 +44,7 @@ public abstract class ExpandableView extends FrameLayout {
     private int mMinClipTopAmount = 0;
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
+    private ViewGroup mTransientContainer;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -414,6 +415,14 @@ public abstract class ExpandableView extends FrameLayout {
 
     public boolean isChangingPosition() {
         return mChangingPosition;
+    }
+
+    public void setTransientContainer(ViewGroup transientContainer) {
+        mTransientContainer = transientContainer;
+    }
+
+    public ViewGroup getTransientContainer() {
+        return mTransientContainer;
     }
 
     /**
