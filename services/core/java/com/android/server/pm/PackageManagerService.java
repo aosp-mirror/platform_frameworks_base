@@ -7874,9 +7874,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                         mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
                         mResolveActivity.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NEVER;
                         mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
-                        mResolveActivity.theme = R.style.Theme_Holo_Dialog_Alert;
+                        mResolveActivity.theme = R.style.Theme_Material_Dialog_Alert;
                         mResolveActivity.exported = true;
                         mResolveActivity.enabled = true;
+                        mResolveActivity.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+                        mResolveActivity.configChanges = ActivityInfo.CONFIG_SCREEN_SIZE
+                                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
+                                | ActivityInfo.CONFIG_SCREEN_LAYOUT
+                                | ActivityInfo.CONFIG_ORIENTATION
+                                | ActivityInfo.CONFIG_KEYBOARD
+                                | ActivityInfo.CONFIG_KEYBOARD_HIDDEN;
                         mResolveInfo.activityInfo = mResolveActivity;
                         mResolveInfo.priority = 0;
                         mResolveInfo.preferredOrder = 0;
