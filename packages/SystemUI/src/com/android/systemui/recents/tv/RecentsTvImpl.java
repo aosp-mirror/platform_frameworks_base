@@ -38,10 +38,13 @@ import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.ThumbnailData;
 import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.statusbar.tv.TvStatusBar;
+import com.android.systemui.tv.pip.PipManager;
 
 public class RecentsTvImpl extends RecentsImpl{
     public final static String RECENTS_TV_ACTIVITY =
             "com.android.systemui.recents.tv.RecentsTvActivity";
+
+    private static final PipManager mPipManager = PipManager.getInstance();
 
     public RecentsTvImpl(Context context) {
         super(context);
@@ -120,7 +123,8 @@ public class RecentsTvImpl extends RecentsImpl{
      */
     private ActivityOptions getThumbnailTransitionActivityOptionsForTV(
             ActivityManager.RunningTaskInfo runningTask, int numTasks) {
-        Rect rect = TaskCardView.getStartingCardThumbnailRect(mContext, numTasks);
+        Rect rect = TaskCardView.getStartingCardThumbnailRect(
+            mContext, !mPipManager.isPipShown(), numTasks);
         SystemServicesProxy ssp = Recents.getSystemServices();
         ThumbnailData thumbnailData = ssp.getTaskThumbnail(runningTask.id);
         if (thumbnailData.thumbnail != null) {
