@@ -189,6 +189,7 @@ public abstract class BatteryStats implements Parcelable {
     
     private static final String VERSION_DATA = "vers";
     private static final String UID_DATA = "uid";
+    private static final String WAKEUP_ALARM_DATA = "wua";
     private static final String APK_DATA = "apk";
     private static final String PROCESS_DATA = "pr";
     private static final String CPU_DATA = "cpu";
@@ -3251,7 +3252,10 @@ public abstract class BatteryStats implements Parcelable {
                 int wakeups = 0;
                 final ArrayMap<String, ? extends Counter> alarms = ps.getWakeupAlarmStats();
                 for (int iwa=alarms.size()-1; iwa>=0; iwa--) {
-                    wakeups += alarms.valueAt(iwa).getCountLocked(which);
+                    int count = alarms.valueAt(iwa).getCountLocked(which);
+                    wakeups += count;
+                    String name = alarms.keyAt(iwa).replace(',', '_');
+                    dumpLine(pw, uid, category, WAKEUP_ALARM_DATA, name, count);
                 }
                 final ArrayMap<String, ? extends  Uid.Pkg.Serv> serviceStats = ps.getServiceStats();
                 for (int isvc=serviceStats.size()-1; isvc>=0; isvc--) {
