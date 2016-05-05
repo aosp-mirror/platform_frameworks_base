@@ -331,23 +331,32 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     private boolean move(int from, int to, View v) {
         if (to >= mEditIndex) {
-            if (from >= mEditIndex) {
-                return false;
-            }
-            // Sort tiles into system/non-system groups.
-            TileInfo tile = mTiles.get(from);
-            if (tile.isSystem) {
-                if (to > mTileDividerIndex) {
-                    to = mTileDividerIndex;
+            if (from < mEditIndex) {
+                // Removing a tile.
+                // Sort tiles into system/non-system groups.
+                TileInfo tile = mTiles.get(from);
+                if (tile.isSystem) {
+                    if (to > mTileDividerIndex) {
+                        to = mTileDividerIndex;
+                    }
+                } else {
+                    if (mTileDividerIndex == mTiles.size()) {
+                        notifyItemInserted(mTiles.size());
+                        mTiles.add(null);
+                    }
+                    if (to <= mTileDividerIndex) {
+                        to = mTileDividerIndex;
+                    }
                 }
             } else {
-                if (mTileDividerIndex == mTiles.size()) {
-                    notifyItemInserted(mTiles.size());
-                    mTiles.add(null);
+                if (to > mEditIndex) {
+                    // Don't allow tiles to be dragged around when they aren't added.
+                    return false;
                 }
-                if (to <= mTileDividerIndex) {
-                    to = mTileDividerIndex;
-                }
+                // Allow the case where to == mEditIndex to fall through and swap which
+                // side the tile is currently on.
+                // This lets the the cases where all tiles are on one side of the line
+                // work.
             }
         }
         CharSequence fromLabel = mTiles.get(from).state.label;
