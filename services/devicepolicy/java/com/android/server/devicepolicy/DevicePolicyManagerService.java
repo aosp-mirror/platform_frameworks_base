@@ -8871,6 +8871,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(admin);
         ensureDeviceOwnerManagingSingleUser(admin);
 
+        if (!mContext.getResources().getBoolean(R.bool.config_supportPreRebootSecurityLogs)) {
+            return null;
+        }
+
         ArrayList<SecurityEvent> output = new ArrayList<SecurityEvent>();
         try {
             SecurityLog.readPreviousEvents(output);
