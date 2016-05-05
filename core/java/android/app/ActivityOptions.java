@@ -20,6 +20,7 @@ import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -939,6 +940,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    @TestApi
     public void setLaunchStackId(int launchStackId) {
         mLaunchStackId = launchStackId;
     }
