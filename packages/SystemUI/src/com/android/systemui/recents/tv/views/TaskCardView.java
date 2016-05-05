@@ -110,20 +110,24 @@ public class TaskCardView extends LinearLayout {
         return r;
     }
 
-    public static Rect getStartingCardThumbnailRect(Context context, int numberOfTasks) {
+    public static Rect getStartingCardThumbnailRect(
+            Context context, boolean hasFocus, int numberOfTasks) {
         if(numberOfTasks > 1) {
-            return getStartingCardThumbnailRectForStartPosition(context);
+            return getStartingCardThumbnailRectForStartPosition(context, hasFocus);
         } else {
-            return getStartingCardThumbnailRectForFocusedPosition(context);
+            return getStartingCardThumbnailRectForFocusedPosition(context, hasFocus);
         }
     }
 
-    private static Rect getStartingCardThumbnailRectForStartPosition(Context context) {
+    private static Rect getStartingCardThumbnailRectForStartPosition(
+            Context context, boolean hasFocus) {
         Resources res = context.getResources();
 
         int width = res.getDimensionPixelOffset(R.dimen.recents_tv_card_width);
-        int totalSpacing = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_card_spacing) * 2
-                + res.getDimensionPixelOffset(R.dimen.recents_tv_gird_focused_card_delta);
+        int totalSpacing = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_card_spacing) * 2;
+        if (hasFocus) {
+            totalSpacing += res.getDimensionPixelOffset(R.dimen.recents_tv_gird_focused_card_delta);
+        }
         int height = res.getDimensionPixelOffset(R.dimen.recents_tv_screenshot_height);
         int topMargin = res.getDimensionPixelOffset(R.dimen.recents_tv_gird_row_top_margin);
         int headerHeight = res.getDimensionPixelOffset(R.dimen.recents_tv_card_extra_badge_size) +
@@ -141,12 +145,13 @@ public class TaskCardView extends LinearLayout {
                 topMargin + headerHeight + height);
     }
 
-    private static Rect getStartingCardThumbnailRectForFocusedPosition(Context context) {
+    private static Rect getStartingCardThumbnailRectForFocusedPosition(
+            Context context, boolean hasFocus) {
         Resources res = context.getResources();
 
         TypedValue out = new TypedValue();
         res.getValue(R.integer.selected_scale, out, true);
-        float scale = out.getFloat();
+        float scale = hasFocus ? out.getFloat() : 1;
 
         int width = res.getDimensionPixelOffset(R.dimen.recents_tv_card_width);
         int widthDelta = (int) (width * scale - width);
