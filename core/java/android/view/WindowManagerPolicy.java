@@ -1134,6 +1134,11 @@ public interface WindowManagerPolicy {
     public boolean isKeyguardShowingOrOccluded();
 
     /**
+     * @return true if in keyguard is on and not occluded.
+     */
+    public boolean isKeyguardShowingAndNotOccluded();
+
+    /**
      * inKeyguardRestrictedKeyInputMode
      *
      * if keyguard screen is showing or in restricted key input mode (i.e. in

@@ -6270,7 +6270,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private boolean isKeyguardShowingAndNotOccluded() {
+    @Override
+    public boolean isKeyguardShowingAndNotOccluded() {
         if (mKeyguardDelegate == null) return false;
         return mKeyguardDelegate.isShowing() && !mKeyguardOccluded;
     }

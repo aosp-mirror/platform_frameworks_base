@@ -59,6 +59,7 @@ public class KeyguardServiceDelegate {
             showingAndNotOccluded = true;
             secure = true;
             deviceHasKeyguard = true;
+            enabled = true;
         }
         boolean showing;
         boolean showingAndNotOccluded;
@@ -176,6 +177,9 @@ public class KeyguardServiceDelegate {
             }
             if (mKeyguardState.occluded) {
                 mKeyguardService.setOccluded(mKeyguardState.occluded);
+            }
+            if (!mKeyguardState.enabled) {
+                mKeyguardService.setKeyguardEnabled(mKeyguardState.enabled);
             }
         }
 
