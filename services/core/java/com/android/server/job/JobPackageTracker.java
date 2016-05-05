@@ -23,6 +23,7 @@ import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import com.android.internal.util.RingBufferIndices;
 import com.android.server.job.controllers.JobStatus;
 
 import java.io.PrintWriter;
@@ -33,26 +34,24 @@ public final class JobPackageTracker {
     // Number of historical data sets we keep.
     static final int NUM_HISTORY = 5;
 
-    private static final int EVENT_BUFFER_SIZE = 50;
+    private static final int EVENT_BUFFER_SIZE = 100;
 
     public static final int EVENT_NULL = 0;
     public static final int EVENT_START_JOB = 1;
     public static final int EVENT_STOP_JOB = 2;
 
-    private int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
-    private long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
-    private int[] mEventUids = new int[EVENT_BUFFER_SIZE];
-    private String[] mEventTags = new String[EVENT_BUFFER_SIZE];
+    private final RingBufferIndices mEventIndices = new RingBufferIndices(EVENT_BUFFER_SIZE);
+    private final int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
+    private final long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
+    private final int[] mEventUids = new int[EVENT_BUFFER_SIZE];
+    private final String[] mEventTags = new String[EVENT_BUFFER_SIZE];
 
     public void addEvent(int cmd, int uid, String tag) {
-        System.arraycopy(mEventCmds, 0, mEventCmds, 1, EVENT_BUFFER_SIZE - 1);
-        System.arraycopy(mEventTimes, 0, mEventTimes, 1, EVENT_BUFFER_SIZE - 1);
-        System.arraycopy(mEventUids, 0, mEventUids, 1, EVENT_BUFFER_SIZE - 1);
-        System.arraycopy(mEventTags, 0, mEventTags, 1, EVENT_BUFFER_SIZE - 1);
-        mEventCmds[0] = cmd;
-        mEventTimes[0] = SystemClock.elapsedRealtime();
-        mEventUids[0] = uid;
-        mEventTags[0] = tag;
+        int index = mEventIndices.add();
+        mEventCmds[index] = cmd;
+        mEventTimes[index] = SystemClock.elapsedRealtime();
+        mEventUids[index] = uid;
+        mEventTags[index] = tag;
     }
 
     DataSet mCurDataSet = new DataSet();
@@ -61,20 +60,23 @@ public final class JobPackageTracker {
     final static class PackageEntry {
         long pastActiveTime;
         long activeStartTime;
+        int activeNesting;
         int activeCount;
         boolean hadActive;
         long pastActiveTopTime;
         long activeTopStartTime;
+        int activeTopNesting;
         int activeTopCount;
         boolean hadActiveTop;
         long pastPendingTime;
         long pendingStartTime;
+        int pendingNesting;
         int pendingCount;
         boolean hadPending;
 
         public long getActiveTime(long now) {
             long time = pastActiveTime;
-            if (activeCount > 0) {
+            if (activeNesting > 0) {
                 time += now - activeStartTime;
             }
             return time;
@@ -82,7 +84,7 @@ public final class JobPackageTracker {
 
         public long getActiveTopTime(long now) {
             long time = pastActiveTopTime;
-            if (activeTopCount > 0) {
+            if (activeTopNesting > 0) {
                 time += now - activeTopStartTime;
             }
             return time;
@@ -90,7 +92,7 @@ public final class JobPackageTracker {
 
         public long getPendingTime(long now) {
             long time = pastPendingTime;
-            if (pendingCount > 0) {
+            if (pendingNesting > 0) {
                 time += now - pendingStartTime;
             }
             return time;
@@ -147,50 +149,53 @@ public final class JobPackageTracker {
 
         void incPending(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.pendingCount == 0) {
+            if (pe.pendingNesting == 0) {
                 pe.pendingStartTime = now;
+                pe.pendingCount++;
             }
-            pe.pendingCount++;
+            pe.pendingNesting++;
         }
 
         void decPending(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.pendingCount == 1) {
+            if (pe.pendingNesting == 1) {
                 pe.pastPendingTime += now - pe.pendingStartTime;
             }
-            pe.pendingCount--;
+            pe.pendingNesting--;
         }
 
         void incActive(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.activeCount == 0) {
+            if (pe.activeNesting == 0) {
                 pe.activeStartTime = now;
+                pe.activeCount++;
             }
-            pe.activeCount++;
+            pe.activeNesting++;
         }
 
         void decActive(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.activeCount == 1) {
+            if (pe.activeNesting == 1) {
                 pe.pastActiveTime += now - pe.activeStartTime;
             }
-            pe.activeCount--;
+            pe.activeNesting--;
         }
 
         void incActiveTop(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.activeTopCount == 0) {
+            if (pe.activeTopNesting == 0) {
                 pe.activeTopStartTime = now;
+                pe.activeTopCount++;
             }
-            pe.activeTopCount++;
+            pe.activeTopNesting++;
         }
 
         void decActiveTop(int uid, String pkg, long now) {
             PackageEntry pe = getOrCreateEntry(uid, pkg);
-            if (pe.activeTopCount == 1) {
+            if (pe.activeTopNesting == 1) {
                 pe.pastActiveTopTime += now - pe.activeTopStartTime;
             }
-            pe.activeTopCount--;
+            pe.activeTopNesting--;
         }
 
         void finish(DataSet next, long now) {
@@ -198,27 +203,27 @@ public final class JobPackageTracker {
                 ArrayMap<String, PackageEntry> uidMap = mEntries.valueAt(i);
                 for (int j = uidMap.size() - 1; j >= 0; j--) {
                     PackageEntry pe = uidMap.valueAt(j);
-                    if (pe.activeCount > 0 || pe.activeTopCount > 0 || pe.pendingCount > 0) {
+                    if (pe.activeNesting > 0 || pe.activeTopNesting > 0 || pe.pendingNesting > 0) {
                         // Propagate existing activity in to next data set.
                         PackageEntry nextPe = next.getOrCreateEntry(mEntries.keyAt(i), uidMap.keyAt(j));
                         nextPe.activeStartTime = now;
-                        nextPe.activeCount = pe.activeCount;
+                        nextPe.activeNesting = pe.activeNesting;
                         nextPe.activeTopStartTime = now;
-                        nextPe.activeTopCount = pe.activeTopCount;
+                        nextPe.activeTopNesting = pe.activeTopNesting;
                         nextPe.pendingStartTime = now;
-                        nextPe.pendingCount = pe.pendingCount;
+                        nextPe.pendingNesting = pe.pendingNesting;
                         // Finish it off.
-                        if (pe.activeCount > 0) {
+                        if (pe.activeNesting > 0) {
                             pe.pastActiveTime += now - pe.activeStartTime;
-                            pe.activeCount = 0;
+                            pe.activeNesting = 0;
                         }
-                        if (pe.activeTopCount > 0) {
+                        if (pe.activeTopNesting > 0) {
                             pe.pastActiveTopTime += now - pe.activeTopStartTime;
-                            pe.activeTopCount = 0;
+                            pe.activeTopNesting = 0;
                         }
-                        if (pe.pendingCount > 0) {
+                        if (pe.pendingNesting > 0) {
                             pe.pastPendingTime += now - pe.pendingStartTime;
-                            pe.pendingCount = 0;
+                            pe.pendingNesting = 0;
                         }
                     }
                 }
@@ -233,17 +238,20 @@ public final class JobPackageTracker {
                     PackageEntry pe = uidMap.valueAt(j);
                     PackageEntry outPe = out.getOrCreateEntry(mEntries.keyAt(i), uidMap.keyAt(j));
                     outPe.pastActiveTime += pe.pastActiveTime;
+                    outPe.activeCount += pe.activeCount;
                     outPe.pastActiveTopTime += pe.pastActiveTopTime;
+                    outPe.activeTopCount += pe.activeTopCount;
                     outPe.pastPendingTime += pe.pastPendingTime;
-                    if (pe.activeCount > 0) {
+                    outPe.pendingCount += pe.pendingCount;
+                    if (pe.activeNesting > 0) {
                         outPe.pastActiveTime += now - pe.activeStartTime;
                         outPe.hadActive = true;
                     }
-                    if (pe.activeTopCount > 0) {
+                    if (pe.activeTopNesting > 0) {
                         outPe.pastActiveTopTime += now - pe.activeTopStartTime;
                         outPe.hadActiveTop = true;
                     }
-                    if (pe.pendingCount > 0) {
+                    if (pe.pendingNesting > 0) {
                         outPe.pastPendingTime += now - pe.pendingStartTime;
                         outPe.hadPending = true;
                     }
@@ -251,13 +259,20 @@ public final class JobPackageTracker {
             }
         }
 
-        void printDuration(PrintWriter pw, long period, long duration, String suffix) {
+        void printDuration(PrintWriter pw, long period, long duration, int count, String suffix) {
             float fraction = duration / (float) period;
             int percent = (int) ((fraction * 100) + .5f);
             if (percent > 0) {
                 pw.print(" ");
                 pw.print(percent);
                 pw.print("% ");
+                pw.print(count);
+                pw.print("x ");
+                pw.print(suffix);
+            } else if (count > 0) {
+                pw.print(" ");
+                pw.print(count);
+                pw.print("x ");
                 pw.print(suffix);
             }
         }
@@ -286,16 +301,17 @@ public final class JobPackageTracker {
                     UserHandle.formatUid(pw, uid);
                     pw.print(" / "); pw.print(uidMap.keyAt(j));
                     pw.print(":");
-                    printDuration(pw, period, pe.getPendingTime(now), "pending");
-                    printDuration(pw, period, pe.getActiveTime(now), "active");
-                    printDuration(pw, period, pe.getActiveTopTime(now), "active-top");
-                    if (pe.pendingCount > 0 || pe.hadPending) {
+                    printDuration(pw, period, pe.getPendingTime(now), pe.pendingCount, "pending");
+                    printDuration(pw, period, pe.getActiveTime(now), pe.activeCount, "active");
+                    printDuration(pw, period, pe.getActiveTopTime(now), pe.activeTopCount,
+                            "active-top");
+                    if (pe.pendingNesting > 0 || pe.hadPending) {
                         pw.print(" (pending)");
                     }
-                    if (pe.activeCount > 0 || pe.hadActive) {
+                    if (pe.activeNesting > 0 || pe.hadActive) {
                         pw.print(" (active)");
                     }
-                    if (pe.activeTopCount > 0 || pe.hadActiveTop) {
+                    if (pe.activeTopNesting > 0 || pe.hadActiveTop) {
                         pw.print(" (active-top)");
                     }
                     pw.println();
@@ -389,34 +405,36 @@ public final class JobPackageTracker {
     }
 
     public boolean dumpHistory(PrintWriter pw, String prefix, int filterUid) {
-        if (mEventCmds[0] == EVENT_NULL) {
+        final int size = mEventIndices.size();
+        if (size <= 0) {
             return false;
         }
         pw.println("  Job history:");
-        long now = SystemClock.elapsedRealtime();
-        for (int i=EVENT_BUFFER_SIZE-1; i>=0; i--) {
-            int uid = mEventUids[i];
+        final long now = SystemClock.elapsedRealtime();
+        for (int i=0; i<size; i++) {
+            final int index = mEventIndices.indexOf(i);
+            final int uid = mEventUids[index];
             if (filterUid != -1 && filterUid != UserHandle.getAppId(filterUid)) {
                 continue;
             }
-            int cmd = mEventCmds[i];
+            final int cmd = mEventCmds[index];
             if (cmd == EVENT_NULL) {
                 continue;
             }
-            String label;
-            switch (mEventCmds[i]) {
+            final String label;
+            switch (mEventCmds[index]) {
                 case EVENT_START_JOB:           label = "START"; break;
                 case EVENT_STOP_JOB:            label = " STOP"; break;
                 default:                        label = "   ??"; break;
             }
             pw.print(prefix);
-            TimeUtils.formatDuration(mEventTimes[i]-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+            TimeUtils.formatDuration(mEventTimes[index]-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
             pw.print(" ");
             pw.print(label);
             pw.print(": ");
             UserHandle.formatUid(pw, uid);
             pw.print(" ");
-            pw.println(mEventTags[i]);
+            pw.println(mEventTags[index]);
         }
         return true;
     }
