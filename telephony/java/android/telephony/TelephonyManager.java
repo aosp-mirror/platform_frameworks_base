@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.TelephonyHistogram;
@@ -51,6 +52,7 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -5457,5 +5459,45 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getTelephonyHistograms", e);
         }
         return null;
+    }
+
+    /**
+     * Set the allowed carrier list for slotId
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return The number of carriers set successfully. Should be length of
+     * carrierList on success; -1 on error.
+     * @hide
+     */
+    public int setAllowedCarriers(int slotId, List<CarrierIdentifier> carriers) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.setAllowedCarriers(slotId, carriers);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setAllowedCarriers", e);
+        }
+        return -1;
+    }
+
+    /**
+     * Get the allowed carrier list for slotId.
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return List of {@link android.telephony.CarrierIdentifier}; empty list
+     * means all carriers are allowed.
+     * @hide
+     */
+    public List<CarrierIdentifier> getAllowedCarriers(int slotId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getAllowedCarriers(slotId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getAllowedCarriers", e);
+        }
+        return new ArrayList<CarrierIdentifier>(0);
     }
 }
