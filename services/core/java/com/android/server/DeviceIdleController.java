@@ -1413,9 +1413,12 @@ public class DeviceIdleController extends SystemService
                 IntentFilter filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_BATTERY_CHANGED);
                 getContext().registerReceiver(mReceiver, filter);
+
                 filter = new IntentFilter();
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
+                getContext().registerReceiver(mReceiver, filter);
+
                 filter = new IntentFilter();
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 getContext().registerReceiver(mReceiver, filter);
