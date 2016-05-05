@@ -206,12 +206,6 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public void stopAllRecognitions() {
-            if (!isInitialized()) return;
-            mSoundTriggerHelper.stopAllRecognitions();
-        }
-
-        @Override
         public ModuleProperties getModuleProperties() {
             if (!isInitialized()) return null;
             return mSoundTriggerHelper.getModuleProperties();
