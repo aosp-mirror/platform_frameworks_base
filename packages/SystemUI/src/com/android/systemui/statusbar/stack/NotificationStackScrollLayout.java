@@ -2329,9 +2329,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateHideSensitiveForChild(View child) {
-        if (mAmbientState.isHideSensitive() && child instanceof ExpandableView) {
+        if (child instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) child;
-            expandableView.setHideSensitiveForIntrinsicHeight(true);
+            expandableView.setHideSensitiveForIntrinsicHeight(mAmbientState.isHideSensitive());
         }
     }
 
