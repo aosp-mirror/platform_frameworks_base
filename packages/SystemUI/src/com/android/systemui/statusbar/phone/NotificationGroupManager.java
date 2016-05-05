@@ -241,6 +241,12 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         if (group == null || group.summary == null || group.suppressed) {
             return false;
         }
+        if (group.children.isEmpty()) {
+            // If the suppression of a group changes because the last child was removed, this can
+            // still be called temporarily because the child hasn't been fully removed yet. Let's
+            // make sure we still return false in that case.
+            return false;
+        }
         return true;
     }
 

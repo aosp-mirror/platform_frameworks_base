@@ -3316,9 +3316,9 @@ public class NotificationManagerService extends SystemService {
 
                         mNotificationList.remove(index);
 
+                        cancelNotificationLocked(r, sendDelete, reason);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
                                 REASON_GROUP_SUMMARY_CANCELED);
-                        cancelNotificationLocked(r, sendDelete, reason);
                         updateLightsLocked();
                     }
                 }
