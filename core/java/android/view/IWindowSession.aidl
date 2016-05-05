@@ -125,11 +125,13 @@ interface IWindowSession {
 
     /*
      * Notify the window manager that an application is relaunching and
-     * child windows should be prepared for replacement.
+     * windows should be prepared for replacement.
      *
      * @param appToken The application
+     * @param childrenOnly Whether to only prepare child windows for replacement
+     * (for example when main windows are being reused via preservation).
      */
-    void prepareToReplaceChildren(IBinder appToken);
+    void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,

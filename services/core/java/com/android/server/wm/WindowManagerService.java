@@ -10700,12 +10700,16 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Hint to a token that its children will be replaced across activity relaunch.
-     * The children would otherwise be removed  shortly following this as the
+     * Hint to a token that its windows will be replaced across activity relaunch.
+     * The windows would otherwise be removed  shortly following this as the
      * activity is torn down.
      * @param token Application token for which the activity will be relaunched.
+     * @param childrenOnly Whether to mark only child windows for replacement
+     *                     (for the case where main windows are being preserved/
+     *                     reused rather than replaced).
+     *
      */
-    public void setReplacingChildren(IBinder token) {
+    public void setReplacingWindows(IBinder token, boolean childrenOnly) {
         AppWindowToken appWindowToken = null;
         synchronized (mWindowMap) {
             appWindowToken = findAppWindowToken(token);
@@ -10715,7 +10719,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            appWindowToken.setReplacingChildren();
+            if (childrenOnly) {
+                appWindowToken.setReplacingChildren();
+            } else {
+                appWindowToken.setReplacingWindows(false /* animate */);
+            }
+
             scheduleClearReplacingWindowIfNeeded(token, true /* replacing */);
         }
     }
