@@ -262,8 +262,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         try {
             // Check if the top task is in the home stack, and start the recents activity
             SystemServicesProxy ssp = Recents.getSystemServices();
-            MutableBoolean isHomeStackVisible = new MutableBoolean(false);
-            if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+            boolean forceVisible = launchedWhileDockingTask || draggingInRecents;
+            MutableBoolean isHomeStackVisible = new MutableBoolean(forceVisible);
+            if (forceVisible || !ssp.isRecentsActivityVisible(isHomeStackVisible)) {
                 ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
                 startRecentsActivity(runningTask, isHomeStackVisible.value || fromHome, animate,
                         growTarget);
