@@ -906,3 +906,13 @@ redirects:
 # Handle the rest of the tool pages that moved into /studio
 - from: /tools/...
   to: /studio/tools/...
+
+# Vanity urls
+- from: /background_optimizations
+  to: /preview/features/background-optimization.html
+- from: /background_optimizations/
+  to: /preview/features/background-optimization.html
+- from: /bgopt
+  to: /preview/features/background-optimization.html
+- from: /bgopt/
+  to: /preview/features/background-optimization.html
