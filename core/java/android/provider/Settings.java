@@ -1277,6 +1277,17 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_WEBVIEW_SETTINGS = "android.settings.WEBVIEW_SETTINGS";
 
+    /**
+     * Activity Action: Show the Deletion Helper settings.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DELETION_HELPER_SETTINGS
+            = "android.settings.DELETION_HELPER_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
