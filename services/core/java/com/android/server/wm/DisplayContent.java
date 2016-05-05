@@ -603,6 +603,8 @@ class DisplayContent {
         }
         pw.println();
         mDimLayerController.dump(prefix + "  ", pw);
+        pw.println();
+        mDividerControllerLocked.dump(prefix + "  ", pw);
     }
 
     @Override
