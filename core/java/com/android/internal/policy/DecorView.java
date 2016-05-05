@@ -43,6 +43,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
@@ -255,6 +256,26 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     void setBackgroundFallback(int resId) {
         mBackgroundFallback.setDrawable(resId != 0 ? getContext().getDrawable(resId) : null);
         setWillNotDraw(getBackground() == null && !mBackgroundFallback.hasFallback());
+    }
+
+    @Override
+    public boolean gatherTransparentRegion(Region region) {
+        boolean statusOpaque = gatherTransparentRegion(mStatusColorViewState, region);
+        boolean navOpaque = gatherTransparentRegion(mNavigationColorViewState, region);
+        boolean decorOpaque = super.gatherTransparentRegion(region);
+
+        // combine bools after computation, so each method above always executes
+        return statusOpaque || navOpaque || decorOpaque;
+    }
+
+    boolean gatherTransparentRegion(ColorViewState colorViewState, Region region) {
+        if (colorViewState.view != null && colorViewState.visible && isResizing()) {
+            // If a visible ColorViewState is in a resizing host DecorView, forcibly register its
+            // opaque area, since it's drawn by a different root RenderNode. It would otherwise be
+            // rejected by ViewGroup#gatherTransparentRegion() for the view not being VISIBLE.
+            return colorViewState.view.gatherTransparentRegion(region);
+        }
+        return false; // no opaque area added
     }
 
     @Override
