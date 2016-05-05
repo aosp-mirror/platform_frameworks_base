@@ -115,15 +115,13 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
                 IoUtils.closeQuietly(fd);
             }
         } else {
-            if (selectedUser != null && selectedUser.getIdentifier() != currentUserId) {
-                // When selected user is different from the current user, show the selected
-                // user's static wallpaper.
+            if (selectedUser != null) {
+                // Show the selected user's static wallpaper.
                 return LoaderResult.success(
                         mWallpaperManager.getBitmapAsUser(selectedUser.getIdentifier()));
 
             } else {
-                // When there is no selected user, or it's same as the current user, show the
-                // system (possibly dynamic) wallpaper for the selected user.
+                // When there is no selected user, show the system wallpaper
                 return LoaderResult.success(null);
             }
         }
