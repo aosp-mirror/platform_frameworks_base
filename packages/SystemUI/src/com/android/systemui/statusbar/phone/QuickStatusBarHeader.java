@@ -287,10 +287,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateAlarmVisibilities();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
+        mSettingsContainer.setVisibility(mExpanded ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
-        mMultiUserSwitch.setVisibility(mMultiUserSwitch.hasMultipleUsers() ? View.VISIBLE
-                : View.GONE);
+        mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers()
+                ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void updateListeners() {
