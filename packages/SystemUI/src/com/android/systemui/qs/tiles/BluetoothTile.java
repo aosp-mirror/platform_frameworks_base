@@ -47,7 +47,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
     public BluetoothTile(Host host) {
         super(host);
         mController = host.getBluetoothController();
-        mDetailAdapter = new BluetoothDetailAdapter();
+        mDetailAdapter = (BluetoothDetailAdapter) createDetailAdapter();
     }
 
     @Override
@@ -179,7 +179,12 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         }
     };
 
-    private final class BluetoothDetailAdapter implements DetailAdapter, QSDetailItems.Callback {
+    @Override
+    protected DetailAdapter createDetailAdapter() {
+        return new BluetoothDetailAdapter();
+    }
+
+    protected class BluetoothDetailAdapter implements DetailAdapter, QSDetailItems.Callback {
         private QSDetailItems mItems;
 
         @Override

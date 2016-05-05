@@ -18,16 +18,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingLeft="@dimen/qs_detail_header_padding"
+    android:paddingTop="@dimen/qs_detail_header_padding"
+    android:paddingBottom="@dimen/qs_detail_header_bottom_padding"
     android:paddingEnd="@dimen/qs_panel_padding"
     android:background="@drawable/btn_borderless_rect"
     android:gravity="center">
 
     <ImageView
         android:id="@*android:id/up"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginEnd="16dp"
-        android:padding="16dp"
+        android:layout_width="@dimen/qs_detail_image_width"
+        android:layout_height="@dimen/qs_detail_image_height"
+        android:layout_marginEnd="@dimen/qs_detail_back_margin_end"
+        android:padding="@dimen/qs_detail_image_padding"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
         android:contentDescription="@*android:string/action_bar_up_description"
@@ -35,10 +38,20 @@
 
     <TextView
         android:id="@android:id/title"
+        android:paddingLeft="@dimen/qs_detail_header_text_padding"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+
+    <ImageView
+        android:id="@+id/settings"
+        android:layout_width="@dimen/qs_detail_image_width"
+        android:layout_height="@dimen/qs_detail_image_height"
+        android:background="?android:attr/selectableItemBackground"
+        android:padding="@dimen/qs_detail_image_padding"
+        android:src="@drawable/ic_settings"
+        android:visibility="gone"/>
 
     <Switch
         android:id="@android:id/toggle"

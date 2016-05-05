@@ -45,7 +45,7 @@ import java.util.List;
 public class WifiTile extends QSTile<QSTile.SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
 
-    private final NetworkController mController;
+    protected final NetworkController mController;
     private final AccessPointController mWifiController;
     private final WifiDetailAdapter mDetailAdapter;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
@@ -56,7 +56,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         super(host);
         mController = host.getNetworkController();
         mWifiController = mController.getAccessPointController();
-        mDetailAdapter = new WifiDetailAdapter();
+        mDetailAdapter = (WifiDetailAdapter) createDetailAdapter();
     }
 
     @Override
@@ -86,6 +86,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     public DetailAdapter getDetailAdapter() {
         return mDetailAdapter;
     }
+
+    @Override
+    protected DetailAdapter createDetailAdapter() { return new WifiDetailAdapter(); }
 
     @Override
     public QSIconView createTileView(Context context) {
@@ -246,7 +249,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     };
 
-    private final class WifiDetailAdapter implements DetailAdapter,
+    protected class WifiDetailAdapter implements DetailAdapter,
             NetworkController.AccessPointController.AccessPointCallback, QSDetailItems.Callback {
 
         private QSDetailItems mItems;
