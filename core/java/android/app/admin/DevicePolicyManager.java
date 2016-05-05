@@ -6150,23 +6150,28 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to retrieve device logs from before the device's last reboot.
      * <p>
-     * <strong> The device logs are retrieved from a RAM region which is not guaranteed to be
-     * corruption-free during power cycles, due to hardware variations and limitations. As a result,
-     * this API is provided as best-effort and the returned logs may be empty or contain corrupted
-     * data. </strong>
+     * <strong> This API is not supported on all devices. Calling this API on unsupported devices
+     * will result in {@code null} being returned. The device logs are retrieved from a RAM region
+     * which is not guaranteed to be corruption-free during power cycles, as a result be cautious
+     * about data corruption when parsing. </strong>
      * <p>
      * There must be only one user on the device, managed by the device owner. Otherwise a
      * {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
-     * @return Device logs from before the latest reboot of the system.
+     * @return Device logs from before the latest reboot of the system, or {@code null} if this API
+     *         is not supported on the device.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
     public List<SecurityEvent> retrievePreRebootSecurityLogs(@NonNull ComponentName admin) {
         throwIfParentInstance("retrievePreRebootSecurityLogs");
         try {
             ParceledListSlice<SecurityEvent> list = mService.retrievePreRebootSecurityLogs(admin);
-            return list.getList();
+            if (list != null) {
+                return list.getList();
+            } else {
+                return null;
+            }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
