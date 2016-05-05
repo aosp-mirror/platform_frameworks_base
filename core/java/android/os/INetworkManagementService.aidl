@@ -233,11 +233,6 @@ interface INetworkManagementService
     void stopAccessPoint(String iface);
 
     /**
-     * Set Access Point config
-     */
-    void setAccessPoint(in WifiConfiguration wifiConfig, String iface);
-
-    /**
      ** DATA USAGE RELATED
      **/
 
