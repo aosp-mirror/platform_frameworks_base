@@ -2191,6 +2191,21 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
 
+    // The number of packages optimized during the optimizing apps dialog.
+    OPTIMIZING_APPS_NUM_PKGS_DEXOPTED = 402;
+
+    // The number of packages which did not need optimizing during the optimizing apps dialog.
+    OPTIMIZING_APPS_NUM_PKGS_SKIPPED = 403;
+
+    // The number of packages which failed to optimize during the optimizing apps dialog.
+    OPTIMIZING_APPS_NUM_PKGS_FAILED = 404;
+
+    // The number of optimizable packages in the system.
+    OPTIMIZING_APPS_NUM_PKGS_TOTAL = 405;
+
+    // The total amount of time the user was blocked on the optimizing apps dialog.
+    OPTIMIZING_APPS_TOTAL_TIME_MS = 406;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
