@@ -49,10 +49,13 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
+import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
+import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.RULE_UNKNOWN;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
+import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
 import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
@@ -2048,13 +2051,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean uidDeleted,
             boolean updateNow) {
         final boolean oldStatus = mRestrictBackgroundWhitelistUids.get(uid);
-        if (!oldStatus) {
+        if (!oldStatus && !uidDeleted) {
             if (LOGD) Slog.d(TAG, "uid " + uid + " was not whitelisted before");
             return false;
         }
         final boolean needFirewallRules = uidDeleted || isUidValidForWhitelistRules(uid);
-        Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
-        mRestrictBackgroundWhitelistUids.delete(uid);
+        if (oldStatus) {
+            Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
+            mRestrictBackgroundWhitelistUids.delete(uid);
+        }
         if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
                 && !mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
             if (LOGD) Slog.d(TAG, "Adding uid " + uid
@@ -2352,7 +2357,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             collectKeys(mUidState, knownUids);
             collectKeys(mUidRules, knownUids);
 
-            fout.println("Status for known UIDs:");
+            fout.println("Status for all known UIDs:");
             fout.increaseIndent();
             size = knownUids.size();
             for (int i = 0; i < size; i++) {
@@ -2370,18 +2375,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             ? " (fg svc)" : " (bg)");
                 }
 
-                final int rule = mUidRules.get(uid, RULE_UNKNOWN);
-                fout.print(" rule=");
-                fout.print(ruleToString(rule));
+                final int uidRules = mUidRules.get(uid, RULE_NONE);
+                fout.print(" rules=");
+                fout.print(uidRulesToString(uidRules));
+                fout.println();
+            }
+            fout.decreaseIndent();
 
+            fout.println("Status for just UIDs with rules:");
+            fout.increaseIndent();
+            size = mUidRules.size();
+            for (int i = 0; i < size; i++) {
+                final int uid = mUidRules.keyAt(i);
+                fout.print("UID=");
+                fout.print(uid);
+                final int uidRules = mUidRules.get(uid, RULE_NONE);
+                fout.print(" rules=");
+                fout.print(uidRulesToString(uidRules));
                 fout.println();
             }
             fout.decreaseIndent();
         }
-    }
-
-    private String ruleToString(int rule) {
-        return DebugUtils.valueToString(NetworkPolicyManager.class, "RULE_", rule);
     }
 
     @Override
@@ -2564,12 +2578,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         enableFirewallChainLocked(chain, enabled);
     }
 
+    private boolean isWhitelistedBatterySaverLocked(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+        return mPowerSaveTempWhitelistAppIds.get(appId) || mPowerSaveWhitelistAppIds.get(appId);
+    }
+
     // NOTE: since both fw_dozable and fw_powersave uses the same map
     // (mPowerSaveTempWhitelistAppIds) for whitelisting, we can reuse their logic in this method.
     private void updateRulesForWhitelistedPowerSaveLocked(int uid, boolean enabled, int chain) {
         if (enabled) {
-            int appId = UserHandle.getAppId(uid);
-            if (mPowerSaveTempWhitelistAppIds.get(appId) || mPowerSaveWhitelistAppIds.get(appId)
+            if (isWhitelistedBatterySaverLocked(uid)
                     || isProcStateAllowedWhileIdleOrPowerSaveMode(mUidState.get(uid))) {
                 setUidFirewallRule(chain, uid, FIREWALL_RULE_ALLOW);
             } else {
@@ -2732,7 +2750,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * <p>There are currently 2 types of restriction rules:
      * <ul>
      * <li>Battery Saver Mode (also referred as power save).
-     * <li>Data Saver Mode (formerly known as restrict background data).
+     * <li>Data Saver Mode (The Feature Formerly Known As 'Restrict Background Data').
      * </ul>
      */
     private void updateRestrictionRulesForUidLocked(int uid) {
@@ -2793,42 +2811,47 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
+        final int oldUidRules = mUidRules.get(uid, RULE_NONE);
         final boolean isForeground = isUidForegroundOnRestrictBackgroundLocked(uid);
-        final boolean isBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
-        final boolean isWhitelisted = mRestrictBackgroundWhitelistUids.get(uid);
 
-        int newRule = RULE_UNKNOWN;
-        final int oldRule = mUidRules.get(uid, RULE_UNKNOWN);
+        // Data Saver status.
+        final boolean isDsBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
+        final boolean isDsWhitelisted = mRestrictBackgroundWhitelistUids.get(uid);
+        int newDsRule = RULE_NONE;
+        final int oldDsRule = oldUidRules & MASK_METERED_NETWORKS;
 
         // First step: define the new rule based on user restrictions and foreground state.
         if (isForeground) {
-            if (isBlacklisted || (mRestrictBackground && !isWhitelisted)) {
-                newRule = RULE_TEMPORARY_ALLOW_METERED;
+            if (isDsBlacklisted || (mRestrictBackground && !isDsWhitelisted)) {
+                newDsRule = RULE_TEMPORARY_ALLOW_METERED;
             }
         } else {
-            if (isBlacklisted) {
-                newRule = RULE_REJECT_METERED;
-            } else if (isWhitelisted) {
-                newRule = RULE_ALLOW_METERED;
+            if (isDsBlacklisted) {
+                newDsRule = RULE_REJECT_METERED;
+            } else if (isDsWhitelisted) {
+                newDsRule = RULE_ALLOW_METERED;
             }
         }
+
+        final int newUidRules = newDsRule;
 
         if (LOGV) {
             Log.v(TAG, "updateRuleForRestrictBackgroundLocked(" + uid + "):"
-                    + " isForeground=" +isForeground + ", isBlacklisted: " + isBlacklisted
-                    + ", isWhitelisted: " + isWhitelisted + ", newRule: " + ruleToString(newRule)
-                    + ", oldRule: " + ruleToString(oldRule));
+                    + " isForeground=" +isForeground + ", isBlacklisted: " + isDsBlacklisted
+                    + ", isDsWhitelisted: " + isDsWhitelisted
+                    + ", newUidRule: " + uidRulesToString(newUidRules)
+                    + ", oldUidRule: " + uidRulesToString(oldUidRules));
         }
 
-        if (newRule == RULE_UNKNOWN) {
+        if (newUidRules == RULE_NONE) {
             mUidRules.delete(uid);
         } else {
-            mUidRules.put(uid, newRule);
+            mUidRules.put(uid, newUidRules);
         }
 
         // Second step: apply bw changes based on change of state.
-        if (newRule != oldRule) {
-            if (newRule == RULE_TEMPORARY_ALLOW_METERED) {
+        if (newDsRule != oldDsRule) {
+            if ((newDsRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
                 // Temporarily whitelist foreground app, removing from blacklist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
 
@@ -2836,44 +2859,48 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: if statement below is used to avoid an unnecessary call to netd / iptables,
                 // but ideally it should be just:
                 //    setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if (isBlacklisted) {
+                if (isDsBlacklisted) {
                     setMeteredNetworkBlacklist(uid, false);
                 }
-            } else if (oldRule == RULE_TEMPORARY_ALLOW_METERED) {
+            } else if ((oldDsRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
                 // Remove temporary whitelist from app that is not on foreground anymore.
 
                 // TODO: if statements below are used to avoid unnecessary calls to netd / iptables,
                 // but ideally they should be just:
                 //    setMeteredNetworkWhitelist(uid, isWhitelisted);
                 //    setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if (!isWhitelisted) {
+                if (!isDsWhitelisted) {
                     setMeteredNetworkWhitelist(uid, false);
                 }
-                if (isBlacklisted) {
+                if (isDsBlacklisted) {
                     setMeteredNetworkBlacklist(uid, true);
                 }
-            } else if (newRule == RULE_REJECT_METERED || oldRule == RULE_REJECT_METERED) {
+            } else if ((newDsRule & RULE_REJECT_METERED) != 0
+                    || (oldDsRule & RULE_REJECT_METERED) != 0) {
                 // Flip state because app was explicitly added or removed to blacklist.
-                setMeteredNetworkBlacklist(uid, isBlacklisted);
-                if (oldRule == RULE_REJECT_METERED && isWhitelisted) {
+                setMeteredNetworkBlacklist(uid, isDsBlacklisted);
+                if ((oldDsRule & RULE_REJECT_METERED) != 0 && isDsWhitelisted) {
                     // Since blacklist prevails over whitelist, we need to handle the special case
                     // where app is whitelisted and blacklisted at the same time (although such
                     // scenario should be blocked by the UI), then blacklist is removed.
-                    setMeteredNetworkWhitelist(uid, isWhitelisted);
+                    setMeteredNetworkWhitelist(uid, isDsWhitelisted);
                 }
-            } else if (newRule == RULE_ALLOW_METERED || oldRule == RULE_ALLOW_METERED) {
+            } else if ((newDsRule & RULE_ALLOW_METERED) != 0
+                    || (oldDsRule & RULE_ALLOW_METERED) != 0) {
                 // Flip state because app was explicitly added or removed to whitelist.
-                setMeteredNetworkWhitelist(uid, isWhitelisted);
+                setMeteredNetworkWhitelist(uid, isDsWhitelisted);
             } else {
                 // All scenarios should have been covered above
-                Log.wtf(TAG, "Unexpected change of state for " + uid
-                        + ": foreground=" + isForeground + ", whitelisted=" + isWhitelisted
-                        + ", blacklisted=" + isBlacklisted + ", newRule="
-                        + ruleToString(newRule) + ", oldRule=" + ruleToString(oldRule));
+                Log.wtf(TAG, "Unexpected change of metered UID state for " + uid
+                        + ": foreground=" + isForeground
+                        + ", whitelisted=" + isDsWhitelisted
+                        + ", blacklisted=" + isDsBlacklisted
+                        + ", newRules=" + uidRulesToString(newUidRules)
+                        + ", oldRules=" + uidRulesToString(oldUidRules));
             }
 
             // dispatch changed rule to existing listeners
-            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newRule).sendToTarget();
+            mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRules).sendToTarget();
         }
     }
 
