@@ -5,12 +5,15 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.os.SystemClock;
+import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -19,6 +22,9 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
  * Handles logging into Tron.
  */
 class ActivityMetricsLogger {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityMetricsLogger" : TAG_AM;
+
     // Window modes we are interested in logging. If we ever introduce a new type, we need to add
     // a value here and increase the {@link #TRON_WINDOW_STATE_VARZ_STRINGS} array.
     private static final int WINDOW_STATE_STANDARD = 0;
@@ -74,8 +80,9 @@ class ActivityMetricsLogger {
                 || stack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
             mWindowState = WINDOW_STATE_STANDARD;
         } else if (stack.mStackId == DOCKED_STACK_ID) {
-            throw new IllegalStateException("Docked stack shouldn't be the focused stack, "
-                    + "because it reported not being visible.");
+            Slog.wtf(TAG, "Docked stack shouldn't be the focused stack, because it reported not"
+                    + " being visible.");
+            mWindowState = WINDOW_STATE_INVALID;
         } else if (stack.mStackId == FREEFORM_WORKSPACE_STACK_ID) {
             mWindowState = WINDOW_STATE_FREEFORM;
         } else if (StackId.isStaticStack(stack.mStackId)) {
