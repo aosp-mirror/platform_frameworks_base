@@ -1527,7 +1527,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
 
         case SET_LOCK_SCREEN_SHOWN_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
-            setLockScreenShown(data.readInt() != 0);
+            final boolean showing = data.readInt() != 0;
+            final boolean occluded = data.readInt() != 0;
+            setLockScreenShown(showing, occluded);
             reply.writeNoException();
             return true;
         }
@@ -4922,12 +4924,13 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return pfd;
     }
-    public void setLockScreenShown(boolean shown) throws RemoteException
+    public void setLockScreenShown(boolean showing, boolean occluded) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(shown ? 1 : 0);
+        data.writeInt(showing ? 1 : 0);
+        data.writeInt(occluded ? 1 : 0);
         mRemote.transact(SET_LOCK_SCREEN_SHOWN_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
