@@ -118,6 +118,11 @@ public class Task {
     public TaskKey key;
 
     /**
+     * The temporary sort index in the stack, used when ordering the stack.
+     */
+    public int temporarySortIndexInStack;
+
+    /**
      * The group will be computed separately from the initialization of the task
      */
     @ViewDebug.ExportedProperty(deepExport=true, prefix="group_")
