@@ -105,7 +105,7 @@ class CarNavigationBarController {
         }
     }
 
-    public void taskChanged(String packageName) {
+    public void taskChanged(String packageName, int stackId) {
         // If the package name belongs to a filter, then highlight appropriate button in
         // the navigation bar.
         if (mFacetPackageMap.containsKey(packageName)) {
@@ -116,6 +116,12 @@ class CarNavigationBarController {
         String category = getPackageCategory(packageName);
         if (category != null) {
             setCurrentFacet(mFacetCategoryMap.get(category));
+        }
+
+        // Set up the persistent docked task if needed.
+        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
+                && stackId != StackId.HOME_STACK_ID) {
+            mStatusBar.startActivityOnStack(mPersistentTaskIntent, StackId.DOCKED_STACK_ID);
         }
     }
 
@@ -334,14 +340,8 @@ class CarNavigationBarController {
             stackId = StackId.HOME_STACK_ID;
         }
 
-        if (mPersistentTaskIntent != null && !mStatusBar.hasDockedTask()
-                && stackId != StackId.HOME_STACK_ID) {
-            mStatusBar.startActivityOnStack(mPersistentTaskIntent, StackId.DOCKED_STACK_ID);
-        }
-
         setCurrentFacet(index);
         mStatusBar.startActivityOnStack(intent, stackId);
-
     }
 
     private void onFacetLongClicked(int index) {
