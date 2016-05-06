@@ -7193,7 +7193,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         numberOfPackagesToDexopt + ": " + pkg.packageName);
             }
 
-            if (!isFirstBoot()) {
+            if (mIsPreNUpgrade) {
                 try {
                     ActivityManagerNative.getDefault().showBootMessage(
                             mContext.getResources().getString(R.string.android_upgrading_apk,
