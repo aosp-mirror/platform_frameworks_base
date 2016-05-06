@@ -385,9 +385,13 @@ public final class ScanFilter implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDeviceName, mDeviceAddress, mManufacturerId, mManufacturerData,
-                mManufacturerDataMask, mServiceDataUuid, mServiceData, mServiceDataMask,
-                mServiceUuid, mServiceUuidMask);
+        return Objects.hash(mDeviceName, mDeviceAddress, mManufacturerId,
+                            Arrays.hashCode(mManufacturerData),
+                            Arrays.hashCode(mManufacturerDataMask),
+                            mServiceDataUuid,
+                            Arrays.hashCode(mServiceData),
+                            Arrays.hashCode(mServiceDataMask),
+                            mServiceUuid, mServiceUuidMask);
     }
 
     @Override
@@ -401,10 +405,10 @@ public final class ScanFilter implements Parcelable {
         ScanFilter other = (ScanFilter) obj;
         return Objects.equals(mDeviceName, other.mDeviceName) &&
                 Objects.equals(mDeviceAddress, other.mDeviceAddress) &&
-                        mManufacturerId == other.mManufacturerId &&
+                mManufacturerId == other.mManufacturerId &&
                 Objects.deepEquals(mManufacturerData, other.mManufacturerData) &&
                 Objects.deepEquals(mManufacturerDataMask, other.mManufacturerDataMask) &&
-                Objects.deepEquals(mServiceDataUuid, other.mServiceDataUuid) &&
+                Objects.equals(mServiceDataUuid, other.mServiceDataUuid) &&
                 Objects.deepEquals(mServiceData, other.mServiceData) &&
                 Objects.deepEquals(mServiceDataMask, other.mServiceDataMask) &&
                 Objects.equals(mServiceUuid, other.mServiceUuid) &&
