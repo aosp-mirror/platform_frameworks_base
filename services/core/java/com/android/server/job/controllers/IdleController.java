@@ -28,14 +28,12 @@ import android.content.IntentFilter;
 import android.os.SystemClock;
 import android.util.Slog;
 
+import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
 public class IdleController extends StateController {
     private static final String TAG = "IdleController";
-
-    private static final String ACTION_TRIGGER_IDLE =
-            "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE";
 
     // Policy: we decide that we're "idle" if the device has been unused /
     // screen off or dreaming for at least this long
@@ -113,7 +111,7 @@ public class IdleController extends StateController {
         public IdlenessTracker() {
             mAlarm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
-            Intent intent = new Intent(ACTION_TRIGGER_IDLE)
+            Intent intent = new Intent(ActivityManagerService.ACTION_TRIGGER_IDLE)
                     .setPackage("android")
                     .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mIdleTriggerIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
@@ -140,7 +138,7 @@ public class IdleController extends StateController {
             filter.addAction(Intent.ACTION_DREAMING_STOPPED);
 
             // Debugging/instrumentation
-            filter.addAction(ACTION_TRIGGER_IDLE);
+            filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
             mContext.registerReceiver(this, filter);
         }
@@ -176,7 +174,7 @@ public class IdleController extends StateController {
                 mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         when, mIdleWindowSlop, mIdleTriggerIntent);
-            } else if (action.equals(ACTION_TRIGGER_IDLE)) {
+            } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
                 // idle time starts now. Do not set mIdle if screen is on.
                 if (!mIdle && !mScreenOn) {
                     if (DEBUG) {
