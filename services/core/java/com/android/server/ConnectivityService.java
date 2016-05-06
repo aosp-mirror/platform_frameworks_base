@@ -30,10 +30,11 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.RULE_UNKNOWN;
+import static android.net.NetworkPolicyManager.uidRulesToString;
 
 import android.annotation.Nullable;
 import android.app.BroadcastOptions;
@@ -915,7 +916,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final String iface = (lp == null ? "" : lp.getInterfaceName());
         synchronized (mRulesLock) {
             networkMetered = mMeteredIfaces.contains(iface);
-            uidRules = mUidRules.get(uid, RULE_UNKNOWN);
+            uidRules = mUidRules.get(uid, RULE_NONE);
         }
 
         switch (uidRules) {
@@ -927,7 +928,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return networkMetered;
             case RULE_REJECT_ALL:
                 return true;
-            case RULE_UNKNOWN:
+            case RULE_NONE:
             default:
                 // When background data is restricted device-wide, the default
                 // behavior for apps should be like RULE_REJECT_METERED
@@ -1860,6 +1861,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.print("Restrict background: ");
         pw.println(mRestrictBackground);
         pw.println();
+
+        pw.println("Status for known UIDs:");
+        pw.increaseIndent();
+        final int size = mUidRules.size();
+        for (int i = 0; i < size; i++) {
+            final int uid = mUidRules.keyAt(i);
+            pw.print("UID=");
+            pw.print(uid);
+            final int uidRules = mUidRules.get(uid, RULE_NONE);
+            pw.print(" rules=");
+            pw.print(uidRulesToString(uidRules));
+            pw.println();
+        }
+        pw.println();
+        pw.decreaseIndent();
 
         pw.println("Network Requests:");
         pw.increaseIndent();
