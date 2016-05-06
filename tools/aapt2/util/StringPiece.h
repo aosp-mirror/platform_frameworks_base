@@ -57,6 +57,7 @@ public:
     bool empty() const;
     std::basic_string<TChar> toString() const;
 
+    bool contains(const BasicStringPiece<TChar>& rhs) const;
     int compare(const BasicStringPiece<TChar>& rhs) const;
     bool operator<(const BasicStringPiece<TChar>& rhs) const;
     bool operator>(const BasicStringPiece<TChar>& rhs) const;
@@ -164,6 +165,17 @@ inline std::basic_string<TChar> BasicStringPiece<TChar>::toString() const {
 }
 
 template <>
+inline bool BasicStringPiece<char>::contains(const BasicStringPiece<char>& rhs) const {
+    if (!mData || !rhs.mData) {
+        return false;
+    }
+    if (rhs.mLength > mLength) {
+        return false;
+    }
+    return strstr(mData, rhs.mData) != nullptr;
+}
+
+template <>
 inline int BasicStringPiece<char>::compare(const BasicStringPiece<char>& rhs) const {
     const char nullStr = '\0';
     const char* b1 = mData != nullptr ? mData : &nullStr;
@@ -185,6 +197,16 @@ inline ::std::ostream& operator<<(::std::ostream& out, const BasicStringPiece<ch
     return out.write(utf8.string(), utf8.size());
 }
 
+template <>
+inline bool BasicStringPiece<char16_t>::contains(const BasicStringPiece<char16_t>& rhs) const {
+    if (!mData || !rhs.mData) {
+        return false;
+    }
+    if (rhs.mLength > mLength) {
+        return false;
+    }
+    return strstr16(mData, rhs.mData) != nullptr;
+}
 
 template <>
 inline int BasicStringPiece<char16_t>::compare(const BasicStringPiece<char16_t>& rhs) const {
