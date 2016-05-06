@@ -216,7 +216,12 @@ public final class CellIdentityGsm implements Parcelable {
         mLac = in.readInt();
         mCid = in.readInt();
         mArfcn = in.readInt();
-        mBsic = in.readInt();
+        int bsic = in.readInt();
+        // In RIL BSIC is a UINT8, so 0xFF is the 'INVALID' designator
+        // for inbound parcels
+        if (bsic == 0xFF) bsic = Integer.MAX_VALUE;
+        mBsic = bsic;
+
         if (DBG) log("CellIdentityGsm(Parcel): " + toString());
     }
 
