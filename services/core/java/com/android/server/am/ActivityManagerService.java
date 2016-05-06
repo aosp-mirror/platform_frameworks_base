@@ -11476,7 +11476,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mWindowManager.setEventDispatching(mBooted && !mShuttingDown);
     }
 
-    public void setLockScreenShown(boolean shown) {
+    public void setLockScreenShown(boolean showing, boolean occluded) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -11486,8 +11486,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
-                mLockScreenShown = shown ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
+                if (DEBUG_LOCKSCREEN) logLockScreen(" showing=" + showing + " occluded=" + occluded);
+                mLockScreenShown = (showing && !occluded) ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
+                if (showing && occluded) {
+                    // The lock screen is currently showing, but is occluded by a window that can
+                    // show on top of the lock screen. In this can we want to dismiss the docked
+                    // stack since it will be complicated/risky to try to put the activity on top
+                    // of the lock screen in the right fullscreen configuration.
+                    mStackSupervisor.moveTasksToFullscreenStackLocked(DOCKED_STACK_ID,
+                            mStackSupervisor.mFocusedStack.getStackId() == DOCKED_STACK_ID);
+                }
+
                 updateSleepIfNeededLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
