@@ -79,6 +79,7 @@ import com.android.systemui.recents.events.ui.UpdateFreeformTaskViewVisibilityEv
 import com.android.systemui.recents.events.ui.UserInteractionEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartInitializeDropTargetsEvent;
 import com.android.systemui.recents.events.ui.focus.DismissFocusedTaskViewEvent;
@@ -640,19 +641,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * @see #relayoutTaskViews(AnimationProps, boolean)
+     * @see #relayoutTaskViews(AnimationProps, ArrayMap<Task, AnimationProps>, boolean)
      */
     public void relayoutTaskViews(AnimationProps animation) {
-        relayoutTaskViews(animation, false /* ignoreTaskOverrides */);
+        relayoutTaskViews(animation, null /* animationOverrides */,
+                false /* ignoreTaskOverrides */);
     }
 
     /**
      * Relayout the the visible {@link TaskView}s to their current transforms as specified by the
      * {@link TaskStackLayoutAlgorithm} with the given {@param animation}. This call cancels any
      * animations that are current running on those task views, and will ensure that the children
-     * {@link TaskView}s will match the set of visible tasks in the stack.
+     * {@link TaskView}s will match the set of visible tasks in the stack.  If a {@link Task} has
+     * an animation provided in {@param animationOverrides}, that will be used instead.
      */
-    private void relayoutTaskViews(AnimationProps animation, boolean ignoreTaskOverrides) {
+    private void relayoutTaskViews(AnimationProps animation,
+            ArrayMap<Task, AnimationProps> animationOverrides,
+            boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
         cancelDeferredTaskViewLayoutAnimation();
 
@@ -665,11 +670,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         int taskViewCount = taskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
-            int taskIndex = mStack.indexOfStackTask(tv.getTask());
+            Task task = tv.getTask();
+            int taskIndex = mStack.indexOfStackTask(task);
             TaskViewTransform transform = mCurrentTaskTransforms.get(taskIndex);
 
-            if (mIgnoreTasks.contains(tv.getTask().key)) {
+            if (mIgnoreTasks.contains(task.key)) {
                 continue;
+            }
+
+            if (animationOverrides != null && animationOverrides.containsKey(task)) {
+                animation = animationOverrides.get(task);
             }
 
             updateTaskViewToTransform(tv, transform, animation);
@@ -827,6 +837,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (boundScrollToNewMinMax) {
             mStackScroller.boundScroll();
         }
+    }
+
+    /**
+     * Updates the stack layout to its stable places.
+     */
+    private void updateLayoutToStableBounds() {
+        mWindowRect.set(mStableWindowRect);
+        mStackBounds.set(mStableStackBounds);
+        mLayoutAlgorithm.setSystemInsets(mStableLayoutAlgorithm.mSystemInsets);
+        mLayoutAlgorithm.initialize(mDisplayRect, mWindowRect, mStackBounds,
+                TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
+        updateLayoutAlgorithm(true /* boundScroll */);
     }
 
     /** Returns the scroller. */
@@ -1820,16 +1842,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         } else {
             // Restore the pre-drag task stack bounds, but ensure that we don't layout the dragging
             // task view, so add it back to the ignore set after updating the layout
-            mWindowRect.set(mStableWindowRect);
-            mStackBounds.set(mStableStackBounds);
             removeIgnoreTask(event.task);
-            mLayoutAlgorithm.setSystemInsets(mStableLayoutAlgorithm.mSystemInsets);
-            mLayoutAlgorithm.initialize(mDisplayRect, mWindowRect, mStackBounds,
-                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(mStack));
-            updateLayoutAlgorithm(true /* boundScroll */);
+            updateLayoutToStableBounds();
             addIgnoreTask(event.task);
         }
-        relayoutTaskViews(animation, ignoreTaskOverrides);
+        relayoutTaskViews(animation, null /* animationOverrides */, ignoreTaskOverrides);
     }
 
     public final void onBusEvent(final DragEndEvent event) {
@@ -1867,30 +1884,38 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             });
         }
 
-        // We translated the view but we need to animate it back from the current layout-space rect
-        // to its final layout-space rect
-        int x = (int) event.taskView.getTranslationX();
-        int y = (int) event.taskView.getTranslationY();
-        Rect taskViewRect = new Rect(event.taskView.getLeft(), event.taskView.getTop(),
-                event.taskView.getRight(), event.taskView.getBottom());
-        taskViewRect.offset(x, y);
-        event.taskView.setTranslationX(0);
-        event.taskView.setTranslationY(0);
-        event.taskView.setLeftTopRightBottom(taskViewRect.left, taskViewRect.top,
-                taskViewRect.right, taskViewRect.bottom);
-
-        // Animate the non-drag TaskViews back into position
-        mLayoutAlgorithm.getStackTransform(event.task, getScroller().getStackScroll(),
-                mTmpTransform, null);
-        event.getAnimationTrigger().increment();
-        relayoutTaskViews(new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN));
-
-        // Animate the drag TaskView back into position
-        updateTaskViewToTransform(event.taskView, mTmpTransform,
-                new AnimationProps(DEFAULT_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN,
-                        event.getAnimationTrigger().decrementOnAnimationEnd()));
+        // Restore the task, so that relayout will apply to it below
         removeIgnoreTask(event.task);
+
+        // Convert the dragging task view back to its final layout-space rect
+        Utilities.setViewFrameFromTranslation(event.taskView);
+
+        // Animate all the tasks into place
+        ArrayMap<Task, AnimationProps> animationOverrides = new ArrayMap<>();
+        animationOverrides.put(event.task, new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN,
+                event.getAnimationTrigger().decrementOnAnimationEnd()));
+        relayoutTaskViews(new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN));
+        event.getAnimationTrigger().increment();
+    }
+
+    public final void onBusEvent(final DragEndCancelledEvent event) {
+        // Restore the pre-drag task stack bounds, including the dragging task view
+        removeIgnoreTask(event.task);
+        updateLayoutToStableBounds();
+
+        // Convert the dragging task view back to its final layout-space rect
+        Utilities.setViewFrameFromTranslation(event.taskView);
+
+        // Animate all the tasks into place
+        ArrayMap<Task, AnimationProps> animationOverrides = new ArrayMap<>();
+        animationOverrides.put(event.task, new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN,
+                event.getAnimationTrigger().decrementOnAnimationEnd()));
+        relayoutTaskViews(new AnimationProps(SLOW_SYNC_STACK_DURATION,
+                Interpolators.FAST_OUT_SLOW_IN));
+        event.getAnimationTrigger().increment();
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
