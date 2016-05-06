@@ -517,16 +517,8 @@ public class TaskStack {
         }
     }
 
-    // A comparator that sorts tasks by their last active time
-    private Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR = new Comparator<Task>() {
-        @Override
-        public int compare(Task o1, Task o2) {
-            return Long.compare(o1.key.lastActiveTime, o2.key.lastActiveTime);
-        }
-    };
-
-    // A comparator that sorts tasks by their last active time and freeform state
-    private Comparator<Task> FREEFORM_LAST_ACTIVE_TIME_COMPARATOR = new Comparator<Task>() {
+    // A comparator that sorts tasks by their freeform state
+    private Comparator<Task> FREEFORM_COMPARATOR = new Comparator<Task>() {
         @Override
         public int compare(Task o1, Task o2) {
             if (o1.isFreeformTask() && !o2.isFreeformTask()) {
@@ -534,7 +526,7 @@ public class TaskStack {
             } else if (o2.isFreeformTask() && !o1.isFreeformTask()) {
                 return -1;
             }
-            return Long.compare(o1.key.lastActiveTime, o2.key.lastActiveTime);
+            return Long.compare(o1.temporarySortIndexInStack, o2.temporarySortIndexInStack);
         }
     };
 
@@ -696,7 +688,10 @@ public class TaskStack {
         }
 
         // Sort all the tasks to ensure they are ordered correctly
-        Collections.sort(allTasks, FREEFORM_LAST_ACTIVE_TIME_COMPARATOR);
+        for (int i = allTasks.size() - 1; i >= 0; i--) {
+            allTasks.get(i).temporarySortIndexInStack = i;
+        }
+        Collections.sort(allTasks, FREEFORM_COMPARATOR);
 
         mStackTaskList.set(allTasks);
         mRawTaskList = allTasks;
@@ -769,12 +764,11 @@ public class TaskStack {
     }
 
     /**
-     * Computes a set of all the active and historical tasks ordered by their last active time.
+     * Computes a set of all the active and historical tasks.
      */
     public ArrayList<Task> computeAllTasksList() {
         ArrayList<Task> tasks = new ArrayList<>();
         tasks.addAll(mStackTaskList.getTasks());
-        Collections.sort(tasks, LAST_ACTIVE_TIME_COMPARATOR);
         return tasks;
     }
 

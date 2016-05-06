@@ -41,6 +41,7 @@ import android.view.WindowManager.LayoutParams;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
@@ -166,6 +167,13 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
+            } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
+                // For the time being, if the time changes, then invalidate the
+                // last-stack-active-time, this ensures that we will just show the last N tasks
+                // the next time that Recents loads, but prevents really old tasks from showing
+                // up if the task time is set forward.
+                Prefs.putLong(RecentsActivity.this, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
+                        0);
             }
         }
     };
@@ -311,6 +319,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
