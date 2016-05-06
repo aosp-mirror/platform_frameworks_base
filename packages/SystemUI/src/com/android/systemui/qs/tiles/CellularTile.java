@@ -23,6 +23,8 @@ import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -132,13 +134,28 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         final String signalContentDesc = cb.enabled && (cb.mobileSignalIconId > 0)
                 ? cb.signalContentDescription
                 : r.getString(R.string.accessibility_no_signal);
-        final String dataContentDesc = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiEnabled
-                ? cb.dataContentDescription
-                : r.getString(R.string.accessibility_no_data);
-        state.contentDescription = r.getString(
-                R.string.accessibility_quick_settings_mobile,
-                signalContentDesc, dataContentDesc,
-                state.label);
+
+        if (cb.noSim) {
+            state.contentDescription = state.label;
+        } else {
+            String enabledDesc = cb.enabled ? r.getString(R.string.accessibility_cell_data_on)
+                    : r.getString(R.string.accessibility_cell_data_off);
+
+            state.contentDescription = r.getString(
+                    R.string.accessibility_quick_settings_mobile,
+                    enabledDesc, signalContentDesc,
+                    state.label);
+            state.minimalContentDescription = r.getString(
+                    R.string.accessibility_quick_settings_mobile,
+                    r.getString(R.string.accessibility_cell_data), signalContentDesc,
+                    state.label);
+        }
+        state.contentDescription = state.contentDescription + "," + r.getString(
+                R.string.accessibility_quick_settings_open_settings, getTileLabel());
+        state.expandedAccessibilityClassName = Button.class.getName();
+        state.minimalAccessibilityClassName = Switch.class.getName();
+        state.value = mDataController.isMobileDataSupported()
+                && mDataController.isMobileDataEnabled();
     }
 
     @Override

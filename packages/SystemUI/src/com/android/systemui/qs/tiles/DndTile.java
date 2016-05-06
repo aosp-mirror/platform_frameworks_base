@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -162,7 +163,7 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
                 state.icon = TOTAL_SILENCE.equals(state.icon) ? mDisableTotalSilence : mDisable;
                 state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription =  mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_off);
+                        R.string.accessibility_quick_settings_dnd);
                 break;
         }
         if (mShowingDetail && !state.value) {
@@ -171,6 +172,8 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         if (valueChanged) {
             fireToggleStateChanged(state.value);
         }
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override
