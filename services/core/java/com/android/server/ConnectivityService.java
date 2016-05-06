@@ -30,8 +30,9 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
+import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.RULE_NONE;
-import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidRulesToString;
@@ -217,6 +218,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Flag indicating if background data is restricted. */
     @GuardedBy("mRulesLock")
     private boolean mRestrictBackground;
+    /** Flag indicating if background data is restricted due to battery savings. */
+    @GuardedBy("mRulesLock")
+    private boolean mRestrictPower;
 
     final private Context mContext;
     private int mNetworkPreference;
@@ -665,9 +669,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             mPolicyManager.setConnectivityListener(mPolicyListener);
             mRestrictBackground = mPolicyManager.getRestrictBackground();
+            mRestrictPower = mPolicyManager.getRestrictPower();
         } catch (RemoteException e) {
             // ouch, no rules updates means some processes may never get network
-            loge("unable to register INetworkPolicyListener" + e.toString());
+            loge("unable to register INetworkPolicyListener" + e);
         }
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
@@ -919,21 +924,33 @@ public class ConnectivityService extends IConnectivityManager.Stub
             uidRules = mUidRules.get(uid, RULE_NONE);
         }
 
-        switch (uidRules) {
-            case RULE_ALLOW_ALL:
-            case RULE_ALLOW_METERED:
-            case RULE_TEMPORARY_ALLOW_METERED:
-                return false;
-            case RULE_REJECT_METERED:
-                return networkMetered;
-            case RULE_REJECT_ALL:
-                return true;
-            case RULE_NONE:
-            default:
-                // When background data is restricted device-wide, the default
-                // behavior for apps should be like RULE_REJECT_METERED
-                return mRestrictBackground ? networkMetered : false;
+        boolean allowed = true;
+        // Check Data Saver Mode first...
+        if (networkMetered) {
+            if ((uidRules & RULE_REJECT_METERED) != 0) {
+                if (LOGD_RULES) Log.d(TAG, "uid " + uid + " is blacklisted");
+                // Explicitly blacklisted.
+                allowed = false;
+            } else {
+                allowed = !mRestrictBackground
+                      || (uidRules & RULE_ALLOW_METERED) != 0
+                      || (uidRules & RULE_TEMPORARY_ALLOW_METERED) != 0;
+                if (LOGD_RULES) Log.d(TAG, "allowed status for uid " + uid + " when"
+                        + " mRestrictBackground=" + mRestrictBackground
+                        + ", whitelisted=" + ((uidRules & RULE_ALLOW_METERED) != 0)
+                        + ", tempWhitelist= + ((uidRules & RULE_TEMPORARY_ALLOW_METERED) != 0)"
+                        + ": " + allowed);
+            }
         }
+        // ...then Battery Saver Mode.
+        if (allowed && mRestrictPower) {
+            allowed = (uidRules & RULE_ALLOW_ALL) != 0;
+            if (LOGD_RULES) Log.d(TAG, "allowed status for uid " + uid + " when"
+                    + " mRestrictPower=" + mRestrictPower
+                    + ", whitelisted=" + ((uidRules & RULE_ALLOW_ALL) != 0)
+                    + ": " + allowed);
+        }
+        return !allowed;
     }
 
     private void maybeLogBlockedNetworkInfo(NetworkInfo ni, int uid) {
@@ -1380,7 +1397,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             synchronized (mRulesLock) {
                 // skip update when we've already applied rules
-                final int oldRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+                final int oldRules = mUidRules.get(uid, RULE_NONE);
                 if (oldRules == uidRules) return;
 
                 mUidRules.put(uid, uidRules);
@@ -1418,6 +1435,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (restrictBackground) {
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
+            }
+        }
+
+        @Override
+        public void onRestrictPowerChanged(boolean restrictPower) {
+            // caller is NPMS, since we only register with them
+            if (LOGD_RULES) {
+                log("onRestrictPowerChanged(restrictPower=" + restrictPower + ")");
+            }
+
+            synchronized (mRulesLock) {
+                mRestrictPower = restrictPower;
             }
         }
 
@@ -1863,6 +1892,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.print("Restrict background: ");
         pw.println(mRestrictBackground);
+        pw.println();
+
+        pw.print("Restrict power: ");
+        pw.println(mRestrictPower);
         pw.println();
 
         pw.println("Status for known UIDs:");
@@ -4001,9 +4034,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized(mRulesLock) {
                 uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             }
-            if (uidRules != RULE_ALLOW_ALL) {
+            if ((uidRules & RULE_ALLOW_ALL) == 0) {
                 // we could silently fail or we can filter the available nets to only give
-                // them those they have access to.  Chose the more useful
+                // them those they have access to.  Chose the more useful option.
                 networkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
             }
         }
