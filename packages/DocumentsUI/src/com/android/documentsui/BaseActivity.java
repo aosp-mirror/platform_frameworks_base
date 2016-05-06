@@ -22,6 +22,7 @@ import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.State.MODE_GRID;
 
 import android.app.Activity;
@@ -213,18 +214,25 @@ public abstract class BaseActivity extends Activity
 
         includeState(state);
 
-        // Advanced roots are shown by deafult without menu option if forced by config or intent.
+        // Advanced roots are shown by default without menu option if forced by config or intent.
         state.showAdvanced = Shared.shouldShowDeviceRoot(this, intent);
         // Menu option is shown for whitelisted intents if advanced roots are not shown by default.
-        state.showAdvancedOption = !state.showAdvanced &&
-                (state.action == ACTION_OPEN ||
-                        state.action == ACTION_CREATE ||
-                        state.action == ACTION_OPEN_TREE ||
-                        state.action == ACTION_GET_CONTENT);
+        state.showAdvancedOption = !state.showAdvanced && (
+                !directLaunch(intent) ||
+                state.action == ACTION_OPEN ||
+                state.action == ACTION_CREATE ||
+                state.action == ACTION_OPEN_TREE ||
+                state.action == ACTION_PICK_COPY_DESTINATION ||
+                state.action == ACTION_GET_CONTENT);
 
         if (DEBUG) Log.d(mTag, "Created new state object: " + state);
 
         return state;
+    }
+
+    private static boolean directLaunch(Intent intent) {
+        return LauncherActivity.isLaunchUri(intent.getData())
+                && intent.hasExtra(Shared.EXTRA_STACK);
     }
 
     public void setRootsDrawerOpen(boolean open) {
