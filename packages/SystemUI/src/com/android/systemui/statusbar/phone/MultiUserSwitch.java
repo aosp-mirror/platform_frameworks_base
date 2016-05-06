@@ -25,6 +25,9 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -150,29 +153,28 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         }
 
         String text = null;
-        if (isClickable()) {
-            if (mUserManager.isUserSwitcherEnabled()) {
-                if (TextUtils.isEmpty(currentUser)) {
-                    text = mContext.getString(R.string.accessibility_multi_user_switch_switcher);
-                } else {
-                    text = mContext.getString(
-                            R.string.accessibility_multi_user_switch_switcher_with_current,
-                            currentUser);
-                }
-            } else {
-                text = mContext.getString(R.string.accessibility_multi_user_switch_quick_contact);
-            }
-        } else {
-            if (!TextUtils.isEmpty(currentUser)) {
-                text = mContext.getString(
-                        R.string.accessibility_multi_user_switch_inactive,
-                        currentUser);
-            }
+
+        if (!TextUtils.isEmpty(currentUser)) {
+            text = mContext.getString(
+                    R.string.accessibility_quick_settings_user,
+                    currentUser);
         }
 
         if (!TextUtils.equals(getContentDescription(), text)) {
             setContentDescription(text);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(Button.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(Button.class.getName());
     }
 
     @Override

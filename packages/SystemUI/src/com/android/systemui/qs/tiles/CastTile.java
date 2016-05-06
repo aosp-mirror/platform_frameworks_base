@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -115,6 +116,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_cast_title);
+        state.contentDescription = state.label;
         state.value = false;
         state.autoMirrorDrawable = false;
         final Set<CastDevice> devices = mController.getCastDevices();
@@ -123,6 +125,8 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
             if (device.state == CastDevice.STATE_CONNECTED) {
                 state.value = true;
                 state.label = getDeviceName(device);
+                state.contentDescription = state.contentDescription + "," +
+                        mContext.getString(R.string.accessibility_cast_name, state.label);
             } else if (device.state == CastDevice.STATE_CONNECTING) {
                 connecting = true;
             }
@@ -133,6 +137,10 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
         mDetailAdapter.updateItems(devices);
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName =
+                Button.class.getName();
+        state.contentDescription = state.contentDescription + ","
+                + mContext.getString(R.string.accessibility_quick_settings_open_details);
     }
 
     @Override
