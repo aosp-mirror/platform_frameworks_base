@@ -331,7 +331,7 @@ public interface IActivityManager extends IInterface {
     public void forceStopPackage(final String packageName, int userId) throws RemoteException;
 
     // Note: probably don't want to allow applications access to these.
-    public void setLockScreenShown(boolean shown) throws RemoteException;
+    public void setLockScreenShown(boolean showing, boolean occluded) throws RemoteException;
 
     public void unhandledBack() throws RemoteException;
     public ParcelFileDescriptor openContentUri(Uri uri) throws RemoteException;
