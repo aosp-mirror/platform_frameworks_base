@@ -350,13 +350,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         } else {
             mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
         }
-        if(mTaskStackHorizontalGridView.getStack().getTaskCount() > 1 && !mLaunchedFromHome) {
-            // If there are 2 or more tasks, and we are not launching from home
-            // set the selected position to the 2nd task to allow for faster app switching
-            mTaskStackHorizontalGridView.setSelectedPosition(1);
-        } else {
-            mTaskStackHorizontalGridView.setSelectedPosition(0);
-        }
 
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
@@ -382,6 +375,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if(mLaunchedFromHome) {
             mHomeRecentsEnterExitAnimationHolder.startEnterAnimation(mPipManager.isPipShown());
         }
+        mTaskStackViewAdapter.setResetAddedCards(true);
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
     }
 
@@ -389,12 +383,20 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     public void onResume() {
         super.onResume();
         mPipRecentsOverlayManager.onRecentsResumed();
+        if(mTaskStackHorizontalGridView.getStack().getTaskCount() > 1 && !mLaunchedFromHome) {
+            // If there are 2 or more tasks, and we are not launching from home
+            // set the selected position to the 2nd task to allow for faster app switching
+            mTaskStackHorizontalGridView.setSelectedPosition(1);
+        } else {
+            mTaskStackHorizontalGridView.setSelectedPosition(0);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mPipRecentsOverlayManager.onRecentsPaused();
+        mTaskStackViewAdapter.setResetAddedCards(false);
     }
 
     @Override
