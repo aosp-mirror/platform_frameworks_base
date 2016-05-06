@@ -22,6 +22,8 @@ import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
+import android.widget.Switch;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -122,10 +124,9 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         }
         final AnimationIcon icon = state.value ? mEnable : mDisable;
         state.icon = icon;
-        int onOrOffId = state.value
-                ? R.string.accessibility_quick_settings_flashlight_on
-                : R.string.accessibility_quick_settings_flashlight_off;
-        state.contentDescription = mContext.getString(onOrOffId);
+        state.contentDescription = mContext.getString(R.string.quick_settings_flashlight_label);
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override

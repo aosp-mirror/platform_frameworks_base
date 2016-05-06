@@ -513,9 +513,12 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public CharSequence label;
         public CharSequence contentDescription;
         public CharSequence dualLabelContentDescription;
+        public CharSequence minimalContentDescription;
         public boolean autoMirrorDrawable = true;
         public boolean disabledByPolicy;
         public EnforcedAdmin enforcedAdmin;
+        public String minimalAccessibilityClassName;
+        public String expandedAccessibilityClassName;
 
         public boolean copyTo(State other) {
             if (other == null) throw new IllegalArgumentException();
@@ -526,12 +529,21 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     || !Objects.equals(other.autoMirrorDrawable, autoMirrorDrawable)
                     || !Objects.equals(other.dualLabelContentDescription,
                     dualLabelContentDescription)
+                    || !Objects.equals(other.minimalContentDescription,
+                    minimalContentDescription)
+                    || !Objects.equals(other.minimalAccessibilityClassName,
+                    minimalAccessibilityClassName)
+                    || !Objects.equals(other.expandedAccessibilityClassName,
+                    expandedAccessibilityClassName)
                     || !Objects.equals(other.disabledByPolicy, disabledByPolicy)
                     || !Objects.equals(other.enforcedAdmin, enforcedAdmin);
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
+            other.minimalContentDescription = minimalContentDescription;
+            other.minimalAccessibilityClassName = minimalAccessibilityClassName;
+            other.expandedAccessibilityClassName = expandedAccessibilityClassName;
             other.autoMirrorDrawable = autoMirrorDrawable;
             other.disabledByPolicy = disabledByPolicy;
             if (enforcedAdmin == null) {
@@ -555,6 +567,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
             sb.append(",label=").append(label);
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
+            sb.append(",minimalContentDescription=").append(minimalContentDescription);
+            sb.append(",minimalAccessibilityClassName=").append(minimalAccessibilityClassName);
+            sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);
             sb.append(",autoMirrorDrawable=").append(autoMirrorDrawable);
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",enforcedAdmin=").append(enforcedAdmin);
@@ -581,8 +596,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
     }
 
-    public static final class SignalState extends State {
-        public boolean enabled;
+    public static final class SignalState extends BooleanState {
         public boolean connected;
         public boolean activityIn;
         public boolean activityOut;
@@ -593,12 +607,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         public boolean copyTo(State other) {
             final SignalState o = (SignalState) other;
-            final boolean changed = o.enabled != enabled
-                    || o.connected != connected || o.activityIn != activityIn
+            final boolean changed = o.connected != connected || o.activityIn != activityIn
                     || o.activityOut != activityOut
                     || o.overlayIconId != overlayIconId
                     || o.isOverlayIconWide != isOverlayIconWide;
-            o.enabled = enabled;
             o.connected = connected;
             o.activityIn = activityIn;
             o.activityOut = activityOut;
@@ -611,7 +623,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         protected StringBuilder toStringBuilder() {
             final StringBuilder rt = super.toStringBuilder();
-            rt.insert(rt.length() - 1, ",enabled=" + enabled);
             rt.insert(rt.length() - 1, ",connected=" + connected);
             rt.insert(rt.length() - 1, ",activityIn=" + activityIn);
             rt.insert(rt.length() - 1, ",activityOut=" + activityOut);

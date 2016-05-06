@@ -224,7 +224,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
         mNextAlarm = nextAlarm;
         if (nextAlarm != null) {
-            mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
+            String alarmString = KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm);
+            mAlarmStatus.setText(alarmString);
+            mAlarmStatus.setContentDescription(mContext.getString(
+                    R.string.accessibility_quick_settings_alarm, alarmString));
+            mAlarmStatusCollapsed.setContentDescription(mContext.getString(
+                    R.string.accessibility_quick_settings_alarm, alarmString));
         }
         if (mAlarmShowing != (nextAlarm != null)) {
             mAlarmShowing = nextAlarm != null;
@@ -281,6 +286,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void updateEverything() {
         updateDateTimePosition();
         updateVisibilities();
+        setClickable(false);
     }
 
     protected void updateVisibilities() {

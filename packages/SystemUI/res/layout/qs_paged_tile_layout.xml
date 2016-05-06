@@ -47,7 +47,8 @@
             android:textAppearance="@style/TextAppearance.QS.DetailButton"
             android:textColor="#64FFFFFF"
             android:focusable="true"
-            android:text="@string/qs_edit" />
+            android:text="@string/qs_edit"
+            android:contentDescription="@string/accessibility_quick_settings_edit"/>
 
     </FrameLayout>
 
