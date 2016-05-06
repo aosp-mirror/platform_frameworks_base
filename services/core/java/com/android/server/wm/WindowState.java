@@ -1995,12 +1995,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAppToken.shouldSaveSurface();
     }
 
+    static final Region sEmptyRegion = new Region();
+
     void destroyOrSaveSurface() {
         mSurfaceSaved = shouldSaveSurface();
         if (mSurfaceSaved) {
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 Slog.v(TAG, "Saving surface: " + this);
             }
+            // Previous user of the surface may have set a transparent region signaling a portion
+            // doesn't need to be composited, so reset to default empty state.
+            mSession.setTransparentRegion(mClient, sEmptyRegion);
 
             mWinAnimator.hide("saved surface");
             mWinAnimator.mDrawState = WindowStateAnimator.NO_SURFACE;
