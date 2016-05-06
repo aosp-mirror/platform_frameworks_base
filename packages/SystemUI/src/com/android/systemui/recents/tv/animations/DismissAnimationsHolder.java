@@ -18,7 +18,6 @@ package com.android.systemui.recents.tv.animations;
 import android.animation.Animator.AnimatorListener;
 import android.content.res.Resources;
 import android.graphics.drawable.TransitionDrawable;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +38,7 @@ public class DismissAnimationsHolder {
     private TransitionDrawable mDismissDrawable;
     private TextView mDismissText;
 
-    private float mDismissUnselectedAlpha;
+    private float mDismissIconNotInDismissStateAlpha;
     private long mShortDuration;
     private long mLongDuration;
 
@@ -57,7 +56,7 @@ public class DismissAnimationsHolder {
         mDismissStartYDelta = mDismissEnterYDelta * 2;
         mShortDuration =  res.getInteger(R.integer.dismiss_short_duration);
         mLongDuration =  res.getInteger(R.integer.dismiss_long_duration);
-        mDismissUnselectedAlpha = res.getFloat(R.integer.dismiss_unselected_alpha);
+        mDismissIconNotInDismissStateAlpha = res.getFloat(R.integer.dismiss_unselected_alpha);
     }
 
     public void startEnterAnimation() {
@@ -94,7 +93,7 @@ public class DismissAnimationsHolder {
         mCardDismissIcon.animate()
                 .setDuration(mShortDuration)
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .alpha(mDismissUnselectedAlpha)
+                .alpha(mDismissIconNotInDismissStateAlpha)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
@@ -157,7 +156,7 @@ public class DismissAnimationsHolder {
         mInfoField.animate().setListener(null);
         mThumbnailView.setAlpha(1.0f);
         mThumbnailView.setTranslationY(0);
-        mCardDismissIcon.setAlpha(mDismissUnselectedAlpha);
+        mCardDismissIcon.setAlpha(0.0f);
         mDismissText.setAlpha(0.0f);
     }
 }
