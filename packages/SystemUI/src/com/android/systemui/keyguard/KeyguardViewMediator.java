@@ -1542,7 +1542,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void updateActivityLockScreenState() {
         try {
-            ActivityManagerNative.getDefault().setLockScreenShown(mShowing && !mOccluded);
+            ActivityManagerNative.getDefault().setLockScreenShown(mShowing, mOccluded);
         } catch (RemoteException e) {
         }
     }
