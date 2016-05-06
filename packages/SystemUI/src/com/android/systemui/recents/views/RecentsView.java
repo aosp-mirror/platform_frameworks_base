@@ -64,6 +64,7 @@ import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEndedEvent;
 import com.android.systemui.recents.events.ui.DraggingInRecentsEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragDropTargetChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -510,45 +511,43 @@ public class RecentsView extends FrameLayout {
 
             // We translated the view but we need to animate it back from the current layout-space
             // rect to its final layout-space rect
-            int x = (int) event.taskView.getTranslationX();
-            int y = (int) event.taskView.getTranslationY();
-            Rect taskViewRect = new Rect(event.taskView.getLeft(), event.taskView.getTop(),
-                    event.taskView.getRight(), event.taskView.getBottom());
-            taskViewRect.offset(x, y);
-            event.taskView.setTranslationX(0);
-            event.taskView.setTranslationY(0);
-            event.taskView.setLeftTopRightBottom(taskViewRect.left, taskViewRect.top,
-                    taskViewRect.right, taskViewRect.bottom);
-
-            final OnAnimationStartedListener startedListener = new OnAnimationStartedListener() {
-                @Override
-                public void onAnimationStarted() {
-                    EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
-                    // Remove the task and don't bother relaying out, as all the tasks will be
-                    // relaid out when the stack changes on the multiwindow change event
-                    mTaskStackView.getStack().removeTask(event.task, null,
-                            true /* fromDockGesture */);
-                }
-            };
+            Utilities.setViewFrameFromTranslation(event.taskView);
 
             // Dock the task and launch it
             SystemServicesProxy ssp = Recents.getSystemServices();
-            ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode);
-            final Rect taskRect = getTaskRect(event.taskView);
-            IAppTransitionAnimationSpecsFuture future = mTransitionHelper.getAppTransitionFuture(
-                    new AnimationSpecComposer() {
-                        @Override
-                        public List<AppTransitionAnimationSpec> composeSpecs() {
-                            return mTransitionHelper.composeDockAnimationSpec(
-                                    event.taskView, taskRect);
-                        }
-                    });
-            ssp.overridePendingAppTransitionMultiThumbFuture(future,
-                    mTransitionHelper.wrapStartedListener(startedListener),
-                    true /* scaleUp */);
+            if (ssp.startTaskInDockedMode(event.task.key.id, dockState.createMode)) {
+                final OnAnimationStartedListener startedListener =
+                        new OnAnimationStartedListener() {
+                    @Override
+                    public void onAnimationStarted() {
+                        EventBus.getDefault().send(new DockedFirstAnimationFrameEvent());
+                        // Remove the task and don't bother relaying out, as all the tasks will be
+                        // relaid out when the stack changes on the multiwindow change event
+                        mTaskStackView.getStack().removeTask(event.task, null,
+                                true /* fromDockGesture */);
+                    }
+                };
 
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
-                    event.task.getTopComponent().flattenToShortString());
+                final Rect taskRect = getTaskRect(event.taskView);
+                IAppTransitionAnimationSpecsFuture future =
+                        mTransitionHelper.getAppTransitionFuture(
+                                new AnimationSpecComposer() {
+                                    @Override
+                                    public List<AppTransitionAnimationSpec> composeSpecs() {
+                                        return mTransitionHelper.composeDockAnimationSpec(
+                                                event.taskView, taskRect);
+                                    }
+                                });
+                ssp.overridePendingAppTransitionMultiThumbFuture(future,
+                        mTransitionHelper.wrapStartedListener(startedListener),
+                        true /* scaleUp */);
+
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_DRAG_DROP,
+                        event.task.getTopComponent().flattenToShortString());
+            } else {
+                EventBus.getDefault().send(new DragEndCancelledEvent(mStack, event.task,
+                        event.taskView));
+            }
         } else {
             // Animate the overlay alpha back to 0
             updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
@@ -563,6 +562,12 @@ public class RecentsView extends FrameLayout {
                     .setInterpolator(Interpolators.ALPHA_IN)
                     .start();
         }
+    }
+
+    public final void onBusEvent(final DragEndCancelledEvent event) {
+        // Animate the overlay alpha back to 0
+        updateVisibleDockRegions(null, true /* isDefaultDockState */, -1, -1,
+                true /* animateAlpha */, false /* animateBounds */);
     }
 
     private Rect getTaskRect(TaskView taskView) {
