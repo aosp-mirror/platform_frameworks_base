@@ -307,7 +307,7 @@
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_END" />
 
-    <protected-broadcast android:name="com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE" />
+    <protected-broadcast android:name="com.android.server.ACTION_TRIGGER_IDLE" />
 
     <protected-broadcast android:name="android.intent.action.HDMI_PLUGGED" />
 
