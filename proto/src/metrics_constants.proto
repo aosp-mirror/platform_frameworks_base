@@ -2323,6 +2323,20 @@ message MetricsEvent {
     // Deletion helper encountered an error during photo and video deletion.
     ACTION_DELETION_HELPER_PHOTOS_VIDEOS_DELETION_FAIL = 473;
 
+    // OPEN: Settings (root page if there are multiple tabs)
+    // CATEGORY: SETTINGS
+    DASHBOARD_CONTAINER = 474;
+
+    // OPEN: Settings -> SUPPORT TAB
+    // CATEGORY: SETTINGS
+    SUPPORT_FRAGMENT = 475;
+
+    // ACTION: Settings -> Select summary tab.
+    ACTION_SELECT_SUMMARY=476;
+
+    // ACTION: Settings -> Select support tab.
+    ACTION_SELECT_SUPPORT_FRAGMENT = 477;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
