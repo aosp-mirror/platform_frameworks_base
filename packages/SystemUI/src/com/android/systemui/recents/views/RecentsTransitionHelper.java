@@ -306,8 +306,11 @@ public class RecentsTransitionHelper {
                 mTmpTransform.fillIn(taskView);
                 stackLayout.transformToScreenCoordinates(mTmpTransform,
                         null /* windowOverrideRect */);
-                specs.add(composeAnimationSpec(stackView, taskView, mTmpTransform,
-                        true /* addHeaderBitmap */));
+                AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, taskView,
+                        mTmpTransform, true /* addHeaderBitmap */);
+                if (spec != null) {
+                    specs.add(spec);
+                }
             }
             return specs;
         }
@@ -329,8 +332,11 @@ public class RecentsTransitionHelper {
                     mTmpTransform.fillIn(taskView);
                     stackLayout.transformToScreenCoordinates(mTmpTransform,
                             null /* windowOverrideRect */);
-                    specs.add(composeAnimationSpec(stackView, tv, mTmpTransform,
-                            true /* addHeaderBitmap */));
+                    AppTransitionAnimationSpec spec = composeAnimationSpec(stackView, tv,
+                            mTmpTransform, true /* addHeaderBitmap */);
+                    if (spec != null) {
+                        specs.add(spec);
+                    }
                 }
             }
         }
@@ -376,11 +382,13 @@ public class RecentsTransitionHelper {
     private static Bitmap composeHeaderBitmap(TaskView taskView,
             TaskViewTransform transform) {
         float scale = transform.scale;
-        int fromHeaderWidth = (int) (transform.rect.width());
-        int fromHeaderHeight = (int) (taskView.mHeaderView.getMeasuredHeight() * scale);
-        Bitmap b = Bitmap.createBitmap(fromHeaderWidth, fromHeaderHeight,
-                Bitmap.Config.ARGB_8888);
+        int headerWidth = (int) (transform.rect.width());
+        int headerHeight = (int) (taskView.mHeaderView.getMeasuredHeight() * scale);
+        if (headerWidth == 0 || headerHeight == 0) {
+            return null;
+        }
 
+        Bitmap b = Bitmap.createBitmap(headerWidth, headerHeight, Bitmap.Config.ARGB_8888);
         if (RecentsDebugFlags.Static.EnableTransitionThumbnailDebugMode) {
             b.eraseColor(0xFFff0000);
         } else {
@@ -400,6 +408,9 @@ public class RecentsTransitionHelper {
         Bitmap b = null;
         if (addHeaderBitmap) {
             b = composeHeaderBitmap(taskView, transform);
+            if (b == null) {
+                return null;
+            }
         }
 
         Rect taskRect = new Rect();
