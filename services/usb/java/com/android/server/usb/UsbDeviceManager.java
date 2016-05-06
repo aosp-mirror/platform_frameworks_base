@@ -319,6 +319,7 @@ public class UsbDeviceManager {
         // current USB state
         private boolean mConnected;
         private boolean mHostConnected;
+        private boolean mSourcePower;
         private boolean mConfigured;
         private boolean mUsbDataUnlocked;
         private String mCurrentFunctions;
@@ -399,7 +400,8 @@ public class UsbDeviceManager {
 
         public void updateHostState(UsbPort port, UsbPortStatus status) {
             boolean hostConnected = status.getCurrentDataRole() == UsbPort.DATA_ROLE_HOST;
-            obtainMessage(MSG_UPDATE_HOST_STATE, hostConnected ? 1 :0, 0).sendToTarget();
+            boolean sourcePower = status.getCurrentPowerRole() == UsbPort.POWER_ROLE_SOURCE;
+            obtainMessage(MSG_UPDATE_HOST_STATE, hostConnected ? 1 :0, sourcePower ? 1 :0).sendToTarget();
         }
 
         private boolean waitForState(String state) {
@@ -717,6 +719,7 @@ public class UsbDeviceManager {
                     break;
                 case MSG_UPDATE_HOST_STATE:
                     mHostConnected = (msg.arg1 == 1);
+                    mSourcePower = (msg.arg2 == 1);
                     updateUsbNotification();
                     if (mBootCompleted) {
                         updateUsbStateBroadcastIfNeeded();
@@ -782,7 +785,11 @@ public class UsbDeviceManager {
             Resources r = mContext.getResources();
             if (mConnected) {
                 if (!mUsbDataUnlocked) {
-                    id = com.android.internal.R.string.usb_charging_notification_title;
+                    if (mSourcePower) {
+                        id = com.android.internal.R.string.usb_supplying_notification_title;
+                    } else {
+                        id = com.android.internal.R.string.usb_charging_notification_title;
+                    }
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_MTP)) {
                     id = com.android.internal.R.string.usb_mtp_notification_title;
@@ -795,10 +802,12 @@ public class UsbDeviceManager {
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_ACCESSORY)) {
                     id = com.android.internal.R.string.usb_accessory_notification_title;
+                } else if (mSourcePower) {
+                    id = com.android.internal.R.string.usb_supplying_notification_title;
                 } else {
                     id = com.android.internal.R.string.usb_charging_notification_title;
                 }
-            } else if (mHostConnected) {
+            } else if (mSourcePower) {
                 id = com.android.internal.R.string.usb_supplying_notification_title;
             }
             if (id != mUsbNotificationId) {
