@@ -54,6 +54,7 @@ interface INetworkPolicyManager {
     /** Control if background data is restricted system-wide. */
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
+    boolean getRestrictPower();
 
     /** Callback used to change internal state on tethering */
     void onTetheringChanged(String iface, boolean tethering);
