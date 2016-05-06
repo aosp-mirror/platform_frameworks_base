@@ -65,6 +65,9 @@ class RecentTasks extends ArrayList<TaskRecord> {
     private static final int MAX_RECENT_BITMAPS = 3;
     private static final int DEFAULT_INITIAL_CAPACITY = 5;
 
+    // Whether or not to move all affiliated tasks to the front when one of the tasks is launched
+    private static final boolean MOVE_AFFILIATED_TASKS_TO_FRONT = false;
+
     /**
      * Save recent tasks information across reboots.
      */
@@ -513,7 +516,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         if (task.inRecents) {
             int taskIndex = indexOf(task);
             if (taskIndex >= 0) {
-                if (!isAffiliated) {
+                if (!isAffiliated || MOVE_AFFILIATED_TASKS_TO_FRONT) {
                     // Simple case: this is not an affiliated task, so we just move it to the front.
                     remove(taskIndex);
                     add(0, task);
