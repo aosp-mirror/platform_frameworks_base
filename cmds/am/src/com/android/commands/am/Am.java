@@ -1598,10 +1598,10 @@ public class Am extends BaseCommand {
         }
 
         System.out.println("Performing idle maintenance...");
-        Intent intent = new Intent(
-                "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE");
-        mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
-                android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
+        try {
+            mAm.sendIdleJobTrigger();
+        } catch (RemoteException e) {
+        }
     }
 
     private void runScreenCompat() throws Exception {
