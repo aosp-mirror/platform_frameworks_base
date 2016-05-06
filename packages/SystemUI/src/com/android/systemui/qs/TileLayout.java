@@ -32,6 +32,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public TileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setFocusableInTouchMode(true);
         updateResources();
     }
 

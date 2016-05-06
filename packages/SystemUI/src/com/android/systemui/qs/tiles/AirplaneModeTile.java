@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -88,13 +89,12 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         state.label = mContext.getString(R.string.airplane_mode);
         if (airplaneMode) {
             state.icon = mEnable;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane_on);
         } else {
             state.icon = mDisable;
-            state.contentDescription =  mContext.getString(
-                    R.string.accessibility_quick_settings_airplane_off);
         }
+        state.contentDescription = state.label;
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override

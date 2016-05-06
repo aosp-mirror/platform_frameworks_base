@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 
 import android.provider.Settings;
+import android.widget.Switch;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -106,10 +108,9 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
             state.icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
         }
-        state.contentDescription = getAccessibilityString(rotationLocked,
-                R.string.accessibility_rotation_lock_on_portrait,
-                R.string.accessibility_rotation_lock_on_landscape,
-                R.string.accessibility_rotation_lock_off);
+        state.contentDescription = getAccessibilityString(rotationLocked);
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     public static boolean isCurrentOrientationLockPortrait(RotationLockController controller,
@@ -133,29 +134,25 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
      * Get the correct accessibility string based on the state
      *
      * @param locked Whether or not rotation is locked.
-     * @param idWhenPortrait The id which should be used when locked in portrait.
-     * @param idWhenLandscape The id which should be used when locked in landscape.
-     * @param idWhenOff The id which should be used when the rotation lock is off.
-     * @return
      */
-    private String getAccessibilityString(boolean locked, int idWhenPortrait, int idWhenLandscape,
-            int idWhenOff) {
-        int stringID;
+    private String getAccessibilityString(boolean locked) {
         if (locked) {
-            stringID = isCurrentOrientationLockPortrait(mController, mContext) ? idWhenPortrait
-                    : idWhenLandscape;
+            return mContext.getString(R.string.accessibility_quick_settings_rotation) + ","
+                    + mContext.getString(R.string.accessibility_quick_settings_rotation_value,
+                    isCurrentOrientationLockPortrait(mController, mContext)
+                            ? mContext.getString(
+                                    R.string.quick_settings_rotation_locked_portrait_label)
+                            : mContext.getString(
+                                    R.string.quick_settings_rotation_locked_landscape_label));
+
         } else {
-            stringID = idWhenOff;
+            return mContext.getString(R.string.accessibility_quick_settings_rotation);
         }
-        return mContext.getString(stringID);
     }
 
     @Override
     protected String composeChangeAnnouncement() {
-        return getAccessibilityString(mState.value,
-                R.string.accessibility_rotation_lock_on_portrait_changed,
-                R.string.accessibility_rotation_lock_on_landscape_changed,
-                R.string.accessibility_rotation_lock_off_changed);
+        return getAccessibilityString(mState.value);
     }
 
     private final RotationLockControllerCallback mCallback = new RotationLockControllerCallback() {

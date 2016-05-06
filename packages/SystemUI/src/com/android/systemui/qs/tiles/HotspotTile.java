@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.os.UserManager;
 
 import android.provider.Settings;
+import android.widget.Switch;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -94,6 +96,9 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
             state.value = mController.isHotspotEnabled();
         }
         state.icon = state.value ? mEnable : mDisable;
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
+        state.contentDescription = state.label;
     }
 
     @Override
