@@ -105,7 +105,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpToPerms, sOpDefault
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -338,6 +338,43 @@ public class AppOpsManager {
     /** @hide Get device accounts. */
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
+
+    private static final int[] RUNTIME_PERMISSIONS_OPS = {
+            // Contacts
+            OP_READ_CONTACTS,
+            OP_WRITE_CONTACTS,
+            OP_GET_ACCOUNTS,
+            // Calendar
+            OP_READ_CALENDAR,
+            OP_WRITE_CALENDAR,
+            // SMS
+            OP_SEND_SMS,
+            OP_RECEIVE_SMS,
+            OP_READ_SMS,
+            OP_RECEIVE_WAP_PUSH,
+            OP_RECEIVE_MMS,
+            OP_READ_CELL_BROADCASTS,
+            // Storage
+            OP_READ_EXTERNAL_STORAGE,
+            OP_WRITE_EXTERNAL_STORAGE,
+            // Location
+            OP_COARSE_LOCATION,
+            OP_FINE_LOCATION,
+            // Phone
+            OP_READ_PHONE_STATE,
+            OP_CALL_PHONE,
+            OP_READ_CALL_LOG,
+            OP_WRITE_CALL_LOG,
+            OP_ADD_VOICEMAIL,
+            OP_USE_SIP,
+            OP_PROCESS_OUTGOING_CALLS,
+            // Microphone
+            OP_RECORD_AUDIO,
+            // Camera
+            OP_CAMERA,
+            // Body sensors
+            OP_BODY_SENSORS
+    };
 
     /**
      * This maps each operation to the operation that serves as the
@@ -922,7 +959,7 @@ public class AppOpsManager {
     /**
      * Mapping from a permission to the corresponding app op.
      */
-    private static HashMap<String, Integer> sPermToOp = new HashMap<>();
+    private static HashMap<String, Integer> sRuntimePermToOp = new HashMap<>();
 
     static {
         if (sOpToSwitch.length != _NUM_OP) {
@@ -962,9 +999,9 @@ public class AppOpsManager {
                 sOpStrToOp.put(sOpToString[i], i);
             }
         }
-        for (int i=0; i<_NUM_OP; i++) {
-            if (sOpPerms[i] != null) {
-                sPermToOp.put(sOpPerms[i], i);
+        for (int op : RUNTIME_PERMISSIONS_OPS) {
+            if (sOpPerms[op] != null) {
+                sRuntimePermToOp.put(sOpPerms[op], op);
             }
         }
     }
@@ -1016,10 +1053,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve the app op code for a permission, or null if there is not one.
+     * This API is intended to be used for mapping runtime permissions to the
+     * corresponding app op.
      * @hide
      */
     public static int permissionToOpCode(String permission) {
-        Integer boxedOpCode = sPermToOp.get(permission);
+        Integer boxedOpCode = sRuntimePermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
     }
 
@@ -1352,12 +1391,14 @@ public class AppOpsManager {
      * Gets the app op name associated with a given permission.
      * The app op name is one of the public constants defined
      * in this class such as {@link #OPSTR_COARSE_LOCATION}.
+     * This API is intended to be used for mapping runtime
+     * permissions to the corresponding app op.
      *
      * @param permission The permission.
      * @return The app op associated with the permission or null.
      */
     public static String permissionToOp(String permission) {
-        final Integer opCode = sPermToOp.get(permission);
+        final Integer opCode = sRuntimePermToOp.get(permission);
         if (opCode == null) {
             return null;
         }
