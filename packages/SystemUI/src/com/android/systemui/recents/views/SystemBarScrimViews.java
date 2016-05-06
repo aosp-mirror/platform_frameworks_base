@@ -28,6 +28,9 @@ import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimatio
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.ui.DismissAllTaskViewsEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
+import com.android.systemui.recents.model.TaskStack;
 
 /** Manages the scrims for the various system bars. */
 public class SystemBarScrimViews {
@@ -154,10 +157,22 @@ public class SystemBarScrimViews {
         animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
     }
 
+    public final void onBusEvent(final DragEndEvent event) {
+        // Hide the nav bar scrims once we drop to a dock region
+        if (event.dropTarget instanceof TaskStack.DockState) {
+            animateScrimToCurrentNavBarState(false /* hasStackTasks */);
+        }
+    }
+
+    public final void onBusEvent(final DragEndCancelledEvent event) {
+        // Restore the scrims to the normal state
+        animateScrimToCurrentNavBarState(event.stack.getStackTaskCount() > 0);
+    }
+
     /**
      * Animates the scrim to match the state of the current nav bar.
      */
-    public void animateScrimToCurrentNavBarState(boolean hasStackTasks) {
+    private void animateScrimToCurrentNavBarState(boolean hasStackTasks) {
         boolean hasNavBarScrim = isNavBarScrimRequired(hasStackTasks);
         if (mHasNavBarScrim != hasNavBarScrim) {
             AnimationProps animation = hasNavBarScrim
