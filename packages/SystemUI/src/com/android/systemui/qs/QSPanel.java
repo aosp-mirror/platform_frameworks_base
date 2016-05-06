@@ -440,7 +440,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         fireShowingDetail(show ? r.detailAdapter : null, x, y);
     }
 
-    private void setDetailRecord(Record r) {
+    protected void setDetailRecord(Record r) {
         if (r == mDetailRecord) return;
         mDetailRecord = r;
         final boolean scanState = mDetailRecord instanceof TileRecord
