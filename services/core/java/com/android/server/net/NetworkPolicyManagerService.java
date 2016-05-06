@@ -48,10 +48,12 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.RULE_NONE;
+import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
@@ -264,6 +266,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
+    private static final int MSG_RESTRICT_POWER_CHANGED = 12;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -554,9 +557,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             updateRulesForGlobalChangeLocked(true);
                         }
                     }
+                    mHandler.obtainMessage(MSG_RESTRICT_POWER_CHANGED,
+                            enabled ? 1 : 0, 0).sendToTarget();
                 }
             });
+            final boolean oldRestrictPower = mRestrictPower;
             mRestrictPower = mPowerManagerInternal.getLowPowerModeEnabled();
+            if (mRestrictPower != oldRestrictPower) {
+                // Some early services may have read the default value,
+                // so notify them that it's changed
+                mHandler.obtainMessage(MSG_RESTRICT_POWER_CHANGED,
+                        mRestrictPower ? 1 : 0, 0).sendToTarget();
+            }
+
             mSystemReady = true;
 
             // read policy from disk
@@ -2133,6 +2146,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public boolean getRestrictPower() {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mRulesLock) {
+            return mRestrictPower;
+        }
+    }
+
+    @Override
     public void setDeviceIdleMode(boolean enabled) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
@@ -2795,6 +2817,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * have permission to use the internet.
      *
      * <p>The {@link #mUidRules} map is used to define the transtion of states of an UID.
+     *
+     * <p>This method also updates the {@link #mUidRules} with the power-related status for the uid
+     * and send the proper {@value #MSG_RULES_CHANGED} notification, although it does not change
+     * the power-related firewall rules per se.
      */
     private void updateRuleForRestrictBackgroundLocked(int uid) {
         updateRuleForRestrictBackgroundLocked(uid, false);
@@ -2817,30 +2843,47 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Data Saver status.
         final boolean isDsBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
         final boolean isDsWhitelisted = mRestrictBackgroundWhitelistUids.get(uid);
-        int newDsRule = RULE_NONE;
         final int oldDsRule = oldUidRules & MASK_METERED_NETWORKS;
+        int newDsRule = RULE_NONE;
+
+        // Battery Saver status.
+        final boolean isBsWhitelisted = isWhitelistedBatterySaverLocked(uid);
+        final int oldBsRule = oldUidRules & MASK_ALL_NETWORKS;
+        int newBsRule = RULE_NONE;
 
         // First step: define the new rule based on user restrictions and foreground state.
         if (isForeground) {
+            // Data Saver rules
             if (isDsBlacklisted || (mRestrictBackground && !isDsWhitelisted)) {
                 newDsRule = RULE_TEMPORARY_ALLOW_METERED;
-            }
-        } else {
-            if (isDsBlacklisted) {
-                newDsRule = RULE_REJECT_METERED;
             } else if (isDsWhitelisted) {
                 newDsRule = RULE_ALLOW_METERED;
             }
+            // Battery Saver rules
+            if (mRestrictPower) {
+                newBsRule = RULE_ALLOW_ALL;
+            }
+        } else {
+            // Data Saver rules
+            if (isDsBlacklisted) {
+                newDsRule = RULE_REJECT_METERED;
+            } else if (mRestrictBackground && isDsWhitelisted) {
+                newDsRule = RULE_ALLOW_METERED;
+            }
+            // Battery Saver rules
+            if (mRestrictPower) {
+                newBsRule = isBsWhitelisted ? RULE_ALLOW_ALL : RULE_REJECT_ALL;
+            }
         }
-
-        final int newUidRules = newDsRule;
+        final int newUidRules = newDsRule | newBsRule;
 
         if (LOGV) {
             Log.v(TAG, "updateRuleForRestrictBackgroundLocked(" + uid + "):"
                     + " isForeground=" +isForeground + ", isBlacklisted: " + isDsBlacklisted
                     + ", isDsWhitelisted: " + isDsWhitelisted
-                    + ", newUidRule: " + uidRulesToString(newUidRules)
-                    + ", oldUidRule: " + uidRulesToString(oldUidRules));
+                    + ", isBsWhitelisted: " + isBsWhitelisted
+                    + ", newUidRules: " + uidRulesToString(newUidRules)
+                    + ", oldUidRules: " + uidRulesToString(oldUidRules));
         }
 
         if (newUidRules == RULE_NONE) {
@@ -2849,8 +2892,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mUidRules.put(uid, newUidRules);
         }
 
+        boolean changed = false;
+
         // Second step: apply bw changes based on change of state.
+
+        // Apply Data Saver rules.
         if (newDsRule != oldDsRule) {
+            changed = true;
+
             if ((newDsRule & RULE_TEMPORARY_ALLOW_METERED) != 0) {
                 // Temporarily whitelist foreground app, removing from blacklist if necessary
                 // (since bw_penalty_box prevails over bw_happy_box).
@@ -2895,11 +2944,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + ": foreground=" + isForeground
                         + ", whitelisted=" + isDsWhitelisted
                         + ", blacklisted=" + isDsBlacklisted
-                        + ", newRules=" + uidRulesToString(newUidRules)
-                        + ", oldRules=" + uidRulesToString(oldUidRules));
+                        + ", newRule=" + uidRulesToString(newUidRules)
+                        + ", oldRule=" + uidRulesToString(oldUidRules));
             }
+        }
 
-            // dispatch changed rule to existing listeners
+        // Apply Battery Saver rules.
+        // NOTE: the firewall rules are changed outside this method, but it's still necessary to
+        // send the MSG_RULES_CHANGED so ConnectivityService can update its internal status.
+        if (newBsRule != oldBsRule) {
+            changed = true;
+            if (newBsRule == RULE_NONE || (newBsRule & RULE_ALLOW_ALL) != 0) {
+                if (LOGV) Log.v(TAG, "Allowing non-metered access for UID " + uid);
+            } else if ((newBsRule & RULE_REJECT_ALL) != 0) {
+                if (LOGV) Log.v(TAG, "Rejecting non-metered access for UID " + uid);
+            } else {
+                // All scenarios should have been covered above
+                Log.wtf(TAG, "Unexpected change of non-metered UID state for " + uid
+                        + ": foreground=" + isForeground
+                        + ", whitelisted=" + isBsWhitelisted
+                        + ", newRule=" + uidRulesToString(newUidRules)
+                        + ", oldRule=" + uidRulesToString(oldUidRules));
+            }
+        }
+
+        // Final step: dispatch changed rule to existing listeners
+        if (changed) {
             mHandler.obtainMessage(MSG_RULES_CHANGED, uid, newUidRules).sendToTarget();
         }
     }
@@ -2966,6 +3036,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void dispatchRestrictPowerChanged(INetworkPolicyListener listener,
+            boolean restrictPower) {
+        if (listener != null) {
+            try {
+                listener.onRestrictPowerChanged(restrictPower);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -3011,6 +3091,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             updateNotificationsLocked();
                         }
                     }
+                    return true;
+                }
+                case MSG_RESTRICT_POWER_CHANGED: {
+                    final boolean restrictPower = msg.arg1 != 0;
+                    dispatchRestrictPowerChanged(mConnectivityListener, restrictPower);
                     return true;
                 }
                 case MSG_RESTRICT_BACKGROUND_CHANGED: {
