@@ -60,6 +60,7 @@ public class AppLaunch extends InstrumentationTestCase {
     // optional parameter: comma separated list of required account types before proceeding
     // with the app launch
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
+    private static final String KEY_SKIP_INITIAL_LAUNCH = "skip_initial_launch";
     private static final String WEARABLE_ACTION_GOOGLE =
             "com.google.android.wearable.action.GOOGLE";
     private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 60000; //60s to allow app to idle
@@ -74,6 +75,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private int mLaunchIterations = 10;
     private Bundle mResult = new Bundle();
     private Set<String> mRequiredAccounts;
+    private boolean mSkipInitialLaunch = false;
 
     @Override
     protected void setUp() throws Exception {
@@ -97,20 +99,22 @@ public class AppLaunch extends InstrumentationTestCase {
         parseArgs(args);
         checkAccountSignIn();
 
-        // do initial app launch, without force stopping
-        for (String app : mNameToResultKey.keySet()) {
-            long launchTime = startApp(app, false);
-            if (launchTime <= 0) {
-                mNameToLaunchTime.put(app, -1L);
-                // simply pass the app if launch isn't successful
-                // error should have already been logged by startApp
-                continue;
-            } else {
-                mNameToLaunchTime.put(app, launchTime);
+        if (!mSkipInitialLaunch) {
+            // do initial app launch, without force stopping
+            for (String app : mNameToResultKey.keySet()) {
+                long launchTime = startApp(app, false);
+                if (launchTime <= 0) {
+                    mNameToLaunchTime.put(app, -1L);
+                    // simply pass the app if launch isn't successful
+                    // error should have already been logged by startApp
+                    continue;
+                } else {
+                    mNameToLaunchTime.put(app, launchTime);
+                }
+                sleep(INITIAL_LAUNCH_IDLE_TIMEOUT);
+                closeApp(app, false);
+                sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
             }
-            sleep(INITIAL_LAUNCH_IDLE_TIMEOUT);
-            closeApp(app, false);
-            sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
         }
         // do the real app launch now
         for (int i = 0; i < mLaunchIterations; i++) {
@@ -174,6 +178,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 mRequiredAccounts.add(accountType);
             }
         }
+        mSkipInitialLaunch = "true".equals(args.getString(KEY_SKIP_INITIAL_LAUNCH));
     }
 
     private boolean hasLeanback(Context context) {
