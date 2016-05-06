@@ -255,7 +255,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запис на звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"правене на снимки и запис на видеоклипове"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"прави снимки и записва видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>

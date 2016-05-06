@@ -1040,7 +1040,7 @@
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi-nätverket är inte anslutet till internet"</string>
-    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryck för alternativ."</string>
+    <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryck för alternativ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Det gick inte att ansluta till Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dålig Internetanslutning."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Tillåt anslutning?"</string>
