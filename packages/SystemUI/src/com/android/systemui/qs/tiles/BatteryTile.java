@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -131,7 +132,13 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         };
         state.label = percentage;
         state.contentDescription = mContext.getString(R.string.accessibility_quick_settings_battery,
-                percentage);
+                percentage) + "," +
+                (mPowerSave ? mContext.getString(R.string.battery_saver_notification_title)
+                        : mCharging ? mContext.getString(R.string.expanded_header_battery_charging)
+                                : "")
+                + "," + mContext.getString(R.string.accessibility_battery_details);
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Button.class.getName();
     }
 
     @Override

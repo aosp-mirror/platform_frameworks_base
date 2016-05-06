@@ -40,7 +40,11 @@ public class QSTileView extends QSTileBaseView {
     private ImageView mPadLock;
 
     public QSTileView(Context context, QSIconView icon) {
-        super(context, icon);
+        this(context, icon, false);
+    }
+
+    public QSTileView(Context context, QSIconView icon, boolean collapsedView) {
+        super(context, icon, collapsedView);
 
         mContext = context;
         final Resources res = context.getResources();

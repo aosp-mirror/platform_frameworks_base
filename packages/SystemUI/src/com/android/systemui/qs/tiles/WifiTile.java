@@ -24,6 +24,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -104,8 +106,8 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     protected void handleSecondaryClick() {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);
-        MetricsLogger.action(mContext, getMetricsCategory(), !mState.enabled);
-        mController.setWifiEnabled(!mState.enabled);
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
+        mController.setWifiEnabled(!mState.value);
     }
 
     @Override
@@ -114,9 +116,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mHost.startActivityDismissingKeyguard(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;
         }
-        if (!mState.enabled) {
+        if (!mState.value) {
             mController.setWifiEnabled(true);
-            mState.enabled = true;
+            mState.value = true;
         }
         showDetail(true);
     }
@@ -136,43 +138,58 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
         boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
-        boolean enabledChanging = state.enabled != cb.enabled;
+        boolean enabledChanging = state.value != cb.enabled;
         if (enabledChanging) {
             mDetailAdapter.setItemsVisible(cb.enabled);
             fireToggleStateChanged(cb.enabled);
         }
-        state.enabled = cb.enabled;
+        state.value = cb.enabled;
         state.connected = wifiConnected;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
         state.filter = true;
-        final String signalContentDescription;
+        final StringBuffer minimalContentDescription = new StringBuffer();
+        final StringBuffer expandedContentDescription = new StringBuffer();
         final Resources r = mContext.getResources();
-        if (!state.enabled) {
+        if (!state.value) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disabled);
             state.label = r.getString(R.string.quick_settings_wifi_label);
-            signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         } else if (wifiConnected) {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);
             state.label = removeDoubleQuotes(cb.enabledDesc);
-            signalContentDescription = cb.wifiSignalContentDescription;
         } else if (wifiNotConnected) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disconnected);
             state.label = r.getString(R.string.quick_settings_wifi_label);
-            signalContentDescription = r.getString(R.string.accessibility_no_wifi);
         } else {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_no_network);
             state.label = r.getString(R.string.quick_settings_wifi_label);
-            signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         }
-        state.contentDescription = mContext.getString(
-                R.string.accessibility_quick_settings_wifi,
-                signalContentDescription);
+        minimalContentDescription.append(
+                mContext.getString(R.string.quick_settings_wifi_label)).append(",");
+        if (state.value) {
+            expandedContentDescription.append(
+                    r.getString(R.string.quick_settings_wifi_on_label)).append(",");
+            if (wifiConnected) {
+                minimalContentDescription.append(cb.wifiSignalContentDescription).append(",");
+                minimalContentDescription.append(removeDoubleQuotes(cb.enabledDesc));
+                expandedContentDescription.append(cb.wifiSignalContentDescription).append(",");
+                expandedContentDescription.append(removeDoubleQuotes(cb.enabledDesc));
+            }
+        } else {
+            expandedContentDescription.append(
+                    r.getString(R.string.quick_settings_wifi_off_label));
+        }
+        state.minimalContentDescription =  minimalContentDescription;
+        expandedContentDescription.append(",").append(
+                r.getString(R.string.accessibility_quick_settings_open_settings, getTileLabel()));
+        state.contentDescription = expandedContentDescription;
         CharSequence wifiName = state.label;
         if (state.connected) {
             wifiName = r.getString(R.string.accessibility_wifi_name, state.label);
         }
         state.dualLabelContentDescription = wifiName;
+        state.expandedAccessibilityClassName = Button.class.getName();
+        state.minimalAccessibilityClassName = Switch.class.getName();
     }
 
     @Override
@@ -182,12 +199,12 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected boolean shouldAnnouncementBeDelayed() {
-        return mStateBeforeClick.enabled == mState.enabled;
+        return mStateBeforeClick.value == mState.value;
     }
 
     @Override
     protected String composeChangeAnnouncement() {
-        if (mState.enabled) {
+        if (mState.value) {
             return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_on);
         } else {
             return mContext.getString(R.string.accessibility_quick_settings_wifi_changed_off);
@@ -266,7 +283,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public Boolean getToggleState() {
-            return mState.enabled;
+            return mState.value;
         }
 
         @Override
@@ -294,7 +311,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
                     R.string.quick_settings_wifi_detail_empty_text);
             updateItems();
-            setItemsVisible(mState.enabled);
+            setItemsVisible(mState.value);
             return mItems;
         }
 

@@ -34,6 +34,7 @@ public class ExpandableIndicator extends ImageView {
         super.onFinishInflate();
         final int res = getDrawableResourceId(mExpanded);
         setImageResource(res);
+        setContentDescription(getContentDescription(mExpanded));
     }
 
     public void setExpanded(boolean expanded) {
@@ -46,6 +47,7 @@ public class ExpandableIndicator extends ImageView {
         setImageDrawable(avd);
         avd.forceAnimationOnUI();
         avd.start();
+        setContentDescription(getContentDescription(expanded));
     }
 
     /** Whether the icons are using the default direction or the opposite */
@@ -61,5 +63,10 @@ public class ExpandableIndicator extends ImageView {
             return expanded ? R.drawable.ic_volume_expand_animation
                     : R.drawable.ic_volume_collapse_animation;
         }
+    }
+
+    private String getContentDescription(boolean expanded) {
+        return expanded ? mContext.getString(R.string.accessibility_quick_settings_collapse)
+                : mContext.getString(R.string.accessibility_quick_settings_expand);
     }
 }

@@ -30,6 +30,8 @@ import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
+import com.android.systemui.R;
+
 import java.util.Objects;
 
 
@@ -80,6 +82,10 @@ public class WifiSignalController extends
         String wifiDesc = wifiVisible ? mCurrentState.ssid : null;
         boolean ssidPresent = wifiVisible && mCurrentState.ssid != null;
         String contentDescription = getStringIfExists(getContentDescription());
+        if (mCurrentState.inetCondition == 0) {
+            contentDescription +=
+                    ("," + mContext.getString(R.string.accessibility_quick_settings_no_internet));
+        }
 
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         IconState qsIcon = new IconState(mCurrentState.connected, getQsCurrentIconId(),

@@ -23,6 +23,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Space;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.SignalState;
 import com.android.systemui.qs.QSTile.State;
@@ -93,8 +94,8 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected QSTileBaseView createTileView(QSTile<?> tile) {
-        return new QSTileBaseView(mContext, tile.createTileView(mContext));
+    protected QSTileBaseView createTileView(QSTile<?> tile, boolean collapsedView) {
+        return new QSTileBaseView(mContext, tile.createTileView(mContext), collapsedView);
     }
 
     @Override
@@ -133,7 +134,7 @@ public class QuickQSPanel extends QSPanel {
                 break;
             }
         }
-        super.setTiles(quickTiles);
+        super.setTiles(quickTiles, true);
     }
 
     private final Tunable mNumTiles = new Tunable() {
@@ -150,6 +151,7 @@ public class QuickQSPanel extends QSPanel {
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
 
         private final Space mEndSpacer;
+        protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -185,6 +187,7 @@ public class QuickQSPanel extends QSPanel {
             // Add a spacer.
             addView(new Space(mContext), getChildCount() - 1 /* Leave icon at end */,
                     generateSpaceParams());
+            mRecords.add(tile);
         }
 
         private LayoutParams generateSpaceParams() {
@@ -209,6 +212,7 @@ public class QuickQSPanel extends QSPanel {
             removeViewAt(childIndex);
             // Remove its spacer as well.
             removeViewAt(childIndex);
+            mRecords.remove(tile);
         }
 
         private int getChildIndex(QSTileBaseView tileView) {
@@ -235,6 +239,22 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public boolean hasOverlappingRendering() {
             return false;
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            if (mRecords != null && mRecords.size() > 0) {
+                View previousView = this;
+                for (TileRecord record : mRecords) {
+                    if (record.tileView.getVisibility() == GONE) continue;
+                    previousView = record.tileView.updateAccessibilityOrder(previousView);
+                }
+                mRecords.get(0).tileView.setAccessibilityTraversalAfter(
+                        R.id.alarm_status_collapsed);
+                mRecords.get(mRecords.size() - 1).tileView.setAccessibilityTraversalBefore(
+                        R.id.expand_indicator);
+            }
         }
     }
 }

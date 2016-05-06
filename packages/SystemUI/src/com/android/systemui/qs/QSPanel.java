@@ -277,13 +277,17 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     public void setTiles(Collection<QSTile<?>> tiles) {
+        setTiles(tiles, false);
+    }
+
+    public void setTiles(Collection<QSTile<?>> tiles, boolean collapsedView) {
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
             record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
         for (QSTile<?> tile : tiles) {
-            addTile(tile);
+            addTile(tile, collapsedView);
         }
     }
 
@@ -291,14 +295,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         r.tileView.onStateChanged(state);
     }
 
-    protected QSTileBaseView createTileView(QSTile<?> tile) {
-        return new QSTileView(mContext, tile.createTileView(mContext));
+    protected QSTileBaseView createTileView(QSTile<?> tile, boolean collapsedView) {
+        return new QSTileView(mContext, tile.createTileView(mContext), collapsedView);
     }
 
-    protected void addTile(final QSTile<?> tile) {
+    protected void addTile(final QSTile<?> tile, boolean collapsedView) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
-        r.tileView = createTileView(tile);
+        r.tileView = createTileView(tile, collapsedView);
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {

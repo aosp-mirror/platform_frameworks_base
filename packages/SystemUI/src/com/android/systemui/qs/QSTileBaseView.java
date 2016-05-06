@@ -22,8 +22,12 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 
 import com.android.systemui.R;
 
@@ -33,8 +37,15 @@ public class QSTileBaseView extends LinearLayout {
     private QSIconView mIcon;
     private RippleDrawable mRipple;
     private Drawable mTileBackground;
+    private String mAccessibilityClass;
+    private boolean mTileState;
+    private boolean mCollapsedView;
 
     public QSTileBaseView(Context context, QSIconView icon) {
+        this(context, icon, false);
+    }
+
+    public QSTileBaseView(Context context, QSIconView icon, boolean collapsedView) {
         super(context);
         mIcon = icon;
         addView(mIcon);
@@ -51,6 +62,7 @@ public class QSTileBaseView extends LinearLayout {
         setPadding(0, padding, 0, padding);
         setClipChildren(false);
         setClipToPadding(false);
+        mCollapsedView = collapsedView;
     }
 
     private Drawable newTileBackground() {
@@ -116,11 +128,52 @@ public class QSTileBaseView extends LinearLayout {
 
     protected void handleStateChanged(QSTile.State state) {
         mIcon.setIcon(state);
-        setContentDescription(state.contentDescription);
+        if (mCollapsedView && !TextUtils.isEmpty(state.minimalContentDescription)) {
+            setContentDescription(state.minimalContentDescription);
+        } else {
+            setContentDescription(state.contentDescription);
+        }
+        if (mCollapsedView) {
+            mAccessibilityClass = state.minimalAccessibilityClassName;
+        } else {
+            mAccessibilityClass = state.expandedAccessibilityClassName;
+        }
+        if (state instanceof QSTile.BooleanState) {
+            mTileState = ((QSTile.BooleanState) state).value;
+        }
     }
 
     public QSIconView getIcon() {
         return mIcon;
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        if (!TextUtils.isEmpty(mAccessibilityClass)) {
+            event.setClassName(mAccessibilityClass);
+            if (Switch.class.getName().equals(mAccessibilityClass)) {
+                String label = getResources()
+                        .getString(mTileState ? R.string.switch_bar_on : R.string.switch_bar_off);
+                event.setContentDescription(label);
+                event.setChecked(mTileState);
+            }
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (!TextUtils.isEmpty(mAccessibilityClass)) {
+            info.setClassName(mAccessibilityClass);
+            if (Switch.class.getName().equals(mAccessibilityClass)) {
+                String label = getResources()
+                        .getString(mTileState ? R.string.switch_bar_on : R.string.switch_bar_off);
+                info.setText(label);
+                info.setChecked(mTileState);
+                info.setCheckable(true);
+            }
+        }
     }
 
     private class H extends Handler {
