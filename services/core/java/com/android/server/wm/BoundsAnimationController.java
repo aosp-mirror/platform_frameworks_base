@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
@@ -40,6 +41,8 @@ import android.view.WindowManagerInternal;
  * the bounds of the resized object.
  *
  * The object that is resized needs to implement {@link AnimateBoundsUser} interface.
+ *
+ * NOTE: All calls to methods in this class should be done on the UI thread
  */
 public class BoundsAnimationController {
     private static final boolean DEBUG_LOCAL = false;
@@ -51,28 +54,41 @@ public class BoundsAnimationController {
     // Only accessed on UI thread.
     private ArrayMap<AnimateBoundsUser, BoundsAnimator> mRunningAnimations = new ArrayMap<>();
 
-    private final WindowManagerInternal.AppTransitionListener mAppTransitionNotifier
-        = new WindowManagerInternal.AppTransitionListener() {
-                public void onAppTransitionCancelledLocked() {
-                    animationFinished();
-                }
-                public void onAppTransitionFinishedLocked(IBinder token) {
-                    animationFinished();
-                }
-                private void animationFinished() {
-                    if (mFinishAnimationAfterTransition) {
-                        for (int i = 0; i < mRunningAnimations.size(); i++) {
-                            BoundsAnimator b = mRunningAnimations.valueAt(i);
-                            b.onAnimationEnd(null);
-                        }
-                    }
-                }
-            };
+    private final class AppTransitionNotifier
+            extends WindowManagerInternal.AppTransitionListener implements Runnable {
 
+        public void onAppTransitionCancelledLocked() {
+            animationFinished();
+        }
+        public void onAppTransitionFinishedLocked(IBinder token) {
+            animationFinished();
+        }
+        private void animationFinished() {
+            if (mFinishAnimationAfterTransition) {
+                mHandler.removeCallbacks(this);
+                // This might end up calling into activity manager which will be bad since we have the
+                // window manager lock held at this point. Post a message to take care of the processing
+                // so we don't deadlock.
+                mHandler.post(this);
+            }
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < mRunningAnimations.size(); i++) {
+                final BoundsAnimator b = mRunningAnimations.valueAt(i);
+                b.onAnimationEnd(null);
+            }
+        }
+    }
+
+    private final Handler mHandler;
     private final AppTransition mAppTransition;
+    private final AppTransitionNotifier mAppTransitionNotifier = new AppTransitionNotifier();
     private boolean mFinishAnimationAfterTransition = false;
 
-    BoundsAnimationController(AppTransition transition) {
+    BoundsAnimationController(AppTransition transition, Handler handler) {
+        mHandler = handler;
         mAppTransition = transition;
         mAppTransition.registerListenerLocked(mAppTransitionNotifier);
     }
