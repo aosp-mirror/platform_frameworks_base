@@ -172,6 +172,7 @@ public class DirectoryFragment extends Fragment
     private RootInfo mRoot;
     private DocumentInfo mDocument;
     private String mQuery = null;
+    // Save selection found during creation so it can be restored during directory loading.
     private Selection mSelection = null;
     private boolean mSearchMode = false;
     private @Nullable ActionMode mActionMode;
@@ -700,7 +701,7 @@ public class DirectoryFragment extends Fragment
 
     public final boolean onBackPressed() {
         if (mSelectionManager.hasSelection()) {
-            if (DEBUG) Log.d(TAG, "Clearing selection on back pressed.");
+            if (DEBUG) Log.d(TAG, "Clearing selection on selection manager.");
             mSelectionManager.clearSelection();
             return true;
         }
@@ -1875,6 +1876,7 @@ public class DirectoryFragment extends Fragment
 
         if (mSelection != null) {
             mSelectionManager.setItemsSelected(mSelection.toList(), true);
+            mSelection.clear();
         }
 
         // Restore any previous instance state
