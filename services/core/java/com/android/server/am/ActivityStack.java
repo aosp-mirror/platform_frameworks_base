@@ -5065,7 +5065,7 @@ final class ActivityStack {
     void positionTask(final TaskRecord task, int position) {
         final ActivityRecord topRunningActivity = task.topRunningActivityLocked();
         final boolean wasResumed = topRunningActivity == task.stack.mResumedActivity;
-        final ActivityStack prevStack = preAddTask(task, "positionTask", ON_TOP);
+        final ActivityStack prevStack = preAddTask(task, "positionTask", !ON_TOP);
         task.stack = this;
         insertTaskAtPosition(task, position);
         postAddTask(task, prevStack);
