@@ -1158,9 +1158,9 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Виявлено новий пристрій пам’яті (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для перенесення фотографій і медіафайлів"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> не підключається"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> пошкоджено. Торкніться, щоб виправити."</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Носій (<xliff:g id="NAME">%s</xliff:g>) пошкоджено. Торкніться, щоб виправити."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> не підтримується"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Цей пристрій не підтримує <xliff:g id="NAME">%s</xliff:g>. Торкніться, щоб налаштувати підтримуваний формат."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"<xliff:g id="NAME">%s</xliff:g> не підтримується цим пристроєм. Торкніться, щоб налаштувати підтримуваний формат."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> несподівано вийнято"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Перш ніж виймати пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>, відключіть його, щоб не втратити дані"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Ви вийняли пристрій пам’яті <xliff:g id="NAME">%s</xliff:g>"</string>

@@ -1004,7 +1004,7 @@
     <string name="new_app_action" msgid="5472756926945440706">"Mulai <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Hentikan apl lama tanpa menyimpan."</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> melampaui batas memori"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Tumpukan sampah telah dikumpulkan; ketuk untuk membagikan"</string>
+    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Informasi memori elah dikumpulkan; ketuk untuk membagikan"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Share tumpukan membuang?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Proses <xliff:g id="PROC">%1$s</xliff:g> telah melampaui batas memori proses <xliff:g id="SIZE">%2$s</xliff:g>. Tumpukan sampah tersedia untuk Anda bagikan kepada pengembangnya. Hati-hati, tumpukan sampah ini hanya dapat memuat informasi pribadi yang dapat diakses oleh aplikasi."</string>
     <string name="sendText" msgid="5209874571959469142">"Pilih tindakan untuk teks"</string>
@@ -1126,7 +1126,7 @@
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> rusak"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> sudah rusak. Ketuk untuk memperbaiki."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> tidak didukung"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Ketuk untuk menyiapkan dalam format yang didukung."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Perangkat tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Ketuk untuk menyiapkan dalam format yang didukung."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> tiba-tiba dicabut"</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Lingsirkan <xliff:g id="NAME">%s</xliff:g> sebelum mencabut agar data tidak hilang"</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
