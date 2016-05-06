@@ -226,6 +226,18 @@ public class Utilities {
     }
 
     /**
+     * Sets the given {@link View}'s frame from its current translation.
+     */
+    public static void setViewFrameFromTranslation(View v) {
+        RectF taskViewRect = new RectF(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+        taskViewRect.offset(v.getTranslationX(), v.getTranslationY());
+        v.setTranslationX(0);
+        v.setTranslationY(0);
+        v.setLeftTopRightBottom((int) taskViewRect.left, (int) taskViewRect.top,
+                (int) taskViewRect.right, (int) taskViewRect.bottom);
+    }
+
+    /**
      * Returns a view stub for the given view id.
      */
     public static ViewStub findViewStubById(View v, int stubId) {

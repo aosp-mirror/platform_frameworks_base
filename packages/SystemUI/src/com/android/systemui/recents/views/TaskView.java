@@ -49,6 +49,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.ui.DismissTaskViewEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
+import com.android.systemui.recents.events.ui.dragndrop.DragEndCancelledEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -695,15 +696,18 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     public final void onBusEvent(DragEndEvent event) {
         if (!(event.dropTarget instanceof TaskStack.DockState)) {
-            event.addPostAnimationCallback(new Runnable() {
-                @Override
-                public void run() {
-                    // Animate the drag view back from where it is, to the view location, then after
-                    // it returns, update the clip state
-                    setClipViewInStack(true);
-                }
+            event.addPostAnimationCallback(() -> {
+                // Reset the clip state for the drag view after the end animation completes
+                setClipViewInStack(true);
             });
         }
         EventBus.getDefault().unregister(this);
+    }
+
+    public final void onBusEvent(DragEndCancelledEvent event) {
+        // Reset the clip state for the drag view after the cancel animation completes
+        event.addPostAnimationCallback(() -> {
+            setClipViewInStack(true);
+        });
     }
 }

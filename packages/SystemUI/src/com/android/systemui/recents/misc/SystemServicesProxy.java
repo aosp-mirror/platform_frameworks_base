@@ -393,18 +393,19 @@ public class SystemServicesProxy {
     }
 
     /** Docks a task to the side of the screen and starts it. */
-    public void startTaskInDockedMode(int taskId, int createMode) {
-        if (mIam == null) return;
+    public boolean startTaskInDockedMode(int taskId, int createMode) {
+        if (mIam == null) return false;
 
         try {
-            // TODO: Determine what animation we want for the incoming task
             final ActivityOptions options = ActivityOptions.makeBasic();
             options.setDockCreateMode(createMode);
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());
-        } catch (RemoteException e) {
+            return true;
+        } catch (RemoteException | IllegalArgumentException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
     /** Docks an already resumed task to the side of the screen. */
