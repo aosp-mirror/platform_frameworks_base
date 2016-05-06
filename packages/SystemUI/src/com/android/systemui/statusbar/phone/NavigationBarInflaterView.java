@@ -282,6 +282,12 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             final int indexOfKey = mButtonDispatchers.indexOfKey(v.getId());
             if (indexOfKey >= 0) {
                 mButtonDispatchers.valueAt(indexOfKey).addView(v);
+            } else if (v instanceof ViewGroup) {
+                final ViewGroup viewGroup = (ViewGroup)v;
+                final int N = viewGroup.getChildCount();
+                for (int i = 0; i < N; i++) {
+                    addToDispatchers(viewGroup.getChildAt(i));
+                }
             }
         }
     }
