@@ -65,7 +65,7 @@ interface IAccessibilityServiceConnection {
 
     boolean performGlobalAction(int action);
 
-    oneway void disableSelf();
+    void disableSelf();
 
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
