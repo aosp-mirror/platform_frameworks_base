@@ -31,8 +31,8 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class WifiNanEventCallback {
     @IntDef({
-            REASON_INVALID_ARGS, REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG, REASON_REQUESTED,
-            REASON_OTHER })
+            REASON_INVALID_ARGS, REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG, REASON_OTHER
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventReasonCodes {
     }
@@ -51,12 +51,6 @@ public class WifiNanEventCallback {
      * incompatible configurations.
      */
     public static final int REASON_ALREADY_CONNECTED_INCOMPAT_CONFIG = 1001;
-
-    /**
-     * Reason flag for {@link WifiNanEventCallback#onNanDown(int)} callback.
-     * Indicates NAN is shut-down per user request.
-     */
-    public static final int REASON_REQUESTED = 1002;
 
     /**
      * Failure reason flag for {@link WifiNanEventCallback} callbacks. Indicates
@@ -83,16 +77,6 @@ public class WifiNanEventCallback {
      *            {@code WifiNanEventCallback.REASON_*}.
      */
     public void onConnectFail(@EventReasonCodes int reason) {
-        /* empty */
-    }
-
-    /**
-     * Called when NAN cluster is down
-     *
-     * @param reason Reason code for event, see
-     *            {@code WifiNanEventCallback.REASON_*}.
-     */
-    public void onNanDown(@EventReasonCodes int reason) {
         /* empty */
     }
 
