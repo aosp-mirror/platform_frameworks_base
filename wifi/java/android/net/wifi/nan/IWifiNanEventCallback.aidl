@@ -27,6 +27,5 @@ oneway interface IWifiNanEventCallback
 {
     void onConnectSuccess();
     void onConnectFail(int reason);
-    void onNanDown(int reason);
     void onIdentityChanged();
 }
