@@ -1008,13 +1008,14 @@ final class ActivityStack {
     void goToSleep() {
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
 
-        // Make sure any stopped but visible activities are now sleeping.
+        // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
-                if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED) {
+                if (r.state == ActivityState.STOPPING || r.state == ActivityState.STOPPED
+                        || r.state == ActivityState.PAUSED || r.state == ActivityState.PAUSING) {
                     r.setSleeping(true);
                 }
             }
