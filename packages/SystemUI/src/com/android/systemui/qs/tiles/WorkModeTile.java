@@ -18,6 +18,8 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.provider.Settings;
+import android.widget.Switch;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -104,6 +106,8 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
         }
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Switch.class.getName();
     }
 
     @Override
