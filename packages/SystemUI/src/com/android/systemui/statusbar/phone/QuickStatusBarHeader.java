@@ -57,7 +57,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected View mSettingsContainer;
 
     private TextView mAlarmStatus;
-    private TextView mAlarmStatusCollapsed;
+    private View mAlarmStatusCollapsed;
 
     private QSPanel mQsPanel;
 
@@ -117,7 +117,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
 
-        mAlarmStatusCollapsed = (TextView) findViewById(R.id.alarm_status_collapsed);
+        mAlarmStatusCollapsed = findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
 
