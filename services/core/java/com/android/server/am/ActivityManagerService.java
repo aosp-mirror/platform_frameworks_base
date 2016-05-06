@@ -390,6 +390,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
     private static final String TAG_VISIBLE_BEHIND = TAG + POSTFIX_VISIBLE_BEHIND;
 
+    // Mock "pretend we're idle now" broadcast action to the job scheduler; declared
+    // here so that while the job scheduler can depend on AMS, the other way around
+    // need not be the case.
+    public static final String ACTION_TRIGGER_IDLE = "com.android.server.ACTION_TRIGGER_IDLE";
+
     /** Control over CPU and battery monitoring */
     // write battery stats every 30 minutes.
     static final long BATTERY_STATS_TIME = 30 * 60 * 1000;
@@ -12646,6 +12651,26 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             mHandler.removeMessages(REQUEST_ALL_PSS_MSG);
             mHandler.sendEmptyMessageDelayed(REQUEST_ALL_PSS_MSG, 2*60*1000);
+        }
+    }
+
+    @Override
+    public void sendIdleJobTrigger() {
+        if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+        }
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            Intent intent = new Intent(ACTION_TRIGGER_IDLE)
+                    .setPackage("android")
+                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            broadcastIntent(null, intent, null, null, 0, null, null, null,
+                    android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

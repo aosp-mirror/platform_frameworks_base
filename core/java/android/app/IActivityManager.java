@@ -546,6 +546,8 @@ public interface IActivityManager extends IInterface {
 
     public void performIdleMaintenance() throws RemoteException;
 
+    public void sendIdleJobTrigger() throws RemoteException;
+
     public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException;
 
@@ -1035,4 +1037,5 @@ public interface IActivityManager extends IInterface {
     int SWAP_DOCKED_AND_FULLSCREEN_STACK = IBinder.FIRST_CALL_TRANSACTION + 372;
     int NOTIFY_LOCKED_PROFILE = IBinder.FIRST_CALL_TRANSACTION + 373;
     int START_CONFIRM_DEVICE_CREDENTIAL_INTENT = IBinder.FIRST_CALL_TRANSACTION + 374;
+    int SEND_IDLE_JOB_TRIGGER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 375;
 }

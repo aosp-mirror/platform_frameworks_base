@@ -2968,6 +2968,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case SEND_IDLE_JOB_TRIGGER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            sendIdleJobTrigger();
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6239,6 +6245,16 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         mRemote.transact(PERFORM_IDLE_MAINTENANCE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void sendIdleJobTrigger() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(SEND_IDLE_JOB_TRIGGER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
