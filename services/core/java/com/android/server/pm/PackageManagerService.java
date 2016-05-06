@@ -7184,7 +7184,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
             }
 
-            if (!isFirstBoot()) {
+            if (mIsPreNUpgrade) {
                 try {
                     ActivityManagerNative.getDefault().showBootMessage(
                             mContext.getResources().getString(R.string.android_upgrading_apk,
