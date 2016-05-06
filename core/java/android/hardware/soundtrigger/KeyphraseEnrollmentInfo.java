@@ -35,6 +35,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,7 +106,7 @@ public class KeyphraseEnrollmentInfo {
         if (ris == null || ris.isEmpty()) {
             // No application capable of enrolling for voice keyphrases is present.
             mParseError = "No enrollment applications found";
-            mKeyphrasePackageMap = null;
+            mKeyphrasePackageMap = Collections.<KeyphraseMetadata, String>emptyMap();
             mKeyphrases = null;
             return;
         }
@@ -328,17 +329,15 @@ public class KeyphraseEnrollmentInfo {
      *         and locale, null otherwise.
      */
     public KeyphraseMetadata getKeyphraseMetadata(String keyphrase, Locale locale) {
-        if (mKeyphrases == null || mKeyphrases.length == 0) {
-            Slog.w(TAG, "Enrollment application doesn't support keyphrases");
-            return null;
-        }
-        for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
-            // Check if the given keyphrase is supported in the locale provided by
-            // the enrollment application.
-            if (keyphraseMetadata.supportsPhrase(keyphrase)
-                    && keyphraseMetadata.supportsLocale(locale)) {
-                return keyphraseMetadata;
-            }
+        if (mKeyphrases != null && mKeyphrases.length > 0) {
+          for (KeyphraseMetadata keyphraseMetadata : mKeyphrases) {
+              // Check if the given keyphrase is supported in the locale provided by
+              // the enrollment application.
+              if (keyphraseMetadata.supportsPhrase(keyphrase)
+                      && keyphraseMetadata.supportsLocale(locale)) {
+                  return keyphraseMetadata;
+              }
+          }
         }
         Slog.w(TAG, "No Enrollment application supports the given keyphrase/locale");
         return null;
