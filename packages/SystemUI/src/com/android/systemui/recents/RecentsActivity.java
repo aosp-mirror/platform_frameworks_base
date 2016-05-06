@@ -34,6 +34,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
@@ -47,6 +48,7 @@ import com.android.systemui.recents.events.activity.ConfigurationChangedEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
 import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
@@ -167,6 +169,16 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         }
     };
+
+    private final OnPreDrawListener mRecentsDrawnEventListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    EventBus.getDefault().post(new RecentsDrawnEvent());
+                    return true;
+                }
+            };
 
     /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
@@ -316,16 +328,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.visible(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
         // Notify of the next draw
-        mRecentsView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-
-                    @Override
-                    public boolean onPreDraw() {
-                        mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        EventBus.getDefault().post(new RecentsDrawnEvent());
-                        return true;
-                    }
-                });
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
     }
 
     @Override
@@ -753,6 +756,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         if (event.dropTarget instanceof TaskStack.DockState) {
             mScrimViews.animateScrimToCurrentNavBarState(false /* hasStackTasks */);
         }
+    }
+
+    public final void onBusEvent(final DockedTopTaskEvent event) {
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+        mRecentsView.invalidate();
     }
 
     @Override
