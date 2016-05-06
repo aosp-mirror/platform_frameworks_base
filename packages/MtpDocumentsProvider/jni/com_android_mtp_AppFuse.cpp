@@ -77,7 +77,7 @@ class FuseResponse {
    size_t size_;
    T* const buffer_;
 public:
-   FuseResponse(void* buffer) : size_(0), buffer_(static_cast<T*>(buffer)) {}
+   explicit FuseResponse(void* buffer) : size_(0), buffer_(static_cast<T*>(buffer)) {}
 
    void prepare_buffer(size_t size = sizeof(T)) {
        memset(buffer_, 0, size);
