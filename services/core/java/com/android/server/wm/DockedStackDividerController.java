@@ -19,6 +19,10 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
@@ -30,6 +34,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -41,6 +46,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.wm.DimLayer.DimLayerUser;
 import com.android.server.wm.WindowManagerService.H;
 
@@ -96,6 +103,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
+    private final Rect mTmpRect3 = new Rect();
     private final Rect mLastRect = new Rect();
     private boolean mLastVisibility = false;
     private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
@@ -121,6 +129,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private float mDividerAnimationTarget;
     private float mLastAnimationProgress;
     private float mLastDividerProgress;
+    private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -133,6 +142,77 @@ public class DockedStackDividerController implements DimLayerUser {
         loadDimens();
     }
 
+    int getSmallestWidthDpForBounds(Rect bounds) {
+        final DisplayInfo di = mDisplayContent.getDisplayInfo();
+
+        // If the bounds are fullscreen, return the value of the fullscreen configuration
+        if (bounds == null || (bounds.left == 0 && bounds.top == 0
+                && bounds.right == di.logicalWidth && bounds.bottom == di.logicalHeight)) {
+            return mService.mCurConfiguration.smallestScreenWidthDp;
+        }
+        final int baseDisplayWidth = mDisplayContent.mBaseDisplayWidth;
+        final int baseDisplayHeight = mDisplayContent.mBaseDisplayHeight;
+        int minWidth = Integer.MAX_VALUE;
+
+        // Go through all screen orientations and find the orientation in which the task has the
+        // smallest width.
+        for (int rotation = 0; rotation < 4; rotation++) {
+            mTmpRect.set(bounds);
+            mDisplayContent.rotateBounds(di.rotation, rotation, mTmpRect);
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            mTmpRect2.set(0, 0,
+                    rotated ? baseDisplayHeight : baseDisplayWidth,
+                    rotated ? baseDisplayWidth : baseDisplayHeight);
+            final int orientation = mTmpRect2.width() <= mTmpRect2.height()
+                    ? ORIENTATION_PORTRAIT
+                    : ORIENTATION_LANDSCAPE;
+            final int dockSide = TaskStack.getDockSideUnchecked(mTmpRect, mTmpRect2, orientation);
+            final int position = DockedDividerUtils.calculatePositionForBounds(mTmpRect, dockSide,
+                    getContentWidth());
+
+            // Since we only care about feasible states, snap to the closest snap target, like it
+            // would happen when actually rotating the screen.
+            final int snappedPosition = mSnapAlgorithmForRotation[rotation]
+                    .calculateNonDismissingSnapTarget(position).position;
+            DockedDividerUtils.calculateBoundsForPosition(snappedPosition, dockSide, mTmpRect,
+                    mTmpRect2.width(), mTmpRect2.height(), getContentWidth());
+            mService.mPolicy.getStableInsetsLw(rotation, mTmpRect2.width(), mTmpRect2.height(),
+                    mTmpRect3);
+            mService.subtractInsets(mTmpRect2, mTmpRect3, mTmpRect);
+            minWidth = Math.min(mTmpRect.width(), minWidth);
+        }
+        return (int) (minWidth / mDisplayContent.getDisplayMetrics().density);
+    }
+
+    private void initSnapAlgorithmForRotations() {
+        final Configuration baseConfig = mService.mCurConfiguration;
+
+        // Initialize the snap algorithms for all 4 screen orientations.
+        final Configuration config = new Configuration();
+        for (int rotation = 0; rotation < 4; rotation++) {
+            final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
+            final int dw = rotated
+                    ? mDisplayContent.mBaseDisplayHeight
+                    : mDisplayContent.mBaseDisplayWidth;
+            final int dh = rotated
+                    ? mDisplayContent.mBaseDisplayWidth
+                    : mDisplayContent.mBaseDisplayHeight;
+            mService.mPolicy.getStableInsetsLw(rotation, dw, dh, mTmpRect);
+            config.setToDefaults();
+            config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
+            config.screenWidthDp = (int)
+                    (mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, baseConfig.uiMode) /
+                            mDisplayContent.getDisplayMetrics().density);
+            config.screenHeightDp = (int)
+                    (mService.mPolicy.getConfigDisplayHeight(dw, dh, rotation, baseConfig.uiMode) /
+                            mDisplayContent.getDisplayMetrics().density);
+            final Context rotationContext = mService.mContext.createConfigurationContext(config);
+            mSnapAlgorithmForRotation[rotation] = new DividerSnapAlgorithm(
+                    rotationContext.getResources(), dw, dh, getContentWidth(),
+                    config.orientation == ORIENTATION_PORTRAIT, mTmpRect);
+        }
+    }
+
     private void loadDimens() {
         final Context context = mService.mContext;
         mDividerWindowWidth = context.getResources().getDimensionPixelSize(
@@ -141,6 +221,7 @@ public class DockedStackDividerController implements DimLayerUser {
                 com.android.internal.R.dimen.docked_stack_divider_insets);
         mDividerWindowWidthInactive = WindowManagerService.dipToPixel(
                 DIVIDER_WIDTH_INACTIVE_DP, mDisplayContent.getDisplayMetrics());
+        initSnapAlgorithmForRotations();
     }
 
     void onConfigurationChanged() {
