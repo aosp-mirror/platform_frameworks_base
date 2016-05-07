@@ -378,6 +378,9 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     private void checkMinimizeChanged(boolean animate) {
+        if (mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
+            return;
+        }
         final TaskStack homeStack = mDisplayContent.getHomeStack();
         if (homeStack == null) {
             return;
@@ -412,8 +415,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private void setMinimizedDockedStack(boolean minimizedDock, boolean animate) {
         final boolean wasMinimized = mMinimizedDock;
         mMinimizedDock = minimizedDock;
-        if (minimizedDock == wasMinimized
-                || mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
+        if (minimizedDock == wasMinimized) {
             return;
         }
 
