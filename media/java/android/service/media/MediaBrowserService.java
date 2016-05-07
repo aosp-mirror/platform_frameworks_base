@@ -249,6 +249,11 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
+        public void addSubscriptionDeprecated(String id, IMediaBrowserServiceCallbacks callbacks) {
+            // do-nothing
+        }
+
+        @Override
         public void addSubscription(final String id, final IBinder token, final Bundle options,
                 final IMediaBrowserServiceCallbacks callbacks) {
             mHandler.post(new Runnable() {
@@ -267,6 +272,11 @@ public abstract class MediaBrowserService extends Service {
                         MediaBrowserService.this.addSubscription(id, connection, token, options);
                     }
                 });
+        }
+
+        @Override
+        public void removeSubscriptionDeprecated(String id, IMediaBrowserServiceCallbacks callbacks) {
+            // do-nothing
         }
 
         @Override
@@ -632,7 +642,7 @@ public abstract class MediaBrowserService extends Service {
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
                         filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
-                    connection.callbacks.onLoadChildren(parentId, pls, options);
+                    connection.callbacks.onLoadChildrenWithOptions(parentId, pls, options);
                 } catch (RemoteException ex) {
                     // The other side is in the process of crashing.
                     Log.w(TAG, "Calling onLoadChildren() failed for id=" + parentId
