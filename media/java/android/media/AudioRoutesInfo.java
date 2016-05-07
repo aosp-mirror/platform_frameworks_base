@@ -54,6 +54,23 @@ public class AudioRoutesInfo implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{ type=" + typeToString(mainType)
+                + (TextUtils.isEmpty(bluetoothName) ? "" : ", bluetoothName=" + bluetoothName)
+                + " }";
+    }
+
+    private static String typeToString(int type) {
+        if (type == MAIN_SPEAKER) return "SPEAKER";
+        if ((type & MAIN_HEADSET) != 0) return "HEADSET";
+        if ((type & MAIN_HEADPHONES) != 0) return "HEADPHONES";
+        if ((type & MAIN_DOCK_SPEAKERS) != 0) return "DOCK_SPEAKERS";
+        if ((type & MAIN_HDMI) != 0) return "HDMI";
+        if ((type & MAIN_USB) != 0) return "USB";
+        return Integer.toHexString(type);
+    }
+
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
         TextUtils.writeToParcel(bluetoothName, dest, flags);
         dest.writeInt(mainType);
