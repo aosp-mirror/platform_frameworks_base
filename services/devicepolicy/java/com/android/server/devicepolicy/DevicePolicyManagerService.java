@@ -2696,10 +2696,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Build and show a warning notification
             int smallIconId;
             String contentText;
+            int parentUserId = userHandle.getIdentifier();
             if (getProfileOwner(userHandle.getIdentifier()) != null) {
                 contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
                         getProfileOwnerName(userHandle.getIdentifier()));
                 smallIconId = R.drawable.stat_sys_certificate_info;
+                parentUserId = getProfileParentId(userHandle.getIdentifier());
             } else if (getDeviceOwnerUserId() == userHandle.getIdentifier()) {
                 contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed,
                         getDeviceOwnerName());
@@ -2711,12 +2713,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             final int numberOfCertificates = pendingCertificates.size();
             Intent dialogIntent = new Intent(Settings.ACTION_MONITORING_CERT_INFO);
-            dialogIntent.setFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            dialogIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             dialogIntent.setPackage("com.android.settings");
             dialogIntent.putExtra(Settings.EXTRA_NUMBER_OF_CERTIFICATES, numberOfCertificates);
+            dialogIntent.putExtra(Intent.EXTRA_USER_ID, userHandle.getIdentifier());
             PendingIntent notifyIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                    dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT, null, userHandle);
+                    dialogIntent, PendingIntent.FLAG_UPDATE_CURRENT, null,
+                    new UserHandle(parentUserId));
 
             final Context userContext;
             try {
