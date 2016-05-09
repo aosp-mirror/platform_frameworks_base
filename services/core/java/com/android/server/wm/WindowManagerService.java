@@ -6156,12 +6156,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
         WindowState appWin = null;
 
-        boolean appIsImTarget;
+        boolean includeImeInScreenshot;
         synchronized(mWindowMap) {
-            appIsImTarget = mInputMethodTarget != null
-                    && mInputMethodTarget.mAppToken != null
-                    && mInputMethodTarget.mAppToken.appToken != null
-                    && mInputMethodTarget.mAppToken.appToken.asBinder() == appToken;
+            final AppWindowToken imeTargetAppToken =
+                    mInputMethodTarget != null ? mInputMethodTarget.mAppToken : null;
+            // We only include the Ime in the screenshot if the app we are screenshoting is the IME
+            // target and isn't in multi-window mode. We don't screenshot the IME in multi-window
+            // mode because the frame of the IME might not overlap with that of the app.
+            // E.g. IME target app at the top in split-screen mode and the IME at the bottom
+            // overlapping with the bottom app.
+            includeImeInScreenshot = imeTargetAppToken != null
+                    && imeTargetAppToken.appToken != null
+                    && imeTargetAppToken.appToken.asBinder() == appToken
+                    && !mInputMethodTarget.isInMultiWindowMode();
         }
 
         final int aboveAppLayer = (mPolicy.windowTypeToLayerLw(TYPE_APPLICATION) + 1)
@@ -6180,7 +6187,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
                 if (ws.mIsImWindow) {
-                    if (!appIsImTarget) {
+                    if (!includeImeInScreenshot) {
                         continue;
                     }
                 } else if (ws.mIsWallpaper) {
