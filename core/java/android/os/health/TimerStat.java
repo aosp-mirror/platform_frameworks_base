@@ -101,14 +101,14 @@ public final class TimerStat implements Parcelable {
     }
 
     /**
-     * Set the time for this timer.
+     * Set the time for this timer in milliseconds.
      */
     public void setTime(long time) {
         mTime = time;
     }
 
     /**
-     * Get the time for this timer.
+     * Get the time for this timer in milliseconds.
      */
     public long getTime() {
         return mTime;
