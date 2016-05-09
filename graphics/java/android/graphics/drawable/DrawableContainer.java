@@ -786,13 +786,19 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mChangingConfigurations | mChildrenChangingConfigurations;
         }
 
+        /**
+         * Adds the drawable to the end of the list of contained drawables.
+         *
+         * @param dr the drawable to add
+         * @return the position of the drawable within the container
+         */
         public final int addChild(Drawable dr) {
             final int pos = mNumChildren;
-
             if (pos >= mDrawables.length) {
                 growArray(pos, pos+10);
             }
 
+            dr.mutate();
             dr.setVisible(false, true);
             dr.setCallback(mOwner);
 
