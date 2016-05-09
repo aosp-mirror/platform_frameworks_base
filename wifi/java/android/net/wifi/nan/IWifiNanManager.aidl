@@ -23,6 +23,7 @@ import android.net.wifi.nan.IWifiNanEventCallback;
 import android.net.wifi.nan.IWifiNanSessionCallback;
 import android.net.wifi.nan.PublishConfig;
 import android.net.wifi.nan.SubscribeConfig;
+import android.net.wifi.RttManager;
 
 /**
  * Interface that WifiNanService implements
@@ -51,4 +52,5 @@ interface IWifiNanManager
     void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
             int messageId);
     void terminateSession(int clientId, int sessionId);
+    int startRanging(int clientId, int sessionId, in RttManager.ParcelableRttParams parms);
 }
