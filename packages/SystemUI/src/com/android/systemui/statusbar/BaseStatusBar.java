@@ -2188,9 +2188,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                     == View.VISIBLE;
             boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
             if (suppressedSummary || (isLockscreenPublicMode() && !mShowLockscreenNotifications) ||
-                    (onKeyguard && (visibleNotifications >= maxNotifications
-                            && !childWithVisibleSummary
-                            || !showOnKeyguard))) {
+                    (onKeyguard && !childWithVisibleSummary
+                            && (visibleNotifications >= maxNotifications || !showOnKeyguard))) {
                 entry.row.setVisibility(View.GONE);
                 if (onKeyguard && showOnKeyguard && !childNotification && !suppressedSummary) {
                     mKeyguardIconOverflowContainer.getIconsView().addNotification(entry);
