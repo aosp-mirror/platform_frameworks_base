@@ -584,14 +584,8 @@ class WindowStateAnimator {
                     + drawStateToString());
         }
 
-        if (mWin.mAppToken != null && mWin.mAppToken.mAnimatingWithSavedSurface) {
-            // App has drawn something to its windows, we're no longer animating with
-            // the saved surfaces. If the user exits now, we only want to save again
-            // if allDrawn is true.
-            if (DEBUG_ANIM) Slog.d(TAG,
-                    "finishDrawingLocked: mAnimatingWithSavedSurface=false " + mWin);
-            mWin.mAppToken.mAnimatingWithSavedSurface = false;
-        }
+        mWin.clearAnimatingWithSavedSurface();
+
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + mWin + " in "
@@ -687,8 +681,7 @@ class WindowStateAnimator {
         mDrawState = DRAW_PENDING;
         if (w.mAppToken != null) {
             if (w.mAppToken.mAppAnimator.animation == null) {
-                w.mAppToken.allDrawn = false;
-                w.mAppToken.deferClearAllDrawn = false;
+                w.mAppToken.clearAllDrawn();
             } else {
                 // Currently animating, persist current state of allDrawn until animation
                 // is complete.
@@ -840,20 +833,19 @@ class WindowStateAnimator {
     }
 
     boolean hasSurface() {
-        return !mWin.mSurfaceSaved
+        return !mWin.hasSavedSurface()
                 && mSurfaceController != null && mSurfaceController.hasSurface();
     }
 
     void destroySurfaceLocked() {
         final AppWindowToken wtoken = mWin.mAppToken;
         if (wtoken != null) {
-            wtoken.mAnimatingWithSavedSurface = false;
             if (mWin == wtoken.startingWindow) {
                 wtoken.startingDisplayed = false;
             }
         }
 
-        mWin.mSurfaceSaved = false;
+        mWin.clearHasSavedSurface();
 
         if (mSurfaceController == null) {
             return;
