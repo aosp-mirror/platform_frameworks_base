@@ -22,6 +22,9 @@ import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -67,9 +70,11 @@ import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
@@ -88,7 +93,10 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -119,9 +127,18 @@ public class Vpn {
     private final Looper mLooper;
     private final NetworkCapabilities mNetworkCapabilities;
 
-    /* list of users using this VPN. */
+    /**
+     * List of UIDs that are set to use this VPN by default. Normally, every UID in the user is
+     * added to this set but that can be changed by adding allowed or disallowed applications. It
+     * is non-null iff the VPN is connected.
+     *
+     * Unless the VPN has set allowBypass=true, these UIDs are forced into the VPN.
+     *
+     * @see VpnService.Builder#addAllowedApplication(String)
+     * @see VpnService.Builder#addDisallowedApplication(String)
+     */
     @GuardedBy("this")
-    private List<UidRange> mVpnUsers = null;
+    private Set<UidRange> mVpnUsers = null;
 
     // Handle of user initiating VPN.
     private final int mUserHandle;
@@ -467,22 +484,8 @@ public class Vpn {
             Binder.restoreCallingIdentity(token);
         }
 
-        addVpnUserLocked(mUserHandle);
-        // If the user can have restricted profiles, assign all its restricted profiles to this VPN
-        if (canHaveRestrictedProfile(mUserHandle)) {
-            token = Binder.clearCallingIdentity();
-            List<UserInfo> users;
-            try {
-                users = UserManager.get(mContext).getUsers();
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-            for (UserInfo user : users) {
-                if (user.isRestricted() && (user.restrictedProfileParentId == mUserHandle)) {
-                    addVpnUserLocked(user.id);
-                }
-            }
-        }
+        mVpnUsers = createUserAndRestrictedProfilesRanges(mUserHandle,
+                mConfig.allowedApplications, mConfig.disallowedApplications);
         mNetworkAgent.addUidRanges(mVpnUsers.toArray(new UidRange[mVpnUsers.size()]));
 
         mNetworkInfo.setIsAvailable(true);
@@ -568,7 +571,7 @@ public class Vpn {
         Connection oldConnection = mConnection;
         NetworkAgent oldNetworkAgent = mNetworkAgent;
         mNetworkAgent = null;
-        List<UidRange> oldUsers = mVpnUsers;
+        Set<UidRange> oldUsers = mVpnUsers;
 
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
@@ -601,8 +604,6 @@ public class Vpn {
             mConfig = config;
 
             // Set up forwarding and DNS rules.
-            mVpnUsers = new ArrayList<UidRange>();
-
             agentConnect();
 
             if (oldConnection != null) {
@@ -657,44 +658,93 @@ public class Vpn {
         return uids;
     }
 
-    // Note: This function adds to mVpnUsers but does not publish list to NetworkAgent.
-    private void addVpnUserLocked(int userHandle) {
-        if (mVpnUsers == null) {
-            throw new IllegalStateException("VPN is not active");
-        }
+    /**
+     * Creates a {@link Set} of non-intersecting {@link UidRange} objects including all UIDs
+     * associated with one user, and any restricted profiles attached to that user.
+     *
+     * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
+     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * in each user and profile will be included.
+     *
+     * @param userHandle The userId to create UID ranges for along with any of its restricted
+     *                   profiles.
+     * @param allowedApplications (optional) whitelist of applications to include.
+     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     */
+    @VisibleForTesting
+    Set<UidRange> createUserAndRestrictedProfilesRanges(@UserIdInt int userHandle,
+            @Nullable List<String> allowedApplications,
+            @Nullable List<String> disallowedApplications) {
+        final Set<UidRange> ranges = new ArraySet<>();
 
-        if (mConfig.allowedApplications != null) {
+        // Assign the top-level user to the set of ranges
+        addUserToRanges(ranges, userHandle, allowedApplications, disallowedApplications);
+
+        // If the user can have restricted profiles, assign all its restricted profiles too
+        if (canHaveRestrictedProfile(userHandle)) {
+            final long token = Binder.clearCallingIdentity();
+            List<UserInfo> users;
+            try {
+                users = UserManager.get(mContext).getUsers();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            for (UserInfo user : users) {
+                if (user.isRestricted() && (user.restrictedProfileParentId == userHandle)) {
+                    addUserToRanges(ranges, user.id, allowedApplications, disallowedApplications);
+                }
+            }
+        }
+        return ranges;
+    }
+
+    /**
+     * Updates a {@link Set} of non-intersecting {@link UidRange} objects to include all UIDs
+     * associated with one user.
+     *
+     * <p>If one of {@param allowedApplications} or {@param disallowedApplications} is provided,
+     * the UID ranges will match the app whitelist or blacklist specified there. Otherwise, all UIDs
+     * in the user will be included.
+     *
+     * @param ranges {@link Set} of {@link UidRange}s to which to add.
+     * @param userHandle The userId to add to {@param ranges}.
+     * @param allowedApplications (optional) whitelist of applications to include.
+     * @param disallowedApplications (optional) blacklist of applications to exclude.
+     */
+    @VisibleForTesting
+    void addUserToRanges(@NonNull Set<UidRange> ranges, @UserIdInt int userHandle,
+            @Nullable List<String> allowedApplications,
+            @Nullable List<String> disallowedApplications) {
+        if (allowedApplications != null) {
             // Add ranges covering all UIDs for allowedApplications.
             int start = -1, stop = -1;
-            for (int uid : getAppsUids(mConfig.allowedApplications, userHandle)) {
+            for (int uid : getAppsUids(allowedApplications, userHandle)) {
                 if (start == -1) {
                     start = uid;
                 } else if (uid != stop + 1) {
-                    mVpnUsers.add(new UidRange(start, stop));
+                    ranges.add(new UidRange(start, stop));
                     start = uid;
                 }
                 stop = uid;
             }
-            if (start != -1) mVpnUsers.add(new UidRange(start, stop));
-        } else if (mConfig.disallowedApplications != null) {
+            if (start != -1) ranges.add(new UidRange(start, stop));
+        } else if (disallowedApplications != null) {
             // Add all ranges for user skipping UIDs for disallowedApplications.
             final UidRange userRange = UidRange.createForUser(userHandle);
             int start = userRange.start;
-            for (int uid : getAppsUids(mConfig.disallowedApplications, userHandle)) {
+            for (int uid : getAppsUids(disallowedApplications, userHandle)) {
                 if (uid == start) {
                     start++;
                 } else {
-                    mVpnUsers.add(new UidRange(start, uid - 1));
+                    ranges.add(new UidRange(start, uid - 1));
                     start = uid + 1;
                 }
             }
-            if (start <= userRange.stop) mVpnUsers.add(new UidRange(start, userRange.stop));
+            if (start <= userRange.stop) ranges.add(new UidRange(start, userRange.stop));
         } else {
             // Add all UIDs for the user.
-            mVpnUsers.add(UidRange.createForUser(userHandle));
+            ranges.add(UidRange.createForUser(userHandle));
         }
-
-        prepareStatusIntent();
     }
 
     // Returns the subset of the full list of active UID ranges the VPN applies to (mVpnUsers) that
@@ -703,7 +753,7 @@ public class Vpn {
         final UidRange userRange = UidRange.createForUser(userHandle);
         final List<UidRange> ranges = new ArrayList<UidRange>();
         for (UidRange range : mVpnUsers) {
-            if (range.start >= userRange.start && range.stop <= userRange.stop) {
+            if (userRange.containsRange(range)) {
                 ranges.add(range);
             }
         }
@@ -719,7 +769,6 @@ public class Vpn {
             mNetworkAgent.removeUidRanges(ranges.toArray(new UidRange[ranges.size()]));
         }
         mVpnUsers.removeAll(ranges);
-        mStatusIntent = null;
     }
 
     public void onUserAdded(int userHandle) {
@@ -729,7 +778,8 @@ public class Vpn {
                 && mVpnUsers != null) {
             synchronized(Vpn.this) {
                 try {
-                    addVpnUserLocked(userHandle);
+                    addUserToRanges(mVpnUsers, userHandle, mConfig.allowedApplications,
+                            mConfig.disallowedApplications);
                     if (mNetworkAgent != null) {
                         final List<UidRange> ranges = uidRangesForUser(userHandle);
                         mNetworkAgent.addUidRanges(ranges.toArray(new UidRange[ranges.size()]));
@@ -902,7 +952,7 @@ public class Vpn {
             return false;
         }
         for (UidRange uidRange : mVpnUsers) {
-            if (uidRange.start <= uid && uid <= uidRange.stop) {
+            if (uidRange.contains(uid)) {
                 return true;
             }
         }
@@ -1408,7 +1458,7 @@ public class Vpn {
 
                     // Now INetworkManagementEventObserver is watching our back.
                     mInterface = mConfig.interfaze;
-                    mVpnUsers = new ArrayList<UidRange>();
+                    prepareStatusIntent();
 
                     agentConnect();
 
