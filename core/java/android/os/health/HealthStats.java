@@ -83,6 +83,10 @@ import java.util.Map;
  * returned for UidHealthStats.STATS_PACKAGES, the keys come from the
  * {@link android.os.health.PackageHealthStats}  class.
  *
+ * <p>
+ * The keys that are available are subject to change, depending on what a particular
+ * device or software version is capable of recording. Applications must handle the absence of
+ * data without crashing.
  */
 public class HealthStats {
     // Header fields
