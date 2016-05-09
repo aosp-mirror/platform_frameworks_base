@@ -3214,6 +3214,7 @@ public class ListView extends AbsListView {
                 last = getChildAt(--lastIndex);
             }
         }
+        recycleBin.fullyDetachScrapViews();
         removeUnusedFixedViews(mHeaderViewInfos);
         removeUnusedFixedViews(mFooterViewInfos);
     }
