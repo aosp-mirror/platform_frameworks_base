@@ -5,24 +5,22 @@ redirects:
   to: /about/index.html
 - from: /about/versions/api-levels.html
   to: /guide/topics/manifest/uses-sdk-element.html#ApiLevels
-- from: /sdk/oem-usb.html
-  to: /studio/tools/extras/oem-usb.html
 - from: /sdk/installing.html
   to: /studio/index.html
 - from: /sdk/exploring.html
-  to: /studio/guide/index.html
+  to: /studio/intro/update.html
 - from: /sdk/installing/adding-packages.html
-  to: /studio/tools/help/sdk-manager.html
+  to: /studio/intro/update.html
 - from: /sdk/installing/bundle.html
-  to: /studio/index.html
+  to: /studio/intro/update.html
 - from: /sdk/installing/studio.html
   to: /studio/index.html
 - from: /sdk/installing/studio-debug.html
-  to: /studio/tools/debugging/debugging-studio.html
+  to: /studio/debug/index.html
 - from: /tools/debugging/debugging-devtools.html
-  to: /studio/tools/debugging/index.html
+  to: /studio/debug/index.html
 - from: /tools/debugging/debugging-projects-cmdline.html
-  to: /studio/tools/debugging/index.html
+  to: /studio/debug/index.html
 - from: /sdk/compatibility-library.html
   to: /topic/libraries/support-library/index.html
 - from: /tools/extras/support-library.html
@@ -32,11 +30,11 @@ redirects:
 - from: /sdk/eclipse-adt.html
   to: /studio/tools/sdk/eclipse-adt.html
 - from: /sdk/RELEASENOTES.html
-  to: /studio/tools/sdk/tools-notes.html
+  to: /studio/releases/sdk-tools.html
 - from: /sdk/tools-notes.html
-  to: /studio/tools/sdk/tools-notes.html
+  to: /studio/releases/sdk-tools.html
 - from: /sdk/adding-components.html
-  to: /studio/tools/help/sdk-manager.html
+  to: /studio/intro/update.html
 - from: /sdk/ndk/overview.html
   to: /ndk/index.html
 - from: /sdk/ndk/
@@ -44,15 +42,15 @@ redirects:
 - from: /go/vulkan
   to: /ndk/guides/graphics/index.html
 - from: /tools/sdk/win-usb.html
-  to: /studio/guide/run/win-usb.html
+  to: /studio/run/win-usb.html
 - from: /tools/sdk/index.html
   to: /studio/index.html
 - from: /tools/index.html
   to: /tools-moved.html
 - from: /tools/sdk/installing.html
-  to: /studio/sdk/index.html
-- from: /tools/eclipse/installing-adt.html
   to: /studio/index.html
+- from: /tools/eclipse/installing-adt.html
+  to: /studio/tools/help/adt.html
 - from: /sdk/requirements.html
   to: /studio/index.html
 - from: /sdk/installing/next.html
@@ -156,7 +154,7 @@ redirects:
 - from: /google/play/billing/billing_about.html
   to: /google/play/billing/index.html
 - from: /guide/developing/tools/
-  to: /studio/tools/help/
+  to: /studio/command-line/
 - from: /guide/developing/
   to: /studio/
 - from: /tools/aidl.html
@@ -166,7 +164,7 @@ redirects:
 - from: /guide/publishing/publishing.html
   to: /distribute/tools/launch-checklist.html
 - from: /guide/publishing/
-  to: /studio/tools/publishing/publishing_overview.html
+  to: /studio/publish/index.html
 - from: /guide/topics/fundamentals.html
   to: /guide/components/fundamentals.html
 - from: /guide/topics/intents/intents-filters.html
@@ -184,21 +182,21 @@ redirects:
 - from: /guide/topics/connectivity/usb/adk.html
   to: /adk/index.html
 - from: /tools/workflow/publishing/versioning.html
-  to: /studio/tools/publishing/versioning.html
+  to: /studio/publish/versioning.html
 - from: /tools/workflow/publishing/publishing.html
-  to: /studio/tools/publishing/publishing_overview.html
+  to: /studio/publish/index.html
 - from: /tools/workflow/publishing_overview.html
-  to: /studio/tools/publishing/publishing_overview.html
+  to: /studio/publish/index.html
 - from: /tools/workflow/publishing/publishing_overview.html
-  to: /studio/tools/publishing/publishing_overview.html
+  to: /studio/publish/index.html
 - from: /tools/workflow/app-signing.html
-  to: /studio/tools/publishing/app-signing.html
+  to: /studio/publish/app-signing.html
 - from: /tools/adk/aoa.html
   to: https://source.android.com/tech/accessories/aoap/aoa.html
 - from: /tools/adk/aoa2.html
   to: https://source.android.com/tech/accessories/aoap/aoa2.html
 - from: /tools/eclipse/migrate-adt.html
-  to: /studio/installing/migrate.html
+  to: /studio/intro/migrate.html
 - from: /guide/topics/usb
   to: /guide/topics/connectivity/usb
 - from: /guide/appendix/api-levels.html
@@ -216,7 +214,7 @@ redirects:
 - from: /guide/appendix/market-filters.html
   to: /google/play/filters.html
 - from: /guide/topics/testing/
-  to: /studio/tools/testing/
+  to: /studio/test/
 - from: /guide/topics/graphics/animation.html
   to: /guide/topics/graphics/overview.html
 - from: /guide/topics/graphics/renderscript/compute.html
@@ -507,8 +505,6 @@ redirects:
   to: /distribute/engage/index.html
 - from: /essentials/best-practices/...
   to: /distribute/googleplay/guide.html
-- from: /tools/index.html
-  to: /distribute/essentials/index.html#tools
 - from: /users/build-buzz.html
   to: /distribute/users/index.html
 - from: /users/build-community.html
@@ -800,47 +796,47 @@ redirects:
 - from: /2016/03/first-preview-of-android-n-developer.html
   to: http://android-developers.blogspot.com/2016/03/first-preview-of-android-n-developer.html
 - from: /r/studio-ui/vector-asset-studio.html
-  to: /studio/tools/help/vector-asset-studio.html
+  to: /studio/write/vector-asset-studio.html
 - from: /r/studio-ui/image-asset-studio.html
-  to: /studio/tools/help/image-asset-studio.html
+  to: /studio/write/image-asset-studio.html
 - from: /r/studio-ui/project-structure.html
-  to: /studio/tools/help/project-mgmt.html
+  to: /studio/projects/index.html
 - from: /r/studio-ui/android-monitor.html
-  to: /studio/tools/help/android-monitor.html
+  to: /studio/profile/android-monitor.html
 - from: /r/studio-ui/am-logcat.html
-  to: /studio/tools/help/am-logcat.html
+  to: /studio/debug/am-logcat.html
 - from: /r/studio-ui/am-memory.html
-  to: /studio/tools/help/am-memory.html
+  to: /studio/profile/am-memory.html
 - from: /r/studio-ui/am-cpu.html
-  to: /studio/tools/help/am-cpu.html
+  to: /studio/profile/am-cpu.html
 - from: /r/studio-ui/am-gpu.html
-  to: /studio/tools/help/am-gpu.html
+  to: /studio/profile/am-gpu.html
 - from: /r/studio-ui/am-network.html
-  to: /studio/tools/help/am-network.html
+  to: /studio/profile/am-network.html
 - from: /r/studio-ui/am-hprof.html
-  to: /studio/tools/help/am-hprof.html
+  to: /studio/profile/am-hprof.html
 - from: /r/studio-ui/am-allocation.html
-  to: /studio/tools/help/am-allocation.html
+  to: /studio/profile/am-allocation.html
 - from: /r/studio-ui/am-methodtrace.html
-  to: /studio/tools/help/am-methodtrace.html
+  to: /studio/profile/am-methodtrace.html
 - from: /r/studio-ui/am-sysinfo.html
-  to: /studio/tools/help/am-sysinfo.html
+  to: /studio/profile/am-sysinfo.html
 - from: /r/studio-ui/am-screenshot.html
-  to: /studio/tools/help/am-screenshot.html
+  to: /studio/debug/am-screenshot.html
 - from: /r/studio-ui/am-video.html
-  to: /studio/tools/help/am-video.html
+  to: /studio/debug/am-video.html
 - from: /r/studio-ui/avd-manager.html
-  to: /studio/tools/devices/managing-avds.html
+  to: /studio/run/managing-avds.html
 - from: /r/studio-ui/rundebugconfig.html
-  to: /studio/tools/devices/emulator.html
+  to: /studio/run/emulator.html
 - from: /r/studio-ui/devicechooser.html
-  to: /studio/tools/devices/emulator.html
+  to: /studio/run/emulator.html
 - from: /r/studio-ui/virtualdeviceconfig.html
-  to: /studio/tools/devices/emulator.html
+  to: /studio/run/emulator.html
 - from: /r/studio-ui/emulator.html
-  to: /studio/tools/devices/emulator.html
+  to: /studio/run/emulator.html
 - from: /r/studio-ui/instant-run.html
-  to: /studio/tools/building/building-studio.html#instant-run
+  to: /studio/run/index.html#instant-run
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
 - from: /shareables/
