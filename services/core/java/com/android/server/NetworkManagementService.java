@@ -1845,6 +1845,22 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
+    public void setAllowOnlyVpnForUids(boolean add, UidRange[] uidRanges)
+            throws ServiceSpecificException {
+        try {
+            mNetdService.networkRejectNonSecureVpn(add, uidRanges);
+        } catch (ServiceSpecificException e) {
+            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
+                    + ": netd command failed", e);
+            throw e;
+        } catch (RemoteException e) {
+            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
+                    + ": netd command failed", e);
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public void setUidCleartextNetworkPolicy(int uid, int policy) {
         if (Binder.getCallingUid() != uid) {
             mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
