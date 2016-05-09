@@ -119,8 +119,19 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
             group.expanded = added.row.areChildrenExpanded();
             updateSuppression(group);
             if (!group.children.isEmpty()) {
+                HashSet<NotificationData.Entry> childrenCopy =
+                        (HashSet<NotificationData.Entry>) group.children.clone();
+                for (NotificationData.Entry child : childrenCopy) {
+                    onEntryBecomingChild(child);
+                }
                 mListener.onGroupCreatedFromChildren(group);
             }
+        }
+    }
+
+    private void onEntryBecomingChild(NotificationData.Entry entry) {
+        if (entry.row.isHeadsUp()) {
+            onHeadsUpStateChanged(entry, true);
         }
     }
 
@@ -188,6 +199,8 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 updateSuppression(mGroupMap.get(oldKey));
                 updateSuppression(mGroupMap.get(newKey));
             }
+        } else if (!isGroupChild(oldNotification) && isGroupChild(entry.notification)) {
+            onEntryBecomingChild(entry);
         }
     }
 
@@ -354,7 +367,6 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                 mListener.onGroupsChanged();
             } else {
                 handleSuppressedSummaryHeadsUpped(entry);
-
             }
         } else {
             if (mIsolatedEntries.containsKey(sbn.getKey())) {
