@@ -18,6 +18,9 @@ toc:
 - title: Auto App Quality
   path: /distribute/essentials/quality/auto.html
 
+- title: Building for Billions
+  path: /distribute/essentials/quality/billions.html
+
 - title: Launch Checklist
   path: /distribute/tools/launch-checklist.html
   custom_link_attributes:

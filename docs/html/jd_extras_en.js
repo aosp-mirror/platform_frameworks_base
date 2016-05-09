@@ -17,6 +17,18 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
  /* TODO Remove standard resources from here, such as below
  */
   {
+    "title":"SmallerAPK, Part 6: Image optimization, Zopfli & WebP",
+    "category":"",
+    "summary":"Series of posts on minimizing your APK size.",
+    "url":"https://medium.com/@wkalicinski/smallerapk-part-6-image-optimization-zopfli-webp-4c462955647d#.23hlddo3x",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"https://cdn-images-1.medium.com/max/2000/1*chMiA9mGa_FBUOoesHHk3Q.png",
+    "type":"medium"
+  },
+
+  {
     "title":"Measure your app’s user acquisition channels",
     "category":"google",
     "summary":"Get details on how to use the Developer Console User Acquisitions reports to discover where your users come from.",
@@ -887,6 +899,20 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type": "develop",
     "category": "compatibility"
   },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "training/material/animations.html#Touch",
+    "timestamp": 1194884220000,
+    "image": null,
+    "title": "Customize Touch Feedback",
+    "summary": "Provide visual confirmation when users interact with your UI.",
+    "keywords": [],
+    "type": "develop",
+    "category": "guide"
+  },
+
   {
     "lang": "en",
     "group": "",
@@ -3519,6 +3545,7 @@ METADATA['en'].collections = {
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/auto.html",
+      "distribute/essentials/quality/billions.html",
       "https://developers.google.com/edu/guidelines"
     ]
   },
@@ -3640,6 +3667,7 @@ METADATA['en'].collections = {
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/auto.html",
+      "distribute/essentials/quality/billions.html",
       "https://developers.google.com/edu/guidelines"
     ]
   },
@@ -4095,6 +4123,44 @@ METADATA['en'].collections = {
       "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "distribute/tools/launch-checklist.html",
       "distribute/tools/promote/device-art.html"
+    ]
+  },
+ "distribute/essentials/billionsquality/connectivity": {
+    "title": "",
+    "resources": [
+      "training/basics/network-ops/managing.html",
+      "training/monitoring-device-state/connectivity-monitoring.html",
+      "guide/topics/providers/content-providers.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/capability": {
+    "title": "",
+    "resources": [
+      "guide/practices/screens_support.html",
+      "training/multiscreen/screendensities.html",
+      "training/articles/memory.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/cost": {
+    "title": "",
+    "resources": [
+      "https://medium.com/@wkalicinski/smallerapk-part-4-multi-apk-through-abi-and-density-splits-477083989006#.23hlddo3x",
+      "training/basics/network-ops/managing.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/consumption": {
+    "title": "",
+    "resources": [
+      "training/efficient-downloads/efficient-network-access.html",
+      "training/monitoring-device-state/index.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/content": {
+    "title": "",
+    "resources": [
+      "training/material/animations.html#Touch",
+      "training/articles/perf-anr.html",
+      "training/improving-layouts/index.html"
     ]
   },
   "distribute/getusers/notifications": {
