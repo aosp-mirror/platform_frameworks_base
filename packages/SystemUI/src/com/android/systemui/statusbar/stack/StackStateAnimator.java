@@ -823,11 +823,6 @@ public class StackStateAnimator {
                     // The position for this child was never generated, let's continue.
                     continue;
                 }
-                if (changingView.getVisibility() == View.GONE) {
-                    // The view was set to gone but the state never removed
-                    finalState.removeViewStateForView(changingView);
-                    continue;
-                }
                 finalState.applyState(changingView, viewState);
                 mNewAddChildren.add(changingView);
 
