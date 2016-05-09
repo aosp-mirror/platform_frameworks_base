@@ -1067,4 +1067,13 @@ interface ITelephony {
      * Returns a list of packages that have carrier privileges.
      */
     List<String> getPackagesWithCarrierPrivileges();
+
+    /**
+     * Return the application ID for the app type.
+     *
+     * @param subId the subscription ID that this request applies to.
+     * @param appType the uicc app type,
+     * @return Application ID for specificied app type or null if no uicc or error.
+     */
+    String getAidForAppType(int subId, int appType);
 }
