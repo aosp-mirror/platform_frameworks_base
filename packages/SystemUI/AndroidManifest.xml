@@ -298,6 +298,7 @@
             android:theme="@style/ForcedResizableTheme"
             android:excludeFromRecents="true"
             android:stateNotNeeded="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:exported="false">
         </activity>
 
