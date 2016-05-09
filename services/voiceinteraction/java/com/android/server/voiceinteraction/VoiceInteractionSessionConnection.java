@@ -251,7 +251,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                         && structureEnabled) {
                     mAssistData.clear();
                     final int count = activityToken != null ? 1 : topActivities.size();
-                    for (int i = 0; i < count; i++) {
+                    // Temp workaround for bug: 28348867  Revert after DP3
+                    for (int i = 0; i < count && i < 1; i++) {
                         IBinder topActivity = count == 1 ? activityToken : topActivities.get(i);
                         try {
                             MetricsLogger.count(mContext, "assist_with_context", 1);
