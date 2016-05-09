@@ -658,6 +658,13 @@ public class RadialTimePickerView extends View {
 
         if (animate) {
             animatePicker(hours, ANIM_DURATION_NORMAL);
+        } else {
+            // If we have a pending or running animator, cancel it.
+            if (mHoursToMinutesAnimator != null && mHoursToMinutesAnimator.isStarted()) {
+                mHoursToMinutesAnimator.cancel();
+                mHoursToMinutesAnimator = null;
+            }
+            mHoursToMinutes = hours ? 0.0f : 1.0f;
         }
 
         initData();
