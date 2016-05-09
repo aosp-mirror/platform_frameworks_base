@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.net.wifi.RttManager;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -97,6 +98,7 @@ public class WifiNanSession {
                     + "terminated so step should be done explicitly");
             terminate();
         }
+        super.finalize();
     }
 
     /**
@@ -128,6 +130,33 @@ public class WifiNanSession {
             }
 
             mgr.sendMessage(mSessionId, peerId, message, messageLength, messageId);
+        }
+    }
+
+    /**
+     * Start a ranging operation with the specified peers. The peer IDs are obtained from an
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} or
+     * {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)} operation - i.e. can only
+     * range devices which are part of an ongoing discovery session.
+     *
+     * @param params   RTT parameters - each corresponding to a specific peer ID (the array sizes
+     *                 must be identical). The
+     *                 {@link android.net.wifi.RttManager.RttParams#bssid} member must be set to
+     *                 a peer ID - not to a MAC address.
+     * @param listener The listener to receive the results of the ranging session.
+     */
+    public void startRanging(RttManager.RttParams[] params, RttManager.RttListener listener) {
+        if (mTerminated) {
+            Log.w(TAG, "startRanging: called on terminated session");
+            return;
+        } else {
+            WifiNanManager mgr = mMgr.get();
+            if (mgr == null) {
+                Log.w(TAG, "startRanging: called post GC on WifiNanManager");
+                return;
+            }
+
+            mgr.startRanging(mSessionId, params, listener);
         }
     }
 }

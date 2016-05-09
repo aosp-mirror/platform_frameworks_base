@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.net.wifi.RttManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,10 +29,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 /**
  * This class provides the primary API for managing Wi-Fi NAN operation:
@@ -91,7 +94,7 @@ public class WifiNanManager {
 
     private final IWifiNanManager mService;
 
-    private Object mLock = new Object(); // lock access to the following vars
+    private final Object mLock = new Object(); // lock access to the following vars
 
     @GuardedBy("mLock")
     private final IBinder mBinder = new Binder();
@@ -101,6 +104,9 @@ public class WifiNanManager {
 
     @GuardedBy("mLock")
     private Looper mLooper;
+
+    @GuardedBy("mLock")
+    private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
 
     /**
      * {@hide}
@@ -237,6 +243,7 @@ public class WifiNanManager {
     @Override
     protected void finalize() throws Throwable {
         disconnect();
+        super.finalize();
     }
 
     /**
@@ -415,12 +422,63 @@ public class WifiNanManager {
         }
     }
 
+    /**
+     * {@hide}
+     */
+    public void startRanging(int sessionId, RttManager.RttParams[] params,
+                             RttManager.RttListener listener) {
+        if (VDBG) {
+            Log.v(TAG, "startRanging: sessionId=" + sessionId + ", " + "params="
+                    + Arrays.toString(params) + ", listener=" + listener);
+        }
+
+        int clientId;
+        synchronized (mLock) {
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG, "startRanging(): called with invalid client ID - not connected first?");
+                return;
+            }
+
+            clientId = mClientId;
+        }
+
+        int rangingKey = 0;
+        try {
+            rangingKey = mService.startRanging(clientId, sessionId,
+                    new RttManager.ParcelableRttParams(params));
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+
+        synchronized (mLock) {
+            mRangingListeners.put(rangingKey, listener);
+        }
+    }
+
     private static class WifiNanEventCallbackProxy extends IWifiNanEventCallback.Stub {
         private static final int CALLBACK_CONNECT_SUCCESS = 0;
         private static final int CALLBACK_CONNECT_FAIL = 1;
         private static final int CALLBACK_IDENTITY_CHANGED = 2;
+        private static final int CALLBACK_RANGING_SUCCESS = 3;
+        private static final int CALLBACK_RANGING_FAILURE = 4;
+        private static final int CALLBACK_RANGING_ABORTED = 5;
 
         private final Handler mHandler;
+        private final WeakReference<WifiNanManager> mNanManager;
+
+        RttManager.RttListener getAndRemoveRangingListener(int rangingId) {
+            WifiNanManager mgr = mNanManager.get();
+            if (mgr == null) {
+                Log.w(TAG, "getAndRemoveRangingListener: called post GC");
+                return null;
+            }
+
+            synchronized (mgr.mLock) {
+                RttManager.RttListener listener = mgr.mRangingListeners.get(rangingId);
+                mgr.mRangingListeners.delete(rangingId);
+                return listener;
+            }
+        }
 
         /**
          * Constructs a {@link WifiNanEventCallback} using the specified looper.
@@ -430,7 +488,7 @@ public class WifiNanManager {
          */
         WifiNanEventCallbackProxy(WifiNanManager mgr, Looper looper,
                 final WifiNanEventCallback originalCallback) {
-            final WeakReference<WifiNanManager> nanManager = new WeakReference<WifiNanManager>(mgr);
+            mNanManager = new WeakReference<>(mgr);
 
             if (VDBG) Log.v(TAG, "WifiNanEventCallbackProxy ctor: looper=" + looper);
             mHandler = new Handler(looper) {
@@ -440,7 +498,7 @@ public class WifiNanManager {
                         Log.d(TAG, "WifiNanEventCallbackProxy: What=" + msg.what + ", msg=" + msg);
                     }
 
-                    WifiNanManager mgr = nanManager.get();
+                    WifiNanManager mgr = mNanManager.get();
                     if (mgr == null) {
                         Log.w(TAG, "WifiNanEventCallbackProxy: handleMessage post GC");
                         return;
@@ -455,12 +513,43 @@ public class WifiNanManager {
                                 mgr.mLooper = null;
                                 mgr.mClientId = INVALID_CLIENT_ID;
                             }
-                            nanManager.clear();
+                            mNanManager.clear();
                             originalCallback.onConnectFail(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
                             originalCallback.onIdentityChanged();
                             break;
+                        case CALLBACK_RANGING_SUCCESS: {
+                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
+                            if (listener == null) {
+                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
+                                        + ": no listener registered (anymore)");
+                            } else {
+                                listener.onSuccess(
+                                        ((RttManager.ParcelableRttResults) msg.obj).mResults);
+                            }
+                            break;
+                        }
+                        case CALLBACK_RANGING_FAILURE: {
+                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
+                            if (listener == null) {
+                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
+                                        + ": no listener registered (anymore)");
+                            } else {
+                                listener.onFailure(msg.arg2, (String) msg.obj);
+                            }
+                            break;
+                        }
+                        case CALLBACK_RANGING_ABORTED: {
+                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
+                            if (listener == null) {
+                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
+                                        + ": no listener registered (anymore)");
+                            } else {
+                                listener.onAborted();
+                            }
+                            break;
+                        }
                     }
                 }
             };
@@ -489,6 +578,43 @@ public class WifiNanManager {
 
             Message msg = mHandler.obtainMessage(CALLBACK_IDENTITY_CHANGED);
             mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onRangingSuccess(int rangingId, RttManager.ParcelableRttResults results) {
+            if (VDBG) {
+                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", results=" + results);
+            }
+
+            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_SUCCESS);
+            msg.arg1 = rangingId;
+            msg.obj = results;
+            mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onRangingFailure(int rangingId, int reason, String description) {
+            if (VDBG) {
+                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", reason=" + reason
+                        + ", description=" + description);
+            }
+
+            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_FAILURE);
+            msg.arg1 = rangingId;
+            msg.arg2 = reason;
+            msg.obj = description;
+            mHandler.sendMessage(msg);
+
+        }
+
+        @Override
+        public void onRangingAborted(int rangingId) {
+            if (VDBG) Log.v(TAG, "onRangingAborted: rangingId=" + rangingId);
+
+            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_ABORTED);
+            msg.arg1 = rangingId;
+            mHandler.sendMessage(msg);
+
         }
     }
 

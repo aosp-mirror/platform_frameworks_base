@@ -17,6 +17,7 @@
 package android.net.wifi.nan;
 
 import android.net.wifi.nan.ConfigRequest;
+import android.net.wifi.RttManager;
 
 /**
  * Callback interface that WifiNanManager implements
@@ -28,4 +29,8 @@ oneway interface IWifiNanEventCallback
     void onConnectSuccess();
     void onConnectFail(int reason);
     void onIdentityChanged();
+
+    void onRangingSuccess(int rangingId, in RttManager.ParcelableRttResults results);
+    void onRangingFailure(int rangingId, int reason, in String description);
+    void onRangingAborted(int rangingId);
 }

@@ -459,6 +459,34 @@ public class RttManager {
             preamble = PREAMBLE_HT;
             bandwidth = RTT_BW_20_SUPPORT;
         }
+
+        /**
+         * {@hide}
+         */
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("deviceType=" + deviceType);
+            sb.append(", requestType=" + requestType);
+            sb.append(", secure=" + secure);
+            sb.append(", bssid=" + bssid);
+            sb.append(", frequency=" + frequency);
+            sb.append(", channelWidth=" + channelWidth);
+            sb.append(", centerFreq0=" + centerFreq0);
+            sb.append(", centerFreq1=" + centerFreq1);
+            sb.append(", num_samples=" + num_samples);
+            sb.append(", num_retries=" + num_retries);
+            sb.append(", numberBurst=" + numberBurst);
+            sb.append(", interval=" + interval);
+            sb.append(", numSamplesPerBurst=" + numSamplesPerBurst);
+            sb.append(", numRetriesPerMeasurementFrame=" + numRetriesPerMeasurementFrame);
+            sb.append(", numRetriesPerFTMR=" + numRetriesPerFTMR);
+            sb.append(", LCIRequest=" + LCIRequest);
+            sb.append(", LCRRequest=" + LCRRequest);
+            sb.append(", burstTimeout=" + burstTimeout);
+            sb.append(", preamble=" + preamble);
+            sb.append(", bandwidth=" + bandwidth);
+            return sb.toString();
+        }
     }
 
     /** pseudo-private class used to parcel arguments */
@@ -466,7 +494,10 @@ public class RttManager {
 
         public RttParams mParams[];
 
-        ParcelableRttParams(RttParams[] params) {
+        /**
+         * {@hide}
+         */
+        public ParcelableRttParams(RttParams[] params) {
             mParams = params;
         }
 
@@ -712,6 +743,51 @@ public class RttManager {
 
         public ParcelableRttResults(RttResult[] results) {
             mResults = results;
+        }
+
+        /**
+         * {@hide}
+         */
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mResults.length; ++i) {
+                sb.append("[" + i + "]: ");
+                sb.append("bssid=" + mResults[i].bssid);
+                sb.append(", burstNumber=" + mResults[i].burstNumber);
+                sb.append(", measurementFrameNumber=" + mResults[i].measurementFrameNumber);
+                sb.append(", successMeasurementFrameNumber="
+                        + mResults[i].successMeasurementFrameNumber);
+                sb.append(", frameNumberPerBurstPeer=" + mResults[i].frameNumberPerBurstPeer);
+                sb.append(", status=" + mResults[i].status);
+                sb.append(", requestType=" + mResults[i].requestType);
+                sb.append(", measurementType=" + mResults[i].measurementType);
+                sb.append(", retryAfterDuration=" + mResults[i].retryAfterDuration);
+                sb.append(", ts=" + mResults[i].ts);
+                sb.append(", rssi=" + mResults[i].rssi);
+                sb.append(", rssi_spread=" + mResults[i].rssi_spread);
+                sb.append(", rssiSpread=" + mResults[i].rssiSpread);
+                sb.append(", tx_rate=" + mResults[i].tx_rate);
+                sb.append(", txRate=" + mResults[i].txRate);
+                sb.append(", rxRate=" + mResults[i].rxRate);
+                sb.append(", rtt_ns=" + mResults[i].rtt_ns);
+                sb.append(", rtt=" + mResults[i].rtt);
+                sb.append(", rtt_sd_ns=" + mResults[i].rtt_sd_ns);
+                sb.append(", rttStandardDeviation=" + mResults[i].rttStandardDeviation);
+                sb.append(", rtt_spread_ns=" + mResults[i].rtt_spread_ns);
+                sb.append(", rttSpread=" + mResults[i].rttSpread);
+                sb.append(", distance_cm=" + mResults[i].distance_cm);
+                sb.append(", distance=" + mResults[i].distance);
+                sb.append(", distance_sd_cm=" + mResults[i].distance_sd_cm);
+                sb.append(", distanceStandardDeviation=" + mResults[i].distanceStandardDeviation);
+                sb.append(", distance_spread_cm=" + mResults[i].distance_spread_cm);
+                sb.append(", distanceSpread=" + mResults[i].distanceSpread);
+                sb.append(", burstDuration=" + mResults[i].burstDuration);
+                sb.append(", negotiatedBurstNum=" + mResults[i].negotiatedBurstNum);
+                sb.append(", LCI=" + mResults[i].LCI);
+                sb.append(", LCR=" + mResults[i].LCR);
+                sb.append(", secure=" + mResults[i].secure);
+            }
+            return sb.toString();
         }
 
         /** Implement the Parcelable interface {@hide} */

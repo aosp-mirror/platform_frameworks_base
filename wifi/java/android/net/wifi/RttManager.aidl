@@ -15,4 +15,7 @@
  */
 
 package android.net.wifi;
+
 parcelable RttManager.RttCapabilities;
+parcelable RttManager.ParcelableRttResults;
+parcelable RttManager.ParcelableRttParams;
