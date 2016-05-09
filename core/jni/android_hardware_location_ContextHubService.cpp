@@ -319,14 +319,27 @@ static int onMessageReceipt(uint32_t *header, size_t headerLen, char *msg, size_
     }
 
     jbyteArray jmsg = env->NewByteArray(msgLen);
+    if (jmsg == nullptr) {
+        ALOGW("Can't allocate %zu byte array", msgLen);
+        return -1;
+    }
     jintArray jheader = env->NewIntArray(headerLen);
+    if (jheader == nullptr) {
+        env->DeleteLocalRef(jmsg);
+        ALOGW("Can't allocate %zu int array", headerLen);
+        return -1;
+    }
 
     env->SetByteArrayRegion(jmsg, 0, msgLen, (jbyte *)msg);
     env->SetIntArrayRegion(jheader, 0, headerLen, (jint *)header);
 
-    return (env->CallIntMethod(db.jniInfo.jContextHubService,
+    int ret = (env->CallIntMethod(db.jniInfo.jContextHubService,
                           db.jniInfo.contextHubServiceMsgReceiptCallback,
                           jheader, jmsg) != 0);
+    env->DeleteLocalRef(jmsg);
+    env->DeleteLocalRef(jheader);
+
+    return ret;
 }
 
 int handle_query_apps_response(char *msg, int msgLen, uint32_t hubHandle) {
@@ -529,12 +542,15 @@ static jobject constructJContextHubInfo(JNIEnv *env, const struct context_hub_t 
 
     jstrBuf = env->NewStringUTF(hub->name);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetName, jstrBuf);
+    env->DeleteLocalRef(jstrBuf);
 
     jstrBuf = env->NewStringUTF(hub->vendor);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetVendor, jstrBuf);
+    env->DeleteLocalRef(jstrBuf);
 
     jstrBuf = env->NewStringUTF(hub->toolchain);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchain, jstrBuf);
+    env->DeleteLocalRef(jstrBuf);
 
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetPlatformVersion, hub->platform_version);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetToolchainVersion, hub->toolchain_version);
@@ -555,11 +571,13 @@ static jobject constructJContextHubInfo(JNIEnv *env, const struct context_hub_t 
     jintBuf = env->NewIntArray(array_length(dummyConnectedSensors));
     env->SetIntArrayRegion(jintBuf, 0, hub->num_connected_sensors, dummyConnectedSensors);
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetSupportedSensors, jintBuf);
+    env->DeleteLocalRef(jintBuf);
 
     // We are not getting the memory regions from the CH Hal - change this when it is available
     jmemBuf = env->NewObjectArray(0, db.jniInfo.memoryRegionsClass, nullptr);
     // Note the zero size above. We do not need to set any elements
     env->CallVoidMethod(jHub, db.jniInfo.contextHubInfoSetMemoryRegions, jmemBuf);
+    env->DeleteLocalRef(jmemBuf);
 
 
     return jHub;
