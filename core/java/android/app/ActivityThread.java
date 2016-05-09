@@ -2905,14 +2905,14 @@ public final class ActivityThread {
     private void handleMultiWindowModeChanged(IBinder token, boolean isInMultiWindowMode) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onMultiWindowModeChanged(isInMultiWindowMode);
+            r.activity.dispatchMultiWindowModeChanged(isInMultiWindowMode);
         }
     }
 
     private void handlePictureInPictureModeChanged(IBinder token, boolean isInPipMode) {
         final ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onPictureInPictureModeChanged(isInPipMode);
+            r.activity.dispatchPictureInPictureModeChanged(isInPipMode);
         }
     }
 
