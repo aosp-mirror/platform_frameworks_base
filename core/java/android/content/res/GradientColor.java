@@ -63,7 +63,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * Note that different attributes are relevant for different types of gradient.
  * For example, android:gradientRadius is only applied to RadialGradient.
- * androd:centerX and android:centerY are only applied to SweepGradient or RadialGradient.
+ * android:centerX and android:centerY are only applied to SweepGradient or RadialGradient.
  * android:startX, android:startY, android:endX and android:endY are only applied to LinearGradient.
  *
  * Also note if any color "item" element is defined, then startColor, centerColor and endColor will
