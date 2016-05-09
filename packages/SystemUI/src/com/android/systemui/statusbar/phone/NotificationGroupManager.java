@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -239,7 +240,12 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
     }
 
     public void collapseAllGroups() {
-        for (NotificationGroup group : mGroupMap.values()) {
+        // Because notifications can become isolated when the group becomes suppressed it can
+        // lead to concurrent modifications while looping. We need to make a copy.
+        ArrayList<NotificationGroup> groupCopy = new ArrayList<>(mGroupMap.values());
+        int size = groupCopy.size();
+        for (int i = 0; i < size; i++) {
+            NotificationGroup group =  groupCopy.get(i);
             if (group.expanded) {
                 setGroupExpanded(group, false);
             }
