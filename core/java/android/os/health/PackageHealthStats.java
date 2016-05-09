@@ -37,7 +37,7 @@ public final class PackageHealthStats {
      * Key for a map of the number of times that a package's wakeup alarms have fired
      * while the device was on battery.
      *
-     * @see android.app.AlarmManager.
+     * @see android.app.AlarmManager
      */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENTS)
     public static final int MEASUREMENTS_WAKEUP_ALARMS_COUNT = HealthKeys.BASE_PACKAGE + 2;
