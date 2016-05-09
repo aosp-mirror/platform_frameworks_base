@@ -73,13 +73,8 @@ public final class Ranker extends NotificationRankerService {
                     mUnbundledNotifications.put(sbn.getPackageName(), notificationsForPackage);
 
                     if (notificationsForPackage.size() >= AUTOBUNDLE_AT_COUNT) {
-                        // Autobundle all but the most recently posted (not updated) notification.
-                        int count = 0;
                         for (String key : notificationsForPackage) {
-                            if (count < notificationsForPackage.size() - 1) {
-                                notificationsToBundle.add(key);
-                            }
-                            count++;
+                            notificationsToBundle.add(key);
                         }
                     }
                 }
