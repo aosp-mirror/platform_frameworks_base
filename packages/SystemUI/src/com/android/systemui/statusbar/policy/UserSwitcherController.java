@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
@@ -23,7 +25,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -63,8 +64,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Keeps a list of all users on the device for user switching.
@@ -490,7 +489,7 @@ public class UserSwitcherController {
                 }
                 // Connect to the new secondary user's service (purely to ensure that a persistent
                 // SystemUI application is created for that user)
-                if (userInfo != null && !userInfo.isPrimary()) {
+                if (userInfo != null && userInfo.id != UserHandle.USER_SYSTEM) {
                     context.startServiceAsUser(mSecondaryUserServiceIntent,
                             UserHandle.of(userInfo.id));
                     mSecondaryUser = userInfo.id;
