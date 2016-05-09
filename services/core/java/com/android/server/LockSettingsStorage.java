@@ -74,7 +74,7 @@ class LockSettingsStorage {
 
     private SparseArray<Integer> mStoredCredentialType;
 
-    class CredentialHash {
+    static class CredentialHash {
         static final int TYPE_NONE = -1;
         static final int TYPE_PATTERN = 1;
         static final int TYPE_PASSWORD = 2;
