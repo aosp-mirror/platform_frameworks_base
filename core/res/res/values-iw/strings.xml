@@ -269,7 +269,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"בדוק את התוכן של חלון שאיתו אתה מבצע אינטראקציה."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"הפעלה של \'גילוי באמצעות מגע\'"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"פריטים שעליהם תקיש ייאמרו בקול, ותוכל לנווט במסך באמצעות תנועות."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"פריטים שעליהם תקיש יוקראו בקול, ותוכל לנווט במסך באמצעות תנועות."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"הפעלה של גישה משופרת לאינטרנט"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"ייתכן שסקריפטים יותקנו על מנת להקל את הגישה אל תוכן של אפליקציות."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"הצגת טקסט בזמן הקלדה"</string>

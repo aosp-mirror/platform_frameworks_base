@@ -263,7 +263,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contenido de la ventana"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contenido de una ventana con la que estés interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar la exploración táctil"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos seleccionados se dicen en voz alta y se puede explorar la pantalla mediante gestos."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Los elementos que tocas se dicen en voz alta y se puede explorar la pantalla mediante gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar la accesibilidad web mejorada"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Es posible que se instalen secuencias de comandos para que el contenido de las aplicaciones sea más accesible."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar el texto que escribes"</string>
@@ -662,7 +662,7 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Introduce el código PUK y un nuevo código PIN."</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Código PUK"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"Nuevo código PIN"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Toca para insertar contraseña"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"Toca para escribir contraseña"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Introduce la contraseña para desbloquear."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Introduce el código PIN para desbloquear."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Código PIN incorrecto"</string>
@@ -1124,7 +1124,7 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Nueva <xliff:g id="NAME">%s</xliff:g> detectada"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Para transferir fotos y multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Medio externo (<xliff:g id="NAME">%s</xliff:g>) dañado"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> está dañado. Toca para solucionar el problema."</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> está en mal estado. Toca para solucionar el problema."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Medio externo (<xliff:g id="NAME">%s</xliff:g>) no admitido"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"El dispositivo no admite este medio externo (<xliff:g id="NAME">%s</xliff:g>). Toca para configurarlo con un formato admitido."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Extracción inesperada de <xliff:g id="NAME">%s</xliff:g>"</string>

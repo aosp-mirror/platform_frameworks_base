@@ -263,7 +263,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ստուգեք պատուհանի բովանդակությունը, որի հետ փոխգործակցում եք:"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Տարրերը, որոնց հպեք, բարձրաձայն կարտասանվեն, և էկրանը հնարավոր կլինի ուսումնասիրել ժեստերով:"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Ուսումնաիրեք էկրանը այն շոշափելով։ Այս կամ այն տարրին հպելուց հետո դրանք բարձրաձայն կնկարագրվեն։"</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Միացնել ընդլայնված վեբ մատչելիությունը"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Հնարավոր է սկրիպտներ տեղադրվեն` ծրագրի բովանդակությունն ավելի մատչելի դարձնելու համար:"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Զննել ձեր մուտքագրած տեքստը"</string>
@@ -1124,7 +1124,7 @@
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Հայտնաբերվել է նոր <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> անունը վնասված է: Հպեք՝ շտկելու համար:"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է: Հպեք՝ շտկելու համար:"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>

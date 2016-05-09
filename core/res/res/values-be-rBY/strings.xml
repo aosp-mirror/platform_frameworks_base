@@ -269,7 +269,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымайце змесцiва акна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Вывучыце змесцiва акна, з якiм вы працуеце."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключыце Explore by Touch"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якiх дакранулiся, будуць агучаны, а з экранам можна будзе ўзаемадзейнічаць пры дапамозе жэстаў."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Элементы, да якіх дакрануліся, будуць агучаны, а экранам можна даследаваць пры дапамозе жэстаў."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Уключыце паляпшэнне вэб-даступнасці"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Сцэнарыi могуць быць усталяваны, каб зрабіць змесцiва прыкладання больш даступным."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Глядзiце, што набiраеце"</string>
@@ -1136,7 +1136,7 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB для перадачы фота"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB для MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Падключаны да USB-прылады"</string>
-    <string name="usb_notification_message" msgid="3370903770828407960">"Дакраніцеся, каб атрымаць больш параметраў."</string>
+    <string name="usb_notification_message" msgid="3370903770828407960">"Дакраніцеся, каб атрымаць іншыя параметры."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Прылада адладкі USB падключана"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Дакраніцеся, каб адключыць адладку USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Стварэнне справаздачы пра памылку…"</string>
@@ -1232,13 +1232,13 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Падключэнне заўсёды ўключанага VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Заўсёды ўключаны i падключаны VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Памылка заўсёды ўключанага VPN"</string>
-    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Дакраніцеся, каб змяніць канфігурацыю"</string>
+    <string name="vpn_lockdown_config" msgid="4655589351146766608">"Дакраніцеся, каб сканфігураваць"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выберыце файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Файл не выбраны"</string>
     <string name="reset" msgid="2448168080964209908">"Скінуць"</string>
     <string name="submit" msgid="1602335572089911941">"Перадаць"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Рэжым \"У машыне\" ўключаны"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Дакраніцеся, каб выйсці з рэжыму \"Ў аўтамабілі\"."</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Дакраніцеся, каб выйсці з рэжыму \"У машыне\"."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або кропка доступу Wi-Fi актыўныя"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Дакраніцеся, каб наладзіць."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
@@ -1275,7 +1275,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Дадаць уліковы запіс"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Павялічыць"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Паменшыць"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"Націсніце і ўтрымлівайце <xliff:g id="VALUE">%s</xliff:g>."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> – Націсніце і ўтрымлівайце."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Правядзіце пальцам уверх, каб павялічыць, або ўніз, каб паменшыць."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Павялічыць лічбу хвілін."</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Паменшыць лічбу хвілін."</string>
@@ -1319,7 +1319,7 @@
     <string name="storage_usb" msgid="3017954059538517278">"USB-назапашвальнік"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Рэдагаваць"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Папярэджанне выкарыстання дадзеных"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Кран. для прагл. выкар. і налад."</string>
+    <string name="data_usage_warning_body" msgid="6660692274311972007">"Прагляд выкарыстання і налад."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Дасягнуты ліміт трафіку 2G-3G"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Дасягнуты ліміт трафіку 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Дасягн. ліміт маб.перадачы даных"</string>
@@ -1549,8 +1549,8 @@
     <string name="select_year" msgid="7952052866994196170">"Выберыце год"</string>
     <string name="deleted_key" msgid="7659477886625566590">"Выдалена: <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (праца)"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Каб адмацаваць гэты экран, краніце і ўтрымлівайце кнопку \"Назад\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Каб адмацаваць гэты экран, краніце і ўтрымлівайце кнопку \"Агляд\"."</string>
+    <string name="lock_to_app_toast" msgid="1420543809500606964">"Каб адмацаваць гэты экран, дакраніцеся і ўтрымлівайце кнопку \"Назад\"."</string>
+    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Каб адмацаваць гэты экран, дакраніцеся і ўтрымлівайце кнопку \"Агляд\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Праграма замацавана: адмацаванне на гэтай прыладзе не дапускаецца."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран замацаваны"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран адмацаваны"</string>
