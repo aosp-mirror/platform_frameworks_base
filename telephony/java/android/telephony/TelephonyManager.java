@@ -5178,4 +5178,40 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /**
+     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @param appType the uicc app type like {@link APPTYPE_CSIM}
+     * @return Application ID for specificied app type or null if no uicc or error.
+     * @hide
+     */
+    public String getAidForAppType(int appType) {
+        return getAidForAppType(getDefaultSubscription(), appType);
+    }
+
+    /**
+     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @param subId the subscription ID that this request applies to.
+     * @param appType the uicc app type, like {@link APPTYPE_CSIM}
+     * @return Application ID for specificied app type or null if no uicc or error.
+     * @hide
+     */
+    public String getAidForAppType(int subId, int appType) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getAidForAppType(subId, appType);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getAidForAppType", e);
+        }
+        return null;
+    }
+
 }
