@@ -476,6 +476,9 @@ public final class MediaBrowser {
         // the service will be told when we connect.
         if (mState == CONNECT_STATE_CONNECTED) {
             try {
+                if (options == null) {
+                    mServiceBinder.addSubscriptionDeprecated(parentId, mServiceCallbacks);
+                }
                 mServiceBinder.addSubscription(parentId, callback.mToken, options,
                         mServiceCallbacks);
             } catch (RemoteException ex) {
@@ -500,6 +503,7 @@ public final class MediaBrowser {
         try {
             if (callback == null) {
                 if (mState == CONNECT_STATE_CONNECTED) {
+                    mServiceBinder.removeSubscriptionDeprecated(parentId, mServiceCallbacks);
                     mServiceBinder.removeSubscription(parentId, null, mServiceCallbacks);
                 }
             } else {
@@ -1070,7 +1074,12 @@ public final class MediaBrowser {
         }
 
         @Override
-        public void onLoadChildren(String parentId, ParceledListSlice list,
+        public void onLoadChildren(String parentId, ParceledListSlice list) {
+            onLoadChildrenWithOptions(parentId, list, null);
+        }
+
+        @Override
+        public void onLoadChildrenWithOptions(String parentId, ParceledListSlice list,
                 final Bundle options) {
             MediaBrowser mediaBrowser = mMediaBrowser.get();
             if (mediaBrowser != null) {
