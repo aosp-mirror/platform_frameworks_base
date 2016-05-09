@@ -167,7 +167,6 @@
 
     <com.android.systemui.qs.QuickQSPanel
         android:id="@+id/quick_qs_panel"
-        android:background="#0000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
