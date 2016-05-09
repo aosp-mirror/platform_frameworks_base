@@ -2853,7 +2853,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void clearTransientViews(ViewGroup viewGroup) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
-            viewGroup.removeTransientView(getTransientView(0));
+            viewGroup.removeTransientView(viewGroup.getTransientView(0));
         }
     }
 
