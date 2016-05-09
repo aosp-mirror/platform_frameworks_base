@@ -3150,6 +3150,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         } else {
             pw.println("  mHeadsUpManager: null");
         }
+        if (mGroupManager != null) {
+            mGroupManager.dump(fd, pw, args);
+        } else {
+            pw.println("  mGroupManager: null");
+        }
         if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
             KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
         }

@@ -24,9 +24,12 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -69,6 +72,7 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     public void onEntryRemoved(NotificationData.Entry removed) {
         onEntryRemovedInternal(removed, removed.notification);
+        mIsolatedEntries.remove(removed.key);
     }
 
     /**
@@ -425,6 +429,19 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         mHeadsUpManager = headsUpManager;
     }
 
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("GroupManager state:");
+        pw.println("  number of groups: " +  mGroupMap.size());
+        for (Map.Entry<String, NotificationGroup>  entry : mGroupMap.entrySet()) {
+            pw.println("\n    key: " + entry.getKey()); pw.println(entry.getValue());
+        }
+        pw.println("\n    isolated entries: " +  mIsolatedEntries.size());
+        for (Map.Entry<String, StatusBarNotification> entry : mIsolatedEntries.entrySet()) {
+            pw.print("      "); pw.print(entry.getKey());
+            pw.print(", "); pw.println(entry.getValue());
+        }
+    }
+
     public static class NotificationGroup {
         public final HashSet<NotificationData.Entry> children = new HashSet<>();
         public NotificationData.Entry summary;
@@ -433,6 +450,16 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
          * Is this notification group suppressed, i.e its summary is hidden
          */
         public boolean suppressed;
+
+        @Override
+        public String toString() {
+            String result = "    summary:\n      " + summary.notification;
+            result += "\n    children size: " + children.size();
+            for (NotificationData.Entry child : children) {
+                result += "\n      " + child.notification;
+            }
+            return result;
+        }
     }
 
     public interface OnGroupChangeListener {
