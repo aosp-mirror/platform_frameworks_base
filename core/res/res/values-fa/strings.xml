@@ -310,7 +310,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"‏به برنامه اجازه می‎دهد تا حالت خودرو را فعال کند."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"بستن سایر برنامه‌ها"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"به برنامه امکان می‌دهد به فرآیندهای پس‌زمینه سایر برنامه‌ها پایان دهد. این ممکن است باعث شود سایر برنامه‌ها متوقف شوند."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ترسیم روی برنامه‌های دیگر"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"نمایش روی برنامه‌های دیگر"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"به برنامه اجازه می‌دهد که در بالا یا بخش‌هایی از رابط کاربری دیگر برنامه‌های کاربردی متصل شود. این کار می‌تواند در استفاده شما از رابط هر برنامه کاربردی تداخل ایجاد کند یا آنچه را که به نظر خود در دیگر برنامه‌های کاربردی می‌بینید، تغییر دهد."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"همیشه برنامه اجرا شود"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"به برنامه امکان می‌دهد قسمت‌هایی از خود را در حافظه دائمی کند. این کار حافظه موجود را برای سایر برنامه‌ها محدود کرده و باعث کندی رایانهٔ لوحی می‌شود."</string>
