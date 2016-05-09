@@ -1586,11 +1586,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     win.transferDimToReplacement();
                 }
                 win.mWillReplaceWindow = false;
+                final boolean animateReplacingWindow = win.mAnimateReplacingWindow;
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
                 win.mReplacingWindow = null;
                 mSkipEnterAnimationForSeamlessReplacement = false;
-                if (win.mAnimatingExit) {
+                if (win.mAnimatingExit || !animateReplacingWindow) {
                     mService.removeWindowInnerLocked(win);
                 }
             }
