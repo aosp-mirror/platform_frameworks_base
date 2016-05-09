@@ -71,7 +71,7 @@ public class SystemHealthManager {
      * @return A {@link HealthStats} object containing the metrics for the requested
      * application. The keys for this HealthStats object will be from the {@link UidHealthStats}
      * class.
-     * @see Process#myUid()
+     * @see Process#myUid() Process.myUid()
      */
     public HealthStats takeUidSnapshot(int uid) {
         try {
