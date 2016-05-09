@@ -772,7 +772,7 @@ class WindowSurfacePlacer {
                             }
                         }
                     }
-                    if (!winAnimator.isAnimationStarting()) {
+                    if (!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening()) {
                         // Updates the shown frame before we set up the surface. This is needed
                         // because the resizing could change the top-left position (in addition to
                         // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
@@ -1236,8 +1236,8 @@ class WindowSurfacePlacer {
             int topOpeningLayer = 0;
             if (animLp != null) {
                 int layer = -1;
-                for (int j = 0; j < wtoken.windows.size(); j++) {
-                    final WindowState win = wtoken.windows.get(j);
+                for (int j = 0; j < wtoken.allAppWindows.size(); j++) {
+                    final WindowState win = wtoken.allAppWindows.get(j);
                     // Clearing the mAnimatingExit flag before entering animation. It will be set to true
                     // if app window is removed, or window relayout to invisible. We don't want to
                     // clear it out for windows that get replaced, because the animation depends on
@@ -1249,6 +1249,14 @@ class WindowSurfacePlacer {
                     // they won't eventually be removed by WindowStateAnimator#finishExit.
                     if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
                         win.mAnimatingExit = false;
+                        // Clear mAnimating flag together with mAnimatingExit. When animation
+                        // changes from exiting to entering, we need to clear this flag until the
+                        // new animation gets applied, so that isAnimationStarting() becomes true
+                        // until then.
+                        // Otherwise applySurfaceChangesTransaction will faill to skip surface
+                        // placement for this window during this period, one or more frame will
+                        // show up with wrong position or scale.
+                        win.mWinAnimator.mAnimating = false;
                     }
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
