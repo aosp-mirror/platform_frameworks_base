@@ -26,9 +26,20 @@ public final class ServiceHealthStats {
     private ServiceHealthStats() {
     }
 
+    /**
+     * Key for a measurement of the number of times this service was started due to calls to
+     * {@link android.content.Context#startService startService()}, including re-launches
+     * after crashes.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_START_SERVICE_COUNT = HealthKeys.BASE_SERVICE + 1;
 
+    /**
+     * Key for a measurement of the total number of times this service was started
+     * due to calls to {@link android.content.Context#startService startService()}
+     * or {@link android.content.Context#bindService bindService()} including re-launches
+     * after crashes.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_LAUNCH_COUNT = HealthKeys.BASE_SERVICE + 2;
 

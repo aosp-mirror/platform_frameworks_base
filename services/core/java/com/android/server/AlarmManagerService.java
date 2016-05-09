@@ -3067,7 +3067,7 @@ class AlarmManagerService extends SystemService {
                     }
                 } else {
                     ActivityManagerNative.noteWakeupAlarm(
-                            alarm.operation, -1, alarm.packageName, alarm.statsTag);
+                            alarm.operation, alarm.uid, alarm.packageName, alarm.statsTag);
                 }
             }
         }
