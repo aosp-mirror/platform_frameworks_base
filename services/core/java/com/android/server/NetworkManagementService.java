@@ -330,6 +330,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (DBG) Slog.d(TAG, "Awaiting socket connection");
         connectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
+        service.connectNativeNetdService();
         return service;
     }
 
@@ -560,11 +561,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
     }
 
-    /**
-     * Prepare native daemon once connected, enabling modules and pushing any
-     * existing in-memory rules.
-     */
-    private void prepareNativeDaemon() {
+    private void connectNativeNetdService() {
         boolean nativeServiceAvailable = false;
         try {
             mNetdService = INetd.Stub.asInterface(ServiceManager.getService(NETD_SERVICE_NAME));
@@ -573,6 +570,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         if (!nativeServiceAvailable) {
             Slog.wtf(TAG, "Can't connect to NativeNetdService " + NETD_SERVICE_NAME);
         }
+    }
+
+    /**
+     * Prepare native daemon once connected, enabling modules and pushing any
+     * existing in-memory rules.
+     */
+    private void prepareNativeDaemon() {
 
         mBandwidthControlEnabled = false;
 
@@ -767,12 +771,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // event is dispatched from internal NDC thread, so we prepare the
             // daemon back on main thread.
             if (mConnectedSignal != null) {
+                // The system is booting and we're connecting to netd for the first time.
                 mConnectedSignal.countDown();
                 mConnectedSignal = null;
             } else {
+                // We're reconnecting to netd after the socket connection
+                // was interrupted (e.g., if it crashed).
                 mFgHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        connectNativeNetdService();
                         prepareNativeDaemon();
                     }
                 });
