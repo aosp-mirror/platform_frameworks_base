@@ -642,7 +642,7 @@ public class LayoutTransition {
      * example, a ObjectAnimator that animates the property "left" is able to set and get the
      * <code>left</code> property from the View objects being animated by the layout
      * transition. The transition works by setting target objects and properties
-     * dynamically, according to the pre- and post-layoout values of those objects, so
+     * dynamically, according to the pre- and post-layout values of those objects, so
      * having animations that can handle those properties appropriately will work best
      * for custom animation. The dynamic setting of values is only the case for the
      * CHANGE animations; the APPEARING and DISAPPEARING animations are simply run with
