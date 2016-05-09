@@ -176,6 +176,7 @@ public class MediaRouter {
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
+            Log.v(TAG, "Updating audio routes: " + newRoutes);
             if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
                 mCurAudioRoutesInfo.mainType = newRoutes.mainType;
                 int name;
@@ -905,6 +906,7 @@ public class MediaRouter {
     }
 
     static void selectRouteStatic(int types, @NonNull RouteInfo route, boolean explicit) {
+        Log.v(TAG, "Selecting route: " + route);
         assert(route != null);
         final RouteInfo oldRoute = sStatic.mSelectedRoute;
         if (oldRoute == route) return;
@@ -1007,6 +1009,7 @@ public class MediaRouter {
     }
 
     static void addRouteStatic(RouteInfo info) {
+        Log.v(TAG, "Adding route: " + info);
         final RouteCategory cat = info.getCategory();
         if (!sStatic.mCategories.contains(cat)) {
             sStatic.mCategories.add(cat);
@@ -1061,6 +1064,7 @@ public class MediaRouter {
     }
 
     static void removeRouteStatic(RouteInfo info) {
+        Log.v(TAG, "Removing route: " + info);
         if (sStatic.mRoutes.remove(info)) {
             final RouteCategory removingCat = info.getCategory();
             final int count = sStatic.mRoutes.size();
@@ -1210,6 +1214,7 @@ public class MediaRouter {
     }
 
     static void dispatchRouteChanged(RouteInfo info, int oldSupportedTypes) {
+        Log.v(TAG, "Dispatching route change: " + info);
         final int newSupportedTypes = info.mSupportedTypes;
         for (CallbackInfo cbi : sStatic.mCallbacks) {
             // Reconstruct some of the history for callbacks that may not have observed
