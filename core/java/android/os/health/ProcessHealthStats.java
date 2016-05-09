@@ -26,21 +26,42 @@ public final class ProcessHealthStats {
     private ProcessHealthStats() {
     }
 
+    /**
+     * Key for a measurement of number of millseconds the CPU spent running in user space
+     * for this process.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_USER_TIME_MS = HealthKeys.BASE_PROCESS + 1;
 
+    /**
+     * Key for a measurement of number of millseconds the CPU spent running in kernel space
+     * for this process.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_SYSTEM_TIME_MS = HealthKeys.BASE_PROCESS + 2;
 
+    /**
+     * Key for a measurement of the number of times this process was started for any reason.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_STARTS_COUNT = HealthKeys.BASE_PROCESS + 3;
 
+    /**
+     * Key for a measurement of the number of crashes that happened in this process.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_CRASHES_COUNT = HealthKeys.BASE_PROCESS + 4;
 
+    /**
+     * Key for a measurement of the number of ANRs that happened in this process.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_ANR_COUNT = HealthKeys.BASE_PROCESS + 5;
 
+    /**
+     * Key for a measurement of the number of milliseconds this process spent with
+     * an activity in the foreground.
+     */
     @HealthKeys.Constant(type=HealthKeys.TYPE_MEASUREMENT)
     public static final int MEASUREMENT_FOREGROUND_MS = HealthKeys.BASE_PROCESS + 6;
 

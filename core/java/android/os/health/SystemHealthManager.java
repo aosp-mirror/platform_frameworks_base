@@ -27,6 +27,11 @@ import com.android.internal.app.IBatteryStats;
 /**
  * Provides access to data about how various system resources are used by applications.
  * @more
+ * <p>
+ * If you are going to be using this class to log your application's resource usage,
+ * please consider the amount of resources (battery, network, etc) that will be used
+ * by the logging itself.  It can be substantial.
+ * <p>
  * <b>Battery Usage</b><br>
  * The statistics related to power (battery) usage are recorded since the device
  * was last unplugged. It is expected that applications schedule more work to do
