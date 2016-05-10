@@ -56,7 +56,7 @@ import com.android.server.net.NetworkStatsServiceTest.IdleableHandlerThread;
 import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -91,7 +91,6 @@ public class NetworkStatsObserversTest extends TestCase {
     private static final long BASE_BYTES = 7 * MB_IN_BYTES;
     private static final int INVALID_TYPE = -1;
 
-    private static final int[] NO_UIDS = null;
     private static final VpnInfo[] VPN_INFO = new VpnInfo[0];
 
     private long mElapsedRealtime;
@@ -134,112 +133,60 @@ public class NetworkStatsObserversTest extends TestCase {
 
     public void testRegister_thresholdTooLow_setsDefaultThreshold() throws Exception {
         long thresholdTooLowBytes = 1L;
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, thresholdTooLowBytes);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateWifi, thresholdTooLowBytes);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateWifi, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
     }
 
     public void testRegister_highThreshold_accepted() throws Exception {
         long highThresholdBytes = 2 * THRESHOLD_BYTES;
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, highThresholdBytes);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateWifi, highThresholdBytes);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateWifi, request.template));
         assertEquals(highThresholdBytes, request.thresholdInBytes);
     }
 
     public void testRegister_twoRequests_twoIds() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateWifi, THRESHOLD_BYTES);
 
         DataUsageRequest request1 = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request1.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request1.templates));
-        assertNull(request1.uids);
+        assertTrue(Objects.equals(sTemplateWifi, request1.template));
         assertEquals(THRESHOLD_BYTES, request1.thresholdInBytes);
 
         DataUsageRequest request2 = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request2.requestId > request1.requestId);
-        assertTrue(Arrays.deepEquals(templates, request2.templates));
-        assertNull(request2.uids);
+        assertTrue(Objects.equals(sTemplateWifi, request2.template));
         assertEquals(THRESHOLD_BYTES, request2.thresholdInBytes);
     }
 
-    public void testRegister_defaultAccess_otherUids_securityException() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
-        int[] uids = new int[] { UID_RED, UID_BLUE, UID_GREEN };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, THRESHOLD_BYTES);
-
-        try {
-            mStatsObservers.register(inputRequest, mMessenger, mockBinder, UID_RED,
-                    NetworkStatsAccess.Level.DEFAULT);
-            fail("Should have denied access");
-        } catch (SecurityException expected) {}
-    }
-
-    public void testRegister_userAccess_otherUidsSameUser()
-            throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
-        int[] uids = new int[] { UID_RED, UID_BLUE, UID_GREEN };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, THRESHOLD_BYTES);
-
-        DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
-                UID_RED, NetworkStatsAccess.Level.USER);
-        assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertTrue(Arrays.equals(uids, request.uids));
-        assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
-    }
-
-    public void testRegister_defaultAccess_sameUid() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
-        int[] uids = new int[] { UID_RED };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, THRESHOLD_BYTES);
-
-        DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
-                UID_RED, NetworkStatsAccess.Level.DEFAULT);
-        assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertTrue(Arrays.equals(uids, request.uids));
-        assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
-    }
-
     public void testUnregister_unknownRequest_noop() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
         DataUsageRequest unknownRequest = new DataUsageRequest(
-                123456 /* id */, templates, NO_UIDS, THRESHOLD_BYTES);
+                123456 /* id */, sTemplateWifi, THRESHOLD_BYTES);
 
         mStatsObservers.unregister(unknownRequest, UID_RED);
     }
 
     public void testUnregister_knownRequest_releasesCaller() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
         Mockito.verify(mockBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
 
@@ -250,15 +197,13 @@ public class NetworkStatsObserversTest extends TestCase {
     }
 
     public void testUnregister_knownRequest_invalidUid_doesNotUnregister() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 UID_RED, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
         Mockito.verify(mockBinder).linkToDeath(any(IBinder.DeathRecipient.class), anyInt());
 
@@ -269,15 +214,13 @@ public class NetworkStatsObserversTest extends TestCase {
     }
 
     public void testUpdateStats_initialSample_doesNotNotify() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -301,15 +244,13 @@ public class NetworkStatsObserversTest extends TestCase {
     }
 
     public void testUpdateStats_belowThreshold_doesNotNotify() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -339,16 +280,14 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(INVALID_TYPE, mHandler.mLastMessageType);
     }
 
-    public void testUpdateStats_aboveThresholdNetwork_notifies() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
+    public void testUpdateStats_deviceAccess_notifies() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -378,104 +317,14 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
     }
 
-    public void testUpdateStats_aboveThresholdMultipleNetwork_notifies() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1, sTemplateImsi2 };
+    public void testUpdateStats_defaultAccess_notifiesSameUid() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
-
-        DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
-                UID_RED, NetworkStatsAccess.Level.DEVICESUMMARY);
-        assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
-        assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
-
-        NetworkIdentitySet identSet1 = new NetworkIdentitySet();
-        identSet1.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
-        mActiveIfaces.put(TEST_IFACE, identSet1);
-
-        NetworkIdentitySet identSet2 = new NetworkIdentitySet();
-        identSet2.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_2, null /* networkId */, false /* roaming */, true /* metered */));
-        mActiveIfaces.put(TEST_IFACE2, identSet2);
-
-        // Baseline
-        NetworkStats xtSnapshot = new NetworkStats(TEST_START, 1 /* initialSize */)
-                .addIfaceValues(TEST_IFACE, BASE_BYTES, 8L, BASE_BYTES, 16L)
-                .addIfaceValues(TEST_IFACE2, BASE_BYTES + 1234L, 18L, BASE_BYTES, 12L);
-        NetworkStats uidSnapshot = null;
-        mStatsObservers.updateStats(
-                xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
-                VPN_INFO, TEST_START);
-
-        // Delta - traffic on IMSI2
-        xtSnapshot = new NetworkStats(TEST_START + MINUTE_IN_MILLIS, 1 /* initialSize */)
-                .addIfaceValues(TEST_IFACE, BASE_BYTES, 8L, BASE_BYTES, 16L)
-                .addIfaceValues(TEST_IFACE2, BASE_BYTES + THRESHOLD_BYTES, 22L,
-                        BASE_BYTES + THRESHOLD_BYTES, 24L);
-        mStatsObservers.updateStats(
-                xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
-                VPN_INFO, TEST_START);
-        waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
-    }
-
-    public void testUpdateStats_aboveThresholdUid_notifies() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
-        int[] uids = new int[] { UID_RED, UID_BLUE, UID_GREEN };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, THRESHOLD_BYTES);
-
-        DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
-                Process.SYSTEM_UID, NetworkStatsAccess.Level.DEVICE);
-        assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertTrue(Arrays.equals(uids,request.uids));
-        assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
-
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
-        mActiveUidIfaces.put(TEST_IFACE, identSet);
-
-        // Baseline
-        NetworkStats xtSnapshot = null;
-        NetworkStats uidSnapshot = new NetworkStats(TEST_START, 2 /* initialSize */)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                        BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
-        mStatsObservers.updateStats(
-                xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
-                VPN_INFO, TEST_START);
-
-        // Delta
-        uidSnapshot = new NetworkStats(TEST_START+ 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                        BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
-        mStatsObservers.updateStats(
-                xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
-                VPN_INFO, TEST_START);
-        waitForObserverToIdle();
-
-        assertTrue(mCv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
-    }
-
-    public void testUpdateStats_defaultAccess_noUid_notifiesSameUid() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 UID_RED, NetworkStatsAccess.Level.DEFAULT);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -494,7 +343,7 @@ public class NetworkStatsObserversTest extends TestCase {
                 VPN_INFO, TEST_START);
 
         // Delta
-        uidSnapshot = new NetworkStats(TEST_START+ 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
+        uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                         BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
@@ -506,16 +355,14 @@ public class NetworkStatsObserversTest extends TestCase {
         assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, mHandler.mLastMessageType);
     }
 
-    public void testUpdateStats_defaultAccess_noUid_usageOtherUid_doesNotNotify() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
+    public void testUpdateStats_defaultAccess_usageOtherUid_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 UID_BLUE, NetworkStatsAccess.Level.DEFAULT);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -534,7 +381,7 @@ public class NetworkStatsObserversTest extends TestCase {
                 VPN_INFO, TEST_START);
 
         // Delta
-        uidSnapshot = new NetworkStats(TEST_START+ 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
+        uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                         BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
@@ -547,15 +394,13 @@ public class NetworkStatsObserversTest extends TestCase {
     }
 
     public void testUpdateStats_userAccess_usageSameUser_notifies() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 UID_BLUE, NetworkStatsAccess.Level.USER);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -574,7 +419,7 @@ public class NetworkStatsObserversTest extends TestCase {
                 VPN_INFO, TEST_START);
 
         // Delta
-        uidSnapshot = new NetworkStats(TEST_START+ 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
+        uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                         BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
@@ -587,15 +432,13 @@ public class NetworkStatsObserversTest extends TestCase {
     }
 
     public void testUpdateStats_userAccess_usageAnotherUser_doesNotNotify() throws Exception {
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1 };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, NO_UIDS, THRESHOLD_BYTES);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateImsi1, THRESHOLD_BYTES);
 
         DataUsageRequest request = mStatsObservers.register(inputRequest, mMessenger, mockBinder,
                 UID_RED, NetworkStatsAccess.Level.USER);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
         NetworkIdentitySet identSet = new NetworkIdentitySet();
@@ -614,7 +457,7 @@ public class NetworkStatsObserversTest extends TestCase {
                 VPN_INFO, TEST_START);
 
         // Delta
-        uidSnapshot = new NetworkStats(TEST_START+ 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
+        uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_ANOTHER_USER, SET_DEFAULT, TAG_NONE, ROAMING_NO,
                         BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(

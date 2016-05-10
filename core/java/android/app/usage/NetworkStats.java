@@ -193,14 +193,9 @@ public final class NetworkStats implements AutoCloseable {
         public static final int ROAMING_YES = 0x2;
 
         /**
-         * Special TAG value matching any tag.
-         */
-        public static final int TAG_ANY = android.net.NetworkStats.TAG_ALL;
-
-        /**
          * Special TAG value for total data across all tags
          */
-        public static final int TAG_ALL = android.net.NetworkStats.TAG_NONE;
+        public static final int TAG_NONE = android.net.NetworkStats.TAG_NONE;
 
         private int mUid;
         private int mTag;
@@ -232,8 +227,7 @@ public final class NetworkStats implements AutoCloseable {
 
         private static int convertTag(int tag) {
             switch (tag) {
-                case android.net.NetworkStats.TAG_ALL: return TAG_ANY;
-                case android.net.NetworkStats.TAG_NONE: return TAG_ALL;
+                case android.net.NetworkStats.TAG_NONE: return TAG_NONE;
             }
             return tag;
         }
@@ -417,9 +411,9 @@ public final class NetworkStats implements AutoCloseable {
      * Collects summary results and sets summary enumeration mode.
      * @throws RemoteException
      */
-    void startSummaryEnumeration(boolean includeTags) throws RemoteException {
+    void startSummaryEnumeration() throws RemoteException {
         mSummary = mSession.getSummaryForAllUid(mTemplate, mStartTimeStamp, mEndTimeStamp,
-                includeTags);
+                false /* includeTags */);
         mEnumerationIndex = 0;
     }
 
