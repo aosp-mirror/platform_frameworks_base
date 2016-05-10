@@ -95,7 +95,7 @@ final class SettingsState {
 
     private final Object mLock;
 
-    private final Handler mHandler;
+    private final Handler mHandler = new MyHandler();
 
     @GuardedBy("mLock")
     private final ArrayMap<String, Setting> mSettings = new ArrayMap<>();
@@ -134,15 +134,13 @@ final class SettingsState {
     @GuardedBy("mLock")
     private long mNextId;
 
-    public SettingsState(Object lock, File file, int key, int maxBytesPerAppPackage,
-            Handler handler) {
+    public SettingsState(Object lock, File file, int key, int maxBytesPerAppPackage) {
         // It is important that we use the same lock as the settings provider
         // to ensure multiple mutations on this state are atomicaly persisted
         // as the async persistence should be blocked while we make changes.
         mLock = lock;
         mStatePersistFile = file;
         mKey = key;
-        mHandler = handler;
         if (maxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_LIMITED) {
             mMaxBytesPerAppPackage = maxBytesPerAppPackage;
             mPackageToMemoryUsage = new ArrayMap<>();
