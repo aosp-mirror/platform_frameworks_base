@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 
 public class Movie {
-    private final long mNativeMovie;
+    private long mNativeMovie;
 
     private Movie(long nativeMovie) {
         if (nativeMovie == 0) {
@@ -82,6 +82,7 @@ public class Movie {
     protected void finalize() throws Throwable {
         try {
             nativeDestructor(mNativeMovie);
+            mNativeMovie = 0;
         } finally {
             super.finalize();
         }

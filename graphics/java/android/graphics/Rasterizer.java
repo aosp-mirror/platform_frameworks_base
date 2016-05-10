@@ -26,6 +26,7 @@ public class Rasterizer {
 
     protected void finalize() throws Throwable {
         finalizer(native_instance);
+        native_instance = 0;
     }
 
     private static native void finalizer(long native_instance);
