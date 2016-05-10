@@ -557,7 +557,7 @@ public final class ActivityThread {
                 return;
             }
             try {
-                int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-in-mb", 8);
+                int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
                         bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval);
                 profiling = true;
