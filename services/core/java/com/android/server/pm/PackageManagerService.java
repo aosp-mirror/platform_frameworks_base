@@ -17753,6 +17753,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 17;
         public static final int DUMP_DOMAIN_PREFERRED = 1 << 18;
         public static final int DUMP_FROZEN = 1 << 19;
+        public static final int DUMP_DEXOPT = 1 << 20;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -17869,6 +17870,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    write: write current settings now");
                 pw.println("    installs: details about install sessions");
                 pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
+                pw.println("    dexopt: dump dexopt state");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -17988,6 +17990,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_INSTALLS);
             } else if ("frozen".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_FROZEN);
+            } else if ("dexopt".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_DEXOPT);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -18345,6 +18349,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 ipw.decreaseIndent();
             }
 
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                dumpDexoptStateLPr(pw, packageName);
+            }
+
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
@@ -18380,6 +18389,32 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     IoUtils.closeQuietly(in);
                 }
             }
+        }
+    }
+
+    private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+        ipw.println();
+        ipw.println("Dexopt state:");
+        ipw.increaseIndent();
+        Collection<PackageParser.Package> packages = null;
+        if (packageName != null) {
+            PackageParser.Package targetPackage = mPackages.get(packageName);
+            if (targetPackage != null) {
+                packages = Collections.singletonList(targetPackage);
+            } else {
+                ipw.println("Unable to find package: " + packageName);
+                return;
+            }
+        } else {
+            packages = mPackages.values();
+        }
+
+        for (PackageParser.Package pkg : packages) {
+            ipw.println("[" + pkg.packageName + "]");
+            ipw.increaseIndent();
+            mPackageDexOptimizer.dumpDexoptState(ipw, pkg);
+            ipw.decreaseIndent();
         }
     }
 
