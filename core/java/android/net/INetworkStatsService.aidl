@@ -61,10 +61,10 @@ interface INetworkStatsService {
     void advisePersistThreshold(long thresholdBytes);
 
     /** Registers a callback on data usage. */
-    DataUsageRequest registerDataUsageCallback(String callingPackage,
+    DataUsageRequest registerUsageCallback(String callingPackage,
             in DataUsageRequest request, in Messenger messenger, in IBinder binder);
 
     /** Unregisters a callback on data usage. */
-    void unregisterDataUsageRequest(in DataUsageRequest request);
+    void unregisterUsageRequest(in DataUsageRequest request);
 
 }

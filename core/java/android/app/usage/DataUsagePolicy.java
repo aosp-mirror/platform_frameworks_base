@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Defines a policy for data usage callbacks, made through {@link DataUsagePolicy.Builder} and used
  * to be notified on data usage via {@link NetworkStatsManager#registerDataUsageCallback}.
+ * @removed
  */
 public class DataUsagePolicy {
 

@@ -100,7 +100,7 @@ import org.easymock.EasyMock;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.List;
 
 /**
@@ -887,7 +887,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     }
 
-    public void testRegisterDataUsageCallback_network() throws Exception {
+    public void testRegisterUsageCallback() throws Exception {
         // pretend that wifi network comes online; service should ask about full
         // network state, and poll any existing interfaces before updating.
         expectCurrentTime();
@@ -907,9 +907,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         String callingPackage = "the.calling.package";
         long thresholdInBytes = 1L;  // very small; should be overriden by framework
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
         DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, null /* uids */, thresholdInBytes);
+                DataUsageRequest.REQUEST_ID_UNSET, sTemplateWifi, thresholdInBytes);
 
         // Create a messenger that waits for callback activity
         ConditionVariable cv = new ConditionVariable(false);
@@ -931,11 +930,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // Register and verify request and that binder was called
         DataUsageRequest request =
-                mService.registerDataUsageCallback(callingPackage, inputRequest,
+                mService.registerUsageCallback(callingPackage, inputRequest,
                         messenger, mockBinder);
         assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertNull(request.uids);
+        assertTrue(Objects.equals(sTemplateWifi, request.template));
         long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
         assertEquals(minThresholdInBytes, request.thresholdInBytes);
 
@@ -997,7 +995,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         EasyMock.replay(mockBinder);
 
         // Unregister request
-        mService.unregisterDataUsageRequest(request);
+        mService.unregisterUsageRequest(request);
 
         // Wait for the caller to ack receipt of CALLBACK_RELEASED
         assertTrue(cv.block(WAIT_TIMEOUT));
@@ -1007,157 +1005,13 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         EasyMock.verify(mockBinder);
     }
 
-    public void testRegisterDataUsageCallback_uids() throws Exception {
-        // pretend that network comes online
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkState(buildMobile3gState(IMSI_1, true /* isRoaming */));
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-        expectBandwidthControlCheck();
-
-        replay();
-        mService.forceUpdateIfaces();
-        verifyAndReset();
-
+    public void testUnregisterUsageCallback_unknown_noop() throws Exception {
         String callingPackage = "the.calling.package";
         long thresholdInBytes = 10 * 1024 * 1024;  // 10 MB
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1, sTemplateImsi2 };
-        int[] uids = new int[] { UID_RED };
-        DataUsageRequest inputRequest = new DataUsageRequest(
-                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, thresholdInBytes);
-
-        // Create a messenger that waits for callback activity
-        ConditionVariable cv = new ConditionVariable(false);
-        cv.close();
-        LatchedHandler latchedHandler = new LatchedHandler(Looper.getMainLooper(), cv);
-        Messenger messenger = new Messenger(latchedHandler);
-
-        // Allow binder to connect
-        IBinder mockBinder = createMock(IBinder.class);
-        mockBinder.linkToDeath((IBinder.DeathRecipient) anyObject(), anyInt());
-        EasyMock.replay(mockBinder);
-
-        // Force poll
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
-        expectNetworkStatsPoll();
-        replay();
-
-        // Register and verify request and that binder was called
-        DataUsageRequest request =
-                mService.registerDataUsageCallback(callingPackage, inputRequest,
-                        messenger, mockBinder);
-        assertTrue(request.requestId > 0);
-        assertTrue(Arrays.deepEquals(templates, request.templates));
-        assertTrue(Arrays.equals(uids, request.uids));
-        assertEquals(thresholdInBytes, request.thresholdInBytes);
-
-        // Wait for service to handle internal MSG_REGISTER_DATA_USAGE_LISTENER
-        mHandler.sendMessage(mHandler.obtainMessage(-1));
-        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
-
-        verifyAndReset();
-
-        // Make sure that the caller binder gets connected
-        EasyMock.verify(mockBinder);
-        EasyMock.reset(mockBinder);
-
-        // modify some number on mobile interface, and trigger poll event
-        // not enough traffic to call data usage callback
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO, 128L, 2L,
-                        128L, 2L, 0L)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_NO, 64L, 1L, 64L,
-                        1L, 0L));
-        expectNetworkStatsPoll();
-
-        replay();
-        forcePollAndWaitForIdle();
-
-        // verify service recorded history
-        assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
-
-        // verify entire history present
-        NetworkStats stats = mSession.getSummaryForAllUid(
-                sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
-        assertEquals(2, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_YES, 128L, 2L,
-                128L, 2L, 0);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_YES, 64L, 1L, 64L,
-                1L, 0);
-
-        verifyAndReset();
-
-        // make sure callback has not being called
-        assertEquals(INVALID_TYPE, latchedHandler.mLastMessageType);
-
-        // and bump forward again, with counters going higher. this is
-        // important, since it will trigger the data usage callback
-        incrementCurrentTime(DAY_IN_MILLIS);
-        expectCurrentTime();
-        expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_NO,
-                        128000000L, 2L, 128000000L, 2L, 0L)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_NO,
-                        64000000L, 1L, 64000000L, 1L, 0L));
-        expectNetworkStatsPoll();
-
-        replay();
-        forcePollAndWaitForIdle();
-
-        // verify service recorded history
-        assertUidTotal(sTemplateImsi1, UID_RED, 128000000L, 2L, 128000000L, 2L, 0);
-
-        // verify entire history present
-        stats = mSession.getSummaryForAllUid(
-                sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
-        assertEquals(2, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_YES,
-                128000000L, 2L, 128000000L, 2L, 0);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_YES,
-                64000000L, 1L, 64000000L, 1L, 0);
-
-        verifyAndReset();
-
-        // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
-        assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.mLastMessageType);
-        cv.close();
-
-        // Allow binder to disconnect
-        expect(mockBinder.unlinkToDeath((IBinder.DeathRecipient) anyObject(), anyInt()))
-                .andReturn(true);
-        EasyMock.replay(mockBinder);
-
-        // Unregister request
-        mService.unregisterDataUsageRequest(request);
-
-        // Wait for the caller to ack receipt of CALLBACK_RELEASED
-        assertTrue(cv.block(WAIT_TIMEOUT));
-        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
-
-        // Make sure that the caller binder gets disconnected
-        EasyMock.verify(mockBinder);
-    }
-
-    public void testUnregisterDataUsageCallback_unknown_noop() throws Exception {
-        String callingPackage = "the.calling.package";
-        long thresholdInBytes = 10 * 1024 * 1024;  // 10 MB
-        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1, sTemplateImsi2 };
         DataUsageRequest unknownRequest = new DataUsageRequest(
-                2, templates, null /* uids */, thresholdInBytes);
+                2 /* requestId */, sTemplateImsi1, thresholdInBytes);
 
-        mService.unregisterDataUsageRequest(unknownRequest);
+        mService.unregisterUsageRequest(unknownRequest);
     }
 
     private static File getBaseDir(File statsDir) {

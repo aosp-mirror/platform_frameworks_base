@@ -578,9 +578,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 if (tag == TAG_NONE) {
                     return getUidComplete().getHistory(template, uid, set, tag, fields, start, end,
                             accessLevel);
-                } else {
+                } else if (uid == Binder.getCallingUid()) {
                     return getUidTagComplete().getHistory(template, uid, set, tag, fields,
                             start, end, accessLevel);
+                } else {
+                    throw new SecurityException("Calling package " + mCallingPackage
+                            + " cannot access tag information from a different uid");
                 }
             }
 
@@ -761,12 +764,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public DataUsageRequest registerDataUsageCallback(String callingPackage,
+    public DataUsageRequest registerUsageCallback(String callingPackage,
                 DataUsageRequest request, Messenger messenger, IBinder binder) {
         checkNotNull(callingPackage, "calling package is null");
         checkNotNull(request, "DataUsageRequest is null");
-        checkNotNull(request.templates, "NetworkTemplate is null");
-        checkArgument(request.templates.length > 0);
+        checkNotNull(request.template, "NetworkTemplate is null");
         checkNotNull(messenger, "messenger is null");
         checkNotNull(binder, "binder is null");
 
@@ -788,7 +790,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
    }
 
     @Override
-    public void unregisterDataUsageRequest(DataUsageRequest request) {
+    public void unregisterUsageRequest(DataUsageRequest request) {
         checkNotNull(request, "DataUsageRequest is null");
 
         int callingUid = Binder.getCallingUid();
