@@ -27,6 +27,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.WINDOW_REPLACEMENT_TIMEOUT_DURATION;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN;
 
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.wm.WindowManagerService.H;
@@ -64,10 +65,6 @@ class AppWindowToken extends WindowToken {
     @NonNull final AppWindowAnimator mAppAnimator;
 
     final boolean voiceInteraction;
-
-    // Whether we're performing an entering animation with a saved surface.
-    boolean mAnimatingWithSavedSurface;
-
 
     Task mTask;
     boolean appFullscreen;
@@ -157,6 +154,13 @@ class AppWindowToken extends WindowToken {
                 win.mClient.dispatchAppVisibility(!clientHidden);
             } catch (RemoteException e) {
             }
+        }
+    }
+
+    void setVisibleBeforeClientHidden() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            w.setVisibleBeforeClientHidden();
         }
     }
 
@@ -295,7 +299,7 @@ class AppWindowToken extends WindowToken {
             // If we're animating with a saved surface, we're already visible.
             // Return true so that the alpha doesn't get cleared.
             if (!win.mAppFreezing
-                    && (win.mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface
+                    && (win.mViewVisibility == View.VISIBLE || win.isAnimatingWithSavedSurface()
                             || (win.mWinAnimator.isAnimationSet()
                                     && !service.mAppTransition.isTransitionSet()))
                     && !win.mDestroying
@@ -347,7 +351,6 @@ class AppWindowToken extends WindowToken {
 
             win.destroyOrSaveSurface();
             if (win.mRemoveOnExit) {
-                win.mAnimatingExit = false;
                 service.removeWindowInnerLocked(win);
             }
             final DisplayContent displayContent = win.getDisplayContent();
@@ -391,43 +394,56 @@ class AppWindowToken extends WindowToken {
         return allDrawn;
     }
 
-    boolean hasSavedSurface() {
+    boolean canRestoreSurfaces() {
         for (int i = allAppWindows.size() -1; i >= 0; i--) {
-            final WindowState ws = allAppWindows.get(i);
-            if (ws.hasSavedSurface()) {
+            final WindowState w = allAppWindows.get(i);
+            if (w.canRestoreSurface()) {
                 return true;
             }
         }
         return false;
     }
 
+    void clearVisibleBeforeClientHidden() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            w.clearVisibleBeforeClientHidden();
+        }
+    }
+
     void restoreSavedSurfaces() {
-        if (!hasSavedSurface()) {
+        if (!canRestoreSurfaces()) {
+            clearVisibleBeforeClientHidden();
             return;
         }
-        mAnimatingWithSavedSurface = true;
-
         // Check if we have enough drawn windows to mark allDrawn= true.
         int numInteresting = 0;
         int numDrawn = 0;
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState w = allAppWindows.get(i);
-            if (w.hasSavedSurface()) {
-                w.restoreSavedSurface();
-            }
-            if (w != startingWindow && !w.mAppDied
+            if (w != startingWindow && !w.mAppDied && w.wasVisibleBeforeClientHidden()
                     && (!mAppAnimator.freezingScreen || !w.mAppFreezing)) {
                 numInteresting++;
+                if (w.hasSavedSurface()) {
+                    w.restoreSavedSurface();
+                }
                 if (w.isDrawnLw()) {
                     numDrawn++;
                 }
             }
         }
 
-        allDrawn |= (numInteresting > 0) && (numInteresting == numDrawn);
+        if (!allDrawn) {
+            allDrawn = (numInteresting > 0) && (numInteresting == numDrawn);
+            if (allDrawn) {
+                service.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN, token).sendToTarget();
+            }
+        }
+        clearVisibleBeforeClientHidden();
 
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
-                "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn);
+                "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn
+                + " numInteresting=" + numInteresting + " numDrawn=" + numDrawn);
     }
 
     void destroySavedSurfaces() {
@@ -435,7 +451,11 @@ class AppWindowToken extends WindowToken {
             WindowState win = allAppWindows.get(i);
             win.destroySavedSurface();
         }
-        mAnimatingWithSavedSurface = false;
+    }
+
+    void clearAllDrawn() {
+        allDrawn = false;
+        deferClearAllDrawn = false;
     }
 
     @Override

@@ -2170,7 +2170,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Returns true if we're done setting up any transitions.
      */
     private boolean prepareWindowReplacementTransition(AppWindowToken atoken) {
-        atoken.allDrawn = false;
+        atoken.clearAllDrawn();
         WindowState replacedWindow = null;
         for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
             WindowState candidate = atoken.windows.get(i);
@@ -2316,7 +2316,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Preserving " + win + " until the new one is "
                         + "added");
                 // TODO: We are overloading mAnimatingExit flag to prevent the window state from
-                // been removed. We probably need another falg to indicate that window removal
+                // been removed. We probably need another flag to indicate that window removal
                 // should be deffered vs. overloading the flag that says we are playing an exit
                 // animation.
                 win.mAnimatingExit = true;
@@ -2464,7 +2464,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mTokenMap.remove(token.token);
             } else if (atoken != null) {
                 atoken.firstWindowDrawn = false;
-                atoken.allDrawn = false;
+                atoken.clearAllDrawn();
             }
         }
 
@@ -4423,6 +4423,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Now that the app is going invisible, we can remove it. It will be restarted
                 // if made visible again.
                 wtoken.removeAllDeadWindows();
+                wtoken.setVisibleBeforeClientHidden();
             } else if (visible) {
                 if (!mAppTransition.isTransitionSet() && mAppTransition.isReady()) {
                     // Add the app mOpeningApps if transition is unset but ready. This means
@@ -4434,8 +4435,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // If the token is currently hidden (should be the common case), or has been
                 // stopped, then we need to set up to wait for its windows to be ready.
                 if (wtoken.hidden || wtoken.mAppStopped) {
-                    wtoken.allDrawn = false;
-                    wtoken.deferClearAllDrawn = false;
+                    wtoken.clearAllDrawn();
 
                     // If the app was already visible, don't reset the waitingToShow state.
                     if (wtoken.hidden) {
@@ -9234,8 +9234,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     winAnimator.mDrawState = DRAW_PENDING;
                     if (w.mAppToken != null) {
-                        w.mAppToken.allDrawn = false;
-                        w.mAppToken.deferClearAllDrawn = false;
+                        w.mAppToken.clearAllDrawn();
                     }
                 }
                 if (!mResizingWindows.contains(w)) {
@@ -9392,7 +9391,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
                                 + ws + " surface=" + wsa.mSurfaceController
                                 + " token=" + ws.mAppToken
-                                + " saved=" + ws.mAppToken.hasSavedSurface());
+                                + " saved=" + ws.hasSavedSurface());
                         if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", false);
                         wsa.destroySurface();
                         leakedSurface = true;

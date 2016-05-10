@@ -185,8 +185,7 @@ public class AppWindowAnimator {
         clearThumbnail();
         setNullAnimation();
         if (mAppToken.deferClearAllDrawn) {
-            mAppToken.allDrawn = false;
-            mAppToken.deferClearAllDrawn = false;
+            mAppToken.clearAllDrawn();
         }
         mStackClip = STACK_CLIP_BEFORE_ANIM;
     }
