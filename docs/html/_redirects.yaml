@@ -988,7 +988,7 @@ redirects:
 - from: /tools/help/theme-editor.html
   to: /studio/write/theme-editor.html
 - from: /tools/help/traceview.html
-  to: /studio/profile/traceview-commandline.html
+  to: /studio/profile/traceview.html
 - from: /tools/help/translations-editor.html
   to: /studio/write/translations-editor.html
 - from: /tools/help/uiautomator/Configurator.html
@@ -1113,6 +1113,26 @@ redirects:
   to: /studio/test/index.html
 - from: /tools/testing/testing-tools.html
   to: /studio/test/index.html
+- from: /tools/performance/importing-legacy-apps.html
+  to: /studio/projects/index.html
+- from: /tools/performance/comparison.html
+  to: /studio/profile/android-monitor.html
+- from: /tools/performance/memory-monitor/index.html
+  to: /studio/profile/am-memory.html
+- from: /tools/devices/index.html
+  to: /studio/run/managing-avds.html
+- from: /tools/extras/index.html
+  to: /studio/intro/update.html
+- from: /tools/workflow.html
+  to: /studio/guide/workflow.html
+- from: /installing/studio-androidview.html
+  to: /studio/projects/index.html
+- from: /installing/studio-tips.html
+  to: /studio/guide/guide-intro.html
+- from: /tools/help/ddms.html
+  to: /studio/profile/ddms.html
+- from: /tools/revisions/index.html
+  to: /studio/releases/index.html
 
 
 # Just incase something was missed, go to intro page
