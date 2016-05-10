@@ -15,6 +15,7 @@
  */
 package com.android.providers.settings;
 
+import android.os.Handler;
 import android.test.AndroidTestCase;
 import android.util.Xml;
 
@@ -126,7 +127,7 @@ public class SettingsStateTest extends AndroidTestCase {
         final Object lock = new Object();
 
         final SettingsState ssWriter = new SettingsState(lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED);
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, new Handler());
         ssWriter.setVersionLocked(SettingsState.SETTINGS_VERSOIN_NEW_ENCODING);
 
         ssWriter.insertSettingLocked("k1", "\u0000", "package");
@@ -138,7 +139,7 @@ public class SettingsStateTest extends AndroidTestCase {
         }
 
         final SettingsState ssReader = new SettingsState(lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED);
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, new Handler());
         synchronized (lock) {
             assertEquals("\u0000", ssReader.getSettingLocked("k1").getValue());
             assertEquals("abc", ssReader.getSettingLocked("k2").getValue());
@@ -165,7 +166,7 @@ public class SettingsStateTest extends AndroidTestCase {
         os.close();
 
         final SettingsState ss = new SettingsState(lock, file, 1,
-                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED);
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, new Handler());
         synchronized (lock) {
             SettingsState.Setting s;
             s = ss.getSettingLocked("k0");
