@@ -697,7 +697,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // The offset from the layout containing frame to the actual containing frame.
         final int layoutXDiff;
         final int layoutYDiff;
-        if (mInsetFrame.isEmpty() && (fullscreenTask || layoutInParentFrame())) {
+        if (fullscreenTask || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mContainingFrame.set(pf);
             mDisplayFrame.set(df);
