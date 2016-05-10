@@ -4265,17 +4265,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final PackageParser.Package pkg = mPackages.get(packageName);
             if (pkg == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
+                return 0;
             }
 
             final BasePermission bp = mSettings.mPermissions.get(name);
             if (bp == null) {
-                throw new IllegalArgumentException("Unknown permission: " + name);
+                return 0;
             }
 
             SettingBase sb = (SettingBase) pkg.mExtras;
             if (sb == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
+                return 0;
             }
 
             PermissionsState permissionsState = sb.getPermissionsState();
