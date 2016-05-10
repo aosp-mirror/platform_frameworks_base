@@ -31,12 +31,14 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnDragListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -58,7 +60,7 @@ import java.util.Objects;
 /**
  * Display list of known storage backend roots.
  */
-public class RootsFragment extends Fragment {
+public class RootsFragment extends Fragment implements ItemDragListener.DragHost {
 
     private static final String TAG = "RootsFragment";
     private static final String EXTRA_INCLUDE_APPS = "includeApps";
@@ -66,7 +68,6 @@ public class RootsFragment extends Fragment {
     private ListView mList;
     private RootsAdapter mAdapter;
     private LoaderCallbacks<Collection<RootInfo>> mCallbacks;
-
 
     public static void show(FragmentManager fm, Intent includeApps) {
         final Bundle args = new Bundle();
@@ -118,7 +119,8 @@ public class RootsFragment extends Fragment {
 
                 Intent handlerAppIntent = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, handlerAppIntent, state);
+                mAdapter = new RootsAdapter(context, result, handlerAppIntent, state,
+                        new ItemDragListener<>(RootsFragment.this));
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -184,25 +186,53 @@ public class RootsFragment extends Fragment {
         startActivity(intent);
     }
 
+    private void openItem(int position) {
+        Item item = mAdapter.getItem(position);
+        if (item instanceof RootItem) {
+            BaseActivity activity = BaseActivity.get(this);
+            RootInfo newRoot = ((RootItem) item).root;
+            Metrics.logRootVisited(getActivity(), newRoot);
+            activity.onRootPicked(newRoot);
+        } else if (item instanceof AppItem) {
+            DocumentsActivity activity = DocumentsActivity.get(this);
+            ResolveInfo info = ((AppItem) item).info;
+            Metrics.logAppVisited(getActivity(), info);
+            activity.onAppPicked(info);
+        } else if (item instanceof SpacerItem) {
+            if (DEBUG) Log.d(TAG, "Ignoring click/hover on spacer item.");
+        } else {
+            throw new IllegalStateException("Unknown root: " + item);
+        }
+    }
+
+    @Override
+    public void runOnUiThread(Runnable runnable) {
+        getActivity().runOnUiThread(runnable);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * In RootsFragment we open the hovered root.
+     */
+    @Override
+    public void onViewHovered(View view) {
+        int position = (Integer) view.getTag(R.id.item_position_tag);
+        openItem(position);
+    }
+
+    @Override
+    public void setDropTargetHighlight(View v, boolean highlight) {
+        @ColorRes int colorId = highlight ? R.color.item_doc_background_selected
+                : android.R.color.transparent;
+
+        v.setBackgroundColor(getActivity().getColor(colorId));
+    }
+
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Item item = mAdapter.getItem(position);
-            if (item instanceof RootItem) {
-                BaseActivity activity = BaseActivity.get(RootsFragment.this);
-                RootInfo newRoot = ((RootItem) item).root;
-                Metrics.logRootVisited(getActivity(), newRoot);
-                activity.onRootPicked(newRoot);
-            } else if (item instanceof AppItem) {
-                DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
-                ResolveInfo info = ((AppItem) item).info;
-                Metrics.logAppVisited(getActivity(), info);
-                activity.onAppPicked(info);
-            } else if (item instanceof SpacerItem) {
-                if (DEBUG) Log.d(TAG, "Ignoring click on spacer item.");
-            } else {
-                throw new IllegalStateException("Unknown root: " + item);
-            }
+            openItem(position);
         }
     };
 
@@ -236,7 +266,9 @@ public class RootsFragment extends Fragment {
             return convertView;
         }
 
-        public abstract void bindView(View convertView);
+        abstract void bindView(View convertView);
+
+        abstract boolean isDropTarget();
     }
 
     private static class RootItem extends Item {
@@ -267,6 +299,11 @@ public class RootsFragment extends Fragment {
             summary.setText(summaryText);
             summary.setVisibility(TextUtils.isEmpty(summaryText) ? View.GONE : View.VISIBLE);
         }
+
+        @Override
+        boolean isDropTarget() {
+            return root.supportsCreate() && !root.isLibrary();
+        }
     }
 
     private static class SpacerItem extends Item {
@@ -275,8 +312,13 @@ public class RootsFragment extends Fragment {
         }
 
         @Override
-        public void bindView(View convertView) {
+        void bindView(View convertView) {
             // Nothing to bind
+        }
+
+        @Override
+        boolean isDropTarget() {
+            return false;
         }
     }
 
@@ -289,7 +331,7 @@ public class RootsFragment extends Fragment {
         }
 
         @Override
-        public void bindView(View convertView) {
+        void bindView(View convertView) {
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
@@ -301,16 +343,24 @@ public class RootsFragment extends Fragment {
             // TODO: match existing summary behavior from disambig dialog
             summary.setVisibility(View.GONE);
         }
+
+        @Override
+        boolean isDropTarget() {
+            // We won't support drag n' drop in DocumentsActivity, and apps only show up there.
+            return false;
+        }
     }
 
     private static class RootsAdapter extends ArrayAdapter<Item> {
 
+        private OnDragListener mDragListener;
+
         /**
-         * @param handlerAppIntent When not null, apps capable of handling the original
-         *     intent will be included in list of roots (in special section at bottom).
+         * @param handlerAppIntent When not null, apps capable of handling the original intent will
+         *            be included in list of roots (in special section at bottom).
          */
         public RootsAdapter(Context context, Collection<RootInfo> roots,
-                @Nullable Intent handlerAppIntent, State state) {
+                @Nullable Intent handlerAppIntent, State state, OnDragListener dragListener) {
             super(context, 0);
 
             final List<RootItem> libraries = new ArrayList<>();
@@ -320,7 +370,8 @@ public class RootsFragment extends Fragment {
                 final RootItem item = new RootItem(root);
 
                 if (root.isHome() &&
-                        !Shared.shouldShowDocumentsRoot(context, ((Activity) context).getIntent())) {
+                        !Shared.shouldShowDocumentsRoot(context,
+                                ((Activity) context).getIntent())) {
                     continue;
                 } else if (root.isLibrary()) {
                     if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
@@ -346,11 +397,13 @@ public class RootsFragment extends Fragment {
             if (handlerAppIntent != null) {
                 includeHandlerApps(context, handlerAppIntent);
             }
+
+            mDragListener = dragListener;
         }
 
         /**
-         * Adds apps capable of handling the original intent will be included
-         * in list of roots (in special section at bottom).
+         * Adds apps capable of handling the original intent will be included in list of roots (in
+         * special section at bottom).
          */
         private void includeHandlerApps(Context context, Intent handlerAppIntent) {
             final PackageManager pm = context.getPackageManager();
@@ -375,7 +428,16 @@ public class RootsFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final Item item = getItem(position);
-            return item.getView(convertView, parent);
+            final View view = item.getView(convertView, parent);
+
+            if (item.isDropTarget()) {
+                view.setTag(R.id.item_position_tag, position);
+                view.setOnDragListener(mDragListener);
+            } else {
+                view.setTag(R.id.item_position_tag, null);
+                view.setOnDragListener(null);
+            }
+            return view;
         }
 
         @Override

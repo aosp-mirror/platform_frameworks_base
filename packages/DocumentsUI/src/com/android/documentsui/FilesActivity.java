@@ -312,6 +312,13 @@ public class FilesActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void springOpenDirectory(DocumentInfo doc) {
+        assert(doc.isContainer());
+        assert(!doc.isArchive());
+        openContainerDocument(doc);
+    }
+
     /**
      * Launches an intent to view the specified document.
      */

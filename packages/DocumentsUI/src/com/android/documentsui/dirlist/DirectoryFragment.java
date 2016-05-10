@@ -24,6 +24,8 @@ import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import com.google.common.collect.Lists;
+
 import android.annotation.IntDef;
 import android.annotation.StringRes;
 import android.app.Activity;
@@ -48,7 +50,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
@@ -87,6 +88,7 @@ import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
 import com.android.documentsui.Events.MotionInputEvent;
+import com.android.documentsui.ItemDragListener;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.Metrics;
@@ -106,8 +108,6 @@ import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
 
-import com.google.common.collect.Lists;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -121,7 +121,8 @@ import java.util.Set;
  * Display the documents inside a single directory.
  */
 public class DirectoryFragment extends Fragment
-        implements DocumentsAdapter.Environment, LoaderCallbacks<DirectoryResult> {
+        implements DocumentsAdapter.Environment, LoaderCallbacks<DirectoryResult>,
+        ItemDragListener.DragHost {
 
     @IntDef(flag = true, value = {
             TYPE_NORMAL,
@@ -177,6 +178,8 @@ public class DirectoryFragment extends Fragment
     private boolean mSearchMode = false;
     private @Nullable ActionMode mActionMode;
 
+    private DirectoryDragListener mOnDragListener;
+
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -196,6 +199,8 @@ public class DirectoryFragment extends Fragment
                 });
 
         mRecView.setItemAnimator(new DirectoryItemAnimator(getActivity()));
+
+        mOnDragListener = new DirectoryDragListener(this);
 
         // Make the recycler and the empty views responsive to drop events.
         mRecView.setOnDragListener(mOnDragListener);
@@ -1253,103 +1258,86 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    private View.OnDragListener mOnDragListener = new View.OnDragListener() {
-        @Override
-        public boolean onDrag(View v, DragEvent event) {
-            switch (event.getAction()) {
-                case DragEvent.ACTION_DRAG_STARTED:
-                    // TODO: Check if the event contains droppable data.
-                    return true;
+    public void clearSelection() {
+        mSelectionManager.clearSelection();
+    }
 
-                // TODO: Expand drop target directory on hover?
-                case DragEvent.ACTION_DRAG_ENTERED:
-                    setDropTargetHighlight(v, true);
-                    return true;
-                case DragEvent.ACTION_DRAG_EXITED:
-                    setDropTargetHighlight(v, false);
-                    return true;
+    @Override
+    public void runOnUiThread(Runnable runnable) {
+        getActivity().runOnUiThread(runnable);
+    }
 
-                case DragEvent.ACTION_DRAG_LOCATION:
-                    return true;
+    /**
+     * {@inheritDoc}
+     *
+     * In DirectoryFragment, we spring loads the hovered folder.
+     */
+    @Override
+    public void onViewHovered(View view) {
+        if (getModelId(view) != null) {
+            ((BaseActivity) getActivity()).springOpenDirectory(getDestination(view));
+        }
+    }
 
-                case DragEvent.ACTION_DRAG_ENDED:
-                    // After a drop event, always stop highlighting the target.
-                    setDropTargetHighlight(v, false);
-                    if (event.getResult()) {
-                        // Exit selection mode if the drop was handled.
-                        mSelectionManager.clearSelection();
-                    }
-                    return true;
+    public boolean handleDropEvent(View v, DragEvent event) {
+        ClipData clipData = event.getClipData();
+        assert (clipData != null);
 
-                case DragEvent.ACTION_DROP:
-                return handleDropEvent(v, event);
-            }
+        ClipDetails clipDetails = mClipper.getClipDetails(clipData);
+        assert(clipDetails.opType == FileOperationService.OPERATION_COPY);
+
+        // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
+        // multi-window drag, because localState isn't carried over from one process to
+        // another.
+        Object src = event.getLocalState();
+        DocumentInfo dst = getDestination(v);
+        if (Objects.equals(src, dst)) {
+            if (DEBUG) Log.d(TAG, "Drop target same as source. Ignoring.");
             return false;
         }
 
-        private boolean handleDropEvent(View v, DragEvent event) {
+        // Recognize multi-window drag and drop based on the fact that localState is not
+        // carried between processes. It will stop working when the localsState behavior
+        // is changed. The info about window should be passed in the localState then.
+        // The localState could also be null for copying from Recents in single window
+        // mode, but Recents doesn't offer this functionality (no directories).
+        Metrics.logUserAction(getContext(),
+                src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
+                        : Metrics.USER_ACTION_DRAG_N_DROP);
 
-            ClipData clipData = event.getClipData();
-            if (clipData == null) {
-                Log.w(TAG, "Received invalid drop event with null clipdata. Ignoring.");
-                return false;
+        copyFromClipData(clipData, dst);
+        return true;
+    }
+
+    private DocumentInfo getDestination(View v) {
+        String id = getModelId(v);
+        if (id != null) {
+            Cursor dstCursor = mModel.getItem(id);
+            if (dstCursor == null) {
+                Log.w(TAG, "Invalid destination. Can't obtain cursor for modelId: " + id);
+                return null;
             }
-
-            ClipDetails clipDetails = mClipper.getClipDetails(clipData);
-            assert(clipDetails.opType == FileOperationService.OPERATION_COPY);
-
-            // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
-            // multi-window drag, because localState isn't carried over from one process to
-            // another.
-            Object src = event.getLocalState();
-            DocumentInfo dst = getDestination(v);
-            if (Objects.equals(src, dst)) {
-                if (DEBUG) Log.d(TAG, "Drop target same as source. Ignoring.");
-                return false;
-            }
-
-            // Recognize multi-window drag and drop based on the fact that localState is not
-            // carried between processes. It will stop working when the localsState behavior
-            // is changed. The info about window should be passed in the localState then.
-            // The localState could also be null for copying from Recents in single window
-            // mode, but Recents doesn't offer this functionality (no directories).
-            Metrics.logUserAction(getContext(),
-                    src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
-                            : Metrics.USER_ACTION_DRAG_N_DROP);
-
-            copyFromClipData(clipData, dst);
-            return true;
+            return DocumentInfo.fromDirectoryCursor(dstCursor);
         }
 
-        private DocumentInfo getDestination(View v) {
-            String id = getModelId(v);
-            if (id != null) {
-                Cursor dstCursor = mModel.getItem(id);
-                if (dstCursor == null) {
-                    Log.w(TAG, "Invalid destination. Can't obtain cursor for modelId: " + id);
-                    return null;
-                }
-                return DocumentInfo.fromDirectoryCursor(dstCursor);
-            }
-
-            if (v == mRecView || v == mEmptyView) {
-                return getDisplayState().stack.peek();
-            }
-
-            return null;
+        if (v == mRecView || v == mEmptyView) {
+            return getDisplayState().stack.peek();
         }
 
-        private void setDropTargetHighlight(View v, boolean highlight) {
-            // Note: use exact comparison - this code is searching for views which are children of
-            // the RecyclerView instance in the UI.
-            if (v.getParent() == mRecView) {
-                RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(v);
-                if (vh instanceof DocumentHolder) {
-                    ((DocumentHolder) vh).setHighlighted(highlight);
-                }
+        return null;
+    }
+
+    @Override
+    public void setDropTargetHighlight(View v, boolean highlight) {
+        // Note: use exact comparison - this code is searching for views which are children of
+        // the RecyclerView instance in the UI.
+        if (v.getParent() == mRecView) {
+            RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(v);
+            if (vh instanceof DocumentHolder) {
+                ((DocumentHolder) vh).setHighlighted(highlight);
             }
         }
-    };
+    }
 
     /**
      * Gets the model ID for a given motion event (using the event position)
@@ -1373,7 +1361,7 @@ public class DirectoryFragment extends Fragment
      * @return The Model ID for the given document, or null if the given view is not associated with
      *     a document item view.
      */
-    private String getModelId(View view) {
+    protected String getModelId(View view) {
         View itemView = mRecView.findContainingItemView(view);
         if (itemView != null) {
             RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(itemView);

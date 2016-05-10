@@ -398,6 +398,13 @@ public abstract class BaseActivity extends Activity
     }
 
     /**
+     * This is called when user hovers over a doc for enough time during a drag n' drop, to open a
+     * folder that accepts drop. We should only open a container that's not an archive.
+     */
+    public void springOpenDirectory(DocumentInfo doc) {
+    }
+
+    /**
      * Called when search results changed.
      * Refreshes the content of the directory. It doesn't refresh elements on the action bar.
      * e.g. The current directory name displayed on the action bar won't get updated.
