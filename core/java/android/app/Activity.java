@@ -1879,14 +1879,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @param isInMultiWindowMode True if the activity is in multi-window mode.
      */
-    @CallSuper
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
-        if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onMultiWindowModeChanged " + this + ": " + isInMultiWindowMode);
-        mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode);
-        if (mWindow != null) {
-            mWindow.onMultiWindowModeChanged();
-        }
+        // Left deliberately empty. There should be no side effects if a direct
+        // subclass of Activity does not call super.
     }
 
     /**
@@ -1909,11 +1904,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @param isInPictureInPictureMode True if the activity is in picture-in-picture mode.
      */
-    @CallSuper
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-        if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode);
-        mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
+        // Left deliberately empty. There should be no side effects if a direct
+        // subclass of Activity does not call super.
     }
 
     /**
@@ -6873,6 +6866,23 @@ public class Activity extends ContextThemeWrapper
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
         }
+    }
+
+    final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG,
+                "dispatchMultiWindowModeChanged " + this + ": " + isInMultiWindowMode);
+        mFragments.dispatchMultiWindowModeChanged(isInMultiWindowMode);
+        if (mWindow != null) {
+            mWindow.onMultiWindowModeChanged();
+        }
+        onMultiWindowModeChanged(isInMultiWindowMode);
+    }
+
+    final void dispatchPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        if (DEBUG_LIFECYCLE) Slog.v(TAG,
+                "dispatchPictureInPictureModeChanged " + this + ": " + isInPictureInPictureMode);
+        mFragments.dispatchPictureInPictureModeChanged(isInPictureInPictureMode);
+        onPictureInPictureModeChanged(isInPictureInPictureMode);
     }
 
     /**
