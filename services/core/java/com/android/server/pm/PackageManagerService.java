@@ -226,6 +226,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.os.SomeArgs;
@@ -7220,8 +7221,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final int elapsedTime = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        // TODO: Log events using MetricsLogger.histogram / MetricsLogger.count
+        final int elapsedTimeMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+        // Report the elapsed time in deci-seconds (tenths of a second) rounded upwards
+        // (e.g. 1234 ms will become 13ds). This will help provide histograms at a more reasonable
+        // granularity.
+        final int elapsedTimeDs = ((elapsedTimeMs + 99) / 100);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_dexopted", numberOfPackagesOptimized);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_skipped", numberOfPackagesSkipped);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_failed", numberOfPackagesFailed);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_total", getOptimizablePackages().size());
+        MetricsLogger.histogram(mContext, "opt_dialog_time_decis", elapsedTimeDs);
     }
 
     @Override
