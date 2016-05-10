@@ -151,6 +151,15 @@ class MagnificationController {
         }
     }
 
+    /**
+     * Check if we are registered. Note that we may be planning to unregister at any moment.
+     *
+     * @return {@code true} if the controller is registered. {@code false} otherwise.
+     */
+    public boolean isRegisteredLocked() {
+        return mRegistered;
+    }
+
     private void unregisterInternalLocked() {
         if (mRegistered) {
             mSpecAnimationBridge.setEnabled(false);
@@ -179,6 +188,10 @@ class MagnificationController {
      */
     private void onMagnificationRegionChanged(Region magnified, boolean updateSpec) {
         synchronized (mLock) {
+            if (!mRegistered) {
+                // Don't update if we've unregistered
+                return;
+            }
             boolean magnificationChanged = false;
             boolean boundsChanged = false;
 
