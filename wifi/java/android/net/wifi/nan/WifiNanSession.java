@@ -33,6 +33,8 @@ public class WifiNanSession {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
+    public static final int MAX_SEND_RETRY_COUNT = 5;
+
     /**
      * @hide
      */
@@ -102,23 +104,24 @@ public class WifiNanSession {
     }
 
     /**
-     * Sends a message to the specified destination. Message transmission is
-     * part of the current discovery session - i.e. executed subsequent to a
-     * publish/subscribe
-     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}
-     * event.
+     * Sends a message to the specified destination. Message transmission is part of the current
+     * discovery session - i.e. executed subsequent to a publish/subscribe
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}
-     *            event.
+     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
      * @param message The message to be transmitted.
-     * @param messageLength The number of bytes from the {@code message} to be
-     *            transmitted.
-     * @param messageId An arbitrary integer used by the caller to identify the
-     *            message. The same integer ID will be returned in the callbacks
-     *            indicated message send success or failure.
+     * @param messageLength The number of bytes from the {@code message} to be transmitted.
+     * @param messageId An arbitrary integer used by the caller to identify the message. The same
+     *            integer ID will be returned in the callbacks indicated message send success or
+     *            failure.
+     * @param retryCount An integer specifying how many additional service-level (as opposed to PHY
+     *            or MAC level) retries should be attempted if there is no ACK from the receiver
+     *            (note: no retransmissions are attempted in other failure cases). A value of 0
+     *            indicates no retries. Max possible value is {@link #MAX_SEND_RETRY_COUNT}.
      */
-    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
+    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId,
+            int retryCount) {
         if (mTerminated) {
             Log.w(TAG, "sendMessage: called on terminated session");
             return;
@@ -129,8 +132,27 @@ public class WifiNanSession {
                 return;
             }
 
-            mgr.sendMessage(mSessionId, peerId, message, messageLength, messageId);
+            mgr.sendMessage(mSessionId, peerId, message, messageLength, messageId, retryCount);
         }
+    }
+
+    /**
+     * Sends a message to the specified destination. Message transmission is part of the current
+     * discovery session - i.e. executed subsequent to a publish/subscribe
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event. This is
+     * equivalent to {@link #sendMessage(int, byte[], int, int, int)} with a {@code retryCount} of
+     * 0.
+     *
+     * @param peerId The peer's ID for the message. Must be a result of an
+     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)} event.
+     * @param message The message to be transmitted.
+     * @param messageLength The number of bytes from the {@code message} to be transmitted.
+     * @param messageId An arbitrary integer used by the caller to identify the message. The same
+     *            integer ID will be returned in the callbacks indicated message send success or
+     *            failure.
+     */
+    public void sendMessage(int peerId, byte[] message, int messageLength, int messageId) {
+        sendMessage(peerId, message, messageLength, messageId, 0);
     }
 
     /**
