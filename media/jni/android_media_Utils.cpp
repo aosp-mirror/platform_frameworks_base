@@ -31,7 +31,7 @@
 namespace android {
 
 AssetStream::AssetStream(SkStream* stream)
-    : mStream(stream) {
+    : mStream(stream), mPosition(0) {
 }
 
 AssetStream::~AssetStream() {
@@ -48,7 +48,7 @@ piex::Error AssetStream::GetData(
 
     // Read bytes.
     size_t size = mStream->read((void*)data, length);
-    mPosition += size;
+    mPosition = offset + size;
 
     return size == length ? piex::Error::kOk : piex::Error::kFail;
 }
