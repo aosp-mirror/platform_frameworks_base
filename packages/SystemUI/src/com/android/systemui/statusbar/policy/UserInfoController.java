@@ -50,7 +50,6 @@ public final class UserInfoController {
             new ArrayList<OnUserInfoChangedListener>();
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
-    private boolean mUseDefaultAvatar;
     private String mUserName;
     private Drawable mUserDrawable;
 
@@ -58,7 +57,6 @@ public final class UserInfoController {
         mContext = context;
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
         IntentFilter profileFilter = new IntentFilter();
@@ -83,10 +81,6 @@ public final class UserInfoController {
             final String action = intent.getAction();
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 reloadUserInfo();
-            } else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-                if (mUseDefaultAvatar) {
-                    reloadUserInfo();
-                }
             }
         }
     };
@@ -159,7 +153,6 @@ public final class UserInfoController {
                 } else {
                     avatar = UserIcons.getDefaultUserIcon(isGuest? UserHandle.USER_NULL : userId,
                             /* light= */ true);
-                    mUseDefaultAvatar = true;
                 }
 
                 // If it's a single-user device, get the profile name, since the nickname is not
@@ -200,6 +193,10 @@ public final class UserInfoController {
         for (OnUserInfoChangedListener listener : mCallbacks) {
             listener.onUserInfoChanged(mUserName, mUserDrawable);
         }
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        reloadUserInfo();
     }
 
     public interface OnUserInfoChangedListener {
