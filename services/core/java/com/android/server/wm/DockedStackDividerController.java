@@ -377,6 +377,10 @@ public class DockedStackDividerController implements DimLayerUser {
         checkMinimizeChanged(true /* animate */);
     }
 
+    boolean isMinimizedDock() {
+        return mMinimizedDock;
+    }
+
     private void checkMinimizeChanged(boolean animate) {
         if (mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
             return;
