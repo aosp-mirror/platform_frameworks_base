@@ -310,7 +310,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite á aplicación activar o modo coche."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"pechar outras aplicacións"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Permite á aplicación finalizar procesos en segundo plano doutras aplicacións. É posible que esta acción provoque que outras aplicacións deixen de funcionar."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"debuxar sobre outras aplicacións"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"superpoñerse a outras aplicacións"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Permite á aplicación debuxar sobre outras aplicacións ou partes da interface de usuario. É posible que interfiran co teu uso da interface de calquera aplicación ou que cambien o que cres que estás vendo noutras aplicacións."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"facer que a aplicación se execute sempre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite á aplicación converter partes súas como persistentes na memoria. Esta acción pode limitar a cantidade memoria dispoñible para outras aplicacións e reducir a velocidade de funcionamento do tablet."</string>
