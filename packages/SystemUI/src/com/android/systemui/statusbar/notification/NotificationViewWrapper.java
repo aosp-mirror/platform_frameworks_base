@@ -158,4 +158,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public void setShowingLegacyBackground(boolean showing) {
     }
+
+    public void setContentHeight(int contentHeight, int minHeightHint) {
+    }
 }
