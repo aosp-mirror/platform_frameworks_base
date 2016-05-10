@@ -175,7 +175,8 @@ attribute:</p>
 </pre>
 
 <p class="note"><strong>Note:</strong> Files you save in the directories provided by
-{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} are deleted
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()} or
+{@link android.content.Context#getFilesDir getFilesDir()} are deleted
 when the user uninstalls your app.</p>
 
 <p>Once you decide the directory for the file, you need to create a
@@ -190,8 +191,7 @@ private File createImageFile() throws IOException {
     // Create an image file name
     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
     String imageFileName = "JPEG_" + timeStamp + "_";
-    File storageDir = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES);
+    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     File image = File.createTempFile(
         imageFileName,  /* prefix */
         ".jpg",         /* suffix */
@@ -225,14 +225,66 @@ private void dispatchTakePictureIntent() {
         }
         // Continue only if the File was successfully created
         if (photoFile != null) {
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                    Uri.fromFile(photoFile));
+            Uri photoURI = FileProvider.getUriForFile(this,
+                                                  "com.example.android.fileprovider",
+                                                  photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
             startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
         }
     }
 }
 </pre>
 
+<p class="note"><strong>Note:</strong> We are using {@link
+android.support.v4.content.FileProvider#getUriForFile} which returns a <code>content://</code>
+URI. For more recent apps targeting Android N and higher, passing a <code>file://</code> URI
+across a package boundary causes a {@link android.os.FileUriExposedException
+FileUriExposedException}.
+Therefore, we now present a more generic way of storing images using a
+{@link android.support.v4.content.FileProvider FileProvider}.
+</p>
+
+Now, you need to configure the {@link android.support.v4.content.FileProvider
+FileProvider}. In your app's manifest, add a provider to your application:
+
+<pre>
+&lt;application&gt;
+   ...
+   &lt;provider
+        android:name="android.support.v4.content.FileProvider"
+        android:authorities="com.example.android.fileprovider"
+        android:exported="false"
+        android:grantUriPermissions="true"&gt;
+        &lt;meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths"&gt;&lt;/meta-data&gt;
+    &lt;/provider&gt;
+    ...
+&lt;/application&gt;
+</pre>
+
+Make sure that the authorities string matches the second argument to {@link
+android.support.v4.content.FileProvider#getUriForFile}.
+In the meta-data section of the provider definition, you can see that
+the provider expects eligible paths to be configured in a dedicated resource file,
+<c>res/xml/file_paths.xml</c>. Here is the content required for this particular
+example:
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;paths xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;external-path name="my_images" path="Android/data/com.example.package.name/files/Pictures" /&gt;
+&lt;/paths&gt;
+</pre>
+
+The path component corresponds to the path that is returned by
+{@link android.content.Context#getExternalFilesDir getExternalFilesDir()}
+when called with {@link android.os.Environment#DIRECTORY_PICTURES
+Environment.DIRECTORY_PICTURES}. Make sure that you replace
+<code>com.example.package.name</code> with the actual package name of your
+app. Also, checkout the documentation of {@link android.support.v4.content.FileProvider} for
+an extensive description of path specifiers that you can use besides
+<code>external-path</code>.
 
 <h2 id="TaskGallery">Add the Photo to a Gallery</h2>
 
