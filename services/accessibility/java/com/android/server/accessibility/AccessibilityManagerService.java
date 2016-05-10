@@ -1737,7 +1737,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         if (userState.mIsDisplayMagnificationEnabled ||
-                userHasMagnificationServicesLocked(userState)) {
+                userHasListeningMagnificationServicesLocked(userState)) {
             // Initialize the magnification controller if necessary
             getMagnificationController();
             mMagnificationController.register();
@@ -1755,6 +1755,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         for (int i = 0, count = services.size(); i < count; i++) {
             final Service service = services.get(i);
             if (mSecurityPolicy.canControlMagnification(service)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the specified user has any services that are capable of
+     * controlling magnification and are actively listening for magnification updates.
+     */
+    private boolean userHasListeningMagnificationServicesLocked(UserState userState) {
+        final List<Service> services = userState.mBoundServices;
+        for (int i = 0, count = services.size(); i < count; i++) {
+            final Service service = services.get(i);
+            if (mSecurityPolicy.canControlMagnification(service)
+                    && service.mInvocationHandler.mIsMagnificationCallbackEnabled) {
                 return true;
             }
         }
@@ -2864,19 +2880,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
-        public Region getMagnifiedRegion() {
+        public Region getMagnificationRegion() {
             synchronized (mLock) {
-                if (!isCalledForCurrentUserLocked()) {
-                    return Region.obtain();
-                }
-            }
-            final long identity = Binder.clearCallingIdentity();
-            try {
                 final Region region = Region.obtain();
-                getMagnificationController().getMagnificationRegion(region);
-                return region;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                if (!isCalledForCurrentUserLocked()) {
+                    return region;
+                }
+                MagnificationController magnificationController = getMagnificationController();
+                boolean forceRegistration = mSecurityPolicy.canControlMagnification(this);
+                boolean initiallyRegistered = magnificationController.isRegisteredLocked();
+                if (!initiallyRegistered && forceRegistration) {
+                    magnificationController.register();
+                }
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    magnificationController.getMagnificationRegion(region);
+                    return region;
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                    if (!initiallyRegistered && forceRegistration) {
+                        magnificationController.unregister();
+                    }
+                }
             }
         }
 
@@ -2940,13 +2965,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (!permissionGranted) {
                     return false;
                 }
-            }
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                return getMagnificationController().setScaleAndCenter(
-                        scale, centerX, centerY, animate, mId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    MagnificationController magnificationController = getMagnificationController();
+                    if (!magnificationController.isRegisteredLocked()) {
+                        magnificationController.register();
+                    }
+                    return magnificationController
+                            .setScaleAndCenter(scale, centerX, centerY, animate, mId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
