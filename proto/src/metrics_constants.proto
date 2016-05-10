@@ -2191,6 +2191,15 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
 
+    // Settings -> Dev options -> Convert to file encryption
+    CONVERT_FBE = 402;
+
+    // Settings -> Dev options -> Convert to file encryption -> WIPE AND CONVERT...
+    CONVERT_FBE_CONFIRM = 403;
+
+    // Settings -> Dev options -> Running services
+    RUNNING_SERVICES = 404;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
