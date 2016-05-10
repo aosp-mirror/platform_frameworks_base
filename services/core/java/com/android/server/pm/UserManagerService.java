@@ -320,6 +320,9 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private boolean mForceEphemeralUsers;
 
+    @GuardedBy("mUsersLock")
+    private final SparseBooleanArray mUnlockingOrUnlockedUsers = new SparseBooleanArray();
+
     private static UserManagerService sInstance;
 
     public static UserManagerService getInstance() {
@@ -2302,6 +2305,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
             mIsUserManaged.delete(userHandle);
+            mUnlockingOrUnlockedUsers.delete(userHandle);
         }
         synchronized (mRestrictionsLock) {
             mBaseUserRestrictions.remove(userHandle);
@@ -3158,6 +3162,20 @@ public class UserManagerService extends IUserManager.Stub {
                 setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
             }
             return user;
+        }
+
+        @Override
+        public void setUserUnlockingOrUnlocked(int userId, boolean unlockingOrUnlocked) {
+            synchronized (mUsersLock) {
+                mUnlockingOrUnlockedUsers.put(userId, unlockingOrUnlocked);
+            }
+        }
+
+        @Override
+        public boolean isUserUnlockingOrUnlocked(int userId) {
+            synchronized (mUsersLock) {
+                return mUnlockingOrUnlockedUsers.get(userId);
+            }
         }
     }
 
