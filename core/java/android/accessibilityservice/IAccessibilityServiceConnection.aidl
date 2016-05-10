@@ -75,7 +75,7 @@ interface IAccessibilityServiceConnection {
 
     float getMagnificationCenterY();
 
-    Region getMagnifiedRegion();
+    Region getMagnificationRegion();
 
     boolean resetMagnification(boolean animate);
 
