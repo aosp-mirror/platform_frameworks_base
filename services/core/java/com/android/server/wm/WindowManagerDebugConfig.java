@@ -75,5 +75,5 @@ public class WindowManagerDebugConfig {
     static final boolean DEBUG_WINDOW_CROP = false;
 
     static final String TAG_KEEP_SCREEN_ON = "DebugKeepScreenOn";
-    static final boolean DEBUG_KEEP_SCREEN_ON = true;
+    static final boolean DEBUG_KEEP_SCREEN_ON = false;
 }
