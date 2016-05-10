@@ -340,8 +340,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     public void onUnlockUser(int userId) {
-        tieManagedProfileLockIfNecessary(userId, null);
+        // Hide notification first, as tie managed profile lock takes time
         hideEncryptionNotification(new UserHandle(userId));
+        tieManagedProfileLockIfNecessary(userId, null);
 
         // Now we have unlocked the parent user we should show notifications
         // about any profiles that exist.
