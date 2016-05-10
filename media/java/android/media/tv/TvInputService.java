@@ -78,6 +78,8 @@ public abstract class TvInputService extends Service {
     private static final boolean DEBUG = false;
     private static final String TAG = "TvInputService";
 
+    private static final int DETACH_OVERLAY_VIEW_TIMEOUT_MS = 5000;
+
     /**
      * This is the interface name that a service implementing a TV input should say that it support
      * -- that is, this is the action it uses for its intent filter. To be supported, the service
@@ -268,7 +270,6 @@ public abstract class TvInputService extends Service {
      * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract static class Session implements KeyEvent.Callback {
-        private static final int DETACH_OVERLAY_VIEW_TIMEOUT_MS = 5000;
         private static final int POSITION_UPDATE_INTERVAL_MS = 1000;
 
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
@@ -1256,7 +1257,7 @@ public abstract class TvInputService extends Service {
             // Creates a container view to check hanging on the overlay view detaching.
             // Adding/removing the overlay view to/from the container make the view attach/detach
             // logic run on the main thread.
-            mOverlayViewContainer = new FrameLayout(mContext);
+            mOverlayViewContainer = new FrameLayout(mContext.getApplicationContext());
             mOverlayViewContainer.addView(mOverlayView);
             // TvView's window type is TYPE_APPLICATION_MEDIA and we want to create
             // an overlay window above the media window but below the application window.
@@ -1496,26 +1497,26 @@ public abstract class TvInputService extends Service {
                         POSITION_UPDATE_INTERVAL_MS);
             }
         }
+    }
 
-        private final class OverlayViewCleanUpTask extends AsyncTask<View, Void, Void> {
-            @Override
-            protected Void doInBackground(View... views) {
-                View overlayViewParent = views[0];
-                try {
-                    Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT_MS);
-                } catch (InterruptedException e) {
-                    return null;
-                }
-                if (isCancelled()) {
-                    return null;
-                }
-                if (overlayViewParent.isAttachedToWindow()) {
-                    Log.e(TAG, "Time out on releasing overlay view. Killing "
-                            + overlayViewParent.getContext().getPackageName());
-                    Process.killProcess(Process.myPid());
-                }
+    private static final class OverlayViewCleanUpTask extends AsyncTask<View, Void, Void> {
+        @Override
+        protected Void doInBackground(View... views) {
+            View overlayViewParent = views[0];
+            try {
+                Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT_MS);
+            } catch (InterruptedException e) {
                 return null;
             }
+            if (isCancelled()) {
+                return null;
+            }
+            if (overlayViewParent.isAttachedToWindow()) {
+                Log.e(TAG, "Time out on releasing overlay view. Killing "
+                        + overlayViewParent.getContext().getPackageName());
+                Process.killProcess(Process.myPid());
+            }
+            return null;
         }
     }
 
