@@ -412,8 +412,9 @@ def parse_ucd(ucd_path):
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
 
     # filter modern pentathlon, as it seems likely to be removed from final spec
+    # also filter rifle
     def is_excluded(n):
-        return n == 0x1f93b
+        return n in [0x1f93b, 0x1f946]
 
     def contains_excluded(t):
         if type(t) == int:
