@@ -144,11 +144,18 @@ public class BackgroundDexOptService extends JobService {
                     if (DEBUG_DEXOPT) {
                         Log.i(TAG, "Updating package " + pkg);
                     }
+
                     // Update package if needed. Note that there can be no race between concurrent
                     // jobs because PackageDexOptimizer.performDexOpt is synchronized.
+
+                    // checkProfiles is false to avoid merging profiles during boot which
+                    // might interfere with background compilation (b/28612421).
+                    // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
+                    // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
+                    // trade-off worth doing to save boot time work.
                     pm.performDexOpt(pkg,
                             /* instruction set */ null,
-                            /* checkProfiles */ true,
+                            /* checkProfiles */ false,
                             PackageManagerService.REASON_BOOT,
                             /* force */ false);
                 }
