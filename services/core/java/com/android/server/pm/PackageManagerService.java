@@ -7202,9 +7202,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            // checkProfiles is false to avoid merging profiles during boot which
+            // might interfere with background compilation (b/28612421).
+            // Unfortunately this will also means that "pm.dexopt.boot=speed-profile" will
+            // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
+            // trade-off worth doing to save boot time work.
             int dexOptStatus = performDexOptTraced(pkg.packageName,
                     null /* instructionSet */,
-                    true /* checkProfiles */,
+                    false /* checkProfiles */,
                     getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
                     false /* force */);
             switch (dexOptStatus) {
