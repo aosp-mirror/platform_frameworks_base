@@ -36,7 +36,7 @@ LOCAL_JACK_FLAGS := \
 
 # Only enable asserts on userdebug/eng builds
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
-LOCAL_JACK_FLAGS += -D jack.assert.policy=enable
+LOCAL_JACK_FLAGS += -D jack.assert.policy=always
 endif
 
 LOCAL_PACKAGE_NAME := DocumentsUI
