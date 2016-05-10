@@ -23,6 +23,7 @@ import android.os.Handler;
 
 import java.lang.String;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -1025,7 +1026,7 @@ public final class Call {
     }
 
     /**
-     * Adds an integer extra to this {@code Connection}.
+     * Adds an integer extra to this {@link Call}.
      *
      * @param key The extra key.
      * @param value The value.
@@ -1040,7 +1041,7 @@ public final class Call {
     }
 
     /**
-     * Adds a string extra to this {@code Connection}.
+     * Adds a string extra to this {@link Call}.
      *
      * @param key The extra key.
      * @param value The value.
@@ -1055,7 +1056,7 @@ public final class Call {
     }
 
     /**
-     * Removes extras from this {@code Connection}.
+     * Removes extras from this {@link Call}.
      *
      * @param keys The keys of the extras to remove.
      */
@@ -1069,6 +1070,15 @@ public final class Call {
             }
         }
         mInCallAdapter.removeExtras(mTelecomCallId, keys);
+    }
+
+    /**
+     * Removes extras from this {@link Call}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(String ... keys) {
+        removeExtras(Arrays.asList(keys));
     }
 
     /**
