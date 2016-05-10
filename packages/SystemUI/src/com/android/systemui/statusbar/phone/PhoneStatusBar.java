@@ -1551,6 +1551,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>(notificationChildren);
             for (int i = 0; i < toRemove.size(); i++) {
                 toRemove.get(i).setKeepInParent(true);
+                toRemove.get(i).setRemoved(true);
             }
             for (int i = 0; i < toRemove.size(); i++) {
                 removeNotification(toRemove.get(i).getStatusBarNotification().getKey(), ranking);
