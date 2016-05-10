@@ -2237,8 +2237,13 @@ public class AccountManagerService
                 }
             }
 
-            new Session(accounts, response, account.type, expectActivityLaunch,
-                    false /* stripAuthTokenFromResult */, account.name,
+            new Session(
+                    accounts,
+                    response,
+                    account.type,
+                    expectActivityLaunch,
+                    false /* stripAuthTokenFromResult */,
+                    account.name,
                     false /* authDetailsRequired */) {
                 @Override
                 protected String toDebugString(long now) {
@@ -2310,6 +2315,15 @@ public class AccountManagerService
 
                         Intent intent = result.getParcelable(AccountManager.KEY_INTENT);
                         if (intent != null && notifyOnAuthFailure && !customTokens) {
+                            /*
+                             * Make sure that the supplied intent is owned by the authenticator
+                             * giving it to the system. Otherwise a malicious authenticator could
+                             * have users launching arbitrary activities by tricking users to
+                             * interact with malicious notifications.
+                             */
+                            checkKeyIntent(
+                                    Binder.getCallingUid(),
+                                    intent);
                             doNotification(mAccounts,
                                     account, result.getString(AccountManager.KEY_AUTH_FAILED_MESSAGE),
                                     intent, accounts.userId);
