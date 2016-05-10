@@ -480,19 +480,22 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureChildren(widthMeasureSpec, heightMeasureSpec);
+        // We need to measure all children even the GONE ones, such that the heights are calculated
+        // correctly as they are used to calculate how many we can fit on the screen.
+        final int size = getChildCount();
+        for (int i = 0; i < size; i++) {
+            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+        }
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
         // we layout all our children centered on the top
         float centerX = getWidth() / 2.0f;
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
+            // We need to layout all children even the GONE ones, such that the heights are
+            // calculated correctly as they are used to calculate how many we can fit on the screen
             float width = child.getMeasuredWidth();
             float height = child.getMeasuredHeight();
             child.layout((int) (centerX - width / 2.0f),
