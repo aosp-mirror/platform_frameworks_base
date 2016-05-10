@@ -557,8 +557,9 @@ public final class ActivityThread {
                 return;
             }
             try {
+                int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-in-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        8 * 1024 * 1024, 0, samplingInterval != 0, samplingInterval);
+                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile);
