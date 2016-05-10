@@ -1533,6 +1533,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             for (int i = 0; i < toRemove.size(); i++) {
                 removeNotification(toRemove.get(i).getStatusBarNotification().getKey(), ranking);
+                // we need to ensure that the view is actually properly removed from the viewstate
+                // as this won't happen anymore when kept in the parent.
+                mStackScroller.removeViewStateForView(toRemove.get(i));
             }
         }
     }
