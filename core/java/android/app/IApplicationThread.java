@@ -143,8 +143,8 @@ public interface IApplicationThread extends IInterface {
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void unstableProviderDied(IBinder provider) throws RemoteException;
-    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType)
-            throws RemoteException;
+    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType,
+            int sessionId) throws RemoteException;
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
             throws RemoteException;
     void scheduleOnNewActivityOptions(IBinder token, ActivityOptions options)
