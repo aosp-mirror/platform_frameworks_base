@@ -15421,9 +15421,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         removePackageLI(ps, (flags & REMOVE_CHATTY) != 0);
 
         if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
-            destroyAppDataLIF(deletedPkg, UserHandle.USER_ALL,
+            final PackageParser.Package resolvedPkg;
+            if (deletedPkg != null) {
+                resolvedPkg = deletedPkg;
+            } else {
+                // We don't have a parsed package when it lives on an ejected
+                // adopted storage device, so fake something together
+                resolvedPkg = new PackageParser.Package(ps.name);
+                resolvedPkg.setVolumeUuid(ps.volumeUuid);
+            }
+            destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(deletedPkg);
+            destroyAppProfilesLIF(resolvedPkg);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
@@ -19581,6 +19590,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final String label;
         final int targetSdkVersion;
         final PackageFreezer freezer;
+        final int[] installedUserIds;
 
         // reader
         synchronized (mPackages) {
@@ -19635,6 +19645,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
             targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
             freezer = new PackageFreezer(packageName, "movePackageInternal");
+            installedUserIds = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
         }
 
         final Bundle extras = new Bundle();
@@ -19672,10 +19683,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         final PackageStats stats = new PackageStats(null, -1);
         synchronized (mInstaller) {
-            if (!getPackageSizeInfoLI(packageName, -1, stats)) {
-                freezer.close();
-                throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
-                        "Failed to measure package size");
+            for (int userId : installedUserIds) {
+                if (!getPackageSizeInfoLI(packageName, userId, stats)) {
+                    freezer.close();
+                    throw new PackageManagerException(MOVE_FAILED_INTERNAL_ERROR,
+                            "Failed to measure package size");
+                }
             }
         }
 
