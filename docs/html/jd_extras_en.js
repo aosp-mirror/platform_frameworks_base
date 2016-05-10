@@ -28,6 +28,233 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
  /* TODO Remove standard resources from here, such as below
  */
   {
+    "title":"Meet Android Studio",
+    "summary":"The basics of working with Android Studio, from projects to build and performance.",
+    "url":"studio/intro/index.html",
+    "image":"studio/images/intro/main-window_2-1_2x.png",
+    "type":"studio",
+    "keywords": ["studio","sdk","tools","firstapp"],
+    "tags": ["studio","sdk","tools","firstapp"],
+    "lang":"en"
+  },
+  {
+    "title":"Configure Your Build",
+    "summary":"Learn about Android Studio's build configuration.",
+    "url":"studio/build/index.html",
+    "image":"images/tools/studio/build-process_2x.png",
+    "type":"studio",
+    "keywords": ["studio","configuration"],
+    "tags": ["studio","configuration"],
+    "lang":"en"
+  },
+  {
+    "title":"Android Studio Features",
+    "summary":"A quick look at key Android Studio features.",
+    "url":"studio/features.html",
+    "image":"images/cards/card-studio-modules_crop_2x.png",
+    "type":"studio",
+    "keywords": ["studio","tools","sdk"],
+    "tags": ["studio"],
+    "lang":"en"
+  },
+  {
+    "title":"Using Code Templates",
+    "summary":"Quickly create Android app projects with various UI or functional components.",
+    "url":"studio/projects/templates.html",
+    "image":"images/cards/card-using-code-templates_16x9_2x.png",
+    "type":"studio",
+    "keywords": ["studio","templates","firstapp"],
+    "tags": ["studio","templates","firstapp"],
+    "lang":"en"
+  },
+  {
+    "title":"Publishing Overview",
+    "summary":"Start here for an overview of publishing options for Android apps.",
+    "url":"studio/publish/index.html",
+    "image":"images/publishing/publishing_overview.png",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"Preparing for Release",
+    "summary":"Developer documentation on how to build the signed, release-ready APK. This process is the same for all Android apps.",
+    "url":"studio/publish/preparing.html",
+    "image":"images/publishing/publishing_overview_prep.png",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"Network Monitor",
+    "summary":"The Network Monitor makes it possible to track when your application is making network requests. Using this tool, you can monitor how and when your app transfers data, and optimize the underlying code appropriately. By monitoring the frequency of data\u2026",
+    "url":"studio/profile/am-network.html",
+    "image":"images/tools/thumbnails/am-networkmon.png",
+    "type":"studio",
+    "keywords": ["monitor"],
+    "tags": ["monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Memory Monitor",
+    "summary":"Android Studio provides a Memory Monitor so you can more easily monitor app performance and memory usage to find deallocated objects, locate memory leaks, and track the amount of memory the connected device is using. The Memory Monitor reports how your\u2026",
+    "url":"studio/profile/am-memory.html",
+    "image":"images/tools/thumbnails/am-memorymon.png",
+    "type":"studio",
+    "keywords": ["monitor"],
+    "tags": ["monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"UI&#47;Application Exerciser Monkey",
+    "summary":"The Monkey is a program that runs on your emulator or device and generates pseudo-random streams of user events such as clicks, touches, or gestures, as well as a number of system-level events. You can use the Monkey to stress-test applications that you\u2026",
+    "url":"studio/test/monkey.html",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"CPU Monitor",
+    "summary":"The CPU Monitor lets you easily monitor the central processing unit (CPU) usage of your app. It displays CPU usage in real time and displays the percentage of total CPU time (including all cores) used by user and kernel mode. In user mode, the code must\u2026",
+    "url":"studio/profile/am-cpu.html",
+    "image":"images/tools/thumbnails/am-cpumon.png",
+    "type":"studio",
+    "keywords": ["monitor"],
+    "tags": ["monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Shrink Your Code and Resources",
+    "summary":"Make your APK file smaller and more secure by shrinking your code and resources.",
+    "url":"studio/build/shrink-code.html",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"logcat Monitor",
+    "summary":"The Android logging system provides a mechanism for collecting and viewing system debug output. logcat Monitor displays messages that you added to your app by using the Log class, as well as system messages, such as stack traces when the emulator throws\u2026",
+    "url":"studio/debug/am-logcat.html",
+    "image":"images/tools/thumbnails/am-logcatmon.png",
+    "type":"studio",
+    "keywords": ["monitor"],
+    "tags": ["monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"GPU Monitor",
+    "summary":"The GPU Monitor gives you a quick visual representation of how much time it takes to render the frames of a UI window. It profiles the amount of time it takes for the render thread to prepare, process, and execute the draw commands. The GPU Monitor can\u2026",
+    "url":"studio/profile/am-gpu.html",
+    "image":"images/tools/thumbnails/am-gpumon.png",
+    "type":"studio",
+    "keywords": ["monitor"],
+    "tags": ["monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"HPROF Viewer and Analyzer",
+    "summary":"Use the Memory Monitor to dump the Java heap to an HPROF file. The HPROF Viewer displays classes, instances of each class, and a reference tree to help you track memory usage and find memory leaks.",
+    "url":"studio/profile/am-hprof.html",
+    "image":"images/tools/thumbnails/am_hprofviewer.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Video Capture",
+    "summary":"Use the Video tool to make a video of the display on a hardware device.",
+    "url":"studio/debug/am-video.html",
+    "image":"images/tools/thumbnails/am_video.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Screen Capture",
+    "summary":"Use the Screen Capture tool to take a screenshot of the display on a hardware device or the emulator. Optionally display the screenshot within a graphic of a device.",
+    "url":"studio/debug/am-screenshot.html",
+    "image":"images/tools/thumbnails/am_screenshot.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Allocation Tracker",
+    "summary":"Use the Memory Monitor to capture allocation data about your app. The Allocation Tracker displays each method responsible for an allocation, as well as the allocation size and number of instances.",
+    "url":"studio/profile/am-allocation.html",
+    "image":"images/tools/thumbnails/am_alloctracker.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"Method Trace",
+    "summary":"Use the CPU Monitor to perform a method trace on your app. View call stack and timing information in the method trace display.",
+    "url":"studio/profile/am-methodtrace.html",
+    "image":"images/tools/thumbnails/am_methodtrace.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"System Information",
+    "summary":"Use the System Information tool to capture <code>dumpsys</code> information about your app. View activity manager, package, memory usage, and graphics state information.",
+    "url":"studio/profile/am-sysinfo.html",
+    "image":"images/tools/thumbnails/am_sysinfo.png",
+    "type":"tools",
+    "keywords": ["android","performance","profiling","tools","monitor"],
+    "tags": ["android","performance","profiling","tools","monitor"],
+    "lang":"en"
+  },
+  {
+    "title":"monkeyrunner",
+    "summary":"The monkeyrunner tool provides an API for writing programs that control an Android device or emulator from outside of Android code. With monkeyrunner, you can write a Python program that installs an Android application or test package, runs it, sends \u2026",
+    "url":"studio/test/monkeyrunner/index.html",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"Testing from the Command-Line",
+    "summary":"This document describes how to create and run tests directly from the command line. This document assumes that you already know how to create a Android application in your programming environment. You can run tests from the command-line, either with Gradle\u2026",
+    "url":"studio/test/command-line.html",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"Test Your App",
+    "summary":"This document describes key concepts related to Android app testing. It assumes you have a basic knowledge of the JUnit testing framework. Android testing is based on JUnit. In general, a JUnit test is a method whose statements test a part of the application\u2026",
+    "url":"studio/test/index.html",
+    "image":"images/testing/test_framework.png",
+    "type":"studio",
+    "keywords": [],
+    "tags": [],
+    "lang":"en"
+  },
+  {
+    "title":"Android Studio 2.0",
+    "category":"",
+    "summary":"Android Studio 2.0 is the fastest way to build high quality, performant apps for the Android platform, including phones and tablets, Android Auto, Android Wear, and Android TV. As the official IDE from Google, Android Studio includes everything you…",
+    "url":"http://android-developers.blogspot.com/2016/04/android-studio-2-0.html",
+    "group":"",
+    "keywords": [],
+    "tags": ['studio'],
+    "image":"https://1.bp.blogspot.com/-vxXg6Inv_WA/VwaJ0uzSf_I/AAAAAAAACr4/xzszbcRzWRgSaHXpOpYroG7u6bgsFJjqw/s200/image03.png",
+    "type":"blog"
+  },
+  {
     "title":"Writing More Code by Writing Less Code with Android Studio Live Templates",
     "category":"",
     "summary":"Unless you’re getting paid by the keystroke, no one wants to write repetitive boilerplate code.",
@@ -3413,9 +3640,9 @@ METADATA['en'].collections = {
   "develop/landing/mainlinks": {
     "title": "",
     "resources": [
-      "tools/studio/index.html",
+      "studio/index.html",
       "samples/new/index.html",
-      "tools/projects/templates.html"
+      "studio/projects/templates.html"
     ]
   },
   "develop/landing/latest": {
@@ -4368,8 +4595,8 @@ METADATA['en'].collections = {
   "distribute/toolsreference/launchchecklist/understanding": {
     "title": "",
     "resources": [
-      "tools/publishing/publishing_overview.html",
-      "tools/publishing/preparing.html"
+      "studio/publish/index.html",
+      "studio/publish/preparing.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/policies": {
@@ -4404,7 +4631,7 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "google/play/expansion-files.html",
-      "tools/help/proguard.html"
+      "studio/build/shrink-code.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/platform": {
@@ -4625,17 +4852,17 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "training/testing/start/index.html",
-      "tools/testing/testing_android.html",
+      "studio/test/index.html",
       "https://www.youtube.com/watch?v=vdasFFfXKOY"
     ]
   },
   "training/testing/tools": {
     "title": "",
     "resources": [
-      "tools/testing-support-library/index.html",
-      "tools/help/monkey.html",
-      "tools/help/monkeyrunner_concepts.html",
-      "tools/testing/testing_otheride.html",
+      "topic/libraries/testing-support-library/index.html",
+      "studio/test/monkey.html",
+      "studio/test/monkeyrunner/index.html",
+      "studio/test/command-line.html",
       "https://source.android.com/devices/tech/debug/dumpsys.html"
     ]
   },
@@ -4663,7 +4890,7 @@ METADATA['en'].collections = {
       "distribute/essentials/quality/core.html",
       "distribute/essentials/quality/tablets.html",
       "distribute/tools/launch-checklist.html",
-      "tools/publishing/publishing_overview.html",
+      "studio/publish/index.html",
       "distribute/tools/localization-checklist.html"
     ]
   },
@@ -4684,7 +4911,7 @@ METADATA['en'].collections = {
       "distribute/tools/promote/device-art.html",
       "distribute/tools/promote/linking.html",
       "distribute/tools/promote/brand.html",
-      "tools/help/proguard.html"
+      "studio/build/shrink-code.html"
     ]
   },
   "overview/4": {
@@ -4719,65 +4946,65 @@ METADATA['en'].collections = {
 "tools/help/log": {
     "title": "",
     "resources": [
-       "tools/help/am-logcat.html"
+       "studio/debug/am-logcat.html"
     ]
   },
 "tools/help/monitor": {
     "title": "",
     "resources": [
-       "tools/help/am-memory.html",
-       "tools/help/am-cpu.html",
-       "tools/help/am-gpu.html",
-       "tools/help/am-network.html"
+       "studio/profile/am-memory.html",
+       "studio/profile/am-cpu.html",
+       "studio/profile/am-gpu.html",
+       "studio/profile/am-network.html"
     ]
   },
  "tools/help/data": {
     "title": "",
     "resources": [
-       "tools/help/am-hprof.html",
-       "tools/help/am-allocation.html",
-       "tools/help/am-methodtrace.html",
-       "tools/help/am-sysinfo.html"
+       "studio/profile/am-hprof.html",
+       "studio/profile/am-allocation.html",
+       "studio/profile/am-methodtrace.html",
+       "studio/profile/am-sysinfo.html"
     ]
   },
   "tools/help/shot": {
     "title": "",
     "resources": [
-       "tools/help/am-screenshot.html",
-       "tools/help/am-video.html"
+       "studio/debug/am-screenshot.html",
+       "studio/debug/am-video.html"
     ]
   },
   "tools/performance/rendering": {
     "title": "",
     "resources": [
-      "tools/performance/debug-gpu-overdraw/index.html",
-      "tools/performance/profile-gpu-rendering/index.html",
-      "tools/performance/hierarchy-viewer/setup.html",
-      "tools/performance/hierarchy-viewer/index.html",
-      "tools/performance/hierarchy-viewer/profiling.html"
+      "studio/profile/dev-options-overdraw.html",
+      "studio/profile/dev-options-rendering.html",
+      "studio/profile/hierarchy-viewer-setup.html",
+      "studio/profile/hierarchy-viewer-walkthru.html",
+      "studio/profile/hierarchy-viewer-results-walkthru.html"
     ]
   },
   "tools/performance/memory": {
     "title": "",
     "resources": [
-      "tools/performance/memory-monitor/index.html",
-      "tools/performance/heap-viewer/index.html",
-      "tools/performance/allocation-tracker/index.html",
-      "tools/performance/comparison.html"
+      "studio/tools/performance/memory-monitor/index.html",
+      "studio/profile/heap-viewer-walkthru.html",
+      "studio/profile/allocation-tracker-walkthru.html",
+      "studio/tools/performance/comparison.html"
     ]
   },
   "tools/performance/cpu": {
     "title": "",
     "resources": [
-      "tools/performance/traceview/index.html",
-      "tools/performance/systrace/index.html"
+      "studio/profile/traceview-walkthru.html",
+      "studio/profile/systrace-walkthru.html"
     ]
   },
   "tools/performance/battery": {
     "title": "",
     "resources": [
-      "tools/performance/batterystats-battery-historian/index.html",
-      "tools/performance/batterystats-battery-historian/charts.html"
+      "studio/profile/battery-historian.html",
+      "studio/profile/battery-historian-charts.html"
     ]
   },
   "marshmallow/landing/resources": {
@@ -4830,9 +5057,17 @@ METADATA['en'].collections = {
   "tools/landing/resources": {
     "title": "",
     "resources": [
-    "tools/studio/index.html",
-    "tools/studio/studio-features.html",
-    "sdk/installing/studio-tips.html",
+    "studio/features.html",
+    "studio/intro/index.html",
+    "studio/build/index.html",
+    ]
+  },
+  "tools/landing/latest": {
+    "title": "",
+    "resources": [
+    "https://medium.com/google-developers/how-often-should-you-update-android-studio-db25785c488e#.8blbql35x",
+    "http://android-developers.blogspot.com/2016/04/android-studio-2-0.html",
+    "https://medium.com/google-developers/writing-more-code-by-writing-less-code-with-android-studio-live-templates-244f648d17c7#.hczcm02du",
     ]
   },
   "preview/landing/resources": {
