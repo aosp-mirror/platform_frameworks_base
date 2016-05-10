@@ -33,6 +33,7 @@ public class Xfermode {
     protected void finalize() throws Throwable {
         try {
             finalizer(native_instance);
+            native_instance = 0;
         } finally {
             super.finalize();
         }
