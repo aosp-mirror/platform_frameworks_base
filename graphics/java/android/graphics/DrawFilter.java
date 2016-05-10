@@ -33,6 +33,7 @@ public class DrawFilter {
     protected void finalize() throws Throwable {
         try {
             nativeDestructor(mNativeInt);
+            mNativeInt = 0;
         } finally {
             super.finalize();
         }
