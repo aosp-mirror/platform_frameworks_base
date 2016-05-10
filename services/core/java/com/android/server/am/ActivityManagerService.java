@@ -1513,6 +1513,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     PackageManagerInternal mPackageManagerInt;
 
+    // VoiceInteraction session ID that changes for each new request except when
+    // being called for multiwindow assist in a single session.
+    private int mViSessionId = 1000;
+
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
 
@@ -11881,7 +11885,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public Bundle getAssistContextExtras(int requestType) {
         PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
-                null, null, true, UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
+                null, null, true /* focused */, true /* newSessionId */,
+                UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_TIMEOUT);
         if (pae == null) {
             return null;
         }
@@ -11946,16 +11951,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
             Bundle receiverExtras,
-            IBinder activityToken, boolean focused) {
+            IBinder activityToken, boolean focused, boolean newSessionId) {
         return enqueueAssistContext(requestType, null, null, receiver, receiverExtras,
-                activityToken, focused,
+                activityToken, focused, newSessionId,
                 UserHandle.getCallingUserId(), null, PENDING_ASSIST_EXTRAS_LONG_TIMEOUT)
                 != null;
     }
 
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken, boolean focused,
-            int userHandle, Bundle args, long timeout) {
+            IResultReceiver receiver, Bundle receiverExtras, IBinder activityToken,
+            boolean focused, boolean newSessionId, int userHandle, Bundle args, long timeout) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "enqueueAssistContext()");
         synchronized (this) {
@@ -11995,9 +12000,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             extras.putInt(Intent.EXTRA_ASSIST_UID, activity.app.uid);
             pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, receiverExtras,
                     userHandle);
+            // Increment the sessionId if necessary
+            if (newSessionId) {
+                mViSessionId++;
+            }
             try {
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
-                        requestType);
+                        requestType, mViSessionId);
                 mPendingAssistExtras.add(pae);
                 mUiHandler.postDelayed(pae, timeout);
             } catch (RemoteException e) {
@@ -12102,7 +12111,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
             Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, null, null, true,
+        return enqueueAssistContext(requestType, intent, hint, null, null, null,
+                true /* focused */, true /* newSessionId */,
                 userHandle, args, PENDING_ASSIST_EXTRAS_TIMEOUT) != null;
     }
 

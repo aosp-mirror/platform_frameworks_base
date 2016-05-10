@@ -260,7 +260,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                             receiverExtras.putInt(KEY_RECEIVER_EXTRA_INDEX, i);
                             receiverExtras.putInt(KEY_RECEIVER_EXTRA_COUNT, count);
                             if (mAm.requestAssistContextExtras(ActivityManager.ASSIST_CONTEXT_FULL,
-                                    mAssistReceiver, receiverExtras, topActivity, i == 0)) {
+                                    mAssistReceiver, receiverExtras, topActivity,
+                                    /* focused= */ i == 0, /* newSessionId= */ i == 0)) {
                                 needDisclosure = true;
                                 mPendingAssistDataCount++;
                             } else if (i == 0) {

@@ -524,7 +524,7 @@ public interface IActivityManager extends IInterface {
 
     public boolean requestAssistContextExtras(int requestType, IResultReceiver receiver,
             Bundle receiverExtras,
-            IBinder activityToken, boolean focused) throws RemoteException;
+            IBinder activityToken, boolean focused, boolean newSessionId) throws RemoteException;
 
     public void reportAssistContextExtras(IBinder token, Bundle extras,
             AssistStructure structure, AssistContent content, Uri referrer) throws RemoteException;
