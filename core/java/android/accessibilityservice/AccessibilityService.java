@@ -949,7 +949,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnifiedRegion();
+                    return connection.getMagnificationRegion();
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain magnified region", re);
                     re.rethrowFromSystemServer();
