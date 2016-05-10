@@ -3341,14 +3341,12 @@ final class ActivityStack {
                         } catch (RemoteException re) {
                             // Ok
                         }
-                        // TODO: VI This is redundant in some cases
                         mService.finishRunningVoiceLocked();
                         break;
                     }
                 }
             }
         }
-        Slog.d(TAG, "ActivityStack.finishVoiceTask()");
 
         if (didOne) {
             mService.updateOomAdjLocked();
