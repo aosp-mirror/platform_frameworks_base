@@ -968,8 +968,8 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     }
                     daemon.setActiveGroup(userId, fpDir.getAbsolutePath().getBytes());
                     mCurrentUserId = userId;
-                    mCurrentAuthenticatorId = daemon.getAuthenticatorId();
                 }
+                mCurrentAuthenticatorId = daemon.getAuthenticatorId();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to setActiveGroup():", e);
             }
