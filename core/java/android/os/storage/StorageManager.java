@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -341,7 +342,7 @@ public class StorageManager {
      * Constructs a StorageManager object through which an application can
      * can communicate with the systems mount service.
      *
-     * @param tgtLooper The {@link android.os.Looper} which events will be received on.
+     * @param looper The {@link android.os.Looper} which events will be received on.
      *
      * <p>Applications can get instance of this class by calling
      * {@link android.content.Context#getSystemService(java.lang.String)} with an argument
@@ -349,14 +350,11 @@ public class StorageManager {
      *
      * @hide
      */
-    public StorageManager(Context context, Looper looper) {
+    public StorageManager(Context context, Looper looper) throws ServiceNotFoundException {
         mContext = context;
         mResolver = context.getContentResolver();
         mLooper = looper;
-        mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
-        if (mMountService == null) {
-            throw new IllegalStateException("Failed to find running mount service");
-        }
+        mMountService = IMountService.Stub.asInterface(ServiceManager.getServiceOrThrow("mount"));
     }
 
     /**

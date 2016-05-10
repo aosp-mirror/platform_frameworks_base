@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -225,8 +226,12 @@ public final class InputManager {
     public static InputManager getInstance() {
         synchronized (InputManager.class) {
             if (sInstance == null) {
-                IBinder b = ServiceManager.getService(Context.INPUT_SERVICE);
-                sInstance = new InputManager(IInputManager.Stub.asInterface(b));
+                try {
+                    sInstance = new InputManager(IInputManager.Stub
+                            .asInterface(ServiceManager.getServiceOrThrow(Context.INPUT_SERVICE)));
+                } catch (ServiceNotFoundException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             return sInstance;
         }

@@ -16,11 +16,6 @@
 
 package android.os;
 
-import android.content.Context;
-import android.os.BatteryProperty;
-import android.os.IBatteryPropertiesRegistrar;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import com.android.internal.app.IBatteryStats;
 
 /**
@@ -216,6 +211,13 @@ public class BatteryManager {
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(
                 ServiceManager.getService("batteryproperties"));
+    }
+
+    /** {@hide} */
+    public BatteryManager(IBatteryStats batteryStats,
+            IBatteryPropertiesRegistrar batteryPropertiesRegistrar) {
+        mBatteryStats = batteryStats;
+        mBatteryPropertiesRegistrar = batteryPropertiesRegistrar;
     }
 
     /**

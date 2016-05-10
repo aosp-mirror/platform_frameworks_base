@@ -66,6 +66,7 @@ import android.os.Looper;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -5591,7 +5592,11 @@ public class Activity extends ContextThemeWrapper
             return;
         }
 
-        mSearchManager = new SearchManager(this, null);
+        try {
+            mSearchManager = new SearchManager(this, null);
+        } catch (ServiceNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override

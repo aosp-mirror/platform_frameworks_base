@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.view.IWindowManager;
@@ -192,12 +193,12 @@ public class KeyguardManager {
     }
 
 
-    KeyguardManager() {
+    KeyguardManager() throws ServiceNotFoundException {
         mWM = WindowManagerGlobal.getWindowManagerService();
         mTrustManager = ITrustManager.Stub.asInterface(
-                ServiceManager.getService(Context.TRUST_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.TRUST_SERVICE));
         mUserManager = IUserManager.Stub.asInterface(
-                ServiceManager.getService(Context.USER_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.USER_SERVICE));
     }
 
     /**

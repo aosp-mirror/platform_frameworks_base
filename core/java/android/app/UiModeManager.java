@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -123,9 +124,9 @@ public class UiModeManager {
 
     private IUiModeManager mService;
 
-    /*package*/ UiModeManager() {
+    /*package*/ UiModeManager() throws ServiceNotFoundException {
         mService = IUiModeManager.Stub.asInterface(
-                ServiceManager.getService(Context.UI_MODE_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.UI_MODE_SERVICE));
     }
 
     /**

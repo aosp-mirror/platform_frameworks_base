@@ -21,6 +21,7 @@ import android.os.BatteryStats;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 
 import com.android.internal.app.IBatteryStats;
 
@@ -47,8 +48,12 @@ public class SystemHealthManager {
      * @hide
      */
     public SystemHealthManager() {
-        mBatteryStats = IBatteryStats.Stub.asInterface(
-            ServiceManager.getService(BatteryStats.SERVICE_NAME));
+        this(IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME)));
+    }
+
+    /** {@hide} */
+    public SystemHealthManager(IBatteryStats batteryStats) {
+        mBatteryStats = batteryStats;
     }
 
     /**

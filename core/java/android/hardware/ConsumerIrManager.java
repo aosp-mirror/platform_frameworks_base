@@ -19,6 +19,7 @@ package android.hardware;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
 
 /**
@@ -40,10 +41,10 @@ public final class ConsumerIrManager {
     /**
      * @hide to prevent subclassing from outside of the framework
      */
-    public ConsumerIrManager(Context context) {
+    public ConsumerIrManager(Context context) throws ServiceNotFoundException {
         mPackageName = context.getPackageName();
         mService = IConsumerIrService.Stub.asInterface(
-                ServiceManager.getService(Context.CONSUMER_IR_SERVICE));
+                ServiceManager.getServiceOrThrow(Context.CONSUMER_IR_SERVICE));
     }
 
     /**

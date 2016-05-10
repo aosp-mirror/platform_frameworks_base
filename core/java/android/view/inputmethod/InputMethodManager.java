@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.Trace;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.Log;
@@ -55,6 +56,7 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
+import android.view.textservice.TextServicesManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -622,8 +624,9 @@ public final class InputMethodManager {
 
     final InputConnection mDummyInputConnection = new BaseInputConnection(this, false);
 
-    InputMethodManager(IInputMethodManager service, Looper looper) {
-        mService = service;
+    InputMethodManager(Looper looper) throws ServiceNotFoundException {
+        mService = IInputMethodManager.Stub.asInterface(
+                ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
         mMainLooper = looper;
         mH = new H(looper);
         mIInputContext = new ControlledInputConnectionWrapper(looper,
@@ -638,9 +641,11 @@ public final class InputMethodManager {
     public static InputMethodManager getInstance() {
         synchronized (InputMethodManager.class) {
             if (sInstance == null) {
-                IBinder b = ServiceManager.getService(Context.INPUT_METHOD_SERVICE);
-                IInputMethodManager service = IInputMethodManager.Stub.asInterface(b);
-                sInstance = new InputMethodManager(service, Looper.getMainLooper());
+                try {
+                    sInstance = new InputMethodManager(Looper.getMainLooper());
+                } catch (ServiceNotFoundException e) {
+                    throw new IllegalStateException(e);
+                }
             }
             return sInstance;
         }
