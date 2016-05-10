@@ -3592,6 +3592,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * Remove the a given view from the viewstate. This is currently used when the children are
+     * kept in the parent artificially to have a nicer animation.
+     * @param view the view to remove
+     */
+    public void removeViewStateForView(View view) {
+        mCurrentStackScrollState.removeViewStateForView(view);
+    }
+
+    /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
