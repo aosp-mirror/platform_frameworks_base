@@ -106,7 +106,7 @@ public class NetworkStatsManager {
      * device. Result is a single Bucket aggregated over time, state, uid, tag and roaming. This
      * means the bucket's start and end timestamp are going to be the same as the 'startTime' and
      * 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
-     * {@link NetworkStats.Bucket#UID_ALL}, tag {@link NetworkStats.Bucket#TAG_ALL}
+     * {@link NetworkStats.Bucket#UID_ALL}, tag {@link NetworkStats.Bucket#TAG_NONE}
      * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
@@ -122,8 +122,11 @@ public class NetworkStatsManager {
      */
     public Bucket querySummaryForDevice(int networkType, String subscriberId,
             long startTime, long endTime) throws SecurityException, RemoteException {
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        if (template == null) {
+        NetworkTemplate template;
+        try {
+            template = createTemplate(networkType, subscriberId);
+        } catch (IllegalArgumentException e) {
+            if (DBG) Log.e(TAG, "Cannot create template", e);
             return null;
         }
 
@@ -136,21 +139,10 @@ public class NetworkStatsManager {
     }
 
     /**
-     * Query network usage statistics summaries aggregated across tags.
-     *
-     * #see querySummaryForUser(int, String, long, long, boolean)
-     */
-    public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
-            long endTime) throws SecurityException, RemoteException {
-        return querySummaryForUser(networkType, subscriberId, startTime, endTime,
-            false /* includeTags */);
-    }
-
-    /**
      * Query network usage statistics summaries. Result is summarised data usage for all uids
      * belonging to calling user. Result is a single Bucket aggregated over time, state and uid.
      * This means the bucket's start and end timestamp are going to be the same as the 'startTime'
-     * and 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
+     * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
      * {@link NetworkStats.Bucket#UID_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
@@ -161,42 +153,33 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
-     * @param includeTags whether to include network tags. If {@code true}, tags will be returned
-     *            and history retention may be shorter.
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
     public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
-            long endTime, boolean includeTags) throws SecurityException, RemoteException {
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        if (template == null) {
+            long endTime) throws SecurityException, RemoteException {
+        NetworkTemplate template;
+        try {
+            template = createTemplate(networkType, subscriberId);
+        } catch (IllegalArgumentException e) {
+            if (DBG) Log.e(TAG, "Cannot create template", e);
             return null;
         }
 
         NetworkStats stats;
         stats = new NetworkStats(mContext, template, startTime, endTime);
-        stats.startSummaryEnumeration(includeTags);
+        stats.startSummaryEnumeration();
 
         stats.close();
         return stats.getSummaryAggregate();
     }
 
     /**
-     * Query network usage statistics summaries aggregated across tags.
-     *
-     * #see querySummary(int, String, long, long, boolean)
-     */
-    public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
-            long endTime) throws SecurityException, RemoteException {
-        return querySummary(networkType, subscriberId, startTime, endTime, false /* includeTags */);
-    }
-
-    /**
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
-     * end timestamps. Not aggregated over state or uid or tag. This means buckets' start and end
-     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters. State,
-     * uid and tag are going to vary.
+     * end timestamps. Not aggregated over state or uid. This means buckets' start and end
+     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters.
+     * State and uid are going to vary, and tag is going to be the same.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -206,21 +189,22 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
-     * @param includeTags whether to include network tags. If {@code true}, tags will be returned
-     *            and history retention may be shorter.
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
     public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
-            long endTime, boolean includeTags) throws SecurityException, RemoteException {
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        if (template == null) {
+            long endTime) throws SecurityException, RemoteException {
+        NetworkTemplate template;
+        try {
+            template = createTemplate(networkType, subscriberId);
+        } catch (IllegalArgumentException e) {
+            if (DBG) Log.e(TAG, "Cannot create template", e);
             return null;
         }
 
         NetworkStats result;
         result = new NetworkStats(mContext, template, startTime, endTime);
-        result.startSummaryEnumeration(includeTags);
+        result.startSummaryEnumeration();
 
         return result;
     }
@@ -233,7 +217,7 @@ public class NetworkStatsManager {
     public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
             long startTime, long endTime, int uid) throws SecurityException, RemoteException {
         return queryDetailsForUidTag(networkType, subscriberId, startTime, endTime, uid,
-            NetworkStats.Bucket.TAG_ALL);
+            NetworkStats.Bucket.TAG_NONE);
     }
 
     /**
@@ -255,22 +239,28 @@ public class NetworkStatsManager {
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
-     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_ANY} for any tags, use
-     *            {@link NetworkStats.Bucket#TAG_ALL} to aggregate over tags.
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for no tags.
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
     public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
-            long startTime, long endTime, int uid, int tag) throws SecurityException,
-            RemoteException {
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        if (template == null) {
+            long startTime, long endTime, int uid, int tag) {
+        NetworkTemplate template;
+        try {
+            template = createTemplate(networkType, subscriberId);
+        } catch (IllegalArgumentException e) {
+            if (DBG) Log.e(TAG, "Cannot create template", e);
             return null;
         }
 
         NetworkStats result;
-        result = new NetworkStats(mContext, template, startTime, endTime);
-        result.startHistoryEnumeration(uid, tag);
+        try {
+            result = new NetworkStats(mContext, template, startTime, endTime);
+            result.startHistoryEnumeration(uid, tag);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag, e);
+            return null;
+        }
 
         return result;
     }
@@ -280,7 +270,7 @@ public class NetworkStatsManager {
      * calling user. Result is aggregated over state but not aggregated over time or uid. This means
      * buckets' start and end timestamps are going to be between 'startTime' and 'endTime'
      * parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid will vary,
-     * tag {@link NetworkStats.Bucket#TAG_ALL} and roaming is going to be
+     * tag {@link NetworkStats.Bucket#TAG_NONE} and roaming is going to be
      * {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
@@ -299,44 +289,59 @@ public class NetworkStatsManager {
      */
     public NetworkStats queryDetails(int networkType, String subscriberId, long startTime,
             long endTime) throws SecurityException, RemoteException {
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        if (template == null) {
+        NetworkTemplate template;
+        try {
+            template = createTemplate(networkType, subscriberId);
+        } catch (IllegalArgumentException e) {
+            if (DBG) Log.e(TAG, "Cannot create template", e);
             return null;
         }
+
         NetworkStats result;
         result = new NetworkStats(mContext, template, startTime, endTime);
         result.startUserUidEnumeration();
         return result;
     }
 
+    /** @removed */
+    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback,
+                @Nullable Handler handler) {}
+
+    /** @removed */
+    public void registerDataUsageCallback(DataUsagePolicy policy, UsageCallback callback,
+                @Nullable Handler handler) {}
+
+    /** @removed */
+    public void unregisterDataUsageCallback(DataUsageCallback callback) {}
+
     /**
-     * Registers to receive notifications about data usage on specified networks and uids.
-     * The callbacks will continue to be called as long as the process is live or
-     * {@link #unregisterDataUsageCallback} is called.
+     * Registers to receive notifications about data usage on specified networks.
      *
-     * @param policy {@link DataUsagePolicy} describing this request.
-     * @param callback The {@link DataUsageCallback} that the system will call when data usage
-     *            has exceeded the specified threshold.
+     * #see registerUsageCallback(int, String[], long, UsageCallback, Handler)
      */
-    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback) {
-        registerDataUsageCallback(policy, callback, null /* handler */);
+    public void registerUsageCallback(int networkType, String subscriberId, long thresholdBytes,
+            UsageCallback callback) {
+        registerUsageCallback(networkType, subscriberId, thresholdBytes, null /* handler */);
     }
 
     /**
-     * Registers to receive notifications about data usage on specified networks and uids.
-     * The callbacks will continue to be called as long as the process is live or
-     * {@link #unregisterDataUsageCallback} is called.
+     * Registers to receive notifications about data usage on specified networks.
      *
-     * @param policy {@link DataUsagePolicy} describing this request.
-     * @param callback The {@link DataUsageCallback} that the system will call when data usage
+     * <p>The callbacks will continue to be called as long as the process is live or
+     * {@link #unregisterUsageCallback} is called.
+     *
+     * @param networkType Type of network to monitor. Either
+                  {@link ConnectivityManager#TYPE_MOBILE} or {@link ConnectivityManager#TYPE_WIFI}.
+     * @param subscriberId If applicable, the subscriber id of the network interface.
+     * @param thresholdBytes Threshold in bytes to be notified on.
+     * @param callback The {@link UsageCallback} that the system will call when data usage
      *            has exceeded the specified threshold.
      * @param handler to dispatch callback events through, otherwise if {@code null} it uses
      *            the calling thread.
      */
-    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback,
-                @Nullable Handler handler) {
-        checkNotNull(policy, "DataUsagePolicy cannot be null");
-        checkNotNull(callback, "DataUsageCallback cannot be null");
+    public void registerUsageCallback(int networkType, String subscriberId, long thresholdBytes,
+            UsageCallback callback, @Nullable Handler handler) {
+        checkNotNull(callback, "UsageCallback cannot be null");
 
         final Looper looper;
         if (handler == null) {
@@ -345,62 +350,72 @@ public class NetworkStatsManager {
             looper = handler.getLooper();
         }
 
-        if (DBG) Log.d(TAG, "registerDataUsageCallback called with " + policy);
-
-        NetworkTemplate[] templates;
-        if (policy.subscriberIds == null || policy.subscriberIds.length == 0) {
-            templates = new NetworkTemplate[1];
-            templates[0] = createTemplate(policy.networkType, null /* subscriberId */);
-        } else {
-            templates = new NetworkTemplate[policy.subscriberIds.length];
-            for (int i = 0; i < policy.subscriberIds.length; i++) {
-                templates[i] = createTemplate(policy.networkType, policy.subscriberIds[i]);
-            }
+        if (DBG) {
+            Log.d(TAG, "registerUsageCallback called with: {"
+                + " networkType=" + networkType
+                + " subscriberId=" + subscriberId
+                + " thresholdBytes=" + thresholdBytes
+                + " }");
         }
+
+        NetworkTemplate template = createTemplate(networkType, subscriberId);
         DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
-                templates, policy.uids, policy.thresholdInBytes);
+                template, thresholdBytes);
         try {
-            CallbackHandler callbackHandler = new CallbackHandler(looper, callback);
-            callback.request = mService.registerDataUsageCallback(
+            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
+                    subscriberId, callback);
+            callback.request = mService.registerUsageCallback(
                     mContext.getOpPackageName(), request, new Messenger(callbackHandler),
                     new Binder());
-            if (DBG) Log.d(TAG, "registerDataUsageCallback returned " + callback.request);
+            if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
 
             if (callback.request == null) {
                 Log.e(TAG, "Request from callback is null; should not happen");
             }
         } catch (RemoteException e) {
             if (DBG) Log.d(TAG, "Remote exception when registering callback");
+            throw e.rethrowFromSystemServer();
         }
     }
 
     /**
      * Unregisters callbacks on data usage.
      *
-     * @param callback The {@link DataUsageCallback} used when registering.
+     * @param callback The {@link UsageCallback} used when registering.
      */
-    public void unregisterDataUsageCallback(DataUsageCallback callback) {
+    public void unregisterUsageCallback(UsageCallback callback) {
         if (callback == null || callback.request == null
                 || callback.request.requestId == DataUsageRequest.REQUEST_ID_UNSET) {
-            throw new IllegalArgumentException("Invalid DataUsageCallback");
+            throw new IllegalArgumentException("Invalid UsageCallback");
         }
         try {
-            mService.unregisterDataUsageRequest(callback.request);
+            mService.unregisterUsageRequest(callback.request);
         } catch (RemoteException e) {
             if (DBG) Log.d(TAG, "Remote exception when unregistering callback");
+            throw e.rethrowFromSystemServer();
         }
     }
 
-    /**
-     * Base class for data usage callbacks. Should be extended by applications wanting
-     * notifications.
-     */
-    public static class DataUsageCallback {
-        /**
-         * Called when data usage has reached the given policy threshold.
-         */
+    /** @removed */
+    public static abstract class DataUsageCallback {
+        /** @removed */
+        @Deprecated
         public void onLimitReached() {}
+    }
 
+    /**
+     * Base class for usage callbacks. Should be extended by applications wanting notifications.
+     */
+    public static abstract class UsageCallback {
+
+        /**
+         * Called when data usage has reached the given threshold.
+         */
+        public abstract void onThresholdReached(int networkType, String subscriberId);
+
+        /**
+         * @hide used for internal bookkeeping
+         */
         private DataUsageRequest request;
     }
 
@@ -414,18 +429,24 @@ public class NetworkStatsManager {
                 template = NetworkTemplate.buildTemplateWifiWildcard();
                 } break;
             default: {
-                Log.w(TAG, "Cannot create template for network type " + networkType
-                        + ", subscriberId '" + NetworkIdentity.scrubSubscriberId(subscriberId) +
-                        "'.");
+                throw new IllegalArgumentException("Cannot create template for network type "
+                        + networkType + ", subscriberId '"
+                        + NetworkIdentity.scrubSubscriberId(subscriberId) + "'.");
             }
         }
         return template;
     }
 
     private static class CallbackHandler extends Handler {
-        private DataUsageCallback mCallback;
-        CallbackHandler(Looper looper, DataUsageCallback callback) {
+        private final int mNetworkType;
+        private final String mSubscriberId;
+        private UsageCallback mCallback;
+
+        CallbackHandler(Looper looper, int networkType, String subscriberId,
+                UsageCallback callback) {
             super(looper);
+            mNetworkType = networkType;
+            mSubscriberId = subscriberId;
             mCallback = callback;
         }
 
@@ -437,7 +458,7 @@ public class NetworkStatsManager {
             switch (message.what) {
                 case CALLBACK_LIMIT_REACHED: {
                     if (mCallback != null) {
-                        mCallback.onLimitReached();
+                        mCallback.onThresholdReached(mNetworkType, mSubscriberId);
                     } else {
                         Log.e(TAG, "limit reached with released callback for " + request);
                     }
