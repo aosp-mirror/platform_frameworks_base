@@ -206,7 +206,8 @@ public final class ActivityThread {
     ActivityClientRecord mNewActivities = null;
     // Number of activities that are currently visible on-screen.
     int mNumVisibleActivities = 0;
-    WeakReference<AssistStructure> mLastAssistStructure;
+    ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
+    private int mLastSessionId;
     final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
     AppBindData mBoundApplication;
     Profiler mProfiler;
@@ -622,6 +623,7 @@ public final class ActivityThread {
         IBinder activityToken;
         IBinder requestToken;
         int requestType;
+        int sessionId;
     }
 
     static final class ActivityConfigChangeData {
@@ -1183,11 +1185,12 @@ public final class ActivityThread {
 
         @Override
         public void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
-                int requestType) {
+                int requestType, int sessionId) {
             RequestAssistContextExtras cmd = new RequestAssistContextExtras();
             cmd.activityToken = activityToken;
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
+            cmd.sessionId = sessionId;
             sendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
         }
 
@@ -1804,6 +1807,7 @@ public final class ActivityThread {
     }
 
     private Configuration mMainThreadConfig = new Configuration();
+
     Configuration applyConfigCompatMainThread(int displayDensity, Configuration config,
             CompatibilityInfo compat) {
         if (config == null) {
@@ -2785,10 +2789,15 @@ public final class ActivityThread {
     }
 
     public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
-        if (mLastAssistStructure != null) {
-            AssistStructure structure = mLastAssistStructure.get();
-            if (structure != null) {
-                structure.clearSendChannel();
+        if (mLastSessionId != cmd.sessionId) {
+            // Clear the existing structures
+            mLastSessionId = cmd.sessionId;
+            for (int i = mLastAssistStructures.size() - 1; i >= 0; i--) {
+                AssistStructure structure = mLastAssistStructures.get(i).get();
+                if (structure != null) {
+                    structure.clearSendChannel();
+                }
+                mLastAssistStructures.remove(i);
             }
         }
         Bundle data = new Bundle();
@@ -2820,7 +2829,7 @@ public final class ActivityThread {
         if (structure == null) {
             structure = new AssistStructure();
         }
-        mLastAssistStructure = new WeakReference<>(structure);
+        mLastAssistStructures.add(new WeakReference<>(structure));
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
