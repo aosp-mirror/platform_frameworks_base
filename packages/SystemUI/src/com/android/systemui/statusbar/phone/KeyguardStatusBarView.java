@@ -85,6 +85,11 @@ public class KeyguardStatusBarView extends RelativeLayout
                         com.android.internal.R.dimen.text_size_small_material));
         mBatteryLevel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.battery_level_text_size));
+
+        MarginLayoutParams lp = (MarginLayoutParams) mMultiUserAvatar.getLayoutParams();
+        lp.width = lp.height = getResources().getDimensionPixelSize(
+                R.dimen.multi_user_avatar_keyguard_size);
+        mMultiUserAvatar.setLayoutParams(lp);
     }
 
     private void loadDimens() {
