@@ -47482,56 +47482,25 @@ package java.lang {
     ctor public AbstractMethodError(java.lang.String);
   }
 
-   abstract class AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence {
-    method public java.lang.AbstractStringBuilder append(java.lang.Object);
-    method public java.lang.AbstractStringBuilder append(java.lang.String);
-    method public java.lang.AbstractStringBuilder append(java.lang.StringBuffer);
-    method public java.lang.AbstractStringBuilder append(java.lang.CharSequence);
-    method public java.lang.AbstractStringBuilder append(java.lang.CharSequence, int, int);
-    method public java.lang.AbstractStringBuilder append(char[]);
-    method public java.lang.AbstractStringBuilder append(char[], int, int);
-    method public java.lang.AbstractStringBuilder append(boolean);
-    method public java.lang.AbstractStringBuilder append(char);
-    method public java.lang.AbstractStringBuilder append(int);
-    method public java.lang.AbstractStringBuilder append(long);
-    method public java.lang.AbstractStringBuilder append(float);
-    method public java.lang.AbstractStringBuilder append(double);
-    method public java.lang.AbstractStringBuilder appendCodePoint(int);
+   abstract class AbstractStringBuilder implements java.lang.CharSequence {
     method public int capacity();
     method public char charAt(int);
     method public int codePointAt(int);
     method public int codePointBefore(int);
     method public int codePointCount(int, int);
-    method public java.lang.AbstractStringBuilder delete(int, int);
-    method public java.lang.AbstractStringBuilder deleteCharAt(int);
     method public void ensureCapacity(int);
     method public void getChars(int, int, char[], int);
     method public int indexOf(java.lang.String);
     method public int indexOf(java.lang.String, int);
-    method public java.lang.AbstractStringBuilder insert(int, char[], int, int);
-    method public java.lang.AbstractStringBuilder insert(int, java.lang.Object);
-    method public java.lang.AbstractStringBuilder insert(int, java.lang.String);
-    method public java.lang.AbstractStringBuilder insert(int, char[]);
-    method public java.lang.AbstractStringBuilder insert(int, java.lang.CharSequence);
-    method public java.lang.AbstractStringBuilder insert(int, java.lang.CharSequence, int, int);
-    method public java.lang.AbstractStringBuilder insert(int, boolean);
-    method public java.lang.AbstractStringBuilder insert(int, char);
-    method public java.lang.AbstractStringBuilder insert(int, int);
-    method public java.lang.AbstractStringBuilder insert(int, long);
-    method public java.lang.AbstractStringBuilder insert(int, float);
-    method public java.lang.AbstractStringBuilder insert(int, double);
     method public int lastIndexOf(java.lang.String);
     method public int lastIndexOf(java.lang.String, int);
     method public int length();
     method public int offsetByCodePoints(int, int);
-    method public java.lang.AbstractStringBuilder replace(int, int, java.lang.String);
-    method public java.lang.AbstractStringBuilder reverse();
     method public void setCharAt(int, char);
     method public void setLength(int);
     method public java.lang.CharSequence subSequence(int, int);
     method public java.lang.String substring(int);
     method public java.lang.String substring(int, int);
-    method public abstract java.lang.String toString();
     method public void trimToSize();
   }
 
@@ -49086,19 +49055,79 @@ package java.lang {
     field public static final java.util.Comparator<java.lang.String> CASE_INSENSITIVE_ORDER;
   }
 
-  public final class StringBuffer extends java.lang.AbstractStringBuilder implements java.lang.CharSequence java.io.Serializable {
+  public final class StringBuffer extends java.lang.AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence java.io.Serializable {
     ctor public StringBuffer();
     ctor public StringBuffer(int);
     ctor public StringBuffer(java.lang.String);
     ctor public StringBuffer(java.lang.CharSequence);
+    method public synchronized java.lang.StringBuffer append(java.lang.Object);
+    method public synchronized java.lang.StringBuffer append(java.lang.String);
+    method public synchronized java.lang.StringBuffer append(java.lang.StringBuffer);
+    method public java.lang.StringBuffer append(java.lang.CharSequence);
+    method public synchronized java.lang.StringBuffer append(java.lang.CharSequence, int, int);
+    method public synchronized java.lang.StringBuffer append(char[]);
+    method public synchronized java.lang.StringBuffer append(char[], int, int);
+    method public synchronized java.lang.StringBuffer append(boolean);
+    method public synchronized java.lang.StringBuffer append(char);
+    method public synchronized java.lang.StringBuffer append(int);
+    method public synchronized java.lang.StringBuffer append(long);
+    method public synchronized java.lang.StringBuffer append(float);
+    method public synchronized java.lang.StringBuffer append(double);
+    method public synchronized java.lang.StringBuffer appendCodePoint(int);
+    method public synchronized java.lang.StringBuffer delete(int, int);
+    method public synchronized java.lang.StringBuffer deleteCharAt(int);
+    method public synchronized java.lang.StringBuffer insert(int, char[], int, int);
+    method public synchronized java.lang.StringBuffer insert(int, java.lang.Object);
+    method public synchronized java.lang.StringBuffer insert(int, java.lang.String);
+    method public synchronized java.lang.StringBuffer insert(int, char[]);
+    method public java.lang.StringBuffer insert(int, java.lang.CharSequence);
+    method public synchronized java.lang.StringBuffer insert(int, java.lang.CharSequence, int, int);
+    method public java.lang.StringBuffer insert(int, boolean);
+    method public synchronized java.lang.StringBuffer insert(int, char);
+    method public java.lang.StringBuffer insert(int, int);
+    method public java.lang.StringBuffer insert(int, long);
+    method public java.lang.StringBuffer insert(int, float);
+    method public java.lang.StringBuffer insert(int, double);
+    method public synchronized java.lang.StringBuffer replace(int, int, java.lang.String);
+    method public synchronized java.lang.StringBuffer reverse();
     method public synchronized java.lang.String toString();
   }
 
-  public final class StringBuilder extends java.lang.AbstractStringBuilder implements java.lang.CharSequence java.io.Serializable {
+  public final class StringBuilder extends java.lang.AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence java.io.Serializable {
     ctor public StringBuilder();
     ctor public StringBuilder(int);
     ctor public StringBuilder(java.lang.String);
     ctor public StringBuilder(java.lang.CharSequence);
+    method public java.lang.StringBuilder append(java.lang.Object);
+    method public java.lang.StringBuilder append(java.lang.String);
+    method public java.lang.StringBuilder append(java.lang.StringBuffer);
+    method public java.lang.StringBuilder append(java.lang.CharSequence);
+    method public java.lang.StringBuilder append(java.lang.CharSequence, int, int);
+    method public java.lang.StringBuilder append(char[]);
+    method public java.lang.StringBuilder append(char[], int, int);
+    method public java.lang.StringBuilder append(boolean);
+    method public java.lang.StringBuilder append(char);
+    method public java.lang.StringBuilder append(int);
+    method public java.lang.StringBuilder append(long);
+    method public java.lang.StringBuilder append(float);
+    method public java.lang.StringBuilder append(double);
+    method public java.lang.StringBuilder appendCodePoint(int);
+    method public java.lang.StringBuilder delete(int, int);
+    method public java.lang.StringBuilder deleteCharAt(int);
+    method public java.lang.StringBuilder insert(int, char[], int, int);
+    method public java.lang.StringBuilder insert(int, java.lang.Object);
+    method public java.lang.StringBuilder insert(int, java.lang.String);
+    method public java.lang.StringBuilder insert(int, char[]);
+    method public java.lang.StringBuilder insert(int, java.lang.CharSequence);
+    method public java.lang.StringBuilder insert(int, java.lang.CharSequence, int, int);
+    method public java.lang.StringBuilder insert(int, boolean);
+    method public java.lang.StringBuilder insert(int, char);
+    method public java.lang.StringBuilder insert(int, int);
+    method public java.lang.StringBuilder insert(int, long);
+    method public java.lang.StringBuilder insert(int, float);
+    method public java.lang.StringBuilder insert(int, double);
+    method public java.lang.StringBuilder replace(int, int, java.lang.String);
+    method public java.lang.StringBuilder reverse();
     method public java.lang.String toString();
   }
 
