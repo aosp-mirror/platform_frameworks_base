@@ -646,7 +646,7 @@ public class ApplicationsState {
             if (DEBUG) Log.i(TAG, "Rebuilding...");
             for (int i=0; i<apps.size(); i++) {
                 AppEntry entry = apps.get(i);
-                if (filter == null || filter.filterApp(entry)) {
+                if (entry != null && (filter == null || filter.filterApp(entry))) {
                     synchronized (mEntriesMap) {
                         if (DEBUG_LOCKING) Log.v(TAG, "rebuild acquired lock");
                         if (comparator != null) {
