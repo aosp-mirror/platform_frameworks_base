@@ -441,7 +441,7 @@ final class ServiceRecord extends Binder {
                     Notification localForegroundNoti = _foregroundNoti;
                     try {
                         if (localForegroundNoti.getSmallIcon() == null) {
-                            // It is not correct for the caller to supply a notification
+                            // It is not correct for the caller to not supply a notification
                             // icon, but this used to be able to slip through, so for
                             // those dirty apps we will create a notification clearly
                             // blaming the app.
@@ -458,8 +458,8 @@ final class ServiceRecord extends Binder {
                             }
                             Context ctx = null;
                             try {
-                                ctx = ams.mContext.createPackageContext(
-                                        appInfo.packageName, 0);
+                                ctx = ams.mContext.createPackageContextAsUser(
+                                        appInfo.packageName, 0, new UserHandle(userId));
 
                                 Notification.Builder notiBuilder = new Notification.Builder(ctx);
 
