@@ -329,11 +329,14 @@ class AppWindowToken extends WindowToken {
         final DisplayContentList displayList = new DisplayContentList();
         for (int i = allWindows.size() - 1; i >= 0; i--) {
             final WindowState win = allWindows.get(i);
-            if (!win.mDestroying) {
+
+            if (!(mAppStopped || win.mWindowRemovalAllowed)) {
                 continue;
             }
 
-            if (!(mAppStopped || win.mWindowRemovalAllowed)) {
+            win.mWinAnimator.destroyPreservedSurfaceLocked();
+
+            if (!win.mDestroying) {
                 continue;
             }
 

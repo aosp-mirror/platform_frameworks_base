@@ -659,6 +659,13 @@ class WindowStateAnimator {
         mDestroyPreservedSurfaceUponRedraw = false;
     }
 
+    void markPreservedSurfaceForDestroy() {
+        if (mDestroyPreservedSurfaceUponRedraw
+                && !mService.mDestroyPreservedSurface.contains(mWin)) {
+            mService.mDestroyPreservedSurface.add(mWin);
+        }
+    }
+
     WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
         if (w.hasSavedSurface()) {
@@ -1518,9 +1525,7 @@ class WindowStateAnimator {
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
                 if (showSurfaceRobustlyLocked()) {
-                    if (mDestroyPreservedSurfaceUponRedraw) {
-                        mService.mDestroyPreservedSurface.add(mWin);
-                    }
+                    markPreservedSurfaceForDestroy();
                     mAnimator.requestRemovalOfReplacedWindows(w);
                     mLastHidden = false;
                     if (mIsWallpaper) {
