@@ -272,7 +272,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public boolean requestScrollTo() {
         findScrollContainer();
-        mScrollContainer.scrollTo(mScrollContainerChild);
+        mScrollContainer.lockScrollTo(mScrollContainerChild);
         return true;
     }
 
