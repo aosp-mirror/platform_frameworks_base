@@ -169,6 +169,22 @@ var RESOURCE_COLLECTIONS = {
       "preview/features/tv-recording-api.html"
     ]
   },
+  "wear/preview/landing": {
+    "title": "",
+    "resources": [
+      "preview/api-overview.html",
+      "preview/download.html",
+      "preview/setup-sdk.html"
+    ]
+  },
+  "wear/preview/landing/resources": {
+    "title": "",
+    "resources": [
+      "design/wear/index.html",
+      "training/building-wearables.html",
+      "training/wearables/ui/index.html"
+    ]
+  },
   "google/landing/services": {
     "title": "",
     "resources": [
