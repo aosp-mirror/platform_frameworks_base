@@ -1,0 +1,139 @@
+page.title=Get Started with Wear Preview
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+<ol>
+  <li><a href="#get-as22">Get Android Studio 2.2</a></li>
+  <li><a href="#get-sdk">Get the Wear Preview SDK</a></li>
+  <li><a href="#create-update">Update or Create a Project</a></li>
+</ol>
+  </div>
+</div>
+
+<p>
+  To develop apps for the Wear Developer Preview, you need to make some updates
+  to your developer environment. This page describes how to setup for testing
+  the Wear Preview APIs with your app.
+</p>
+
+
+<h2 id="get-as22">Get Android Studio 2.2 (preview)</h2>
+
+<p>
+  Android Studio 2.2 is currently available as a preview in the canary release
+  channel. If you already have Android Studio and don't want to update to the
+  canary channel, you can download Android Studio 2.2 as a separate
+  installation and use it for development with the Wear Developer Preview,
+  leaving your primary Android Studio environment unaffected.
+</p>
+
+<p>
+  To download Android Studio 2.2 as a separate installation, follow these steps
+  (or if you want to receive Android Studio 2.1 as an update to your existing
+  installation, skip to step 4):
+</p>
+
+<ol>
+  <li>Edit the name of your
+  existing Android Studio installation and append the version number. This way,
+  when you install the new version, it will not override the existing one.</li>
+  <li>Download the appropriate ZIP file for your operating system from the
+    <a href="http://tools.android.com/download/studio/canary/latest"
+    >canary channel download page</a>.
+  </li>
+  <li>Unzip the package and move the Android Studio 2.1 contents to the
+    appropriate location for applications on your system, then launch it.</li>
+  <li>Open the Settings dialog
+    (<strong>File &gt; Settings</strong> on Windows/Linux, or
+    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
+    panel, select <strong>Appearance &amp; Behavior &gt; System Settings &gt;
+    Updates</strong>.
+  </li>
+  <li>On the Updates panel, select the <strong>Automatically
+    check updates for</strong> check box and select
+    <strong>Canary Channel</strong> from the drop-down list.
+  </li>
+</ol>
+
+<p>Keep this settings window open for the next step.</p>
+
+
+<h2 id="get-sdk">Get the Wear Preview SDK</h2>
+
+<p>To start developing with Wear Preview APIs, you need to install the
+Wear Preview SDK in Android Studio as follows:</p>
+
+<ol>
+  <li>While still viewing the Updates panel (step 4 from above),
+  select the <strong>Automatically
+    check updates for Android SDK</strong> check box and select
+    <strong>Preview Channel</strong> from the drop-down list.
+  </li>
+  <li>Click <strong>Check Now</strong>.</li>
+
+  <li>In the left panel, select <strong>Appearance &amp; Behavior &gt;
+  System Settings &gt; Android SDK</strong>.
+
+  <li>Click the <strong>SDK Platforms</strong> tab, then select the
+  <strong>Wear Preview</strong> check box.</li>
+
+  <li>Click the <strong>SDK Tools</strong> tab, then select the
+    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
+    Platform-Tools</strong>, and <strong>Android SDK Tools</strong> check
+    boxes.
+  </li>
+
+  <li>Click <strong>OK</strong>, then accept the licensing
+    agreements for any packages that need to be installed.
+  </li>
+</ol>
+
+
+<h2 id="create-update">Update or Create a Project</h2>
+
+<p>
+  To use the Wear Preview APIs, your project must be configured appropriately.
+</p>
+
+
+<h3 id="update">Update an existing project</h3>
+
+<p>Open the
+  <code>build.gradle</code> file for your module and update the values as
+  follows:
+</p>
+
+<pre>
+android {
+  compileSdkVersion <strong>'23'</strong>
+  buildToolsVersion <strong>'24.0.1-rc1'</strong>
+  ...
+
+  defaultConfig {
+     minSdkVersion <strong>'23'</strong>
+     targetSdkVersion <strong>'23'</strong>
+     ...
+  }
+  ...
+}</pre>
+
+
+<h3 id="create">Create a new project</h3>
+
+<p>To create a new project for development with the Wear Preview SDK:</p>
+
+<ol>
+  <li>Click <strong>File > New Project</strong>. and follow the steps until
+  you reach the Target Android Devices page.
+  </li>
+  <li>On this page, select <strong>Wear</strong> option.</li>
+  <li>Under <strong>Wear</strong> option, in the <strong>Minimum
+    SDK</strong> option list, select
+    <strong>API 23: Android API 6.0 (Wear Preview)</strong>.</li>
+</ol>

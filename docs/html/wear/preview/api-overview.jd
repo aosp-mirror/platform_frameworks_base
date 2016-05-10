@@ -1,0 +1,124 @@
+page.title=Preview API Overview
+meta.tags="wear", "wear-preview"
+page.tags="wear"
+page.image=images/cards/card-n-apis_2x.png
+@jd:body
+
+
+
+
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>Key developer features</h2>
+  <ol>
+      <ul style="list-style-type:none;">
+        <li><a href="#stand-alone">Stand Alone Devices</a>
+          <ol>
+            <li><a href="#wear-apk">Wear-Specific APKs</a></li>
+            <li><a href="#network">Network Access</a></li>
+            <li><a href="#auth">Authentication</a></li>
+          </ol>
+        </li>
+        <li><a href="#notify">Notifications and Interactions</a>
+          <ol>
+            <li><a href="#appoid">Appoids with Chat Templates</a></li>
+            <li><a href="#smart-replies">Smart Replies</a></li>
+            <li><a href="#remote-input">Remote Input</a></li>
+            <li><a href="#imf">Input Method Framework</a></li>
+          </ol>
+        </li>
+        <li><a href="#ui">User Interface Improvements</a>
+          <ol>
+            <li><a href="#complicatiosn">Complications</a></li>
+            <li><a href="#drawers">Navigation and Action Drawers</a></li>
+            <li><a href="#button-loc">Button Locations</a></li>
+          </ol>
+        </li>
+      </ol>
+</div>
+</div>
+
+
+
+<p>
+  The Android Wear Preview API is still in active development, but you can try
+  it now as part of the Wear 2.0 Developer Preview. The sections below
+  highlight some of the new features for Wear developers.
+</p>
+
+
+<h2 id="stand-alone">Stand Alone Devices</h2>
+
+<p>Description of developer theme</p>
+
+<h3 id="wear-apk">Wear-Specific APKs</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="network">Network Access</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="auth">Authentication</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+
+
+<h2 id="notify">Notifications and Interactions</h2>
+
+<p>Description of developer theme</p>
+
+<h3 id="appoid">Appoids with Chat Templates</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="smart-replies">Smart Replies</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="remote-input">Remote Input</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="imf">Input Method Framework</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+
+
+<h2 id="ui">User Interface Improvements</h2>
+
+<p>Description of developer theme</p>
+
+<h3 id="complicatiosn">Complications</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="drawers">Navigation and Action Drawers</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
+
+<h3 id="button-loc">Button Locations</h3>
+
+<p>Description of feature</p>
+
+<p>Sample implementation of feature</p>
