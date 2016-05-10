@@ -399,10 +399,11 @@ public class WifiNanManager {
      * {@hide}
      */
     public void sendMessage(int sessionId, int peerId, byte[] message, int messageLength,
-            int messageId) {
+            int messageId, int retryCount) {
         if (VDBG) {
             Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
-                    + ", messageLength=" + messageLength + ", messageId=" + messageId);
+                    + ", messageLength=" + messageLength + ", messageId=" + messageId
+                    + ", retryCount=" + retryCount);
         }
 
         int clientId;
@@ -416,7 +417,8 @@ public class WifiNanManager {
         }
 
         try {
-            mService.sendMessage(clientId, sessionId, peerId, message, messageLength, messageId);
+            mService.sendMessage(clientId, sessionId, peerId, message, messageLength, messageId,
+                    retryCount);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
