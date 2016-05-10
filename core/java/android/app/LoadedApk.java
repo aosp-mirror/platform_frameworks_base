@@ -466,11 +466,7 @@ public final class LoadedApk {
         final boolean isBundledApp = mApplicationInfo.isSystemApp()
                 && !mApplicationInfo.isUpdatedSystemApp();
 
-        // Apps are allowed to open any native library under /data
-        // TODO (dimitry):This is something which could be limited to apps own directory
-        // later on but currently there are number of apps relying on this.
-        // (see http://b/27588281 and http://b/26954419 for examples)
-        String libraryPermittedPath = "/data";
+        String libraryPermittedPath = mDataDir;
         if (isBundledApp) {
             // This is necessary to grant bundled apps access to
             // libraries located in subdirectories of /system/lib
