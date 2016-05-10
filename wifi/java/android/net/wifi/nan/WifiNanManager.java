@@ -53,6 +53,8 @@ public class WifiNanManager {
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
+    private static final int INVALID_CLIENT_ID = 0;
+
     /**
      * Broadcast intent action to indicate whether Wi-Fi NAN is enabled or
      * disabled. An extra {@link #EXTRA_WIFI_STATE} provides the state
@@ -89,27 +91,13 @@ public class WifiNanManager {
 
     private final IWifiNanManager mService;
 
-    /*
-     * State transitions:
-     * UNCONNECTED -- (connect()) --> CONNECTING -- (onConnectSuccess()) --> CONNECTED
-     * UNCONNECTED -- (connect()) --> CONNECTING -- (onConnectFail()) --> UNCONNECTED
-     * CONNECTED||CONNECTING -- (disconnect()) --> UNCONNECTED
-     * CONNECTED||CONNECTING -- onNanDown() --> UNCONNECTED
-     */
-    private static final int STATE_UNCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
-
     private Object mLock = new Object(); // lock access to the following vars
 
     @GuardedBy("mLock")
-    private int mState = STATE_UNCONNECTED;
+    private final IBinder mBinder = new Binder();
 
     @GuardedBy("mLock")
-    private IBinder mBinder;
-
-    @GuardedBy("mLock")
-    private int mClientId;
+    private int mClientId = INVALID_CLIENT_ID;
 
     @GuardedBy("mLock")
     private Looper mLooper;
@@ -122,8 +110,9 @@ public class WifiNanManager {
     }
 
     /**
-     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster
-     * formation - that only happens when a connection is made.
+     * Enable the usage of the NAN API. Doesn't actually turn on NAN cluster formation - that only
+     * happens when a connection is made. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast will be
+     * triggered.
      *
      * @hide PROPOSED_NAN_SYSTEM_API
      */
@@ -131,15 +120,14 @@ public class WifiNanManager {
         try {
             mService.enableUsage();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Disable the usage of the NAN API. All attempts to connect() will be
-     * rejected. All open connections and sessions will be terminated. The
-     * {@link WifiNanEventCallback#onNanDown(int)} will be called with reason
-     * code {@link WifiNanEventCallback#REASON_REQUESTED}.
+     * Disable the usage of the NAN API. All attempts to connect() will be rejected. All open
+     * connections and sessions will be terminated. {@link #WIFI_NAN_STATE_CHANGED_ACTION} broadcast
+     * will be triggered.
      *
      * @hide PROPOSED_NAN_SYSTEM_API
      */
@@ -147,7 +135,7 @@ public class WifiNanManager {
         try {
             mService.disableUsage();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -161,7 +149,7 @@ public class WifiNanManager {
         try {
             return mService.isUsageEnabled();
         } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+            e.rethrowFromSystemServer();
         }
 
         return false;
@@ -199,22 +187,14 @@ public class WifiNanManager {
         }
 
         synchronized (mLock) {
-            if (mState != STATE_UNCONNECTED) {
-                Log.e(TAG, "connect(): Calling connect() when state != UNCONNECTED!");
-                return;
-            }
-
             mLooper = looper;
-            mBinder = new Binder();
-            mState = STATE_CONNECTING;
 
             try {
                 mClientId = mService.connect(mBinder,
                         new WifiNanEventCallbackProxy(this, looper, callback), configRequest);
             } catch (RemoteException e) {
+                mClientId = INVALID_CLIENT_ID;
                 mLooper = null;
-                mBinder = null;
-                mState = STATE_UNCONNECTED;
                 e.rethrowFromSystemServer();
             }
         }
@@ -235,18 +215,16 @@ public class WifiNanManager {
         IBinder binder;
         int clientId;
         synchronized (mLock) {
-            if (mState == STATE_UNCONNECTED) {
-                Log.e(TAG, "disconnect(): called while UNCONNECTED - ignored");
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.w(TAG, "disconnect(): called with invalid client ID - not connected first?");
                 return;
             }
 
             binder = mBinder;
             clientId = mClientId;
 
-            mState = STATE_UNCONNECTED;
-            mBinder = null;
             mLooper = null;
-            mClientId = 0;
+            mClientId = INVALID_CLIENT_ID;
         }
 
         try {
@@ -258,9 +236,7 @@ public class WifiNanManager {
 
     @Override
     protected void finalize() throws Throwable {
-        if (mState != STATE_UNCONNECTED) {
-            disconnect();
-        }
+        disconnect();
     }
 
     /**
@@ -283,8 +259,9 @@ public class WifiNanManager {
         int clientId;
         Looper looper;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "publish(): called when not CONNECTED!");
+            if (mLooper == null || mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG, "publish(): called with null looper or invalid client ID - "
+                        + "not connected first?");
                 return;
             }
 
@@ -307,8 +284,8 @@ public class WifiNanManager {
 
         int clientId;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "updatePublish(): called when not CONNECTED)!");
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG, "updatePublish(): called with invalid client ID - not connected first?");
                 return;
             }
 
@@ -343,8 +320,9 @@ public class WifiNanManager {
         int clientId;
         Looper looper;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "subscribe(): called when not CONNECTED!");
+            if (mLooper == null || mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG, "subscribe(): called with null looper or invalid client ID - "
+                        + "not connected first?");
                 return;
             }
 
@@ -370,8 +348,9 @@ public class WifiNanManager {
 
         int clientId;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "updateSubscribe(): called when not CONNECTED!");
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG,
+                        "updateSubscribe(): called with invalid client ID - not connected first?");
                 return;
             }
 
@@ -393,8 +372,9 @@ public class WifiNanManager {
 
         int clientId;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "terminateSession(): called when not CONNECTED!");
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG,
+                        "terminateSession(): called with invalid client ID - not connected first?");
                 return;
             }
 
@@ -420,8 +400,8 @@ public class WifiNanManager {
 
         int clientId;
         synchronized (mLock) {
-            if (mState != STATE_CONNECTED) {
-                Log.e(TAG, "sendMessage(): called when not CONNECTED!");
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG, "sendMessage(): called with invalid client ID - not connected first?");
                 return;
             }
 
@@ -438,8 +418,7 @@ public class WifiNanManager {
     private static class WifiNanEventCallbackProxy extends IWifiNanEventCallback.Stub {
         private static final int CALLBACK_CONNECT_SUCCESS = 0;
         private static final int CALLBACK_CONNECT_FAIL = 1;
-        private static final int CALLBACK_NAN_DOWN = 2;
-        private static final int CALLBACK_IDENTITY_CHANGED = 3;
+        private static final int CALLBACK_IDENTITY_CHANGED = 2;
 
         private final Handler mHandler;
 
@@ -469,41 +448,15 @@ public class WifiNanManager {
 
                     switch (msg.what) {
                         case CALLBACK_CONNECT_SUCCESS:
-                            synchronized (mgr.mLock) {
-                                if (mgr.mState != STATE_CONNECTING) {
-                                    Log.w(TAG, "onConnectSuccess indication received but not in "
-                                            + "CONNECTING state. Ignoring.");
-                                    return;
-                                }
-                                mgr.mState = STATE_CONNECTED;
-                            }
                             originalCallback.onConnectSuccess();
                             break;
                         case CALLBACK_CONNECT_FAIL:
                             synchronized (mgr.mLock) {
-                                if (mgr.mState != STATE_CONNECTING) {
-                                    Log.w(TAG, "onConnectFail indication received but not in "
-                                            + "CONNECTING state. Ignoring.");
-                                    return;
-                                }
-
-                                mgr.mState = STATE_UNCONNECTED;
-                                mgr.mBinder = null;
                                 mgr.mLooper = null;
-                                mgr.mClientId = 0;
+                                mgr.mClientId = INVALID_CLIENT_ID;
                             }
                             nanManager.clear();
                             originalCallback.onConnectFail(msg.arg1);
-                            break;
-                        case CALLBACK_NAN_DOWN:
-                            synchronized (mgr.mLock) {
-                                mgr.mState = STATE_UNCONNECTED;
-                                mgr.mBinder = null;
-                                mgr.mLooper = null;
-                                mgr.mClientId = 0;
-                            }
-                            nanManager.clear();
-                            originalCallback.onNanDown(msg.arg1);
                             break;
                         case CALLBACK_IDENTITY_CHANGED:
                             originalCallback.onIdentityChanged();
@@ -526,15 +479,6 @@ public class WifiNanManager {
             if (VDBG) Log.v(TAG, "onConfigFailed: reason=" + reason);
 
             Message msg = mHandler.obtainMessage(CALLBACK_CONNECT_FAIL);
-            msg.arg1 = reason;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onNanDown(int reason) {
-            if (VDBG) Log.v(TAG, "onNanDown: reason=" + reason);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_NAN_DOWN);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
