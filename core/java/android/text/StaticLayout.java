@@ -754,15 +754,21 @@ public class StaticLayout extends Layout {
                                 && ellipsize != TextUtils.TruncateAt.MARQUEE));
             if (remainingLineCount > 0 && remainingLineCount < breakCount &&
                     ellipsisMayBeApplied) {
-                // Treat the last line and overflowed lines as a single line.
-                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
                 // Calculate width and flag.
                 float width = 0;
                 int flag = 0;
                 for (int i = remainingLineCount - 1; i < breakCount; i++) {
-                    width += lineWidths[i];
+                    if (i == breakCount - 1) {
+                        width += lineWidths[i];
+                    } else {
+                        for (int j = (i == 0 ? 0 : breaks[i - 1]); j < breaks[i]; j++) {
+                            width += widths[j];
+                        }
+                    }
                     flag |= flags[i] & TAB_MASK;
                 }
+                // Treat the last line and overflowed lines as a single line.
+                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
                 lineWidths[remainingLineCount - 1] = width;
                 flags[remainingLineCount - 1] = flag;
 
