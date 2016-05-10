@@ -356,6 +356,10 @@ package android.provider {
     field public static final deprecated java.lang.String TIMESTAMP = "timestamp";
   }
 
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final deprecated java.lang.String CONTACT_METADATA_SYNC = "contact_metadata_sync";
+  }
+
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
