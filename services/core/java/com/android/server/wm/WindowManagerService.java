@@ -7540,6 +7540,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 imeTargetStack.getDockSide() : DOCKED_INVALID;
         final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
         final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
+        final boolean dockMinimized = displayContent.mDividerControllerLocked.isMinimizedDock();
 
         // The divider could be adjusted for IME position, or be thinner than usual,
         // or both. There are three possible cases:
@@ -7547,7 +7548,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // - If IME is visible, and focus is on bottom, divider is moved for IME and thinner.
         // - If IME is not visible, divider is not moved and is normal width.
 
-        if (imeVisible && dockVisible && (imeOnTop || imeOnBottom)) {
+        if (imeVisible && dockVisible && (imeOnTop || imeOnBottom) && !dockMinimized) {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
                 final TaskStack stack = stacks.get(i);
