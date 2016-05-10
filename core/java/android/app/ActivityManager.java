@@ -901,7 +901,7 @@ public class ActivityManager {
      */
     static public int getMaxRecentTasksStatic() {
         if (gMaxRecentTasks < 0) {
-            return gMaxRecentTasks = isLowRamDeviceStatic() ? 50 : 100;
+            return gMaxRecentTasks = isLowRamDeviceStatic() ? 36 : 48;
         }
         return gMaxRecentTasks;
     }
