@@ -92,8 +92,8 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -2197,7 +2197,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else {
                 boolean wasGone = entry.row.getVisibility() == View.GONE;
                 entry.row.setVisibility(View.VISIBLE);
-                if (!childNotification) {
+                if (!childNotification && !entry.row.isRemoved()) {
                     if (wasGone) {
                         // notify the scroller of a child addition
                         mStackScroller.generateAddAnimation(entry.row,
@@ -2217,7 +2217,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mStackScroller.getChildCount() - 3);
     }
 
-    private boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
+    public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
         return mShowLockscreenNotifications && !mNotificationData.isAmbient(sbn.getKey());
     }
 
