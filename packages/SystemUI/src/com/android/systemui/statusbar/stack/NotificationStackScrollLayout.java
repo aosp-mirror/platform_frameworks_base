@@ -243,6 +243,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
+            updateForcedScroll();
             updateChildren();
             mChildrenUpdateRequested = false;
             getViewTreeObserver().removeOnPreDrawListener(this);
@@ -334,6 +335,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadedOut;
     private boolean mGroupExpandedForMeasure;
+    private View mForcedScroll;
     private float mBackgroundFadeAmount = 1.0f;
     private static final Property<NotificationStackScrollLayout, Float> BACKGROUND_FADE =
             new FloatProperty<NotificationStackScrollLayout>("backgroundFade") {
@@ -589,6 +591,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         clampScrollPosition();
+    }
+
+    private void updateForcedScroll() {
+        if (mForcedScroll != null && (!mForcedScroll.hasFocus()
+                || !mForcedScroll.isAttachedToWindow())) {
+            mForcedScroll = null;
+        }
+        if (mForcedScroll != null) {
+            ExpandableView expandableView = (ExpandableView) mForcedScroll;
+            int positionInLinearLayout = getPositionInLinearLayout(expandableView);
+            int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
+
+            targetScroll = Math.max(0, Math.min(targetScroll, getScrollRange()));
+            if (mOwnScrollY < targetScroll || positionInLinearLayout < mOwnScrollY) {
+                mOwnScrollY = targetScroll;
+            }
+        }
     }
 
     private void requestChildrenUpdate() {
@@ -978,11 +997,19 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScrollingEnabled = enable;
     }
 
+    @Override
+    public void lockScrollTo(View v) {
+        if (mForcedScroll == v) {
+            return;
+        }
+        mForcedScroll = v;
+        scrollTo(v);
+    }
+
+    @Override
     public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
-        int positionInLinearLayout = getPositionInLinearLayout(v);
-        int targetScroll = positionInLinearLayout + expandableView.getIntrinsicHeight() +
-                getImeInset() - getHeight() + getTopPadding();
+        int targetScroll = targetScrollForView(expandableView, getPositionInLinearLayout(v));
 
         if (mOwnScrollY < targetScroll) {
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
@@ -991,6 +1018,15 @@ public class NotificationStackScrollLayout extends ViewGroup
             return true;
         }
         return false;
+    }
+
+    /**
+     * @return the scroll necessary to make the bottom edge of {@param v} align with the top of
+     *         the IME.
+     */
+    private int targetScrollForView(ExpandableView v, int positionInLinearLayout) {
+        return positionInLinearLayout + v.getIntrinsicHeight() +
+                getImeInset() - getHeight() + getTopPadding();
     }
 
     @Override
@@ -1111,6 +1147,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (ev.getY() < mQsContainer.getBottom()) {
             return false;
         }
+        mForcedScroll = null;
         initVelocityTrackerIfNotExists();
         mVelocityTracker.addMovement(ev);
 
@@ -2785,6 +2822,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         super.onWindowFocusChanged(hasWindowFocus);
         if (!hasWindowFocus) {
             removeLongPressCallback();
+        }
+    }
+
+    @Override
+    public void clearChildFocus(View child) {
+        super.clearChildFocus(child);
+        if (mForcedScroll == child) {
+            mForcedScroll = null;
         }
     }
 

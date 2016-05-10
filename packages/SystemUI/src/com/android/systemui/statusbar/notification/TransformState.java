@@ -374,6 +374,11 @@ public class TransformState {
             result.initFrom(view);
             return result;
         }
+        if (view.getId() == com.android.internal.R.id.actions_container) {
+            ActionListTransformState result = ActionListTransformState.obtain();
+            result.initFrom(view);
+            return result;
+        }
         if (view instanceof NotificationHeaderView) {
             HeaderTransformState result = HeaderTransformState.obtain();
             result.initFrom(view);
@@ -467,7 +472,7 @@ public class TransformState {
         resetTransformedView();
     }
 
-    private void resetTransformedView() {
+    protected void resetTransformedView() {
         mTransformedView.setTranslationX(0);
         mTransformedView.setTranslationY(0);
         mTransformedView.setScaleX(1.0f);
