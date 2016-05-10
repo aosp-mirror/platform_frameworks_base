@@ -435,7 +435,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     // Whether the window has a saved surface from last pause, which can be
     // used to start an entering animation earlier.
-    public boolean mSurfaceSaved = false;
+    private boolean mSurfaceSaved = false;
+
+    // Whether we're performing an entering animation with a saved surface.
+    private boolean mAnimatingWithSavedSurface;
+
+    // Whether the window was visible when we set the app to invisible last time. WM uses
+    // this as a hint to restore the surface (if available) for early animation next time
+    // the app is brought visible.
+    boolean mWasVisibleBeforeClientHidden;
 
     // This window will be replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
@@ -1949,12 +1957,29 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isAnimatingWithSavedSurface() {
-        return mAppToken != null && mAppToken.mAnimatingWithSavedSurface;
+        return mAnimatingWithSavedSurface;
+    }
+
+    public void setVisibleBeforeClientHidden() {
+        mWasVisibleBeforeClientHidden |=
+                (mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface);
+    }
+
+    public void clearVisibleBeforeClientHidden() {
+        mWasVisibleBeforeClientHidden = false;
+    }
+
+    public boolean wasVisibleBeforeClientHidden() {
+        return mWasVisibleBeforeClientHidden;
     }
 
     private boolean shouldSaveSurface() {
         if (mWinAnimator.mSurfaceController == null) {
             // Don't bother if the surface controller is gone for any reason.
+            return false;
+        }
+
+        if (!mWasVisibleBeforeClientHidden) {
             return false;
         }
 
@@ -2020,18 +2045,22 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         } else {
             mWinAnimator.destroySurfaceLocked();
         }
+        // Clear animating flags now, since the surface is now gone. (Note this is true even
+        // if the surface is saved, to outside world the surface is still NO_SURFACE.)
+        mAnimatingExit = false;
     }
 
-    public void destroySavedSurface() {
+    void destroySavedSurface() {
         if (mSurfaceSaved) {
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 Slog.v(TAG, "Destroying saved surface: " + this);
             }
             mWinAnimator.destroySurfaceLocked();
         }
+        mWasVisibleBeforeClientHidden = false;
     }
 
-    public void restoreSavedSurface() {
+    void restoreSavedSurface() {
         if (!mSurfaceSaved) {
             return;
         }
@@ -2039,6 +2068,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mWinAnimator.mSurfaceController != null) {
             setHasSurface(true);
             mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
+            mAnimatingWithSavedSurface = true;
 
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
                 Slog.v(TAG, "Restoring saved surface: " + this);
@@ -2051,8 +2081,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    public boolean hasSavedSurface() {
+    boolean canRestoreSurface() {
+        return mWasVisibleBeforeClientHidden && mSurfaceSaved;
+    }
+
+    boolean hasSavedSurface() {
         return mSurfaceSaved;
+    }
+
+    void clearHasSavedSurface() {
+        mSurfaceSaved = false;
+        mAnimatingWithSavedSurface = false;
+        mWasVisibleBeforeClientHidden = false;
+    }
+
+    void clearAnimatingWithSavedSurface() {
+        if (mAnimatingWithSavedSurface) {
+            // App has drawn something to its windows, we're no longer animating with
+            // the saved surfaces.
+            if (DEBUG_ANIM) Slog.d(TAG,
+                    "clearAnimatingWithSavedSurface(): win=" + this);
+            mAnimatingWithSavedSurface = false;
+        }
     }
 
     @Override
