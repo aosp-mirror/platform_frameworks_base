@@ -472,12 +472,6 @@ public final class BluetoothAdapter {
 
     private static final int ADDRESS_LENGTH = 17;
 
-    private static final int CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS = 30;
-    /** @hide */
-    public static final int ACTIVITY_ENERGY_INFO_CACHED = 0;
-    /** @hide */
-    public static final int ACTIVITY_ENERGY_INFO_REFRESHED = 1;
-
     /**
      * Lazily initialized singleton. Guaranteed final after first object
      * constructed.
@@ -1374,13 +1368,13 @@ public final class BluetoothAdapter {
      * @return a record with {@link BluetoothActivityEnergyInfo} or null if
      * report is unavailable or unsupported
      * @deprecated use the asynchronous
-     * {@link #requestControllerActivityEnergyInfo(int, ResultReceiver)} instead.
+     * {@link #requestControllerActivityEnergyInfo(ResultReceiver)} instead.
      * @hide
      */
     @Deprecated
     public BluetoothActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
         SynchronousResultReceiver receiver = new SynchronousResultReceiver();
-        requestControllerActivityEnergyInfo(updateType, receiver);
+        requestControllerActivityEnergyInfo(receiver);
         try {
             SynchronousResultReceiver.Result result = receiver.awaitResult(1000);
             if (result.bundle != null) {
@@ -1400,34 +1394,24 @@ public final class BluetoothAdapter {
      * A null value for the activity info object may be sent if the bluetooth service is
      * unreachable or the device does not support reporting such information.
      *
-     * @param updateType Type of info, cached vs refreshed.
      * @param result The callback to which to send the activity info.
      * @hide
      */
-    public void requestControllerActivityEnergyInfo(int updateType, ResultReceiver result) {
-        if (getState() != STATE_ON) {
-            result.send(0, null);
-            return;
-        }
-
+    public void requestControllerActivityEnergyInfo(ResultReceiver result) {
         try {
-            if (!mService.isActivityAndEnergyReportingSupported()) {
-                result.send(0, null);
-                return;
-            }
-            synchronized(this) {
-                if (updateType == ACTIVITY_ENERGY_INFO_REFRESHED) {
-                    mService.getActivityEnergyInfoFromController();
-                    wait(CONTROLLER_ENERGY_UPDATE_TIMEOUT_MILLIS);
+            synchronized(mManagerCallback) {
+                if (mService != null) {
+                    mService.requestActivityInfo(result);
+                    result = null;
                 }
-                mService.requestActivityInfo(result);
             }
-        } catch (InterruptedException e) {
-            Log.e(TAG, "getControllerActivityEnergyInfoCallback wait interrupted: " + e);
-            result.send(0, null);
         } catch (RemoteException e) {
             Log.e(TAG, "getControllerActivityEnergyInfoCallback: " + e);
-            result.send(0, null);
+        } finally {
+            if (result != null) {
+                // Only send an immediate result if we failed.
+                result.send(0, null);
+            }
         }
     }
 
