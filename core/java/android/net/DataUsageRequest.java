@@ -20,7 +20,6 @@ import android.net.NetworkTemplate;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -28,56 +27,33 @@ import java.util.Objects;
  * {@link android.app.usage.NetworkStatsManager#registerDataUsageCallback}.
  * If no {@code uid}s are set, callbacks are restricted to device-owners,
  * carrier-privileged apps, or system apps.
+ *
+ * @hide
  */
 public final class DataUsageRequest implements Parcelable {
 
-    /**
-     * @hide
-     */
     public static final String PARCELABLE_KEY = "DataUsageRequest";
-
-    /**
-     * @hide
-     */
     public static final int REQUEST_ID_UNSET = 0;
 
     /**
      * Identifies the request.  {@link DataUsageRequest}s should only be constructed by
      * the Framework and it is used internally to identify the request.
-     * @hide
      */
     public final int requestId;
 
     /**
-     * Set of {@link NetworkTemplate}s describing the networks to monitor.
-     * @hide
+     * {@link NetworkTemplate} describing the network to monitor.
      */
-    public final NetworkTemplate[] templates;
-
-    /**
-     * Set of UIDs of which to monitor data usage.
-     *
-     * <p>If not {@code null}, the caller will be notified when any of the uids exceed
-     * the given threshold. If {@code null} all uids for which the calling process has access
-     * to stats will be monitored.
-     * @hide
-     */
-    public final int[] uids;
+    public final NetworkTemplate template;
 
     /**
      * Threshold in bytes to be notified on.
-     * @hide
      */
     public final long thresholdInBytes;
 
-    /**
-     * @hide
-     */
-    public DataUsageRequest(int requestId, NetworkTemplate[] templates, int[] uids,
-                long thresholdInBytes) {
+    public DataUsageRequest(int requestId, NetworkTemplate template, long thresholdInBytes) {
         this.requestId = requestId;
-        this.templates = templates;
-        this.uids = uids;
+        this.template = template;
         this.thresholdInBytes = thresholdInBytes;
     }
 
@@ -89,8 +65,7 @@ public final class DataUsageRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(requestId);
-        dest.writeTypedArray(templates, flags);
-        dest.writeIntArray(uids);
+        dest.writeParcelable(template, flags);
         dest.writeLong(thresholdInBytes);
     }
 
@@ -99,11 +74,10 @@ public final class DataUsageRequest implements Parcelable {
                 @Override
                 public DataUsageRequest createFromParcel(Parcel in) {
                     int requestId = in.readInt();
-                    NetworkTemplate[] templates = in.createTypedArray(NetworkTemplate.CREATOR);
-                    int[] uids = in.createIntArray();
+                    NetworkTemplate template = in.readParcelable(null);
                     long thresholdInBytes = in.readLong();
-                    DataUsageRequest result = new DataUsageRequest(requestId,
-                            templates, uids, thresholdInBytes);
+                    DataUsageRequest result = new DataUsageRequest(requestId, template,
+                            thresholdInBytes);
                     return result;
                 }
 
@@ -116,8 +90,7 @@ public final class DataUsageRequest implements Parcelable {
     @Override
     public String toString() {
         return "DataUsageRequest [ requestId=" + requestId
-                + ", networkTemplates=" + Arrays.toString(templates)
-                + ", uids=" + Arrays.toString(uids)
+                + ", networkTemplate=" + template
                 + ", thresholdInBytes=" + thresholdInBytes + " ]";
     }
 
@@ -126,23 +99,13 @@ public final class DataUsageRequest implements Parcelable {
         if (obj instanceof DataUsageRequest == false) return false;
         DataUsageRequest that = (DataUsageRequest) obj;
         return that.requestId == this.requestId
-                && Arrays.deepEquals(that.templates, this.templates)
-                && Arrays.equals(that.uids, this.uids)
+                && Objects.equals(that.template, this.template)
                 && that.thresholdInBytes == this.thresholdInBytes;
     }
 
     @Override
     public int hashCode() {
-        // Start with a non-zero constant.
-        int result = 17;
-
-        // Include a hash for each field.
-        result = 31 * result + requestId;
-        result = 31 * result + Arrays.deepHashCode(templates);
-        result = 31 * result + Arrays.hashCode(uids);
-        result = 31 * result + (int) (thresholdInBytes ^ (thresholdInBytes >>> 32));
-
-        return result;
+        return Objects.hash(requestId, template, thresholdInBytes);
    }
 
 }
