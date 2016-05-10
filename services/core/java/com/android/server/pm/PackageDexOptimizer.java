@@ -28,6 +28,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.os.InstallerConnection.InstallerException;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,6 +121,32 @@ class PackageDexOptimizer {
      */
     protected int adjustDexoptFlags(int dexoptFlags) {
         return dexoptFlags;
+    }
+
+    /**
+     * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
+     */
+    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg) {
+        final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
+        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+
+        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+
+        for (String instructionSet : dexCodeInstructionSets) {
+             pw.println("Instruction Set: " + instructionSet);
+             pw.increaseIndent();
+             for (String path : paths) {
+                  String status = null;
+                  try {
+                      status = DexFile.getDexFileStatus(path, instructionSet);
+                  } catch (IOException ioe) {
+                      status = "[Exception]: " + ioe.getMessage();
+                  }
+                  pw.println("path: " + path);
+                  pw.println("status: " + status);
+             }
+             pw.decreaseIndent();
+        }
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] sharedLibraries,
