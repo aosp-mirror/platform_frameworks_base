@@ -189,7 +189,7 @@ class ShortcutPackageInfo {
         mSigHashes = hashes;
     }
 
-    public void dump(ShortcutService s, PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.println();
 
         pw.print(prefix);
