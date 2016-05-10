@@ -418,9 +418,16 @@ public class NotificationPanelView extends PanelView implements
             if (!(child instanceof ExpandableNotificationRow)) {
                 continue;
             }
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
-                    ((ExpandableNotificationRow) child).getStatusBarNotification());
+                    row.getStatusBarNotification());
             if (suppressedSummary) {
+                continue;
+            }
+            if (!mStatusBar.shouldShowOnKeyguard(row.getStatusBarNotification())) {
+                continue;
+            }
+            if (row.isRemoved()) {
                 continue;
             }
             availableSpace -= child.getMinHeight() + notificationPadding;
