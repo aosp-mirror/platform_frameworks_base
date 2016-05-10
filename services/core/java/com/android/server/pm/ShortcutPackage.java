@@ -98,17 +98,16 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private long mLastKnownForegroundElapsedTime;
 
-    private ShortcutPackage(ShortcutService s, ShortcutUser shortcutUser,
+    private ShortcutPackage(ShortcutUser shortcutUser,
             int packageUserId, String packageName, ShortcutPackageInfo spi) {
         super(shortcutUser, packageUserId, packageName,
                 spi != null ? spi : ShortcutPackageInfo.newEmpty());
 
-        mPackageUid = s.injectGetPackageUid(packageName, packageUserId);
+        mPackageUid = shortcutUser.mService.injectGetPackageUid(packageName, packageUserId);
     }
 
-    public ShortcutPackage(ShortcutService s, ShortcutUser shortcutUser,
-            int packageUserId, String packageName) {
-        this(s, shortcutUser, packageUserId, packageName, null);
+    public ShortcutPackage(ShortcutUser shortcutUser, int packageUserId, String packageName) {
+        this(shortcutUser, packageUserId, packageName, null);
     }
 
     @Override
@@ -126,10 +125,12 @@ class ShortcutPackage extends ShortcutPackageItem {
      * exists (as opposed to Launcher trying to fetch shortcuts from a non-existent package), so
      * we do some initialization for the package.
      */
-    private void onShortcutPublish(ShortcutService s) {
+    private void onShortcutPublish() {
         // Make sure we have the version code for the app.  We need the version code in
         // handlePackageUpdated().
         if (getPackageInfo().getVersionCode() < 0) {
+            final ShortcutService s = mShortcutUser.mService;
+
             final int versionCode = s.getApplicationVersionCode(getPackageName(), getOwnerUserId());
             if (ShortcutService.DEBUG) {
                 Slog.d(TAG, String.format("Package %s version = %d", getPackageName(),
@@ -143,16 +144,16 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     @Override
-    protected void onRestoreBlocked(ShortcutService s) {
+    protected void onRestoreBlocked() {
         // Can't restore due to version/signature mismatch.  Remove all shortcuts.
         mShortcuts.clear();
     }
 
     @Override
-    protected void onRestored(ShortcutService s) {
+    protected void onRestored() {
         // Because some launchers may not have been restored (e.g. allowBackup=false),
         // we need to re-calculate the pinned shortcuts.
-        refreshPinnedFlags(s);
+        refreshPinnedFlags();
     }
 
     /**
@@ -163,19 +164,18 @@ class ShortcutPackage extends ShortcutPackageItem {
         return mShortcuts.get(id);
     }
 
-    private ShortcutInfo deleteShortcut(@NonNull ShortcutService s,
-            @NonNull String id) {
+    private ShortcutInfo deleteShortcut(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
-            s.removeIcon(getPackageUserId(), shortcut);
+            mShortcutUser.mService.removeIcon(getPackageUserId(), shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED);
         }
         return shortcut;
     }
 
-    void addShortcut(@NonNull ShortcutService s, @NonNull ShortcutInfo newShortcut) {
-        deleteShortcut(s, newShortcut.getId());
-        s.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
+    void addShortcut(@NonNull ShortcutInfo newShortcut) {
+        deleteShortcut(newShortcut.getId());
+        mShortcutUser.mService.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
         mShortcuts.put(newShortcut.getId(), newShortcut);
     }
 
@@ -184,10 +184,9 @@ class ShortcutPackage extends ShortcutPackageItem {
      *
      * It checks the max number of dynamic shortcuts.
      */
-    public void addDynamicShortcut(@NonNull ShortcutService s,
-            @NonNull ShortcutInfo newShortcut) {
+    public void addDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
 
-        onShortcutPublish(s);
+        onShortcutPublish();
 
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
@@ -209,21 +208,21 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Make sure there's still room.
-        s.enforceMaxDynamicShortcuts(newDynamicCount);
+        mShortcutUser.mService.enforceMaxDynamicShortcuts(newDynamicCount);
 
         // Okay, make it dynamic and add.
         if (wasPinned) {
             newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
         }
 
-        addShortcut(s, newShortcut);
+        addShortcut(newShortcut);
         mDynamicShortcutCount = newDynamicCount;
     }
 
     /**
      * Remove all shortcuts that aren't pinned nor dynamic.
      */
-    private void removeOrphans(@NonNull ShortcutService s) {
+    private void removeOrphans() {
         ArrayList<String> removeList = null; // Lazily initialize.
 
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
@@ -238,7 +237,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         if (removeList != null) {
             for (int i = removeList.size() - 1; i >= 0; i--) {
-                deleteShortcut(s, removeList.get(i));
+                deleteShortcut(removeList.get(i));
             }
         }
     }
@@ -246,18 +245,18 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Remove all dynamic shortcuts.
      */
-    public void deleteAllDynamicShortcuts(@NonNull ShortcutService s) {
+    public void deleteAllDynamicShortcuts() {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_DYNAMIC);
         }
-        removeOrphans(s);
+        removeOrphans();
         mDynamicShortcutCount = 0;
     }
 
     /**
      * Remove a dynamic shortcut by ID.
      */
-    public void deleteDynamicWithId(@NonNull ShortcutService s, @NonNull String shortcutId) {
+    public void deleteDynamicWithId(@NonNull String shortcutId) {
         final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
         if (oldShortcut == null) {
@@ -269,7 +268,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (oldShortcut.isPinned()) {
             oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
         } else {
-            deleteShortcut(s, shortcutId);
+            deleteShortcut(shortcutId);
         }
     }
 
@@ -279,14 +278,15 @@ class ShortcutPackage extends ShortcutPackageItem {
      *
      * <p>Then remove all shortcuts that are not dynamic and no longer pinned either.
      */
-    public void refreshPinnedFlags(@NonNull ShortcutService s) {
+    public void refreshPinnedFlags() {
         // First, un-pin all shortcuts
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_PINNED);
         }
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
-        s.getUserShortcutsLocked(getPackageUserId()).forAllLaunchers(launcherShortcuts -> {
+        mShortcutUser.mService.getUserShortcutsLocked(getPackageUserId())
+                .forAllLaunchers(launcherShortcuts -> {
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
                     getPackageName(), getPackageUserId());
 
@@ -308,7 +308,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         });
 
         // Lastly, remove the ones that are no longer pinned nor dynamic.
-        removeOrphans(s);
+        removeOrphans();
     }
 
     /**
@@ -317,8 +317,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * <p>This takes care of the resetting the counter for foreground apps as well as after
      * locale changes.
      */
-    public int getApiCallCount(@NonNull ShortcutService s) {
-        mShortcutUser.resetThrottlingIfNeeded(s);
+    public int getApiCallCount() {
+        mShortcutUser.resetThrottlingIfNeeded();
+
+        final ShortcutService s = mShortcutUser.mService;
 
         // Reset the counter if:
         // - the package is in foreground now.
@@ -328,7 +330,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 || mLastKnownForegroundElapsedTime
                     < s.getUidLastForegroundElapsedTimeLocked(mPackageUid)) {
             mLastKnownForegroundElapsedTime = s.injectElapsedRealtime();
-            resetRateLimiting(s);
+            resetRateLimiting();
         }
 
         // Note resetThrottlingIfNeeded() and resetRateLimiting() will set 0 to mApiCallCount,
@@ -349,8 +351,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         // If not reset yet, then reset.
         if (mLastResetTime < last) {
             if (ShortcutService.DEBUG) {
-                Slog.d(TAG, String.format("My last reset=%d, now=%d, last=%d: resetting",
-                        mLastResetTime, now, last));
+                Slog.d(TAG, String.format("%s: last reset=%d, now=%d, last=%d: resetting",
+                        getPackageName(), mLastResetTime, now, last));
             }
             mApiCallCount = 0;
             mLastResetTime = last;
@@ -365,8 +367,10 @@ class ShortcutPackage extends ShortcutPackageItem {
      * <p>This takes care of the resetting the counter for foreground apps as well as after
      * locale changes, which is done internally by {@link #getApiCallCount}.
      */
-    public boolean tryApiCall(@NonNull ShortcutService s) {
-        if (getApiCallCount(s) >= s.mMaxUpdatesPerInterval) {
+    public boolean tryApiCall() {
+        final ShortcutService s = mShortcutUser.mService;
+
+        if (getApiCallCount() >= s.mMaxUpdatesPerInterval) {
             return false;
         }
         mApiCallCount++;
@@ -374,13 +378,13 @@ class ShortcutPackage extends ShortcutPackageItem {
         return true;
     }
 
-    public void resetRateLimiting(@NonNull ShortcutService s) {
+    public void resetRateLimiting() {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, "resetRateLimiting: " + getPackageName());
         }
         if (mApiCallCount > 0) {
             mApiCallCount = 0;
-            s.scheduleSaveUser(getOwnerUserId());
+            mShortcutUser.mService.scheduleSaveUser(getOwnerUserId());
         }
     }
 
@@ -392,9 +396,9 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Find all shortcuts that match {@code query}.
      */
-    public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
+    public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag) {
-        findAll(s, result, query, cloneFlag, null, 0);
+        findAll(result, query, cloneFlag, null, 0);
     }
 
     /**
@@ -404,13 +408,15 @@ class ShortcutPackage extends ShortcutPackageItem {
      * by the calling launcher will not be included in the result, and also "isPinned" will be
      * adjusted for the caller too.
      */
-    public void findAll(@NonNull ShortcutService s, @NonNull List<ShortcutInfo> result,
+    public void findAll(@NonNull List<ShortcutInfo> result,
             @Nullable Predicate<ShortcutInfo> query, int cloneFlag,
             @Nullable String callingLauncher, int launcherUserId) {
         if (getPackageInfo().isShadow()) {
             // Restored and the app not installed yet, so don't return any.
             return;
         }
+
+        final ShortcutService s = mShortcutUser.mService;
 
         // Set of pinned shortcuts by the calling launcher.
         final ArraySet<String> pinnedByCallerSet = (callingLauncher == null) ? null
@@ -479,7 +485,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Called when the package is updated.  If there are shortcuts with resource icons, update
      * their timestamps.
      */
-    public void handlePackageUpdated(ShortcutService s, int newVersionCode) {
+    public void handlePackageUpdated(int newVersionCode) {
         if (getPackageInfo().getVersionCode() >= newVersionCode) {
             // Version hasn't changed; nothing to do.
             return;
@@ -490,6 +496,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         getPackageInfo().setVersionCode(newVersionCode);
+
+        final ShortcutService s = mShortcutUser.mService;
 
         boolean changed = false;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
@@ -509,7 +517,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
-    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
         pw.print(prefix);
@@ -522,7 +530,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print(prefix);
         pw.print("  ");
         pw.print("Calls: ");
-        pw.print(getApiCallCount(s));
+        pw.print(getApiCallCount());
         pw.println();
 
         // getApiCallCount() may have updated mLastKnownForegroundElapsedTime.
@@ -538,10 +546,10 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print("Last reset: [");
         pw.print(mLastResetTime);
         pw.print("] ");
-        pw.print(s.formatTime(mLastResetTime));
+        pw.print(ShortcutService.formatTime(mLastResetTime));
         pw.println();
 
-        getPackageInfo().dump(s, pw, prefix + "  ");
+        getPackageInfo().dump(pw, prefix + "  ");
         pw.println();
 
         pw.print(prefix);
@@ -569,7 +577,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         pw.print("Total bitmap size: ");
         pw.print(totalBitmapSize);
         pw.print(" (");
-        pw.print(Formatter.formatFileSize(s.mContext, totalBitmapSize));
+        pw.print(Formatter.formatFileSize(mShortcutUser.mService.mContext, totalBitmapSize));
         pw.println(")");
     }
 
@@ -651,7 +659,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final String packageName = ShortcutService.parseStringAttribute(parser,
                 ATTR_NAME);
 
-        final ShortcutPackage ret = new ShortcutPackage(s, shortcutUser,
+        final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
 
         ret.mDynamicShortcutCount =

@@ -80,26 +80,31 @@ class ShortcutLauncher extends ShortcutPackageItem {
      * Called when the new package can't receive the backup, due to signature or version mismatch.
      */
     @Override
-    protected void onRestoreBlocked(ShortcutService s) {
+    protected void onRestoreBlocked() {
         final ArrayList<PackageWithUser> pinnedPackages =
                 new ArrayList<>(mPinnedShortcuts.keySet());
         mPinnedShortcuts.clear();
         for (int i = pinnedPackages.size() - 1; i >= 0; i--) {
             final PackageWithUser pu = pinnedPackages.get(i);
-            s.getPackageShortcutsLocked(pu.packageName, pu.userId)
-                    .refreshPinnedFlags(s);
+            final ShortcutPackage p = mShortcutUser.getPackageShortcutsIfExists(pu.packageName);
+            if (p != null) {
+                p.refreshPinnedFlags();
+            }
         }
     }
 
     @Override
-    protected void onRestored(ShortcutService s) {
+    protected void onRestored() {
         // Nothing to do.
     }
 
-    public void pinShortcuts(@NonNull ShortcutService s, @UserIdInt int packageUserId,
+    public void pinShortcuts(@UserIdInt int packageUserId,
             @NonNull String packageName, @NonNull List<String> ids) {
         final ShortcutPackage packageShortcuts =
-                s.getPackageShortcutsLocked(packageName, packageUserId);
+                mShortcutUser.getPackageShortcutsIfExists(packageName);
+        if (packageShortcuts == null) {
+            return; // No need to instantiate.
+        }
 
         final PackageWithUser pu = PackageWithUser.of(packageUserId, packageName);
 
@@ -126,7 +131,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
             }
             mPinnedShortcuts.put(pu, newSet);
         }
-        packageShortcuts.refreshPinnedFlags(s);
+        packageShortcuts.refreshPinnedFlags();
     }
 
     /**
@@ -240,7 +245,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         return ret;
     }
 
-    public void dump(@NonNull ShortcutService s, @NonNull PrintWriter pw, @NonNull String prefix) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
         pw.print(prefix);
@@ -252,7 +257,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
         pw.print(getOwnerUserId());
         pw.println();
 
-        getPackageInfo().dump(s, pw, prefix + "  ");
+        getPackageInfo().dump(pw, prefix + "  ");
         pw.println();
 
         final int size = mPinnedShortcuts.size();

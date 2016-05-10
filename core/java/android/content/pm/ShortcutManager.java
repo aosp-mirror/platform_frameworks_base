@@ -18,7 +18,6 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -80,8 +79,18 @@ import java.util.List;
  *
  * <h3>Backup and Restore</h3>
  *
- * Shortcuts will be backed up and restored across devices.  This means all information, including
- * IDs, must be meaningful on a different device.
+ * Pinned shortcuts will be backed up and restored across devices.  This means all information
+ * within shortcuts, including IDs, must be meaningful on different devices.
+ *
+ * <p>Note that:
+ * <ul>
+ *     <li>Dynamic shortcuts will not be backed up or restored.
+ *     <li>Icons of pinned shortcuts will <b>not</b> be backed up for performance reasons, unless
+ *     they refer to resources.  Instead, launcher applications are supposed to back up and restore
+ *     icons of pinned shortcuts by themselves, and thus from the user's point of view, pinned
+ *     shortcuts will look to have icons restored.
+ * </ul>
+ *
  *
  * <h3>APIs for launcher</h3>
  *
@@ -147,8 +156,8 @@ public class ShortcutManager {
     }
 
     /**
-     * Publish a single dynamic shortcut.  If there's already dynamic or pinned shortcuts with
-     * the same ID, they will all be updated.
+     * Publish list of dynamic shortcuts.  If there's already dynamic or pinned shortcuts with
+     * the same IDs, they will all be updated.
      *
      * <p>This API will be rate-limited.
      *
@@ -167,7 +176,7 @@ public class ShortcutManager {
     }
 
     /**
-     * Delete a single dynamic shortcut by ID.
+     * Delete dynamic shortcuts by ID.
      */
     public void removeDynamicShortcuts(@NonNull List<String> shortcutIds) {
         try {
