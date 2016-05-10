@@ -11,7 +11,7 @@ LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 # Only enable asserts on userdebug/eng builds
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
-LOCAL_JACK_FLAGS += -D jack.assert.policy=enable
+LOCAL_JACK_FLAGS += -D jack.assert.policy=always
 endif
 
 include $(BUILD_PACKAGE)
