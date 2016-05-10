@@ -967,7 +967,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         super.onDensityOrFontScaleChanged();
         mScrimController.onDensityOrFontScaleChanged();
         mStatusBarView.onDensityOrFontScaleChanged();
-        mBrightnessMirrorController.onDensityOrFontScaleChanged();
+        if (mBrightnessMirrorController != null) {
+            mBrightnessMirrorController.onDensityOrFontScaleChanged();
+        }
         inflateSignalClusters();
         mIconController.onDensityOrFontScaleChanged();
         inflateDismissView();
@@ -976,6 +978,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateEmptyShadeView();
         inflateOverflowContainer();
         mStatusBarKeyguardViewManager.onDensityOrFontScaleChanged();
+        mUserInfoController.onDensityOrFontScaleChanged();
+        if (mUserSwitcherController != null) {
+            mUserSwitcherController.onDensityOrFontScaleChanged();
+        }
+        if (mKeyguardUserSwitcher != null) {
+            mKeyguardUserSwitcher.onDensityOrFontScaleChanged();
+        }
     }
 
     private void inflateSignalClusters() {
