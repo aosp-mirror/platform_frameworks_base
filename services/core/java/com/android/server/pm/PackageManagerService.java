@@ -226,8 +226,6 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.os.InstallerConnection.InstallerException;
 import com.android.internal.os.SomeArgs;
@@ -7223,16 +7221,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final int elapsedTime = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        MetricsLogger.action(mContext,
-                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_DEXOPTED, numberOfPackagesOptimized);
-        MetricsLogger.action(mContext,
-                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_SKIPPED, numberOfPackagesSkipped);
-        MetricsLogger.action(mContext,
-                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_FAILED, numberOfPackagesFailed);
-        MetricsLogger.action(mContext,
-                MetricsEvent.OPTIMIZING_APPS_NUM_PKGS_TOTAL, getOptimizablePackages().size());
-        MetricsLogger.action(mContext,
-                MetricsEvent.OPTIMIZING_APPS_TOTAL_TIME_MS, elapsedTime);
+        // TODO: Log events using MetricsLogger.histogram / MetricsLogger.count
     }
 
     @Override
