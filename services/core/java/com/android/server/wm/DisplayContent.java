@@ -378,6 +378,8 @@ class DisplayContent {
                  * We save the focused task region once we find it, and add it back at the end.
                  */
 
+                task.getDimBounds(mTmpRect);
+
                 if (task == focusedTask) {
                     addBackFocusedTask = true;
                     mTmpRect2.set(mTmpRect);
@@ -385,7 +387,6 @@ class DisplayContent {
 
                 final boolean isFreeformed = task.inFreeformWorkspace();
                 if (task != focusedTask || isFreeformed) {
-                    task.getDimBounds(mTmpRect);
                     if (isFreeformed) {
                         // If the task is freeformed, enlarge the area to account for outside
                         // touch area for resize.
