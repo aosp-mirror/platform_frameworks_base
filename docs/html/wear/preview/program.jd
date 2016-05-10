@@ -1,0 +1,62 @@
+page.title=Preview Program Overview
+page.metaDescription=Get your apps ready for the next version of Android.
+page.image=images/cards/card-n-overview_2x.png
+meta.tags="wear", "wear-preview"
+page.tags="wear"
+
+@jd:body
+
+
+<p>
+  Welcome to the <strong>Wear Developer Preview</strong>, a program that
+  gives you everything you need to test and optimize your apps for the next
+  version of Android Wear. It's free, and you can get started right away just by
+  downloading the Wear Developer Preview tools.
+</p>
+
+
+
+<h2 id="timeline">Timeline and updates</h2>
+
+<p>
+  Lorem ipsum dolor sit amet, consul graecis gloriatur in cum. Porro noster ea
+  nam, omnes tollit facete ut vix. Ut nibh ancillae mei, unum mollis aliquid an
+  pri. No melius dignissim mel. An eum erant dicit volumus, ut eum animal
+  convenire.
+</p>
+
+
+<h2 id="preview_tools">What's in the Wear Developer Preview?</h2>
+
+<p>
+  Lorem ipsum dolor sit amet, consul graecis gloriatur in cum. Porro noster ea
+  nam, omnes tollit facete ut vix. Ut nibh ancillae mei, unum mollis aliquid an
+  pri. No melius dignissim mel. An eum erant dicit volumus, ut eum animal
+  convenire.
+</p>
+
+
+<h2 id="how_to_get_started">How to get started</h2>
+
+<p>
+  To get started testing your app with the Wear Developer Preview:
+</p>
+
+<ol>
+  <li> Review the <a href="{@docRoot}wear/preview/api-overview.html">API
+  Overview</a> to
+  get an idea of what's new and how it affects your apps.</li>
+  <li>Download the preview API documentation and system images from the
+    <a href="{@docRoot}wear/preview/downloads.html">Preview Downloads</a>
+  </li>
+  <li> Set up your environment by following the instructions for <a
+  href="{@docRoot}wear/preview/start.html">Get Started with Wear Preview</a>
+  and configuring test devices.</li>
+  <li> Join the <a href="http://g.co/androidweardev">Android Wear
+  Developer Community</a> to get the latest news and connect with other
+  developers working with the new platform.</li>
+</ol>
+
+<p>
+  Thank you for participating in the Android Wear Developer Preview program!
+</p>
