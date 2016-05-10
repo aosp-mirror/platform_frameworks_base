@@ -374,8 +374,40 @@ public class NotificationContentView extends FrameLayout {
         mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());;
         mUnrestrictedContentHeight = Math.max(contentHeight, getMinHeight());
         selectLayout(mAnimate /* animate */, false /* force */);
+
+        int minHeightHint = getMinContentHeightHint();
+
+        NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
+        if (wrapper != null) {
+            wrapper.setContentHeight(mContentHeight, minHeightHint);
+        }
+
+        wrapper = getVisibleWrapper(mTransformationStartVisibleType);
+        if (wrapper != null) {
+            wrapper.setContentHeight(mContentHeight, minHeightHint);
+        }
+
         updateClipping();
         invalidateOutline();
+    }
+
+    /**
+     * @return the minimum apparent height that the wrapper should allow for the purpose
+     *         of aligning elements at the bottom edge. If this is larger than the content
+     *         height, the notification is clipped instead of being further shrunk.
+     */
+    private int getMinContentHeightHint() {
+        if (mIsChildInGroup && (mVisibleType == VISIBLE_TYPE_SINGLELINE
+                || mTransformationStartVisibleType == VISIBLE_TYPE_SINGLELINE)) {
+            return mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_action_list_height);
+        }
+        if (mHeadsUpChild != null) {
+            return mHeadsUpChild.getHeight();
+        } else {
+            return mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_action_list_height);
+        }
     }
 
     private void updateContentTransformation() {
@@ -493,11 +525,15 @@ public class NotificationContentView extends FrameLayout {
         } else {
             int visibleType = calculateVisibleType();
             if (visibleType != mVisibleType || force) {
-            View visibleView = getViewForVisibleType(visibleType);
-            if (visibleView != null) {
-                visibleView.setVisibility(VISIBLE);
-                transferRemoteInputFocus(visibleType);
-            }
+                View visibleView = getViewForVisibleType(visibleType);
+                if (visibleView != null) {
+                    visibleView.setVisibility(VISIBLE);
+                    transferRemoteInputFocus(visibleType);
+                }
+                NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
+                if (visibleWrapper != null) {
+                    visibleWrapper.setContentHeight(mContentHeight, getMinContentHeightHint());
+                }
 
                 if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
                         || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
