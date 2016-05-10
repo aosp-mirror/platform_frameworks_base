@@ -790,11 +790,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (isSecure) {
                     tieManagedProfileLockIfNecessary(managedUserId, null);
                 } else {
-                    clearUserKeyProtection(managedUserId);
                     getGateKeeperService().clearSecureUserId(managedUserId);
                     mStorage.writePatternHash(null, managedUserId);
                     setKeystorePassword(null, managedUserId);
-                    fixateNewestUserKeyAuth(managedUserId);
+                    clearUserKeyProtection(managedUserId);
                     mStorage.removeChildProfileLock(managedUserId);
                     removeKeystoreProfileKey(managedUserId);
                 }
@@ -829,11 +828,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] currentHandle = getCurrentHandle(userId);
 
         if (pattern == null) {
-            clearUserKeyProtection(userId);
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePatternHash(null, userId);
             setKeystorePassword(null, userId);
-            fixateNewestUserKeyAuth(userId);
+            clearUserKeyProtection(userId);
             onUserLockChanged(userId);
             return;
         }
@@ -863,12 +861,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, pattern, userId);
         if (enrolledHandle != null) {
-            CredentialHash willStore
-                = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
-            setUserKeyProtection(userId, pattern,
-                doVerifyPattern(pattern, willStore, true, 0, userId));
             mStorage.writePatternHash(enrolledHandle, userId);
-            fixateNewestUserKeyAuth(userId);
+            setUserKeyProtection(userId, pattern, verifyPattern(pattern, 0, userId));
             onUserLockChanged(userId);
         } else {
             throw new RemoteException("Failed to enroll pattern");
@@ -891,11 +885,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             throws RemoteException {
         byte[] currentHandle = getCurrentHandle(userId);
         if (password == null) {
-            clearUserKeyProtection(userId);
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePasswordHash(null, userId);
             setKeystorePassword(null, userId);
-            fixateNewestUserKeyAuth(userId);
+            clearUserKeyProtection(userId);
             onUserLockChanged(userId);
             return;
         }
@@ -923,12 +916,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, password, userId);
         if (enrolledHandle != null) {
-            CredentialHash willStore
-                = new CredentialHash(enrolledHandle, CredentialHash.VERSION_GATEKEEPER);
-            setUserKeyProtection(userId, password,
-                doVerifyPassword(password, willStore, true, 0, userId));
             mStorage.writePasswordHash(enrolledHandle, userId);
-            fixateNewestUserKeyAuth(userId);
+            setUserKeyProtection(userId, password, verifyPassword(password, 0, userId));
             onUserLockChanged(userId);
         } else {
             throw new RemoteException("Failed to enroll password");
@@ -1033,11 +1022,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (token == null) {
             throw new RemoteException("Empty payload verifying a credential we just set");
         }
-        addUserKeyAuth(userId, token, secretFromCredential(credential));
+        changeUserKey(userId, token, secretFromCredential(credential));
     }
 
     private void clearUserKeyProtection(int userId) throws RemoteException {
-        addUserKeyAuth(userId, null, null);
+        changeUserKey(userId, null, null);
     }
 
     private static byte[] secretFromCredential(String credential) throws RemoteException {
@@ -1056,21 +1045,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void addUserKeyAuth(int userId, byte[] token, byte[] secret)
+    private void changeUserKey(int userId, byte[] token, byte[] secret)
             throws RemoteException {
         final UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
         final IMountService mountService = getMountService();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mountService.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+            mountService.changeUserKey(userId, userInfo.serialNumber, token, null, secret);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
-    }
-
-    private void fixateNewestUserKeyAuth(int userId)
-            throws RemoteException {
-        getMountService().fixateNewestUserKeyAuth(userId);
     }
 
     @Override
@@ -1088,11 +1072,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             long challenge, int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
        CredentialHash storedHash = mStorage.readPatternHash(userId);
-       return doVerifyPattern(pattern, storedHash, hasChallenge, challenge, userId);
-    }
-
-    private VerifyCredentialResponse doVerifyPattern(String pattern, CredentialHash storedHash,
-            boolean hasChallenge, long challenge, int userId) throws RemoteException {
        boolean shouldReEnrollBaseZero = storedHash != null && storedHash.isBaseZeroPattern;
 
        String patternToVerify;
@@ -1130,6 +1109,7 @@ public class LockSettingsService extends ILockSettings.Stub {
        }
 
        return response;
+
     }
 
     @Override
@@ -1179,11 +1159,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             long challenge, int userId) throws RemoteException {
        checkPasswordReadPermission(userId);
        CredentialHash storedHash = mStorage.readPasswordHash(userId);
-       return doVerifyPassword(password, storedHash, hasChallenge, challenge, userId);
-    }
-
-    private VerifyCredentialResponse doVerifyPassword(String password, CredentialHash storedHash,
-            boolean hasChallenge, long challenge, int userId) throws RemoteException {
        return verifyCredential(userId, storedHash, password, hasChallenge, challenge,
                new CredentialUtil() {
                    @Override
