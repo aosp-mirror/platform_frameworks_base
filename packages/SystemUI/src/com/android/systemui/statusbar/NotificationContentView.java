@@ -742,7 +742,7 @@ public class NotificationContentView extends FrameLayout {
             }
         } else {
             if (noExpandedChild || (viewHeight <= mContractedChild.getHeight()
-                    && (!mIsChildInGroup
+                    && (!mIsChildInGroup || isGroupExpanded()
                             || !mContainingNotification.isExpanded(true /* allowOnKeyguard */)))) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
