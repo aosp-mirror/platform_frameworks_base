@@ -46,7 +46,6 @@ import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -200,12 +199,6 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private SettingsRegistry mSettingsRegistry;
 
-    @GuardedBy("mLock")
-    private HandlerThread mHandlerThread;
-
-    @GuardedBy("mLock")
-    private Handler mBackgroundHandler;
-
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
@@ -252,10 +245,6 @@ public class SettingsProvider extends ContentProvider {
             mUserManager = UserManager.get(getContext());
             mPackageManager = AppGlobals.getPackageManager();
             mSettingsRegistry = new SettingsRegistry();
-            mHandlerThread = new HandlerThread(LOG_TAG,
-                    Process.THREAD_PRIORITY_BACKGROUND);
-            mHandlerThread.start();
-            mBackgroundHandler = new Handler(mHandlerThread.getLooper());
         }
         registerBroadcastReceivers();
         startWatchingUserRestrictionChanges();
@@ -1680,7 +1669,7 @@ public class SettingsProvider extends ContentProvider {
             if (mSettingsStates.get(key) == null) {
                 final int maxBytesPerPackage = getMaxBytesPerPackageForType(getTypeFromKey(key));
                 SettingsState settingsState = new SettingsState(mLock, getSettingsFile(key), key,
-                        maxBytesPerPackage, mBackgroundHandler);
+                        maxBytesPerPackage);
                 mSettingsStates.put(key, settingsState);
             }
         }
