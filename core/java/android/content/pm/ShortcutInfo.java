@@ -439,6 +439,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setIntent(@NonNull Intent intent) {
             mIntent = Preconditions.checkNotNull(intent, "intent");
+            Preconditions.checkNotNull(mIntent.getAction(), "Intent action must be set.");
             return this;
         }
 

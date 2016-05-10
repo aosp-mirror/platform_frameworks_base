@@ -69,18 +69,20 @@ abstract class ShortcutPackageItem {
         return mPackageInfo;
     }
 
-    public void refreshPackageInfoAndSave(ShortcutService s) {
+    public void refreshPackageInfoAndSave() {
         if (mPackageInfo.isShadow()) {
             return; // Don't refresh for shadow user.
         }
+        final ShortcutService s = mShortcutUser.mService;
         mPackageInfo.refresh(s, this);
         s.scheduleSaveUser(getOwnerUserId());
     }
 
-    public void attemptToRestoreIfNeededAndSave(ShortcutService s) {
+    public void attemptToRestoreIfNeededAndSave() {
         if (!mPackageInfo.isShadow()) {
             return; // Already installed, nothing to do.
         }
+        final ShortcutService s = mShortcutUser.mService;
         if (!s.isPackageInstalled(mPackageName, mPackageUserId)) {
             if (ShortcutService.DEBUG) {
                 Slog.d(TAG, String.format("Package still not installed: %s user=%d",
@@ -91,14 +93,14 @@ abstract class ShortcutPackageItem {
         if (!mPackageInfo.hasSignatures()) {
             s.wtf("Attempted to restore package " + mPackageName + ", user=" + mPackageUserId
                     + " but signatures not found in the restore data.");
-            onRestoreBlocked(s);
+            onRestoreBlocked();
             return;
         }
 
         final PackageInfo pi = s.getPackageInfoWithSignatures(mPackageName, mPackageUserId);
         if (!mPackageInfo.canRestoreTo(s, pi)) {
             // Package is now installed, but can't restore.  Let the subclass do the cleanup.
-            onRestoreBlocked(s);
+            onRestoreBlocked();
             return;
         }
         if (ShortcutService.DEBUG) {
@@ -106,7 +108,7 @@ abstract class ShortcutPackageItem {
                     mPackageUserId, getOwnerUserId()));
         }
 
-        onRestored(s);
+        onRestored();
 
         // Now the package is not shadow.
         mPackageInfo.setShadow(false);
@@ -118,12 +120,12 @@ abstract class ShortcutPackageItem {
      * Called when the new package can't be restored because it has a lower version number
      * or different signatures.
      */
-    protected abstract void onRestoreBlocked(ShortcutService s);
+    protected abstract void onRestoreBlocked();
 
     /**
      * Called when the new package is successfully restored.
      */
-    protected abstract void onRestored(ShortcutService s);
+    protected abstract void onRestored();
 
     public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
