@@ -21,8 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,11 +45,12 @@ public class KeyguardUserSwitcher {
     private static final boolean ALWAYS_ON = false;
 
     private final Container mUserSwitcherContainer;
-    private final ViewGroup mUserSwitcher;
     private final KeyguardStatusBarView mStatusBarView;
     private final Adapter mAdapter;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final KeyguardUserSwitcherScrim mBackground;
+
+    private ViewGroup mUserSwitcher;
     private ObjectAnimator mBgAnimator;
     private UserSwitcherController mUserSwitcherController;
     private boolean mAnimating;
@@ -63,10 +62,8 @@ public class KeyguardUserSwitcher {
                 context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
         if (userSwitcherController != null && keyguardUserSwitcherEnabled) {
             mUserSwitcherContainer = (Container) userSwitcher.inflate();
-            mUserSwitcher = (ViewGroup)
-                    mUserSwitcherContainer.findViewById(R.id.keyguard_user_switcher_inner);
-            mBackground = new KeyguardUserSwitcherScrim(mUserSwitcher);
-            mUserSwitcher.setBackground(mBackground);
+            mBackground = new KeyguardUserSwitcherScrim(context);
+            reinflateViews();
             mStatusBarView = statusBarView;
             mStatusBarView.setKeyguardUserSwitcher(this);
             panelView.setKeyguardUserSwitcher(this);
@@ -78,12 +75,27 @@ public class KeyguardUserSwitcher {
             mUserSwitcherContainer.setKeyguardUserSwitcher(this);
         } else {
             mUserSwitcherContainer = null;
-            mUserSwitcher = null;
             mStatusBarView = null;
             mAdapter = null;
             mAppearAnimationUtils = null;
             mBackground = null;
         }
+    }
+
+    private void reinflateViews() {
+        if (mUserSwitcher != null) {
+            mUserSwitcher.setBackground(null);
+            mUserSwitcher.removeOnLayoutChangeListener(mBackground);
+        }
+        mUserSwitcherContainer.removeAllViews();
+
+        LayoutInflater.from(mUserSwitcherContainer.getContext())
+                .inflate(R.layout.keyguard_user_switcher_inner, mUserSwitcherContainer);
+
+        mUserSwitcher = (ViewGroup) mUserSwitcherContainer.findViewById(
+                R.id.keyguard_user_switcher_inner);
+        mUserSwitcher.addOnLayoutChangeListener(mBackground);
+        mUserSwitcher.setBackground(mBackground);
     }
 
     public void setKeyguard(boolean keyguard, boolean animate) {
@@ -227,6 +239,13 @@ public class KeyguardUserSwitcher {
             refresh();
         }
     };
+
+    public void onDensityOrFontScaleChanged() {
+        if (mUserSwitcherContainer != null) {
+            reinflateViews();
+            refresh();
+        }
+    }
 
     public static class Adapter extends UserSwitcherController.BaseUserAdapter implements
             View.OnClickListener {

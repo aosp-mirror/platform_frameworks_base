@@ -23,7 +23,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -169,12 +168,13 @@ public class UserSwitcherController {
             return;
         }
 
+        boolean forceAllUsers = mForcePictureLoadForUserId.get(UserHandle.USER_ALL);
         SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
         final int N = mUsers.size();
         for (int i = 0; i < N; i++) {
             UserRecord r = mUsers.get(i);
-            if (r == null || r.picture == null ||
-                    r.info == null || mForcePictureLoadForUserId.get(r.info.id)) {
+            if (r == null || r.picture == null || r.info == null || forceAllUsers
+                    || mForcePictureLoadForUserId.get(r.info.id)) {
                 continue;
             }
             bitmaps.put(r.info.id, r.picture);
@@ -598,6 +598,10 @@ public class UserSwitcherController {
         if (item == null || item.info == null) return null;
         if (item.isGuest) return context.getString(R.string.guest_nickname);
         return item.info.name;
+    }
+
+    public void onDensityOrFontScaleChanged() {
+        refreshUsers(UserHandle.USER_ALL);
     }
 
     public static abstract class BaseUserAdapter extends BaseAdapter {
