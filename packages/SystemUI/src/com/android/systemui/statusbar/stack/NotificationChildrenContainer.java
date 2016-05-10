@@ -103,9 +103,8 @@ public class NotificationChildrenContainer extends ViewGroup {
         int childCount = Math.min(mChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
         for (int i = 0; i < childCount; i++) {
             View child = mChildren.get(i);
-            if (child.getVisibility() == View.GONE) {
-                continue;
-            }
+            // We need to layout all children even the GONE ones, such that the heights are
+            // calculated correctly as they are used to calculate how many we can fit on the screen
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
             mDividers.get(i).layout(0, 0, getWidth(), mDividerHeight);
         }
@@ -138,17 +137,19 @@ public class NotificationChildrenContainer extends ViewGroup {
         int overflowIndex = childCount > collapsedChildren ? collapsedChildren - 1 : -1;
         for (int i = 0; i < childCount; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
+            // We need to measure all children even the GONE ones, such that the heights are
+            // calculated correctly as they are used to calculate how many we can fit on the screen.
             boolean isOverflow = i == overflowIndex;
             child.setSingleLineWidthIndention(isOverflow && mOverflowNumber != null
                     ? mOverflowNumber.getMeasuredWidth()
                     : 0);
             child.measure(widthMeasureSpec, newHeightSpec);
-            height += child.getMeasuredHeight();
-
             // layout the divider
             View divider = mDividers.get(i);
             divider.measure(widthMeasureSpec, dividerHeightSpec);
-            height += mDividerHeight;
+            if (child.getVisibility() != GONE) {
+                height += child.getMeasuredHeight() + mDividerHeight;
+            }
         }
         mRealHeight = height;
         if (heightMode != MeasureSpec.UNSPECIFIED) {
