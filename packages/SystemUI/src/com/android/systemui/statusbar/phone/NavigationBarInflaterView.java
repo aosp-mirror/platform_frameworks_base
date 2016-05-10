@@ -67,6 +67,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     private SparseArray<ButtonDispatcher> mButtonDispatchers;
     private String mCurrentLayout;
 
+    private View mLastRot0;
+    private View mLastRot90;
+
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mDensity = context.getResources().getConfiguration().densityDpi;
@@ -163,6 +166,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         String[] start = sets[0].split(BUTTON_SEPARATOR);
         String[] center = sets[1].split(BUTTON_SEPARATOR);
         String[] end = sets[2].split(BUTTON_SEPARATOR);
+        // Inflate these in start to end order or accessibility traversal will be messed up.
         inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.ends_group), false);
         inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group), true);
 
@@ -240,6 +244,15 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         }
         parent.addView(v);
         addToDispatchers(v);
+        View lastView = landscape ? mLastRot90 : mLastRot0;
+        if (lastView != null) {
+            v.setAccessibilityTraversalAfter(lastView.getId());
+        }
+        if (landscape) {
+            mLastRot90 = v;
+        } else {
+            mLastRot0 = v;
+        }
         return v;
     }
 
