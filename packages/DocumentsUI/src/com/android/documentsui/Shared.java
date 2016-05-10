@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -183,13 +184,6 @@ public final class Shared {
     /*
      * Returns true if app is running in "productivity mode".
      */
-    public static boolean productivityMode(Context context) {
-        return context.getResources().getBoolean(R.bool.productivity_device);
-    }
-
-    /*
-     * Returns true if app is running in "productivity mode".
-     */
     private static boolean isProductivityMode(Context context, Intent intent) {
         return intent.getBooleanExtra(
                 Shared.EXTRA_PRODUCTIVITY_MODE,
@@ -209,5 +203,14 @@ public final class Shared {
     public static boolean shouldShowDeviceRoot(Context context, Intent intent) {
         return isProductivityMode(context, intent)
                 || intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
+    }
+
+    /**
+     * Returns true if device root should be shown.
+     */
+    public static boolean shouldShowFancyFeatures(Activity activity) {
+        Intent intent = activity.getIntent();
+        return isProductivityMode(activity, intent)
+                || intent.getBooleanExtra(DocumentsContract.EXTRA_FANCY_FEATURES, false);
     }
 }

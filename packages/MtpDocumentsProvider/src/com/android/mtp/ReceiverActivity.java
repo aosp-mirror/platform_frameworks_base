@@ -49,6 +49,7 @@ public class ReceiverActivity extends Activity {
                 final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE);
                 intent.setData(uri);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.putExtra(DocumentsContract.EXTRA_FANCY_FEATURES, true);
                 this.startActivity(intent);
             } catch (IOException exception) {
                 Log.e(MtpDocumentsProvider.TAG, "Failed to open device", exception);
