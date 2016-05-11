@@ -37,7 +37,23 @@ experience for your TV input service.</p>
 
 <h2 id="supporting">Indicating Support for Recording</h2>
 
-<p>To tell the system that your TV input service supports recording, follow
+<p>To tell the system that your TV input service supports recording, set
+the <code>android:canRecord</code> attribute in your service metadata XML file
+to <code>true</code>:
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>For more information on the service metadata file, see
+<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">Declare Your TV Input
+Service in the Manifest</a>.
+</p>
+
+<p>Alternatively, you can indicate recording support in your code using
 these steps:</p>
 
 <ol>
@@ -48,7 +64,7 @@ class.</li>
 <code>setCanRecord(true)</code> before calling <code>build()</code> to
 indicate your service supports recording.</li>
 <li>Register your <code>TvInputInfo</code> object with the system by calling
-<code>TvInputService.updateTvInputInfo()</code>.</li>
+<code>TvInputManager.updateTvInputInfo()</code>.</li>
 </ol>
 
 <h2 id="recording">Recording a Session</h2>
