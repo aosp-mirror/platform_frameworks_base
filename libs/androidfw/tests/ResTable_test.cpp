@@ -131,6 +131,11 @@ TEST(ResTableTest, libraryThemeIsAppliedCorrectly) {
     ASSERT_GE(index, 0);
     ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
     ASSERT_EQ(uint32_t(700), val.data);
+
+    index = theme.getAttribute(lib::R::attr::attr2, &val, &specFlags);
+    ASSERT_GE(index, 0);
+    ASSERT_EQ(Res_value::TYPE_INT_DEC, val.dataType);
+    ASSERT_EQ(uint32_t(700), val.data);
 }
 
 TEST(ResTableTest, referenceToBagIsNotResolved) {
