@@ -69,8 +69,6 @@ redirects:
   to: /studio/tools/help/adt.html
 - from: /tools/publishing/app-signing-eclipse.html
   to: /studio/tools/help/adt.html
-- from: /tools/help/uiautomator/...
-  to: /topic/libraries/testing-support-library/
 - from: /tools/testing/testing_ui.html
   to: /training/testing/ui-testing/index.html
 - from: /tools/testing/activity_test.html
@@ -994,27 +992,27 @@ redirects:
 - from: /tools/help/translations-editor.html
   to: /studio/write/translations-editor.html
 - from: /tools/help/uiautomator/Configurator.html
-  to: /studio/test/uiautomator/Configurator.html
+  to: /reference/android/support/test/uiautomator/Configurator.html
 - from: /tools/help/uiautomator/IAutomationSupport.html
-  to: /studio/test/uiautomator/IAutomationSupport.html
+  to: /reference/android/support/test/uiautomator/IAutomationSupport.html
 - from: /tools/help/uiautomator/index.html
-  to: /studio/test/uiautomator/index.html
+  to: /topic/libraries/testing-support-library/index.html#UIAutomator
 - from: /tools/help/uiautomator/UiAutomatorTestCase.html
-  to: /studio/test/uiautomator/UiAutomatorTestCase.html
+  to: /reference/android/support/test/uiautomator/UiAutomatorTestCase.html
 - from: /tools/help/uiautomator/UiCollection.html
-  to: /studio/test/uiautomator/UiCollection.html
+  to: /reference/android/support/test/uiautomator/UiCollection.html
 - from: /tools/help/uiautomator/UiDevice.html
-  to: /studio/test/uiautomator/UiDevice.html
+  to: /reference/android/support/test/uiautomator/UiDevice.html
 - from: /tools/help/uiautomator/UiObject.html
-  to: /studio/test/uiautomator/UiObject.html
+  to: /reference/android/support/test/uiautomator/UiObject.html
 - from: /tools/help/uiautomator/UiObjectNotFoundException.html
-  to: /studio/test/uiautomator/UiObjectNotFoundException.html
+  to: /reference/android/support/test/uiautomator/UiObjectNotFoundException.html
 - from: /tools/help/uiautomator/UiScrollable.html
-  to: /studio/test/uiautomator/UiScrollable.html
+  to: /reference/android/support/test/uiautomator/UiScrollable.html
 - from: /tools/help/uiautomator/UiSelector.html
-  to: /studio/test/uiautomator/UiSelector.html
+  to: /reference/android/support/test/uiautomator/UiSelector.html
 - from: /tools/help/uiautomator/UiWatcher.html
-  to: /studio/test/uiautomator/UiWatcher.html
+  to: /reference/android/support/test/uiautomator/UiWatcher.html
 - from: /tools/help/vector-asset-studio.html
   to: /studio/write/vector-asset-studio.html
 - from: /tools/help/zipalign.html
