@@ -52,7 +52,20 @@
 
             </com.android.documentsui.DocumentsToolbar>
 
-            <include layout="@layout/directory_cluster"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include layout="@layout/directory_cluster"/>
+
+                <!-- Drawer edge is a dummy view used to capture hovering event
+                     on view edge to open the drawer. (b/28345294) -->
+                <View
+                    android:id="@+id/drawer_edge"
+                    android:background="@android:color/transparent"
+                    android:layout_width="@dimen/drawer_edge_width"
+                    android:layout_height="match_parent"/>
+            </FrameLayout>
 
         </LinearLayout>
 

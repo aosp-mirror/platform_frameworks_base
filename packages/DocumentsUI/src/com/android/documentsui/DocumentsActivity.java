@@ -317,12 +317,6 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    void onRootPicked(RootInfo root) {
-        super.onRootPicked(root);
-        mNavigator.revealRootsDrawer(false);
-    }
-
-    @Override
     public void onDocumentPicked(DocumentInfo doc, Model model) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isContainer()) {

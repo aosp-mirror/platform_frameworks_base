@@ -186,25 +186,6 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         startActivity(intent);
     }
 
-    private void openItem(int position) {
-        Item item = mAdapter.getItem(position);
-        if (item instanceof RootItem) {
-            BaseActivity activity = BaseActivity.get(this);
-            RootInfo newRoot = ((RootItem) item).root;
-            Metrics.logRootVisited(getActivity(), newRoot);
-            activity.onRootPicked(newRoot);
-        } else if (item instanceof AppItem) {
-            DocumentsActivity activity = DocumentsActivity.get(this);
-            ResolveInfo info = ((AppItem) item).info;
-            Metrics.logAppVisited(getActivity(), info);
-            activity.onAppPicked(info);
-        } else if (item instanceof SpacerItem) {
-            if (DEBUG) Log.d(TAG, "Ignoring click/hover on spacer item.");
-        } else {
-            throw new IllegalStateException("Unknown root: " + item);
-        }
-    }
-
     @Override
     public void runOnUiThread(Runnable runnable) {
         getActivity().runOnUiThread(runnable);
@@ -217,8 +198,9 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
      */
     @Override
     public void onViewHovered(View view) {
-        int position = (Integer) view.getTag(R.id.item_position_tag);
-        openItem(position);
+        final int position = (Integer) view.getTag(R.id.item_position_tag);
+        final Item item = mAdapter.getItem(position);
+        item.open(this);
     }
 
     @Override
@@ -232,7 +214,8 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            openItem(position);
+            final Item item = mAdapter.getItem(position);
+            item.open(RootsFragment.this);
         }
     };
 
@@ -269,6 +252,8 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         abstract void bindView(View convertView);
 
         abstract boolean isDropTarget();
+
+        abstract void open(RootsFragment fragment);
     }
 
     private static class RootItem extends Item {
@@ -304,6 +289,13 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         boolean isDropTarget() {
             return root.supportsCreate() && !root.isLibrary();
         }
+
+        @Override
+        public void open(RootsFragment fragment) {
+            BaseActivity activity = BaseActivity.get(fragment);
+            Metrics.logRootVisited(fragment.getActivity(), root);
+            activity.onRootPicked(root);
+        }
     }
 
     private static class SpacerItem extends Item {
@@ -319,6 +311,11 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         @Override
         boolean isDropTarget() {
             return false;
+        }
+
+        @Override
+        public void open(RootsFragment fragment) {
+            if (DEBUG) Log.d(TAG, "Ignoring click/hover on spacer item.");
         }
     }
 
@@ -348,6 +345,13 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         boolean isDropTarget() {
             // We won't support drag n' drop in DocumentsActivity, and apps only show up there.
             return false;
+        }
+
+        @Override
+        public void open(RootsFragment fragment) {
+            DocumentsActivity activity = DocumentsActivity.get(fragment);
+            Metrics.logAppVisited(fragment.getActivity(), info);
+            activity.onAppPicked(info);
         }
     }
 
