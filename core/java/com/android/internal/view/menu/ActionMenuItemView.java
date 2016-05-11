@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -30,7 +31,6 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ActionMenuView;
 import android.widget.ForwardingListener;
-import android.widget.ListPopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,6 +86,7 @@ public class ActionMenuItemView extends TextView
         setOnLongClickListener(this);
 
         mSavedPaddingLeft = -1;
+        setSaveEnabled(false);
     }
 
     @Override
@@ -346,6 +347,13 @@ public class ActionMenuItemView extends TextView
             }
             return false;
         }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        // This might get called with the state of ActionView since it shares the same ID with
+        // ActionMenuItemView. Do not restore this state as ActionMenuItemView never saved it.
+        super.onRestoreInstanceState(null);
     }
 
     public static abstract class PopupCallback {
