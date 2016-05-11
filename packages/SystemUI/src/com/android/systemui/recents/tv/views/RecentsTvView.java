@@ -78,7 +78,7 @@ public class RecentsTvView extends FrameLayout {
         setWillNotDraw(false);
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
+        mEmptyView = inflater.inflate(R.layout.recents_tv_empty, this, false);
         addView(mEmptyView);
         mEmptyViewFocusAnimationHolder = new RecentsRowFocusAnimationHolder(mEmptyView, null);
 
