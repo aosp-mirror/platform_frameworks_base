@@ -998,6 +998,7 @@ public class UserManager {
 
     /** {@hide} */
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
+        // TODO Switch to using UMS internal isUserUnlockingOrUnlocked
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId,
                     ActivityManager.FLAG_AND_UNLOCKING_OR_UNLOCKED);
