@@ -5348,16 +5348,17 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                     return false;
                 }
             }
-            if (!accessor) {
-                outValue->data = rid;
-                return true;
+
+            if (accessor) {
+                rid = Res_MAKEID(
+                    accessor->getRemappedPackage(Res_GETPACKAGE(rid)),
+                    Res_GETTYPE(rid), Res_GETENTRY(rid));
             }
-            rid = Res_MAKEID(
-                accessor->getRemappedPackage(Res_GETPACKAGE(rid)),
-                Res_GETTYPE(rid), Res_GETENTRY(rid));
-            //printf("Incl %s:%s/%s: 0x%08x\n",
-            //       String8(package).string(), String8(type).string(),
-            //       String8(name).string(), rid);
+
+            uint32_t packageId = Res_GETPACKAGE(rid) + 1;
+            if (packageId != APP_PACKAGE_ID && packageId != SYS_PACKAGE_ID) {
+                outValue->dataType = Res_value::TYPE_DYNAMIC_ATTRIBUTE;
+            }
             outValue->data = rid;
             return true;
         }
@@ -5365,11 +5366,17 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
         if (accessor) {
             uint32_t rid = accessor->getCustomResource(package, type, name);
             if (rid != 0) {
-                //printf("Mine %s:%s/%s: 0x%08x\n",
-                //       String8(package).string(), String8(type).string(),
-                //       String8(name).string(), rid);
-                outValue->data = rid;
-                return true;
+                uint32_t packageId = Res_GETPACKAGE(rid) + 1;
+                if (packageId == 0x00) {
+                    outValue->data = rid;
+                    outValue->dataType = Res_value::TYPE_DYNAMIC_ATTRIBUTE;
+                    return true;
+                } else if (packageId == APP_PACKAGE_ID || packageId == SYS_PACKAGE_ID) {
+                    // We accept packageId's generated as 0x01 in order to support
+                    // building the android system resources
+                    outValue->data = rid;
+                    return true;
+                }
             }
         }
 
@@ -6526,10 +6533,25 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
 }
 
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
-    if (value->dataType != Res_value::TYPE_DYNAMIC_REFERENCE &&
-        (value->dataType != Res_value::TYPE_REFERENCE || !mAppAsLib)) {
+    uint8_t resolvedType = Res_value::TYPE_REFERENCE;
+    switch (value->dataType) {
+    case Res_value::TYPE_ATTRIBUTE:
+        resolvedType = Res_value::TYPE_ATTRIBUTE;
+        // fallthrough
+    case Res_value::TYPE_REFERENCE:
+        if (!mAppAsLib) {
+            return NO_ERROR;
+        }
+
         // If the package is loaded as shared library, the resource reference
         // also need to be fixed.
+        break;
+    case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
+        resolvedType = Res_value::TYPE_ATTRIBUTE;
+        // fallthrough
+    case Res_value::TYPE_DYNAMIC_REFERENCE:
+        break;
+    default:
         return NO_ERROR;
     }
 
@@ -6538,7 +6560,7 @@ status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
         return err;
     }
 
-    value->dataType = Res_value::TYPE_REFERENCE;
+    value->dataType = resolvedType;
     return NO_ERROR;
 }
 
@@ -6816,6 +6838,8 @@ void ResTable::print_value(const Package* pkg, const Res_value& value) const
         printf("(dynamic reference) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_ATTRIBUTE) {
         printf("(attribute) 0x%08x\n", value.data);
+    } else if (value.dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
+        printf("(dynamic attribute) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_STRING) {
         size_t len;
         const char* str8 = pkg->header->values.string8At(
