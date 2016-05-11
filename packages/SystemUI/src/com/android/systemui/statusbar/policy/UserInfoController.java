@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,7 +34,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
@@ -48,10 +48,11 @@ public final class UserInfoController {
     private final Context mContext;
     private final ArrayList<OnUserInfoChangedListener> mCallbacks =
             new ArrayList<OnUserInfoChangedListener>();
-    private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
+    private AsyncTask<Void, Void, UserInfoQueryResult> mUserInfoTask;
 
     private String mUserName;
     private Drawable mUserDrawable;
+    private String mUserAccount;
 
     public UserInfoController(Context context) {
         mContext = context;
@@ -68,7 +69,7 @@ public final class UserInfoController {
 
     public void addListener(OnUserInfoChangedListener callback) {
         mCallbacks.add(callback);
-        callback.onUserInfoChanged(mUserName, mUserDrawable);
+        callback.onUserInfoChanged(mUserName, mUserDrawable, mUserAccount);
     }
 
     public void remListener(OnUserInfoChangedListener callback) {
@@ -137,9 +138,10 @@ public final class UserInfoController {
                 res.getDimensionPixelSize(R.dimen.multi_user_avatar_keyguard_size));
 
         final Context context = currentUserContext;
-        mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
+        mUserInfoTask = new AsyncTask<Void, Void, UserInfoQueryResult>() {
+
             @Override
-            protected Pair<String, Drawable> doInBackground(Void... params) {
+            protected UserInfoQueryResult doInBackground(Void... params) {
                 final UserManager um = UserManager.get(mContext);
 
                 // Fall back to the UserManager nickname if we can't read the name from the local
@@ -175,13 +177,15 @@ public final class UserInfoController {
                         }
                     }
                 }
-                return new Pair<String, Drawable>(name, avatar);
+                String userAccount = um.getUserAccount(userId);
+                return new UserInfoQueryResult(name, avatar, userAccount);
             }
 
             @Override
-            protected void onPostExecute(Pair<String, Drawable> result) {
-                mUserName = result.first;
-                mUserDrawable = result.second;
+            protected void onPostExecute(UserInfoQueryResult result) {
+                mUserName = result.getName();
+                mUserDrawable = result.getAvatar();
+                mUserAccount = result.getUserAccount();
                 mUserInfoTask = null;
                 notifyChanged();
             }
@@ -191,7 +195,7 @@ public final class UserInfoController {
 
     private void notifyChanged() {
         for (OnUserInfoChangedListener listener : mCallbacks) {
-            listener.onUserInfoChanged(mUserName, mUserDrawable);
+            listener.onUserInfoChanged(mUserName, mUserDrawable, mUserAccount);
         }
     }
 
@@ -200,6 +204,30 @@ public final class UserInfoController {
     }
 
     public interface OnUserInfoChangedListener {
-        public void onUserInfoChanged(String name, Drawable picture);
+        public void onUserInfoChanged(String name, Drawable picture, String userAccount);
+    }
+
+    private static class UserInfoQueryResult {
+        private String mName;
+        private Drawable mAvatar;
+        private String mUserAccount;
+
+        public UserInfoQueryResult(String name, Drawable avatar, String userAccount) {
+            mName = name;
+            mAvatar = avatar;
+            mUserAccount = userAccount;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public Drawable getAvatar() {
+            return mAvatar;
+        }
+
+        public String getUserAccount() {
+            return mUserAccount;
+        }
     }
 }

@@ -96,7 +96,7 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     }
 
     @Override
-    public void onUserInfoChanged(String name, Drawable picture) {
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
         mLastUpdate = new Pair<>(name, picture);
         refreshState(mLastUpdate);
     }
