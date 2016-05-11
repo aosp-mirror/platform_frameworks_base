@@ -124,7 +124,7 @@ public class VectorDrawable_Delegate {
     }
 
     @LayoutlibDelegate
-    static void nDraw(long rendererPtr, long canvasWrapperPtr,
+    static int nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache) {
         VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
 
@@ -143,6 +143,8 @@ public class VectorDrawable_Delegate {
         nativePathRenderer.draw(canvasWrapperPtr, colorFilterPtr, bounds.width(), bounds.height());
 
         Canvas_Delegate.native_restore(canvasWrapperPtr, true);
+
+        return bounds.width() * bounds.height();
     }
 
     @LayoutlibDelegate

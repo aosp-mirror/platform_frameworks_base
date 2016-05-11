@@ -42,6 +42,7 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.RenderParamsFlags;
+import com.android.layoutlib.bridge.android.graphics.NopCanvas;
 import com.android.layoutlib.bridge.android.support.DesignLibUtil;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
@@ -113,6 +114,8 @@ import static com.android.layoutlib.bridge.util.ReflectionUtils.isInstanceOf;
  * be done on the layout.
  */
 public class RenderSessionImpl extends RenderAction<SessionParams> {
+
+    private static final Canvas NOP_CANVAS = new NopCanvas();
 
     // scene state
     private RenderSession mScene;
@@ -483,7 +486,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     long initialTime = System_Delegate.nanoTime();
                     if (!mFirstFrameExecuted) {
                         // We need to run an initial draw call to initialize the animations
-                        render(getContext(), mViewRoot, mCanvas, 0, 0);
+                        render(getContext(), mViewRoot, NOP_CANVAS, mMeasuredScreenWidth, mMeasuredScreenHeight);
 
                         // The first frame will initialize the animations
                         Choreographer_Delegate.doFrame(initialTime);
