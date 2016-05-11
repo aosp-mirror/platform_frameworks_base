@@ -36,7 +36,6 @@ import android.text.TextPaint;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.MathUtils;
 import android.util.StateSet;
 import android.view.KeyEvent;
@@ -48,7 +47,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -59,8 +57,6 @@ import libcore.icu.LocaleData;
  * within the specified month.
  */
 class SimpleMonthView extends View {
-    private static final String LOG_TAG = "SimpleMonthView";
-
     private static final int DAYS_IN_WEEK = 7;
     private static final int MAX_WEEKS_IN_MONTH = 6;
 
@@ -70,9 +66,6 @@ class SimpleMonthView extends View {
     private static final String MONTH_YEAR_FORMAT = "MMMMy";
 
     private static final int SELECTED_HIGHLIGHT_ALPHA = 0xB0;
-
-    /** Temporary until we figure out why the date gets messed up. */
-    private static final boolean DEBUG_WRONG_DATE = true;
 
     private final TextPaint mMonthPaint = new TextPaint();
     private final TextPaint mDayOfWeekPaint = new TextPaint();
@@ -195,21 +188,11 @@ class SimpleMonthView extends View {
     }
 
     private void updateDayOfWeekLabels() {
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "enter updateDayOfWeekLabels()", new Exception());
-            Log.d(LOG_TAG, "mLocale => " + mLocale);
-            Log.d(LOG_TAG, "mWeekStart => " + mWeekStart);
-        }
-
         // Use tiny (e.g. single-character) weekday names from ICU. The indices
         // for this list correspond to Calendar days, e.g. SUNDAY is index 1.
         final String[] tinyWeekdayNames = LocaleData.get(mLocale).tinyWeekdayNames;
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             mDayOfWeekLabels[i] = tinyWeekdayNames[(mWeekStart + i - 1) % DAYS_IN_WEEK + 1];
-        }
-
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "mDayOfWeekLabels <= " + Arrays.toString(mDayOfWeekLabels));
         }
     }
 
@@ -773,18 +756,10 @@ class SimpleMonthView extends View {
      *                  {@link Calendar#SUNDAY} through {@link Calendar#SATURDAY}
      */
     public void setFirstDayOfWeek(int weekStart) {
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "enter setFirstDayOfWeek(" + weekStart + ")", new Exception());
-        }
-
         if (isValidDayOfWeek(weekStart)) {
             mWeekStart = weekStart;
         } else {
             mWeekStart = mCalendar.getFirstDayOfWeek();
-        }
-
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "mWeekStart <=" + mWeekStart);
         }
 
         updateDayOfWeekLabels();
@@ -812,11 +787,6 @@ class SimpleMonthView extends View {
      */
     void setMonthParams(int selectedDay, int month, int year, int weekStart, int enabledDayStart,
             int enabledDayEnd) {
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "setMonthParams(" + selectedDay + ", " + month + ", " + year + ", "
-                    + weekStart + ", " + enabledDayStart + ", " + enabledDayEnd + ")");
-        }
-
         mActivatedDay = selectedDay;
 
         if (isValidMonth(month)) {
@@ -855,14 +825,6 @@ class SimpleMonthView extends View {
         // Invalidate cached accessibility information.
         mTouchHelper.invalidateRoot();
         invalidate();
-
-        if (DEBUG_WRONG_DATE) {
-            Log.d(LOG_TAG, "mMonth = " + mMonth);
-            Log.d(LOG_TAG, "mDayOfWeekStart = " + mDayOfWeekStart);
-            Log.d(LOG_TAG, "mWeekStart = " + mWeekStart);
-            Log.d(LOG_TAG, "mDaysInMonth = " + mDaysInMonth);
-            Log.d(LOG_TAG, "mToday = " + mToday);
-        }
     }
 
     private static int getDaysInMonth(int month, int year) {
