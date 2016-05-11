@@ -190,6 +190,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.IMountService;
 import android.os.storage.MountServiceInternal;
 import android.os.storage.StorageEventListener;
@@ -737,6 +738,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
+
+    private UserManagerInternal mUserManagerInternal;
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -3486,13 +3489,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             // give them what they want
         } else {
             // Caller expressed no opinion, so match based on user state
-            if (StorageManager.isUserKeyUnlocked(userId)) {
+            if (getUserManagerInternal().isUserUnlockingOrUnlocked(userId)) {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
             } else {
                 flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE;
             }
         }
         return flags;
+    }
+
+    private UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal;
     }
 
     /**
