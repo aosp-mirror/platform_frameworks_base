@@ -88,6 +88,8 @@ import java.util.List;
  * Launcher applications should use {@link LauncherApps} to get shortcuts that are published from
  * applications.  Launcher applications can also pin shortcuts with
  * {@link LauncherApps#pinShortcuts(String, List, UserHandle)}.
+ *
+ * @hide
  */
 public class ShortcutManager {
     private static final String TAG = "ShortcutManager";

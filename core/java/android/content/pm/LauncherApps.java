@@ -166,6 +166,8 @@ public class LauncherApps {
          * @param shortcuts all shortcuts from the package (dynamic and/or pinned).  Only "key"
          *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
+         *
+         * @hide
          */
         public void onShortcutsChanged(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
@@ -174,6 +176,8 @@ public class LauncherApps {
 
     /**
      * Represents a query passed to {@link #getShortcuts(ShortcutQuery, UserHandle)}.
+     *
+     * @hide
      */
     public static class ShortcutQuery {
         /**
@@ -422,6 +426,8 @@ public class LauncherApps {
      * the user is trying a new launcher application.  The user may decide to change the default
      * launcher to the calling application again, so even if a launcher application loses
      * this permission, it does <b>not</b> have to purge pinned shortcut information.
+     *
+     * @hide
      */
     public boolean hasShortcutHostPermission() {
         try {
@@ -441,6 +447,8 @@ public class LauncherApps {
      * @param user The UserHandle of the profile.
      *
      * @return the IDs of {@link ShortcutInfo}s that match the query.
+     *
+     * @hide
      */
     @Nullable
     public List<ShortcutInfo> getShortcuts(@NonNull ShortcutQuery query,
@@ -480,6 +488,8 @@ public class LauncherApps {
      * @param packageName The target package name.
      * @param shortcutIds The IDs of the shortcut to be pinned.
      * @param user The UserHandle of the profile.
+     *
+     * @hide
      */
     public void pinShortcuts(@NonNull String packageName, @NonNull List<String> shortcutIds,
             @NonNull UserHandle user) {
@@ -519,6 +529,8 @@ public class LauncherApps {
      * #hasShortcutHostPermission()}.
      *
      * @param shortcut The target shortcut.
+     *
+     * @hide
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut) {
@@ -536,6 +548,8 @@ public class LauncherApps {
      * @param packageName The target package name.
      * @param shortcutId The ID of the shortcut to lad rom.
      * @param user The UserHandle of the profile.
+     *
+     * @hide
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull String packageName, @NonNull String shortcutId, @NonNull UserHandle user) {
@@ -565,6 +579,8 @@ public class LauncherApps {
      * @param user The UserHandle of the profile.
      * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
      *   has been uninstalled). {@code true} when the shortcut is still valid.
+     *
+     * @hide
      */
     public boolean startShortcut(@NonNull String packageName, @NonNull String shortcutId,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions,
@@ -584,6 +600,8 @@ public class LauncherApps {
      * @param startActivityOptions Options to pass to startActivity.
      * @return {@code false} when the shortcut is no longer valid (e.g. the creator application
      *   has been uninstalled). {@code true} when the shortcut is still valid.
+     *
+     * @hide
      */
     public boolean startShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {

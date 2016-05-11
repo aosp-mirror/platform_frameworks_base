@@ -745,6 +745,9 @@ public class LauncherAppsService extends SystemService {
             @Override
             public void onShortcutChanged(@NonNull String packageName,
                     @UserIdInt int userId) {
+                if (!ShortcutService.FEATURE_ENABLED) {
+                    return;
+                }
                 postToPackageMonitorHandler(() -> onShortcutChangedInner(packageName, userId));
             }
 
