@@ -37,7 +37,6 @@ import android.os.storage.VolumeInfo;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 
 import libcore.io.IoUtils;
 
@@ -46,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -383,23 +383,31 @@ public class PackageHelper {
             installLocation = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
         }
 
-        // If app expresses strong desire for internal space, honor it
+        // If app expresses strong desire for internal storage, honor it
         if (!forceAllowOnExternal
                 && installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            if (existingInfo != null && !Objects.equals(existingInfo.volumeUuid,
+                    StorageManager.UUID_PRIVATE_INTERNAL)) {
+                throw new IOException("Cannot automatically move " + packageName + " from "
+                        + existingInfo.volumeUuid + " to internal storage");
+            }
             if (fitsOnInternal) {
-                return null;
+                return StorageManager.UUID_PRIVATE_INTERNAL;
             } else {
                 throw new IOException("Requested internal only, but not enough space");
             }
         }
 
-        // If app already exists somewhere, prefer to stay on that volume
+        // If app already exists somewhere, we must stay on that volume
         if (existingInfo != null) {
-            if (existingInfo.volumeUuid == null && fitsOnInternal) {
-                return null;
-            }
-            if (allCandidates.contains(existingInfo.volumeUuid)) {
+            if (Objects.equals(existingInfo.volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)
+                    && fitsOnInternal) {
+                return StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (allCandidates.contains(existingInfo.volumeUuid)) {
                 return existingInfo.volumeUuid;
+            } else {
+                throw new IOException("Not enough space on existing volume "
+                        + existingInfo.volumeUuid + " for " + packageName + " upgrade");
             }
         }
 
@@ -408,7 +416,7 @@ public class PackageHelper {
         if (bestCandidate != null) {
             return bestCandidate.fsUuid;
         } else if (fitsOnInternal) {
-            return null;
+            return StorageManager.UUID_PRIVATE_INTERNAL;
         } else {
             throw new IOException("No special requests, but no room anywhere");
         }
