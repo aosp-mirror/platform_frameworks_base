@@ -288,7 +288,6 @@ public class TaskCardView extends LinearLayout {
         lp.height = LayoutParams.MATCH_PARENT;
 
         screenshotView.setLayoutParams(lp);
-        screenshotView.setImageBitmap(screenshot);
         screenshotView.setClipToOutline(true);
         screenshotView.setOutlineProvider(new ViewOutlineProvider() {
             @Override
@@ -296,6 +295,7 @@ public class TaskCardView extends LinearLayout {
                 outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mCornerRadius);
             }
         });
+        screenshotView.setImageBitmap(screenshot);
     }
 
     private void setAsBannerView(Drawable banner, ImageView bannerView) {
@@ -304,7 +304,6 @@ public class TaskCardView extends LinearLayout {
                 .getDimensionPixelSize(R.dimen.recents_tv_banner_width);
         lp.height = getResources()
                 .getDimensionPixelSize(R.dimen.recents_tv_banner_height);
-
         bannerView.setLayoutParams(lp);
         bannerView.setImageDrawable(banner);
     }
@@ -326,5 +325,17 @@ public class TaskCardView extends LinearLayout {
 
     public View getDismissIconView() {
         return mDismissIconView;
+    }
+
+    public static int getNumberOfVisibleTasks(Context context) {
+        Resources res = context.getResources();
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int screenWidth = size.x;
+        int cardWidth = res.getDimensionPixelSize(R.dimen.recents_tv_card_width);
+        int spacing = res.getDimensionPixelSize(R.dimen.recents_tv_gird_card_spacing);
+        return (int) (1.0 + Math.ceil(screenWidth / (cardWidth + spacing * 2.0)));
     }
 }
