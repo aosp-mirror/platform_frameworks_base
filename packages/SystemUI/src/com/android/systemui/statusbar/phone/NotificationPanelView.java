@@ -123,7 +123,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mKeyguardShowing;
     private boolean mDozing;
     private boolean mDozingOnDown;
-    private int mStatusBarState;
+    protected int mStatusBarState;
     private float mInitialHeightOnTouch;
     private float mInitialTouchX;
     private float mInitialTouchY;
