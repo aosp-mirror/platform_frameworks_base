@@ -56,28 +56,35 @@ public final class AudioRecordingConfiguration implements Parcelable {
         mPatchHandle = patchHandle;
     }
 
+    // matches the sources that return false in MediaRecorder.isSystemOnlyAudioSource(source)
     /** @hide */
     @IntDef({
         MediaRecorder.AudioSource.DEFAULT,
+        MediaRecorder.AudioSource.MIC,
         MediaRecorder.AudioSource.VOICE_UPLINK,
         MediaRecorder.AudioSource.VOICE_DOWNLINK,
         MediaRecorder.AudioSource.VOICE_CALL,
         MediaRecorder.AudioSource.CAMCORDER,
         MediaRecorder.AudioSource.VOICE_RECOGNITION,
-        MediaRecorder.AudioSource.VOICE_COMMUNICATION
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+        MediaRecorder.AudioSource.UNPROCESSED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioSource {}
 
+    // documented return values match the sources that return false
+    //   in MediaRecorder.isSystemOnlyAudioSource(source)
     /**
      * Returns the audio source being used for the recording.
-     * @return one of {@link MediaRecorder.AudioSource#MIC},
+     * @return one of {@link MediaRecorder.AudioSource#DEFAULT},
+     *       {@link MediaRecorder.AudioSource#MIC},
      *       {@link MediaRecorder.AudioSource#VOICE_UPLINK},
      *       {@link MediaRecorder.AudioSource#VOICE_DOWNLINK},
      *       {@link MediaRecorder.AudioSource#VOICE_CALL},
      *       {@link MediaRecorder.AudioSource#CAMCORDER},
      *       {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
-     *       {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
+     *       {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION},
+     *       {@link MediaRecorder.AudioSource#UNPROCESSED}.
      */
     public @AudioSource int getClientAudioSource() { return mClientSource; }
 
