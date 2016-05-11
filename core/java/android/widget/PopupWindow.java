@@ -827,7 +827,6 @@ public class PopupWindow {
      */
     public void setClipToScreenEnabled(boolean enabled) {
         mClipToScreen = enabled;
-        setClippingEnabled(!enabled);
     }
 
     /**
