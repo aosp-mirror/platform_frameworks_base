@@ -9171,6 +9171,18 @@ public class WindowManagerService extends IWindowManager.Stub
     void updateResizingWindows(final WindowState w) {
         final WindowStateAnimator winAnimator = w.mWinAnimator;
         if (w.mHasSurface && w.mLayoutSeq == mLayoutSeq && !w.isGoneForLayoutLw()) {
+            final Task task = w.getTask();
+            // In the case of stack bound animations, the window frames
+            // will update (unlike other animations which just modifiy
+            // various transformation properties). We don't want to
+            // notify the client of frame changes in this case. Not only
+            // is it a lot of churn, but the frame may not correspond
+            // to the surface size or the onscreen area at various
+            // phases in the animation, and the client will become
+            // sad and confused.
+            if (task != null && task.mStack.getBoundsAnimating()) {
+                return;
+            }
             w.setInsetsChanged();
             boolean configChanged = w.isConfigChanged();
             if (DEBUG_CONFIGURATION && configChanged) {
