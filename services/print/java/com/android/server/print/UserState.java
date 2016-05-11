@@ -95,6 +95,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
+    private static final int SERVICE_RESTART_DELAY_MILLIS = 500;
+
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
@@ -754,6 +756,14 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             // Fail all print jobs.
             failActivePrintJobsForService(service.getComponentName());
             service.onAllPrintJobsHandled();
+
+            mActiveServices.remove(service.getComponentName());
+
+            // The service might need to be restarted if it died because of an update
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(UserStateHandler.MSG_CHECK_CONFIG_CHANGED),
+                    SERVICE_RESTART_DELAY_MILLIS);
+
             // No session - nothing to do.
             if (mPrinterDiscoverySession == null) {
                 return;
@@ -1194,6 +1204,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         public static final int MSG_DISPATCH_PRINT_JOB_STATE_CHANGED = 1;
         public static final int MSG_DISPATCH_PRINT_SERVICES_CHANGED = 2;
         public static final int MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED = 3;
+        public static final int MSG_CHECK_CONFIG_CHANGED = 4;
 
         public UserStateHandler(Looper looper) {
             super(looper, null, false);
@@ -1214,6 +1225,10 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                     handleDispatchPrintServiceRecommendationsUpdated(
                             (List<RecommendationInfo>) message.obj);
                     break;
+                case MSG_CHECK_CONFIG_CHANGED:
+                    synchronized (mLock) {
+                        onConfigurationChangedLocked();
+                    }
                 default:
                     // not reached
             }
@@ -1587,8 +1602,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         }
 
         public void onServiceDiedLocked(RemotePrintService service) {
-            // Remove the reported by that service.
-            removePrintersForServiceLocked(service.getComponentName());
+            removeServiceLocked(service);
         }
 
         public void onServiceAddedLocked(RemotePrintService service) {

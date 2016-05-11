@@ -160,7 +160,10 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     private void handleBinderDied() {
-        mPrintService.asBinder().unlinkToDeath(this, 0);
+        if (mPrintService != null) {
+            mPrintService.asBinder().unlinkToDeath(this, 0);
+        }
+
         mPrintService = null;
         mServiceDied = true;
         mCallbacks.onServiceDied(this);
@@ -536,9 +539,21 @@ final class RemotePrintService implements DeathRecipient {
             Slog.i(LOG_TAG, "[user: " + mUserId + "] ensureBound()");
         }
         mBinding = true;
-        mContext.bindServiceAsUser(mIntent, mServiceConnection,
+
+        boolean wasBound = mContext.bindServiceAsUser(mIntent, mServiceConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
                 new UserHandle(mUserId));
+
+        if (!wasBound) {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] could not bind to " + mIntent);
+            }
+            mBinding = false;
+
+            if (!mServiceDied) {
+                handleBinderDied();
+            }
+        }
     }
 
     private void ensureUnbound() {
