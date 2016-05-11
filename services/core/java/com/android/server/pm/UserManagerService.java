@@ -694,9 +694,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean trySetQuietModeDisabled(int userHandle, IntentSender target) {
-        final int credentialOwnerUserId = getCredentialOwnerProfile(userHandle);
         if (StorageManager.isUserKeyUnlocked(userHandle)
-                || !mLockPatternUtils.isSecure(credentialOwnerUserId)) {
+                || !mLockPatternUtils.isSecure(userHandle)) {
             // if the user is already unlocked, no need to show a profile challenge
             setQuietModeEnabled(userHandle, false);
             return true;
