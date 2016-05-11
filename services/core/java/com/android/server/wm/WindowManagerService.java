@@ -5344,9 +5344,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean isKeyguardSecure() {
+        int userId = UserHandle.getCallingUserId();
         long origId = Binder.clearCallingIdentity();
         try {
-            return mPolicy.isKeyguardSecure();
+            return mPolicy.isKeyguardSecure(userId);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
