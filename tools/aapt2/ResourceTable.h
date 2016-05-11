@@ -26,6 +26,7 @@
 #include "io/File.h"
 
 #include <android-base/macros.h>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -109,6 +110,9 @@ public:
     ResourceConfigValue* findOrCreateValue(const ConfigDescription& config,
                                            const StringPiece& product);
     std::vector<ResourceConfigValue*> findAllValues(const ConfigDescription& config);
+    std::vector<ResourceConfigValue*> findValuesIf(
+            const std::function<bool(ResourceConfigValue*)>& f);
+
 
 private:
     DISALLOW_COPY_AND_ASSIGN(ResourceEntry);

@@ -128,23 +128,6 @@ struct Visitor : public RawValueVisitor {
             mPool(pool), mMethod(method), mLocalizer(method) {
     }
 
-    void visit(Array* array) override {
-        std::unique_ptr<Array> localized = util::make_unique<Array>();
-        localized->items.resize(array->items.size());
-        for (size_t i = 0; i < array->items.size(); i++) {
-            Visitor subVisitor(mPool, mMethod);
-            array->items[i]->accept(&subVisitor);
-            if (subVisitor.mItem) {
-                localized->items[i] = std::move(subVisitor.mItem);
-            } else {
-                localized->items[i] = std::unique_ptr<Item>(array->items[i]->clone(mPool));
-            }
-        }
-        localized->setSource(array->getSource());
-        localized->setWeak(true);
-        mValue = std::move(localized);
-    }
-
     void visit(Plural* plural) override {
         std::unique_ptr<Plural> localized = util::make_unique<Plural>();
         for (size_t i = 0; i < plural->values.size(); i++) {
@@ -164,10 +147,6 @@ struct Visitor : public RawValueVisitor {
     }
 
     void visit(String* string) override {
-        if (!string->isTranslateable()) {
-            return;
-        }
-
         std::u16string result = mLocalizer.start() + mLocalizer.text(*string->value) +
                 mLocalizer.end();
         std::unique_ptr<String> localized = util::make_unique<String>(mPool->makeRef(result));
@@ -177,10 +156,6 @@ struct Visitor : public RawValueVisitor {
     }
 
     void visit(StyledString* string) override {
-        if (!string->isTranslateable()) {
-            return;
-        }
-
         mItem = pseudolocalizeStyledString(string, mMethod, mPool);
         mItem->setWeak(true);
     }
@@ -238,14 +213,26 @@ void pseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
     }
 }
 
+/**
+ * A value is pseudolocalizable if it does not define a locale (or is the default locale)
+ * and is translateable.
+ */
+static bool isPseudolocalizable(ResourceConfigValue* configValue) {
+    const int diff = configValue->config.diff(ConfigDescription::defaultConfig());
+    if (diff & ConfigDescription::CONFIG_LOCALE) {
+        return false;
+    }
+    return configValue->value->isTranslateable();
+}
+
 } // namespace
 
 bool PseudolocaleGenerator::consume(IAaptContext* context, ResourceTable* table) {
     for (auto& package : table->packages) {
         for (auto& type : package->types) {
             for (auto& entry : type->entries) {
-                std::vector<ResourceConfigValue*> values = entry->findAllValues(
-                        ConfigDescription::defaultConfig());
+                std::vector<ResourceConfigValue*> values = entry->findValuesIf(isPseudolocalizable);
+
                 for (ResourceConfigValue* value : values) {
                     pseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value,
                                            &table->stringPool, entry.get());

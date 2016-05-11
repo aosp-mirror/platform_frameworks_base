@@ -289,7 +289,7 @@ std::unique_ptr<BinaryPrimitive> tryParseEnumSymbol(const Attribute* enumAttr,
 std::unique_ptr<BinaryPrimitive> tryParseFlagSymbol(const Attribute* flagAttr,
                                                     const StringPiece16& str) {
     android::Res_value flags = { };
-    flags.dataType = android::Res_value::TYPE_INT_DEC;
+    flags.dataType = android::Res_value::TYPE_INT_HEX;
     flags.data = 0u;
 
     if (util::trimWhitespace(str).empty()) {
