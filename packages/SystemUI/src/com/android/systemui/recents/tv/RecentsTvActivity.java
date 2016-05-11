@@ -334,7 +334,23 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     @Override
     protected void onStart() {
         super.onStart();
+        updatePipUI();
+    }
 
+    @Override
+    public void onEnterAnimationComplete() {
+        super.onEnterAnimationComplete();
+        if(mLaunchedFromHome) {
+            mHomeRecentsEnterExitAnimationHolder.startEnterAnimation(mPipManager.isPipShown());
+        }
+        mTaskStackViewAdapter.setResetAddedCards(true);
+        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPipRecentsOverlayManager.onRecentsResumed();
         // Update the recent tasks
         updateRecentsTasks();
 
@@ -365,24 +381,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         // Notify that recents is now visible
         SystemServicesProxy ssp = Recents.getSystemServices();
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
-
-        updatePipUI();
-    }
-
-    @Override
-    public void onEnterAnimationComplete() {
-        super.onEnterAnimationComplete();
-        if(mLaunchedFromHome) {
-            mHomeRecentsEnterExitAnimationHolder.startEnterAnimation(mPipManager.isPipShown());
-        }
-        mTaskStackViewAdapter.setResetAddedCards(true);
-        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mPipRecentsOverlayManager.onRecentsResumed();
         if(mTaskStackHorizontalGridView.getStack().getTaskCount() > 1 && !mLaunchedFromHome) {
             // If there are 2 or more tasks, and we are not launching from home
             // set the selected position to the 2nd task to allow for faster app switching
