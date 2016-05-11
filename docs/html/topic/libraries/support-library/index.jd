@@ -186,6 +186,135 @@ page.metaDescription=The Android Support Library offers backward-compatible vers
 <p>This section provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
+  <p id="rev23-4-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 23.4.0</a>
+    <em>(May 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed issue where fragments were added in the wrong order.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=206901">Issue
+          206901</a>)
+          </li>
+
+          <li>Fixed issue where app bar wasn't drawn after being scrolled
+          offscreen. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=178037">Issue
+          178037</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added <!-- TODO: Link to method -->
+             <code><a href=
+            "{@docRoot}reference/android/support/v7/app/AppCompatDelegate.html">
+            AppCompatDelegate</a>.setCompatVectorFromResourcesEnabled()</code>
+            method to re-enable usage of vector drawables in {@link
+            android.graphics.drawable.DrawableContainer} objects on devices
+            running Android 4.4 (API level 19) and lower. See <a href=
+            "https://medium.com/@chrisbanes/appcompat-v23-2-age-of-the-vectors-91cbafa87c88#.44uulkfal"
+            class="external-link">AppCompat v23.2 — Age of the vectors</a> for
+            more information.
+          </li>
+
+          <li>Fixed an issue in API 23 with <a href=
+          "{@docRoot}reference/android/support/v7/app/AppCompatDelegate.html#setDefaultNightMode(int)">
+            <code>AppCompatDelegate.setDefaultNightMode()</code></a> not
+            loading correct resources in API level 23. (<a class=
+            "external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=206573">Issue
+            206573</a>)
+          </li>
+
+          <li>Fixed issue that could cause {@link
+          java.lang.NullPointerException}. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=207638">Issue
+          207638</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed an issue where {@link
+          android.support.design.widget.TextInputLayout} doesn't clear error
+          tint after {@link
+          android.support.design.widget.TextInputLayout#setErrorEnabled
+          setErrorEnabled(false)} on API level 21 - 22 (<a class=
+          "external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=202829">Issue
+          202829</a>)
+          </li>
+
+          <li>Fixed an issue where {@link
+          android.support.design.widget.FloatingActionButton} does not return
+          when animations are disabled. (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=206416">Issue
+          206416</a>)
+          </li>
+
+          <li>Fixed issue in {@link android.support.design.widget.AppBarLayout}
+          snap functionality when used with <code>{@link
+                    android.support.design.R.id#scroll}|{@link
+                    android.support.design.R.id#enterAlways}|{@link
+                    android.support.design.R.id#enterAlwaysCollapsed}|{@link
+                    android.support.design.R.id#snap}</code> scroll flags.
+          (<a class="external-link" href=
+          "https://code.google.com/p/android/issues/detail?id=207398">Issue
+          207398</a>)
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <!-- TODO: Add link -->Vector Drawable library:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Fixed a bug where <!-- TODO: Javadoc link -->
+             <code>VectorDrawableCompat</code> does not render correctly in
+            {@link android.widget.TextView} on API level 23. (<a class=
+            "external-link" href=
+            "https://code.google.com/p/android/issues/detail?id=206227">Issue
+            206227</a>)
+          </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<!-- end of collapsible section: 23.4.0 -->
+
+
+<div class="toggle-content closed">
   <p id="rev23-3-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/styles/disclosure_up.png" class="toggle-content-img"
