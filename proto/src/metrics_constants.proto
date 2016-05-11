@@ -2200,6 +2200,9 @@ message MetricsEvent {
     // Settings -> Dev options -> Running services
     RUNNING_SERVICES = 404;
 
+    // The dialog shown by 3P intent to change current webview implementation.
+    WEBVIEW_IMPLEMENTATION = 405;
+
     // ---- End N Constants, all N constants go above this line ----
 
     // ------- Begin N App Disambig Shade -----
