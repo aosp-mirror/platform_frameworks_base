@@ -194,8 +194,12 @@ void BakedOpDispatcher::onMergedPatchOps(BakedOpRenderer& renderer,
     renderer.renderGlop(nullptr, clip, glop);
 }
 
-static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRenderer,
+static void renderTextShadow(BakedOpRenderer& renderer,
         const TextOp& op, const BakedOpState& textOpState) {
+    if (CC_LIKELY(!PaintUtils::hasTextShadow(op.paint))) return;
+
+    FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
+    fontRenderer.setFont(op.paint, SkMatrix::I());
     renderer.caches().textureState().activateTexture(0);
 
     PaintUtils::TextShadow textShadow;
@@ -258,15 +262,9 @@ enum class TextRenderType {
     Flush
 };
 
-static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state,
+static void renderText(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state,
         const ClipBase* renderClip, TextRenderType renderType) {
     FontRenderer& fontRenderer = renderer.caches().fontRenderer.getFontRenderer();
-
-    if (CC_UNLIKELY(PaintUtils::hasTextShadow(op.paint))) {
-        fontRenderer.setFont(op.paint, SkMatrix::I());
-        renderTextShadow(renderer, fontRenderer, op, state);
-    }
-
     float x = op.x;
     float y = op.y;
     const Matrix4& transform = state.computedState.transform;
@@ -321,6 +319,12 @@ static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const Bake
 
 void BakedOpDispatcher::onMergedTextOps(BakedOpRenderer& renderer,
         const MergedBakedOpList& opList) {
+    for (size_t i = 0; i < opList.count; i++) {
+        const BakedOpState& state = *(opList.states[i]);
+        const TextOp& op = *(static_cast<const TextOp*>(state.op));
+        renderTextShadow(renderer, op, state);
+    }
+
     ClipRect renderTargetClip(opList.clip);
     const ClipBase* clip = opList.clipSideFlags ? &renderTargetClip : nullptr;
     for (size_t i = 0; i < opList.count; i++) {
@@ -328,7 +332,7 @@ void BakedOpDispatcher::onMergedTextOps(BakedOpRenderer& renderer,
         const TextOp& op = *(static_cast<const TextOp*>(state.op));
         TextRenderType renderType = (i + 1 == opList.count)
                 ? TextRenderType::Flush : TextRenderType::Defer;
-        renderTextOp(renderer, op, state, clip, renderType);
+        renderText(renderer, op, state, clip, renderType);
     }
 }
 
@@ -740,7 +744,8 @@ void BakedOpDispatcher::onSimpleRectsOp(BakedOpRenderer& renderer, const SimpleR
 }
 
 void BakedOpDispatcher::onTextOp(BakedOpRenderer& renderer, const TextOp& op, const BakedOpState& state) {
-    renderTextOp(renderer, op, state, state.computedState.getClipIfNeeded(), TextRenderType::Flush);
+    renderTextShadow(renderer, op, state);
+    renderText(renderer, op, state, state.computedState.getClipIfNeeded(), TextRenderType::Flush);
 }
 
 void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPathOp& op, const BakedOpState& state) {
