@@ -363,11 +363,12 @@ public class ResolverActivity extends Activity {
         if (isVoiceInteraction()) {
             onSetupVoiceInteraction();
         }
+        final Set<String> categories = intent.getCategories();
         MetricsLogger.action(this, mAdapter.hasFilteredItem()
                 ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
-                        + Arrays.toString(intent.getCategories().toArray()));
+                        + (categories != null ? Arrays.toString(categories.toArray()) : ""));
     }
 
     public final void setFilteredComponents(ComponentName[] components) {
