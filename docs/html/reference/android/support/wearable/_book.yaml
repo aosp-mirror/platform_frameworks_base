@@ -1,0 +1,26 @@
+
+reference:
+- title: android.support.wearable
+  path: /reference/android/support/wearable/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.activity
+  path: /reference/android/support/wearable/activity/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.companion
+  path: /reference/android/support/wearable/companion/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.input
+  path: /reference/android/support/wearable/input/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.media
+  path: /reference/android/support/wearable/media/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.provider
+  path: /reference/android/support/wearable/provider/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.view
+  path: /reference/android/support/wearable/view/package-summary.html
+  status_text: apilevel-
+- title: android.support.wearable.watchface
+  path: /reference/android/support/wearable/watchface/package-summary.html
+  status_text: apilevel-
