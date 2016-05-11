@@ -112,11 +112,6 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    protected void onTileClick(QSTile<?> tile) {
-        tile.secondaryClick();
-    }
-
-    @Override
     public void onTuningChanged(String key, String newValue) {
         // No tunings for you.
         if (key.equals(QS_SHOW_BRIGHTNESS)) {
@@ -134,7 +129,7 @@ public class QuickQSPanel extends QSPanel {
                 break;
             }
         }
-        super.setTiles(quickTiles, true);
+        super.setTiles(quickTiles, false);
     }
 
     private final Tunable mNumTiles = new Tunable() {
