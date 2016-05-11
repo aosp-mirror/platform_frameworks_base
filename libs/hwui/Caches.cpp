@@ -68,8 +68,6 @@ bool Caches::init() {
     mRegionMesh = nullptr;
     mProgram = nullptr;
 
-    patchCache.init();
-
     mInitialized = true;
 
     mPixelBufferState = new PixelBufferState();
