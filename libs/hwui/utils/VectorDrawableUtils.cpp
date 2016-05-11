@@ -198,12 +198,12 @@ static void drawArc(SkPath* p,
     /* Solve for intersecting unit circles */
     double dsq = dx * dx + dy * dy;
     if (dsq == 0.0) {
-        ALOGW("Points are coincident");
+        VECTOR_DRAWABLE_LOGD("Points are coincident");
         return; /* Points are coincident */
     }
     double disc = 1.0 / dsq - 1.0 / 4.0;
     if (disc < 0.0) {
-        ALOGW("Points are too far apart %f", dsq);
+        VECTOR_DRAWABLE_LOGD("Points are too far apart %f", dsq);
         float adjust = (float) (sqrt(dsq) / 1.99999);
         drawArc(p, x0, y0, x1, y1, a * adjust,
                 b * adjust, theta, isMoreThanHalf, isPositiveArc);

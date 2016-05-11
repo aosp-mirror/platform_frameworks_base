@@ -39,6 +39,13 @@
 namespace android {
 namespace uirenderer {
 
+// Debug
+#if DEBUG_VECTOR_DRAWABLE
+    #define VECTOR_DRAWABLE_LOGD(...) ALOGD(__VA_ARGS__)
+#else
+    #define VECTOR_DRAWABLE_LOGD(...)
+#endif
+
 namespace VectorDrawable {
 #define VD_SET_PRIMITIVE_FIELD_WITH_FLAG(field, value, flag) (VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(field, (value)) ? ((flag) = true, true) : false)
 #define VD_SET_PROP(field, value) ((value) != (field) ? ((field) = (value), true) : false)
