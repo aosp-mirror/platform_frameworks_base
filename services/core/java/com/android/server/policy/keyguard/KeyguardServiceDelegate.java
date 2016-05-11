@@ -226,9 +226,9 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public boolean isSecure() {
+    public boolean isSecure(int userId) {
         if (mKeyguardService != null) {
-            mKeyguardState.secure = mKeyguardService.isSecure();
+            mKeyguardState.secure = mKeyguardService.isSecure(userId);
         }
         return mKeyguardState.secure;
     }
