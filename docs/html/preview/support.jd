@@ -8,7 +8,8 @@ page.image=images/cards/card-n-support_2x.png
 <p>
   Two primary support channels are available to you when developing and testing
   with the Android N Developer Preview: Please file bugs at <a href=
-  "https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> for
+  "https://developer.android.com/preview/bug"
+  >https://developer.android.com/preview/bug</a> for
   device-specific, system, and Google App bugs. For issues in other apps,
   please contact the developer directly.
 </p>
@@ -33,9 +34,25 @@ page.image=images/cards/card-n-support_2x.png
 
 <h3 id="new">New in DP3</h3>
 
-<ul>
-  <li>TODO</li>
-</ul>
+
+<h4 id="api-changes">API changes</h4>
+
+<dl>
+  <dt><a href="{@docRoot}preview/api-overview.html#number-blocking"
+    >Number-blocking</a></dt>
+  <dd>If an unauthorized user attempts to block or unblock a number, the operation
+    now fails with {@link java.lang.SecurityException}. (Previously, the
+    operation threw {@link java.lang.UnsupportedOperationException}.)</dd>
+
+  <dt><a href="{@docRoot}preview/api-overview.html#tile_api">Quick
+    Settings Tile API</a></dt>
+  <dd>Tile mode is now controlled by the activity's metadata. (Previously, tile
+    mode was controlled by the return value of
+    <code>TileService.onTileAdded()</code>.) For more information, see
+    <code>TileService.META_DATA_ACTIVE_TILE</code> in the downloadable
+    <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+  </dd>
+</dl>
 
 <h4 id="dp2-fixes">Fixes for issues reported by developers</h4>
 
