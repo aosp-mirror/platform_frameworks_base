@@ -544,12 +544,11 @@ public final class Metrics {
 
     public static void logInvalidScopedAccessRequest(Context context,
             @InvalidScopedAccess String type) {
-        MetricsLogger.count(context, type, 1);
         switch (type) {
             case SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS:
             case SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY:
             case SCOPED_DIRECTORY_ACCESS_ERROR:
-                MetricsLogger.count(context, type, 1);
+                logCount(context, type);
                 break;
             default:
                 Log.wtf(TAG, "invalid InvalidScopedAccess: " + type);
