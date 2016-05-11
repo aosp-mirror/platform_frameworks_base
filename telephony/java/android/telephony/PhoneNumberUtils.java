@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.SystemProperties;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.telecom.PhoneAccount;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -2596,6 +2597,48 @@ public class PhoneNumberUtils
             delimiterIndex = number.length();
         }
         return number.substring(0, delimiterIndex);
+    }
+
+    /**
+     * Given a {@link Uri} with a {@code sip} scheme, attempts to build an equivalent {@code tel}
+     * scheme {@link Uri}.  If the source {@link Uri} does not contain a valid number, or is not
+     * using the {@code sip} scheme, the original {@link Uri} is returned.
+     *
+     * @param source The {@link Uri} to convert.
+     * @return The equivalent {@code tel} scheme {@link Uri}.
+     *
+     * @hide
+     */
+    public static Uri convertSipUriToTelUri(Uri source) {
+        // A valid SIP uri has the format: sip:user:password@host:port;uri-parameters?headers
+        // Per RFC3261, the "user" can be a telephone number.
+        // For example: sip:1650555121;phone-context=blah.com@host.com
+        // In this case, the phone number is in the user field of the URI, and the parameters can be
+        // ignored.
+        //
+        // A SIP URI can also specify a phone number in a format similar to:
+        // sip:+1-212-555-1212@something.com;user=phone
+        // In this case, the phone number is again in user field and the parameters can be ignored.
+        // We can get the user field in these instances by splitting the string on the @, ;, or :
+        // and looking at the first found item.
+
+        String scheme = source.getScheme();
+
+        if (!PhoneAccount.SCHEME_SIP.equals(scheme)) {
+            // Not a sip URI, bail.
+            return source;
+        }
+
+        String number = source.getSchemeSpecificPart();
+        String numberParts[] = number.split("[@;:]");
+
+        if (numberParts.length == 0) {
+            // Number not found, bail.
+            return source;
+        }
+        number = numberParts[0];
+
+        return Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null);
     }
 
     /**
