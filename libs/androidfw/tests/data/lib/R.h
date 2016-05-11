@@ -23,6 +23,7 @@ namespace R {
 namespace attr {
     enum {
         attr1       = 0x02010000, // default
+        attr2       = 0x02010001, // default
     };
 }
 
