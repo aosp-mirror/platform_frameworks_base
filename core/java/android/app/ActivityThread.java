@@ -4183,18 +4183,23 @@ public final class ActivityThread {
                         // window is being added.
                         r.mPendingRemoveWindow = r.window;
                         r.mPendingRemoveWindowManager = wm;
-                        if (r.mPreserveWindow) {
-                            // We can only keep the part of the view hierarchy that we control,
-                            // everything else must be removed, because it might not be able to
-                            // behave properly when activity is relaunching.
-                            r.window.clearContentView();
-                        }
+                        // We can only keep the part of the view hierarchy that we control,
+                        // everything else must be removed, because it might not be able to
+                        // behave properly when activity is relaunching.
+                        r.window.clearContentView();
                     } else {
                         wm.removeViewImmediate(v);
                     }
                 }
                 if (wtoken != null && r.mPendingRemoveWindow == null) {
                     WindowManagerGlobal.getInstance().closeAll(wtoken,
+                            r.activity.getClass().getName(), "Activity");
+                } else if (r.mPendingRemoveWindow != null) {
+                    // We're preserving only one window, others should be closed so app views
+                    // will be detached before the final tear down. It should be done now because
+                    // some components (e.g. WebView) rely on detach callbacks to perform receiver
+                    // unregister and other cleanup.
+                    WindowManagerGlobal.getInstance().closeAllExceptView(token, v,
                             r.activity.getClass().getName(), "Activity");
                 }
                 r.activity.mDecor = null;

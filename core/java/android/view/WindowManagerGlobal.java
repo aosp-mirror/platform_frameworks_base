@@ -391,17 +391,34 @@ public final class WindowManagerGlobal {
         }
     }
 
+    /**
+     * Remove all roots with specified token.
+     *
+     * @param token app or window token.
+     * @param who name of caller, used in logs.
+     * @param what type of caller, used in logs.
+     */
     public void closeAll(IBinder token, String who, String what) {
+        closeAllExceptView(token, null /* view */, who, what);
+    }
+
+    /**
+     * Remove all roots with specified token, except maybe one view.
+     *
+     * @param token app or window token.
+     * @param view view that should be should be preserved along with it's root.
+     *             Pass null if everything should be removed.
+     * @param who name of caller, used in logs.
+     * @param what type of caller, used in logs.
+     */
+    public void closeAllExceptView(IBinder token, View view, String who, String what) {
         synchronized (mLock) {
             int count = mViews.size();
-            //Log.i("foo", "Closing all windows of " + token);
             for (int i = 0; i < count; i++) {
-                //Log.i("foo", "@ " + i + " token " + mParams[i].token
-                //        + " view " + mRoots[i].getView());
-                if (token == null || mParams.get(i).token == token) {
+                if ((view == null || mViews.get(i) != view)
+                        && (token == null || mParams.get(i).token == token)) {
                     ViewRootImpl root = mRoots.get(i);
 
-                    //Log.i("foo", "Force closing " + root);
                     if (who != null) {
                         WindowLeaked leak = new WindowLeaked(
                                 what + " " + who + " has leaked window "
