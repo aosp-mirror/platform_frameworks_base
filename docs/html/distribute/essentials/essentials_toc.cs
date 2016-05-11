@@ -29,6 +29,12 @@
           </a>
     </div>
   </li>
+    <li class="nav-section">
+    <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/billions.html">
+            <span class="en">Building for Billions</span>
+          </a>
+    </div>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/tools/launch-checklist.html" zh-cn-lang="发布检查清单">
