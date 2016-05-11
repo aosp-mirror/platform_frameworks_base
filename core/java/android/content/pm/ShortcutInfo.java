@@ -22,6 +22,8 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -67,6 +69,15 @@ public final class ShortcutInfo implements Parcelable {
     /* @hide */
     public static final int FLAG_KEY_FIELDS_ONLY = 1 << 4;
 
+    /* @hide */
+    public static final int FLAG_FROM_MANIFEST = 1 << 5;
+
+    /* @hide */
+    public static final int FLAG_DISABLED = 1 << 6;
+
+    /* @hide */
+    public static final int FLAG_STRINGS_RESOLVED = 1 << 7;
+
     /** @hide */
     @IntDef(flag = true,
             value = {
@@ -75,6 +86,9 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_HAS_ICON_RES,
             FLAG_HAS_ICON_FILE,
             FLAG_KEY_FIELDS_ONLY,
+            FLAG_FROM_MANIFEST,
+            FLAG_DISABLED,
+            FLAG_STRINGS_RESOLVED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -124,28 +138,37 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     private Icon mIcon;
 
-    @NonNull
+    private int mTitleResId;
+
+    @Nullable
     private String mTitle;
+
+    private int mTextResId;
 
     @Nullable
     private String mText;
 
-    @NonNull
+    private int mDisabledMessageResId;
+
+    @Nullable
+    private String mDisabledMessage;
+
+    @Nullable
     private ArraySet<String> mCategories;
 
     /**
      * Intent *with extras removed*.
      */
-    @NonNull
+    @Nullable
     private Intent mIntent;
 
     /**
      * Extras for the intent.
      */
-    @NonNull
+    @Nullable
     private PersistableBundle mIntentPersistableExtras;
 
-    private int mWeight;
+    private int mRank;
 
     @Nullable
     private PersistableBundle mExtras;
@@ -176,7 +199,11 @@ public final class ShortcutInfo implements Parcelable {
         mActivityComponent = b.mActivityComponent;
         mIcon = b.mIcon;
         mTitle = b.mTitle;
+        mTitleResId = b.mTitleResId;
         mText = b.mText;
+        mTextResId = b.mTextResId;
+        mDisabledMessage = b.mDisabledMessage;
+        mDisabledMessageResId = b.mDisabledMessageResId;
         mCategories = clone(b.mCategories);
         mIntent = b.mIntent;
         if (mIntent != null) {
@@ -186,7 +213,7 @@ public final class ShortcutInfo implements Parcelable {
                 mIntentPersistableExtras = new PersistableBundle(intentExtras);
             }
         }
-        mWeight = b.mWeight;
+        mRank = b.mRank;
         mExtras = b.mExtras;
         updateTimestamp();
     }
@@ -202,7 +229,10 @@ public final class ShortcutInfo implements Parcelable {
      */
     public void enforceMandatoryFields() {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
-        Preconditions.checkStringNotEmpty(mTitle, "Shortcut title must be provided");
+        Preconditions.checkNotNull(mActivityComponent, "activityComponent must be provided");
+        if (mTitle == null && mTitleResId == 0) {
+            throw new IllegalArgumentException("Shortcut title must be provided");
+        }
         Preconditions.checkNotNull(mIntent, "Shortcut Intent must be provided");
     }
 
@@ -228,17 +258,45 @@ public final class ShortcutInfo implements Parcelable {
             }
 
             mTitle = source.mTitle;
+            mTitleResId = source.mTitleResId;
             mText = source.mText;
+            mTextResId = source.mTextResId;
+            mDisabledMessage = source.mDisabledMessage;
+            mDisabledMessageResId = source.mDisabledMessageResId;
             mCategories = clone(source.mCategories);
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntent = source.mIntent;
                 mIntentPersistableExtras = source.mIntentPersistableExtras;
             }
-            mWeight = source.mWeight;
+            mRank = source.mRank;
             mExtras = source.mExtras;
         } else {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
+        }
+    }
+
+    /** @hide */
+    public void resolveStringsRequiringCrossUser(Context context) throws NameNotFoundException {
+        mFlags |= FLAG_STRINGS_RESOLVED;
+
+        if ((mTitleResId == 0) && (mTextResId == 0) && (mDisabledMessageResId == 0)) {
+            return; // Bail early.
+        }
+        final Resources res = context.getPackageManager().getResourcesForApplicationAsUser(
+                mPackageName, mUserId);
+
+        if (mTitleResId != 0) {
+            mTitle = res.getString(mTitleResId);
+            mTitleResId = 0;
+        }
+        if (mTextResId != 0) {
+            mText = res.getString(mTextResId);
+            mTextResId = 0;
+        }
+        if (mDisabledMessageResId != 0) {
+            mDisabledMessage = res.getString(mDisabledMessageResId);
+            mDisabledMessageResId = 0;
         }
     }
 
@@ -275,9 +333,24 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (source.mTitle != null) {
             mTitle = source.mTitle;
+            mTitleResId = 0;
+        } else if (source.mTitleResId != 0) {
+            mTitle = null;
+            mTitleResId = source.getTitleResId();
         }
         if (source.mText != null) {
             mText = source.mText;
+            mTextResId = 0;
+        } else if (source.mTextResId != 0) {
+            mText = null;
+            mTextResId = source.mTextResId;
+        }
+        if (source.mDisabledMessage != null) {
+            mDisabledMessage = source.mDisabledMessage;
+            mDisabledMessageResId = 0;
+        } else if (source.mDisabledMessageResId != 0) {
+            mDisabledMessage = null;
+            mDisabledMessageResId = source.mDisabledMessageResId;
         }
         if (source.mCategories != null) {
             mCategories = clone(source.mCategories);
@@ -286,8 +359,8 @@ public final class ShortcutInfo implements Parcelable {
             mIntent = source.mIntent;
             mIntentPersistableExtras = source.mIntentPersistableExtras;
         }
-        if (source.mWeight != 0) {
-            mWeight = source.mWeight;
+        if (source.mRank != 0) {
+            mRank = source.mRank;
         }
         if (source.mExtras != null) {
             mExtras = source.mExtras;
@@ -308,7 +381,6 @@ public final class ShortcutInfo implements Parcelable {
                 throw getInvalidIconException();
         }
         if (icon.hasTint()) {
-            // TODO support it
             throw new IllegalArgumentException("Icons with tints are not supported");
         }
 
@@ -333,15 +405,23 @@ public final class ShortcutInfo implements Parcelable {
 
         private Icon mIcon;
 
+        private int mTitleResId;
+
         private String mTitle;
 
+        private int mTextResId;
+
         private String mText;
+
+        private int mDisabledMessageResId;
+
+        private String mDisabledMessage;
 
         private Set<String> mCategories;
 
         private Intent mIntent;
 
-        private int mWeight;
+        private int mRank;
 
         private PersistableBundle mExtras;
 
@@ -396,6 +476,13 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
+        /** TODO Javadoc */
+        public Builder setTitleResId(int titleResId) {
+            Preconditions.checkState(mTitle == null, "title already set");
+            mTitleResId = titleResId;
+            return this;
+        }
+
         /**
          * Sets the title of a shortcut.  This is a mandatory field.
          *
@@ -404,7 +491,15 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setTitle(@NonNull String title) {
+            Preconditions.checkState(mTitleResId == 0, "titleResId already set");
             mTitle = Preconditions.checkStringNotEmpty(title, "title");
+            return this;
+        }
+
+        /** TODO Javadoc */
+        public Builder setTextResId(int textResId) {
+            Preconditions.checkState(mText == null, "text already set");
+            mTextResId = textResId;
             return this;
         }
 
@@ -416,7 +511,24 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setText(@NonNull String text) {
+            Preconditions.checkState(mTextResId == 0, "textResId already set");
             mText = Preconditions.checkStringNotEmpty(text, "text");
+            return this;
+        }
+
+        /** TODO Javadoc */
+        public Builder setDisabledMessageResId(int disabledMessageResId) {
+            Preconditions.checkState(mDisabledMessage == null, "disabledMessage already set");
+            mDisabledMessageResId = disabledMessageResId;
+            return this;
+        }
+
+        @NonNull
+        public Builder setDisabledMessage(@NonNull String disabledMessage) {
+            Preconditions.checkState(
+                    mDisabledMessageResId == 0, "disabledMessageResId already set");
+            mDisabledMessage =
+                    Preconditions.checkStringNotEmpty(disabledMessage, "disabledMessage");
             return this;
         }
 
@@ -444,12 +556,11 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optionally sets the weight of a shortcut, which will be used by the launcher for sorting.
-         * The larger the weight, the more "important" a shortcut is.
+         * TODO javadoc.
          */
         @NonNull
-        public Builder setWeight(int weight) {
-            mWeight = weight;
+        public Builder setRank(int rank) {
+            mRank = rank;
             return this;
         }
 
@@ -527,12 +638,35 @@ public final class ShortcutInfo implements Parcelable {
         return mTitle;
     }
 
+    /** TODO Javadoc */
+    public int getTitleResId() {
+        return mTitleResId;
+    }
+
     /**
      * Return the shortcut text.
      */
     @Nullable
     public String getText() {
         return mText;
+    }
+
+    /** TODO Javadoc */
+    public int getTextResId() {
+        return mTextResId;
+    }
+
+    /**
+     * Return the message that should be shown when a shortcut in disabled state is launched.
+     */
+    @Nullable
+    public String getDisabledMessage() {
+        return mDisabledMessage;
+    }
+
+    /** TODO Javadoc */
+    public int getDisabledMessageResId() {
+        return mDisabledMessageResId;
     }
 
     /**
@@ -584,11 +718,10 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return the weight of a shortcut, which will be used by Launcher for sorting.
-     * The larger the weight, the more "important" a shortcut is.
+     * TODO Javadoc
      */
-    public int getWeight() {
-        return mWeight;
+    public int getRank() {
+        return mRank;
     }
 
     /**
@@ -655,12 +788,35 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
+     * Return whether a shortcut is published via manifest or not.  If true, the shortcut is
+     * immutable.
+     */
+    public boolean isFromManifest() {
+        return hasFlags(FLAG_FROM_MANIFEST);
+    }
+
+    /** Return whether a shortcut is disabled by publisher or not. */
+    public boolean isDisabled() {
+        return !hasFlags(FLAG_DISABLED);
+    }
+
+    /**
      * Return whether a shortcut's icon is a resource in the owning package.
      *
      * @see LauncherApps#getShortcutIconResId(ShortcutInfo)
      */
     public boolean hasIconResource() {
         return hasFlags(FLAG_HAS_ICON_RES);
+    }
+
+    /** @hide */
+    public boolean hasStringResources() {
+        return (mTitleResId != 0) || (mTextResId != 0) || (mDisabledMessageResId != 0);
+    }
+
+    /** @hide */
+    public boolean hasAnyResources() {
+        return hasIconResource() || hasStringResources();
     }
 
     /**
@@ -687,6 +843,11 @@ public final class ShortcutInfo implements Parcelable {
      */
     public boolean hasKeyFieldsOnly() {
         return hasFlags(FLAG_KEY_FIELDS_ONLY);
+    }
+
+    /** TODO Javadoc */
+    public boolean hasStringResourcesResolved() {
+        return hasFlags(FLAG_STRINGS_RESOLVED);
     }
 
     /** @hide */
@@ -736,10 +897,14 @@ public final class ShortcutInfo implements Parcelable {
         mActivityComponent = source.readParcelable(cl);
         mIcon = source.readParcelable(cl);
         mTitle = source.readString();
+        mTitleResId = source.readInt();
         mText = source.readString();
+        mTextResId = source.readInt();
+        mDisabledMessage = source.readString();
+        mDisabledMessageResId = source.readInt();
         mIntent = source.readParcelable(cl);
         mIntentPersistableExtras = source.readParcelable(cl);
-        mWeight = source.readInt();
+        mRank = source.readInt();
         mExtras = source.readParcelable(cl);
         mLastChangedTimestamp = source.readLong();
         mFlags = source.readInt();
@@ -765,11 +930,15 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mActivityComponent, flags);
         dest.writeParcelable(mIcon, flags);
         dest.writeString(mTitle);
+        dest.writeInt(mTitleResId);
         dest.writeString(mText);
+        dest.writeInt(mTextResId);
+        dest.writeString(mDisabledMessage);
+        dest.writeInt(mDisabledMessageResId);
 
         dest.writeParcelable(mIntent, flags);
         dest.writeParcelable(mIntentPersistableExtras, flags);
-        dest.writeInt(mWeight);
+        dest.writeInt(mRank);
         dest.writeParcelable(mExtras, flags);
         dest.writeLong(mLastChangedTimestamp);
         dest.writeInt(mFlags);
@@ -837,9 +1006,18 @@ public final class ShortcutInfo implements Parcelable {
 
         sb.append(", title=");
         sb.append(secure ? "***" : mTitle);
+        sb.append(", titleResId=");
+        sb.append(mTitleResId);
 
         sb.append(", text=");
         sb.append(secure ? "***" : mText);
+        sb.append(", textResId=");
+        sb.append(mTextResId);
+
+        sb.append(", disabledMessage=");
+        sb.append(secure ? "***" : mDisabledMessage);
+        sb.append(", disabledMessageResId=");
+        sb.append(mDisabledMessageResId);
 
         sb.append(", categories=");
         sb.append(mCategories);
@@ -847,8 +1025,8 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", icon=");
         sb.append(mIcon);
 
-        sb.append(", weight=");
-        sb.append(mWeight);
+        sb.append(", rank=");
+        sb.append(mRank);
 
         sb.append(", timestamp=");
         sb.append(mLastChangedTimestamp);
@@ -864,6 +1042,32 @@ public final class ShortcutInfo implements Parcelable {
 
         sb.append(", flags=");
         sb.append(mFlags);
+        sb.append(" [");
+        if (hasFlags(FLAG_DISABLED)) {
+            sb.append("X");
+        }
+        if (hasFlags(FLAG_FROM_MANIFEST)) {
+            sb.append("M");
+        }
+        if (hasFlags(FLAG_DYNAMIC)) {
+            sb.append("D");
+        }
+        if (hasFlags(FLAG_PINNED)) {
+            sb.append("P");
+        }
+        if (hasFlags(FLAG_HAS_ICON_FILE)) {
+            sb.append("If");
+        }
+        if (hasFlags(FLAG_HAS_ICON_RES)) {
+            sb.append("Ir");
+        }
+        if (hasFlags(FLAG_KEY_FIELDS_ONLY)) {
+            sb.append("K");
+        }
+        if (hasFlags(FLAG_STRINGS_RESOLVED)) {
+            sb.append("S");
+        }
+        sb.append("]");
 
         if (includeInternalData) {
 
@@ -881,9 +1085,10 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public ShortcutInfo(
             @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
-            Icon icon, String title, String text, Set<String> categories, Intent intent,
+            Icon icon, String title, int titleResId, String text, int textResId,
+            String disabledMessage, int disabledMessageResId, Set<String> categories, Intent intent,
             PersistableBundle intentPersistableExtras,
-            int weight, PersistableBundle extras, long lastChangedTimestamp,
+            int rank, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
         mUserId = userId;
         mId = id;
@@ -891,11 +1096,15 @@ public final class ShortcutInfo implements Parcelable {
         mActivityComponent = activityComponent;
         mIcon = icon;
         mTitle = title;
+        mTitleResId = titleResId;
         mText = text;
+        mTextResId = textResId;
+        mDisabledMessage = disabledMessage;
+        mDisabledMessageResId = disabledMessageResId;
         mCategories = clone(categories);
         mIntent = intent;
         mIntentPersistableExtras = intentPersistableExtras;
-        mWeight = weight;
+        mRank = rank;
         mExtras = extras;
         mLastChangedTimestamp = lastChangedTimestamp;
         mFlags = flags;

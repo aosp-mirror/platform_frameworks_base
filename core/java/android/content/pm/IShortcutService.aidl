@@ -39,6 +39,9 @@ interface IShortcutService {
 
     boolean updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId);
 
+    void disableShortcuts(String packageName, in List shortcutIds, String disabledMessage,
+            int disabledMessageResId, int userId);
+
     int getMaxDynamicShortcutCount(String packageName, int userId);
 
     int getRemainingCallCount(String packageName, int userId);
@@ -46,6 +49,8 @@ interface IShortcutService {
     long getRateLimitResetTime(String packageName, int userId);
 
     int getIconMaxDimensions(String packageName, int userId);
+
+    void reportShortcutUsed(String packageName, String shortcutId, int userId);
 
     void resetThrottling(); // system only API for developer opsions
 
