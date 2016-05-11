@@ -870,6 +870,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    boolean isStateAtLeast(int state) {
+        return mCurState >= state;
+    }
+
     void moveToState(Fragment f, int newState, int transit, int transitionStyle,
             boolean keepActive) {
         if (DEBUG && false) Log.v(TAG, "moveToState: " + f

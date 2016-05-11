@@ -1486,6 +1486,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         final int version = context != null ? context.getApplicationInfo().targetSdkVersion : 0;
         if (version >= Build.VERSION_CODES.N) {
             restoreChildFragmentState(savedInstanceState, true);
+            if (mChildFragmentManager != null
+                    && !mChildFragmentManager.isStateAtLeast(Fragment.CREATED)) {
+                mChildFragmentManager.dispatchCreate();
+            }
         }
     }
 
