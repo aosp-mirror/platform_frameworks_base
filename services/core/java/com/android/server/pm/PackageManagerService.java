@@ -7231,16 +7231,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final int elapsedTimeMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-        // Report the elapsed time in deci-seconds (tenths of a second) rounded upwards
-        // (e.g. 1234 ms will become 13ds). This will help provide histograms at a more reasonable
-        // granularity.
-        final int elapsedTimeDs = ((elapsedTimeMs + 99) / 100);
+        final int elapsedTimeSeconds =
+                (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
         MetricsLogger.histogram(mContext, "opt_dialog_num_dexopted", numberOfPackagesOptimized);
         MetricsLogger.histogram(mContext, "opt_dialog_num_skipped", numberOfPackagesSkipped);
         MetricsLogger.histogram(mContext, "opt_dialog_num_failed", numberOfPackagesFailed);
         MetricsLogger.histogram(mContext, "opt_dialog_num_total", getOptimizablePackages().size());
-        MetricsLogger.histogram(mContext, "opt_dialog_time_decis", elapsedTimeDs);
+        MetricsLogger.histogram(mContext, "opt_dialog_time_s", elapsedTimeSeconds);
     }
 
     @Override
