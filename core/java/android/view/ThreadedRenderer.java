@@ -352,11 +352,6 @@ public final class ThreadedRenderer {
     private Choreographer mChoreographer;
     private boolean mRootNodeNeedsUpdate;
 
-    // In case of multi threaded render nodes, these bounds indicate the content bounds against
-    // which the backdrop needs to be cropped against.
-    private final Rect mCurrentContentBounds = new Rect();
-    private final Rect mStagedContentBounds = new Rect();
-
     private boolean mEnabled;
     private boolean mRequested = true;
 
@@ -736,7 +731,7 @@ public final class ThreadedRenderer {
      * @param bottom The bottom side of the protected bounds.
      */
     public void setContentDrawBounds(int left, int top, int right, int bottom) {
-        mStagedContentBounds.set(left, top, right, bottom);
+        nSetContentDrawBounds(mNativeProxy, left, top, right, bottom);
     }
 
     /**
@@ -784,14 +779,6 @@ public final class ThreadedRenderer {
         choreographer.mFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
-        // The main content view was updating the content bounds and we transfer them to the
-        // renderer.
-        if (!mCurrentContentBounds.equals(mStagedContentBounds)) {
-            mCurrentContentBounds.set(mStagedContentBounds);
-            nSetContentDrawBounds(mNativeProxy, mCurrentContentBounds.left,
-                    mCurrentContentBounds.top, mCurrentContentBounds.right,
-                    mCurrentContentBounds.bottom);
-        }
 
         attachInfo.mIgnoreDirtyState = false;
 
