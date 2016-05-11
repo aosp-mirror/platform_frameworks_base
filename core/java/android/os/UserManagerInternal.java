@@ -126,4 +126,18 @@ public abstract class UserManagerInternal {
      * createAndManageUser is called by the device owner.
      */
     public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags);
+
+    /**
+     * Return whether the given user is running in an
+     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKING "unlocking"} or
+     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKED "unlocked"} state.
+     */
+    public abstract boolean isUserUnlockingOrUnlocked(int userId);
+
+    /**
+     * Sets whether the given user is running in an
+     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKING "unlocking"} or
+     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKED "unlocked"} state.
+     */
+    public abstract void setUserUnlockingOrUnlocked(int userId, boolean unlockingOrUnlocked);
 }
