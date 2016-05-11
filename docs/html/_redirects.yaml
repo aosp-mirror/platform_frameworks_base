@@ -1125,9 +1125,9 @@ redirects:
   to: /studio/intro/update.html
 - from: /tools/workflow.html
   to: /studio/guide/workflow.html
-- from: /installing/studio-androidview.html
+- from: /sdk/installing/studio-androidview.html
   to: /studio/projects/index.html
-- from: /installing/studio-tips.html
+- from: /sdk/installing/studio-tips.html
   to: /studio/intro/index.html
 - from: /tools/help/ddms.html
   to: /studio/profile/ddms.html
