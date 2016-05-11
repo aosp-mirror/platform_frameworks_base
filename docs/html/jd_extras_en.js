@@ -139,7 +139,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"logcat Monitor",
     "summary":"The Android logging system provides a mechanism for collecting and viewing system debug output. logcat Monitor displays messages that you added to your app by using the Log class, as well as system messages, such as stack traces when the emulator throws\u2026",
     "url":"studio/debug/am-logcat.html",
-    "image":"images/tools/thumbnails/am-logcatmon.png",
+    "image":"images/tools/thumbnails/am-logcatmon2.png",
     "type":"studio",
     "keywords": ["monitor"],
     "tags": ["monitor"],
