@@ -19,6 +19,7 @@ package android.ext.services.notification;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
 
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationRankerService;
 import android.service.notification.StatusBarNotification;
@@ -43,9 +44,9 @@ public final class Ranker extends NotificationRankerService {
     private static final int AUTOBUNDLE_AT_COUNT = 4;
     private static final String AUTOBUNDLE_KEY = "ranker_bundle";
 
-    // Map of package : notification keys. Only contains notifications that are not bundled
-    // by the app (aka no group or sort key).
-    Map<String, LinkedHashSet<String>> mUnbundledNotifications;
+    // Map of user : <Map of package : notification keys>. Only contains notifications that are not
+    // bundled by the app (aka no group or sort key).
+    Map<Integer, Map<String, LinkedHashSet<String>>> mUnbundledNotifications;
 
     @Override
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn, int importance,
@@ -63,14 +64,20 @@ public final class Ranker extends NotificationRankerService {
                 // Not grouped by the app, add to the list of notifications for the app;
                 // send bundling update if app exceeds the autobundling limit.
                 synchronized (mUnbundledNotifications) {
+                    Map<String, LinkedHashSet<String>> unbundledNotificationsByUser
+                            = mUnbundledNotifications.get(sbn.getUserId());
+                    if (unbundledNotificationsByUser == null) {
+                        unbundledNotificationsByUser = new HashMap<>();
+                    }
+                    mUnbundledNotifications.put(sbn.getUserId(), unbundledNotificationsByUser);
                     LinkedHashSet<String> notificationsForPackage
-                            = mUnbundledNotifications.get(sbn.getPackageName());
+                            = unbundledNotificationsByUser.get(sbn.getPackageName());
                     if (notificationsForPackage == null) {
                         notificationsForPackage = new LinkedHashSet<>();
                     }
 
                     notificationsForPackage.add(sbn.getKey());
-                    mUnbundledNotifications.put(sbn.getPackageName(), notificationsForPackage);
+                    unbundledNotificationsByUser.put(sbn.getPackageName(), notificationsForPackage);
 
                     if (notificationsForPackage.size() >= AUTOBUNDLE_AT_COUNT) {
                         for (String key : notificationsForPackage) {
@@ -80,12 +87,13 @@ public final class Ranker extends NotificationRankerService {
                 }
                 if (notificationsToBundle.size() > 0) {
                     adjustAutobundlingSummary(sbn.getPackageName(), notificationsToBundle.get(0),
-                            true);
-                    adjustNotificationBundling(sbn.getPackageName(), notificationsToBundle, true);
+                            true, sbn.getUserId());
+                    adjustNotificationBundling(sbn.getPackageName(), notificationsToBundle, true,
+                            sbn.getUserId());
                 }
             } else {
                 // Grouped, but not by us. Send updates to unautobundle, if we bundled it.
-                maybeUnbundle(sbn, false);
+                maybeUnbundle(sbn, false, sbn.getUserId());
             }
         } catch (Exception e) {
             Slog.e(TAG, "Failure processing new notification", e);
@@ -95,7 +103,7 @@ public final class Ranker extends NotificationRankerService {
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
         try {
-            maybeUnbundle(sbn, true);
+            maybeUnbundle(sbn, true, sbn.getUserId());
         } catch (Exception e) {
             Slog.e(TAG, "Error processing canceled notification", e);
         }
@@ -106,12 +114,17 @@ public final class Ranker extends NotificationRankerService {
      * autobundling if the status change of this notification resulted in the loose notification
      * count being under the limit.
      */
-    private void maybeUnbundle(StatusBarNotification sbn, boolean notificationGone) {
+    private void maybeUnbundle(StatusBarNotification sbn, boolean notificationGone, int user) {
         List<String> notificationsToUnAutobundle = new ArrayList<>();
         boolean removeSummary = false;
         synchronized (mUnbundledNotifications) {
+            Map<String, LinkedHashSet<String>> unbundledNotificationsByUser
+                    = mUnbundledNotifications.get(sbn.getUserId());
+            if (unbundledNotificationsByUser == null || unbundledNotificationsByUser.size() == 0) {
+                return;
+            }
             LinkedHashSet<String> notificationsForPackage
-                    = mUnbundledNotifications.get(sbn.getPackageName());
+                    = unbundledNotificationsByUser.get(sbn.getPackageName());
             if (notificationsForPackage == null || notificationsForPackage.size() == 0) {
                 return;
             }
@@ -132,9 +145,10 @@ public final class Ranker extends NotificationRankerService {
         }
         if (notificationsToUnAutobundle.size() > 0) {
             if (removeSummary) {
-                adjustAutobundlingSummary(sbn.getPackageName(), null, false);
+                adjustAutobundlingSummary(sbn.getPackageName(), null, false, user);
             }
-            adjustNotificationBundling(sbn.getPackageName(), notificationsToUnAutobundle, false);
+            adjustNotificationBundling(sbn.getPackageName(), notificationsToUnAutobundle, false,
+                    user);
         }
     }
 
@@ -147,7 +161,8 @@ public final class Ranker extends NotificationRankerService {
         }
     }
 
-    private void adjustAutobundlingSummary(String packageName, String key, boolean summaryNeeded) {
+    private void adjustAutobundlingSummary(String packageName, String key, boolean summaryNeeded,
+            int user) {
         Bundle signals = new Bundle();
         if (summaryNeeded) {
             signals.putBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, true);
@@ -156,7 +171,8 @@ public final class Ranker extends NotificationRankerService {
             signals.putBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false);
         }
         Adjustment adjustment = new Adjustment(packageName, key, IMPORTANCE_UNSPECIFIED, signals,
-                getContext().getString(R.string.notification_ranker_autobundle_explanation), null);
+                getContext().getString(R.string.notification_ranker_autobundle_explanation), null,
+                user);
         if (DEBUG) {
             Log.i(TAG, "Summary update for: " + packageName + " "
                     + (summaryNeeded ? "adding" : "removing"));
@@ -168,10 +184,11 @@ public final class Ranker extends NotificationRankerService {
         }
 
     }
-    private void adjustNotificationBundling(String packageName, List<String> keys, boolean bundle) {
+    private void adjustNotificationBundling(String packageName, List<String> keys, boolean bundle,
+            int user) {
         List<Adjustment> adjustments = new ArrayList<>();
         for (String key : keys) {
-            adjustments.add(createBundlingAdjustment(packageName, key, bundle));
+            adjustments.add(createBundlingAdjustment(packageName, key, bundle, user));
             if (DEBUG) Log.i(TAG, "Sending bundling adjustment for: " + key);
         }
         try {
@@ -181,7 +198,8 @@ public final class Ranker extends NotificationRankerService {
         }
     }
 
-    private Adjustment createBundlingAdjustment(String packageName, String key, boolean bundle) {
+    private Adjustment createBundlingAdjustment(String packageName, String key, boolean bundle,
+            int user) {
         Bundle signals = new Bundle();
         if (bundle) {
             signals.putString(Adjustment.GROUP_KEY_OVERRIDE_KEY, AUTOBUNDLE_KEY);
@@ -189,7 +207,8 @@ public final class Ranker extends NotificationRankerService {
             signals.putString(Adjustment.GROUP_KEY_OVERRIDE_KEY, null);
         }
         return new Adjustment(packageName, key, IMPORTANCE_UNSPECIFIED, signals,
-                getContext().getString(R.string.notification_ranker_autobundle_explanation), null);
+                getContext().getString(R.string.notification_ranker_autobundle_explanation),
+                null, user);
     }
 
 }
