@@ -2186,8 +2186,12 @@ public final class ActiveServices {
                 if (!inDestroying) {
                     // Not sure what else to do with this...  if it is not actually in the
                     // destroying list, we don't need to make sure to remove it from it.
-                    Slog.wtfStack(TAG, "Service done with onDestroy, but not inDestroying: "
-                            + r);
+                    // If the app is null, then it was probably removed because the process died,
+                    // otherwise wtf
+                    if (r.app != null) {
+                        Slog.wtfStack(TAG, "Service done with onDestroy, but not inDestroying: "
+                                + r + ", app=" + r.app);
+                    }
                 } else if (r.executeNesting != 1) {
                     Slog.wtfStack(TAG, "Service done with onDestroy, but executeNesting="
                             + r.executeNesting + ": " + r);
