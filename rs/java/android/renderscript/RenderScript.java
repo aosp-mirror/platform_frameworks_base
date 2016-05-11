@@ -1616,6 +1616,9 @@ public class RenderScript {
 
             nContextDeinitToClient(mContext);
             mMessageThread.mRun = false;
+            // Interrupt mMessageThread so it gets to see immediately that mRun is false
+            // and exit rightaway.
+            mMessageThread.interrupt();
 
             // Wait for mMessageThread to join.  Try in a loop, in case this thread gets interrupted
             // during the wait.  If interrupted, set the "interrupted" status of the current thread.
