@@ -748,6 +748,11 @@ toc:
     path_attributes:
     - name: description
       value: How to extend text messaging apps to work with Auto devices.
+  - title: Testing for Auto
+    path: /training/auto/testing/index.html
+    path_attributes:
+    - name: description
+      value: How to use DHU to test Auto apps.
 
 - title: Building Apps for Work
   path: /training/enterprise/index.html
