@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.AppWindowAnimator.sDummyAnimation;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
@@ -1319,6 +1320,23 @@ class WindowStateAnimator {
             // to the stack bounds which is only currently supported on the default display.
             // TODO(multi-display): Need to support cropping to stack bounds on other displays
             // when we have stacks on other displays.
+            return;
+        }
+
+        // We crop wallpaper windows to the stack bounds of their current target to avoid them
+        // showing behind transparent windows in other stacks in split-screen mode.
+        if (w.getBaseType() == TYPE_WALLPAPER) {
+            final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
+            if (wallpaperTarget != null) {
+                final Task task = wallpaperTarget.getTask();
+                if (task != null && !task.isFullscreen()) {
+                    final TaskStack stack = task.mStack;
+                    if (stack != null && !stack.isFullscreen()) {
+                        stack.getDimBounds(mTmpStackBounds);
+                        clipRect.intersect(mTmpStackBounds);
+                    }
+                }
+            }
             return;
         }
 
