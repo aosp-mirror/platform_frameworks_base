@@ -8727,9 +8727,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 a.info.deviceProtectedDataDir = pkg.applicationInfo.deviceProtectedDataDir;
                 a.info.credentialProtectedDataDir = pkg.applicationInfo.credentialProtectedDataDir;
 
-                // TODO: Update instrumentation.nativeLibraryDir as well ? Does it
-                // need other information about the application, like the ABI and what not ?
                 a.info.nativeLibraryDir = pkg.applicationInfo.nativeLibraryDir;
+                a.info.secondaryNativeLibraryDir = pkg.applicationInfo.secondaryNativeLibraryDir;
                 mInstrumentation.put(a.getComponentName(), a);
                 if ((policyFlags&PackageParser.PARSE_CHATTY) != 0) {
                     if (r == null) {

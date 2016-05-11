@@ -4957,6 +4957,31 @@ public final class ActivityThread {
         }
     }
 
+    /**
+     * Returns the correct library directory for the current ABI.
+     * <p>
+     * If we're dealing with a multi-arch application that has both 32 and 64 bit shared
+     * libraries, we might need to choose the secondary depending on what the current
+     * runtime's instruction set is.
+     */
+    private String getInstrumentationLibrary(ApplicationInfo appInfo, InstrumentationInfo insInfo) {
+        if (appInfo.primaryCpuAbi != null && appInfo.secondaryCpuAbi != null) {
+            // Get the instruction set supported by the secondary ABI. In the presence
+            // of a native bridge this might be different than the one secondary ABI used.
+            String secondaryIsa =
+                    VMRuntime.getInstructionSet(appInfo.secondaryCpuAbi);
+            final String secondaryDexCodeIsa =
+                    SystemProperties.get("ro.dalvik.vm.isa." + secondaryIsa);
+            secondaryIsa = secondaryDexCodeIsa.isEmpty() ? secondaryIsa : secondaryDexCodeIsa;
+
+            final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
+            if (runtimeIsa.equals(secondaryIsa)) {
+                return insInfo.secondaryNativeLibraryDir;
+            }
+        }
+        return insInfo.nativeLibraryDir;
+    }
+
     private void handleBindApplication(AppBindData data) {
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
@@ -5130,7 +5155,7 @@ public final class ActivityThread {
             mInstrumentationPackageName = ii.packageName;
             mInstrumentationAppDir = ii.sourceDir;
             mInstrumentationSplitAppDirs = ii.splitSourceDirs;
-            mInstrumentationLibDir = ii.nativeLibraryDir;
+            mInstrumentationLibDir = getInstrumentationLibrary(data.appInfo, ii);
             mInstrumentedAppDir = data.info.getAppDir();
             mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
             mInstrumentedLibDir = data.info.getLibDir();
