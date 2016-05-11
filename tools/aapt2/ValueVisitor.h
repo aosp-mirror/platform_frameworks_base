@@ -127,6 +127,11 @@ struct DynCastVisitor<Item> : public RawValueVisitor {
     }
 };
 
+template <typename T>
+const T* valueCast(const Value* value) {
+    return valueCast<T>(const_cast<Value*>(value));
+}
+
 /**
  * Returns a valid pointer to T if the Value is of subtype T.
  * Otherwise, returns nullptr.
@@ -140,7 +145,6 @@ T* valueCast(Value* value) {
     value->accept(&visitor);
     return visitor.value;
 }
-
 
 inline void visitAllValuesInPackage(ResourceTablePackage* pkg, RawValueVisitor* visitor) {
     for (auto& type : pkg->types) {

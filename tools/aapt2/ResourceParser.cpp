@@ -152,7 +152,7 @@ bool ResourceParser::flattenXmlSubtree(xml::XmlPullParser* parser, std::u16strin
                 break;
             }
 
-            spanStack.back().lastChar = builder.str().size();
+            spanStack.back().lastChar = builder.str().size() - 1;
             outStyleString->spans.push_back(spanStack.back());
             spanStack.pop_back();
 
@@ -1057,6 +1057,16 @@ bool ResourceParser::parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* 
     outResource->name.type = ResourceType::kArray;
 
     std::unique_ptr<Array> array = util::make_unique<Array>();
+
+    bool translateable = mOptions.translatable;
+    if (Maybe<StringPiece16> translateableAttr = xml::findAttribute(parser, u"translatable")) {
+        if (!ResourceUtils::tryParseBool(translateableAttr.value(), &translateable)) {
+            mDiag->error(DiagMessage(outResource->source)
+                         << "invalid value for 'translatable'. Must be a boolean");
+            return false;
+        }
+    }
+    array->setTranslateable(translateable);
 
     bool error = false;
     const size_t depth = parser->getDepth();
