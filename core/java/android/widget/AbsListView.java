@@ -2322,7 +2322,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @param position The position to display
      * @param isScrap Array of at least 1 boolean, the first entry will become true if
-     *                the returned view was taken from the scrap heap, false if otherwise.
+     *                the returned view was taken from the "temporary detached" scrap heap, false if
+     *                otherwise.
      *
      * @return A view displaying the data associated with the specified position
      */
@@ -2362,10 +2363,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // Failed to re-bind the data, return scrap to the heap.
                 mRecycler.addScrapView(scrapView, position);
             } else {
-                isScrap[0] = true;
+                if (child.isTemporarilyDetached()) {
+                    isScrap[0] = true;
 
-                // Finish the temporary detach started in addScrapView().
-                child.dispatchFinishTemporaryDetach();
+                    // Finish the temporary detach started in addScrapView().
+                    child.dispatchFinishTemporaryDetach();
+                } else {
+                    // we set isScrap to "true" only if the view is temporarily detached.
+                    // if the view is fully detached, it is as good as a view created by the
+                    // adapter
+                    isScrap[0] = false;
+                }
+
             }
         }
 
@@ -5152,6 +5161,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             fillGap(down);
         }
 
+        mRecycler.fullyDetachScrapViews();
         if (!inTouchMode && mSelectedPosition != INVALID_POSITION) {
             final int childIndex = mSelectedPosition - mFirstPosition;
             if (childIndex >= 0 && childIndex < getChildCount()) {
@@ -6861,8 +6871,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             scrapViews = mScrapViews[whichScrap];
                         }
 
-                        victim.dispatchStartTemporaryDetach();
                         lp.scrappedFromPosition = mFirstActivePosition + i;
+                        removeDetachedView(victim, false);
                         scrapViews.add(victim);
 
                         if (hasListener) {
@@ -6871,8 +6881,26 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     }
                 }
             }
-
             pruneScrapViews();
+        }
+
+        /**
+         * At the end of a layout pass, all temp detached views should either be re-attached or
+         * completely detached. This method ensures that any remaining view in the scrap list is
+         * fully detached.
+         */
+        void fullyDetachScrapViews() {
+            final int viewTypeCount = mViewTypeCount;
+            final ArrayList<View>[] scrapViews = mScrapViews;
+            for (int i = 0; i < viewTypeCount; ++i) {
+                final ArrayList<View> scrapPile = scrapViews[i];
+                for (int j = scrapPile.size() - 1; j >= 0; j--) {
+                    final View view = scrapPile.get(j);
+                    if (view.isTemporarilyDetached()) {
+                        removeDetachedView(view, false);
+                    }
+                }
+            }
         }
 
         /**
@@ -6888,10 +6916,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             for (int i = 0; i < viewTypeCount; ++i) {
                 final ArrayList<View> scrapPile = scrapViews[i];
                 int size = scrapPile.size();
-                final int extras = size - maxViews;
-                size--;
-                for (int j = 0; j < extras; j++) {
-                    removeDetachedView(scrapPile.remove(size--), false);
+                while (size > maxViews) {
+                    scrapPile.remove(--size);
                 }
             }
 
