@@ -499,13 +499,14 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 HdmiLogger.debug("Device info %X not found; buffering the command", logicalAddress);
                 mDelayedMessageBuffer.add(message);
             }
-        } else if (!isInputReady(info.getId())) {
-            HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
-            mDelayedMessageBuffer.add(message);
-        } else {
+        } else if (isInputReady(info.getId())
+                || info.getDeviceType() == HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM) {
             updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
             ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
+        } else {
+            HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
+            mDelayedMessageBuffer.add(message);
         }
         return true;
     }
