@@ -115,6 +115,7 @@ testSources := \
 
 toolSources := \
 	compile/Compile.cpp \
+	diff/Diff.cpp \
 	dump/Dump.cpp \
 	link/Link.cpp
 
