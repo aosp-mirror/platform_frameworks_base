@@ -24,6 +24,7 @@ import android.telecom.Connection.VideoProvider;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -779,9 +780,9 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
-     * Removes an extra from this {@link Conference}.
+     * Removes extras from this {@link Conference}.
      *
-     * @param keys The key of the extra key to remove.
+     * @param keys The keys of the extras to remove.
      */
     public final void removeExtras(List<String> keys) {
         if (keys == null || keys.isEmpty()) {
@@ -800,6 +801,15 @@ public abstract class Conference extends Conferenceable {
         for (Listener l : mListeners) {
             l.onExtrasRemoved(this, keys);
         }
+    }
+
+    /**
+     * Removes extras from this {@link Conference}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(String ... keys) {
+        removeExtras(Arrays.asList(keys));
     }
 
     /**

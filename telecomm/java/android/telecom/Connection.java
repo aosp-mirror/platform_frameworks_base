@@ -35,6 +35,7 @@ import android.util.ArraySet;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -1972,9 +1973,9 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Removes an extra from this {@code Connection}.
+     * Removes extras from this {@code Connection}.
      *
-     * @param keys The key of the extra key to remove.
+     * @param keys The keys of the extras to remove.
      */
     public final void removeExtras(List<String> keys) {
         if (mExtras != null) {
@@ -1990,6 +1991,15 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onExtrasRemoved(this, keys);
         }
+    }
+
+    /**
+     * Removes extras from this {@code Connection}.
+     *
+     * @param keys The keys of the extras to remove.
+     */
+    public final void removeExtras(String ... keys) {
+        removeExtras(Arrays.asList(keys));
     }
 
     /**
