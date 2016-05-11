@@ -2191,32 +2191,43 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACCOUNTS_WORK_PROFILE_SETTINGS = 401;
 
+    // Settings -> Dev options -> Convert to file encryption
+    CONVERT_FBE = 402;
+
+    // Settings -> Dev options -> Convert to file encryption -> WIPE AND CONVERT...
+    CONVERT_FBE_CONFIRM = 403;
+
+    // Settings -> Dev options -> Running services
+    RUNNING_SERVICES = 404;
+
+    // ---- End N Constants, all N constants go above this line ----
+
     // ------- Begin N App Disambig Shade -----
     // Application disambig shade opened or closed with a featured app.
     // These are actually visibility events, but visible/hidden doesn't
     // take a package, so these are being logged as actions.
     // Package: Calling app on open, called app on close
-    ACTION_SHOW_APP_DISAMBIG_APP_FEATURED = 402;
-    ACTION_HIDE_APP_DISAMBIG_APP_FEATURED = 403;
+    ACTION_SHOW_APP_DISAMBIG_APP_FEATURED = 451;
+    ACTION_HIDE_APP_DISAMBIG_APP_FEATURED = 452;
 
     // Application disambig shade opened or closed without a featured app.
     // These are actually visibility events, but visible/hidden doesn't
     // take a package, so these are being logged as actions.
     // Package: Calling app on open, called app on close
-    ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED = 404;
-    ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED = 405;
+    ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED = 453;
+    ACTION_HIDE_APP_DISAMBIG_NONE_FEATURED = 454;
 
     // User opens in an app by pressing “Always” in the application disambig shade.
     // Subtype: Index of selection
-    ACTION_APP_DISAMBIG_ALWAYS = 406;
+    ACTION_APP_DISAMBIG_ALWAYS = 455;
 
     // User opens in an app by pressing “Just Once” in the application disambig shade.
     // Subtype: Index of selection
-    ACTION_APP_DISAMBIG_JUST_ONCE = 407;
+    ACTION_APP_DISAMBIG_JUST_ONCE = 456;
 
     // User opens in an app by tapping on its name in the application disambig shade.
     // Subtype: Index of selection
-    ACTION_APP_DISAMBIG_TAP = 408;
+    ACTION_APP_DISAMBIG_TAP = 457;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
