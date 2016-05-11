@@ -42,35 +42,25 @@ final class GenerationRegistry {
     private final SparseIntArray mKeyToIndexMap = new SparseIntArray();
 
     @GuardedBy("mLock")
-    private final MemoryIntArray mImpl;
+    private MemoryIntArray mBackingStore;
 
     public GenerationRegistry(Object lock) {
         mLock = lock;
-        // One for the global table, two for system and secure tables for a
-        // managed profile (managed profile is not included in the max user
-        // count), ten for partially deleted users if users are quickly removed,
-        // and twice max user count for system and secure.
-        final int size = 1 + 2 + 10 + 2 * UserManager.getMaxSupportedUsers();
-        MemoryIntArray impl = null;
-        try {
-            impl = new MemoryIntArray(size, false);
-        } catch (IOException e) {
-            Slog.e(LOG_TAG, "Error creating generation tracker", e);
-        }
-        mImpl = impl;
     }
 
     public void incrementGeneration(int key) {
         synchronized (mLock) {
-            if (mImpl != null) {
+            MemoryIntArray backingStore = getBackingStoreLocked();
+            if (backingStore != null) {
                 try {
-                    final int index = getKeyIndexLocked(key);
+                    final int index = getKeyIndexLocked(key, mKeyToIndexMap, backingStore);
                     if (index >= 0) {
-                        final int generation = mImpl.get(index) + 1;
-                        mImpl.set(index, generation);
+                        final int generation = backingStore.get(index) + 1;
+                        backingStore.set(index, generation);
                     }
                 } catch (IOException e) {
                     Slog.e(LOG_TAG, "Error updating generation id", e);
+                    destroyBackingStore();
                 }
             }
         }
@@ -78,34 +68,98 @@ final class GenerationRegistry {
 
     public void addGenerationData(Bundle bundle, int key) {
         synchronized (mLock) {
-            if (mImpl != null) {
-                final int index = getKeyIndexLocked(key);
-                if (index >= 0) {
-                    bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY, mImpl);
-                    bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
-                    if (DEBUG) {
-                        Slog.i(LOG_TAG, "Exported index:" + index + " for key:"
-                                + SettingsProvider.keyToString(key));
+            MemoryIntArray backingStore = getBackingStoreLocked();
+            try {
+                if (backingStore != null) {
+                    final int index = getKeyIndexLocked(key, mKeyToIndexMap, backingStore);
+                    if (index >= 0) {
+                        bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
+                                backingStore);
+                        bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
+                        if (DEBUG) {
+                            Slog.i(LOG_TAG, "Exported index:" + index + " for key:"
+                                    + SettingsProvider.keyToString(key));
+                        }
                     }
+                }
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "Error adding generation data", e);
+                destroyBackingStore();
+            }
+        }
+    }
+
+    public void onUserRemoved(int userId) {
+        synchronized (mLock) {
+            MemoryIntArray backingStore = getBackingStoreLocked();
+            if (backingStore != null && mKeyToIndexMap.size() > 0) {
+                try {
+                    final int secureKey = SettingsProvider.makeKey(
+                            SettingsProvider.SETTINGS_TYPE_SECURE, userId);
+                    resetSlotForKeyLocked(secureKey, mKeyToIndexMap, backingStore);
+
+                    final int systemKey = SettingsProvider.makeKey(
+                            SettingsProvider.SETTINGS_TYPE_SYSTEM, userId);
+                    resetSlotForKeyLocked(systemKey, mKeyToIndexMap, backingStore);
+                } catch (IOException e) {
+                    Slog.e(LOG_TAG, "Error cleaning up for user", e);
+                    destroyBackingStore();
                 }
             }
         }
     }
 
-    private int getKeyIndexLocked(int key) {
-        int index = mKeyToIndexMap.get(key, -1);
+    private MemoryIntArray getBackingStoreLocked() {
+        if (mBackingStore == null) {
+            // One for the global table, two for system and secure tables for a
+            // managed profile (managed profile is not included in the max user
+            // count), ten for partially deleted users if users are quickly removed,
+            // and twice max user count for system and secure.
+            final int size = 1 + 2 + 10 + 2 * UserManager.getMaxSupportedUsers();
+            try {
+                mBackingStore = new MemoryIntArray(size, false);
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "Error creating generation tracker", e);
+            }
+        }
+        return mBackingStore;
+    }
+
+    private void destroyBackingStore() {
+        if (mBackingStore != null) {
+            try {
+                mBackingStore.close();
+            } catch (IOException e) {
+                Slog.e(LOG_TAG, "Cannot close generation memory array", e);
+            }
+            mBackingStore = null;
+        }
+    }
+
+    private static void resetSlotForKeyLocked(int key, SparseIntArray keyToIndexMap,
+            MemoryIntArray backingStore) throws IOException {
+        final int index = keyToIndexMap.get(key, -1);
+        if (index >= 0) {
+            keyToIndexMap.delete(key);
+            backingStore.set(index, 0);
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "Freed index:" + index + " for key:"
+                        + SettingsProvider.keyToString(key));
+            }
+        }
+    }
+
+    private static int getKeyIndexLocked(int key, SparseIntArray keyToIndexMap,
+            MemoryIntArray backingStore) throws IOException {
+        int index = keyToIndexMap.get(key, -1);
         if (index < 0) {
-            index = findNextEmptyIndex();
+            index = findNextEmptyIndex(backingStore);
             if (index >= 0) {
-                try {
-                    mImpl.set(index, 1);
-                    mKeyToIndexMap.append(key, index);
-                    if (DEBUG) {
-                        Slog.i(LOG_TAG, "Allocated index:" + index + " for key:"
-                                + SettingsProvider.keyToString(key));
-                    }
-                } catch (IOException e) {
-                    Slog.e(LOG_TAG, "Cannot write to generation memory array", e);
+                backingStore.set(index, 1);
+                keyToIndexMap.append(key, index);
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Allocated index:" + index + " for key:"
+                            + SettingsProvider.keyToString(key));
                 }
             } else {
                 Slog.e(LOG_TAG, "Could not allocate generation index");
@@ -114,46 +168,12 @@ final class GenerationRegistry {
         return index;
     }
 
-    public void onUserRemoved(int userId) {
-        synchronized (mLock) {
-            if (mImpl != null && mKeyToIndexMap.size() > 0) {
-                final int secureKey = SettingsProvider.makeKey(
-                        SettingsProvider.SETTINGS_TYPE_SECURE, userId);
-                resetSlotForKeyLocked(secureKey);
-
-                final int systemKey = SettingsProvider.makeKey(
-                        SettingsProvider.SETTINGS_TYPE_SYSTEM, userId);
-                resetSlotForKeyLocked(systemKey);
+    private static int findNextEmptyIndex(MemoryIntArray backingStore) throws IOException {
+        final int size = backingStore.size();
+        for (int i = 0; i < size; i++) {
+            if (backingStore.get(i) == 0) {
+                return i;
             }
-        }
-    }
-
-    private void resetSlotForKeyLocked(int key) {
-        final int index = mKeyToIndexMap.get(key, -1);
-        if (index >= 0) {
-            mKeyToIndexMap.delete(key);
-            try {
-                mImpl.set(index, 0);
-                if (DEBUG) {
-                    Slog.i(LOG_TAG, "Freed index:" + index + " for key:"
-                            + SettingsProvider.keyToString(key));
-                }
-            } catch (IOException e) {
-                Slog.e(LOG_TAG, "Cannot write to generation memory array", e);
-            }
-        }
-    }
-
-    private int findNextEmptyIndex() {
-        try {
-            final int size = mImpl.size();
-            for (int i = 0; i < size; i++) {
-                if (mImpl.get(i) == 0) {
-                    return i;
-                }
-            }
-        } catch (IOException e) {
-            Slog.e(LOG_TAG, "Error reading generation memory array", e);
         }
         return -1;
     }
