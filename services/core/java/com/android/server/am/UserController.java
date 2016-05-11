@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.FLAG_AND_UNLOCKING_OR_UNLOCKED;
 import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
@@ -157,6 +158,8 @@ final class UserController {
 
     private final LockPatternUtils mLockPatternUtils;
 
+    private UserManagerInternal mUserManagerInternal;
+
     UserController(ActivityManagerService service) {
         mService = service;
         mHandler = mService.mHandler;
@@ -273,6 +276,7 @@ final class UserController {
             if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
+                getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
                 uss.mUnlockProgress.start();
 
                 // Prepare app storage before we go any further
@@ -303,6 +307,7 @@ final class UserController {
             if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
+                getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
                 uss.mUnlockProgress.finish();
 
                 // Dispatch unlocked to external apps
@@ -476,6 +481,7 @@ final class UserController {
         if (uss.state != UserState.STATE_STOPPING
                 && uss.state != UserState.STATE_SHUTDOWN) {
             uss.setState(UserState.STATE_STOPPING);
+            getUserManagerInternal().setUserUnlockingOrUnlocked(userId, false);
             updateStartedUserArrayLocked();
 
             long ident = Binder.clearCallingIdentity();
@@ -537,6 +543,7 @@ final class UserController {
             }
             uss.setState(UserState.STATE_SHUTDOWN);
         }
+        getUserManagerInternal().setUserUnlockingOrUnlocked(userId, false);
 
         mService.mBatteryStatsService.noteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -806,6 +813,9 @@ final class UserController {
                     // so we can just fairly silently bring the user back from
                     // the almost-dead.
                     uss.setState(uss.lastState);
+                    if (isUserRunningLocked(userId, FLAG_AND_UNLOCKING_OR_UNLOCKED)) {
+                        getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
+                    }
                     updateStartedUserArrayLocked();
                     needStart = true;
                 } else if (uss.state == UserState.STATE_SHUTDOWN) {
@@ -1463,6 +1473,13 @@ final class UserController {
 
     boolean isLockScreenDisabled(@UserIdInt int userId) {
         return mLockPatternUtils.isLockScreenDisabled(userId);
+    }
+
+    private UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        return mUserManagerInternal;
     }
 
     void dump(PrintWriter pw, boolean dumpAll) {
