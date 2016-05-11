@@ -289,6 +289,9 @@ struct Res_value
         // The 'data' holds a dynamic ResTable_ref, which needs to be
         // resolved before it can be used like a TYPE_REFERENCE.
         TYPE_DYNAMIC_REFERENCE = 0x07,
+        // The 'data' holds an attribute resource identifier, which needs to be resolved
+        // before it can be used like a TYPE_ATTRIBUTE.
+        TYPE_DYNAMIC_ATTRIBUTE = 0x08,
 
         // Beginning of integer flavors...
         TYPE_FIRST_INT = 0x10,
