@@ -844,14 +844,14 @@ redirects:
 
 # Redirects for the new [dac]/topic/libraries/ area
 
-- from: /tools/support-library
-  to: /topic/libraries/support-library
+- from: /tools/support-library/...
+  to: /topic/libraries/support-library/...
 
 - from: /tools/data-binding/...
-  to: /topic/libraries/data-binding
+  to: /topic/libraries/data-binding/index.html
 
-- from: /tools/testing-support-library
-  to: /topic/libraries/testing-support-library
+- from: /tools/testing-support-library/...
+  to: /topic/libraries/testing-support-library/...
 
 # GCM redirects
 - from: /reference/com/google/...
