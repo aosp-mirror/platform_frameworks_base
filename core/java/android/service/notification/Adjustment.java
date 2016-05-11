@@ -34,6 +34,7 @@ public final class Adjustment implements Parcelable {
     private final CharSequence mExplanation;
     private final Uri mReference;
     private final Bundle mSignals;
+    private final int mUser;
 
     public static final String GROUP_KEY_OVERRIDE_KEY = "group_key_override";
     public static final String NEEDS_AUTOGROUPING_KEY = "autogroup_needed";
@@ -52,13 +53,14 @@ public final class Adjustment implements Parcelable {
      *                  or null.
      */
     public Adjustment(String pkg, String key, int importance, Bundle signals,
-            CharSequence explanation, Uri reference) {
+            CharSequence explanation, Uri reference, int user) {
         mPackage = pkg;
         mKey = key;
         mImportance = importance;
         mSignals = signals;
         mExplanation = explanation;
         mReference = reference;
+        mUser = user;
     }
 
     protected Adjustment(Parcel in) {
@@ -80,6 +82,7 @@ public final class Adjustment implements Parcelable {
         }
         mReference = in.readParcelable(Uri.class.getClassLoader());
         mSignals = in.readBundle();
+        mUser = in.readInt();
     }
 
     public static final Creator<Adjustment> CREATOR = new Creator<Adjustment>() {
@@ -118,6 +121,10 @@ public final class Adjustment implements Parcelable {
         return mSignals;
     }
 
+    public int getUser() {
+        return mUser;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -146,5 +153,6 @@ public final class Adjustment implements Parcelable {
         }
         dest.writeParcelable(mReference, flags);
         dest.writeBundle(mSignals);
+        dest.writeInt(mUser);
     }
 }

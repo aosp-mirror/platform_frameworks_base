@@ -265,7 +265,7 @@ public class NotificationManagerService extends SystemService {
             new ArrayList<NotificationRecord>();
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
-    final ArrayMap<String, String> mAutobundledSummaries = new ArrayMap<>();
+    final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
     final PolicyAccess mPolicyAccess = new PolicyAccess();
@@ -2196,10 +2196,12 @@ public class NotificationManagerService extends SystemService {
             Bundle.setDefusable(adjustment.getSignals(), true);
             if (adjustment.getSignals().containsKey(Adjustment.NEEDS_AUTOGROUPING_KEY)
                 && !adjustment.getSignals().getBoolean(Adjustment.NEEDS_AUTOGROUPING_KEY, false)) {
-                if (mAutobundledSummaries.containsKey(adjustment.getPackage())) {
+                ArrayMap<String, String> summaries =
+                        mAutobundledSummaries.get(adjustment.getUser());
+                if (summaries != null && summaries.containsKey(adjustment.getPackage())) {
                     // Clear summary.
                     final NotificationRecord removed = mNotificationsByKey.get(
-                            mAutobundledSummaries.remove(adjustment.getPackage()));
+                            summaries.remove(adjustment.getPackage()));
                     if (removed != null) {
                         mNotificationList.remove(removed);
                         cancelNotificationLocked(removed, false, REASON_UNAUTOBUNDLED);
@@ -2219,12 +2221,17 @@ public class NotificationManagerService extends SystemService {
                 int userId = -1;
                 NotificationRecord summaryRecord = null;
                 synchronized (mNotificationList) {
-                    if (!mAutobundledSummaries.containsKey(adjustment.getPackage())
+                    final StatusBarNotification adjustedSbn
+                            = mNotificationsByKey.get(adjustment.getKey()).sbn;
+                    userId = adjustedSbn.getUser().getIdentifier();
+                    ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
+                    if (summaries == null) {
+                        summaries = new ArrayMap<>();
+                    }
+                    mAutobundledSummaries.put(userId, summaries);
+                    if (!summaries.containsKey(adjustment.getPackage())
                             && newAutoBundleKey != null) {
                         // Add summary
-                        final StatusBarNotification adjustedSbn
-                                = mNotificationsByKey.get(adjustment.getKey()).sbn;
-
                         final ApplicationInfo appInfo =
                                 adjustedSbn.getNotification().extras.getParcelable(
                                         Notification.EXTRA_BUILDER_APPLICATION_INFO);
@@ -2244,7 +2251,7 @@ public class NotificationManagerService extends SystemService {
                         if (appIntent != null) {
                             summaryNotification.contentIntent = PendingIntent.getActivityAsUser(
                                     getContext(), 0, appIntent, 0, null,
-                                    UserHandle.of(adjustedSbn.getUserId()));
+                                    UserHandle.of(userId));
                         }
                         final StatusBarNotification summarySbn =
                                 new StatusBarNotification(adjustedSbn.getPackageName(),
@@ -2255,8 +2262,7 @@ public class NotificationManagerService extends SystemService {
                                         newAutoBundleKey,
                                         System.currentTimeMillis());
                         summaryRecord = new NotificationRecord(getContext(), summarySbn);
-                        mAutobundledSummaries.put(adjustment.getPackage(), summarySbn.getKey());
-                        userId = adjustedSbn.getUser().getIdentifier();
+                        summaries.put(adjustment.getPackage(), summarySbn.getKey());
                     }
                 }
                 if (summaryRecord != null) {
@@ -3265,8 +3271,9 @@ public class NotificationManagerService extends SystemService {
         if (groupSummary != null && groupSummary.getKey().equals(r.getKey())) {
             mSummaryByGroupKey.remove(groupKey);
         }
-        if (r.sbn.getKey().equals(mAutobundledSummaries.get(r.sbn.getPackageName()))) {
-            mAutobundledSummaries.remove(r.sbn.getPackageName());
+        final ArrayMap<String, String> summaries = mAutobundledSummaries.get(r.sbn.getUserId());
+        if (summaries != null && r.sbn.getKey().equals(summaries.get(r.sbn.getPackageName()))) {
+            summaries.remove(r.sbn.getPackageName());
         }
 
         // Save it for users of getHistoricalNotifications()
