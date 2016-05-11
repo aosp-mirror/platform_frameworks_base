@@ -19,6 +19,9 @@
 #include <RecordedOp.h>
 #include <BakedOpDispatcher.h>
 #include <BakedOpRenderer.h>
+#include <FrameBuilder.h>
+#include <SkBlurDrawLooper.h>
+#include <hwui/Paint.h>
 #include <tests/common/TestUtils.h>
 
 #include <SkDashPathEffect.h>
@@ -26,6 +29,7 @@
 using namespace android::uirenderer;
 
 static BakedOpRenderer::LightInfo sLightInfo;
+const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
 static Rect sBaseClip(100, 100);
 
 class ValidatingBakedOpRenderer : public BakedOpRenderer {
@@ -45,7 +49,7 @@ private:
     std::function<void(const Glop& glop)> mValidator;
 };
 
-typedef void (*BakedOpReceiver)(BakedOpRenderer&, const BakedOpState&);
+typedef void (*TestBakedOpReceiver)(BakedOpRenderer&, const BakedOpState&);
 
 static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, RecordedOp* op,
         std::function<void(const Glop& glop)> glopVerifier) {
@@ -67,7 +71,7 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
         [](BakedOpRenderer& renderer, const BakedOpState& state) { \
             BakedOpDispatcher::on##Type(renderer, static_cast<const Type&>(*(state.op)), state); \
         },
-    static BakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
+    static TestBakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
 #undef X
     unmergedReceivers[op->opId](renderer, *state);
     ASSERT_EQ(1, glopCount) << "Exactly one Glop expected";
@@ -154,4 +158,40 @@ RENDERTHREAD_TEST(BakedOpDispatcher, offsetFlags) {
     LinesOp linesOp(bounds, Matrix4::identity(), nullptr, &paint, points, 4);
     EXPECT_EQ(TransformFlags::OffsetByFudgeFactor, getGlopTransformFlags(renderThread, &linesOp))
             << "Expect an offset for non-AA lines.";
+}
+
+RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
+    auto node = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& props, TestCanvas& canvas) {
+
+        android::Paint shadowPaint;
+        shadowPaint.setColor(SK_ColorRED);
+
+        SkScalar sigma = Blur::convertRadiusToSigma(5);
+        shadowPaint.setLooper(SkBlurDrawLooper::Create(SK_ColorWHITE, sigma, 3, 3))->unref();
+
+        TestUtils::drawUtf8ToCanvas(&canvas, "A", shadowPaint, 25, 25);
+        TestUtils::drawUtf8ToCanvas(&canvas, "B", shadowPaint, 50, 50);
+    });
+
+    int  glopCount = 0;
+    auto glopReceiver = [&glopCount] (const Glop& glop) {
+        if (glopCount < 2) {
+            // two white shadows
+            EXPECT_EQ(FloatColor({1, 1, 1, 1}), glop.fill.color);
+        } else {
+            // two text draws merged into one, drawn after both shadows
+            EXPECT_EQ(FloatColor({1, 0, 0, 1}), glop.fill.color);
+        }
+        glopCount++;
+    };
+
+    ValidatingBakedOpRenderer renderer(renderThread.renderState(), glopReceiver);
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
+
+    frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
+    ASSERT_EQ(3, glopCount) << "Exactly three glops expected";
 }
