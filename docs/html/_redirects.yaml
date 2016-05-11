@@ -947,6 +947,8 @@ redirects:
   to: /studio/command-line/bmgr.html
 - from: /tools/help/draw9patch.html
   to: /studio/write/draw9patch.html
+- from: /tools/help/desktop-head-unit.html
+  to: /training/auto/testing/index.html
 - from: /tools/help/emulator.html
   to: /studio/run/emulator-commandline.html
 - from: /tools/help/etc1tool.html
