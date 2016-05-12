@@ -107,6 +107,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
+    private boolean mReceivedNewIntent;
 
     // Top level views
     private RecentsView mRecentsView;
@@ -120,6 +121,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private int mFocusTimerDuration;
     private DozeTrigger mIterateTrigger;
     private final UserInteractionEvent mUserInteractionEvent = new UserInteractionEvent();
+    private final Runnable mSendEnterWindowAnimationCompleteRunnable = () -> {
+        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+    };
 
     /**
      * A common Runnable to finish Recents by launching Home with an animation depending on the
@@ -342,6 +346,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        mReceivedNewIntent = true;
 
         // Reload the stack view
         reloadStackView();
@@ -419,7 +424,16 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
-        EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
+
+        // Workaround for b/28705801, on first docking, we may receive the enter animation callback
+        // before the first layout, so in such cases, send the event on the next frame after all
+        // the views are laid out and attached (and registered to the EventBus).
+        mHandler.removeCallbacks(mSendEnterWindowAnimationCompleteRunnable);
+        if (!mReceivedNewIntent) {
+            mHandler.post(mSendEnterWindowAnimationCompleteRunnable);
+        } else {
+            mSendEnterWindowAnimationCompleteRunnable.run();
+        }
     }
 
     @Override
@@ -478,6 +492,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify that recents is now hidden
         mIsVisible = false;
+        mReceivedNewIntent = false;
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
 
