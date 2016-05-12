@@ -1752,6 +1752,9 @@ final class ActivityStack {
                         }
                     } else if (r.visible) {
                         // If this activity is already visible, then there is nothing to do here.
+                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                                "Skipping: already visible at " + r);
+
                         if (handleAlreadyVisible(r)) {
                             resumeNextActivity = false;
                         }
@@ -1933,8 +1936,6 @@ final class ActivityStack {
             r.sleeping = false;
             r.app.pendingUiClean = true;
             r.app.thread.scheduleWindowVisibility(r.appToken, true);
-            r.stopFreezingScreenLocked(false);
-
             // The activity may be waiting for stop, but that is no longer
             // appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(r);
@@ -1944,10 +1945,10 @@ final class ActivityStack {
             // visible when it next restarts.
             Slog.w(TAG, "Exception thrown making visibile: " + r.intent.getComponent(), e);
         }
+        handleAlreadyVisible(r);
     }
 
     private boolean handleAlreadyVisible(ActivityRecord r) {
-        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
         r.stopFreezingScreenLocked(false);
         try {
             if (r.returningOptions != null) {
