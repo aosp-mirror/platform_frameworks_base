@@ -42,7 +42,7 @@ public class AssetsAtlasActivity extends Activity {
         BitmapsView(Context c) {
             super(c);
 
-            Drawable d = c.getResources().getDrawable(R.drawable.text_select_handle_left);
+            Drawable d = c.getResources().getDrawable(R.drawable.star_big_on);
             mBitmap = ((BitmapDrawable) d).getBitmap();
         }
 
