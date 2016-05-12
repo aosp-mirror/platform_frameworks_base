@@ -501,7 +501,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final float[] mTmpFloats = new float[9];
     final Rect mTmpRect = new Rect();
     final Rect mTmpRect2 = new Rect();
-    final Region mTmpRegion = new Region();
+    final Rect mTmpRect3 = new Rect();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -10889,8 +10889,7 @@ public class WindowManagerService extends IWindowManager.Stub
             getStableInsetsLocked(mTmpRect2);
             final DisplayInfo di = getDefaultDisplayInfoLocked();
             mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
-            mTmpRect.inset(mTmpRect2);
-            inOutBounds.intersect(mTmpRect);
+            subtractInsets(mTmpRect, mTmpRect2, inOutBounds);
         }
     }
 
@@ -10906,8 +10905,27 @@ public class WindowManagerService extends IWindowManager.Stub
             getNonDecorInsetsLocked(mTmpRect2);
             final DisplayInfo di = getDefaultDisplayInfoLocked();
             mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
-            mTmpRect.inset(mTmpRect2);
-            inOutBounds.intersect(mTmpRect);
+            subtractInsets(mTmpRect, mTmpRect2, inOutBounds);
+        }
+    }
+
+    void subtractInsets(Rect display, Rect insets, Rect inOutBounds) {
+        mTmpRect3.set(display);
+        mTmpRect3.inset(insets);
+        inOutBounds.intersect(mTmpRect3);
+    }
+
+    /**
+     * Calculates the smallest width for a task given the {@param bounds}. It does that by iterating
+     * across all screen orientations, and returns the minimum of the task width taking into account
+     * that the bounds might change because the snap algorithm snaps to a different value.
+     *
+     * @return the smallest width to be used in the Configuration, in dips
+     */
+    public int getSmallestWidthForTaskBounds(Rect bounds) {
+        synchronized (mWindowMap) {
+            return getDefaultDisplayContentLocked().getDockedDividerController()
+                    .getSmallestWidthDpForBounds(bounds);
         }
     }
 
