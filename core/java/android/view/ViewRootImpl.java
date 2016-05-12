@@ -80,7 +80,6 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
-import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 
@@ -915,6 +914,11 @@ public final class ViewRootImpl implements ViewParent,
                     & WindowManager.LayoutParams.TRANSLUCENT_FLAGS_CHANGED) != 0) {
                 // Recompute system ui visibility.
                 mAttachInfo.mRecomputeGlobalAttributes = true;
+            }
+            if ((mWindowAttributesChangesFlag
+                    & WindowManager.LayoutParams.LAYOUT_CHANGED) != 0) {
+                // Request to update light center.
+                mAttachInfo.mNeedsUpdateLightCenter = true;
             }
             if (mWindowAttributes.packageName == null) {
                 mWindowAttributes.packageName = mBasePackageName;
@@ -2222,13 +2226,16 @@ public final class ViewRootImpl implements ViewParent,
             }
             mAttachInfo.mWindowLeft = frame.left;
             mAttachInfo.mWindowTop = frame.top;
-
-            // Update the light position for the new window offsets.
+        }
+        if (windowMoved || mAttachInfo.mNeedsUpdateLightCenter) {
+            // Update the light position for the new offsets.
             if (mAttachInfo.mHardwareRenderer != null) {
                 mAttachInfo.mHardwareRenderer.setLightCenter(mAttachInfo);
             }
+            mAttachInfo.mNeedsUpdateLightCenter = false;
         }
     }
+
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
         Log.e(mTag, "OutOfResourcesException initializing HW surface", e);
         try {
