@@ -1418,16 +1418,28 @@ class WindowStateAnimator {
 
         calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
         if (task != null && task.mStack.getForceScaleToCrop()) {
-            extraHScale = mTmpClipRect.width() / (float)mTmpSize.width();
-            extraVScale = mTmpClipRect.height() / (float)mTmpSize.height();
+            int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
+            int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
+            // We want to calculate the scaling based on the content area, not based on
+            // the entire surface, so that we scale in sync with windows that don't have insets.
+            extraHScale = (mTmpClipRect.width() - hInsets) / (float)(mTmpSize.width() - hInsets);
+            extraVScale = (mTmpClipRect.height() - vInsets) / (float)(mTmpSize.height() - vInsets);
 
             // In the case of ForceScaleToCrop we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
             // or parent and child windows would fall out of alignment.
             int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - extraHScale));
             int posY = (int) (mTmpSize.top - w.mAttrs.y * (1 - extraVScale));
+            // Imagine we are scaling down. As we scale the buffer down, we decrease the
+            // distance between the surface top left, and the start of the surface contents
+            // (previously it was surfaceInsets.left pixels in screen space but now it
+            // will be surfaceInsets.left*extraHScale). This means in order to keep the
+            // non inset content at the same position, we have to shift the whole window
+            // forward. Likewise for scaling up, we've increased this distance, and we need
+            // to shift by a negative number to compensate.
             posX += w.getAttrs().surfaceInsets.left * (1 - extraHScale);
             posY += w.getAttrs().surfaceInsets.top * (1 - extraVScale);
+
             mSurfaceController.setPositionInTransaction(posX, posY, recoveringMemory);
 
             // Since we are scaled to fit in our previously desired crop, we can now
