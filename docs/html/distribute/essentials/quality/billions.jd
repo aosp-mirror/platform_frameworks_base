@@ -585,6 +585,16 @@ screen</h4>
    Implementing a Preferences Activity</a>.</li>
  </ul>
 
+
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/essentials/billionsquality/cost"
+  data-sortOrder="-timestamp"
+  data-cardSizes="6x3"
+  data-maxResults="6"></div>
+
+
 <!-- consumption -->
 <div class="headerLine">
   <h2 id="consumption">Battery Consumption</h2>
