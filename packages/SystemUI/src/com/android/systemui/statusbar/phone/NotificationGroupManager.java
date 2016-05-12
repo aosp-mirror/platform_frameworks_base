@@ -459,7 +459,8 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
         @Override
         public String toString() {
-            String result = "    summary:\n      " + summary.notification;
+            String result = "    summary:\n      "
+                    + (summary != null ? summary.notification : "null");
             result += "\n    children size: " + children.size();
             for (NotificationData.Entry child : children) {
                 result += "\n      " + child.notification;
