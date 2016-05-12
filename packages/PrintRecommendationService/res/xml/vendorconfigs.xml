@@ -67,10 +67,9 @@
     </vendor>
 
     <vendor>
-        <name>@string/plugin_vendor_konika_minolta</name>
+        <name>@string/plugin_vendor_konica_minolta</name>
         <package>com.kmbt.printservice</package>
         <mdns-names>
-            <mdns-name>kmkmkm</mdns-name>
             <mdns-name>Konica Minolta</mdns-name>
             <mdns-name>Minolta</mdns-name>
         </mdns-names>
