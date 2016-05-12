@@ -3105,6 +3105,11 @@ public class Notification implements Parcelable
         }
 
         private Drawable getProfileBadgeDrawable() {
+            if (mContext.getUserId() == UserHandle.USER_SYSTEM) {
+                // This user can never be a badged profile,
+                // and also includes USER_ALL system notifications.
+                return null;
+            }
             // Note: This assumes that the current user can read the profile badge of the
             // originating user.
             return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
