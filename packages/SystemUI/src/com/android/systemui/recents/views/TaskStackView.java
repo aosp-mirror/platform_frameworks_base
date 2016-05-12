@@ -1391,8 +1391,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         updateLayoutAlgorithm(true /* boundScroll */);
 
         // Animate all the tasks into place
-        relayoutTaskViews(new AnimationProps(DEFAULT_SYNC_STACK_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN));
+        relayoutTaskViews(mAwaitingFirstLayout
+                ? AnimationProps.IMMEDIATE
+                : new AnimationProps(DEFAULT_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN));
     }
 
     /**
