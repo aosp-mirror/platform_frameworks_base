@@ -19,7 +19,7 @@ excludeFromSuggestions=true
             frameborder="0" allowfullscreen=""
             style="float: right;"></iframe>
         -->
-        <a href="{@docRoot}sdk/index.html">
+        <a href="{@docRoot}studio/index.html">
         <img class="dac-hero-image" src="{@docRoot}images/tools/studio/studio-feature-instant-run_2x.png" />
         </a>
       </div>
@@ -35,7 +35,7 @@ excludeFromSuggestions=true
         </p>
         <div class="cols">
           <div class="col-1of2">
-            <a class="dac-hero-cta" href="{@docRoot}sdk/index.html">
+            <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
               <span class="dac-sprite dac-auto-chevron"></span>
               Get Android Studio
             </a><br>
