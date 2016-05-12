@@ -18,6 +18,7 @@ page.tags=permissions
 </li>
 <li><a href="#defining">Defining and Enforcing Permissions</a>
 	<ol>
+  <li><a href="#custom-recommendations">Custom permission recommendations</a></li>
 	<li><a href="#manifest">...in AndroidManifest.xml</a></li>
 	<li><a href="#broadcasts">...when Sending Broadcasts</a></li>
 	<li><a href="#enforcement">Other Permission Enforcement</a></li>
@@ -540,17 +541,19 @@ to be as high as possible. You can see which permissions were added with each re
 <a name="declaring"></a>
 <h2 id="defining">Defining and Enforcing Permissions</h2>
 
-<p>To enforce your own permissions, you must first declare them in your
-<code>AndroidManifest.xml</code> using one or more
-<code>{@link android.R.styleable#AndroidManifestPermission &lt;permission&gt;}</code>
-tags.</p>
+<p>
+  To enforce your own permissions, you must first declare them in your
+  <code>AndroidManifest.xml</code> using one or more <a href=
+  "{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a>
+  elements.
+</p>
 
 <p>For example, an application that wants to control who can start one
 of its activities could declare a permission for this operation as follows:</p>
 
 <pre>&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    package=&quot;com.me.app.myapp&quot; &gt;
-    &lt;permission android:name=&quot;com.me.app.myapp.permission.DEADLY_ACTIVITY&quot;
+    package=&quot;com.example.myapp&quot; &gt;
+    &lt;permission android:name=&quot;com.example.myapp.permission.DEADLY_ACTIVITY&quot;
         android:label=&quot;&#64;string/permlab_deadlyActivity&quot;
         android:description=&quot;&#64;string/permdesc_deadlyActivity&quot;
         android:permissionGroup=&quot;android.permission-group.COST_MONEY&quot;
@@ -558,50 +561,65 @@ of its activities could declare a permission for this operation as follows:</p>
     ...
 &lt;/manifest&gt;</pre>
 
+<p class="note">
+  <strong>Note:</strong> The system does not allow multiple packages to declare
+  a permission with the same name, unless all the packages are signed with the
+  same certificate. If a package declares a permission, the system does not permit
+  the user to install other packages with the same permission name, unless
+  those packages are signed with the same certificate as the first package. To
+  avoid naming collisions, we recommend using reverse-domain-style naming for custom
+  permissions, for example <code>com.example.myapp.ENGAGE_HYPERSPACE</code>.
+</p>
+
 <p>The {@link android.R.styleable#AndroidManifestPermission_protectionLevel
-&lt;protectionLevel&gt;} attribute is required, telling the system how the
+protectionLevel} attribute is required, telling the system how the
 user is to be informed of applications requiring the permission, or who is
 allowed to hold that permission, as described in the linked documentation.</p>
 
-<p>The {@link android.R.styleable#AndroidManifestPermission_permissionGroup
-&lt;permissionGroup&gt;} attribute is optional, and only used to help the system display
-permissions to the user.  You will usually want to set this to either a standard
-system group (listed in {@link android.Manifest.permission_group
-android.Manifest.permission_group}) or in more rare cases to one defined by
-yourself.  It is preferred to use an existing group, as this simplifies the
-permission UI shown to the user.</p>
+<p>
+  The <a href=
+  "{@docRoot}guide/topics/manifest/permission-group-element.html"
+  ><code>android:permissionGroup</code></a>
+  attribute is optional, and only used to help the system display permissions
+  to the user. In most cases you will want to set this to a standard system
+  group (listed in {@link android.Manifest.permission_group
+  android.Manifest.permission_group}), although you can define a group yourself.
+  It is preferable to use an existing group, as this simplifies the
+  permission UI shown to the user.
+</p>
 
-<p>Note that both a label and description should be supplied for the
-permission. These are string resources that can be displayed to the user when
+<p>You need to supply both a label and description for the
+permission. These are string resources that the user can see when
 they are viewing a list of permissions
 (<code>{@link android.R.styleable#AndroidManifestPermission_label android:label}</code>)
 or details on a single permission (
 <code>{@link android.R.styleable#AndroidManifestPermission_description android:description}</code>).
-The label should be short, a few words
+The label should be short; a few words
 describing the key piece of functionality the permission is protecting. The
-description should be a couple sentences describing what the permission allows
-a holder to do. Our convention for the description is two sentences, the first
-describing the permission, the second warning the user of what bad things
-can happen if an application is granted the permission.</p>
+description should be a couple of sentences describing what the permission allows
+a holder to do. Our convention is a two-sentence description:
+the first sentence describes the permission, and the second sentence warns the
+user of the type of things that can go wrong if an application is granted the
+permission.</p>
 
 <p>Here is an example of a label and description for the CALL_PHONE
 permission:</p>
 
 <pre>
-    &lt;string name=&quot;permlab_callPhone&quot;&gt;directly call phone numbers&lt;/string&gt;
-    &lt;string name=&quot;permdesc_callPhone&quot;&gt;Allows the application to call
-        phone numbers without your intervention. Malicious applications may
-        cause unexpected calls on your phone bill. Note that this does not
-        allow the application to call emergency numbers.&lt;/string&gt;
+&lt;string name=&quot;permlab_callPhone&quot;&gt;directly call phone numbers&lt;/string&gt;
+&lt;string name=&quot;permdesc_callPhone&quot;&gt;Allows the application to call
+    phone numbers without your intervention. Malicious applications may
+    cause unexpected calls on your phone bill. Note that this does not
+    allow the application to call emergency numbers.&lt;/string&gt;
 </pre>
 
-<p>You can look at the permissions currently defined in the system with the
+<p>You can view at the permissions currently defined in the system using the
 Settings app and the shell command <code>adb shell pm list permissions</code>.
-To use the Settings app, go to Settings &gt; Applications.  Pick an app and
+To use the Settings app, go to <b>Settings</b> &gt; <b>Applications</b>.  Pick an app and
 scroll down to see the permissions that the app uses. For developers, the adb '-s'
 option displays the permissions in a form similar to how the user will see them:</p>
 
-<pre>
+<pre class="no-pretty-print">
 $ adb shell pm list permissions -s
 All Permissions:
 
@@ -615,14 +633,53 @@ Services that cost you money: send SMS messages, directly call phone numbers
 
 ...</pre>
 
+<h3 id="custom-recommendations">
+  Custom permission recommendations
+</h3>
+
+<p>
+  Apps can define their own custom permissions and request custom permissions
+  from other apps by defining <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html"><code
+  >&lt;uses-permission&gt;</code></a> elements.
+  However, you should carefully assess whether it is necessary for your app to
+  do so.
+</p>
+
+<ul>
+  <li>If you are designing a suite of apps that expose functionality to one
+  another, try to design the apps so that each permission is defined only once.
+  You must do this if the apps are not all signed with the same certificate.
+  Even if the apps are all signed with the same certificate, it's a
+  best practice to define each permission once only.
+  </li>
+
+  <li>If the functionality is only available to apps signed with the same
+  signature as the providing app, you may be able to avoid defining custom
+  permissions by using signature checks. When one of your apps makes a request
+  of another of your apps, the second app can verify that both apps are signed
+  with the same certificate before complying with the request.
+  </li>
+
+  <li>If you are developing a suite of apps runs only on your own
+  devices, you should develop and install a package that
+  manages permissions for all the apps in the suite. This package does not need
+  to provide any services itself. It just declares all the permissions, and the
+  other apps in the suite request those permissions with the <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html"><code
+  >&lt;uses-permission&gt;</code></a>
+  element.
+  </li>
+</ul>
+
 <a name="manifest"></a>
 <h3>Enforcing Permissions in AndroidManifest.xml</h3>
 
-<p>High-level permissions restricting access to entire components of the
-system or application can be applied through your
-<code>AndroidManifest.xml</code>. All that this requires is including an {@link
+<p>TYou can apply high-level permissions restricting access to entire components
+of the system or application through your
+<code>AndroidManifest.xml</code>. To do this, include an {@link
 android.R.attr#permission android:permission} attribute on the desired
-component, naming the permission that will be used to control access to
+component, naming the permission that controls access to
 it.</p>
 
 <p><strong>{@link android.app.Activity}</strong> permissions
