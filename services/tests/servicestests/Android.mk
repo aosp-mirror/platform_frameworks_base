@@ -19,8 +19,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     easymocklib \
     guava \
     android-support-test \
-    mockito-target \
-    ShortcutManagerTestUtils
+    mockito-target
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 

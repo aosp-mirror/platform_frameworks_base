@@ -50,6 +50,8 @@ import java.util.Set;
  * </ul>
  *
  * @see {@link ShortcutManager}.
+ *
+ * @hide
  */
 public final class ShortcutInfo implements Parcelable {
     /* @hide */
