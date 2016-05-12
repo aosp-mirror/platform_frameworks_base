@@ -1757,6 +1757,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void startBackgroundAnimation() {
+        // left and right are always instantly applied
+        mCurrentBounds.left = mBackgroundBounds.left;
+        mCurrentBounds.right = mBackgroundBounds.right;
         startBottomAnimation();
         startTopAnimation();
     }
