@@ -42,6 +42,7 @@ page.title=Using Android Emulator Command-Line Features
       </li>
       <li><a href="#console">Using the Emulator Console</a>
         <ol>
+          <li><a href="#console-session">Starting and Stopping a Console Session</a></li>
           <li><a href="#portredirection">Port Redirection</a></li>
           <li><a href="#geo">Geo Location Provider Emulation</a></li>
           <li><a href="#events">Hardware Events Emulation</a></li>
@@ -1440,32 +1441,106 @@ from one of the emulators.</p>
 
 <p>Each running emulator instance provides a console that lets you query and control the emulated
 device environment. For example, you can use the console to manage port redirection, network
-characteristics, and telephony events while your application is running on the emulator. To
-access the console and enter commands, use telnet to connect to the console's port number.</p>
+characteristics, and telephony events while your application is running on the emulator.
 
-<p>To connect to the console of any running emulator instance at any time, use this command: </p>
+<h3 id="console-session">Starting and Stopping a Console Session</h2>
+<p>To access the console and enter commands, from a terminal window, use <code>telnet</code> to
+connect to the
+console port and provide your authentication token.</p>
 
-<pre>telnet localhost &lt;console-port&gt;</pre>
 
-<p>An emulator instance occupies a pair of adjacent ports: a console port and an  {@code adb} port.
-The port numbers differ by 1, with the  {@code adb} port having the higher port number. The console
-of the first emulator instance running on a given machine uses console port 5554 and  {@code adb}
+<p>To connect to the console of a running emulator instance:</p>
+
+<ol>
+<li>Open a terminal window and enter the following command: </li>
+
+<pre>telnet localhost <em>console-port</em></pre>
+
+<p>An emulator instance occupies a pair of adjacent ports: a console port and an <code>adb</code> port.
+The port numbers differ by 1, with the <code>adb</code> port having the higher port number. The console
+of the first emulator instance running on a particular machine uses console port 5554 and <code>adb</code>
 port 5555. Subsequent instances use port numbers increasing by two &mdash; for example, 5556/5557,
 5558/5559, and so on. Up to 16 concurrent emulator instances can run a console facility. </p>
 
-<p>To connect to the emulator console, you must specify a valid console port. If multiple emulator instances are running, you need to determine the console port of the emulator instance you want to connect to. You can find the instance's console port listed in the title of the instance window. For example, here's the window title for an instance whose console port is 5554:</p>
+<p>To connect to the emulator console, you must specify a valid console port. If multiple emulator
+  instances are running, you need to determine the console port of the emulator instance you want
+  to connect to. The emulator window title lists the console port number. For example, the
+  window title for an emulator using console port 5554
+  could be <code>5554:Nexus_5X_API_23</code>.</p>
 
-<p><code>Android Emulator (5554)</code></p>
+<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of
+  running emulator instances and their console port numbers. For more information, see
+  <a href="{@docRoot}tools/help/adb.html#devicestatus">Querying for Emulator/Device Instances</a>.
+</p>
 
-<p>Alternatively, you can use the <code>adb devices</code> command, which prints a list of running emulator instances and their console port numbers. For more information, see <a href="{@docRoot}tools/help/adb.html#devicestatus">Querying for Emulator/Device Instances</a> in the adb documentation.</p>
+<p class="note">Note: The emulator listens for connections on ports 5554 to 5587 and accepts
+  connections from localhost only.</p>
 
-<p class="note">Note: The emulator listens for connections on ports 5554-5587 and accepts connections only from localhost.</p>
+<li>After the console displays <code>OK</code>, enter the <code>auth
+<em>auth_token</em></code> command.</li>
 
-<p>Once you are connected to the console, you can then enter <code>help [command]</code> to see a list of console commands and learn about specific commands. </p>
+<p>Before you can enter console commands, the emulator console requires authentication.
+  <code><em>auth_token</em></code> must
+  match the contents of the <code>.emulator_console_auth_token</code> file in your home directory.
+</p>
 
-<p>To exit the console session, use <code>quit</code> or <code>exit</code>.</p>
+<p>If that file doesn't exist, the <code>telnet localhost <em>console-port</em></code>
+  command creates the file, which contains a randomly generated authentication token.</p>
 
-<p>The following sections below describe the major functional areas of the console.</p>
+<p>To disable authentication, delete the token from the
+  <code>.emulator_console_auth_token</code> file or create an empty file if it doesn't exist.</p>
+
+<li>After you're connected to the console, enter console commands.</li>
+
+<p>Enter <code>help</code> and <code>help <em>command</em></code> to see a
+  list of console commands and learn about specific commands.</p>
+
+<li>To exit the console session, enter <code>quit</code> or <code>exit</code>.</li>
+</ol>
+
+<p>Here's an example session:</p>
+
+<pre class="no-pretty-print">
+me-macbook$ <strong>telnet localhost 5554</strong>
+Trying ::1...
+telnet: connect to address ::1: Connection refused
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Android Console: Authentication required
+Android Console: type 'auth &lt;auth_token&gt;' to authenticate
+Android Console: you can find your &lt;auth_token&gt; in
+'/Users/me/.emulator_console_auth_token'
+OK
+<strong>auth 123456789ABCdefZ</strong>
+Android Console: type 'help' for a list of commands
+OK
+<strong>help</strong>
+Android console command help:
+
+    help|h|?         print a list of commands
+    crash            crash the emulator instance
+    kill             kill the emulator instance
+    quit|exit        quit control session
+    redir            manage port redirections
+    power            power related commands
+    event            simulate hardware events
+    avd              control virtual device execution
+    finger           manage emulator fingerprint
+    geo              Geo-location commands
+    sms              SMS related commands
+    cdma             CDMA related commands
+    gsm              GSM related commands
+    rotate           rotate the screen by 90 degrees
+
+try 'help &lt;command&gt;' for command-specific help
+OK
+<strong>exit</strong>
+Connection closed by foreign host.
+me-macbook$
+</pre>
+
+<p>The following sections describe the major functional areas of the console.</p>
 
 
 <h3 id="portredirection">Port Redirection</h3>

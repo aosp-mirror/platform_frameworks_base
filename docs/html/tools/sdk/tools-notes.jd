@@ -25,9 +25,43 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 </p>
 
 <div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="/assets/images/styles/disclosure_up.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 25.1.6</a> <em>(May 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 23 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>The Android Emulator Console now requires
+        <a href="/tools/help/emulator.html#console-session">authentication</a>
+        before you can enter commands. Enter the <code>auth <em>auth_token</em></code> command after
+          you <code>telnet</code> to an emulator instance. <code><em>auth_token</em></code> must
+        match the contents of the <code>.emulator_console_auth_token</code> file in your
+        home directory.
+        </li>
+      </ul>
+    </dd>
+
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
   <p>
     <a href="#" onclick="return toggleContent(this)"><img src=
-    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "{@docRoot}assets/images/styles/disclosure_down.png" class=
     "toggle-content-img" alt="">SDK Tools, Revision 25.0.0</a>
     <em>(April 2016)</em>
   </p>
