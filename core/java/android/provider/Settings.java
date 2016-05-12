@@ -8875,8 +8875,17 @@ public final class Settings {
         /**
          * Whether to enable contacts metadata syncing or not
          * The value 1 - enable, 0 - disable
+         *
+         * @removed
          */
+        @Deprecated
         public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
+
+        /**
+         * Whether to enable contacts metadata syncing or not
+         * The value 1 - enable, 0 - disable
+         */
+        public static final String CONTACT_METADATA_SYNC_ENABLED = "contact_metadata_sync_enabled";
 
         /**
          * Whether to enable cellular on boot.
