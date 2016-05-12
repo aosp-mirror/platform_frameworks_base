@@ -42,8 +42,6 @@ page.image=images/cards/card-n-sdk_2x.png
 
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>Android Studio 2.1 目前在早期測試發行管道中是以預覽版形式提供。如果您已經有 Android Studio 但不想要更新到早期測試管道，您可以下載 Android Studio 2.1 並另行安裝，並使用它來針對 Android N 進行開發，這樣並不會影響您的主要 Android Studio 環境。
 
 

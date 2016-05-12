@@ -42,8 +42,6 @@ necessário atualizar para o JDK 8 para desenvolver para a plataforma Android N,
 conforme é descrito abaixo.
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>No momento, o Android Studio 2.1 está disponível como prévia no canal da versão canary
 . Se já tiver
 o Android Studio e não quiser atualizar para o canal canary, poderá
