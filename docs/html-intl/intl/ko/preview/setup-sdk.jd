@@ -42,8 +42,6 @@ Jack 컴파일러를 사용할 필요가 없지만 Android N 플랫폼에
 업데이트해야 합니다.
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>현재 Android Studio 2.1은 Canary 릴리스 채널에서 프리뷰로
 제공됩니다.
 Android Studio가 이미 있고 Canary Channel로 업데이트하지 않으려면,
