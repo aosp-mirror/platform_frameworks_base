@@ -2250,9 +2250,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
                 0,
                 mCurrentUserId) != 0;
+        final boolean remoteInputDpm = (dpmFlags
+                & DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT) == 0;
+
 
         setShowLockscreenNotifications(show && allowedByDpm);
-        setLockScreenAllowRemoteInput(remoteInput);
+        setLockScreenAllowRemoteInput(remoteInput && remoteInputDpm);
     }
 
     protected abstract void setAreThereNotifications();
