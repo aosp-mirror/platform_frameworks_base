@@ -60,6 +60,16 @@ toc:
     path: /ndk/guides/audio/basics.html
   - title: OpenSL ES for Android
     path: /ndk/guides/audio/opensl-for-android.html
+  - title: Audio Input Latency
+    path: /ndk/guides/audio/input-latency.html
+  - title: Audio Output Latency
+    path: /ndk/guides/audio/output-latency.html
+  - title: Floating-Point Audio
+    path: /ndk/guides/audio/floating-point.html
+  - title: Sample Rates
+    path: /ndk/guides/audio/sample-rates.html
+  - title: OpenSL ES Programming Notes
+    path: /ndk/guides/audio/opensl-prog-notes.html
 
 - title: Vulkan
   path: /ndk/guides/graphics/index.html
