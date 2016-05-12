@@ -114,6 +114,13 @@ use. Some of the changes include:</p>
   </li>
 
   <li>
+    <strong>Message style customization</strong>: You can customize more of the
+    user interface labels associated with your notifications using the
+    <code>MessageStyle</code> class. You can configure the message, conversation
+    title, and content view.
+  </li>
+
+  <li>
     <strong>Bundled notifications</strong>: The system can group messages
     together, for example by message topic, and display the group. A user can
     take actions, such as Dismiss or Archive, on them in place. If you’ve
@@ -614,7 +621,7 @@ features such as face-tracking, eye-tracking, point scanning, and so on, to
 meet the needs of those users.</p>
 
 <p>For more information, see <code>android.accessibilityservice.GestureDescription</code>
-	in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
+  in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
 
 
 <h2 id="direct_boot">Direct boot</h2>
