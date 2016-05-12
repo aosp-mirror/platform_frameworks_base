@@ -65,6 +65,8 @@ class ApplicationLoaders {
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                setupVulkanLayerPath(pathClassloader, librarySearchPath);
+
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
             }
@@ -75,6 +77,8 @@ class ApplicationLoaders {
             return pathClassloader;
         }
     }
+
+    private static native void setupVulkanLayerPath(ClassLoader classLoader, String librarySearchPath);
 
     /**
      * Adds a new path the classpath of the given loader.
