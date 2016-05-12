@@ -154,7 +154,7 @@ public class DemoModeFragment extends PreferenceFragment implements OnPreference
         getContext().sendBroadcast(intent);
 
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_CLOCK);
-        intent.putExtra("hhmm", "0600");
+        intent.putExtra("hhmm", "0700");
         getContext().sendBroadcast(intent);
 
         intent.putExtra(DemoMode.EXTRA_COMMAND, DemoMode.COMMAND_NETWORK);
