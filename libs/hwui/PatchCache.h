@@ -53,7 +53,6 @@ class PatchCache {
 public:
     PatchCache(RenderState& renderState);
     ~PatchCache();
-    void init();
 
     const Patch* get(const AssetAtlas::Entry* entry,
             const uint32_t bitmapWidth, const uint32_t bitmapHeight,

@@ -17,8 +17,6 @@
 
 #include "Program.h"
 
-#include "ShadowTessellator.h"
-
 namespace android {
 namespace uirenderer {
 
@@ -98,6 +96,12 @@ void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size,
     }
     bindMeshBuffer(*buffer);
     glBufferData(GL_ARRAY_BUFFER, size, data, usage);
+}
+
+void MeshState::updateMeshBufferSubData(GLuint buffer, GLintptr offset,
+        GLsizeiptr size, const void* data) {
+    bindMeshBuffer(buffer);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 
 void MeshState::deleteMeshBuffer(GLuint buffer) {

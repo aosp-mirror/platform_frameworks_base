@@ -72,6 +72,7 @@ public:
     void unbindMeshBuffer();
 
     void genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size, const void* data, GLenum usage);
+    void updateMeshBufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const void* data);
     void deleteMeshBuffer(GLuint);
 
     ///////////////////////////////////////////////////////////////////////////////

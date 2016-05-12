@@ -43,21 +43,6 @@ PatchCache::~PatchCache() {
     clear();
 }
 
-void PatchCache::init() {
-    bool created = false;
-    if (!mMeshBuffer) {
-        glGenBuffers(1, &mMeshBuffer);
-        created = true;
-    }
-
-    mRenderState.meshState().bindMeshBuffer(mMeshBuffer);
-    mRenderState.meshState().resetVertexPointers();
-
-    if (created) {
-        createVertexBuffer();
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,8 +65,7 @@ void PatchCache::clear() {
     clearCache();
 
     if (mMeshBuffer) {
-        mRenderState.meshState().unbindMeshBuffer();
-        glDeleteBuffers(1, &mMeshBuffer);
+        mRenderState.meshState().deleteMeshBuffer(mMeshBuffer);
         mMeshBuffer = 0;
         mSize = 0;
     }
@@ -170,7 +154,8 @@ void PatchCache::clearGarbage() {
 }
 
 void PatchCache::createVertexBuffer() {
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize, nullptr, GL_DYNAMIC_DRAW);
+    mRenderState.meshState().genOrUpdateMeshBuffer(&mMeshBuffer,
+        mMaxSize, nullptr, GL_DYNAMIC_DRAW);
     mSize = 0;
     mFreeBlocks = new BufferBlock(0, mMaxSize);
     mGenerationId++;
@@ -182,7 +167,9 @@ void PatchCache::createVertexBuffer() {
  */
 void PatchCache::setupMesh(Patch* newMesh) {
     // This call ensures the VBO exists and that it is bound
-    init();
+    if (!mMeshBuffer) {
+        createVertexBuffer();
+    }
 
     // If we're running out of space, let's clear the entire cache
     uint32_t size = newMesh->getSize();
@@ -215,7 +202,9 @@ void PatchCache::setupMesh(Patch* newMesh) {
     // Copy the 9patch mesh in the VBO
     newMesh->positionOffset = (GLintptr) (block->offset);
     newMesh->textureOffset = newMesh->positionOffset + kMeshTextureOffset;
-    glBufferSubData(GL_ARRAY_BUFFER, newMesh->positionOffset, size, newMesh->vertices.get());
+
+    mRenderState.meshState().updateMeshBufferSubData(mMeshBuffer, newMesh->positionOffset, size,
+            newMesh->vertices.get());
 
     // Remove the block since we've used it entirely
     if (block->size == size) {
