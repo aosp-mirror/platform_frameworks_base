@@ -401,20 +401,8 @@ public abstract class TvInputService extends Service {
          * with a different track ID.
          *
          * @param tracks A list which includes track information.
-         * @throws IllegalArgumentException if {@code tracks} contains redundant tracks.
          */
         public void notifyTracksChanged(final List<TvTrackInfo> tracks) {
-            Set<String> trackIdSet = new HashSet<>();
-            for (TvTrackInfo track : tracks) {
-                String trackId = track.getId();
-                if (trackIdSet.contains(trackId)) {
-                    throw new IllegalArgumentException("redundant track ID: " + trackId);
-                }
-                trackIdSet.add(trackId);
-            }
-            trackIdSet.clear();
-
-            // TODO: Validate the track list.
             final List<TvTrackInfo> tracksCopy = new ArrayList<>(tracks);
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
