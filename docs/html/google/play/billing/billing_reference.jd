@@ -139,7 +139,8 @@ does not include tax.</td>
     <td>{@code price_amount_micros}</td>
     <td>Price in micro-units, where 1,000,000 micro-units equal one unit of the
     currency. For example, if {@code price} is {@code "€7.99"}, {@code
-    price_amount_micros} is {@code "7990000"}.</td>
+    price_amount_micros} is {@code "7990000"}. This value represents the
+    localized, rounded price for a particular currency.</td>
   </tr>
   <tr>
     <td>{@code price_currency_code}</td>
