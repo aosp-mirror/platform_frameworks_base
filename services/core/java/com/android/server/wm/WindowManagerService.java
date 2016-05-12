@@ -3540,14 +3540,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if ((isStackVisibleLocked(DOCKED_STACK_ID)
-                && !mStackIdToStack.get(DOCKED_STACK_ID).isAdjustedForMinimizedDock())
-                || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID)) {
-            // We don't let app affect the system orientation when in freeform or docked mode since
-            // they don't occupy the entire display and their request can conflict with other apps.
-            return SCREEN_ORIENTATION_UNSPECIFIED;
-        }
-
         // Top system windows are not requesting an orientation. Start searching from apps.
         return getAppSpecifiedOrientation();
     }
@@ -3556,9 +3548,10 @@ public class WindowManagerService extends IWindowManager.Stub
         int lastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
         boolean findingBehind = false;
         boolean lastFullscreen = false;
-        // TODO: Multi window.
         DisplayContent displayContent = getDefaultDisplayContentLocked();
         final ArrayList<Task> tasks = displayContent.getTasks();
+        final boolean inMultiWindow = isStackVisibleLocked(DOCKED_STACK_ID)
+                || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID);
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
             final int firstToken = tokens.size() - 1;
@@ -3593,6 +3586,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
 
+                // No app except the home app may specify the screen orientation in multi-window.
+                if (inMultiWindow && !atoken.mTask.isHomeTask()) {
+                    continue;
+                }
+
                 if (tokenNdx == 0) {
                     // Last token in this task.
                     lastOrientation = atoken.requestedOrientation;
@@ -3620,8 +3618,10 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
                 "No app is requesting an orientation, return " + mForcedAppOrientation);
         // The next app has not been requested to be visible, so we keep the current orientation
-        // to prevent freezing/unfreezing the display too early.
-        return mForcedAppOrientation;
+        // to prevent freezing/unfreezing the display too early unless we are in multi-window, in
+        // which we don't let the app customize the orientation unless it was the home task that
+        // is handled above.
+        return inMultiWindow ? SCREEN_ORIENTATION_UNSPECIFIED : mForcedAppOrientation;
     }
 
     @Override
