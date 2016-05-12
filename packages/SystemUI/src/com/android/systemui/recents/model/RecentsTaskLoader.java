@@ -334,8 +334,8 @@ public class RecentsTaskLoader {
 
     /** Preloads recents tasks using the specified plan to store the output. */
     public void preloadTasks(RecentsTaskLoadPlan plan, int runningTaskId,
-            boolean isHomeStackVisible) {
-        plan.preloadPlan(this, runningTaskId, isHomeStackVisible);
+            boolean includeFrontMostExcludedTask) {
+        plan.preloadPlan(this, runningTaskId, includeFrontMostExcludedTask);
     }
 
     /** Begins loading the heavy task data according to the specified options. */
