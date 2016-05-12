@@ -112,7 +112,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
                 // Load the next task only if we aren't svelte
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-                loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
+                loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
                 // This callback is made when a new activity is launched and the old one is paused
                 // so ignore the current activity and try and preload the thumbnail for the
@@ -189,7 +189,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
+        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getIconCacheSize();
         launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
@@ -366,8 +366,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
             RecentsTaskLoader loader = Recents.getTaskLoader();
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
-            sInstanceLoadPlan.preloadRawTasks(isHomeStackVisible.value);
-            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible.value);
+            sInstanceLoadPlan.preloadRawTasks(!isHomeStackVisible.value);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
             if (stack.getTaskCount() > 0) {
                 // Only preload the icon (but not the thumbnail since it may not have been taken for
@@ -401,7 +401,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
+        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -453,7 +453,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
-        loader.preloadTasks(plan, -1, true /* isHomeStackVisible */);
+        loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
         TaskStack focusedStack = plan.getTaskStack();
 
         // Return early if there are no tasks in the focused stack
@@ -818,7 +818,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible);
         }
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
