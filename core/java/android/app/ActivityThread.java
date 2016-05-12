@@ -5205,10 +5205,6 @@ public final class ActivityThread {
             } else {
                 Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
             }
-
-            // Add the lib dir path to hardware renderer so that vulkan layers
-            // can be searched for within that directory.
-            ThreadedRenderer.setLibDir(data.info.getLibDir());
         }
 
         // Install the Network Security Config Provider. This must happen before the application
