@@ -169,3 +169,37 @@ void BM_CanvasState_translate(benchmark::State& benchState) {
     }
 }
 BENCHMARK(BM_CanvasState_translate);
+
+void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
+    sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100,
+            [](auto& props, auto& canvas) {
+        canvas.drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+    });
+
+    TestCanvas canvas(100, 100);
+    delete canvas.finishRecording();
+
+    while (benchState.KeepRunning()) {
+        canvas.resetRecording(200, 200);
+        canvas.setHighContrastText(false);
+        canvas.translate(0, 0); // mScrollX, mScrollY
+
+        // Clip to padding
+        // Can expect ~25% of views to have clip to padding with a non-null padding
+        int clipRestoreCount = canvas.save(SaveFlags::MatrixClip);
+        canvas.clipRect(1, 1, 199, 199, SkRegion::kIntersect_Op);
+
+        canvas.insertReorderBarrier(true);
+
+        // Draw child loop
+        for (int i = 0; i < benchState.range_x(); i++) {
+            canvas.drawRenderNode(child.get());
+        }
+
+        canvas.insertReorderBarrier(false);
+        canvas.restoreToCount(clipRestoreCount);
+
+        delete canvas.finishRecording();
+    }
+}
+BENCHMARK(BM_DisplayListCanvas_basicViewGroupDraw)->Arg(1)->Arg(5)->Arg(10);
