@@ -676,6 +676,15 @@ public final class Debug
             return getTotalSwappedOutPss();
         }
 
+        /**
+         * Return true if the kernel is reporting pss swapped out...  that is, if
+         * {@link #getSummaryTotalSwapPss()} will return non-0 values.
+         * @hide
+         */
+        public boolean hasSwappedOutPss() {
+            return hasSwappedOutPss;
+        }
+
         public int describeContents() {
             return 0;
         }
