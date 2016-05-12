@@ -1172,7 +1172,8 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.Light.FastScroll" parent="Widget.Holo.FastScroll" />
 
-    <style name="Widget.Holo.SuggestionItem" parent="TextAppearance.Holo.Medium">
+    <style name="Widget.Holo.SuggestionItem">
+        <item name="textAppearance">@android:style/TextAppearance.Holo.Medium</item>
         <item name="background">@color/white</item>
         <item name="drawablePadding">8dip</item>
         <item name="gravity">start|center_vertical</item>
@@ -1188,9 +1189,9 @@ please see styles_device_defaults.xml.
         <item name="textColor">@color/black</item>
     </style>
 
-    <style name="TextAppearance.Holo.SuggestionHighlight" parent="TextAppearance.SuggestionHighlight" />
+    <style name="TextAppearance.Holo.SuggestionHighlight" parent="@android:style/TextAppearance.SuggestionHighlight" />
 
-    <style name="Widget.Holo.SuggestionButton" parent="Widget.Holo.SuggestionItem">
+    <style name="Widget.Holo.SuggestionButton" parent="@android:style/Widget.Holo.SuggestionItem">
         <item name="background">#E9E9E9</item>
         <item name="textColor">@color/black</item>
     </style>
