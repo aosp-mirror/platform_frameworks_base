@@ -2701,6 +2701,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
+            // Note that we do *not* clear the application profiles. These remain valid
+            // across OTAs and are used to drive profile verification (post OTA) and
+            // profile compilation (without waiting to collect a fresh set of profiles).
             if (mIsUpgrade && !onlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (int i = 0; i < mSettings.mPackages.size(); i++) {
@@ -2711,7 +2714,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
-                    clearAppProfilesLIF(ps.pkg);
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
