@@ -868,7 +868,7 @@ abstract public class ManagedServices {
                 return false;
             }
             if (this.userid == UserHandle.USER_ALL) return true;
-            if (this.userid == UserHandle.USER_SYSTEM) return true;
+            if (this.isSystem) return true;
             if (nid == UserHandle.USER_ALL || nid == this.userid) return true;
             return supportsProfiles() && mUserProfiles.isCurrentProfile(nid);
         }
