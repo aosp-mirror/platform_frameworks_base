@@ -1076,4 +1076,15 @@ interface ITelephony {
      * @return Application ID for specificied app type or null if no uicc or error.
      */
     String getAidForAppType(int subId, int appType);
+
+    /**
+    * Return the Electronic Serial Number.
+    *
+    * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+    *
+    * @param subId the subscription ID that this request applies to.
+    * @return ESN or null if error.
+    * @hide
+    */
+    String getEsn(int subId);
 }

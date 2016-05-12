@@ -5214,4 +5214,37 @@ public class TelephonyManager {
         return null;
     }
 
+    /**
+     * Return the Electronic Serial Number.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @return ESN or null if error.
+     * @hide
+     */
+    public String getEsn() {
+        return getEsn(getDefaultSubscription());
+    }
+
+    /**
+     * Return the Electronic Serial Number.
+     *
+     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
+     *
+     * @param subId the subscription ID that this request applies to.
+     * @return ESN or null if error.
+     * @hide
+     */
+    public String getEsn(int subId) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getEsn(subId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#getEsn", e);
+        }
+        return null;
+    }
+
 }
