@@ -902,8 +902,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void unlockUser(int userId) {
         synchronized (mLock) {
-            UserState userState = getUserStateLocked(userId);
-            onUserStateChangedLocked(userState);
+            int parentUserId = mSecurityPolicy.resolveProfileParentLocked(userId);
+            if (parentUserId == mCurrentUserId) {
+                UserState userState = getUserStateLocked(mCurrentUserId);
+                onUserStateChangedLocked(userState);
+            }
         }
     }
 
