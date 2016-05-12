@@ -42,8 +42,6 @@ tetap perlu memperbarui ke JDK 8 untuk mengompilasi pada platform Android N,
 seperti dijelaskan di bawah ini.
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>Android Studio 2.1 saat ini tersedia sebagai preview di
 Canary Release Channel. Jika Anda sudah
 memiliki Android Studio dan tidak ingin memperbarui ke Canary Channel, Anda bisa

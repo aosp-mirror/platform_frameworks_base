@@ -42,8 +42,6 @@ vẫn cần cập nhật lên JDK 8 để biên dịch cho nền tảng Android 
 như mô tả dưới đây.
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>Android Studio 2.1 hiện đang có dưới dạng bản xem trước trong kênh
 phát hành Canary. Nếu bạn đã
 có Android Studio và không muốn cập nhật lên kênh canary thì bạn có thể

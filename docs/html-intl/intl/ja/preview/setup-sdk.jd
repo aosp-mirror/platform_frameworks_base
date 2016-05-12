@@ -42,8 +42,6 @@ page.image=images/cards/card-n-sdk_2x.png
 
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>現在、Android Studio 2.1 は、先行リリース チャンネルでプレビューとして入手できます。Android Studio を既に入手していて、先行チャンネル版にアップデートしない場合は、Android Studio 2.1 を個別のインストールとしてダウンロードして、Android N での開発に使用することにより、Android Studio のプライマリ環境に影響を及ぼさないようにすることができます。
 
 

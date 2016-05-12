@@ -31,7 +31,7 @@
       vi-lang="Kiểm thử trên Thiết bị"
       zh-cn-lang="设置预览版 SDK"
       zh-tw-lang="設定預覽版 SDK">
-      Set Up to Develop</a></div>
+      Set Up the Preview</a></div>
   </li>
 
   <li class="nav-section">

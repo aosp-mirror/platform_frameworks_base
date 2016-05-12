@@ -42,8 +42,6 @@ page.tags="preview", "developer preview"
 
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>在 Canary 发布渠道中，Android Studio 2.1 当前可以预览版的形式提供。如果您已拥有 Android Studio 且不需要更新到 Canary 发布渠道，您可通过单独安装的形式下载 Android Studio 2.1，并使用它在 Android N 中进行开发，从而使您的主要 Android Studio 环境不受影响。
 
 
