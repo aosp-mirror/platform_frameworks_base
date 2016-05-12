@@ -1,0 +1,101 @@
+page.title=Floating-Point Audio
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#best">Best Practices for Floating-Point Audio</a></li>
+        <li><a href="#support">Floating-Point Audio in Android SDK</a></li>
+        <li><a href="#more">For More Information</a></li>
+      </ol>
+    </div>
+  </div>
+
+<a href="https://www.youtube.com/watch?v=sIcieUqMml8" class="notice-developers-video">
+<div>
+    <h3>Video</h3>
+    <p>Will it Float? The Glory and Shame of Floating-Point Audio</p>
+</div>
+</a>
+
+<p>Using floating-point numbers to represent audio data can significantly enhance audio
+ quality in high-performance audio applications. Floating point offers the following
+ advantages:</p>
+
+<ul>
+<li>Wider dynamic range.</li>
+<li>Consistent accuracy across the dynamic range.</li>
+<li>More headroom to avoid clipping during intermediate calculations and transients.</li>
+</ul>
+
+<p>While floating-point can enhance audio quality, it does present certain disadvantages:</p>
+
+<ul>
+<li>Floating-point numbers use more memory.</li>
+<li>Floating-point operations employ unexpected properties, for example, addition is
+ not associative.</li>
+<li>Floating-point calculations can sometimes lose arithmetic precision due to rounding or
+ numerically unstable algorithms.</li>
+<li>Using floating-point effectively requires greater understanding to achieve accurate
+ and reproducible results.</li>
+</ul>
+
+<p>
+  Formerly, floating-point was notorious for being unavailable or slow. This is
+  still true for low-end and embedded processors. But processors on modern
+  mobile devices now have hardware floating-point with performance that is
+  similar (or in some cases even faster) than integer. Modern CPUs also support
+  <a href="http://en.wikipedia.org/wiki/SIMD" class="external-link">SIMD</a>
+  (Single instruction, multiple data), which can improve performance further.
+</p>
+
+<h2 id="best">Best Practices for Floating-Point Audio</h2>
+<p>The following best practices help you avoid problems with floating-point calculations:</p>
+<ul>
+<li>Use double precision floating-point for infrequent calculations,
+such as computing filter coefficients.</li>
+<li>Pay attention to the order of operations.</li>
+<li>Declare explicit variables for intermediate values.</li>
+<li>Use parentheses liberally.</li>
+<li>If you get a NaN or infinity result, use binary search to discover
+where it was introduced.</li>
+</ul>
+
+<h2 id="support">Floating-Point Audio in Android SDK</h2>
+
+<p>For floating-point audio, the audio format encoding
+ <code>AudioFormat.ENCODING_PCM_FLOAT</code> is used similarly to
+ <code>ENCODING_PCM_16_BIT</code> or <code>ENCODING_PCM_8_BIT</code> for specifying
+ AudioTrack data
+formats. The corresponding overloaded method <code>AudioTrack.write()</code>
+ takes in a float array to deliver data.</p>
+
+<pre>
+   public int write(float[] audioData,
+        int offsetInFloats,
+        int sizeInFloats,
+        int writeMode)
+</pre>
+
+<h2 id="more">For More Information</h2>
+
+<p>The following Wikipedia pages are helpful in understanding floating-point audio:</p>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Audio_bit_depth" class="external-link" >Audio bit depth</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Floating_point" class="external-link" >Floating point</a></li>
+<li><a href="http://en.wikipedia.org/wiki/IEEE_floating_point" class="external-link" >IEEE 754 floating-point</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Loss_of_significance" class="external-link" >Loss of significance</a>
+ (catastrophic cancellation)</li>
+<li><a href="https://en.wikipedia.org/wiki/Numerical_stability" class="external-link" >Numerical stability</a></li>
+</ul>
+
+<p>The following article provides information on those aspects of floating-point that have a
+ direct impact on designers of computer systems:</p>
+<ul>
+<li><a href="http://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html" class="external-link" >What every
+ computer scientist should know about floating-point arithmetic</a>
+by David Goldberg, Xerox PARC (edited reprint).</li>
+</ul>
