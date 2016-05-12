@@ -555,6 +555,7 @@ public class Canvas {
      * @param dy The distance to translate in Y
     */
     public void translate(float dx, float dy) {
+        if (dx == 0.0f && dy == 0.0f) return;
         native_translate(mNativeCanvasWrapper, dx, dy);
     }
 
@@ -565,6 +566,7 @@ public class Canvas {
      * @param sy The amount to scale in Y
      */
     public void scale(float sx, float sy) {
+        if (sx == 1.0f && sy == 1.0f) return;
         native_scale(mNativeCanvasWrapper, sx, sy);
     }
 
@@ -577,6 +579,7 @@ public class Canvas {
      * @param py The y-coord for the pivot point (unchanged by the scale)
      */
     public final void scale(float sx, float sy, float px, float py) {
+        if (sx == 1.0f && sy == 1.0f) return;
         translate(px, py);
         scale(sx, sy);
         translate(-px, -py);
@@ -588,6 +591,7 @@ public class Canvas {
      * @param degrees The amount to rotate, in degrees
      */
     public void rotate(float degrees) {
+        if (degrees == 0.0f) return;
         native_rotate(mNativeCanvasWrapper, degrees);
     }
 
@@ -599,6 +603,7 @@ public class Canvas {
      * @param py The y-coord for the pivot point (unchanged by the rotation)
      */
     public final void rotate(float degrees, float px, float py) {
+        if (degrees == 0.0f) return;
         translate(px, py);
         rotate(degrees);
         translate(-px, -py);
@@ -611,6 +616,7 @@ public class Canvas {
      * @param sy The amount to skew in Y
      */
     public void skew(float sx, float sy) {
+        if (sx == 0.0f && sy == 0.0f) return;
         native_skew(mNativeCanvasWrapper, sx, sy);
     }
 
