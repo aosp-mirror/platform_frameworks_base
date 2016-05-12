@@ -3711,11 +3711,10 @@ METADATA['en'].collections = {
   "develop/landing/tools": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=K2dodTXARqc&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=cD7NPxuuXYY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=JLLnhwtDoHw&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
-      "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
+      "https://www.youtube.com/watch?v=StqAZ1OQbqA&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=ZOz_yr8Yxq8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=eOV2owswDkE&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=4rI4tTd7-J8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa"
     ]
   },
   "google/landing/services": {
