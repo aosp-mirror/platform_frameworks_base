@@ -122,7 +122,7 @@ the product types supported by In-app Billing Version 3</a>.</p>
 
 <h2 id="console">Google Play Developer Console</h2>
 <p>The Developer Console is where you can publish your
-In-app Billing application, and manage the various in-app products that are
+In-app Billing application and manage the various in-app products that are
 available for purchase from your application.</p>
 <p>You can create a product list of
 digital goods that are associated with your application, including items for
@@ -130,6 +130,14 @@ one-time purchase and recurring subscriptions. For each item, you can define
 information such as the item’s unique product ID (also called its SKU), product
 type, pricing, description, and how Google Play should handle and track
 purchases for that product.</p>
+<p>If you sell several of your apps or in-app products at the same price, you
+can add <em>pricing templates</em> to manage these price points from a
+centralized location. When using pricing templates, you can include the local
+tax within the prices you provide, or you can provide prices and have the system
+add local taxes to these prices. You can make changes to the prices in your
+templates&mdash;such as refreshing the exchange rates for certain
+countries&mdash;and your changes are applied to the apps and in-app products
+that you link to the template.</p>
 <p>You can also create test accounts to authorize
 access for testing applications that are unpublished.</p>
 <p>To learn how to use the Developer Console to configure your in-app
