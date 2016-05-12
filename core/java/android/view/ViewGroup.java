@@ -3460,7 +3460,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int clipSaveCount = 0;
         final boolean clipToPadding = (flags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK;
         if (clipToPadding) {
-            clipSaveCount = canvas.save();
+            clipSaveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
             canvas.clipRect(mScrollX + mPaddingLeft, mScrollY + mPaddingTop,
                     mScrollX + mRight - mLeft - mPaddingRight,
                     mScrollY + mBottom - mTop - mPaddingBottom);
