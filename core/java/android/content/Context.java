@@ -3603,6 +3603,8 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.content.pm.ShortcutManager
+     *
+     * @hide
      */
     public static final String SHORTCUT_SERVICE = "shortcut";
 

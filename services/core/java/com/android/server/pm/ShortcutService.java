@@ -125,6 +125,8 @@ import java.util.function.Predicate;
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
 
+    public static final boolean FEATURE_ENABLED = false;
+
     static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
@@ -319,6 +321,9 @@ public class ShortcutService extends IShortcutService.Stub {
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mUserManager = context.getSystemService(UserManager.class);
 
+        if (!FEATURE_ENABLED) {
+            return;
+        }
         mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
 
         injectRegisterUidObserver(mUidObserver, ActivityManager.UID_OBSERVER_PROCSTATE
@@ -419,6 +424,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void onBootPhase(int phase) {
+        // We want to call initialize() to initialize the configurations, so we don't disable this.
         if (DEBUG) {
             Slog.d(TAG, "onBootPhase: " + phase);
         }
@@ -431,6 +437,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void handleUnlockUser(int userId) {
+        if (!FEATURE_ENABLED) {
+            return;
+        }
         synchronized (mLock) {
             // Preload
             getUserShortcutsLocked(userId);
@@ -441,6 +450,9 @@ public class ShortcutService extends IShortcutService.Stub {
 
     /** lifecycle event */
     void handleCleanupUser(int userId) {
+        if (!FEATURE_ENABLED) {
+            return;
+        }
         synchronized (mLock) {
             unloadUserLocked(userId);
         }
@@ -1926,6 +1938,9 @@ public class ShortcutService extends IShortcutService.Stub {
          */
         @Override
         public void onSystemLocaleChangedNoLock() {
+            if (!FEATURE_ENABLED) {
+                return;
+            }
             // DO NOT HOLD ANY LOCKS HERE.
 
             // We want to reset throttling for all packages for all users.  But we can't just do so
@@ -1938,7 +1953,6 @@ public class ShortcutService extends IShortcutService.Stub {
             //
             // This allows ShortcutUser's to detect the system locale change, so they can reset
             // counters.
-
             mLocaleChangeSequenceNumber.incrementAndGet();
             postToHandler(() -> scheduleSaveBaseState());
         }
