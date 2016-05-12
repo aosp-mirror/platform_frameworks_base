@@ -54,6 +54,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Implementation Notes:
@@ -1763,6 +1764,10 @@ public class ListView extends AbsListView {
             // Flush any cached views that did not get reused above
             recycleBin.scrapActiveViews();
 
+            // remove any header/footer that has been temp detached and not re-attached
+            removeUnusedFixedViews(mHeaderViewInfos);
+            removeUnusedFixedViews(mFooterViewInfos);
+
             if (sel != null) {
                 // The current selected item should get focus if items are
                 // focusable.
@@ -1876,6 +1881,36 @@ public class ListView extends AbsListView {
             if (!blockLayoutRequests) {
                 mBlockLayoutRequests = false;
             }
+        }
+    }
+
+    @Override
+    boolean trackMotionScroll(int deltaY, int incrementalDeltaY) {
+        final boolean result = super.trackMotionScroll(deltaY, incrementalDeltaY);
+        removeUnusedFixedViews(mHeaderViewInfos);
+        removeUnusedFixedViews(mFooterViewInfos);
+        return result;
+    }
+
+    /**
+     * Header and Footer views are not scrapped / recycled like other views but they are still
+     * detached from the ViewGroup. After a layout operation, call this method to remove such views.
+     *
+     * @param infoList The info list to be traversed
+     */
+    private void removeUnusedFixedViews(@Nullable List<FixedViewInfo> infoList) {
+        if (infoList == null) {
+            return;
+        }
+        for (int i = infoList.size() - 1; i >= 0; i--) {
+            final FixedViewInfo fixedViewInfo = infoList.get(i);
+            final View view = fixedViewInfo.view;
+            final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+            if (view.getParent() == null && lp != null && lp.recycledHeaderFooter) {
+                removeDetachedView(view, false);
+                lp.recycledHeaderFooter = false;
+            }
+
         }
     }
 
@@ -3179,6 +3214,9 @@ public class ListView extends AbsListView {
                 last = getChildAt(--lastIndex);
             }
         }
+        recycleBin.fullyDetachScrapViews();
+        removeUnusedFixedViews(mHeaderViewInfos);
+        removeUnusedFixedViews(mFooterViewInfos);
     }
 
     private View addViewAbove(View theView, int position) {
