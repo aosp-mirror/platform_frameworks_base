@@ -32,6 +32,17 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"medium"
   },
   {
+    "title":"SmallerAPK, Part 6: Image optimization, Zopfli & WebP",
+    "category":"",
+    "summary":"Series of posts on minimizing your APK size.",
+    "url":"https://medium.com/@wkalicinski/smallerapk-part-6-image-optimization-zopfli-webp-4c462955647d#.23hlddo3x",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"https://cdn-images-1.medium.com/max/2000/1*chMiA9mGa_FBUOoesHHk3Q.png",
+    "type":"medium"
+  },
+  {
     "title":"Measure your app’s user acquisition channels",
     "titleFriendly":"",
     "summary":"Get details on how to use the Developer Console User Acquisitions reports to discover where your users come from.",
@@ -994,6 +1005,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "training/material/animations.html#Touch",
+    "timestamp": 1194884220000,
+    "image": null,
+    "title": "Customize Touch Feedback",
+    "summary": "Provide visual confirmation when users interact with your UI.",
+    "keywords": [],
+    "type": "develop",
+    "category": "guide"
   },
   {
     "lang": "en",

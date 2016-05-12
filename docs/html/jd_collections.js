@@ -375,7 +375,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/auto.html",
-      "https://developers.google.com/edu/guidelines"
+      "distribute/essentials/quality/billions.html"
     ]
   },
   "distribute/essentials/zhcn": {
@@ -506,7 +506,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/auto.html",
-      "https://developers.google.com/edu/guidelines"
+      "distribute/essentials/quality/billions.html"
     ]
   },
   "distribute/essentials/tools": {
@@ -1005,6 +1005,44 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
       "google/play/filters.html"
+    ]
+  },
+ "distribute/essentials/billionsquality/connectivity": {
+    "title": "",
+    "resources": [
+      "training/basics/network-ops/managing.html",
+      "training/monitoring-device-state/connectivity-monitoring.html",
+      "guide/topics/providers/content-providers.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/capability": {
+    "title": "",
+    "resources": [
+      "guide/practices/screens_support.html",
+      "training/multiscreen/screendensities.html",
+      "training/articles/memory.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/cost": {
+    "title": "",
+    "resources": [
+      "https://medium.com/@wkalicinski/smallerapk-part-6-image-optimization-zopfli-webp-4c462955647d#.23hlddo3x",
+      "training/basics/network-ops/managing.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/consumption": {
+    "title": "",
+    "resources": [
+      "training/efficient-downloads/efficient-network-access.html",
+      "training/monitoring-device-state/index.html"
+    ]
+  },
+  "distribute/essentials/billionsquality/content": {
+    "title": "",
+    "resources": [
+      "training/material/animations.html#Touch",
+      "training/articles/perf-anr.html",
+      "training/improving-layouts/index.html"
     ]
   },
   "distribute/essentials/tabletguidelines": {
