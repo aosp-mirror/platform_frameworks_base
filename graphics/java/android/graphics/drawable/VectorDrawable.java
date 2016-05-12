@@ -136,13 +136,13 @@ import dalvik.system.VMRuntime;
  * <dd>Defines path data using exactly same format as "d" attribute
  * in the SVG's path data. This is defined in the viewport space.</dd>
  * <dt><code>android:fillColor</code></dt>
- * <dd>Specifies the color used to fill the path. May be a color, also may be a color state list or
- * a gradient color for SDK 24+. If this property is animated, any value set by the animation will
+ * <dd>Specifies the color used to fill the path. May be a color or, for SDK 24+, a color state list
+ * or a gradient color. If this property is animated, any value set by the animation will
  * override the original value. No path fill is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeColor</code></dt>
- * <dd>Specifies the color used to draw the path outline. May be a color or (SDK 24+ only) a color
- * state list. If this property is animated, any value set by the animation will override the
- * original value. No path outline is drawn if this property is not specified.</dd>
+ * <dd>Specifies the color used to draw the path outline. May be a color or, for SDK 24+, a color
+ * state list or a gradient color. If this property is animated, any value set by the animation will
+ * override the original value. No path outline is drawn if this property is not specified.</dd>
  * <dt><code>android:strokeWidth</code></dt>
  * <dd>The width a path stroke.</dd>
  * <dt><code>android:strokeAlpha</code></dt>
@@ -162,6 +162,9 @@ import dalvik.system.VMRuntime;
  * <dd>Sets the lineJoin for a stroked path: miter,round,bevel.</dd>
  * <dt><code>android:strokeMiterLimit</code></dt>
  * <dd>Sets the Miter limit for a stroked path.</dd>
+ * <dt><code>android:fillType</code></dt>
+ * <dd>Sets the fillType for a path. It is the same as SVG's "fill-rule" properties.
+ * For more details, see https://www.w3.org/TR/SVG/painting.html#FillRuleProperty</dd>
  * </dl></dd>
  * </dl>
  *
