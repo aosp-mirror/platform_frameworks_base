@@ -84,6 +84,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.printspooler.R;
 import com.android.printspooler.model.MutexFileProvider;
@@ -658,7 +659,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         intent.setType("application/pdf");
         intent.putExtra(Intent.EXTRA_TITLE, info.getName());
         intent.putExtra(DocumentsContract.EXTRA_PACKAGE_NAME, mCallingPackageName);
-        startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
+
+        try {
+            startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not create file", e);
+            Toast.makeText(this, getString(R.string.could_not_create_file),
+                    Toast.LENGTH_SHORT).show();
+            onStartCreateDocumentActivityResult(RESULT_CANCELED, null);
+        }
     }
 
     private void onStartCreateDocumentActivityResult(int resultCode, Intent data) {
