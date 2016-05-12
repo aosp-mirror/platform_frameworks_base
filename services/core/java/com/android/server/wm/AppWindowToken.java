@@ -582,10 +582,7 @@ class AppWindowToken extends WindowToken {
                 w.mSkipEnterAnimationForSeamlessReplacement = !candidate.mAnimateReplacingWindow;
 
                 // if we got a replacement window, reset the timeout to give drawing more time
-                service.mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
-                service.mH.sendMessageDelayed(
-                        service.mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, this),
-                            WINDOW_REPLACEMENT_TIMEOUT_DURATION);
+                service.scheduleReplacingWindowTimeouts(this);
             }
         }
         allAppWindows.add(w);
