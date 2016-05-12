@@ -29,7 +29,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         super(FilesActivity.class);
     }
 
-    @Suppress
     public void testSearchView_ExpandsOnClick() throws Exception {
         bots.main.openSearchView();
         bots.main.assertSearchTextFiledAndIcon(true, false);
@@ -43,7 +42,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
-    @Suppress
     public void testSearchView_ClearsTextOnBack() throws Exception {
         String query = "file2";
         bots.main.openSearchView();
@@ -54,7 +52,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
-    @Suppress
     public void testSearch_ResultsFound() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -64,7 +61,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.setSearchQuery(query);
         bots.main.assertSearchTextField(true, query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
 
         bots.directory.assertDocumentsCountOnList(true, 2);
         bots.directory.assertDocumentsPresent(fileName1, fileName2);
@@ -90,7 +87,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.openSearchView();
         bots.main.setSearchQuery(query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
 
         bots.directory.assertDocumentsCountOnList(true, 1);
         bots.directory.assertDocumentsPresent(fileName2);
@@ -98,7 +95,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         device.pressBack();
     }
 
-    @Suppress
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -107,13 +103,12 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.openSearchView();
         bots.main.setSearchQuery(query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
         device.pressBack();
 
         assertDefaultContentOfTestDir0();
     }
 
-    @Suppress
     public void testSearch_NoResults() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -122,18 +117,16 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.openSearchView();
         bots.main.setSearchQuery(query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
 
-        bots.directory.assertDocumentsCountOnList(false, 0);
+        bots.directory.assertDocumentsCountOnList(true, 0);
 
-        device.waitForIdle();
         String msg = String.valueOf(context.getString(R.string.no_results));
         bots.directory.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
 
         bots.main.assertSearchTextField(false, query);
     }
 
-    @Suppress
     public void testSearchNoResults_ClearsOnBack() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -142,14 +135,13 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.openSearchView();
         bots.main.setSearchQuery(query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
         device.pressBack();
 
         device.waitForIdle();
         assertDefaultContentOfTestDir0();
     }
 
-    @Suppress
     public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
         initTestFiles();
         assertDefaultContentOfTestDir0();
@@ -158,7 +150,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.main.openSearchView();
         bots.main.setSearchQuery(query);
 
-        device.pressEnter();
+        bots.keyboard.pressEnter();
 
         bots.roots.openRoot(ROOT_1_ID);
         assertDefaultContentOfTestDir1();

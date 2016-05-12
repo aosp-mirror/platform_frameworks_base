@@ -72,16 +72,13 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         device.pressBack();
     }
 
-    @Suppress
     public void testRenameFile_OkButton() throws Exception {
         bots.directory.selectDocument(fileName1);
         bots.main.openOverflowMenu();
         bots.main.menuRename().click();
         bots.main.setDialogText(newName);
 
-        device.waitForIdle(TIMEOUT);
         bots.main.findDialogOkButton().click();
-        device.waitForIdle(TIMEOUT);
 
         bots.directory.assertDocumentsAbsent(fileName1);
         bots.directory.assertDocumentsPresent(newName);
@@ -101,16 +98,13 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsCount(4);
     }
 
-    @Suppress
     public void testRenameFile_Cancel() throws Exception {
         bots.directory.selectDocument(fileName1);
         bots.main.openOverflowMenu();
         bots.main.menuRename().click();
         bots.main.setDialogText(newName);
 
-        device.waitForIdle(TIMEOUT);
         bots.main.findDialogCancelButton().click();
-        device.waitForIdle(TIMEOUT);
 
         bots.directory.assertDocumentsPresent(fileName1);
         bots.directory.assertDocumentsAbsent(newName);

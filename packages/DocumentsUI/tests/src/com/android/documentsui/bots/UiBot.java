@@ -16,12 +16,17 @@
 
 package com.android.documentsui.bots;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
 
 import android.content.Context;
+import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
@@ -29,8 +34,15 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.util.Log;
+import android.widget.Spinner;
+import android.widget.Toolbar;
 
 import com.android.documentsui.R;
+import com.android.documentsui.model.DocumentInfo;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 
 import java.util.Iterator;
 import java.util.List;
@@ -51,18 +63,12 @@ public class UiBot extends BaseBot {
     }
 
     public void assertWindowTitle(String expected) {
-        // Turns out the title field on a window does not have
-        // an id associated with it at runtime (which confuses the hell out of me)
-        // In code we address this via "android.R.id.title".
-        UiObject2 o = find(By.text(expected));
-        // It's a bit of a conceit that we then *assert* that the title
-        // is the value that we used to identify the UiObject2.
-        // If the preceeding lookup fails, this'll choke with an NPE.
-        // But given the issue described in the comment above, we're
-        // going to do it anyway. Because we shouldn't be looking up
-        // the uiobject by it's expected content :|
-        assertEquals(expected, o.getText());
+        onView(isAssignableFrom(Toolbar.class)).check(matches(withToolbarTitle(is(expected))));
     }
+
+    public void assertBreadcrumbTitle(String expected) {
+      onView(isAssignableFrom(Spinner.class)).check(matches(withBreadcrumbTitle(is(expected))));
+  }
 
     public void assertMenuEnabled(int id, boolean enabled) {
         UiObject2 menu= findMenuWithName(mContext.getString(id));
@@ -227,5 +233,32 @@ public class UiBot extends BaseBot {
 
     public void pressKey(int keyCode, int metaState) {
         mDevice.pressKeyCode(keyCode, metaState);
+    }
+
+    private static Matcher<Object> withToolbarTitle(
+        final Matcher<CharSequence> textMatcher) {
+      return new BoundedMatcher<Object, Toolbar>(Toolbar.class) {
+        @Override public boolean matchesSafely(Toolbar toolbar) {
+          return textMatcher.matches(toolbar.getTitle());
+        }
+        @Override public void describeTo(Description description) {
+          description.appendText("with toolbar title: ");
+          textMatcher.describeTo(description);
+        }
+      };
+    }
+
+    private static Matcher<Object> withBreadcrumbTitle(
+        final Matcher<CharSequence> textMatcher) {
+      return new BoundedMatcher<Object, Spinner>(Spinner.class) {
+        @Override public boolean matchesSafely(Spinner breadcrumb) {
+          DocumentInfo selectedDoc = (DocumentInfo) breadcrumb.getSelectedItem();
+          return textMatcher.matches(selectedDoc.displayName);
+        }
+        @Override public void describeTo(Description description) {
+          description.appendText("with breadcrumb title: ");
+          textMatcher.describeTo(description);
+        }
+      };
     }
 }
