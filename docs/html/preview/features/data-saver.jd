@@ -12,10 +12,16 @@ page.keywords="android N", "data usage", "metered network"
     <ol>
       <li>
         <a href="#status">Checking Data Saver Preferences</a>
+        <ol>
+          <li>
+            <a href="#request-whitelist">Requesting Whitelist Permissions</a>
+          </li>
+        </ol>
       </li>
 
       <li>
-        <a href="#monitor-changes">Monitoring Changes to Data Saver Preferences</a>
+        <a href="#monitor-changes">Monitoring Changes to Data Saver
+        Preferences</a>
       </li>
 
       <li>
@@ -123,6 +129,25 @@ if (connMgr.isActiveNetworkMetered()) {
   // Use data as required to perform syncs, downloads, and updates.
 }
 </pre>
+
+<h3 id="request-whitelist">
+  Requesting whitelist permissions
+</h3>
+
+<p>
+  If your app needs to use data in the background, it can request whitelist
+  permissions by sending a
+  <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
+  (<code>"android.settings.IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS"</code>)
+  intent with a <code>package:&lt;your-app-id&gt;</code> URI.
+</p>
+
+<p>
+  Sending the intent and URI launches the <strong>Settings</strong> app, and
+  displays your app's <strong>App Data Usage</strong> page to the user. The
+  user can then decide whether to enable background data for your app.
+  It is good practice to prompt the user before sending this intent.
+</p>
 
 <h2 id="monitor-changes">
   Monitoring Changes to Data Saver Preferences
