@@ -8740,7 +8740,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param direction The direction of the focus
      */
     public void addFocusables(ArrayList<View> views, @FocusDirection int direction) {
-        addFocusables(views, direction, FOCUSABLES_TOUCH_MODE);
+        addFocusables(views, direction, isInTouchMode() ? FOCUSABLES_TOUCH_MODE : FOCUSABLES_ALL);
     }
 
     /**
@@ -8768,7 +8768,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         if ((focusableMode & FOCUSABLES_TOUCH_MODE) == FOCUSABLES_TOUCH_MODE
-                && isInTouchMode() && !isFocusableInTouchMode()) {
+                && !isFocusableInTouchMode()) {
             return;
         }
         views.add(this);
