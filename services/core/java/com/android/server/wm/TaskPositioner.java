@@ -515,7 +515,11 @@ class TaskPositioner implements DimLayer.DimLayerUser {
     }
 
     @Override /** {@link DimLayer.DimLayerUser} */
-    public boolean isFullscreen() {
+    public boolean dimFullscreen() {
+        return isFullscreen();
+    }
+
+    boolean isFullscreen() {
         return false;
     }
 

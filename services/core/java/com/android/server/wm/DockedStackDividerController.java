@@ -758,7 +758,7 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     @Override
-    public boolean isFullscreen() {
+    public boolean dimFullscreen() {
         return false;
     }
 

@@ -750,7 +750,11 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     @Override
-    public boolean isFullscreen() {
+    public boolean dimFullscreen() {
+        return isHomeTask() || isFullscreen();
+    }
+
+    boolean isFullscreen() {
         if (useCurrentBounds()) {
             return mFullscreen;
         }
