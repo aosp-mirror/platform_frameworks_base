@@ -1948,6 +1948,8 @@ public class SettingsProvider extends ContentProvider {
             final int userId = getUserIdFromKey(key);
             Uri uri = getNotificationUriFor(key, name);
 
+            mGenerationRegistry.incrementGeneration(key);
+
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                     userId, 0, uri).sendToTarget();
 
@@ -1958,8 +1960,6 @@ public class SettingsProvider extends ContentProvider {
                 maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                         sSystemCloneToManagedSettings);
             }
-
-            mGenerationRegistry.incrementGeneration(key);
 
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
         }
