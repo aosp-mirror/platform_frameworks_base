@@ -27,7 +27,6 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import com.google.common.collect.Lists;
 
 import android.annotation.IntDef;
-import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -53,6 +52,7 @@ import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v13.view.DragStartHelper;
 import android.support.v7.widget.GridLayoutManager;
@@ -181,6 +181,32 @@ public class DirectoryFragment extends Fragment
 
     private DirectoryDragListener mOnDragListener;
 
+    /**
+     * A callback to show snackbar at the beginning of moving and copying.
+     */
+    private final FileOperations.Callback mFileOpCallback = (status, opType, docCount) -> {
+        if (status == FileOperations.Callback.STATUS_REJECTED) {
+            Snackbars.showPasteFailed(getActivity());
+            return;
+        }
+
+        if (docCount == 0) {
+            // Nothing has been pasted, so there is no need to show a snackbar.
+            return;
+        }
+
+        switch (opType) {
+            case FileOperationService.OPERATION_MOVE:
+                Snackbars.showMove(getActivity(), docCount);
+                break;
+            case FileOperationService.OPERATION_COPY:
+                Snackbars.showCopy(getActivity(), docCount);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported Operation: " + opType);
+        }
+    };
+
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -283,7 +309,7 @@ public class DirectoryFragment extends Fragment
         mFocusManager = new FocusManager(context, mRecView, mModel);
 
         mTuner = FragmentTuner.pick(getContext(), state);
-        mClipper = new DocumentClipper(context);
+        mClipper = DocumentsApplication.getDocumentClipper(getContext());
 
         final ActivityManager am = (ActivityManager) context.getSystemService(
                 Context.ACTIVITY_SERVICE);
@@ -343,11 +369,12 @@ public class DirectoryFragment extends Fragment
                 FileOperationService.OPERATION_COPY);
 
         FileOperations.start(
-                getActivity(),
+                getContext(),
                 getDisplayState().selectedDocumentsForCopy,
                 getDisplayState().stack.peek(),
                 (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
-                operationType);
+                operationType,
+                mFileOpCallback);
     }
 
     protected boolean onDoubleTap(MotionEvent e) {
@@ -1035,94 +1062,6 @@ public class DirectoryFragment extends Fragment
         return commonType[0] + "/" + commonType[1];
     }
 
-    private void copyFromClipboard(final DocumentInfo destination) {
-        new AsyncTask<Void, Void, ClipDetails>() {
-
-            @Override
-            protected ClipDetails doInBackground(Void... params) {
-                return mClipper.getClipDetails();
-            }
-
-            @Override
-            protected void onPostExecute(ClipDetails clipDetails) {
-                if (clipDetails == null) {
-                    Log.w(TAG, "Received null clipDetails from primary clipboard. Ignoring.");
-                    return;
-                }
-                List<DocumentInfo> docs = clipDetails.docs;
-                @OpType int type = clipDetails.opType;
-                DocumentInfo srcParent = clipDetails.parent;
-                moveDocuments(docs, destination, type, srcParent);
-            }
-        }.execute();
-    }
-
-    private void copyFromClipData(final ClipData clipData, final DocumentInfo destination) {
-        assert(clipData != null);
-
-        new AsyncTask<Void, Void, ClipDetails>() {
-
-            @Override
-            protected ClipDetails doInBackground(Void... params) {
-                return mClipper.getClipDetails(clipData);
-            }
-
-            @Override
-            protected void onPostExecute(ClipDetails clipDetails) {
-                if (clipDetails == null) {
-                    Log.w(TAG,  "Received null clipDetails. Ignoring.");
-                    return;
-                }
-
-                List<DocumentInfo> docs = clipDetails.docs;
-                @OpType int type = clipDetails.opType;
-                DocumentInfo srcParent = clipDetails.parent;
-                moveDocuments(docs, destination, type, srcParent);
-            }
-        }.execute();
-    }
-
-    /**
-     * Moves {@code docs} from {@code srcParent} to {@code destination}.
-     * operationType can be copy or cut
-     * srcParent Must be non-null for move operations.
-     */
-    private void moveDocuments(final List<DocumentInfo> docs, final DocumentInfo destination,
-            final @OpType int operationType, final DocumentInfo srcParent) {
-        BaseActivity activity = (BaseActivity) getActivity();
-        if (!canCopy(docs, activity.getCurrentRoot(), destination)) {
-            Snackbars.makeSnackbar(
-                    getActivity(),
-                    R.string.clipboard_files_cannot_paste,
-                    Snackbar.LENGTH_SHORT)
-                    .show();
-            return;
-        }
-
-        if (docs.isEmpty()) {
-            return;
-        }
-
-        final DocumentStack curStack = getDisplayState().stack;
-        DocumentStack dstStack = new DocumentStack();
-        if (destination != null) {
-            dstStack.push(destination);
-            dstStack.addAll(curStack);
-        } else {
-            dstStack = curStack;
-        }
-        switch (operationType) {
-            case FileOperationService.OPERATION_MOVE:
-                FileOperations.move(getActivity(), docs, srcParent, dstStack);
-                break;
-            case FileOperationService.OPERATION_COPY:
-                FileOperations.copy(getActivity(), docs, dstStack);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported operation: " + operationType);
-        }
-    }
-
     public void copySelectedToClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_COPY_CLIPBOARD);
 
@@ -1147,6 +1086,7 @@ public class DirectoryFragment extends Fragment
 
     public void cutSelectedToClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_CUT_CLIPBOARD);
+
         Selection selection = mSelectionManager.getSelection(new Selection());
         if (selection.isEmpty()) {
             return;
@@ -1171,34 +1111,10 @@ public class DirectoryFragment extends Fragment
     public void pasteFromClipboard() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_PASTE_CLIPBOARD);
 
-        DocumentInfo destination = ((BaseActivity) getActivity()).getCurrentDirectory();
-        copyFromClipboard(destination);
+        BaseActivity activity = (BaseActivity) getActivity();
+        DocumentInfo destination = activity.getCurrentDirectory();
+        mClipper.copyFromClipboard(destination, activity.getDisplayState().stack, mFileOpCallback);
         getActivity().invalidateOptionsMenu();
-    }
-
-    /**
-     * Returns true if the list of files can be copied to destination. Note that this
-     * is a policy check only. Currently the method does not attempt to verify
-     * available space or any other environmental aspects possibly resulting in
-     * failure to copy.
-     *
-     * @return true if the list of files can be copied to destination.
-     */
-    private boolean canCopy(List<DocumentInfo> files, RootInfo root, DocumentInfo dest) {
-        if (dest == null || !dest.isDirectory() || !dest.isCreateSupported()) {
-            return false;
-        }
-
-        // Can't copy folders to downloads, because we don't show folders there.
-        if (root.isDownloads()) {
-            for (DocumentInfo docs : files) {
-                if (docs.isDirectory()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     public void selectAllFiles() {
@@ -1316,7 +1232,7 @@ public class DirectoryFragment extends Fragment
                 src == null ? Metrics.USER_ACTION_DRAG_N_DROP_MULTI_WINDOW
                         : Metrics.USER_ACTION_DRAG_N_DROP);
 
-        copyFromClipData(clipData, dst);
+        mClipper.copyFromClipData(dst, getDisplayState().stack, clipData, mFileOpCallback);
         return true;
     }
 
