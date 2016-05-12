@@ -8,10 +8,11 @@ parent.link=index.html
   <h2>In this document</h2>
   <ol>
     <li><a href="#billing-list-setup">Creating a Product List</a></li>
+    <li><a href="#pricing-template">Pricing Templates</a></li>
     <li><a href="#billing-purchase-type">Choosing a Product Type</a></li>
-    <li><a href="#billing-testing-setup">Setting up Test Accounts</a></li>
     <li><a href="#billing-refunds">Handling Refunds</a></li>
     <li><a href="#billing-refunds">Working with Order Numbers</a></li>
+    <li><a href="#billing-testing-setup">Setting up Test Accounts</a></li>
     <li><a href="#billing-support">Where to Get Support</a></li>
   </ol>
 
@@ -44,7 +45,19 @@ Developer Console.</p>
 <p>The Google Play Developer Console provides a product list for each of your published
 applications. You can sell an item using Google Play's in-app billing feature only if the item is
 listed on an application's product list. Each application has its own product list; you cannot sell
-items that are listed in another application's product list.</p>
+items that appear on another application's product list.</p>
+
+<div class="figure-right">
+  <figure id="fig-iap">
+    <img src="{@docRoot}images/in-app-billing/in_app_products.png" width="700"
+    alt="The Mythical Journey app lists two in-app products, Invisibility Potion and Sleeping Potion.">
+    <figcaption>
+      <b>Figure 1. </b>You can access an application's product list by
+      selecting the <strong>In-app Products</strong> link in the main Apps
+      navigation.
+    </figcaption>
+  </figure>
+</div>
 
 <p>You can access an application's product list by clicking the <strong>In-App Products</strong>
 link in applications listed in your developer account (see
@@ -58,25 +71,17 @@ product description, and price. The product list stores only metadata about the 
 you are selling in your application. It does not store any digital content. You are responsible for
 storing and delivering the digital content that you sell in your applications.</p>
 
-<div style="margin:1em;">
-<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_product_list.png" xheight="548" id="figure1" />
-<p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 1.</strong> You can access an application's product list by clicking the
-  <strong>In-App Products</strong> link in the main Apps navigation.
-</p>
-</div>
-
 <p>You can create a product list for any published application, or any
 application in the alpha or beta channels, that's been
 uploaded and saved to the Developer Console. However, you must have a Google payments merchant
 account and the application's manifest must include the <code>com.android.vending.BILLING</code>
 permission. If an application's manifest does not include this permission, you will be able to edit
-existing items in the product list but you will not be able to add new items to the list. For more
+existing items in the product list, but you won't be able to add new items to the list. For more
 information about this permission, see
 <a href="{@docRoot}google/play/billing/billing_integrate.html#billing-permission">Updating Your
 Application's Manifest</a>.</p>
 
-<p class="note"><strong>Note:</strong> Previously you could test an app by
+<p class="note"><strong>Note:</strong> Previously, you could test an app by
 uploading an unpublished "draft" version. This functionality is no longer
 supported; instead, you must publish it to the alpha or beta distribution
 channel. For more information, see <a
@@ -97,7 +102,9 @@ application has only a few in-app items or you are adding only a few items to a
 product list for testing purposes. The CSV file method is useful if your application has a large
 number of in-app items.</p>
 
-<p class="note"><strong>Note:</strong> Batch upload of product lists containing subscriptions is not yet supported.</p>
+<p class="note"><strong>Note:</strong> Batch upload of product lists containing subscriptions is not yet supported.
+Also, you cannot perform a batch upload containing changes to in-app products that are linked to a
+<a href="#pricing-template">pricing template</a>.</p>
 
 <h3 id="billing-form-add">Adding items one at a time to a product list</h3>
 
@@ -107,39 +114,67 @@ number of in-app items.</p>
   <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
   <li>In the <strong>All Applications</strong> panel, click on the
   app name, then select <strong>In-app Products</strong>.</li>
-  <li>Click <strong>Add new product</strong> (see figure 2) and provide details about the item you are
-  selling and then click <strong>Save</strong> or <strong>Publish</strong>.</li>
+  <li>Click <strong>Add new product</strong> (see figure 2) and provide the product type and ID for the item you are
+  selling. Click <strong>Continue</strong>.</li>
+  <li>Enter additional information about the item, then click <strong>Save</strong> or <strong>Publish</strong>.
 </ol>
 
-<div style="margin:1em;">
-<img style="border:1px solid #ddd;padding-bottom:.5em;" src="{@docRoot}images/in-app-billing/billing_add.png" height="300" id="figure2" />
-<p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 2.</strong> The Add New Product page lets you add items to an
-  application's product list.
-</p>
+<div class="figure-right">
+  <figure id="fig-anp">
+    <img src="{@docRoot}images/in-app-billing/add_new_product.png" width="300"
+    alt="Adding a managed product with a Product ID of basic_sleeping_potion.">
+    <figcaption>
+      <b>Figure 2. </b>The <em>Add New Product</em> page lets you
+      provide basic information about a paid app or in-app product.
+    </figcaption>
+  </figure>
 </div>
 
-<p>You must enter the following information for each item in a product list:</p>
+<div class="figure-right">
+  <figure id="fig-nmp">
+    <img src="{@docRoot}images/in-app-billing/new_managed_product.png" width="700"
+    alt="">
+    <figcaption>
+      <b>Figure 3. </b>The <em>New Managed Product</em> page lets you finish
+      adding items to an app’s product list.
+    </figcaption>
+  </figure>
+</div>
+
+<div class="figure-right">
+  <figure id="fig-elp">
+    <img src="{@docRoot}images/in-app-billing/edit_local_prices.png" width="700"
+    alt="An item that costs 1.99 in USD usually costs a different amount in AUD,
+    EUR, or BOB. Some countries also add tax to the price.">
+    <figcaption>
+      <b>Figure 4. </b>Specifying additional currencies for an in-app product.
+    </figcaption>
+  </figure>
+</div>
+
+<p>You must enter the following information for each item in a product list (see
+  figures 2 and 3):</p>
 <ul>
   <li><strong>In-app Product ID</strong>
     <p>Product IDs are unique across an application's namespace. A product ID must start with a
     lowercase letter or a number, and must be composed using only lowercase letters (a-z), numbers
-    (0-9), underlines (_), and dots (.). The product ID "android.test" is reserved, as are all
-    product IDs that start with "android.test."</p>
-    <p>In addition, you cannot modify an item's product ID after it is created, and you cannot reuse
+    (0-9), underscores (_), and dots (.). The product ID <code>"android.test"</code> is reserved, as are all
+    product IDs that start with <code>"android.test"</code>.</p>
+    <p class="note"><strong>Note: </strong>Be sure to plan your product ID namespace carefully. You
+    cannot modify an item's product ID after it is created, and you cannot reuse
     a product ID.</p>
   </li>
   <li><strong>Product Type</strong>
-    <p>The product type can be <strong>Managed per user account</strong>,
-    <strong>Unmanaged</strong>, or <strong>Subscription</strong>. You can never
+    <p>The product type can be <strong>Managed product</strong> or <strong>Subscription</strong>. You cannot
     change an item's product type after you set it. For more information, see
-    <a href="#billing-purchase-type">Choosing a product type</a> later in this
-    document.</p>
+    <a href="#billing-purchase-type">Choosing a product type</a>.</p>
+    <p class="note"><strong>Note: </strong>For subscription items, note that you cannot change the
+    item's price once you have published it.</p>
   </li>
   <li><strong>Publishing State</strong>
     <p>An item's publishing state can be <strong>Published</strong> or <strong>Unpublished
     </strong>. To be visible to a user during checkout, an item's publishing state must be set to
-    <strong>Published</strong> and the item's application must be published on Google Play.</p>
+    <strong>Published</strong>, and the item's application must be published on Google Play.</p>
     <p class="note"><strong>Note:</strong> This is not true for test accounts. An item is visible to
     a test account if the application is not published and the item is published. See <a
     href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-real">Testing In-app
@@ -147,12 +182,12 @@ number of in-app items.</p>
   </li>
   <li><strong>Languages and Translations</strong>
     <p>You can provide localized titles and descriptions for your in-app
-    products using the Add Translations button. If you want Google Play to translate
-    your title and description for you, based on the title and description in the
-    default language, just click the languages that you want to offer. If you want
-    to provide custom translations in specific languages, you can also do that. By
-    default, an in-app product inherits its default language from the parent
-    application.</p>
+    products by selecting <strong>Add Translations</strong>. If you want Google
+    Play to translate your title and description for you, based on the title and
+    description in the default language, just choose the languages that you
+    want to offer. If you want to provide custom translations in specific
+    languages, you can also do that. By default, an in-app product inherits its
+    default language from the parent application.</p>
   </li>
   <li><strong>Title</strong>
     <p>The title is a short descriptor for the item. For example, "Sleeping potion."
@@ -166,35 +201,18 @@ number of in-app items.</p>
     up to 80 characters in length.</p>
   </li>
   <li><strong>Price</strong>
-    <p>You must provide a default price in your home currency. You can also provide prices in other
-    currencies, but you can do this only if a currency's corresponding country is listed as a
-    target country for your application. You can specify target countries on the Edit Application
-    page in the Google Play developer console.</p>
-    <p>To specify prices in other currencies, you can manually enter the price for each
-    currency or you can click <strong>Auto Fill</strong> and let Google Play do a one-time
-    conversion from your home currency to the currencies you are targeting (see figure 3).</p>
-    <p>For subscription items, note that you can not change the item's price once you have published
-    it.</p>
+    <p>Provide a price in your home currency, or link the price to an existing
+    pricing template (see figure 4). Based on the price you enter or the prices
+    from the pricing template, the system autofills country-specific prices for
+    different currencies. These generated prices use today's exchange rates and
+    locally-relevant pricing patterns.</p>
+    <p>You can also change prices for other currencies manually, but you can do
+      this only if a currency is used in one of the target countries for your
+      application. You can specify target countries for your app on the
+      <strong>Pricing &amp; Distribution</strong> page in the Google Play
+      Developer Console.</p>
   </li>
 </ul>
-
-<div style="margin:1em;">
-<img style="border:1px solid #ddd;padding-bottom:.5em"
-    src="{@docRoot}images/in-app-billing/billing_list_form_2.png"
-    xheight="1226" id="figure3" />
-<p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 3.</strong> Specifying additional currencies for an in-app product.
-</p>
-</div>
-
-<p>For more information about product IDs and product lists, see <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1072599">
-Creating In-App Product IDs</a>. For more information about pricing, see <a
-href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=en&answer=1153485">
-In-App Billing Pricing</a>.</p>
-
-<p class="note"><strong>Note</strong>: Be sure to plan your product ID namespace. You cannot reuse
-or modify product IDs after you save them.</p>
 
 <h3 id="billing-bulk-add">Adding a batch of items to a product list</h3>
 
@@ -203,17 +221,48 @@ file. The data values that you specify in the CSV file represent the same data v
 manually through the In-app Products UI (see <a href="#billing-form-add">Adding items one at a time
 to a product list</a>).
 
-<p>If you are importing and exporting CSV files with in-app products, please
-keep tax-inclusive pricing in mind. If you use auto-fill, you can provide a
-tax-exclusive default price and tax-inclusive prices will be auto-filled. If you
+<p>If you are importing and exporting CSV files with in-app products, keep
+country-specific pricing in mind. If you use auto-fill, you can provide a
+tax-exclusive default price, and tax-inclusive prices will be auto-filled. If you
 do not use auto-fill, prices you provide must include tax.</p>
 
 <p class="note"><strong>Note:</strong> Batch upload of product lists containing
-subscriptions is not yet supported.</p>
+subscriptions is not yet supported. Also, you cannot perform a batch upload
+containing changes to in-app products that are linked to a
+<a href="#pricing-template">pricing template</a>.</p>
 
-The CSV file uses commas (,) and semi-colons (;) to separate data values.
-Commas are used to separate primary data values, and semi-colons are used to separate subvalues. For
-example, the syntax for the CSV file is as follows:</p>
+
+
+<p>To import the items that are specified in your CSV file, do the following:</p>
+
+<ol>
+  <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
+  <li>In the <strong>All Applications</strong> panel, click on the app
+  name, then select <strong>In-app Products</strong>.</li>
+  <li>On the In-app Products List page, click <strong>Import/Export</strong>
+  &gt; <strong>Import in-app products from CSV file</strong>, then select your
+  CSV file.
+    <p>The CSV file must be on your local computer or on a local disk that is connected to your
+    computer.</p>
+  </li>
+  <li>Select the <strong>Overwrite</strong> checkbox if you want to overwrite existing items in
+  your product list.
+    <p>This option overwrites values of existing items only if the value of the <em>product_id</em>
+    in the CSV file matches the In-app Product ID for an existing item in the product list.
+    Overwriting doesn't delete items that are on a product list but not present in the CSV
+    file.</p>
+  </li>
+</ol>
+
+<p>You can also export an existing product list to a CSV file by clicking <strong>Export to CSV
+</strong> on the In-app Product List page. This is useful if you have manually added items to
+a product list and you want to start managing the product list through a CSV file.</p>
+
+<h4 id="billing-bulk-format">Formatting batches of items</h4>
+
+<p>The CSV file uses commas (,) and semi-colons (;) to separate data values.
+Commas are used to separate primary data values, and semi-colons are used to
+separate subvalues. For example, the syntax for the CSV file is as follows:</p>
 
 <p>"<em>product_id</em>","<em>publish_state</em>","<em>purchase_type</em>","<em>autotranslate</em>
 ","<em>locale</em>; <em>title</em>; <em>description</em>","<em>autofill</em>","<em>country</em>;
@@ -266,36 +315,39 @@ example, the syntax for the CSV file is as follows:</p>
   <li><em>title</em>
     <p>This is equivalent to the Title setting in the In-app Products UI. If the <em>title</em>
     contains a semicolon, it must be escaped with a backslash (for example, "\;"). A backslash
-    should also be escaped with a backslash (for example, "\\">.</p>
+    should also be escaped with a backslash (for example, "\\").</p>
   </li>
   <li><em>description</em>
     <p>This is equivalent to the Description in the In-app Products UI. If the <em>description</em>
     contains a semicolon, it must be escaped with a backslash (for example, "\;"). A backslash
-    should also be escaped with a backslash (for example, "\\">.</p>
+    should also be escaped with a backslash (for example, "\\").</p>
   </li>
   <li><em>autofill</em>
     <p>This is equivalent to clicking <strong>Auto Fill</strong> in the In-app Products UI. Can be
     <code>true</code> or <code>false</code>. The syntax for specifying the <em>country</em>
     and <em>price</em> varies depending on which <em>autofill</em> setting you use.</p>
     <p>If <em>autofill</em> is set to <code>true</code>, you need to specify only the default
-    price in your home currency and you must use this syntax:</p>
+    price in your home currency, and you must use this syntax:</p>
     <p>"true","<em>default_price_in_home_currency</em>"
     <p>If <em>autofill</em> is set to <code>false</code>, you need to specify a <em>country</em>
-    and a <em>price</em> for each currency and you must use the following syntax:</p>
+    and a <em>price</em> for each currency, and you must use the following syntax:</p>
     <p>"false", "<em>home_country</em>; <em>default_price_in_home_currency</em>; <em>country_2</em>;
     <em>country_2_price</em>; <em>country_3</em>; <em>country_3_price</em>; ..."</p>
+    <p class="note"><strong>Note: </strong>If you use an <em>autofill</em> value of <code>false</code>
+    and set country prices manually, you must incorporate country-specific
+    pricing patterns, including tax rates, into the prices you provide.</p>
   </li>
   <li><em>country</em>
     <p>The country for which you are specifying a price. You can only list countries that your
     application is targeting. The country codes are two-letter uppercase
-    ISO country codes (such as "US") as defined by
+    ISO country codes (such as "US"), as defined by
     <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-2</a>.</p>
   </li>
   <li><em>price</em>
     <p>This is equivalent to the Price in the In-app Products UI. The price must be specified in
     micro-units. To convert a currency value to micro-units, you multiply the real value by
     1,000,000.
-    For example, if you want to sell an in-app item for $1.99 you specify 1990000 in the
+    For example, if you want to sell an in-app item for $1.99, you specify <code>1990000</code> in the
     <em>price</em> field.</p>
   </li>
 </ul>
@@ -373,32 +425,352 @@ with the <em>locale</em> field.</p>
 </tr>
 </table>
 
-<p>To import the items that are specified in your CSV file, do the following:</p>
+<h2 id="pricing-template">
+  Pricing Templates
+</h2>
+
+<p>
+  If you sell multiple apps at the same price—or multiple in-app products at
+  the same price across one or more apps—you can add <em>pricing
+  templates</em>. These templates make it easier to manage shared prices.
+</p>
+
+<h3 id="add-pricing-template">
+  Adding a pricing template
+</h3>
+
+<p>
+  When creating a template, you can provide new pricing information, or you can
+  apply pricing information from an existing paid app or in-app product.
+</p>
+
+<div class="figure-right">
+  <figure id="fig-npt">
+    <img src="{@docRoot}images/in-app-billing/new_pricing_template.png"
+    srcset="{@docRoot}images/in-app-billing/new_pricing_template.png 1x, {@docRoot}images/in-app-billing/new_pricing_template_2x.png 2x"
+    width="400" alt="A template with the name Basic inventory uses a price of
+    USD 0.99.">
+    <figcaption>
+      <b>Figure 5. </b>The <em>Pricing template</em> page, where you add pricing
+      details for the new template you're creating.
+    </figcaption>
+  </figure>
+</div>
+
+<p>
+  To add a pricing template, do the following:
+</p>
 
 <ol>
-  <li><a href="http://play.google.com/apps/publish">Log in</a> to your publisher account.</li>
-  <li>In the <strong>All Applications</strong> panel, click on the app
-  name, then select <strong>In-app Products</strong>.</li>
-  <li>On the In-app Products List page, click <strong>Import/Export</strong>
-  &gt; <strong>Import in-app products from CSV file</strong>, then select your
-  CSV file.
-    <p>The CSV file must be on your local computer or on a local disk that is connected to your
-    computer.</p>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
   </li>
-  <li>Select the <strong>Overwrite</strong> checkbox if you want to overwrite existing items in
-  your product list.
-    <p>This option overwrites values of existing items only if the value of the <em>product_id</em>
-    in the CSV file matches the In-app Product ID for an existing item in the product list.
-    Overwriting does not delete items that are on a product list but not present in the CSV
-    file.</p>
+
+  <li>In the <strong>Settings</strong> panel, select <strong>Pricing
+  template</strong>.
+  </li>
+
+  <li>
+    <p>
+      If you are adding your first pricing template, the <strong>Add a Pricing
+      Template</strong> banner appears. Select <strong>Add template</strong> to
+      create a new template. The <strong>Pricing Template</strong> page
+      appears.
+    </p>
+
+    <p>
+      Otherwise, you see a list of your pricing templates. Select <strong>New
+      pricing template</strong>. The <strong>Pricing Template</strong> page
+      appears.
+    </p>
+  </li>
+
+  <li>
+    <p>
+      Provide details about the template. These details include the name, the
+      price, and whether to include tax as part of your country-specific
+      prices.
+    </p>
+    <p>
+      Based on the price and tax option you provide, the Developer Console
+      generates prices for international currencies using today's exchange
+      rates and country-specific pricing patterns.
+    </p>
+  </li>
+  <li>Select <strong>Create template</strong> to finish adding the template.
   </li>
 </ol>
 
-<p>You can also export an existing product list to a CSV file by clicking <strong>Export to CSV
-</strong> on the In-app Product List page. This is useful if you have manually added items to
-a product list and you want to start managing the product list through a CSV file.</p>
+<h3 id="link-pricing-template">
+  Linking a pricing template
+</h3>
 
-<h3 id="billing-purchase-type">Choosing a Product Type</h3>
+<p>
+  You can link shared prices across paid apps or in-app products to a pricing
+  template. To complete the linking process, use either the template's
+  <em>Linked Items</em> tab or the Price section within a paid app or in-app
+  product's pricing page.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Since a subscription within your app has a constant
+  price, you cannot link a subscription with a pricing template. You can,
+  however, import the prices from a template and apply them to a new
+  subscription.
+</p>
+
+<h4>
+  Linking a pricing template or paid app to an in-app product
+</h4>
+
+<p>
+  After you create a pricing template, you can link the prices of in-app
+  products and paid apps to that template. After completing this linking
+  process, any changes you make to the pricing template are applied to the
+  prices of items that you've linked to the template.
+</p>
+
+<div class="figure-right">
+  <figure id="fig-lpt">
+    <img src="{@docRoot}images/in-app-billing/link_pricing_template.png"
+    width="700" alt="The Sleeping Potion in-app product is linked to the Basic
+    Inventory item, but the Invisibility Potion is not.">
+    <figcaption>
+      <b>Figure 6. </b>Use the Linked Items tab of the
+      <em>Pricing Template</em> page to change which in-app products and paid
+      apps are linked to a pricing template.
+    </figcaption>
+  </figure>
+</div>
+
+<p>
+  To link a pricing template to an in-app product, do the following:
+</p>
+
+<ol>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
+  </li>
+
+  <li>In the <strong>Settings</strong> panel, select <strong>Pricing
+  template</strong>. The <strong>Pricing Template</strong> page appears,
+  showing the list of pricing templates you have created for your account.
+  </li>
+
+  <li>Choose the pricing template that you want to link to an in-app product,
+  then select the <em>Linked Items</em> tab. A page appears, showing options to
+  link your pricing template to in-app products and paid apps.
+  </li>
+
+  <li>In the Link In-App Products section of the page, enter or choose the name
+  of an app. This app should contain the in-app product that you want to link
+  to your pricing template.
+  </li>
+
+  <li>Based on the app that you selected, you see a list of in-app products
+  that are active and are not yet linked to a pricing template. Select the
+  in-app product that you want to link to the pricing template by selecting the
+  <strong>Link</strong> button that appears in the same row as the in-app
+  product.
+  </li>
+
+  <li>The price of the in-app product is now linked to your pricing template.
+  Any changes you make to the prices within your pricing template affect the
+  prices of the linked in-app product.
+  </li>
+</ol>
+
+<p>
+  To link a pricing template to the price of a paid app, you follow a similar
+  process. On the pricing template's <em>Linked Items</em> tab, choose a paid
+  app in the Link Paid Apps section.
+</p>
+
+<h4>
+  Linking an in-app product or paid app with a pricing template
+</h4>
+
+<p>
+  After you create a paid app or in-app product, you can link its pricing
+  information to a pricing template.
+</p>
+
+<div class="figure-right">
+  <figure id="fig-spt">
+    <img src="{@docRoot}images/in-app-billing/select_pricing_template.png"
+    width="700" alt="">
+    <figcaption>
+      <b>Figure 7. </b>Choosing a pricing template to link to a particular
+      in-app product or paid app.
+    </figcaption>
+  </figure>
+</div>
+
+<p>
+  To link an in-app product to a pricing template, do the following:
+</p>
+
+<ol>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
+  </li>
+
+  <li>In the <strong>All Applications</strong> panel, choose the app that
+  contains the in-app product that you want to link to a pricing template.
+  </li>
+
+  <li>Within the app's panel, choose the <strong>In-app Products</strong>
+  sub-panel.
+  </li>
+
+  <li>Choose the in-app product that you want to link to a pricing template.
+  The <em>Managed Product Details</em> page appears.
+  </li>
+
+  <li>In the Pricing section, choose the pricing template that you want to link
+  to the price of this in-app product (see figure 7).
+  </li>
+
+  <li>The price of the in-app product is now linked to the pricing template you
+  selected. Any changes you make to the prices within your pricing template
+  affect the prices of this in-app product.
+  </li>
+</ol>
+
+<p>
+  To link the price of a paid app to a pricing template, you follow a similar
+  process within the app's <strong>Pricing &amp; Distribution</strong>
+  sub-panel.
+</p>
+
+<h3 id="delete-linked-item">
+  Deleting an item that is linked to a pricing template
+</h3>
+
+<p>
+  As your app evolves, you may find it useful to remove older versions of
+  in-app products or apps, some of which may be linked to pricing templates. To
+  delete an in-app product or app that is linked to a pricing template, simply
+  remove it by completing the following steps. You don't need to unlink the
+  in-app product or app from the pricing template beforehand.
+</p>
+
+<h4>
+  Deleting an in-app product that is linked to a template
+</h4>
+
+<div class="figure-right">
+  <figure id="fig-diap">
+    <img src="{@docRoot}images/in-app-billing/delete_iap.png"
+    width="700" alt="">
+    <figcaption>
+      <b>Figure 8. </b>Deleting an in-app product that is linked to a pricing
+      template.
+    </figcaption>
+  </figure>
+</div>
+
+<p>
+  To delete an in-app product that is linked to a template, do the following:
+</p>
+
+<ol>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
+  </li>
+
+  <li>In the Google Play Developer Console, navigate to the app that contains
+  the in-app product you want to delete.
+  </li>
+
+  <li>Open the app's <strong>In-app Products</strong> page.
+  </li>
+
+  <li>Choose the in-app product that you want to delete.
+  </li>
+
+  <li>Select the button that indicates whether the in-app product is active or
+  inactive (enclosed in a box within figure 8). The drop-down menu includes a
+  <strong>Delete</strong> option.
+  </li>
+  <li>Select <strong>Delete</strong>, then select <strong>Yes</strong> in the
+  confirmation dialog that appears.
+  </li>
+</ol>
+
+<h4>
+  Deleting a paid app that is linked to a template
+</h4>
+
+<div class="figure-right">
+  <figure id="fig-upa">
+    <img src="{@docRoot}images/in-app-billing/unpublish_paid_app.png"
+    width="700" alt="">
+    <figcaption>
+      <b>Figure 9. </b>Unpublishing an app that has already been published and is
+      linked to a pricing template.
+    </figcaption>
+  </figure>
+</div>
+
+<p>
+  To delete a paid app that is linked to a template, do the following:
+</p>
+
+<ol>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
+  </li>
+
+  <li>In the Google Play Developer Console, choose the app that you want to
+  delete.
+  </li>
+
+  <li>Choose either <strong>Unpublish app</strong> (enclosed in a box within
+  figure 9) if you have already published the app, or
+  <strong>Delete app</strong> if your app is still in the "draft" state.
+  </li>
+  <li>Confirm your choice in the dialog that appears.
+  </li>
+</ol>
+
+<h3 id="delete-pricing-template">
+  Deleting a pricing template
+</h3>
+
+<p>
+  If you no longer need a pricing template, you can delete it by completing the
+  following steps:
+</p>
+
+<ol>
+  <li>
+    <a href="http://play.google.com/apps/publish">Log in</a> to your publisher
+    account.
+  </li>
+
+  <li>In the <strong>Settings</strong> panel, select <strong>Pricing
+  template</strong>. The <strong>Pricing Template</strong> page appears,
+  showing the list of pricing templates you have created for your account.
+  </li>
+
+  <li>Select the pricing template that you wish to delete.
+  </li>
+
+  <li>In the <em>Linked Items</em> tab on the pricing template details page,
+  unlink the pricing template from all in-app products and paid apps.
+  </li>
+
+  <li>Select <strong>Delete template</strong>.
+  </li>
+</ol>
+
+<h2 id="billing-purchase-type">Choosing a Product Type</h3>
 
 <p>An item's product type controls how Google Play manages the purchase of the item. There are
 several product types, including "managed per user account", "unmanaged," and "subscription." However,
@@ -408,8 +780,7 @@ version of In-app BIlling that your app uses. </p>
 
 <p>For details, refer to the documentation for <a
 href="{@docRoot}google/play/billing/api.html#producttype">In-app Billing Version
-3</a> or <a href="{@docRoot}google/play/billing/v2/api.html#producttype">In-app
-Billing Version 2</a>.
+3</a>.
 
 <h2 id="billing-refunds">Handling Refunds</h2>
 
@@ -496,25 +867,30 @@ accounts yourself and distribute the credentials to your developers or testers.<
 <h3 id="license_key">Getting an app's license key</h3>
 
 <p>The Google Play Developer Console provides a public licensing key for each
-app. To get the key for an app, follow these steps:</p>
+app.</p>
+
+<div class="figure-right">
+  <figure id="fig-bak">
+    <img src="{@docRoot}images/in-app-billing/billing_app_key.png"
+    width="700" alt="">
+    <figcaption>
+      <b>Figure 10. </b>You can find the license key for each app in the
+      <strong>Services &amp; APIs</strong> panel.
+    </figcaption>
+  </figure>
+</div>
+
+<p>To get the key for an app, follow these steps:</p>
 <ol>
   <li>Open the <strong>All Applications</strong> panel.</li>
   <li>Click on the app name, then select <strong>Services &amp; APIs</strong>.</li>
   <li>Scroll down to the <strong>Your License Key for this Application</strong>
-field to locate the key for the app, as shown in the figure below.</li>
+field to locate the key for the app, as shown in figure 10.</li>
 </ol>
 <p>Previously, the Developer Console provided a single public key per developer
 account. To transition apps to the new per-app public key, the Developer Console
 set the app-specific key as the former developer key. This ensures compatibility
 for apps that depend on the (former) developer key. </p>
-
-<div style="margin:1em;">
-<img style="border:1px solid #ddd;padding-bottom:.5em" src="{@docRoot}images/in-app-billing/billing_app_key.png" xheight="510" id="figure4" />
-<p class="img-caption" style="padding-left:.5em;">
-  <strong>Figure 4.</strong> You can find the license key for each app in the
-  <strong>Services &amp; APIs</strong> panel.
-</p>
-</div>
 
 <h2 id="billing-support">Where to Get Support</h2>
 
