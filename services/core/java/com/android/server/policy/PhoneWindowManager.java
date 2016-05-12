@@ -3957,7 +3957,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!isKeyguardShowing) {
                 navTranslucent &= areTranslucentBarsAllowed();
             }
-            boolean statusBarExpandedNotKeyguard = !isKeyguardShowing
+            boolean statusBarExpandedNotKeyguard = !isKeyguardShowing && mStatusBar != null
                     && mStatusBar.getAttrs().height == MATCH_PARENT
                     && mStatusBar.getAttrs().width == MATCH_PARENT;
 
