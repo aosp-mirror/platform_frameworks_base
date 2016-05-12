@@ -246,7 +246,8 @@ public class DividerSnapAlgorithm {
         int dividerMax = isHorizontalDivision
                 ? mDisplayHeight
                 : mDisplayWidth;
-        mTargets.add(new SnapTarget(-mDividerSize, SnapTarget.FLAG_DISMISS_START, 0.35f));
+        mTargets.add(new SnapTarget(-mDividerSize, -mDividerSize, SnapTarget.FLAG_DISMISS_START,
+                0.35f));
         switch (mSnapMode) {
             case SNAP_MODE_16_9:
                 addRatio16_9Targets(isHorizontalDivision, dividerMax);
@@ -259,7 +260,8 @@ public class DividerSnapAlgorithm {
                 break;
         }
         int navBarSize = isHorizontalDivision ? mInsets.bottom : mInsets.right;
-        mTargets.add(new SnapTarget(dividerMax - navBarSize, SnapTarget.FLAG_DISMISS_END, 0.35f));
+        mTargets.add(new SnapTarget(dividerMax - navBarSize, dividerMax,
+                SnapTarget.FLAG_DISMISS_END, 0.35f));
     }
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
@@ -269,13 +271,15 @@ public class DividerSnapAlgorithm {
         maybeAddTarget(bottomPosition, dividerMax - mInsets.bottom
                 - (bottomPosition + mDividerSize));
     }
+
     private void addFixedDivisionTargets(boolean isHorizontalDivision, int dividerMax) {
         int start = isHorizontalDivision ? mInsets.top : mInsets.left;
         int end = isHorizontalDivision
                 ? mDisplayHeight - mInsets.bottom
                 : mDisplayWidth - mInsets.right;
-        int topPosition = (int) (start + mFixedRatio * (end - start)) - mDividerSize / 2;
-        int bottomPosition = (int) (start + (1 - mFixedRatio) * (end - start)) - mDividerSize / 2;
+        int size = (int) (mFixedRatio * (end - start)) - mDividerSize / 2;
+        int topPosition = start + size;
+        int bottomPosition = end - size - mDividerSize;
         addNonDismissingTargets(isHorizontalDivision, topPosition, bottomPosition, dividerMax);
     }
 
@@ -301,13 +305,14 @@ public class DividerSnapAlgorithm {
      */
     private void maybeAddTarget(int position, int smallerSize) {
         if (smallerSize >= mMinimalSizeResizableTask) {
-            mTargets.add(new SnapTarget(position, SnapTarget.FLAG_NONE));
+            mTargets.add(new SnapTarget(position, position, SnapTarget.FLAG_NONE));
         }
     }
 
     private void addMiddleTarget(boolean isHorizontalDivision) {
-        mTargets.add(new SnapTarget(DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
-                mInsets, mDisplayWidth, mDisplayHeight, mDividerSize), SnapTarget.FLAG_NONE));
+        int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
+                mInsets, mDisplayWidth, mDisplayHeight, mDividerSize);
+        mTargets.add(new SnapTarget(position, position, SnapTarget.FLAG_NONE));
     }
 
     public SnapTarget getMiddleTarget() {
@@ -370,7 +375,15 @@ public class DividerSnapAlgorithm {
         /** If the divider reaches this value, the right/bottom task should be dismissed */
         public static final int FLAG_DISMISS_END = 2;
 
+        /** Position of this snap target. The right/bottom edge of the top/left task snaps here. */
         public final int position;
+
+        /**
+         * Like {@link #position}, but used to calculate the task bounds which might be different
+         * from the stack bounds.
+         */
+        public final int taskPosition;
+
         public final int flag;
 
         /**
@@ -379,12 +392,13 @@ public class DividerSnapAlgorithm {
          */
         private final float distanceMultiplier;
 
-        public SnapTarget(int position, int flag) {
-            this(position, flag, 1f);
+        public SnapTarget(int position, int taskPosition, int flag) {
+            this(position, taskPosition, flag, 1f);
         }
 
-        public SnapTarget(int position, int flag, float distanceMultiplier) {
+        public SnapTarget(int position, int taskPosition, int flag, float distanceMultiplier) {
             this.position = position;
+            this.taskPosition = taskPosition;
             this.flag = flag;
             this.distanceMultiplier = distanceMultiplier;
         }

@@ -102,7 +102,6 @@ interface IBluetooth
     boolean isOffloadedFilteringSupported();
     boolean isOffloadedScanBatchingSupported();
     boolean isActivityAndEnergyReportingSupported();
-    void getActivityEnergyInfoFromController();
     BluetoothActivityEnergyInfo reportActivityInfo();
 
     /**

@@ -1448,9 +1448,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                 if (adapter != null) {
                     bluetoothReceiver = new SynchronousResultReceiver();
-                    adapter.requestControllerActivityEnergyInfo(
-                            BluetoothAdapter.ACTIVITY_ENERGY_INFO_REFRESHED,
-                            bluetoothReceiver);
+                    adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
                 }
             }
 

@@ -234,8 +234,8 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         return mKeyguardStateMonitor.isShowing();
     }
 
-    public boolean isSecure() {
-        return mKeyguardStateMonitor.isSecure();
+    public boolean isSecure(int userId) {
+        return mKeyguardStateMonitor.isSecure(userId);
     }
 
     public boolean isInputRestricted() {

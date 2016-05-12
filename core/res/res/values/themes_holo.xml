@@ -247,9 +247,9 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_material</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_dark</item>
 
@@ -588,9 +588,9 @@ please see themes_device_defaults.xml.
         <item name="scrollbarTrackVertical">@null</item>
 
         <!-- Text selection handle attributes -->
-        <item name="textSelectHandleLeft">@drawable/text_select_handle_left</item>
-        <item name="textSelectHandleRight">@drawable/text_select_handle_right</item>
-        <item name="textSelectHandle">@drawable/text_select_handle_middle</item>
+        <item name="textSelectHandleLeft">@drawable/text_select_handle_left_material</item>
+        <item name="textSelectHandleRight">@drawable/text_select_handle_right_material</item>
+        <item name="textSelectHandle">@drawable/text_select_handle_middle_material</item>
         <item name="textSelectHandleWindowStyle">@style/Widget.Holo.TextSelectHandle</item>
         <item name="textCursorDrawable">@drawable/text_cursor_holo_light</item>
 

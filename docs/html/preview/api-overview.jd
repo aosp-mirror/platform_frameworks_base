@@ -37,6 +37,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#print_svc">Print service enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
+        <li><a href="#emoji">New Emojis</a></li>
       </ol>
 </div>
 </div>
@@ -110,6 +111,13 @@ use. Some of the changes include:</p>
     <strong>Template updates</strong>: We're updating notification templates to
     put a new emphasis on hero image and avatar. Developers will be able to
     take advantage of the new templates with minimal adjustments in their code.
+  </li>
+
+  <li>
+    <strong>Message style customization</strong>: You can customize more of the
+    user interface labels associated with your notifications using the
+    <code>MessageStyle</code> class. You can configure the message, conversation
+    title, and content view.
   </li>
 
   <li>
@@ -613,7 +621,7 @@ features such as face-tracking, eye-tracking, point scanning, and so on, to
 meet the needs of those users.</p>
 
 <p>For more information, see <code>android.accessibilityservice.GestureDescription</code>
-	in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
+  in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
 
 
 <h2 id="direct_boot">Direct boot</h2>
@@ -723,18 +731,46 @@ specify how user CAs should be trusted.</p>
 
 <h2 id="apk_signature_v2">APK signature scheme v2</h2>
 
-<p>The PackageManager class now supports verifying apps using the APK
-signature scheme v2. The APK signature scheme v2 is a whole-file signature scheme
-that significantly improves verification speed and strengthens integrity
-  guarantees by detecting any unauthorized changes to APK files.</p>
+<p>
+  Android N introduces APK Signature Scheme v2, a new app-signing scheme that
+  offers faster app install times and better protection against unauthorized
+  alterations to APK files. Android Studio 2.2 and Gradle provide built-in
+  support for APK Signature Scheme v2.
+</p>
 
-<p>To maintain backward-compatibility, an APK must be signed with the v1 signature
-scheme (JAR signature scheme) before being signed with the v2 signature scheme.
-With the v2 signature scheme, verification fails if you sign the APK with an
-  additional certificate after signing with the v2 scheme. </p>
+<p>
+  Although we recommend applying APK Signature Scheme v2 to your app, the new
+  scheme is not mandatory. If your app doesn't build properly when using the
+  APK Signature Scheme v2, you can use the traditional signing scheme—which
+  uses JAR signing—instead. To use the traditional scheme, open the
+  module-level <code>build.gradle</code> file and add the
+  <code>v2SigningEnabled</code> parameter to your release signing
+  configuration, setting this parameter's value to <code>false</code>:
+</p>
 
-<p>APK signature scheme v2 support will be available later in the N Developer
-Preview.</p>
+<pre>
+  android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+      release {
+        storeFile file("myreleasekey.keystore")
+        storePassword "password"
+        keyAlias "MyReleaseKey"
+        keyPassword "password"
+        <strong>v2SigningEnabled false</strong>
+      }
+    }
+  }
+</pre>
+
+<p>
+  For more information, see the following guides, which describe how to <a href=
+  "{@docRoot}studio/tools/publishing/app-signing.html#release-mode"> sign an app
+  in Android Studio</a> and how to <a href=
+  "{@docRoot}studio/tools/building/configuring-gradle.html#signing"> configure
+  the Gradle build file for signing apps</a>.
+</p>
 
 <h2 id="scoped_directory_access">Scoped directory access</h2>
 
@@ -880,3 +916,41 @@ Directory Access</a> developer documentation.</p>
   <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
   Access Frameworks guide</a>.
 </p>
+
+<h2 id="emoji">New Emojis</h2>
+
+<p>
+  Android N introduces new emojis, including skin tone emojis, support
+  for variation
+  selectors, and other improvements. For a good user experience, observe the
+  following guidelines for using the new emojis and emoji features in your apps.
+</p>
+
+<ul>
+  <li>
+    <strong>New emojis</strong>: To check which emojis are present in the
+    system font, use the {@link android.graphics.Paint#hasGlyph(String)} method
+    and the dynamic layout in the emoji picker to place the glyphs.
+  </li>
+  <li>
+    <strong>Variation selectors</strong>: Variation selectors allow certain
+    emojis to be represented in color or in text presentation, which is used in
+    documents. For mobile devices, emojis should use their color representation.
+    To determine whether an emoji has a variation, use the variation selector.
+    You can view the complete list of characters with variations in the
+    <em>emoji variation sequences</em> section of the
+    <a href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">
+      Unicode documentation on variations</a>.
+  </li>
+  <li>
+    <strong>Skin tone modifiers</strong>: In Android N, users can modify the
+    rendered skin tone of emojis. This allows users to customize the presentation
+    of emojis to their preference. Keyboard apps should provide visual
+    indications for emojis that have multiple skin tones and should allow users to
+    select the skin tone that they prefer. To determine which system emojis have
+    skin tone modifiers, use the {@link android.graphics.Paint#hasGlyph(String)}
+    method. You can determine which emojis use skin tones by reading the
+    <a href="http://unicode.org/emoji/charts/full-emoji-list.html">
+     Unicode documentation</a>.
+  </li>
+</ul>

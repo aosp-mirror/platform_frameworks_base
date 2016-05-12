@@ -62,8 +62,8 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
         return mIsShowing;
     }
 
-    public boolean isSecure() {
-        return mLockPatternUtils.isSecure(getCurrentUser()) || mSimSecure;
+    public boolean isSecure(int userId) {
+        return mLockPatternUtils.isSecure(userId) || mSimSecure;
     }
 
     public boolean isInputRestricted() {

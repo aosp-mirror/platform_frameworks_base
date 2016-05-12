@@ -535,7 +535,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         anim.addUpdateListener(animation -> resizeStack((Integer) animation.getAnimatedValue(),
                 taskPositionSameAtEnd && animation.getAnimatedFraction() == 1f
                         ? TASK_POSITION_SAME
-                        : snapTarget.position, snapTarget));
+                        : snapTarget.taskPosition, snapTarget));
         Runnable endAction = () -> {
             commitSnapFlags(snapTarget);
             mWindowManagerProxy.setResizing(false);

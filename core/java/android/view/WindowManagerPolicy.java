@@ -1121,10 +1121,11 @@ public interface WindowManagerPolicy {
      * isKeyguardSecure
      *
      * Return whether the keyguard requires a password to unlock.
+     * @param userId
      *
      * @return true if in keyguard is secure.
      */
-    public boolean isKeyguardSecure();
+    public boolean isKeyguardSecure(int userId);
 
     /**
      * Return whether the keyguard is on.
