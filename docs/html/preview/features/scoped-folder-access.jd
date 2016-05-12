@@ -44,6 +44,12 @@ Use this intent to access external storage directories. To get a list of
 all available volumes, including removable media volumes, use
 <code>StorageManager.getVolumesList()</code>.</p>
 
+<p>If you have information about a specific file, use
+<code>StorageManager.getStorageVolume(File)</code> to get the
+<code>StorageVolume</code> that contains the file. Call
+<code>createAccessIntent()</code> on this <code>StorageVolume</code> to access
+the external storage directory for the file.</p>
+
 <p>
 On secondary volumes, such as external SD cards, pass in null when calling
 <code>StorageVolume.createAccessIntent()</code> to request access to the entire
