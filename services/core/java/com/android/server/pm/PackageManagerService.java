@@ -10043,7 +10043,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             ArrayList<IntentFilter> result = new ArrayList<>();
             for (int n=0; n<count; n++) {
                 PackageParser.Activity activity = pkg.activities.get(n);
-                if (activity.intents != null || activity.intents.size() > 0) {
+                if (activity.intents != null && activity.intents.size() > 0) {
                     result.addAll(activity.intents);
                 }
             }
