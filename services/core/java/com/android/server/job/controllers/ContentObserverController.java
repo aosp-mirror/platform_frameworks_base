@@ -337,7 +337,7 @@ public class ContentObserverController extends StateController {
             } else {
                 pw.print(",");
             }
-            pw.print(System.identityHashCode(it.next()));
+            pw.print(System.identityHashCode(js));
         }
         if (printed) {
             pw.println();
