@@ -221,7 +221,6 @@ public abstract class CompoundButton extends Button implements Checkable {
      * @param drawable the drawable to set
      * @attr ref android.R.styleable#CompoundButton_button
      */
-    @Nullable
     public void setButtonDrawable(@Nullable Drawable drawable) {
         if (mButtonDrawable != drawable) {
             if (mButtonDrawable != null) {
