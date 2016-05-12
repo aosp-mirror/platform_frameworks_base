@@ -16,6 +16,7 @@
 
 package com.android.internal.app.procstats;
 
+import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -150,7 +151,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 19;
+    private static final int PARCEL_VERSION = 20;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -174,10 +175,9 @@ public final class ProcessStats implements Parcelable {
     String mRuntime;
     boolean mRunning;
 
-    public final SparseMappingTable mTableData = new SparseMappingTable();
+    boolean mHasSwappedOutPss;
 
-    int[] mAddLongTable;
-    int mAddLongTableSize;
+    public final SparseMappingTable mTableData = new SparseMappingTable();
 
     public final long[] mSysMemUsageArgs = new long[SYS_MEM_USAGE_COUNT];
     public final SysMemUsageTable mSysMemUsage = new SysMemUsageTable(mTableData);
@@ -191,6 +191,13 @@ public final class ProcessStats implements Parcelable {
     public ProcessStats(boolean running) {
         mRunning = running;
         reset();
+        if (running) {
+            // If we are actively running, we need to determine whether the system is
+            // collecting swap pss data.
+            Debug.MemoryInfo info = new Debug.MemoryInfo();
+            Debug.getMemoryInfo(android.os.Process.myPid(), info);
+            mHasSwappedOutPss = info.hasSwappedOutPss();
+        }
     }
 
     public ProcessStats(Parcel in) {
@@ -281,6 +288,8 @@ public final class ProcessStats implements Parcelable {
         }
         mTimePeriodEndRealtime += other.mTimePeriodEndRealtime - other.mTimePeriodStartRealtime;
         mTimePeriodEndUptime += other.mTimePeriodEndUptime - other.mTimePeriodStartUptime;
+
+        mHasSwappedOutPss |= other.mHasSwappedOutPss;
     }
 
     public void addSysMemUsage(long cachedMem, long freeMem, long zramMem, long kernelMem,
@@ -353,8 +362,8 @@ public final class ProcessStats implements Parcelable {
                         * (double)memTime;
                 data.sysMemFreeWeight += longs[idx+SYS_MEM_USAGE_FREE_AVERAGE]
                         * (double)memTime;
-                data.sysMemZRamWeight += longs[idx+SYS_MEM_USAGE_ZRAM_AVERAGE]
-                        * (double)memTime;
+                data.sysMemZRamWeight += longs[idx + SYS_MEM_USAGE_ZRAM_AVERAGE]
+                        * (double) memTime;
                 data.sysMemKernelWeight += longs[idx+SYS_MEM_USAGE_KERNEL_AVERAGE]
                         * (double)memTime;
                 data.sysMemNativeWeight += longs[idx+SYS_MEM_USAGE_NATIVE_AVERAGE]
@@ -362,6 +371,7 @@ public final class ProcessStats implements Parcelable {
                 data.sysMemSamples += longs[idx+SYS_MEM_USAGE_SAMPLE_COUNT];
              }
         }
+        data.hasSwappedOutPss = mHasSwappedOutPss;
         ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
         for (int iproc=0; iproc<procMap.size(); iproc++) {
             SparseArray<ProcessState> uids = procMap.valueAt(iproc);
@@ -640,6 +650,7 @@ public final class ProcessStats implements Parcelable {
         out.writeLong(mTimePeriodStartUptime);
         out.writeLong(mTimePeriodEndUptime);
         out.writeString(mRuntime);
+        out.writeInt(mHasSwappedOutPss ? 1 : 0);
         out.writeInt(mFlags);
 
         mTableData.writeToParcel(out);
@@ -798,6 +809,7 @@ public final class ProcessStats implements Parcelable {
         mTimePeriodStartUptime = in.readLong();
         mTimePeriodEndUptime = in.readLong();
         mRuntime = in.readString();
+        mHasSwappedOutPss = in.readInt() != 0;
         mFlags = in.readInt();
         mTableData.readFromParcel(in);
         readCompactedLongArray(in, version, mMemFactorDurations, mMemFactorDurations.length);
@@ -1344,6 +1356,9 @@ public final class ProcessStats implements Parcelable {
         if (partial) {
             pw.print(" (partial)");
         }
+        if (mHasSwappedOutPss) {
+            pw.print(" (swapped-out-pss)");
+        }
         pw.print(' ');
         pw.print(mRuntime);
         pw.println();
@@ -1428,6 +1443,9 @@ public final class ProcessStats implements Parcelable {
         }
         if (partial) {
             pw.print(",partial");
+        }
+        if (mHasSwappedOutPss) {
+            pw.print(",swapped-out-pss");
         }
         pw.println();
         pw.print("config,"); pw.println(mRuntime);
@@ -1616,6 +1634,7 @@ public final class ProcessStats implements Parcelable {
         public double sysMemKernelWeight;
         public double sysMemNativeWeight;
         public int sysMemSamples;
+        public boolean hasSwappedOutPss;
     }
 
 }
