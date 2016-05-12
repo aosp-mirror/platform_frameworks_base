@@ -3392,7 +3392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (down) {
-            long shortcutCode = (long) keyCode;
+            long shortcutCode = keyCode;
             if (event.isCtrlPressed()) {
                 shortcutCode |= ((long) KeyEvent.META_CTRL_ON) << Integer.SIZE;
             }
@@ -3511,6 +3511,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
 
+    @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
             throws RemoteException {
         synchronized (mLock) {
@@ -4822,7 +4823,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mShowingLockscreen = false;
         mShowingDream = false;
         mWinShowWhenLocked = null;
-        mKeyguardSecure = isKeyguardSecure();
+        mKeyguardSecure = isKeyguardSecure(mCurrentUserId);
         mKeyguardSecureIncludingHidden = mKeyguardSecure
                 && (mKeyguardDelegate != null && mKeyguardDelegate.isShowing());
     }
@@ -6299,9 +6300,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     @Override
-    public boolean isKeyguardSecure() {
+    public boolean isKeyguardSecure(int userId) {
         if (mKeyguardDelegate == null) return false;
-        return mKeyguardDelegate.isSecure();
+        return mKeyguardDelegate.isSecure(userId);
     }
 
     /** {@inheritDoc} */
@@ -6331,6 +6332,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    @Override
     public void notifyActivityDrawnForKeyguardLw() {
         if (mKeyguardDelegate != null) {
             mHandler.post(new Runnable() {
@@ -6846,7 +6848,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void updateLockScreenTimeout() {
         synchronized (mScreenLockTimeout) {
             boolean enable = (mAllowLockscreenWhenOn && mAwake &&
-                    mKeyguardDelegate != null && mKeyguardDelegate.isSecure());
+                    mKeyguardDelegate != null && mKeyguardDelegate.isSecure(mCurrentUserId));
             if (mLockScreenTimerActive != enable) {
                 if (enable) {
                     if (localLOGV) Log.v(TAG, "setting lockscreen timer");
