@@ -81,8 +81,6 @@
        <item>@drawable/edit_text_holo_dark</item>
        <item>@drawable/text_cursor_holo_light</item>
        <item>@drawable/text_cursor_holo_dark</item>
-       <item>@drawable/text_select_handle_left</item>
-       <item>@drawable/text_select_handle_right</item>
        <item>@drawable/text_edit_paste_window</item>
        <item>@drawable/expander_close_holo_dark</item>
        <item>@drawable/expander_close_holo_light</item>
