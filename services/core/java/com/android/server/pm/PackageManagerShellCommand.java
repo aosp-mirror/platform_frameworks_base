@@ -284,7 +284,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--reset":
                     forceCompilation = true;
                     clearProfileData = true;
-                    compilerFilter = "reset";
+                    compilationReason = "install";
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
