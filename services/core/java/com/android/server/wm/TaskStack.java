@@ -849,10 +849,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
      *
      * @param imeWin The IME window.
      */
-    void setAdjustedForIme(WindowState imeWin) {
+    void setAdjustedForIme(WindowState imeWin, boolean forceUpdate) {
         mImeWin = imeWin;
         mImeGoingAway = false;
-        if (!mAdjustedForIme) {
+        if (!mAdjustedForIme || forceUpdate) {
             mAdjustedForIme = true;
             mAdjustImeAmount = 0f;
             mAdjustDividerAmount = 0f;

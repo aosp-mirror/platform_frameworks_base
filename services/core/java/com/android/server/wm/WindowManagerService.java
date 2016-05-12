@@ -7535,6 +7535,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
         final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
         final boolean dockMinimized = displayContent.mDividerControllerLocked.isMinimizedDock();
+        final int imeHeight = mPolicy.getInputMethodWindowVisibleHeightLw();
+        final boolean imeHeightChanged = imeVisible &&
+                imeHeight != displayContent.mDividerControllerLocked.getImeHeightAdjustedFor();
 
         // The divider could be adjusted for IME position, or be thinner than usual,
         // or both. There are three possible cases:
@@ -7548,13 +7551,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 final TaskStack stack = stacks.get(i);
                 final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
                 if (stack.isVisibleLocked() && (imeOnBottom || isDockedOnBottom)) {
-                    stack.setAdjustedForIme(imeWin);
+                    stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
                 } else {
                     stack.resetAdjustedForIme(false);
                 }
             }
             displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin);
+                    imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin, imeHeight);
         } else {
             final ArrayList<TaskStack> stacks = displayContent.getStacks();
             for (int i = stacks.size() - 1; i >= 0; --i) {
@@ -7562,7 +7565,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 stack.resetAdjustedForIme(!dockVisible);
             }
             displayContent.mDividerControllerLocked.setAdjustedForIme(
-                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin);
+                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin, imeHeight);
         }
     }
 
