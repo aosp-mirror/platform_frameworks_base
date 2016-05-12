@@ -37,6 +37,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#print_svc">Print service enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
+        <li><a href="#emoji">New Emojis</a></li>
       </ol>
 </div>
 </div>
@@ -908,3 +909,41 @@ Directory Access</a> developer documentation.</p>
   <a href="{@docRoot}guide/topics/providers/document-provider.html">Storage
   Access Frameworks guide</a>.
 </p>
+
+<h2 id="emoji">New Emojis</h2>
+
+<p>
+  Android N introduces new emojis, including skin tone emojis, support
+  for variation
+  selectors, and other improvements. For a good user experience, observe the
+  following guidelines for using the new emojis and emoji features in your apps.
+</p>
+
+<ul>
+  <li>
+    <strong>New emojis</strong>: To check which emojis are present in the
+    system font, use the {@link android.graphics.Paint#hasGlyph(String)} method
+    and the dynamic layout in the emoji picker to place the glyphs.
+  </li>
+  <li>
+    <strong>Variation selectors</strong>: Variation selectors allow certain
+    emojis to be represented in color or in text presentation, which is used in
+    documents. For mobile devices, emojis should use their color representation.
+    To determine whether an emoji has a variation, use the variation selector.
+    You can view the complete list of characters with variations in the
+    <em>emoji variation sequences</em> section of the
+    <a href="http://www.unicode.org/Public/9.0.0/ucd/StandardizedVariants-9.0.0d1.txt">
+      Unicode documentation on variations</a>.
+  </li>
+  <li>
+    <strong>Skin tone modifiers</strong>: In Android N, users can modify the
+    rendered skin tone of emojis. This allows users to customize the presentation
+    of emojis to their preference. Keyboard apps should provide visual
+    indications for emojis that have multiple skin tones and should allow users to
+    select the skin tone that they prefer. To determine which system emojis have
+    skin tone modifiers, use the {@link android.graphics.Paint#hasGlyph(String)}
+    method. You can determine which emojis use skin tones by reading the
+    <a href="http://unicode.org/emoji/charts/full-emoji-list.html">
+     Unicode documentation</a>.
+  </li>
+</ul>
