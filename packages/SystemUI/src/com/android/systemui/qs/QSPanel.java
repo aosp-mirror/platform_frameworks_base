@@ -299,7 +299,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return new QSTileView(mContext, tile.createTileView(mContext), collapsedView);
     }
 
-    protected void addTile(final QSTile<?> tile, boolean collapsedView) {
+    protected TileRecord addTile(final QSTile<?> tile, boolean collapsedView) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
         r.tileView = createTileView(tile, collapsedView);
@@ -358,6 +358,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         if (mTileLayout != null) {
             mTileLayout.addTile(r);
         }
+
+        return r;
     }
 
 
