@@ -24,7 +24,7 @@ toc:
 - title: Support and Release Notes
   path: /preview/support.html
 
-- title: Set Up to Develop
+- title: Set Up the Preview
   path: /preview/setup-sdk.html
   path_attributes:
   - name: es-lang

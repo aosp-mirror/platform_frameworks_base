@@ -42,8 +42,6 @@ deberás aplicar una actualización a JDK 8 para compilar tu proyecto en funció
 según lo descrito a continuación.
 </p>
 
-<iframe width="400" height="225" src="//www.youtube.com/embed/SBbWGxXCMqQ?autohide=1&amp;showinfo=0" frameborder="0" allowfullscreen="" style="float: right; margin: 0 0 20px 20px;"></iframe>
-
 <p>Android Studio 2.1 actualmente se encuentra disponible como muestra en el canal de
 versiones Canary. Si ya
 cuentas con Android Studio y no deseas realizar la actualización al canal Canary, puedes
