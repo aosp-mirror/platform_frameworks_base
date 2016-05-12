@@ -1003,56 +1003,63 @@ public abstract class NotificationListenerService extends Service {
      */
     public static class Ranking {
 
-        /** @hide */
-        @IntDef({VISIBILITY_NO_OVERRIDE, IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
-                IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH,
-                IMPORTANCE_MAX})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface Importance {}
-
         /** Value signifying that the user has not expressed a per-app visibility override value.
          * @hide */
-        public static final int VISIBILITY_NO_OVERRIDE = -1000;
+        public static final int VISIBILITY_NO_OVERRIDE = NotificationManager.VISIBILITY_NO_OVERRIDE;
 
         /**
          * Value signifying that the user has not expressed an importance.
          *
          * This value is for persisting preferences, and should never be associated with
          * an actual notification.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_UNSPECIFIED = -1000;
+        public static final int IMPORTANCE_UNSPECIFIED = NotificationManager.IMPORTANCE_UNSPECIFIED;
 
         /**
          * A notification with no importance: shows nowhere, is blocked.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_NONE = 0;
+        public static final int IMPORTANCE_NONE = NotificationManager.IMPORTANCE_NONE;
 
         /**
          * Min notification importance: only shows in the shade, below the fold.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_MIN = 1;
+        public static final int IMPORTANCE_MIN = NotificationManager.IMPORTANCE_MIN;
 
         /**
          * Low notification importance: shows everywhere, but is not intrusive.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_LOW = 2;
+        public static final int IMPORTANCE_LOW = NotificationManager.IMPORTANCE_LOW;
 
         /**
          * Default notification importance: shows everywhere, allowed to makes noise,
          * but does not visually intrude.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_DEFAULT = 3;
+        public static final int IMPORTANCE_DEFAULT = NotificationManager.IMPORTANCE_DEFAULT;
 
         /**
          * Higher notification importance: shows everywhere, allowed to makes noise and peek.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_HIGH = 4;
+        public static final int IMPORTANCE_HIGH = NotificationManager.IMPORTANCE_HIGH;
 
         /**
          * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
          * use full screen intents.
+         *
+         * @hide
          */
-        public static final int IMPORTANCE_MAX = 5;
+        public static final int IMPORTANCE_MAX = NotificationManager.IMPORTANCE_MAX;
 
         private String mKey;
         private int mRank = -1;
@@ -1060,7 +1067,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mMatchesInterruptionFilter;
         private int mVisibilityOverride;
         private int mSuppressedVisualEffects;
-        private @Importance int mImportance;
+        private @NotificationManager.Importance int mImportance;
         private CharSequence mImportanceExplanation;
         // System specified group key.
         private String mOverrideGroupKey;
@@ -1124,11 +1131,11 @@ public abstract class NotificationListenerService extends Service {
 
         /**
          * Returns the importance of the notification, which dictates its
-         * modes of presentation, see: {@link #IMPORTANCE_DEFAULT}, etc.
+         * modes of presentation, see: {@link NotificationManager#IMPORTANCE_DEFAULT}, etc.
          *
          * @return the rank of the notification
          */
-        public @Importance int getImportance() {
+        public @NotificationManager.Importance int getImportance() {
             return mImportance;
         }
 

@@ -16,11 +16,8 @@
 
 package android.app;
 
-import com.android.internal.util.Preconditions;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Notification.Builder;
 import android.content.ComponentName;
@@ -39,8 +36,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.service.notification.IConditionListener;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -48,12 +44,10 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Class to notify the user of events that happen.  This is how you tell
@@ -185,6 +179,56 @@ public class NotificationManager
      * the value is unavailable for any reason.
      */
     public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
+
+    /** @hide */
+    @IntDef({VISIBILITY_NO_OVERRIDE, IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
+            IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH,
+            IMPORTANCE_MAX})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Importance {}
+
+    /** Value signifying that the user has not expressed a per-app visibility override value.
+     * @hide */
+    public static final int VISIBILITY_NO_OVERRIDE = -1000;
+    /**
+     * Value signifying that the user has not expressed an importance.
+     *
+     * This value is for persisting preferences, and should never be associated with
+     * an actual notification.
+     */
+    public static final int IMPORTANCE_UNSPECIFIED = -1000;
+
+    /**
+     * A notification with no importance: shows nowhere, is blocked.
+     */
+    public static final int IMPORTANCE_NONE = 0;
+
+    /**
+     * Min notification importance: only shows in the shade, below the fold.
+     */
+    public static final int IMPORTANCE_MIN = 1;
+
+    /**
+     * Low notification importance: shows everywhere, but is not intrusive.
+     */
+    public static final int IMPORTANCE_LOW = 2;
+
+    /**
+     * Default notification importance: shows everywhere, allowed to makes noise,
+     * but does not visually intrude.
+     */
+    public static final int IMPORTANCE_DEFAULT = 3;
+
+    /**
+     * Higher notification importance: shows everywhere, allowed to makes noise and peek.
+     */
+    public static final int IMPORTANCE_HIGH = 4;
+
+    /**
+     * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
+     * use full screen intents.
+     */
+    public static final int IMPORTANCE_MAX = 5;
 
     private static INotificationManager sService;
 
@@ -538,8 +582,10 @@ public class NotificationManager
 
     /**
      * Returns the user specified importance for notifications from the calling package.
+     *
+     * @return An importance level, such as {@link #IMPORTANCE_DEFAULT}.
      */
-    public @NotificationListenerService.Ranking.Importance int getImportance() {
+    public @Importance int getImportance() {
         INotificationManager service = getService();
         try {
             return service.getPackageImportance(mContext.getPackageName());
