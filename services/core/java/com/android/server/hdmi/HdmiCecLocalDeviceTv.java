@@ -826,9 +826,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        if (getSystemAudioModeSetting() && !isSystemAudioActivated()) {
-            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-        }
+        addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
         if (isArcFeatureEnabled(avr.getPortId())
                 && !hasAction(SetArcTransmissionStateAction.class)) {
             startArcAction(true);
@@ -1172,12 +1170,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             if (getAvrDeviceInfo() == null) {
                 // AVR may not have been discovered yet. Delay the message processing.
                 mDelayedMessageBuffer.add(message);
-                return true;
+            } else {
+                HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
+                mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             }
-            HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
         }
+        removeAction(SystemAudioAutoInitiationAction.class);
         SystemAudioActionFromAvr action = new SystemAudioActionFromAvr(this,
                 message.getSource(), HdmiUtils.parseCommandParamSystemAudioStatus(message), null);
         addAndStartAction(action);
