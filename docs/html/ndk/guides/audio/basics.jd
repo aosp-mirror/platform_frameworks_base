@@ -1,4 +1,4 @@
-page.title=OpenSL ES™ Basics
+page.title=High-Performance Audio Basics
 @jd:body
 
 <div id="qv-wrapper">
@@ -6,25 +6,50 @@ page.title=OpenSL ES™ Basics
       <h2>On this page</h2>
 
       <ol>
+        <li><a href="#overview">Building Great Audio Apps</a></li>
         <li><a href="#adding">Adding OpenSL ES to Your App</a></li>
         <li><a href="#building">Building and Debugging</a></li>
+        <li><a href="#power">Audio Power Consumption</a></li>
         <li><a href="#samples">Samples</a></li>
       </ol>
     </div>
   </div>
 
+<a href="https://www.youtube.com/watch?v=d3kfEeMZ65c" class="notice-developers-video">
+<div>
+    <h3>Video</h3>
+    <p>Google I/O 2013 - High Performance Audio</p>
+</div>
+</a>
 
 <p>
-The Khronos Group's OpenSL ES standard exposes audio features
+The Khronos Group's OpenSL ES™ standard exposes audio features
 similar to those in the {@link android.media.MediaPlayer} and {@link android.media.MediaRecorder}
 APIs in the Android Java framework. OpenSL ES provides a C language interface as well as
 C++ bindings, allowing you to call it from code written in either language.
 </p>
 
 <p>
-This page describes how to add these audio APIs into your app's source code, and how to incorporate
-them into the build process.
+This page describes the typical use cases for these high-performance audio APIs, how to add them
+into your app's source code, and how to incorporate them into the build process.
 </p>
+
+<h2 id="overview">Building Great Audio Apps</h2>
+
+<p>
+The OpenSL ES APIs are available to help you develop and improve your app's audio performance.
+ Some typical use cases include the following:</p>
+
+<ul>
+  <li>Digital Audio Workstations (DAWs).</li>
+  <li>Synthesizers.</li>
+  <li>Drum machines.</li>
+  <li>Music learning apps.</li>
+  <li>Karaoke apps.</li>
+  <li>DJ mixing.</li>
+  <li>Audio effects.</li>
+  <li>Video/audio conferencing.</li>
+</ul>
 
 <h2 id="adding">Adding OpenSL ES to your App</h2>
 
@@ -45,6 +70,18 @@ Android extensions</a> as well, include the {@code OpenSLES_Android.h} header fi
 #include &lt;SLES/OpenSLES_Android.h&gt;
 </pre>
 
+<p>
+When you include the {@code OpenSLES_Android.h} header file, the following headers are included
+automatically:
+</p>
+<pre>
+#include &lt;SLES/OpenSLES_AndroidConfiguration.h&gt;
+#include &lt;SLES/OpenSLES_AndroidMetadata.h&gt;
+</pre>
+
+<p class="note"><strong>Note: </strong>
+These headers are not required, but are shown as an aid in learning the API.
+</p>
 
 <h2 id="building">Building and Debugging</h2>
 
@@ -69,9 +106,9 @@ for a given use case.
 </p>
 
 <p>
-We use asserts in our <a href="https://github.com/googlesamples/android-ndk">examples</a>, because
-they help catch unrealistic conditions that would indicate a coding error. We have used explicit
-error handling for other conditions more likely to occur in production.
+We use asserts in our <a class="external-link" href="https://github.com/googlesamples/android-ndk">
+examples</a>, because they help catch unrealistic conditions that would indicate a coding error. We
+have used explicit error handling for other conditions more likely to occur in production.
 </p>
 
 <p>
@@ -91,18 +128,25 @@ $ adb logcat
 </pre>
 
 <p>
-To examine the log from Android Studio, either click the <em>Logcat</em> tab in the
-<a href="{@docRoot}tools/debugging/debugging-studio.html#runDebug"><em>Debug</em></a>
-window, or click the <em>Devices | logcat</em> tab in the
-<a href="{@docRoot}tools/debugging/debugging-studio.html#systemLogView"><em>Android DDMS</em></a>
+To examine the log from Android Studio, either click the <strong>Logcat</strong> tab in the
+<a href="{@docRoot}tools/debugging/debugging-studio.html#runDebug">Debug</a>
+window, or click the <strong>Devices | logcat</strong> tab in the
+<a href="{@docRoot}tools/debugging/debugging-studio.html#systemLogView">Android DDMS</a>
 window.
 </p>
-
+<h2 id="power">Audio Power Consumption</h2>
+<p>Constantly outputting audio incurs significant power consumption. Ensure that you stop the
+ output in the
+ <a href="{@docRoot}reference/android/app/Activity.html#onPause()">onPause()</a> method.
+ Also consider pausing the silent output after some period of user inactivity.
+</p>
 <h2 id="samples">Samples</h2>
 
 <p>
 Supported and tested example code that you can use as a model for your own code resides both locally
-and on GitHub. The local examples are located in
+and on
+<a class="external-link" href="https://github.com/googlesamples/android-audio-high-performance/">
+GitHub</a>. The local examples are located in
 {@code platforms/android-9/samples/native-audio/}, under your NDK root installation directory.
 On GitHub, they are available from the
 <a class="external-link" href="https://github.com/googlesamples/android-ndk">{@code android-ndk}</a>
@@ -122,4 +166,4 @@ Android app.
 For more information on differences between the reference specification and the
 Android implementation, see
 <a href="{@docRoot}ndk/guides/audio/opensl-for-android.html">
-OpenSL ES™ for Android</a>.
+OpenSL ES for Android</a>.
