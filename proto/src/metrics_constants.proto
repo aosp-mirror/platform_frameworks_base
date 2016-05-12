@@ -2203,6 +2203,9 @@ message MetricsEvent {
     // The dialog shown by 3P intent to change current webview implementation.
     WEBVIEW_IMPLEMENTATION = 405;
 
+    // Settings launched from expanded quick settings.
+    ACTION_QS_EXPANDED_SETTINGS_LAUNCH = 406;
+
     // ---- End N Constants, all N constants go above this line ----
 
     // ------- Begin N App Disambig Shade -----
