@@ -2479,4 +2479,9 @@
 
     <!-- True if the device supports persisting security logs across reboots. -->
     <bool name="config_supportPreRebootSecurityLogs">false</bool>
+
+    <!-- Default files to pin via Pinner Service -->
+    <string-array translatable="false" name="config_defaultPinnerServiceFiles">
+    </string-array>
+
 </resources>
