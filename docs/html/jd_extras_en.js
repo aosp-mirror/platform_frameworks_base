@@ -3852,7 +3852,6 @@ METADATA['en'].collections = {
       "distribute/essentials/quality/wear.html",
       "distribute/essentials/quality/auto.html",
       "distribute/essentials/quality/billions.html",
-      "https://developers.google.com/edu/guidelines"
     ]
   },
   "distribute/users": {
