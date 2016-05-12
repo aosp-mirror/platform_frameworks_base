@@ -1429,10 +1429,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
      *            row. The keys should be the column names and the values the
      *            column values
      * @param conflictAlgorithm for insert conflict resolver
-     * @return the row ID of the newly inserted row
-     * OR the primary key of the existing row if the input param 'conflictAlgorithm' =
-     * {@link #CONFLICT_IGNORE}
-     * OR -1 if any error
+     * @return the row ID of the newly inserted row OR <code>-1</code> if either the
+     *            input parameter <code>conflictAlgorithm</code> = {@link #CONFLICT_IGNORE}
+     *            or an error occurred.
      */
     public long insertWithOnConflict(String table, String nullColumnHack,
             ContentValues initialValues, int conflictAlgorithm) {
