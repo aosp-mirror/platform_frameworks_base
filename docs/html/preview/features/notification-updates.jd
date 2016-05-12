@@ -16,6 +16,7 @@ trainingnavtop=true
   <li><a href="#direct">Direct Reply</a></li>
   <li><a href="#bundle">Bundled Notifications</a></li>
   <li><a href="#custom">Custom Views</a></li>
+  <li><a href="#style">Message Style</a></li>
 </ol>
 
 </div>
@@ -233,6 +234,12 @@ Builder.setGroup()} method to bundle similar notifications.</p>
   group.
 </p>
 
+<p class="note">
+  <strong>Note:</strong> If the same app sends four or more notifications
+  and does not specify a grouping, the
+  system automatically groups them together.
+</p>
+
 <p>To learn how to add notifications to a group, see
 <a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Add
 Each Notification to a Group</a>.</p>
@@ -348,11 +355,35 @@ the desired custom view style.</p>
 {@code DecoratedCustomViewStyle()} method.</p>
 
 <pre>
-Notification noti = new Notification.Builder()
+Notification notification = new Notification.Builder()
            .setSmallIcon(R.drawable.ic_stat_player)
            .setLargeIcon(albumArtBitmap))
            .setCustomContentView(contentView);
            .setStyle(new Notification.DecoratedCustomViewStyle())
            .build();
 
+</pre>
+
+<h2 id="style">Message Style</h2>
+<p>
+  Android N introduces a new API for customizing the style of a notification.
+  Using the <code>MessageStyle</code> class, you can change several of the
+  labels displayed on the notification, including the conversation title,
+  additional messages, and the content view for the notification.
+</p>
+
+<p>
+  The following code snippet demonstrates how to customize a notification's
+  style using the <code>MessageStyle</code> class.
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+             .setConversationTitle("Team lunch")
+             .addMessage("Hi", timestamp1, null) // Pass in null for user.
+             .addMessage("What's up?", timestamp2, "Coworker")
+             .addMessage("Not much", timestamp3, null)
+             .addMessage("How about lunch?", timestamp4, "Coworker")
+             .setAllow());
 </pre>
