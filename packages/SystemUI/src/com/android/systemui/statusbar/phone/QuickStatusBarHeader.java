@@ -30,6 +30,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -340,6 +343,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     @Override
     public void onClick(View v) {
         if (v == mSettingsButton) {
+            MetricsLogger.action(mContext,
+                    MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH);
             if (mSettingsButton.isTunerClick()) {
                 if (TunerService.isTunerEnabled(mContext)) {
                     TunerService.showResetRequest(mContext, new Runnable() {
