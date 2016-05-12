@@ -63,7 +63,7 @@ public class RecentsTvImpl extends RecentsImpl{
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, isHomeStackVisible);
+            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 

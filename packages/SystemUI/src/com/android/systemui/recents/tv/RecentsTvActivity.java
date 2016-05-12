@@ -180,7 +180,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         if (!plan.hasTasks()) {
-            loader.preloadTasks(plan, -1, launchState.launchedFromHome);
+            loader.preloadTasks(plan, -1, !launchState.launchedFromHome);
         }
         mLaunchedFromHome = launchState.launchedFromHome;
         TaskStack stack = plan.getTaskStack();
