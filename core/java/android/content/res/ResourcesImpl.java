@@ -309,90 +309,97 @@ public class ResourcesImpl {
 
     public void updateConfiguration(Configuration config, DisplayMetrics metrics,
                                     CompatibilityInfo compat) {
-        synchronized (mAccessLock) {
-            if (false) {
-                Slog.i(TAG, "**** Updating config of " + this + ": old config is "
-                        + mConfiguration + " old compat is " + mCompatibilityInfo);
-                Slog.i(TAG, "**** Updating config of " + this + ": new config is "
-                        + config + " new compat is " + compat);
-            }
-            if (compat != null) {
-                mCompatibilityInfo = compat;
-            }
-            if (metrics != null) {
-                mMetrics.setTo(metrics);
-            }
-            // NOTE: We should re-arrange this code to create a Display
-            // with the CompatibilityInfo that is used everywhere we deal
-            // with the display in relation to this app, rather than
-            // doing the conversion here.  This impl should be okay because
-            // we make sure to return a compatible display in the places
-            // where there are public APIs to retrieve the display...  but
-            // it would be cleaner and more maintainble to just be
-            // consistently dealing with a compatible display everywhere in
-            // the framework.
-            mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ResourcesImpl#updateConfiguration");
+        try {
+            synchronized (mAccessLock) {
+                if (false) {
+                    Slog.i(TAG, "**** Updating config of " + this + ": old config is "
+                            + mConfiguration + " old compat is " + mCompatibilityInfo);
+                    Slog.i(TAG, "**** Updating config of " + this + ": new config is "
+                            + config + " new compat is " + compat);
+                }
+                if (compat != null) {
+                    mCompatibilityInfo = compat;
+                }
+                if (metrics != null) {
+                    mMetrics.setTo(metrics);
+                }
+                // NOTE: We should re-arrange this code to create a Display
+                // with the CompatibilityInfo that is used everywhere we deal
+                // with the display in relation to this app, rather than
+                // doing the conversion here.  This impl should be okay because
+                // we make sure to return a compatible display in the places
+                // where there are public APIs to retrieve the display...  but
+                // it would be cleaner and more maintainble to just be
+                // consistently dealing with a compatible display everywhere in
+                // the framework.
+                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
-            final @Config int configChanges = calcConfigChanges(config);
+                final @Config int configChanges = calcConfigChanges(config);
 
-            LocaleList locales = mConfiguration.getLocales();
-            if (locales.isEmpty()) {
-                locales = LocaleList.getAdjustedDefault();
-                mConfiguration.setLocales(locales);
+                LocaleList locales = mConfiguration.getLocales();
+                if (locales.isEmpty()) {
+                    locales = LocaleList.getAdjustedDefault();
+                    mConfiguration.setLocales(locales);
+                }
+                if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
+                    mMetrics.densityDpi = mConfiguration.densityDpi;
+                    mMetrics.density =
+                            mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+                }
+                mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+
+                final int width, height;
+                if (mMetrics.widthPixels >= mMetrics.heightPixels) {
+                    width = mMetrics.widthPixels;
+                    height = mMetrics.heightPixels;
+                } else {
+                    //noinspection SuspiciousNameCombination
+                    width = mMetrics.heightPixels;
+                    //noinspection SuspiciousNameCombination
+                    height = mMetrics.widthPixels;
+                }
+
+                final int keyboardHidden;
+                if (mConfiguration.keyboardHidden == Configuration.KEYBOARDHIDDEN_NO
+                        && mConfiguration.hardKeyboardHidden
+                        == Configuration.HARDKEYBOARDHIDDEN_YES) {
+                    keyboardHidden = Configuration.KEYBOARDHIDDEN_SOFT;
+                } else {
+                    keyboardHidden = mConfiguration.keyboardHidden;
+                }
+
+                mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
+                        adjustLanguageTag(locales.get(0).toLanguageTag()),
+                        mConfiguration.orientation,
+                        mConfiguration.touchscreen,
+                        mConfiguration.densityDpi, mConfiguration.keyboard,
+                        keyboardHidden, mConfiguration.navigation, width, height,
+                        mConfiguration.smallestScreenWidthDp,
+                        mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
+                        mConfiguration.screenLayout, mConfiguration.uiMode,
+                        Build.VERSION.RESOURCES_SDK_INT);
+
+                if (DEBUG_CONFIG) {
+                    Slog.i(TAG, "**** Updating config of " + this + ": final config is "
+                            + mConfiguration + " final compat is " + mCompatibilityInfo);
+                }
+
+                mDrawableCache.onConfigurationChange(configChanges);
+                mColorDrawableCache.onConfigurationChange(configChanges);
+                mComplexColorCache.onConfigurationChange(configChanges);
+                mAnimatorCache.onConfigurationChange(configChanges);
+                mStateListAnimatorCache.onConfigurationChange(configChanges);
+
+                flushLayoutCache();
             }
-            if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
-                mMetrics.densityDpi = mConfiguration.densityDpi;
-                mMetrics.density = mConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+            synchronized (sSync) {
+                if (mPluralRule != null) {
+                    mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().get(0));
+                }
             }
-            mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
-
-            final int width, height;
-            if (mMetrics.widthPixels >= mMetrics.heightPixels) {
-                width = mMetrics.widthPixels;
-                height = mMetrics.heightPixels;
-            } else {
-                //noinspection SuspiciousNameCombination
-                width = mMetrics.heightPixels;
-                //noinspection SuspiciousNameCombination
-                height = mMetrics.widthPixels;
-            }
-
-            final int keyboardHidden;
-            if (mConfiguration.keyboardHidden == Configuration.KEYBOARDHIDDEN_NO
-                    && mConfiguration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
-                keyboardHidden = Configuration.KEYBOARDHIDDEN_SOFT;
-            } else {
-                keyboardHidden = mConfiguration.keyboardHidden;
-            }
-
-            mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                    adjustLanguageTag(locales.get(0).toLanguageTag()),
-                    mConfiguration.orientation,
-                    mConfiguration.touchscreen,
-                    mConfiguration.densityDpi, mConfiguration.keyboard,
-                    keyboardHidden, mConfiguration.navigation, width, height,
-                    mConfiguration.smallestScreenWidthDp,
-                    mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
-                    mConfiguration.screenLayout, mConfiguration.uiMode,
-                    Build.VERSION.RESOURCES_SDK_INT);
-
-            if (DEBUG_CONFIG) {
-                Slog.i(TAG, "**** Updating config of " + this + ": final config is "
-                        + mConfiguration + " final compat is " + mCompatibilityInfo);
-            }
-
-            mDrawableCache.onConfigurationChange(configChanges);
-            mColorDrawableCache.onConfigurationChange(configChanges);
-            mComplexColorCache.onConfigurationChange(configChanges);
-            mAnimatorCache.onConfigurationChange(configChanges);
-            mStateListAnimatorCache.onConfigurationChange(configChanges);
-
-            flushLayoutCache();
-        }
-        synchronized (sSync) {
-            if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().get(0));
-            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
