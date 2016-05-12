@@ -100,12 +100,12 @@ public class RecentsTaskLoadPlan {
      * An optimization to preload the raw list of tasks. The raw tasks are saved in least-recent
      * to most-recent order.
      */
-    public synchronized void preloadRawTasks(boolean isHomeStackVisible) {
+    public synchronized void preloadRawTasks(boolean includeFrontMostExcludedTask) {
         int currentUserId = UserHandle.USER_CURRENT;
         updateCurrentQuietProfilesCache(currentUserId);
         SystemServicesProxy ssp = Recents.getSystemServices();
         mRawTasks = ssp.getRecentTasks(ActivityManager.getMaxRecentTasksStatic(),
-                currentUserId, isHomeStackVisible, mCurrentQuietProfiles);
+                currentUserId, includeFrontMostExcludedTask, mCurrentQuietProfiles);
 
         // Since the raw tasks are given in most-recent to least-recent order, we need to reverse it
         Collections.reverse(mRawTasks);
@@ -121,11 +121,11 @@ public class RecentsTaskLoadPlan {
      * - least-recent to most-recent freeform tasks
      */
     public synchronized void preloadPlan(RecentsTaskLoader loader, int runningTaskId,
-            boolean isHomeStackVisible) {
+            boolean includeFrontMostExcludedTask) {
         Resources res = mContext.getResources();
         ArrayList<Task> allTasks = new ArrayList<>();
         if (mRawTasks == null) {
-            preloadRawTasks(isHomeStackVisible);
+            preloadRawTasks(includeFrontMostExcludedTask);
         }
 
         SparseArray<Task.TaskKey> affiliatedTasks = new SparseArray<>();

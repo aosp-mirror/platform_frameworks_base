@@ -254,11 +254,12 @@ public class SystemServicesProxy {
     /**
      * Returns a list of the recents tasks.
      *
-     * @param isHomeStackVisible whether or not the home stack is currently visible.  If it is
-     *                           visible, then we ignore all excluded tasks (even the first one).
+     * @param includeFrontMostExcludedTask if set, will ensure that the front most excluded task
+     *                                     will be visible, otherwise no excluded tasks will be
+     *                                     visible.
      */
     public List<ActivityManager.RecentTaskInfo> getRecentTasks(int numLatestTasks, int userId,
-            boolean isHomeStackVisible, ArraySet<Integer> quietProfileIds) {
+            boolean includeFrontMostExcludedTask, ArraySet<Integer> quietProfileIds) {
         if (mAm == null) return null;
 
         // If we are mocking, then create some recent tasks
@@ -296,13 +297,16 @@ public class SystemServicesProxy {
         // Remove home/recents/excluded tasks
         int minNumTasksToQuery = 10;
         int numTasksToQuery = Math.max(minNumTasksToQuery, numLatestTasks);
-        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
-                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
+        int flags = ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS |
                 ActivityManager.RECENT_INGORE_DOCKED_STACK_TOP_TASK |
                 ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS |
                 ActivityManager.RECENT_IGNORE_UNAVAILABLE |
-                ActivityManager.RECENT_INCLUDE_PROFILES |
-                ActivityManager.RECENT_WITH_EXCLUDED, userId);
+                ActivityManager.RECENT_INCLUDE_PROFILES;
+        if (includeFrontMostExcludedTask) {
+            flags |= ActivityManager.RECENT_WITH_EXCLUDED;
+        }
+        List<ActivityManager.RecentTaskInfo> tasks = mAm.getRecentTasksForUser(numTasksToQuery,
+                flags, userId);
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {
@@ -317,18 +321,20 @@ public class SystemServicesProxy {
             // NOTE: The order of these checks happens in the expected order of the traversal of the
             // tasks
 
-            // Check the first non-recents task, include this task even if it is marked as excluded
-            // from recents if we are currently in the app.  In other words, only remove excluded
-            // tasks if it is not the first active task, and not in the blacklist.
+            // Remove the task if it is blacklisted
+            if (sRecentsBlacklist.contains(t.realActivity.getClassName())) {
+                iter.remove();
+            }
+
+            // Remove the task if it is marked as excluded, unless it is the first most task and we
+            // are requested to include it
             boolean isExcluded = (t.baseIntent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
-            boolean isBlackListed = sRecentsBlacklist.contains(t.realActivity.getClassName());
-            // Filter out recent tasks from managed profiles which are in quiet mode.
             isExcluded |= quietProfileIds.contains(t.userId);
-            if (isBlackListed || (isExcluded && (isHomeStackVisible || !isFirstValidTask))) {
+            if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
                 iter.remove();
-                continue;
             }
+
             isFirstValidTask = false;
         }
 
