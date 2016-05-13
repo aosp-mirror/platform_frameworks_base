@@ -151,8 +151,8 @@ page.tags="preview", "developer", "android"
 </p>
 
 <ul>
-  <li><strong><a href="{@docRoot}preview/support.html">Preview 1</a></strong> (versión inicial, alpha);</li>
-  <li><strong>Preview 2</strong> (actualización gradual, beta);</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong> (versión inicial, alpha);</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong> (actualización gradual, alpha);</li>
   <li><strong>Preview 3</strong> (actualización gradual, beta);</li>
   <li><strong>Preview 4</strong> (API finales y SDK oficial, publicación en Google Play);</li>
   <li><strong>Preview 5</strong> (imágenes de sistema casi definitivas para pruebas finales);</li>
