@@ -204,6 +204,16 @@ notificationManager.notify(notificationId, repliedNotification);
   android.support.v4.app.RemoteInput}, you can update the reply history
   using the {@code setRemoteInputHistory()} method.
 </p>
+
+<p>
+  The notification must be either updated or cancelled after the app has
+  received remote input. When the user replies to a remote update
+  using Direct Reply,
+  do not cancel the notification. Instead, update the notification to display the user's reply. You can update the notification using a
+  <code>MessagingStyle</code>, or you can append the user's reply to the remote
+  input history.
+</p>
+
 <h2 id="bundle">Bundled Notifications</h2>
 
 <p>Android N provides developers with a new way to represent
@@ -364,7 +374,7 @@ Notification notification = new Notification.Builder()
 
 </pre>
 
-<h2 id="style">Message Style</h2>
+<h2 id="style">Messaging Style</h2>
 <p>
   Android N introduces a new API for customizing the style of a notification.
   Using the <code>MessageStyle</code> class, you can change several of the
@@ -380,10 +390,9 @@ Notification notification = new Notification.Builder()
 <pre>
   Notification notification = new Notification.Builder()
              .setStyle(new Notification.MessagingStyle("Me")
-             .setConversationTitle("Team lunch")
-             .addMessage("Hi", timestamp1, null) // Pass in null for user.
-             .addMessage("What's up?", timestamp2, "Coworker")
-             .addMessage("Not much", timestamp3, null)
-             .addMessage("How about lunch?", timestamp4, "Coworker")
-             .setAllow());
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
 </pre>
