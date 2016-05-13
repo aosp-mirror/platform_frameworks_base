@@ -324,6 +324,7 @@ public class SystemServicesProxy {
             // Remove the task if it is blacklisted
             if (sRecentsBlacklist.contains(t.realActivity.getClassName())) {
                 iter.remove();
+                continue;
             }
 
             // Remove the task if it is marked as excluded, unless it is the first most task and we
@@ -333,6 +334,7 @@ public class SystemServicesProxy {
             isExcluded |= quietProfileIds.contains(t.userId);
             if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
                 iter.remove();
+                continue;
             }
 
             isFirstValidTask = false;
