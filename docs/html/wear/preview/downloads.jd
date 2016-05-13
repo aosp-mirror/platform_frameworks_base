@@ -1,10 +1,9 @@
-page.title=Preview Downloads
-meta.tags="wear-preview", "system image", "download"
-page.tags="wear"
-page.image=images/cards/card-n-downloads_2x.png
+page.title=Download and Test with a Device
+meta.keywords="wear-preview"
+page.tags="wear-preview"
+page.image=images/cards/card-n-sdk_2x.png
 
 @jd:body
-
 <div style="position:relative; min-height:600px">
 
   <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
@@ -165,245 +164,393 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
   <div id="landing">
 
-<div id="qv-wrapper">
-  <div id="qv">
-    <h2>In this document</h2>
-      <ol>
-        <li><a href="#device-preview">Set up a hardware device</a>
-          <ol>
-            <li><a href="#flash">Flash a device</a></li>
-            <li><a href="#revertDevice">Uninstalling the Preview</a></li>
-          </ol>
-        </li>
-        <li><a href="#setupAVD">Set up an emulator</a></li>
-      </ol>
-  </div>
-</div>
+    <div id="qv-wrapper">
+      <div id="qv">
+        <ol>
+          <li>
+            <a href="#set_up_a_watch">Set Up a Watch</a>
+          </li>
 
-<p>
-  To run and test your app with the Wear Developer Preview, you need to set up
-  a runtime environment. You can do that in either of these ways:
-</p>
+          <li>
+            <a href="#set_up_an_emulator">Set Up an Emulator</a>
+          </li>
+        </ol>
+      </div>
+    </div>
 
-<ul>
-  <li>Install a Wear Preview system image on a supported hardware device,</li>
-  <li>Set up an Android emulator running the Wear Developer Preview</li>
-</ul>
+    <p>
+      You can run and test your app with the Android Wear 2.0 Developer Preview
+      in either of these ways:
+    </p>
 
-<p>
-  If you want an environment for basic compatibility testing of your app on the
-  new platform, all you need is your current APK and a hardware device or
-  emulator. You don't necessarily need to update your full development
-  environment to do basic testing.
-</p>
+    <ul>
+      <li>Install Android Wear 2.0 on a supported watch, or
+      </li>
 
-<p>
-  If you want to modify your app to target the Wear Preview or use the Wear
-  Preview APIs, you need to set up a development environment that's updated
-  to support the Wear Preview. For more information, see
-  <a href="{@docRoot}wear/preview/start.html">Get Started with Wear Preview</a>.
-</p>
+      <li>Set up an emulator that is running Android Wear 2.0
+      </li>
+    </ul>
 
+    <p>
+      If you want an environment for basic <strong>compatibility
+      testing</strong> of your app, you can use your current APK and a
+      supported watch or an emulator. As described below, you don't necessarily
+      need to update your full development environment to do basic testing.
+    </p>
 
-<h2 id="downloads">Download Files</h2>
+    <p>
+      However, if you want to <strong>modify</strong> your app to target
+      Android Wear 2.0 or use new APIs, you need to update your development
+      environment. See <a href="{@docRoot}wear/preview/start.html">Get Started
+      with the Android Wear 2.0 Preview</a>.
+    </p>
 
+    <h2 id="set_up_a_watch">
+      Set Up a Watch
+    </h2>
 
+    <p>
+      You can download a system image and manually flash it to a matching
+      watch. See the table below to download the system image for your test
+      watch.
+    </p>
 
-<h3 id="docs-dl">Reference documentation</h3>
+    <p>
+      Manually flashing a watch is useful if you need precise control over the
+      test environment or need to reinstall frequently, such as for automated
+      testing.
+    </p>
 
-<p>
-  Detailed information about the Wear Preview APIs is available in the
-  reference documentation, which you can download from the following table.
-  This package contains an abridged, offline version of the Android developer
-  web site, and includes an updated API reference for the Wear Preview APIs
-  and an API difference report.
-</p>
+    <p>
+      Installing a system image on a watch <strong>removes all data from the
+      watch</strong>, so you should back up your data first.
+    </p>
 
-<table>
-  <tr>
-    <th scope="col">Documentation</th>
-    <th scope="col">Checksums</th>
-  </tr>
-  <tr>
-    <td style="white-space: nowrap">
-    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip"
-      >n-preview-1-docs.zip</a></td>
-    <td width="100%">
-      MD5: 4ab33ccbe698f46f125cc5b807cf9c2f<br>
-      SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
-    </td>
-  </tr>
-<table>
+    <h3 id="preview_system_images">
+      Preview system images
+    </h3>
 
-<h3 id="images-dl">Device system images</h3>
+    <p>
+      The preview includes system images for testing your app. Based on your
+      device, you can download a preview system image from the following tables
+      and flash it to the corresponding device.
+    </p>
 
-<p>
-  The following device system images can be used to update a compatible device
-  with the Wear Preview for testing. For information on installing these
-  images, see <a href="#device-preview">Set up a Hardware Device</a>.
-</p>
+    <h4 id="preview_image_for_lge_watch_urbane_2nd_edition">
+      Preview image for LGE Watch Urbane 2nd Edition
+    </h4>
 
-<table>
-  <tr>
-    <th scope="col">Device</th>
-    <th scope="col">Download / Checksums</th>
-  </tr>
+    <p>
+      <strong>Please note the following:</strong>
+      Flashing your device will
+      require unlocking the bootloader which may
+      void the device's warranty--proceed at your own risk.
+     </p>
 
-  <tr id="sprat">
-    <td>Gear Live <br>"sprat"</td>
-    <td><a href="#top" onclick="onDownload(this)"
-      >sprat-XXXXX-preview-d86c7559.tgz</a><br>
-      MD5: d84b6c31a7754e505149594887b3481a<br>
-      SHA-1: d86c7559c93724cca6af91040b012c48529f2c94
-    </td>
-  </tr>
+    <table>
+      <tr>
+        <th scope="col">
+          Type of LGE Watch Urbane 2nd Edition image
+        </th>
+        <th scope="col">
+          Download/Checksums
+        </th>
+      </tr>
+      <tr id="download-3-placeholder">
+        <td>
+          Preview image for testing
+        </td>
+        <td><a href="#top" onclick="onDownload(this)">download-3-placeholder.tgz</a><br>
+          MD5: [string]<br>
+          SHA-1: [string]
+        </td>
+      </tr>
+      <tr id="download-4-placeholder">
+        <td>
+          Non-preview image (for after testing)
+        </td>
+        <td><a href="#top" onclick="onDownload(this)">download-4-placeholder.tgz</a><br>
+          MD5: [string]<br>
+          SHA-1: [string]
+        </td>
+      </tr>
+    </table>
 
-</table>
+    <h4 id="preview_image_for_huawei_watch">
+      Preview image for Huawei Watch
+    </h4>
 
+    <p>
+      <strong>Please note the following:</strong>
+      Flashing your device will require unlocking
+      the bootloader which
+      shall void the device's warranty--proceed at your own risk.
+    </p>
 
+    <table>
+      <tr>
+        <th scope="col">
+          Type of Huawei Watch image
+        </th>
+        <th scope="col">
+          Download/Checksums
+        </th>
+      </tr>
+      <tr id="download-1-placeholder">
+        <td>
+          Preview image for testing
+        </td>
+        <td><a href="#top" onclick="onDownload(this)">download-1-placeholder.tgz</a><br>
+          MD5: [string]<br>
+          SHA-1: [string]
+        </td>
+      </tr>
+      <tr id="download-2-placeholder">
+        <td>
+          Non-preview image (for after testing)
+        </td>
+        <td><a href="#top" onclick="onDownload(this)">download-2-placeholder.tgz</a><br>
+          MD5: [string]<br>
+          SHA-1: [string]
+        </td>
+      </tr>
+    </table>
 
-<h2 id="device-preview">Set up a Hardware Device</h2>
+    <h3 id="flash_a_watch">
+      Flash a watch
+    </h3>
 
-<p>
-  The Wear Developer Preview offers system updates for a range of hardware devices
-  that you can use for testing your app, from phones to tablets and TV.
-</p>
+    <p>
+      The steps for flashing an image to a watch are similar to the <a href=
+      "https://developers.google.com/android/nexus/images">steps provided for
+      flashing to a phone</a>. After you <strong>back up your watch
+      data</strong>, use steps in this section to flash the image to the
+      <strong>specific watch</strong> that matches the image (e.g., you must
+      use an LGE Watch Urbane 2nd Edition for the corresponding image).
+    </p>
 
+    <h4 id="set_up_the_watch_to_be_flashed">
+      Set up the watch to be flashed
+    </h4>
 
+    <p>
+      On the watch, enable the Developer Options menu and ADB debugging as
+      follows:
+    </p>
 
-<h3 id="flash">Flash a device</h3>
+    <ol>
+      <li>Open the Settings menu on the watch.
+      </li>
 
-<p>
-  At any time you can download the latest Developer Preview system image and
-  manually flash it to your device. See the table below to download the system
-  image for your test device. Manually flashing a device is useful if you need
-  precise control over the test environment or need to reinstall frequently,
-  such as for automated testing.
-</p>
+      <li>Scroll to the bottom of the menu. If no <strong>Developer
+      Options</strong> item is provided, tap <strong>About</strong>.
+      </li>
 
-<p>
-  Installing a system image on a device <strong>removes all data from the
-  device</strong>, so you should back up your data first.
-</p>
+      <li>Tap the build number 7 times.
+      </li>
 
-<p>
-  After you back up your device data and download the system image below that
-  matches your device, follow the instructions at <a href=
-  "https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
-  to flash the image onto your device.
-</p>
+      <li>From the Settings menu, tap the <strong>Developer Options</strong>
+      item.
+      </li>
 
+      <li>Enable ADB debugging.
+      </li>
+    </ol>
 
-<h3 id="revertDevice">Uninstalling the Preview</h3>
+    <h4 id="confirm_installation_of_the_fastboot_tool">
+      Confirm installation of the fastboot tool
+    </h4>
 
-<p>
-  If you want to uninstall the preview from a device, you can do so in one of
-  these ways: </p>
-  <ul>
-    <li><strong>Obtain a factory spec system image</strong> and then manually
-    flash it to the device.
-      <ul>
-          <li>For <strong>Nexus devices and Pixel C devices</strong>, see
-        the <a href="http://developers.google.com/android/nexus/images">Factory Images
-        for Nexus Devices</a> page for downloads. </li>
-        <li>For <strong>other devices</strong>, please contact the device manufacturer
-        directly. Alternatively, if the device is supported
-        in the Android Beta Program, you can enroll the device in the
-        program and then un-enroll it (see below).</li>
-      </ul>
-    </li>
-    <li><strong>Un-enroll the device from Android Beta Program</strong>. If the
-    device is enrolled in the <a href="https://g.co/androidbeta">Android Beta
-    Program</a>, regardless of device, you can simply un-enroll it from the program.
-  <p>
-    The device will receive an OTA update to the most recent production version
-    of Android available for that device (for example, Android 6.0 Marshmallow).
-    The update requires a full device reset, so user data on the device will be
-    removed. Make sure to <strong>back up important data</strong> before
-    un-enrolling a device.
-  </p>
-  </li>
-</ul>
+    <p>
+      To flash a device using one of the <a href=
+      "#preview_system_images">system images</a>, confirm that you have the
+      <code>fastboot</code> tool in the <code>platform-tools/</code> directory
+      of the <a href="https://developer.android.com/sdk">Android SDK</a>. Be
+      sure that you have the latest version of the <strong>Android SDK
+      Platform-tools</strong> from the <a href=
+      "{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.
+    </p>
 
-<p class="note"><strong>Note:</strong>
-  Uninstalling a Developer Preview system image prior to
-  the end of the program requires a full device reset and removes all user data
-  on the device.
-</p>
+    <p>
+      After you confirm that you have the <code>fastboot</code> tool, add the
+      tool to your PATH environment variable so the tool can be found when you
+      flash the watch.
+    </p>
 
+    <h4 id="transfer_the_image_to_the_watch">
+      Transfer the image to the watch
+    </h4>
 
-<h2 id="setupAVD">Set up an emulator</h2>
+    <p>
+      To download a preview image and flash it to the watch:
+    </p>
 
-<p>To use the Android Emulator to run the Wear Preview, you need to
-download the Wear Preview SDK and create a virtual device for the
-emulator.</p>
+    <ol>
+      <li>Download and unzip the appropriate system image from the "Preview
+      system image" column in the <a href="#preview_system_images">table
+      above</a>.
+      </li>
 
-<p>First, download the Wear Preview SDK as follows (if you
-already got it while <a href="{@docRoot}preview/setup-sdk.html">setting up
-to develop for Android N</a>, you can skip this part):
+      <li>Attach the watch charger to the watch and plug the USB cord (from the
+      charger) into your computer.
+      </li>
 
-<ol>
-  <li>In Android Studio, open the Settings dialog
-    (<strong>File &gt; Settings</strong> on Windows/Linux, or
-    <strong>Android Studio &gt; Preferences</strong> on Mac). In the left
-    panel, select <strong>Appearance &amp; Behavior &gt;
-  System Settings &gt; Android SDK</strong>.
+      <li>Use the following <a href="{@docRoot}tools/help/adb.html">adb
+      command</a> to confirm that the watch is available for flashing:
+      <code>adb devices</code>
+      </li>
 
-  <li>Click the <strong>SDK Platforms</strong> tab, then select the
-  <strong>Wear Preview</strong> check box.</li>
+      <li>Use the following adb command to start the device in fastboot mode:
+      <code>adb reboot bootloader</code>
+      </li>
 
-  <li>Click the <strong>SDK Tools</strong> tab, then select the
-    <strong>Android SDK Build Tools</strong>, <strong>Android SDK
-    Platform-Tools</strong>, and <strong>Android SDK Tools</strong> check
-    boxes.
-  </li>
+      <li>If necessary, use <strong>one</strong> of following two commands to
+      unlock the device's bootloader. This step <strong>erases all data on the
+      device</strong>: <code>fastboot flashing unlock</code> or, for some
+      devices, <code>fastboot oem unlock</code>
+      </li>
 
-  <li>Click <strong>OK</strong> and accept the license
-    agreements for any packages to be installed.
-  </li>
-</ol>
+      <li>Navigate to the directory where you unzipped the system image in Step
+      1.
+      </li>
 
-<p>You should now have <strong>Android SDK Built-Tools 24.0 0 rc1</strong>,
-<strong>Platform-Tools 24.0.0 rc1</strong>, and <strong>SDK Tools
-25.0.9</strong>. If you do not update the SDK Tools to 25.0.9, then you won't
-be able to run the x86_64 system images for Android N.</p>
+      <li>Execute the <code>flash-all</code> script by typing
+      <code>flash-all.sh</code> or, in the case of Windows,
+      <code>flash-all.bat</code>.
+      </li>
+    </ol>
 
+    <p>
+      After the script finishes, your watch reboots. Pair the watch with a
+      phone or tablet. The preview now is available for testing on the watch.
+      Before installing an app, enable the Developer Options menu, and ADB
+      debugging, on the watch as follows:
+    </p>
 
-<p>Now create a virtual device with the Wear Preview system image:</p>
+    <ol>
+      <li>Open the Settings menu (on the watch).
+      </li>
 
-<ol>
-  <li>Open the AVD Manager by selecting <strong>Tools > Android >
-    AVD Manager</strong>.</li>
-  <li>Click <strong>Create Virtual Device</strong>.</li>
-  <li>Select a device such as Nexus 5X, Nexus 6P, Nexus 9, or Android TV,
-    then click <strong>Next</strong>.</li>
-  <li>Select the <strong>N</strong> system image (with the
-    <strong>x86</strong> ABI), then click <strong>Next</strong>.
-    (Only x86 system images are currently supported with the Android Emulator
-for the Wear Preview.)
-  <li>Complete the rest of the AVD configuration and click
-    <strong>Finish</strong>.</li>
-</ol>
+      <li>Scroll to the bottom of the menu and tap <strong>About</strong>.
+      </li>
 
-<p>You can now launch the Android Emulator with the Wear Preview AVD.</p>
+      <li>Tap the build number 7 times.
+      </li>
 
-<p>
-For the best experience in the Android Emulator, install
-Android Studio 2.2 Preview, which supports the <a
-href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>
-with much faster performance compared to the Emulator in
-Android Studio 1.5.</p>
+      <li>From the Settings menu, tap the <strong>Developer Options</strong>
+      item.
+      </li>
 
-<p>For more information about creating virtual devices, see <a href=
-  "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
-</p>
+      <li>Enable ADB debugging.
+      </li>
 
+      <li>Connect the watch to your computer and tap <strong>Always allow from
+      this computer</strong>.
+      </li>
+    </ol>
 
+    <p>
+      Your watch is ready for you to <a href=
+      "{@docRoot}training/wearables/apps/creating.html#Install">install and run
+      your app</a>:
+    </p>
 
-  </div><!-- landing -->
+    <ol>
+      <li>Open your app in Android Studio.
+      </li>
+
+      <li>Select <strong>wear</strong> from the Run/Debug configuration
+      drop-down menu.
+      </li>
+
+      <li>Click the Play button.
+      </li>
+
+      <li>In the Select Deployment Target box, click your device.
+      </li>
+    </ol>
+
+    <p>
+      After your app is installed on the watch, you are prompted to start the
+      app on the watch.
+    </p>
+
+    <p>
+      When testing is completed, follow the steps for <a href=
+      "#uninstall_the_preview_from_a_watch">uninstalling the preview</a>.
+    </p>
+
+    <h3 id="uninstall_the_preview_from_a_watch">
+      Uninstall the preview from a watch
+    </h3>
+
+    <p>
+      When testing with the preview is done, restore the watch as follows:
+    </p>
+
+    <ol>
+      <li>Download and unzip the appropriate system image from the "Non-preview
+      system image" column in the <a href="#preview_system_images">table
+      above</a>.
+      </li>
+
+      <li>Manually flash the image to the watch using steps similar to those in
+      <a href="#transfer_the_image_to_the_watch">Transfer the image to the
+      watch</a>, except that you flash the <strong>non-preview</strong> image
+      to the watch.
+      </li>
+    </ol>
+
+    <p>
+      <strong>Note</strong>: Removing a preview system image requires a full
+      device reset and removes all user data on the device.
+    </p>
+
+    <h2 id="set_up_an_emulator">
+      Set Up an Emulator
+    </h2>
+
+    <p>
+      To test with the Android Emulator, create a virtual device in Android
+      Studio as follows:
+    </p>
+
+    <ol>
+      <li>Open the AVD Manager by selecting <strong>Tools &gt; Android &gt; AVD
+      Manager</strong>.
+      </li>
+
+      <li>Click <strong>Create Virtual Device</strong>.
+      </li>
+
+      <li>In the <strong>Category</strong> pane, select Wear, choose a name
+      (such as Android Wear Round), and click <strong>Next</strong>.
+      </li>
+
+      <li>Select an <strong>N</strong> image to download. The images may be on
+      the <strong>x86</strong> tab instead of the <strong>Recommended</strong>
+      tab, until installed. For example, select the image with the
+      <strong>Release Name</strong> of N, the <strong>API Level</strong> of N,
+      and the <strong>Target</strong> of "Android 6.X (with Android Wear)".
+      When the download and installation are complete, click
+      <strong>Finish</strong> and then click <strong>Next</strong>.
+      </li>
+
+      <li>Verify the configuration of the Android Virtual Device (AVD) and
+      click <strong>Finish</strong>.
+      </li>
+    </ol>
+
+    <p>
+      You can now test an application in the <a href=
+      "{@docRoot}tools/devices/emulator.html">Android Emulator</a>. For more
+      information about using virtual devices, see <a href=
+      "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with the AVD
+      Manager</a>.
+    </p>
+ </div><!-- landing -->
 
 </div><!-- relative wrapper -->
-
 
 
 <script>
