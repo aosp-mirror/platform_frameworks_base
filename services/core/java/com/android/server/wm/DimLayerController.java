@@ -48,14 +48,15 @@ class DimLayerController {
 
     /** Updates the dim layer bounds, recreating it if needed. */
     void updateDimLayer(DimLayer.DimLayerUser dimLayerUser) {
-        DimLayerState state = getOrCreateDimLayerState(dimLayerUser);
+        final DimLayerState state = getOrCreateDimLayerState(dimLayerUser);
         final boolean previousFullscreen = state.dimLayer != null
                 && state.dimLayer == mSharedFullScreenDimLayer;
         DimLayer newDimLayer;
         final int displayId = mDisplayContent.getDisplayId();
-        if (dimLayerUser.isFullscreen()) {
-            if (previousFullscreen) {
-                // Nothing to do here...
+        if (dimLayerUser.dimFullscreen()) {
+            if (previousFullscreen && mSharedFullScreenDimLayer != null) {
+                // Update the bounds for fullscreen in case of rotation.
+                mSharedFullScreenDimLayer.setBoundsForFullscreen();
                 return;
             }
             // Use shared fullscreen dim layer
@@ -146,7 +147,7 @@ class DimLayerController {
                 || !state.animator.getShown()
                 || state.animator.mAnimLayer <= newWinAnimator.mAnimLayer)) {
             state.animator = newWinAnimator;
-            if (state.animator.mWin.mAppToken == null && !dimLayerUser.isFullscreen()) {
+            if (state.animator.mWin.mAppToken == null && !dimLayerUser.dimFullscreen()) {
                 // Dim should cover the entire screen for system windows.
                 mDisplayContent.getLogicalDisplayRect(mTmpBounds);
             } else {
@@ -190,11 +191,11 @@ class DimLayerController {
         for (int i = mState.size() - 1; i >= 0; i--) {
             DimLayer.DimLayerUser user = mState.keyAt(i);
             DimLayerState state = mState.valueAt(i);
-            // We have to check that we are acutally the shared fullscreen layer
+            // We have to check that we are actually the shared fullscreen layer
             // for this path. If we began as non fullscreen and became fullscreen
             // (e.g. Docked stack closing), then we may not be the shared layer
             // and we have to make sure we always animate the layer.
-            if (user.isFullscreen() && state.dimLayer == mSharedFullScreenDimLayer) {
+            if (user.dimFullscreen() && state.dimLayer == mSharedFullScreenDimLayer) {
                 fullScreen = i;
                 if (mState.valueAt(i).continueDimming) {
                     fullScreenAndDimming = i;
@@ -337,15 +338,18 @@ class DimLayerController {
 
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "DimLayerController");
-        for (int i = 0, n = mState.size(); i < n; i++) {
-            pw.println(prefix + "  " + mState.keyAt(i).toShortString());
-            pw.print(prefix + "    ");
-            DimLayerState state = mState.valueAt(i);
-            pw.print("dimLayer=" + (state.dimLayer == mSharedFullScreenDimLayer ? "shared" :
-                    state.dimLayer));
-            pw.print(", animator=" + state.animator);
-            pw.println(", continueDimming=" + state.continueDimming + "}");
+        final String doubleSpace = "  ";
+        final String prefixPlusDoubleSpace = prefix + doubleSpace;
 
+        for (int i = 0, n = mState.size(); i < n; i++) {
+            pw.println(prefixPlusDoubleSpace + mState.keyAt(i).toShortString());
+            DimLayerState state = mState.valueAt(i);
+            pw.println(prefixPlusDoubleSpace + doubleSpace + "dimLayer="
+                    + (state.dimLayer == mSharedFullScreenDimLayer ? "shared" : state.dimLayer)
+                    + ", animator=" + state.animator + ", continueDimming=" + state.continueDimming);
+            if (state.dimLayer != null) {
+                state.dimLayer.printTo(prefixPlusDoubleSpace + doubleSpace, pw);
+            }
         }
     }
 }

@@ -73,8 +73,8 @@ public class DimLayer {
 
     /** Interface implemented by users of the dim layer */
     interface DimLayerUser {
-        /** Returns true if the user of the dim layer is fullscreen. */
-        boolean isFullscreen();
+        /** Returns true if the  dim should be fullscreen. */
+        boolean dimFullscreen();
         /** Returns the display info. of the dim layer user. */
         DisplayInfo getDisplayInfo();
         /** Gets the bounds of the dim layer user. */
@@ -188,31 +188,38 @@ public class DimLayer {
      * NOTE: Must be called with Surface transaction open.
      */
     private void adjustBounds() {
-        final int dw, dh;
-        final float xPos, yPos;
-        if (!mUser.isFullscreen()) {
-            dw = mBounds.width();
-            dh = mBounds.height();
-            xPos = mBounds.left;
-            yPos = mBounds.top;
-        } else {
-            // Set surface size to screen size.
-            final DisplayInfo info = mUser.getDisplayInfo();
-            // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose
-            // a corner.
-            dw = (int) (info.logicalWidth * 1.5);
-            dh = (int) (info.logicalHeight * 1.5);
-            // back off position so 1/4 of Surface is before and 1/4 is after.
-            xPos = -1 * dw / 6;
-            yPos = -1 * dh / 6;
+        if (mUser.dimFullscreen()) {
+            getBoundsForFullscreen(mBounds);
         }
 
         if (mDimSurface != null) {
-            mDimSurface.setPosition(xPos, yPos);
-            mDimSurface.setSize(dw, dh);
+            mDimSurface.setPosition(mBounds.left, mBounds.top);
+            mDimSurface.setSize(mBounds.width(), mBounds.height());
+            if (DEBUG_DIM_LAYER) Slog.v(TAG,
+                    "adjustBounds user=" + mUser.toShortString() + " mBounds=" + mBounds);
         }
 
         mLastBounds.set(mBounds);
+    }
+
+    private void getBoundsForFullscreen(Rect outBounds) {
+        final int dw, dh;
+        final float xPos, yPos;
+        // Set surface size to screen size.
+        final DisplayInfo info = mUser.getDisplayInfo();
+        // Multiply by 1.5 so that rotating a frozen surface that includes this does not expose
+        // a corner.
+        dw = (int) (info.logicalWidth * 1.5);
+        dh = (int) (info.logicalHeight * 1.5);
+        // back off position so 1/4 of Surface is before and 1/4 is after.
+        xPos = -1 * dw / 6;
+        yPos = -1 * dh / 6;
+        outBounds.set((int) xPos, (int) yPos, (int) xPos + dw, (int) yPos + dh);
+    }
+
+    void setBoundsForFullscreen() {
+        getBoundsForFullscreen(mBounds);
+        setBounds(mBounds);
     }
 
     /** @param bounds The new bounds to set */
