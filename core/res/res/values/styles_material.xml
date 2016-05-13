@@ -1001,7 +1001,8 @@ please see styles_device_defaults.xml.
         <item name="contentDescription">@string/media_route_button_content_description</item>
     </style>
 
-    <style name="Widget.Material.SuggestionItem" parent="@android:style/TextAppearance.Material.Body1">
+    <style name="Widget.Material.SuggestionItem">
+        <item name="textAppearance">@android:style/TextAppearance.Material.Body1</item>
         <item name="textColor">?attr/textColorSecondary</item>
         <item name="drawablePadding">8dip</item>
         <item name="gravity">start|center_vertical</item>
@@ -1016,11 +1017,12 @@ please see styles_device_defaults.xml.
         <item name="textSize">14sp</item>
     </style>
 
-    <style name="TextAppearance.Material.TextSuggestionHighlight" parent="Widget.Material.SuggestionItem">
+    <style name="TextAppearance.Material.TextSuggestionHighlight">
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
-    <style name="Widget.Material.SuggestionButton" parent="@android:style/TextAppearance.Material.Button">
+    <style name="Widget.Material.SuggestionButton">
+        <item name="textAppearance">@android:style/TextAppearance.Material.Button</item>
         <item name="textColor">?attr/colorAccent</item>
         <item name="drawablePadding">8dip</item>
         <item name="gravity">start|center_vertical</item>
