@@ -383,17 +383,18 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     private boolean updateBoundsAfterConfigChange() {
-        if (mFullscreen) {
-            // Bounds will already be set correctly when display info is updated in the case of
-            // fullscreen.
-            return false;
-        }
-
         final int newRotation = getDisplayInfo().rotation;
         final int newDensity = getDisplayInfo().logicalDensityDpi;
 
         if (mRotation == newRotation && mDensity == newDensity) {
             // Nothing to do here as we already update the state in updateDisplayInfo.
+            return false;
+        }
+
+        if (mFullscreen) {
+            // Update stack bounds again since rotation changed since updateDisplayInfo().
+            setBounds(null);
+            // Return false since we don't need the client to resize.
             return false;
         }
 
