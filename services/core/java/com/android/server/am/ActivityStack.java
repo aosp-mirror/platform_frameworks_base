@@ -2459,12 +2459,7 @@ final class ActivityStack {
                     next.hasBeenLaunched = true;
                 } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
                         mStackSupervisor.isFrontStack(lastStack)) {
-                    mWindowManager.setAppStartingWindow(
-                            next.appToken, next.packageName, next.theme,
-                            mService.compatibilityInfoForPackageLocked(next.info.applicationInfo),
-                            next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
-                            next.windowFlags, null, true);
-                    next.mStartingWindowState = STARTING_WINDOW_SHOWN;
+                    next.showStartingWindow(null, true);
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2490,14 +2485,7 @@ final class ActivityStack {
                 next.hasBeenLaunched = true;
             } else {
                 if (SHOW_APP_STARTING_PREVIEW) {
-                    mWindowManager.setAppStartingWindow(
-                            next.appToken, next.packageName, next.theme,
-                            mService.compatibilityInfoForPackageLocked(
-                                    next.info.applicationInfo),
-                            next.nonLocalizedLabel,
-                            next.labelRes, next.icon, next.logo, next.windowFlags,
-                            null, true);
-                    next.mStartingWindowState = STARTING_WINDOW_SHOWN;
+                    next.showStartingWindow(null, true);
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
@@ -2712,7 +2700,7 @@ final class ActivityStack {
                 // "has the same starting icon" as the next one.  This allows the
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
-                ActivityRecord prev = mResumedActivity;
+                ActivityRecord prev = r.task.topRunningActivityWithStartingWindowLocked();
                 if (prev != null) {
                     // We don't want to reuse the previous starting preview if:
                     // (1) The current activity is in a different task.
@@ -2724,13 +2712,7 @@ final class ActivityStack {
                         prev = null;
                     }
                 }
-                mWindowManager.setAppStartingWindow(
-                        r.appToken, r.packageName, r.theme,
-                        mService.compatibilityInfoForPackageLocked(
-                                r.info.applicationInfo), r.nonLocalizedLabel,
-                        r.labelRes, r.icon, r.logo, r.windowFlags,
-                        prev != null ? prev.appToken : null, showStartingIcon);
-                r.mStartingWindowState = STARTING_WINDOW_SHOWN;
+                r.showStartingWindow(prev, showStartingIcon);
             }
         } else {
             // If this is the first activity, don't do any fancy animations,

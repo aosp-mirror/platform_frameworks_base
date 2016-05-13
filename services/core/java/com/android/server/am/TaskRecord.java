@@ -88,6 +88,7 @@ import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -685,6 +686,20 @@ final class TaskRecord {
         return null;
     }
 
+    ActivityRecord topRunningActivityWithStartingWindowLocked() {
+        if (stack != null) {
+            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = mActivities.get(activityNdx);
+                if (r.mStartingWindowState != STARTING_WINDOW_SHOWN
+                        || r.finishing || !stack.okToShowLocked(r)) {
+                    continue;
+                }
+                return r;
+            }
+        }
+        return null;
+    }
+
     void setFrontOfTask() {
         setFrontOfTask(null);
     }
@@ -760,6 +775,18 @@ final class TaskRecord {
             // Otherwise make all added activities match this one.
             r.mActivityType = taskType;
         }
+
+        final int size = mActivities.size();
+
+        if (index == size && size > 0) {
+            final ActivityRecord top = mActivities.get(size - 1);
+            if (top.mTaskOverlay) {
+                // Place below the task overlay activity since the overlay activity should always
+                // be on top.
+                index--;
+            }
+        }
+
         mActivities.add(index, r);
         updateEffectiveIntent();
         if (r.isPersistable()) {

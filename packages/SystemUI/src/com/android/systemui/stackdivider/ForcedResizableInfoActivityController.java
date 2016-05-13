@@ -111,7 +111,7 @@ public class ForcedResizableInfoActivityController {
             Intent intent = new Intent(mContext, ForcedResizableInfoActivity.class);
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchTaskId(mPendingTaskIds.valueAt(i));
-            options.setAvoidMoveToFront(true);
+            options.setTaskOverlay(true);
             mContext.startActivity(intent, options.toBundle());
         }
         mPendingTaskIds.clear();
