@@ -415,6 +415,12 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mFinishedStarting = new ArrayList<>();
 
     /**
+     * List of app window tokens that are waiting for replacing windows. If the
+     * replacement doesn't come in time the stale windows needs to be disposed of.
+     */
+    final ArrayList<AppWindowToken> mReplacingWindowTimeouts = new ArrayList<>();
+
+    /**
      * The input consumer added to the window manager which consumes input events to windows below
      * it.
      */
@@ -8505,9 +8511,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case WINDOW_REPLACEMENT_TIMEOUT: {
-                    final AppWindowToken token = (AppWindowToken) msg.obj;
                     synchronized (mWindowMap) {
-                        token.clearTimedoutReplacesLocked();
+                        for (int i = mReplacingWindowTimeouts.size() - 1; i >= 0; i--) {
+                            final AppWindowToken token = mReplacingWindowTimeouts.get(i);
+                            token.clearTimedoutReplacesLocked();
+                        }
+                        mReplacingWindowTimeouts.clear();
                     }
                 }
                 case NOTIFY_APP_TRANSITION_STARTING: {
@@ -10783,14 +10792,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             if (replacing) {
-                mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
-                mH.sendMessageDelayed(
-                        mH.obtainMessage(H.WINDOW_REPLACEMENT_TIMEOUT, appWindowToken),
-                        WINDOW_REPLACEMENT_TIMEOUT_DURATION);
+                scheduleReplacingWindowTimeouts(appWindowToken);
             } else {
                 appWindowToken.resetReplacingWindows();
             }
         }
+    }
+
+    void scheduleReplacingWindowTimeouts(AppWindowToken appWindowToken) {
+        if (!mReplacingWindowTimeouts.contains(appWindowToken)) {
+            mReplacingWindowTimeouts.add(appWindowToken);
+        }
+        mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
+        mH.sendEmptyMessageDelayed(
+                H.WINDOW_REPLACEMENT_TIMEOUT, WINDOW_REPLACEMENT_TIMEOUT_DURATION);
     }
 
     @Override
