@@ -107,6 +107,47 @@ public class VoicemailContract {
     public static final String ACTION_SYNC_VOICEMAIL = "android.intent.action.SYNC_VOICEMAIL";
 
     /**
+     * Broadcast intent to inform a new visual voicemail SMS has been received. This intent will
+     * only be delivered to the voicemail client. The intent will have the following extra values:
+     *
+     * <ul>
+     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_TYPE}</em> - (String) The event type of the SMS. Common
+     *   values are "SYNC" or "STATUS"</li>
+     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_DATA}</em> - (Bundle) The fields sent by the SMS</li>
+     *   <li><em>{@link #EXTRA_VOICEMAIL_SMS_SUBID}</em> - (Integer) The subscription ID of the
+     *   phone account that received the SMS</li>
+     * </ul>
+     */
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_VOICEMAIL_SMS_RECEIVED =
+            "android.intent.action.VOICEMAIL_SMS_RECEIVED";
+
+    /**
+     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
+     * event type of the SMS. Common values are "SYNC" or "STATUS"
+     */
+    /** @hide */
+    public static final String EXTRA_VOICEMAIL_SMS_PREFIX =
+            "com.android.voicemail.extra.VOICEMAIL_SMS_PREFIX";
+
+    /**
+     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate the
+     * fields sent by the SMS
+     */
+    /** @hide */
+    public static final String EXTRA_VOICEMAIL_SMS_FIELDS =
+            "com.android.voicemail.extra.VOICEMAIL_SMS_FIELDS";
+
+    /**
+     * Extra included in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} broadcast intents to indicate he
+     * subscription ID of the phone account that received the SMS.
+     */
+    /** @hide */
+    public static final String EXTRA_VOICEMAIL_SMS_SUBID =
+            "com.android.voicemail.extra.VOICEMAIL_SMS_SUBID";
+
+    /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
      * receiving package made this change.
      */
