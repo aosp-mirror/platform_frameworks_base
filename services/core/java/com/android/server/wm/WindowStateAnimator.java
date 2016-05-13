@@ -229,6 +229,8 @@ class WindowStateAnimator {
     long mDeferTransactionUntilFrame = -1;
     long mDeferTransactionTime = -1;
 
+    boolean mForceScaleUntilResize;
+
     private final Rect mTmpSize = new Rect();
 
     WindowStateAnimator(final WindowState win) {
@@ -1416,8 +1418,13 @@ class WindowStateAnimator {
         float extraHScale = (float) 1.0;
         float extraVScale = (float) 1.0;
 
+        mSurfaceResized = mSurfaceController.setSizeInTransaction(
+                mTmpSize.width(), mTmpSize.height(), recoveringMemory);
+        mForceScaleUntilResize = mForceScaleUntilResize && !mSurfaceResized;
+
+
         calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
-        if (task != null && task.mStack.getForceScaleToCrop()) {
+        if ((task != null && task.mStack.getForceScaleToCrop()) || mForceScaleUntilResize) {
             int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
             int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
             // We want to calculate the scaling based on the content area, not based on
@@ -1447,6 +1454,14 @@ class WindowStateAnimator {
             // past where the system would have cropped us
             mTmpClipRect.set(0, 0, mTmpSize.width(), mTmpSize.height());
             mTmpFinalClipRect.setEmpty();
+
+            // Various surfaces in the scaled stack may resize at different times.
+            // We need to ensure for each surface, that we disable transformation matrix
+            // scaling in the same transaction which we resize the surface in.
+            // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
+            // then take over the scaling until the new buffer arrives, and things 
+            // will be seamless.
+            mForceScaleUntilResize = true;
         } else {
             mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
                     recoveringMemory);
@@ -1458,8 +1473,6 @@ class WindowStateAnimator {
                 mDtDx * w.mVScale * extraVScale,
                 mDsDy * w.mHScale * extraHScale,
                 mDtDy * w.mVScale * extraVScale, recoveringMemory);
-        mSurfaceResized = mSurfaceController.setSizeInTransaction(
-                mTmpSize.width(), mTmpSize.height(), recoveringMemory);
 
         if (mSurfaceResized) {
             mReportSurfaceResized = true;
