@@ -81,7 +81,8 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
         // only schedule repaint if node still on layer - possible it may have been
         // removed during a dropped frame, but layers may still remain scheduled so
         // as not to lose info on what portion is damaged
-        if (CC_LIKELY(layerNode->getLayer() != nullptr)) {
+        OffscreenBuffer* layer = layerNode->getLayer();
+        if (CC_LIKELY(layer)) {
             ATRACE_FORMAT("Optimize HW Layer DisplayList %s %ux%u",
                     layerNode->getName(), layerNode->getWidth(), layerNode->getHeight());
 
@@ -90,7 +91,7 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
 
             // map current light center into RenderNode's coordinate space
             Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
-            layerNode->getLayer()->inverseTransformInWindow.mapPoint3d(lightCenter);
+            layer->inverseTransformInWindow.mapPoint3d(lightCenter);
 
             saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0,
                     layerDamage, lightCenter, nullptr, layerNode);
