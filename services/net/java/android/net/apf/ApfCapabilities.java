@@ -38,7 +38,8 @@ public class ApfCapabilities {
      */
     public final int apfPacketFormat;
 
-    ApfCapabilities(int apfVersionSupported, int maximumApfProgramSize, int apfPacketFormat) {
+    public ApfCapabilities(int apfVersionSupported, int maximumApfProgramSize, int apfPacketFormat)
+    {
         this.apfVersionSupported = apfVersionSupported;
         this.maximumApfProgramSize = maximumApfProgramSize;
         this.apfPacketFormat = apfPacketFormat;

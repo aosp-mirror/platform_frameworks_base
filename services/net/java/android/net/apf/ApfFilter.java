@@ -31,6 +31,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -69,7 +70,8 @@ import libcore.io.IoBridge;
  */
 public class ApfFilter {
     // Thread to listen for RAs.
-    private class ReceiveThread extends Thread {
+    @VisibleForTesting
+    class ReceiveThread extends Thread {
         private final byte[] mPacket = new byte[1514];
         private final FileDescriptor mSocket;
         private volatile boolean mStopped;
@@ -151,8 +153,10 @@ public class ApfFilter {
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
     private final NetworkInterface mNetworkInterface;
-    private byte[] mHardwareAddress;
-    private ReceiveThread mReceiveThread;
+    @VisibleForTesting
+    byte[] mHardwareAddress;
+    @VisibleForTesting
+    ReceiveThread mReceiveThread;
     @GuardedBy("this")
     private long mUniqueCounter;
     @GuardedBy("this")
@@ -161,7 +165,8 @@ public class ApfFilter {
     @GuardedBy("this")
     private byte[] mIPv4Address;
 
-    private ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
+    @VisibleForTesting
+    ApfFilter(ApfCapabilities apfCapabilities, NetworkInterface networkInterface,
             IpManager.Callback ipManagerCallback, boolean multicastFilter) {
         mApfCapabilities = apfCapabilities;
         mIpManagerCallback = ipManagerCallback;
@@ -184,7 +189,8 @@ public class ApfFilter {
      * Attempt to start listening for RAs and, if RAs are received, generating and installing
      * filters to ignore useless RAs.
      */
-    private void maybeStartFilter() {
+    @VisibleForTesting
+    void maybeStartFilter() {
         FileDescriptor socket;
         try {
             mHardwareAddress = mNetworkInterface.getHardwareAddress();
@@ -724,7 +730,8 @@ public class ApfFilter {
     }
 
     @GuardedBy("this")
-    private void installNewProgramLocked() {
+    @VisibleForTesting
+    void installNewProgramLocked() {
         purgeExpiredRasLocked();
         final byte[] program;
         long programMinLifetime = Long.MAX_VALUE;
