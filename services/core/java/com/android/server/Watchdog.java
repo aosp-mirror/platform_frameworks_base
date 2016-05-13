@@ -73,6 +73,7 @@ public class Watchdog extends Thread {
         "/system/bin/surfaceflinger",
         "media.codec",     // system/bin/mediacodec
         "media.extractor", // system/bin/mediaextractor
+        "com.android.bluetooth",  // Bluetooth service
     };
 
     static Watchdog sWatchdog;
