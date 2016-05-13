@@ -33,6 +33,7 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
 import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.RULE_NONE;
+import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidRulesToString;
@@ -218,9 +219,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /** Flag indicating if background data is restricted. */
     @GuardedBy("mRulesLock")
     private boolean mRestrictBackground;
-    /** Flag indicating if background data is restricted due to battery savings. */
-    @GuardedBy("mRulesLock")
-    private boolean mRestrictPower;
 
     final private Context mContext;
     private int mNetworkPreference;
@@ -669,7 +667,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         try {
             mPolicyManager.setConnectivityListener(mPolicyListener);
             mRestrictBackground = mPolicyManager.getRestrictBackground();
-            mRestrictPower = mPolicyManager.getRestrictPower();
         } catch (RemoteException e) {
             // ouch, no rules updates means some processes may never get network
             loge("unable to register INetworkPolicyListener" + e);
@@ -942,13 +939,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         + ": " + allowed);
             }
         }
-        // ...then Battery Saver Mode.
-        if (allowed && mRestrictPower) {
-            allowed = (uidRules & RULE_ALLOW_ALL) != 0;
+        // ...then power restrictions.
+        if (allowed) {
+            allowed = (uidRules & RULE_REJECT_ALL) == 0;
             if (LOGD_RULES) Log.d(TAG, "allowed status for uid " + uid + " when"
-                    + " mRestrictPower=" + mRestrictPower
-                    + ", whitelisted=" + ((uidRules & RULE_ALLOW_ALL) != 0)
-                    + ": " + allowed);
+                    + " rule is " + uidRulesToString(uidRules) + ": " + allowed);
         }
         return !allowed;
     }
@@ -1400,7 +1395,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final int oldRules = mUidRules.get(uid, RULE_NONE);
                 if (oldRules == uidRules) return;
 
-                mUidRules.put(uid, uidRules);
+                if (uidRules == RULE_NONE) {
+                    mUidRules.delete(uid);
+                } else {
+                    mUidRules.put(uid, uidRules);
+                }
             }
 
             // TODO: notify UID when it has requested targeted updates
@@ -1435,18 +1434,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (restrictBackground) {
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
-            }
-        }
-
-        @Override
-        public void onRestrictPowerChanged(boolean restrictPower) {
-            // caller is NPMS, since we only register with them
-            if (LOGD_RULES) {
-                log("onRestrictPowerChanged(restrictPower=" + restrictPower + ")");
-            }
-
-            synchronized (mRulesLock) {
-                mRestrictPower = restrictPower;
             }
         }
 
@@ -1892,10 +1879,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.print("Restrict background: ");
         pw.println(mRestrictBackground);
-        pw.println();
-
-        pw.print("Restrict power: ");
-        pw.println(mRestrictPower);
         pw.println();
 
         pw.println("Status for known UIDs:");

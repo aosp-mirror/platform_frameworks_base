@@ -91,10 +91,6 @@ public class DataSaverController {
         }
 
         @Override
-        public void onRestrictPowerChanged(boolean restrictPower) {
-        }
-
-        @Override
         public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
         }
     };
