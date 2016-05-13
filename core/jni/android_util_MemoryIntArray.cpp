@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-
 #include "core_jni_helpers.h"
 #include <cutils/ashmem.h>
+#include <linux/ashmem.h>
 #include <sys/mman.h>
 
 namespace android {
@@ -41,11 +41,6 @@ static jint android_util_MemoryIntArray_create(JNIEnv* env, jobject clazz, jstri
 
     if (fd < 0) {
         jniThrowException(env, "java/io/IOException", "ashmem creation failed");
-        return -1;
-    }
-
-    if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
-        jniThrowException(env, "java/io/IOException", "ashmem was purged");
         return -1;
     }
 
@@ -133,24 +128,13 @@ static jint android_util_MemoryIntArray_get(JNIEnv* env, jobject clazz,
         return -1;
     }
 
-    bool unpin = false;
-
-    if (!owner) {
-        if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
-            jniThrowException(env, "java/io/IOException", "ashmem region was purged");
-            return -1;
-        }
-        unpin = true;
+    if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
+        jniThrowException(env, "java/io/IOException", "ashmem region was purged");
+        return -1;
     }
 
     std::atomic_int* value = reinterpret_cast<std::atomic_int*>(address) + index;
-    const int result = value->load(std::memory_order_relaxed);
-
-    if (unpin) {
-        ashmem_unpin_region(fd, 0, 0);
-    }
-
-    return result;
+    return value->load(std::memory_order_relaxed);
 }
 
 static void android_util_MemoryIntArray_set(JNIEnv* env, jobject clazz,
@@ -161,22 +145,13 @@ static void android_util_MemoryIntArray_set(JNIEnv* env, jobject clazz,
         return;
     }
 
-    bool unpin = false;
-
-    if (!owner) {
-        if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
-            jniThrowException(env, "java/io/IOException", "ashmem region was purged");
-            return;
-        }
-        unpin = true;
+    if (ashmem_pin_region(fd, 0, 0) == ASHMEM_WAS_PURGED) {
+        jniThrowException(env, "java/io/IOException", "ashmem region was purged");
+        return;
     }
 
     std::atomic_int* value = reinterpret_cast<std::atomic_int*>(address) + index;
     value->store(newValue, std::memory_order_relaxed);
-
-    if (unpin) {
-        ashmem_unpin_region(fd, 0, 0);
-    }
 }
 
 static jint android_util_MemoryIntArray_size(JNIEnv* env, jobject clazz, jint fd) {
