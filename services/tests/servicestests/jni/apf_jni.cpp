@@ -175,7 +175,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void*) {
                     (void*)com_android_server_ApfTest_compareBpfApf },
     };
 
-    jniRegisterNativeMethods(env, "com/android/server/ApfTest",
+    jniRegisterNativeMethods(env, "android/net/apf/ApfTest",
             gMethods, ARRAY_SIZE(gMethods));
 
     return JNI_VERSION_1_6;
