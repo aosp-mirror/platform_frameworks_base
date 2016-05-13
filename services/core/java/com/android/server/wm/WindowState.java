@@ -437,7 +437,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // used to start an entering animation earlier.
     private boolean mSurfaceSaved = false;
 
-    // Whether we're performing an entering animation with a saved surface.
+    // Whether we're performing an entering animation with a saved surface. This flag is
+    // true during the time we're showing a window with a previously saved surface. It's
+    // cleared when surface is destroyed, saved, or re-drawn by the app.
     private boolean mAnimatingWithSavedSurface;
 
     // Whether the window was visible when we set the app to invisible last time. WM uses
@@ -1256,6 +1258,32 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     /**
+     * Whether this window's drawn state might affect the drawn states of the app token.
+     *
+     * @param visibleOnly Whether we should consider only the windows that's currently
+     *                    visible in layout. If true, windows that has not relayout to VISIBLE
+     *                    would always return false.
+     *
+     * @return true if the window should be considered while evaluating allDrawn flags.
+     */
+    boolean mightAffectAllDrawn(boolean visibleOnly) {
+        final boolean isViewVisible = (mViewVisibility == View.VISIBLE)
+                && (mAppToken == null || !mAppToken.clientHidden);
+        return (isOnScreenIgnoringKeyguard() && (!visibleOnly || isViewVisible)
+                || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION)
+                && !mAnimatingExit && !mDestroying;
+    }
+
+    /**
+     * Whether this window is "interesting" when evaluating allDrawn. If it's interesting,
+     * it must be drawn before allDrawn can become true.
+     */
+    boolean isInteresting() {
+        return mAppToken != null && !mAppDied
+                && (!mAppToken.mAppAnimator.freezingScreen || !mAppFreezing);
+    }
+
+    /**
      * Like isOnScreen(), but we don't return true if the window is part
      * of a transition that has not yet been started.
      */
@@ -1960,6 +1988,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mAnimatingWithSavedSurface;
     }
 
+    boolean isAnimatingInvisibleWithSavedSurface() {
+        return mAnimatingWithSavedSurface
+                && (mViewVisibility != View.VISIBLE || mWindowRemovalAllowed);
+    }
+
     public void setVisibleBeforeClientHidden() {
         mWasVisibleBeforeClientHidden |=
                 (mViewVisibility == View.VISIBLE || mAnimatingWithSavedSurface);
@@ -2042,6 +2075,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (mWinAnimator.mSurfaceController != null) {
                 mWinAnimator.mSurfaceController.disconnectInTransaction();
             }
+            mAnimatingWithSavedSurface = false;
         } else {
             mWinAnimator.destroySurfaceLocked();
         }
