@@ -657,7 +657,54 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "image":"https://i1.ytimg.com/vi/K2dodTXARqc/maxresdefault.jpg",
     "type":"video"
   },
-
+  {
+    "title":"Instant Run: An Android Tool Time Deep Dive",
+    "category":"",
+    "summary":"Instant Run is an Android Studio feature that significantly reduces the time for building and deploying incremental code changes during your coding / testing / debugging lifecycle.",
+    "url":"https://www.youtube.com/watch?v=StqAZ1OQbqA&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/StqAZ1OQbqA/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
+    "title":"What’s New in Android Studio 2.1",
+    "category":"",
+    "summary":"Android Studio 2.1 is required to try out new features and APIs of the Android N developer preview including the new Jack compiler and Java 8 language support. It also includes performance improvements to Instant Run, and a number of bug fixes and stability improvements.",
+    "url":"https://www.youtube.com/watch?v=ZOz_yr8Yxq8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/ZOz_yr8Yxq8/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
+    "title":"10 Things You Didn’t Know You Could Do",
+    "category":"",
+    "summary":"This Android Tool Time pro-tip roundup with Reto Meier shows off expert Android Studio tips designed to help you write less code, and make every keystroke count",
+    "url":"https://www.youtube.com/watch?v=eOV2owswDkE&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/eOV2owswDkE/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
+    "title":"Live Templates in Android Studio",
+    "category":"",
+    "summary":"Android Tool Time Protip: Use and create your own Live Templates in Android Studio to write more code with less keystrokes using Live Templates to insert common, templatized code snippets.",
+    "url":"https://www.youtube.com/watch?v=4rI4tTd7-J8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/4rI4tTd7-J8/maxresdefault.jpg",
+    "type":"youtube"
+  },
   {
     "title":"Google Play Services 7.5",
     "category":"",
