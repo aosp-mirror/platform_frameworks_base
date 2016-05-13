@@ -2766,6 +2766,27 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "tags": [
       "marketing",
+      "engagement",
+      "translate"
+    ],
+    "url": "https://support.google.com/l10n/answer/6359997",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Use the App Translation Service",
+    "summary": "The App Translation Service is a human translation service. It makes it easy to order translations for app UI strings, Play Store text, in-app purchase products, and universal app campaign ads.",
+    "keywords": [
+      "marketing",
+      "engagement",
+      "translate"
+    ],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [
+      "marketing",
       "engagement"
     ],
     "url": "https://support.google.com/adwords/answer/6167162",

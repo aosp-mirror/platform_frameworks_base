@@ -530,19 +530,17 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
 </h4>
 
 <p>
-  Google Play App Translation Service can help you quickly find and purchase
-  translations of your app. In the Developer Console, you can browse a list of
-  third-party vendors who are pre-qualified by Google to offer high-quality
-  translation at competitive prices. You can upload the strings you want
-  translated, select the languages you want to translate into, and select your
-  translation vendor based on time and price.
+  The <a href="https://support.google.com/l10n/answer/6359997">App Translation
+  Service</a> can help you quickly purchase translations of your app. In the
+  Developer Console and Android Studio, you get instant quotes from a list of
+  third-party translation vendors. Beyond the app UI strings, your order can
+  include translations for Play Store text, IAP names, and ad text.
 </p>
 
 <p>
-  Once you've purchased translations, you'll receive an email from your vendor.
-  Your translations are a direct business agreement between you and your
-  vendor; you'll need to work directly with the vendor to manage the
-  translation process and deliverables and resolve any support issues.
+  Your translation order is a direct agreement between you and your chosen
+  vendor. The vendor will work directly with you to provide clarification and
+  resolve any issues during the translation process.
 </p>
 
 <div>
@@ -736,10 +734,12 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
     </h2>
 
     <p>
-      You can use the App Translation service on Google Play to translate your
-      store listing. Prepare an XML file with your store listing information
-      and upload just as you would upload the strings.xml file (see <a href=
-      "#gp-trans">Purchase professional translations</a>)
+      You can use the <a href=
+      "https://support.google.com/l10n/answer/6359997">App Translation
+      Service</a> on Google Play to translate your store listing. You can use
+      your existing published store listing text as the source or edit it
+      online before placing your order (see <a href="#gp-trans">Purchase
+      professional translations</a>).
     </p>
   </div>
 </div>
