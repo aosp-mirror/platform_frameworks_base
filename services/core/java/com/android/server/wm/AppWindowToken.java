@@ -88,6 +88,11 @@ class AppWindowToken extends WindowToken {
     // case do not clear allDrawn until the animation completes.
     boolean deferClearAllDrawn;
 
+    // These are to track the app's real drawing status if there were no saved surfaces.
+    boolean allDrawnExcludingSaved;
+    int numInterestingWindowsExcludingSaved;
+    int numDrawnWindowsExclusingSaved;
+
     // Is this window's surface needed?  This is almost like hidden, except
     // it will sometimes be true a little earlier: when the token has
     // been shown, but is still waiting for its app transition to execute
@@ -411,6 +416,39 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    /**
+     * Whether the app has some window that is invisible in layout, but
+     * animating with saved surface.
+     */
+    boolean isAnimatingInvisibleWithSavedSurface() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            if (w.isAnimatingInvisibleWithSavedSurface()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Hide all window surfaces that's still invisible in layout but animating
+     * with a saved surface, and mark them destroying.
+     */
+    void stopUsingSavedSurfaceLocked() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            if (w.isAnimatingInvisibleWithSavedSurface()) {
+                if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
+                        "stopUsingSavedSurfaceLocked: " + w);
+                w.clearAnimatingWithSavedSurface();
+                w.mDestroying = true;
+                w.mWinAnimator.hide("stopUsingSavedSurfaceLocked");
+                w.mWinAnimator.mWallpaperControllerLocked.hideWallpapers(w);
+            }
+        }
+        destroySurfaces();
+    }
+
     void restoreSavedSurfaces() {
         if (!canRestoreSurfaces()) {
             clearVisibleBeforeClientHidden();
@@ -456,6 +494,7 @@ class AppWindowToken extends WindowToken {
     void clearAllDrawn() {
         allDrawn = false;
         deferClearAllDrawn = false;
+        allDrawnExcludingSaved = false;
     }
 
     @Override

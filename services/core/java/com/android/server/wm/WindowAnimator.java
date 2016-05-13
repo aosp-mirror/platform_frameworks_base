@@ -788,6 +788,7 @@ public class WindowAnimator {
             removeReplacedWindowsLocked();
         }
 
+        mService.stopUsingSavedSurfaceLocked();
         mService.destroyPreservedSurfaceLocked();
         mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
