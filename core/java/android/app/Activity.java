@@ -1593,10 +1593,6 @@ public class Activity extends ContextThemeWrapper
      * receive either {@link #onRestart}, {@link #onDestroy}, or nothing,
      * depending on later user activity.
      *
-     * <p>Note that this method may never be called, in low memory situations
-     * where the system does not have enough memory to keep your activity's
-     * process running after its {@link #onPause} method is called.
-     *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
      * thrown.</em></p>

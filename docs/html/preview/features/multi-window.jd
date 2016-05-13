@@ -138,7 +138,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   When the user puts an app into multi-window mode, the system notifies the
   activity of a configuration change, as specified in <a href=
   "{@docRoot}guide/topics/resources/runtime-changes.html">Handling Runtime
-  Changes</a>. Essentially, this change has the same activity-lifecycle
+  Changes</a>. This also happens when the user resizes the app, or puts the app
+  back into full-screen mode.
+  Essentially, this change has the same activity-lifecycle
   implications as when the system notifies the app that the device has switched
   from portrait to landscape mode, except that the device dimensions are
   changed instead of just being swapped. As discussed in <a href=
