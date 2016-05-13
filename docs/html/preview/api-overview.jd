@@ -733,19 +733,21 @@ specify how user CAs should be trusted.</p>
 
 <p>
   Android N introduces APK Signature Scheme v2, a new app-signing scheme that
-  offers faster app install times and better protection against unauthorized
-  alterations to APK files. Android Studio 2.2 and Gradle provide built-in
-  support for APK Signature Scheme v2.
+  offers faster app install times and more protection against unauthorized
+  alterations to APK files. By default, Android Studio 2.2 and the Android
+  Plugin for Gradle 2.2 sign your app using both APK Signature Scheme v2 and
+  the traditional signing scheme, which uses JAR signing.
 </p>
 
 <p>
-  Although we recommend applying APK Signature Scheme v2 to your app, the new
-  scheme is not mandatory. If your app doesn't build properly when using the
-  APK Signature Scheme v2, you can use the traditional signing scheme—which
-  uses JAR signing—instead. To use the traditional scheme, open the
-  module-level <code>build.gradle</code> file and add the
-  <code>v2SigningEnabled</code> parameter to your release signing
-  configuration, setting this parameter's value to <code>false</code>:
+  Although we recommend applying APK Signature Scheme v2 to your app, this new
+  scheme is not mandatory. If your app doesn't build properly when using APK
+  Signature Scheme v2, you can disable the new scheme. The disabling process
+  causes Android Studio 2.2 and the Android Plugin for Gradle 2.2 to sign your
+  app using only the traditional signing scheme. To sign with only the
+  traditional scheme, open the module-level <code>build.gradle</code> file, then
+  add the line <code>v2SigningEnabled false</code> to your release signing
+  configuration:
 </p>
 
 <pre>
@@ -764,12 +766,18 @@ specify how user CAs should be trusted.</p>
   }
 </pre>
 
+<p class="caution"><strong>Caution: </strong> If you sign your app using APK
+  Signature Scheme v2 and make further changes to the app, the app's signature
+  is invalidated. For this reason, use tools such as <code>zipalign</code>
+  before signing your app using APK Signature Scheme v2, not after.
+</p>
+
 <p>
-  For more information, see the following guides, which describe how to <a href=
-  "{@docRoot}studio/tools/publishing/app-signing.html#release-mode"> sign an app
-  in Android Studio</a> and how to <a href=
+  For more information, read the Android Studio documents that describe how to
+  <a href="{@docRoot}studio/tools/publishing/app-signing.html#release-mode">
+  sign an app</a> in Android Studio and how to <a href=
   "{@docRoot}studio/tools/building/configuring-gradle.html#signing"> configure
-  the Gradle build file for signing apps</a>.
+  the build file for signing apps</a> using the Android Plugin for Gradle.
 </p>
 
 <h2 id="scoped_directory_access">Scoped directory access</h2>
