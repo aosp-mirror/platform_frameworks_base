@@ -36,8 +36,11 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#default_trusted_ca">Default Trusted CA</a></li>
         <li><a href="#apk_signature_v2">APK signature scheme v2</a></li>
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
+        <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
+        <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
         <li><a href="#print_svc">Print service enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
+        <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
       </ol>
 </div>
 </div>
@@ -354,7 +357,7 @@ Saver and make an effort to limit foreground and background data usage.</p>
 
 <p>
   Vulkan is only available to apps on devices with Vulkan-capable hardware,
-  such as Nexus 5X and Nexus 6P. We're working closely with our
+  such as Nexus 5X, Nexus 6P, and Nexus Player. We're working closely with our
   partners to bring Vulkan to more devices as soon as possible.
 </p>
 
@@ -672,7 +675,7 @@ meet the needs of those users.</p>
 <p>Direct boot improves device startup times and lets registered
 apps have limited functionality even after an unexpected reboot.
 For example, if an encrypted device reboots while the user is sleeping,
-registered alarms, messages and incoming calls can now continue notify
+registered alarms, messages and incoming calls can now continue to notify
 the user as normal. This also means accessibility services can also be
   available immediately after a restart.</p>
 
@@ -844,6 +847,53 @@ requesting access to.</p>
 <a href="{@docRoot}preview/features/scoped-folder-access.html">Scoped
 Directory Access</a> developer documentation.</p>
 
+<h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
+
+<p>
+In Android N, the user can press Meta+/ to trigger a Keyboard Shortcuts
+screen that displays all shortcuts available both from the system and from
+the app in focus. These are retrieved automatically from the app’s menu if
+available, but developers can provide their own fine-tuned shortcuts lists
+for the screen. This is done simply by overriding the following method
+in {@code Activity.java}:
+</p>
+
+<pre>
+public void onProvideKeyboardShortcuts(
+     List<KeyboardShortcutGroup> data, Menu menu, int deviceId)
+</pre>
+
+<p>
+To trigger the Keyboard Shortcuts Helper from anywhere in your app,
+call {@code requestKeyboardShortcutsHelper} for the relevant activity.
+</p>
+
+<h2 id="sustained_performance_api">Sustained Performance API</h2>
+
+<p>
+Performance can fluctuate dramatically for long-running apps, because the
+system throttles system-on-chip engines as device components reach their
+temperature limits. This fluctuation presents a moving target for app
+developers creating high-performance, long-running apps.
+</p>
+
+<p>
+To address these limitations, Android N includes support for
+<em>sustained performance mode</em>, enabling OEMs to provide hints on
+device-performance capabilities for long-running applications. App developers
+can use these hints to tune applications for a predictable,
+consistent level of device performance over long periods of time.
+</p>
+
+<p>
+App developers can try out this new API in the N Developer Preview on
+Nexus 6P devices only. To use this feature,
+set the sustained performance window flag for the window
+you want to run in sustained performance mode. Set this flag using the
+{@code setSustainedPerformanceMode(boolean)} method. The system automatically
+disables this mode when the window is no longer in focus.
+</p>
+
 <h2 id="print_svc">Print Service Enhancements</h2>
 
 <p>
@@ -884,6 +934,51 @@ Directory Access</a> developer documentation.</p>
   For more information about these methods, see the downloadable <a href=
   "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
 </p>
+
+<h2 id="framemetrics_api">FrameMetricsListener API</h2>
+
+<p>
+The FrameMetricsListener API allows an app to monitor its UI rendering
+performance by exposing a streaming pubsub API to transfer frame
+timing info for the app's current window. The data returned is
+equivalent to that displayed by {@code adb shell dumpsys gfxinfo framestats},
+but is not limited to the past 120 frames.
+</p>
+
+<p>
+You can use FrameMetricsListener to measure interaction-level UI
+performance in production, without a USB connection. This API
+allows collection of data at a much higher granularity than does
+{@code adb shell dumpsys gfxinfo}. This higher granularity is possible because
+the system can collect data for particular interactions in the app; the system
+need not capture a global summary of the entire app’s
+performance, or clear any global state. You can use this
+capability to gather performance data and catch regressions in UI performance
+for real use cases within an app.
+</p>
+
+<p>
+The API provides a callback interface to be implemented and
+registered on the window that you wish to monitor:
+</p>
+
+<pre>
+ public interface FrameMetricsListener {
+        void onMetricsAvailable(Window window, FrameMetrics frameMetrics,
+                int dropCountSinceLastInvocation);
+    }
+</pre>
+
+<p>
+The API returns a FrameMetrics object, which contains timing data that
+the rendering subsystem reports for various milestones in a frame lifecycle.
+The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
+{@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
+{@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
+{@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
+{@code TOTAL_DURATION}, and {@code FIRST_DRAW_FRAME}
+</p>
+
 
 <h2 id="virtual_files">Virtual Files</h2>
 
