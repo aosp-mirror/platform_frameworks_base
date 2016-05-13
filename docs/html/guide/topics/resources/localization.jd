@@ -33,6 +33,7 @@ Providing Resources</a></li>
 Layouts</a></li>
 <li><a href="{@docRoot}reference/android/app/Activity.html#ActivityLifecycle">
 Activity Lifecycle</a></li>
+<li><a href="https://support.google.com/l10n/answer/6359997">App Translation Service</a></li>
 </ol>
 </div>
 </div>
@@ -395,6 +396,20 @@ defined in <code>res/values/strings.xml</code>.</p>
 that Android makes available:</p>
 
 <pre>String locale = context.getResources().getConfiguration().locale.getDisplayName();</pre>
+<h4>
+  Use the App Translation Service
+</h4>
+
+<p>
+  The <a href="https://support.google.com/l10n/answer/6359997">App Translation
+  Service</a> is integrated into the <a href=
+  "https://support.google.com/l10n/answer/6341304">Developer Console</a>, and
+  it is also accessible from <a href=
+  "https://support.google.com/l10n/answer/6341928">Android Studio</a>. It is a
+  quick and simple way to get an instant quote and place an order with a
+  translation company. You can order translations into one or more languages
+  for app UI strings, Play Store Listing text, IAP names, and ad campaign text.
+</p>
 
 <h2 id="testing">Testing Localized Applications</h2>
 
