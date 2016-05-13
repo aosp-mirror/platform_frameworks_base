@@ -1803,7 +1803,21 @@ public interface WindowManager extends ViewManager {
          */
         public final void setSurfaceInsets(View view, boolean manual, boolean preservePrevious) {
             final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
-            surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+            // Partial workaround for b/28318973. Every inset change causes a freeform window
+            // to jump a little for a few frames. If we never allow surface insets to decrease,
+            // they will stabilize quickly (often from the very beginning, as most windows start
+            // as focused).
+            // TODO(b/22668382) to fix this properly.
+            if (surfaceInset == 0) {
+                // OK to have 0 (this is the case for non-freeform windows).
+                surfaceInsets.set(0, 0, 0, 0);
+            } else {
+                surfaceInsets.set(
+                        Math.max(surfaceInset, surfaceInsets.left),
+                        Math.max(surfaceInset, surfaceInsets.top),
+                        Math.max(surfaceInset, surfaceInsets.right),
+                        Math.max(surfaceInset, surfaceInsets.bottom));
+            }
             hasManualSurfaceInsets = manual;
             preservePreviousSurfaceInsets = preservePrevious;
         }
