@@ -127,7 +127,7 @@ public class BootReceiver extends BroadcastReceiver {
             .append("\n").toString();
         final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
 
-        String recovery = RecoverySystem.handleAftermath();
+        String recovery = RecoverySystem.handleAftermath(ctx);
         if (recovery != null && db != null) {
             db.addText("SYSTEM_RECOVERY_LOG", headers + recovery);
         }
