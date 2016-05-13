@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-#include "GlesDriver.h"
+#include "DefaultGlesDriver.h"
 
-using namespace android::uirenderer::debug;
+#include "gles_undefine.h"
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+#include <EGL/egl.h>
 
-#define API_ENTRY(x) x
-#define CALL_GL_API(api, ...) GlesDriver::get()->api##_(__VA_ARGS__)
-#define CALL_GL_API_RETURN(api, ...) return GlesDriver::get()->api##_(__VA_ARGS__)
+namespace android {
+namespace uirenderer {
+namespace debug {
+
+// Generate the proxy
+#define API_ENTRY(x) DefaultGlesDriver::x##_
+#define CALL_GL_API(x, ...) x(__VA_ARGS__);
+#define CALL_GL_API_RETURN(x, ...) return x(__VA_ARGS__);
 
 #include "gles_stubs.in"
 
 #undef API_ENTRY
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
+
+} // namespace debug
+} // namespace uirenderer
+} // namespace android

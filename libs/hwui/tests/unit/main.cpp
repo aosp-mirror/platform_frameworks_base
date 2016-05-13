@@ -15,8 +15,11 @@
  */
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "Caches.h"
+#include "debug/GlesDriver.h"
+#include "debug/NullGlesDriver.h"
 #include "thread/TaskManager.h"
 #include "tests/common/TestUtils.h"
 
@@ -127,8 +130,13 @@ int main(int argc, char* argv[]) {
         gSigChain.insert(pair<int, struct sigaction>(sig, old_sa));
     }
 
+    // Replace the default GLES driver
+    debug::GlesDriver::replace(std::make_unique<debug::NullGlesDriver>());
+
     // Run the tests
     testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleMock(&argc, argv);
+
     int ret = RUN_ALL_TESTS();
     checkForLeaks();
     return ret;

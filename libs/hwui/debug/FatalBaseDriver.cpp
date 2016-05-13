@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-#include "GlesDriver.h"
+#include "FatalBaseDriver.h"
 
-using namespace android::uirenderer::debug;
+#include <cutils/log.h>
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+namespace android {
+namespace uirenderer {
+namespace debug {
 
-#define API_ENTRY(x) x
-#define CALL_GL_API(api, ...) GlesDriver::get()->api##_(__VA_ARGS__)
-#define CALL_GL_API_RETURN(api, ...) return GlesDriver::get()->api##_(__VA_ARGS__)
+// Generate the proxy
+#define API_ENTRY(x) FatalBaseDriver::x##_
+#define CALL_GL_API(x, ...) LOG_ALWAYS_FATAL("Not Implemented");
+#define CALL_GL_API_RETURN(x, ...) \
+        LOG_ALWAYS_FATAL("Not Implemented"); \
+        return static_cast<decltype(x(__VA_ARGS__))>(0);
 
 #include "gles_stubs.in"
 
 #undef API_ENTRY
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
+
+} // namespace debug
+} // namespace uirenderer
+} // namespace android

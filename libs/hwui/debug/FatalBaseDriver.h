@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+#pragma once
+
 #include "GlesDriver.h"
 
-using namespace android::uirenderer::debug;
+namespace android {
+namespace uirenderer {
+namespace debug {
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+// A base driver that implements all the pure virtuals in the form of
+// LOG_ALWAYS_FATALS. Suitable for selective-override implementations
+// where only a known subset of methods need to be overridden
+class FatalBaseDriver : public GlesDriver {
+public:
+#define GL_ENTRY(ret, api, ...) virtual ret api##_(__VA_ARGS__) override;
+    #include "gles_decls.in"
+#undef GL_ENTRY
+};
 
-#define API_ENTRY(x) x
-#define CALL_GL_API(api, ...) GlesDriver::get()->api##_(__VA_ARGS__)
-#define CALL_GL_API_RETURN(api, ...) return GlesDriver::get()->api##_(__VA_ARGS__)
-
-#include "gles_stubs.in"
-
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+} // namespace debug
+} // namespace uirenderer
+} // namespace android

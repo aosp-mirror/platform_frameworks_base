@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#ifdef HWUI_GLES_WRAP_ENABLED
-#undef HWUI_GLES_WRAP_ENABLED
-
 #undef glActiveShaderProgram
 #undef glActiveShaderProgramEXT
 #undef glActiveTexture
@@ -914,5 +911,3 @@
 #undef glWaitSyncAPPLE
 #undef glWeightPathsNV
 #undef glWeightPointerOES
-
-#endif // HWUI_GLES_WRAP_ENABLED
