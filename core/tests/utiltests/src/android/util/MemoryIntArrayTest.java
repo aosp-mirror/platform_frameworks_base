@@ -16,12 +16,22 @@
 
 package android.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.os.Parcel;
-import junit.framework.TestCase;
+import android.support.test.runner.AndroidJUnit4;
 import libcore.io.IoUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class MemoryIntArrayTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class MemoryIntArrayTest {
 
+    @Test
     public void testSize() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -32,6 +42,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testGetSet() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -49,6 +60,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testWritable() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -59,6 +71,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testClose() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -72,6 +85,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testMarshalledGetSet() throws Exception {
         MemoryIntArray firstArray = null;
         MemoryIntArray secondArray = null;
@@ -99,6 +113,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testInteractOnceClosed() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -141,6 +156,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testInteractPutOfBounds() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -178,6 +194,7 @@ public class MemoryIntArrayTest extends TestCase {
         }
     }
 
+    @Test
     public void testOverMaxSize() throws Exception {
         MemoryIntArray array = null;
         try {
@@ -187,6 +204,30 @@ public class MemoryIntArrayTest extends TestCase {
             /* expected */
         } finally {
             IoUtils.closeQuietly(array);
+        }
+    }
+
+    @Test
+    public void testNotMutableByUnprivilegedClients() throws Exception {
+        RemoteIntArray remoteIntArray = new RemoteIntArray(1, false);
+        try {
+            assertNotNull("Couldn't get remote instance", remoteIntArray);
+            MemoryIntArray localIntArray = remoteIntArray.peekInstance();
+            assertNotNull("Couldn't get local instance", localIntArray);
+
+            remoteIntArray.set(0, 1);
+            assertSame("Remote should be able to modify", 1, remoteIntArray.get(0));
+
+            try {
+                localIntArray.set(0, 0);
+                fail("Local shouldn't be able to modify");
+            } catch (UnsupportedOperationException e) {
+                /* expected */
+            }
+            assertSame("Local shouldn't be able to modify", 1, localIntArray.get(0));
+            assertSame("Local shouldn't be able to modify", 1, remoteIntArray.get(0));
+        } finally {
+            remoteIntArray.destroy();
         }
     }
 }

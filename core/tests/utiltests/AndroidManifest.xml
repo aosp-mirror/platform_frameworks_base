@@ -43,6 +43,11 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+
+        <service android:name="android.util.RemoteMemoryIntArrayService"
+                android:process=":remote">
+        </service>
+
     </application>
 
     <instrumentation
