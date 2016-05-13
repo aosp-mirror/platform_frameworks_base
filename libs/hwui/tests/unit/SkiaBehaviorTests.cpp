@@ -51,15 +51,20 @@ TEST(SkiaBehavior, genIds) {
 }
 
 TEST(SkiaBehavior, lightingColorFilter_simplify) {
-    SkAutoTUnref<SkColorFilter> filter(SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0));
+    {
+        SkAutoTUnref<SkColorFilter> filter(
+                SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0));
 
-    SkColor observedColor;
-    SkXfermode::Mode observedMode;
-    ASSERT_TRUE(filter->asColorMode(&observedColor, &observedMode));
-    EXPECT_EQ(0xFF223344, observedColor);
-    EXPECT_EQ(SkXfermode::Mode::kModulate_Mode, observedMode);
+        SkColor observedColor;
+        SkXfermode::Mode observedMode;
+        ASSERT_TRUE(filter->asColorMode(&observedColor, &observedMode));
+        EXPECT_EQ(0xFF223344, observedColor);
+        EXPECT_EQ(SkXfermode::Mode::kModulate_Mode, observedMode);
+    }
 
-    SkAutoTUnref<SkColorFilter> failFilter(
-            SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0x1));
-    EXPECT_FALSE(filter->asColorMode(nullptr, nullptr));
+    {
+        SkAutoTUnref<SkColorFilter> failFilter(
+                SkColorMatrixFilter::CreateLightingFilter(0x11223344, 0x1));
+        EXPECT_FALSE(failFilter->asColorMode(nullptr, nullptr));
+    }
 }
