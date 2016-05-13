@@ -34,8 +34,8 @@ import com.android.systemui.R;
 public class QSTileBaseView extends LinearLayout {
 
     private final H mHandler = new H();
-    private QSIconView mIcon;
-    private RippleDrawable mRipple;
+    protected QSIconView mIcon;
+    protected RippleDrawable mRipple;
     private Drawable mTileBackground;
     private String mAccessibilityClass;
     private boolean mTileState;
@@ -65,7 +65,7 @@ public class QSTileBaseView extends LinearLayout {
         mCollapsedView = collapsedView;
     }
 
-    private Drawable newTileBackground() {
+    protected Drawable newTileBackground() {
         final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
