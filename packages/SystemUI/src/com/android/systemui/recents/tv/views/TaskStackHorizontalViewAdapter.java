@@ -16,7 +16,6 @@
 package com.android.systemui.recents.tv.views;
 
 import android.animation.Animator;
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -87,7 +86,7 @@ public class TaskStackHorizontalViewAdapter extends
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    removeAt(position);
+                    removeTask(task);
                     EventBus.getDefault().send(new DeleteTaskDataEvent(task));
                     mShouldReset = true;
                 }
@@ -148,20 +147,15 @@ public class TaskStackHorizontalViewAdapter extends
         return mTaskList.size();
     }
 
-    private void removeAt(int position) {
-        Task removedTask = mTaskList.remove(position);
-        if (mGridView != null) {
-            mGridView.getStack().removeTask(removedTask, AnimationProps.IMMEDIATE,
-                    false);
-        }
-        notifyItemRemoved(position);
-    }
-
     public void removeTask(Task task) {
         int position = mTaskList.indexOf(task);
         if (position >= 0) {
             mTaskList.remove(position);
             notifyItemRemoved(position);
+            if (mGridView != null) {
+                mGridView.getStack().removeTask(task, AnimationProps.IMMEDIATE,
+                        false);
+            }
         }
     }
 
