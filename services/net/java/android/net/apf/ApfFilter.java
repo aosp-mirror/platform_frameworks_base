@@ -567,18 +567,21 @@ public class ApfFilter {
     private void generateArpFilterLocked(ApfGenerator gen) throws IllegalInstructionException {
         // Here's a basic summary of what the ARP filter program does:
         //
-        // if it's not an ARP IPv4 request:
-        //   pass
-        // if it's not a request for our IPv4 address:
-        //   drop
+        // if interface has IPv4 address:
+        //   if it's not an ARP IPv4 request:
+        //     pass
+        //   if it's not a request for our IPv4 address:
+        //     drop
         // pass
 
-        // if it's not an ARP IPv4 request, pass
-        gen.addLoadImmediate(Register.R0, ARP_HEADER_OFFSET);
-        gen.addJumpIfBytesNotEqual(Register.R0, ARP_IPV4_REQUEST_HEADER, gen.PASS_LABEL);
-        // if it's not a request for our IPv4 address, drop
-        gen.addLoadImmediate(Register.R0, ARP_TARGET_IP_ADDRESS_OFFSET);
-        gen.addJumpIfBytesNotEqual(Register.R0, mIPv4Address, gen.DROP_LABEL);
+        if (mIPv4Address != null) {
+            // if it's not an ARP IPv4 request, pass
+            gen.addLoadImmediate(Register.R0, ARP_HEADER_OFFSET);
+            gen.addJumpIfBytesNotEqual(Register.R0, ARP_IPV4_REQUEST_HEADER, gen.PASS_LABEL);
+            // if it's not a request for our IPv4 address, drop
+            gen.addLoadImmediate(Register.R0, ARP_TARGET_IP_ADDRESS_OFFSET);
+            gen.addJumpIfBytesNotEqual(Register.R0, mIPv4Address, gen.DROP_LABEL);
+        }
 
         // Otherwise, pass
         gen.addJump(gen.PASS_LABEL);
@@ -674,6 +677,7 @@ public class ApfFilter {
      * <li>Drop IPv4 broadcast packets, except DHCP destined to our MAC,
      * <li>Drop IPv4 multicast packets, if mMulticastFilter,
      * <li>Pass all other IPv4 packets,
+     * <li>Drop all broadcast non-IP non-ARP packets.
      * <li>Pass all non-ICMPv6 IPv6 packets,
      * <li>Pass all non-IPv4 and non-IPv6 packets,
      * <li>Drop IPv6 ICMPv6 NAs to ff02::1.
@@ -690,24 +694,21 @@ public class ApfFilter {
         // Here's a basic summary of what the initial program does:
         //
         // if it's ARP:
-        //   inesrt ARP filter to drop or pass these appropriately
+        //   insert ARP filter to drop or pass these appropriately
         // if it's IPv4:
         //   insert IPv4 filter to drop or pass these appropriately
         // if it's not IPv6:
+        //   if it's broadcast:
+        //     drop
         //   pass
         // insert IPv6 filter to drop, pass, or fall off the end for ICMPv6 packets
 
+        // Add ARP filters:
+        String skipArpFiltersLabel = "skipArpFilters";
         gen.addLoad16(Register.R0, ETH_ETHERTYPE_OFFSET);
-
-        if (mIPv4Address != null) {
-            // Add ARP filters:
-            String skipArpFiltersLabel = "skipArpFilters";
-            // If not ARP, skip ARP filters
-            // NOTE: Relies on R0 containing ethertype.
-            gen.addJumpIfR0NotEquals(ETH_P_ARP, skipArpFiltersLabel);
-            generateArpFilterLocked(gen);
-            gen.defineLabel(skipArpFiltersLabel);
-        }
+        gen.addJumpIfR0NotEquals(ETH_P_ARP, skipArpFiltersLabel);
+        generateArpFilterLocked(gen);
+        gen.defineLabel(skipArpFiltersLabel);
 
         // Add IPv4 filters:
         String skipIPv4FiltersLabel = "skipIPv4Filters";
@@ -715,16 +716,23 @@ public class ApfFilter {
         // execute the ARP filter, since that filter does not fall through, but either drops or
         // passes.
         gen.addJumpIfR0NotEquals(ETH_P_IP, skipIPv4FiltersLabel);
-        // NOTE: Relies on R1 being initialized to 0.
         generateIPv4FilterLocked(gen);
         gen.defineLabel(skipIPv4FiltersLabel);
 
-        // Add IPv6 filters:
-        // If not IPv6, pass
+        // Check for IPv6:
         // NOTE: Relies on R0 containing ethertype. This is safe because if we got here, we did not
         // execute the ARP or IPv4 filters, since those filters do not fall through, but either
         // drop or pass.
-        gen.addJumpIfR0NotEquals(ETH_P_IPV6, gen.PASS_LABEL);
+        String ipv6FilterLabel = "IPv6Filters";
+        gen.addJumpIfR0Equals(ETH_P_IPV6, ipv6FilterLabel);
+
+        // Drop non-IP non-ARP broadcasts, pass the rest
+        gen.addLoadImmediate(Register.R0, ETH_DEST_ADDR_OFFSET);
+        gen.addJumpIfBytesNotEqual(Register.R0, ETH_BROADCAST_MAC_ADDRESS, gen.PASS_LABEL);
+        gen.addJump(gen.DROP_LABEL);
+
+        // Add IPv6 filters:
+        gen.defineLabel(ipv6FilterLabel);
         generateIPv6FilterLocked(gen);
         return gen;
     }
