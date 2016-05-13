@@ -3737,6 +3737,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!configChanged) {
                 return null;
             }
+            prepareFreezingAllTaskBounds();
             mCurConfiguration = new Configuration(config);
             return onConfigurationChanged();
         }
@@ -3752,6 +3753,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void prepareFreezingAllTaskBounds() {
+        for (int i = mDisplayContents.size() - 1; i >= 0; i--) {
+            ArrayList<TaskStack> stacks = mDisplayContents.valueAt(i).getStacks();
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final TaskStack stack = stacks.get(stackNdx);
+                stack.prepareFreezingTaskBounds();
+            }
+        }
+
+    }
     private int[] onConfigurationChanged() {
         mPolicy.onConfigurationChanged();
 

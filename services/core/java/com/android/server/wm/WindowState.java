@@ -190,8 +190,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     int mLayoutSeq = -1;
 
-    private Configuration mConfiguration = Configuration.EMPTY;
-    private Configuration mOverrideConfig = Configuration.EMPTY;
+    private final Configuration mTmpConfig = new Configuration();
     // Represents the changes from our override configuration applied
     // to the global configuration. This is the only form of configuration
     // which is suitable for delivery to the client.
@@ -1417,13 +1416,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isConfigChanged() {
-        final Task task = getTask();
-        final Configuration overrideConfig =
-                (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
-        final Configuration serviceConfig = mService.mCurConfiguration;
-        boolean configChanged =
-                (mConfiguration != serviceConfig && mConfiguration.diff(serviceConfig) != 0)
-                || (mOverrideConfig != overrideConfig && !mOverrideConfig.equals(overrideConfig));
+        getMergedConfig(mTmpConfig);
+
+        // If the merged configuration is still empty, it means that we haven't issues the
+        // configuration to the client yet and we need to return true so the configuration updates.
+        boolean configChanged = mMergedConfiguration.equals(Configuration.EMPTY)
+                || mTmpConfig.diff(mMergedConfiguration) != 0;
 
         if ((mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
             // Retain configuration changed status until resetConfiguration called.
@@ -1454,18 +1452,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         } catch (RuntimeException e) {
             // Ignore if it has already been removed (usually because
             // we are doing this as part of processing a death note.)
-        }
-    }
-
-    private void setConfiguration(
-            final Configuration newConfig, final Configuration newOverrideConfig) {
-        mConfiguration = newConfig;
-        mOverrideConfig = newOverrideConfig;
-        mConfigHasChanged = false;
-
-        mMergedConfiguration.setTo(newConfig);
-        if (newOverrideConfig != null && newOverrideConfig != Configuration.EMPTY) {
-            mMergedConfiguration.updateFrom(newOverrideConfig);
         }
     }
 
@@ -2266,16 +2252,30 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * @return A configuration suitable for sending to the client.
      */
     private Configuration updateConfiguration() {
-        final Task task = getTask();
-        final Configuration overrideConfig =
-            (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
         final boolean configChanged = isConfigChanged();
+        getMergedConfig(mMergedConfiguration);
+        mConfigHasChanged = false;
         if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
             Slog.i(TAG, "Sending new config to window " + this + ": " +
-                    " / config=" + mService.mCurConfiguration + " overrideConfig=" + overrideConfig);
+                    " / mergedConfig=" + mMergedConfiguration);
         }
-        setConfiguration(mService.mCurConfiguration, overrideConfig);
         return mMergedConfiguration;
+    }
+
+    private void getMergedConfig(Configuration outConfig) {
+        if (mAppToken != null && mAppToken.mFrozenMergedConfig.size() > 0) {
+            outConfig.setTo(mAppToken.mFrozenMergedConfig.peek());
+            return;
+        }
+        final Task task = getTask();
+        final Configuration overrideConfig = task != null
+                ? task.mOverrideConfig
+                : Configuration.EMPTY;
+        final Configuration serviceConfig = mService.mCurConfiguration;
+        outConfig.setTo(serviceConfig);
+        if (overrideConfig != Configuration.EMPTY) {
+            outConfig.updateFrom(overrideConfig);
+        }
     }
 
     void reportResized() {
@@ -2572,10 +2572,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 getTouchableRegion(region);
                 pw.print(prefix); pw.print("touchable region="); pw.println(region);
             }
-            pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
-            if (mOverrideConfig != Configuration.EMPTY) {
-                pw.print(prefix); pw.print("mOverrideConfig="); pw.println(mOverrideConfig);
-            }
+            pw.print(prefix); pw.print("mMergedConfiguration="); pw.println(mMergedConfiguration);
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" mShownPosition="); mShownPosition.printShortString(pw);
