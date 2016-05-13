@@ -1155,7 +1155,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     @Override
-    public boolean isFullscreen() {
+    public boolean dimFullscreen() {
+        return mStackId == HOME_STACK_ID || isFullscreen();
+    }
+
+    boolean isFullscreen() {
         if (useCurrentBounds()) {
             return mFullscreen;
         }
