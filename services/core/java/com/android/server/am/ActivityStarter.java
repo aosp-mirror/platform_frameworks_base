@@ -677,16 +677,17 @@ class ActivityStarter {
                 // app in a locked managed profile from an unlocked parent allow it to resolve
                 // as user will be sent via confirm credentials to unlock the profile.
                 UserManager userManager = UserManager.get(mService.mContext);
-                UserInfo parent = null;
+                boolean profileLockedAndParentUnlockingOrUnlocked = false;
                 long token = Binder.clearCallingIdentity();
                 try {
-                    parent = userManager.getProfileParent(userId);
+                    UserInfo parent = userManager.getProfileParent(userId);
+                    profileLockedAndParentUnlockingOrUnlocked = (parent != null)
+                            && userManager.isUserUnlockingOrUnlocked(parent.id)
+                            && !userManager.isUserUnlockingOrUnlocked(userId);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
-                if (parent != null
-                        && userManager.isUserUnlockingOrUnlocked(parent.getUserHandle())
-                        && !userManager.isUserUnlockingOrUnlocked(userInfo.getUserHandle())) {
+                if (profileLockedAndParentUnlockingOrUnlocked) {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
