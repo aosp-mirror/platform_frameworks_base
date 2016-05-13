@@ -5011,6 +5011,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ri = new ResolveInfo(mResolveInfo);
                 ri.activityInfo = new ActivityInfo(ri.activityInfo);
                 ri.activityInfo.labelRes = ResolverActivity.getLabelRes(intent.getAction());
+                // If all of the options come from the same package, show the application's
+                // label and icon instead of the generic resolver's.
+                // Some calls like Intent.resolveActivityInfo query the ResolveInfo from here
+                // and then throw away the ResolveInfo itself, meaning that the caller loses
+                // the resolvePackageName. Therefore the activityInfo.labelRes above provides
+                // a fallback for this case; we only set the target package's resources on
+                // the ResolveInfo, not the ActivityInfo.
+                final String intentPackage = intent.getPackage();
+                if (!TextUtils.isEmpty(intentPackage) && allHavePackage(query, intentPackage)) {
+                    final ApplicationInfo appi = query.get(0).activityInfo.applicationInfo;
+                    ri.resolvePackageName = intentPackage;
+                    if (userNeedsBadging(userId)) {
+                        ri.noResourceId = true;
+                    } else {
+                        ri.icon = appi.icon;
+                    }
+                    ri.iconResourceId = appi.icon;
+                    ri.labelRes = appi.labelRes;
+                }
                 ri.activityInfo.applicationInfo = new ApplicationInfo(
                         ri.activityInfo.applicationInfo);
                 if (userId != 0) {
@@ -5024,6 +5043,24 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return null;
+    }
+
+    /**
+     * Return true if the given list is not empty and all of its contents have
+     * an activityInfo with the given package name.
+     */
+    private boolean allHavePackage(List<ResolveInfo> list, String packageName) {
+        if (ArrayUtils.isEmpty(list)) {
+            return false;
+        }
+        for (int i = 0, N = list.size(); i < N; i++) {
+            final ResolveInfo ri = list.get(i);
+            final ActivityInfo ai = ri != null ? ri.activityInfo : null;
+            if (ai == null || !packageName.equals(ai.packageName)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
