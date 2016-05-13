@@ -204,7 +204,7 @@ public:
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
-    void setPointerIconShape(int32_t iconId);
+    void setPointerIconType(int32_t iconId);
     void reloadPointerIcons();
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setPointerIconDetached(bool detached);
@@ -785,11 +785,11 @@ void NativeInputManager::reloadCalibration() {
             InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
-void NativeInputManager::setPointerIconShape(int32_t iconId) {
+void NativeInputManager::setPointerIconType(int32_t iconId) {
     AutoMutex _l(mLock);
     sp<PointerController> controller = mLocked.pointerController.promote();
     if (controller != NULL) {
-        controller->updatePointerShape(iconId);
+        controller->updatePointerIcon(iconId);
     }
 }
 
@@ -1462,9 +1462,9 @@ static void nativeMonitor(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
     im->getInputManager()->getDispatcher()->monitor();
 }
 
-static void nativeSetPointerIconShape(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint iconId) {
+static void nativeSetPointerIconType(JNIEnv* /* env */, jclass /* clazz */, jlong ptr, jint iconId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    im->setPointerIconShape(iconId);
+    im->setPointerIconType(iconId);
 }
 
 static void nativeReloadPointerIcons(JNIEnv* /* env */, jclass /* clazz */, jlong ptr) {
@@ -1548,8 +1548,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeDump },
     { "nativeMonitor", "(J)V",
             (void*) nativeMonitor },
-    { "nativeSetPointerIconShape", "(JI)V",
-            (void*) nativeSetPointerIconShape },
+    { "nativeSetPointerIconType", "(JI)V",
+            (void*) nativeSetPointerIconType },
     { "nativeReloadPointerIcons", "(J)V",
             (void*) nativeReloadPointerIcons },
     { "nativeSetCustomPointerIcon", "(JLandroid/view/PointerIcon;)V",

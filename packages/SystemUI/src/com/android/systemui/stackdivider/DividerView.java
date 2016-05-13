@@ -16,8 +16,8 @@
 
 package com.android.systemui.stackdivider;
 
-import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -266,7 +266,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         boolean landscape = getResources().getConfiguration().orientation
                 == Configuration.ORIENTATION_LANDSCAPE;
         mHandle.setPointerIcon(PointerIcon.getSystemIcon(getContext(),
-                landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW));
+                landscape ? TYPE_HORIZONTAL_DOUBLE_ARROW : TYPE_VERTICAL_DOUBLE_ARROW));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         mHandle.setAccessibilityDelegate(mHandleDelegate);
         mGestureDetector = new GestureDetector(mContext, new SimpleOnGestureListener() {
