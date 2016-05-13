@@ -201,7 +201,7 @@ public class FilesActivity extends BaseActivity {
         createDir.setEnabled(canCreateDirectory());
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
         settings.setVisible(root.hasSettings());
-        newWindow.setVisible(true);
+        newWindow.setVisible(Shared.shouldShowFancyFeatures(this));
 
         Menus.disableHiddenItems(menu, pasteFromCb);
         // It hides icon if searching in progress
