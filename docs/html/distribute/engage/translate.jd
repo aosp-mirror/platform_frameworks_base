@@ -1,0 +1,91 @@
+page.title=Engage Users in Their Language
+page.metaDescription=Use the App Translation Service to maximize the amount of people who can install and engage with your app.
+page.tags="app translation service, translation, localization"
+page.image=/images/gp-listing-3.jpg
+
+@jd:body
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-listing-3.jpg" style="width:512px;">
+</div>
+<p>
+  Translating your app's store description, user interface text, and in-app
+  purchase products into multiple languages maximizes the amount of people
+  who can install, engage with, and recommend it.
+</p>
+
+<div class="headerLine">
+  <h2 id="before-translation">Before You Translate</h2>
+</div>
+
+<p>
+  Translation is one of the final steps in localization. For more detailed
+  information about the localization process, refer to the following documentation:
+</p>
+
+<ul>
+  <li>
+    <a href="https://developer.android.com/distribute/tools/localization-checklist.html">
+    Localization Checklist</a>
+  </li>
+
+  <li>
+    <a href="http://developer.android.com/guide/topics/resources/localization.html">Localizing
+    with Resources</a>
+  </li>
+
+  <li>
+    <a href="http://developer.android.com/training/basics/supporting-devices/languages.html">
+    Supporting Different Languages</a>
+  </li>
+</ul>
+
+<div class="headerLine">
+  <h2 id="translate">How to Translate</h2>
+</div>
+
+<p>
+  While translating your store listing and universal app campaign ads (if you have any) can make
+  your app more discoverable, providing a translated user interface and in-app purchase products
+  can maximize user engagement and retention. Depending on your budget, there are several
+  options available:
+</p>
+
+<ul>
+  <li>
+    <strong>Use the Google Play App Translation Service</strong>: For your convenience, Google Play
+    provides an <a href="https://support.google.com/l10n/answer/6359997">App Translation Service</a>
+    that is integrated directly into the <a href="https://support.google.com/l10n/answer/6341304">
+    Developer Console</a> and <a href="https://support.google.com/l10n/answer/6341928">Android
+    Studio</a>. Using this professional, human service, you can order translations for your app,
+    store listing text, in-app purchase products, and universal app campaign ads all in one go.
+    You’ll get instant estimates from multiple vendors, all with the convenience of ordering and
+    paying online.
+  </li>
+
+  <li>
+    <strong>Do it yourself</strong>: If you or your colleagues know the target languages, you can
+    translate everything yourself using any text editor, or you can use the
+    <a href="http://tools.android.com/recent/androidstudio087released">Android Studio Translation
+    Editor</a>.
+  </li>
+
+  <li>
+    <strong>Use a third-party translation service</strong>: You can use a translation service
+    that is offered by one of the many translation companies available online.
+  </li>
+</ul>
+
+<p style="clear:both">
+</p>
+
+<div class="headerLine">
+  <h2 id="related-resources">Related Resources</h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/engage/translate"
+  data-sortorder="-timestamp"
+  data-cardsizes="9x3"
+  data-maxresults="6">
+</div>
