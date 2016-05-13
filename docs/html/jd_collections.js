@@ -411,6 +411,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/engage/intents.html",
       "distribute/engage/widgets.html",
+      "distribute/engage/translate.html",
       "distribute/engage/notifications.html",
       "distribute/engage/deep-linking.html",
       "distribute/engage/ads.html",
@@ -1077,6 +1078,12 @@ var RESOURCE_COLLECTIONS = {
       "guide/topics/appwidgets/index.html"
     ]
   },
+  "distribute/engage/translate": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/l10n/answer/6359997"
+    ]
+  },
   "distribute/engage/reengage": {
     "title": "",
     "resources": [
@@ -1329,7 +1336,8 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/localization": {
     "title": "",
     "resources": [
-      "distribute/tools/localization-checklist.html"
+      "distribute/tools/localization-checklist.html",
+      "https://support.google.com/l10n/answer/6359997"
     ]
   },
   "distribute/toolsreference/launchchecklist/graphics": {
