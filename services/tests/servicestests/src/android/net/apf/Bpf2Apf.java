@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package android.net.apf;
 
 import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
@@ -31,9 +31,9 @@ import java.io.InputStreamReader;
  *
  * Example usage:
  *   javac net/java/android/net/apf/ApfGenerator.java \
- *         tests/servicestests/src/com/android/server/Bpf2Apf.java
+ *         tests/servicestests/src/android/net/apf/Bpf2Apf.java
  *   sudo tcpdump -i em1 -d icmp | java -classpath tests/servicestests/src:net/java \
- *                                      com.android.server.Bpf2Apf
+ *                                      android.net.apf.Bpf2Apf
  */
 public class Bpf2Apf {
     private static int parseImm(String line, String arg) {
