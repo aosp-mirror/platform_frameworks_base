@@ -22,7 +22,6 @@ import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
