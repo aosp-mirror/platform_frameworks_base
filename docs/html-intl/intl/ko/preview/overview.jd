@@ -151,8 +151,8 @@ AOSP 및 OEM에 Android N 최종 공개 릴리스까지 진행됩니다.
 </p>
 
 <ul>
-  <li><strong><a href="{@docRoot}preview/support.html">Preview 1</a></strong>(최초 릴리스, 알파)</li>
-  <li><strong>Preview 2</strong>(증분 업데이트, 베타)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong>(최초 릴리스, 알파)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong>(증분 업데이트, 알파)</li>
   <li><strong>Preview 3</strong>(증분 업데이트, 베타)</li>
   <li><strong>Preview 4</strong>(최종 API 및 공식 SDK, Play 게시)</li>
   <li><strong>Preview 5</strong>(최종 테스트를 위한 거의 최종 시스템 이미지)</li>
