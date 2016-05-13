@@ -34,6 +34,7 @@ import com.android.server.wm.WindowManagerService.H;
 
 import android.annotation.NonNull;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Message;
 import android.os.RemoteException;
@@ -133,6 +134,7 @@ class AppWindowToken extends WindowToken {
     int mPendingRelaunchCount;
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
+    ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
             boolean _voiceInteraction) {
@@ -675,6 +677,16 @@ class AppWindowToken extends WindowToken {
      */
     private void freezeBounds() {
         mFrozenBounds.offer(new Rect(mTask.mPreparedFrozenBounds));
+
+        if (mTask.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
+            // We didn't call prepareFreezingBounds on the task, so use the current value.
+            final Configuration config = new Configuration(service.mCurConfiguration);
+            config.updateFrom(mTask.mOverrideConfig);
+            mFrozenMergedConfig.offer(config);
+        } else {
+            mFrozenMergedConfig.offer(new Configuration(mTask.mPreparedFrozenMergedConfig));
+        }
+        mTask.mPreparedFrozenMergedConfig.setToDefaults();
     }
 
     /**
@@ -682,6 +694,7 @@ class AppWindowToken extends WindowToken {
      */
     private void unfreezeBounds() {
         mFrozenBounds.remove();
+        mFrozenMergedConfig.remove();
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             if (!win.mHasSurface) {
@@ -747,6 +760,7 @@ class AppWindowToken extends WindowToken {
         }
         if (!mFrozenBounds.isEmpty()) {
             pw.print(prefix); pw.print("mFrozenBounds="); pw.println(mFrozenBounds);
+            pw.print(prefix); pw.print("mFrozenMergedConfig="); pw.println(mFrozenMergedConfig);
         }
         if (mPendingRelaunchCount != 0) {
             pw.print(prefix); pw.print("mPendingRelaunchCount="); pw.println(mPendingRelaunchCount);

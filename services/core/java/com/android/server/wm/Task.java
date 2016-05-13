@@ -62,6 +62,7 @@ class Task implements DimLayer.DimLayerUser {
     // Content limits relative to the DisplayContent this sits in.
     private Rect mBounds = new Rect();
     final Rect mPreparedFrozenBounds = new Rect();
+    final Configuration mPreparedFrozenMergedConfig = new Configuration();
 
     private Rect mPreScrollBounds = new Rect();
     private boolean mScrollValid;
@@ -77,7 +78,7 @@ class Task implements DimLayer.DimLayerUser {
 
     // Contains configurations settings that are different from the global configuration due to
     // stack specific operations. E.g. {@link #setBounds}.
-    Configuration mOverrideConfig;
+    Configuration mOverrideConfig = Configuration.EMPTY;
 
     // For comparison with DisplayContent bounds.
     private Rect mTmpRect = new Rect();
@@ -320,6 +321,8 @@ class Task implements DimLayer.DimLayerUser {
      */
     void prepareFreezingBounds() {
         mPreparedFrozenBounds.set(mBounds);
+        mPreparedFrozenMergedConfig.setTo(mService.mCurConfiguration);
+        mPreparedFrozenMergedConfig.updateFrom(mOverrideConfig);
     }
 
     /**
