@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -43,6 +44,15 @@ public class LauncherActivity extends Activity {
 
     private static final String LAUNCH_CONTROL_AUTHORITY = "com.android.documentsui.launchControl";
     private static final String TAG = "LauncherActivity";
+
+    // Array of boolean extras that should be copied when creating new launch intents.
+    // Missing intents will be ignored.
+    private static final String[] PERSISTENT_BOOLEAN_EXTRAS = {
+        DocumentsContract.EXTRA_SHOW_FILESIZE,
+        DocumentsContract.EXTRA_SHOW_ADVANCED,
+        DocumentsContract.EXTRA_FANCY_FEATURES,
+        Shared.EXTRA_PRODUCTIVITY_MODE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,11 +104,7 @@ public class LauncherActivity extends Activity {
         // Relay any config overrides bits present in the original intent.
         Intent original = activity.getIntent();
         if (original != null) {
-            if (original.hasExtra(Shared.EXTRA_PRODUCTIVITY_MODE)) {
-                intent.putExtra(
-                        Shared.EXTRA_PRODUCTIVITY_MODE,
-                        original.getBooleanExtra(Shared.EXTRA_PRODUCTIVITY_MODE, false));
-            }
+            copyExtras(original, intent);
             if (original.hasExtra(Intent.EXTRA_TITLE)) {
                 intent.putExtra(
                         Intent.EXTRA_TITLE,
@@ -106,6 +112,14 @@ public class LauncherActivity extends Activity {
             }
         }
         return intent;
+    }
+
+    private static void copyExtras(Intent src, Intent dest) {
+        for (String extra : PERSISTENT_BOOLEAN_EXTRAS) {
+            if (src.hasExtra(extra)) {
+                dest.putExtra(extra, src.getBooleanExtra(extra, false));
+            }
+        }
     }
 
     private static Uri buildLaunchUri() {
