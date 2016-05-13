@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
+import android.media.AudioManager;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.IVibratorService;
@@ -454,9 +455,8 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
 
-            if (vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE
-                    && Settings.System.getInt(
-                    mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) == 0) {
+            if (vib.mUsageHint == AudioAttributes.USAGE_NOTIFICATION_RINGTONE &&
+                    !shouldVibrateForRingtone()) {
                 return;
             }
 
@@ -483,6 +483,18 @@ public class VibratorService extends IVibratorService.Stub
             // called before startNextVibrationLocked or startVibrationLocked.
             mThread = new VibrateThread(vib);
             mThread.start();
+        }
+    }
+
+    private boolean shouldVibrateForRingtone() {
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = audioManager.getRingerMode();
+        // "Also vibrate for calls" Setting in Sound
+        if (Settings.System.getInt(
+                mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) != 0) {
+            return ringerMode != AudioManager.RINGER_MODE_SILENT;
+        } else {
+            return ringerMode == AudioManager.RINGER_MODE_VIBRATE;
         }
     }
 
