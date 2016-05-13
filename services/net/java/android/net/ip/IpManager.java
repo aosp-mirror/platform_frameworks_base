@@ -276,6 +276,16 @@ public class IpManager extends StateMachine {
         public static class Builder {
             private ProvisioningConfiguration mConfig = new ProvisioningConfiguration();
 
+            public Builder withoutIPv4() {
+                mConfig.mEnableIPv4 = false;
+                return this;
+            }
+
+            public Builder withoutIPv6() {
+                mConfig.mEnableIPv6 = false;
+                return this;
+            }
+
             public Builder withoutIpReachabilityMonitor() {
                 mConfig.mUsingIpReachabilityMonitor = false;
                 return this;
@@ -311,6 +321,8 @@ public class IpManager extends StateMachine {
             }
         }
 
+        /* package */ boolean mEnableIPv4 = true;
+        /* package */ boolean mEnableIPv6 = true;
         /* package */ boolean mUsingIpReachabilityMonitor = true;
         /* package */ int mRequestedPreDhcpActionMs;
         /* package */ StaticIpConfiguration mStaticIpConfig;
@@ -320,6 +332,8 @@ public class IpManager extends StateMachine {
         public ProvisioningConfiguration() {}
 
         public ProvisioningConfiguration(ProvisioningConfiguration other) {
+            mEnableIPv4 = other.mEnableIPv4;
+            mEnableIPv6 = other.mEnableIPv6;
             mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
             mRequestedPreDhcpActionMs = other.mRequestedPreDhcpActionMs;
             mStaticIpConfig = other.mStaticIpConfig;
@@ -330,6 +344,8 @@ public class IpManager extends StateMachine {
         @Override
         public String toString() {
             return new StringJoiner(", ", getClass().getSimpleName() + "{", "}")
+                    .add("mEnableIPv4: " + mEnableIPv4)
+                    .add("mEnableIPv6: " + mEnableIPv6)
                     .add("mUsingIpReachabilityMonitor: " + mUsingIpReachabilityMonitor)
                     .add("mRequestedPreDhcpActionMs: " + mRequestedPreDhcpActionMs)
                     .add("mStaticIpConfig: " + mStaticIpConfig)
@@ -883,6 +899,51 @@ public class IpManager extends StateMachine {
         }
     }
 
+    private boolean startIPv4() {
+        // If we have a StaticIpConfiguration attempt to apply it and
+        // handle the result accordingly.
+        if (mConfiguration.mStaticIpConfig != null) {
+            if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
+                handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
+            } else {
+                if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
+                recordMetric(IpManagerEvent.PROVISIONING_FAIL);
+                mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
+                return false;
+            }
+        } else {
+            // Start DHCPv4.
+            mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpManager.this, mInterfaceName);
+            mDhcpClient.registerForPreDhcpNotification();
+            mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
+
+            if (mConfiguration.mProvisioningTimeoutMs > 0) {
+                final long alarmTime = SystemClock.elapsedRealtime() +
+                        mConfiguration.mProvisioningTimeoutMs;
+                mProvisioningTimeoutAlarm.schedule(alarmTime);
+            }
+        }
+
+        return true;
+    }
+
+    private boolean startIPv6() {
+        // Set privacy extensions.
+        try {
+            mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
+            mNwService.enableIpv6(mInterfaceName);
+        } catch (RemoteException re) {
+            Log.e(mTag, "Unable to change interface settings: " + re);
+            return false;
+        } catch (IllegalStateException ie) {
+            Log.e(mTag, "Unable to change interface settings: " + ie);
+            return false;
+        }
+
+        return true;
+    }
+
+
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -978,15 +1039,9 @@ public class IpManager extends StateMachine {
                 mCallback.setFallbackMulticastFilter(mMulticastFiltering);
             }
 
-            // Set privacy extensions.
-            try {
-                mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
-                mNwService.enableIpv6(mInterfaceName);
-                // TODO: Perhaps clearIPv4Address() as well.
-            } catch (RemoteException re) {
-                Log.e(mTag, "Unable to change interface settings: " + re);
-            } catch (IllegalStateException ie) {
-                Log.e(mTag, "Unable to change interface settings: " + ie);
+            if (mConfiguration.mEnableIPv6) {
+                // TODO: Consider transitionTo(mStoppingState) if this fails.
+                startIPv6();
             }
 
             if (mConfiguration.mUsingIpReachabilityMonitor) {
@@ -1001,30 +1056,9 @@ public class IpManager extends StateMachine {
                         });
             }
 
-            // If we have a StaticIpConfiguration attempt to apply it and
-            // handle the result accordingly.
-            if (mConfiguration.mStaticIpConfig != null) {
-                if (setIPv4Address(mConfiguration.mStaticIpConfig.ipAddress)) {
-                    handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
-                } else {
-                    if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
-                    recordMetric(IpManagerEvent.PROVISIONING_FAIL);
-                    mCallback.onProvisioningFailure(new LinkProperties(mLinkProperties));
+            if (mConfiguration.mEnableIPv4) {
+                if (!startIPv4()) {
                     transitionTo(mStoppingState);
-                }
-            } else {
-                // Start DHCPv4.
-                mDhcpClient = DhcpClient.makeDhcpClient(
-                        mContext,
-                        IpManager.this,
-                        mInterfaceName);
-                mDhcpClient.registerForPreDhcpNotification();
-                mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
-
-                if (mConfiguration.mProvisioningTimeoutMs > 0) {
-                    final long alarmTime = SystemClock.elapsedRealtime() +
-                            mConfiguration.mProvisioningTimeoutMs;
-                    mProvisioningTimeoutAlarm.schedule(alarmTime);
                 }
             }
         }
