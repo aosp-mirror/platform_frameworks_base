@@ -14,7 +14,7 @@ page.keywords="android N", "data usage", "metered network"
         <a href="#status">Checking Data Saver Preferences</a>
         <ol>
           <li>
-            <a href="#request-whitelist">Requesting Whitelist Permissions</a>
+            <a href="#request-whitelist">Requesting whitelist permissions</a>
           </li>
         </ol>
       </li>
@@ -138,15 +138,17 @@ if (connMgr.isActiveNetworkMetered()) {
   If your app needs to use data in the background, it can request whitelist
   permissions by sending a
   <code>Settings.ACTION_IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS</code>
-  (<code>"android.settings.IGNORE_BACKGROUND_DATA_RESTRICTIONS_SETTINGS"</code>)
-  intent with a <code>package:&lt;your-app-id&gt;</code> URI.
+  intent containing a URI of your app's package name: for example,
+  <code>package:MY_APP_ID</code>.
 </p>
 
 <p>
-  Sending the intent and URI launches the <strong>Settings</strong> app, and
-  displays your app's <strong>App Data Usage</strong> page to the user. The
-  user can then decide whether to enable background data for your app.
-  It is good practice to prompt the user before sending this intent.
+  Sending the intent and URI launches the <strong>Settings</strong> app and
+  displays data usage settings for your app. The user can then decide whether
+  to enable background data for your app. Before you send this intent, it is
+  good practice to first ask the user if they want to launch the
+  <strong>Settings</strong> app for the purpose of enabling background data
+  usage.
 </p>
 
 <h2 id="monitor-changes">
@@ -156,9 +158,8 @@ if (connMgr.isActiveNetworkMetered()) {
 <p>
   Apps can monitor changes to Data Saver preferences by creating a {@link
   android.content.BroadcastReceiver} to listen for {@code
-  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} ({@code
-  "android.net.conn.RESTRICT_BACKGROUND_CHANGED"}) and dynamically registering
-  the receiver with {@link android.content.Context#registerReceiver
+  ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED} and dynamically
+  registering the receiver with {@link android.content.Context#registerReceiver
   Context.registerReceiver()}. When an app receives this broadcast, it should
   <a href="#status">check if the new Data Saver preferences affect its
   permissions</a> by calling {@code
