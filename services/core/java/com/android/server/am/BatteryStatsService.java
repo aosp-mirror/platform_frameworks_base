@@ -565,10 +565,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteMobileRadioPowerState(int powerState, long timestampNs) {
+    public void noteMobileRadioPowerState(int powerState, long timestampNs, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteMobileRadioPowerState(powerState, timestampNs);
+            mStats.noteMobileRadioPowerState(powerState, timestampNs, uid);
         }
     }
 
