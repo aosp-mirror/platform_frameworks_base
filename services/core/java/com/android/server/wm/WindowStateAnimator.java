@@ -1333,7 +1333,7 @@ class WindowStateAnimator {
                     final TaskStack stack = task.mStack;
                     if (stack != null && !stack.isFullscreen()) {
                         stack.getDimBounds(mTmpStackBounds);
-                        clipRect.intersect(mTmpStackBounds);
+                        finalClipRect.set(mTmpStackBounds);
                     }
                 }
             }
