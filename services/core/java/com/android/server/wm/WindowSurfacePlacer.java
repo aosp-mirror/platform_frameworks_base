@@ -792,15 +792,16 @@ class WindowSurfacePlacer {
                             + " isOnScreen=" + w.isOnScreen() + " allDrawn=" + atoken.allDrawn
                             + " freezingScreen=" + atoken.mAppAnimator.freezingScreen);
                 }
-                if (atoken != null && (!atoken.allDrawn || atoken.mAppAnimator.freezingScreen)) {
+                if (atoken != null && (!atoken.allDrawn || !atoken.allDrawnExcludingSaved
+                        || atoken.mAppAnimator.freezingScreen)) {
                     if (atoken.lastTransactionSequence != mService.mTransactionSequence) {
                         atoken.lastTransactionSequence = mService.mTransactionSequence;
                         atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
+                        atoken.numInterestingWindowsExcludingSaved = 0;
+                        atoken.numDrawnWindowsExclusingSaved = 0;
                         atoken.startingDisplayed = false;
                     }
-                    if ((w.isOnScreenIgnoringKeyguard()
-                            || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
-                            && !w.mAnimatingExit && !w.mDestroying) {
+                    if (!atoken.allDrawn && w.mightAffectAllDrawn(false /* visibleOnly */)) {
                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                             Slog.v(TAG, "Eval win " + w + ": isDrawn="
                                     + w.isDrawnLw()
@@ -816,13 +817,14 @@ class WindowSurfacePlacer {
                             }
                         }
                         if (w != atoken.startingWindow) {
-                            if (!w.mAppDied &&
-                                    (!atoken.mAppAnimator.freezingScreen || !w.mAppFreezing)) {
+                            if (w.isInteresting()) {
                                 atoken.numInterestingWindows++;
                                 if (w.isDrawnLw()) {
                                     atoken.numDrawnWindows++;
                                     if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
                                         Slog.v(TAG, "tokenMayBeDrawn: " + atoken
+                                                + " w=" + w + " numInteresting="
+                                                + atoken.numInterestingWindows
                                                 + " freezingScreen="
                                                 + atoken.mAppAnimator.freezingScreen
                                                 + " mAppFreezing=" + w.mAppFreezing);
@@ -832,6 +834,23 @@ class WindowSurfacePlacer {
                         } else if (w.isDrawnLw()) {
                             mService.mH.sendEmptyMessage(NOTIFY_STARTING_WINDOW_DRAWN);
                             atoken.startingDisplayed = true;
+                        }
+                    }
+                    if (!atoken.allDrawnExcludingSaved
+                            && w.mightAffectAllDrawn(true /* visibleOnly */)) {
+                        if (w != atoken.startingWindow && w.isInteresting()) {
+                            atoken.numInterestingWindowsExcludingSaved++;
+                            if (w.isDrawnLw() && !w.isAnimatingWithSavedSurface()) {
+                                atoken.numDrawnWindowsExclusingSaved++;
+                                if (DEBUG_VISIBILITY || DEBUG_ORIENTATION)
+                                    Slog.v(TAG, "tokenMayBeDrawnExcludingSaved: " + atoken
+                                            + " w=" + w + " numInteresting="
+                                            + atoken.numInterestingWindowsExcludingSaved
+                                            + " freezingScreen="
+                                            + atoken.mAppAnimator.freezingScreen
+                                            + " mAppFreezing=" + w.mAppFreezing);
+                                updateAllDrawn = true;
+                            }
                         }
                     }
                 }
@@ -1537,6 +1556,22 @@ class WindowSurfacePlacer {
                             displayContent.layoutNeeded = true;
                             mService.mH.obtainMessage(NOTIFY_ACTIVITY_DRAWN,
                                     wtoken.token).sendToTarget();
+                        }
+                    }
+                    if (!wtoken.allDrawnExcludingSaved) {
+                        int numInteresting = wtoken.numInterestingWindowsExcludingSaved;
+                        if (numInteresting > 0
+                                && wtoken.numDrawnWindowsExclusingSaved >= numInteresting) {
+                            if (DEBUG_VISIBILITY)
+                                Slog.v(TAG, "allDrawnExcludingSaved: " + wtoken
+                                    + " interesting=" + numInteresting
+                                    + " drawn=" + wtoken.numDrawnWindowsExclusingSaved);
+                            wtoken.allDrawnExcludingSaved = true;
+                            displayContent.layoutNeeded = true;
+                            if (wtoken.isAnimatingInvisibleWithSavedSurface()
+                                    && !mService.mFinishedEarlyAnim.contains(wtoken)) {
+                                mService.mFinishedEarlyAnim.add(wtoken);
+                            }
                         }
                     }
                 }
