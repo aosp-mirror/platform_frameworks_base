@@ -1462,12 +1462,15 @@ public final class Settings {
 
     private static final class GenerationTracker {
         private final MemoryIntArray mArray;
+        private final Runnable mErrorHandler;
         private final int mIndex;
         private int mCurrentGeneration;
 
-        public GenerationTracker(@NonNull MemoryIntArray array, int index) {
+        public GenerationTracker(@NonNull MemoryIntArray array, int index,
+                Runnable errorHandler) {
             mArray = array;
             mIndex = index;
+            mErrorHandler = errorHandler;
             mCurrentGeneration = readCurrentGeneration();
         }
 
@@ -1487,8 +1490,22 @@ public final class Settings {
                 return mArray.get(mIndex);
             } catch (IOException e) {
                 Log.e(TAG, "Error getting current generation", e);
+                if (mErrorHandler != null) {
+                    mErrorHandler.run();
+                }
             }
             return -1;
+        }
+
+        public void destroy() {
+            try {
+                mArray.close();
+            } catch (IOException e) {
+                Log.e(TAG, "Error closing backing array", e);
+                if (mErrorHandler != null) {
+                    mErrorHandler.run();
+                }
+            }
         }
     }
 
@@ -1616,7 +1633,20 @@ public final class Settings {
                                                     + cr.getPackageName() + " and user:"
                                                     + userHandle + " with index:" + index);
                                         }
-                                        mGenerationTracker = new GenerationTracker(array, index);
+                                        mGenerationTracker = new GenerationTracker(array, index,
+                                                () -> {
+                                            synchronized (this) {
+                                                Log.e(TAG, "Error accessing generation"
+                                                        + " tracker - removing");
+                                                if (mGenerationTracker != null) {
+                                                    GenerationTracker generationTracker =
+                                                            mGenerationTracker;
+                                                    mGenerationTracker = null;
+                                                    generationTracker.destroy();
+                                                    mValues.clear();
+                                                }
+                                            }
+                                        });
                                     }
                                 }
                                 mValues.put(name, value);
