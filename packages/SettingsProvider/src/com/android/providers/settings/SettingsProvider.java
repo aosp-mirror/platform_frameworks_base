@@ -2078,7 +2078,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 127;
+            private static final int SETTINGS_VERSION = 128;
 
             private final int mUserId;
 
@@ -2331,6 +2331,18 @@ public class SettingsProvider extends ContentProvider {
                         }
                     }
                     currentVersion = 127;
+                }
+
+                if (currentVersion == 127) {
+                    // Version 127: Disable OEM unlock setting by default on some devices.
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    String defaultOemUnlockDisabled = (getContext().getResources()
+                            .getBoolean(R.bool.def_oem_unlock_disallow) ? "1" : "0");
+                    globalSettings.insertSettingLocked(
+                            Settings.Global.OEM_UNLOCK_DISALLOWED,
+                            defaultOemUnlockDisabled,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                    currentVersion = 128;
                 }
 
                 // vXXX: Add new settings above this point.
