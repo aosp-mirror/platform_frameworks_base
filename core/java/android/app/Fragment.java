@@ -1430,6 +1430,18 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     }
 
     /**
+     * Called when a fragment is attached as a child of this fragment.
+     *
+     * <p>This is called after the attached fragment's <code>onAttach</code> and before
+     * the attached fragment's <code>onCreate</code> if the fragment has not yet had a previous
+     * call to <code>onCreate</code>.</p>
+     *
+     * @param childFragment child fragment being attached
+     */
+    public void onAttachFragment(Fragment childFragment) {
+    }
+
+    /**
      * Called when a fragment is first attached to its context.
      * {@link #onCreate(Bundle)} will be called after this.
      */
