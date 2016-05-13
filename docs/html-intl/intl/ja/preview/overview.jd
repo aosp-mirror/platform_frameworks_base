@@ -151,8 +151,8 @@ page.tags="preview", "developer", "android"
 </p>
 
 <ul>
-  <li><strong><a href="{@docRoot}preview/support.html">Preview 1</a></strong>（初回リリース、アルファ版）</li>
-  <li><strong>Preview 2</strong>（追加アップデート、ベータ版）</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong>（初回リリース、アルファ版）</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong>（追加アップデート、アルファ版）</li>
   <li><strong>Preview 3</strong>（追加アップデート、ベータ版）</li>
   <li><strong>Preview 4</strong>（最終版の API と正式な SDK、Google Play への公開）</li>
   <li><strong>Preview 5</strong>（最終テスト用の最終版とほぼ同じシステム イメージ）</li>
