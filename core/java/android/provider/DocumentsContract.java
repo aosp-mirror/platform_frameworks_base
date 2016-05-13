@@ -99,6 +99,9 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_FILESIZE = "android.content.extra.SHOW_FILESIZE";
 
     /** {@hide} */
+    public static final String EXTRA_FANCY_FEATURES = "android.content.extra.FANCY";
+
+    /** {@hide} */
     public static final String EXTRA_TARGET_URI = "android.content.extra.TARGET_URI";
 
     /**
