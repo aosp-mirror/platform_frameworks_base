@@ -825,13 +825,31 @@ public class ChooserActivity extends ResolverActivity {
                     if (ii == null) {
                         continue;
                     }
-                    final ActivityInfo ai = ii.resolveActivityInfo(pm, 0);
+
+                    // We reimplement Intent#resolveActivityInfo here because if we have an
+                    // implicit intent, we want the ResolveInfo returned by PackageManager
+                    // instead of one we reconstruct ourselves. The ResolveInfo returned might
+                    // have extra metadata and resolvePackageName set and we want to respect that.
+                    ResolveInfo ri = null;
+                    ActivityInfo ai = null;
+                    final ComponentName cn = ii.getComponent();
+                    if (cn != null) {
+                        try {
+                            ai = pm.getActivityInfo(ii.getComponent(), 0);
+                            ri = new ResolveInfo();
+                            ri.activityInfo = ai;
+                        } catch (PackageManager.NameNotFoundException ignored) {
+                            // ai will == null below
+                        }
+                    }
+                    if (ai == null) {
+                        ri = pm.resolveActivity(ii, PackageManager.MATCH_DEFAULT_ONLY);
+                        ai = ri != null ? ri.activityInfo : null;
+                    }
                     if (ai == null) {
                         Log.w(TAG, "No activity found for " + ii);
                         continue;
                     }
-                    ResolveInfo ri = new ResolveInfo();
-                    ri.activityInfo = ai;
                     UserManager userManager =
                             (UserManager) getSystemService(Context.USER_SERVICE);
                     if (ii instanceof LabeledIntent) {
