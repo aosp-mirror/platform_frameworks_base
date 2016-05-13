@@ -4,4 +4,133 @@ page.tags="wear"
 
 @jd:body
 
-<p>stub</p>
+
+<div id="qv-wrapper">
+<div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#creating">Creating an Input Method for Wear</a></li>
+      <li><a href="#invoking">Invoking IME</a></li>
+      <li><a href="#considerations">General IME Considerations</a></li>
+      <li><a href="#test">Testing your IME</a></li>
+    </ol>
+
+</div>
+</div>
+
+
+<p>Wear 2.0 supports input methods beyond voice by extending the Android 
+Input Method Framework (IMF) to Android Wear. IMF allows for virtual, on-screen
+ keyboards and other input methods to be used for text entry. The IMF APIs used 
+ for Wear devices are the same as other form factors, though usage is slightly 
+ different due to limited screen real estate.</p>
+
+<p>Wear 2.0 comes with the system default Input Method Editor (IME) 
+and opens up the IMF APIs for third-party developers to create custom input 
+methods for Wear.
+</p>
+
+
+<h2 id="creating">Creating an Input Method for Wear</h2>
+
+<p>To create an input method for Wear, 
+see <a href="http://developer.android.com/guide/topics/text/creating-input-method.html">Creating an Input Method</a>.
+</p>
+
+<h2 id="invoking">Invoking IME</h2>
+If you are developing an IME for Wear, remember that the 
+feature is supported only on Android 6.0 (API level 23) and higher versions of 
+the platform. 
+To ensure that your IME can only be installed on Wearables that support input 
+methods beyond voice, add the following to your application's manifest:
+<pre>
+&lt;uses-sdk android:minSdkVersion="23" />
+</pre>
+This indicates that your application requires Android 6.0 or higher. 
+For more information, see <a href="http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a>
+ and the documentation for the <a href="http://developer.android.com/guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk></a> 
+element.
+<p>
+To control how your application is filtered from devices that do not support Wear
+IMEs (for example, on Phone), add the following to your application's manifest:
+</p>
+<pre>
+&lt;uses-feature android:required="true" android:name="android.hardware.type.watch" />
+</pre>
+
+<p>Wear provides user settings on the watch that lets the user to enable multiple
+ IMEs from the list of installed IMEs. Once the users enable your IME, they 
+ can invoke your IME from:</p>
+<ul>
+<li>A notification or an app using the 
+<a href="http://developer.android.com/reference/android/support/v4/app/RemoteInput.html">RemoteInput</a></code> API.</li>
+<li>Wear apps with an 
+<a href="http://developer.android.com/reference/android/widget/EditText.html">EditText</a>
+ field. Touching a text field places the cursor in the field and automatically 
+ displays the IME on focus.</li>
+</ul>
+
+
+<h2 id="considerations">General IME Considerations</h2>
+
+<p>Here are some things to consider when implementing IME for wear:</p>
+
+<ul>
+<li><strong>Set Default Action</strong>
+<p>
+<a href="http://developer.android.com/reference/android/support/v4/app/RemoteInput.html">{@code RemoteInput}</a> 
+and Wear apps expect only single-line text entry. The ENTER key should always trigger
+ a call to <a href="http://developer.android.com/reference/android/inputmethodservice/InputMethodService.html#sendDefaultEditorAction(boolean)">sendDefaultEditorAction</a>,
+  which causes the app to dismiss the keyboard and continue on to the next step 
+  or action.</p>
+</li>
+
+<li><Strong>Use full screen mode IME</strong>
+<p>
+Most on-screen input methods will consume most of the screen, leaving very little
+ of the app visible; hence, we discourage Android Wear apps from presenting a 
+ visible {@code EditTextView}. Instead, a full-screen IME uses 
+ <a href="http://developer.android.com/reference/android/inputmethodservice/ExtractEditText.html">ExtractEditText</a>
+  to render its own view of the attached editor, also providing control over the
+   styling of this view. You can ignore all editor-related events that the IME 
+   doesn't generate.
+For more details on full-screen mode, see 
+<a href="http://developer.android.com/reference/android/inputmethodservice/InputMethodService.html">InputMethodService</a>.
+</p>
+</li>
+
+<li><strong>Handle inputType flags</strong>
+<p>
+For privacy reasons, at a minimum you should handle the {@code inputType} 
+flag {@code TYPE_TEXT_VARIATION_PASSWORD} in your IME. When your IME is in 
+password mode, make sure that your keyboard is optimized for single key press 
+(auto spelling correction, auto completion and gesture input are disabled). 
+Most importantly, keyboard in password mode should support ASCII symbols 
+regardless of the input language.  For more details, see 
+<a href="http://developer.android.com/training/keyboard-input/style.html">Specifying The Input Method Type</a>.
+</p>
+</li>
+
+<li><strong>Provide a key for switching to the next input method</strong>
+<p>
+Android allows users to easily switch between all IMEs supported by the platform.
+ In your IME implementation, set the boolean 
+ <a href="http://developer.android.com/guide/topics/text/creating-input-method.html#Switching">supportsSwitchingToNextInputMethod = true</a>
+ to enable your IME to support switching mechanism 
+ (so that apps can switch to the next platform-supported IME).
+</p>
+</li>
+</ul>
+
+
+<h2 id="test">Test your IME</h2>
+
+<p>To test your IME, install the 
+<a href="https://drive.google.com/a/google.com/file/d/0ByOeMdiY1arvWUk5QXU1V0E3cFU/view?usp=sharing">Input Box</a>
+ app which has a simple <i><code>EditText</i></code> field. 
+ When responding to messages from chat apps, you can also use the IME on the 
+ watch.</p>
+
+
+
