@@ -170,11 +170,6 @@ public class ConnectivityController extends StateController implements
         }
 
         @Override
-        public void onRestrictPowerChanged(boolean restrictPower) {
-            updateTrackedJobs(-1);
-        }
-
-        @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
             updateTrackedJobs(-1);
         }

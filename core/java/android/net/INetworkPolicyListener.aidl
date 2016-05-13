@@ -23,6 +23,5 @@ oneway interface INetworkPolicyListener {
     void onMeteredIfacesChanged(in String[] meteredIfaces);
     void onRestrictBackgroundChanged(boolean restrictBackground);
     void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted);
-    void onRestrictPowerChanged(boolean restrictPower);
 
 }
