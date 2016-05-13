@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
+import libcore.io.IoUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -46,6 +47,8 @@ import java.util.UUID;
  * @hide
  */
 public final class MemoryIntArray implements Parcelable, Closeable {
+    private static final String TAG = "MemoryIntArray";
+
     private static final int MAX_SIZE = 1024;
 
     private final int mOwnerPid;
@@ -142,8 +145,9 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            nativeClose(mFd.getFd(), mMemoryAddr, isOwner());
+            ParcelFileDescriptor pfd = mFd;
             mFd = null;
+            nativeClose(pfd.getFd(), mMemoryAddr, isOwner());
         }
     }
 
@@ -156,7 +160,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
 
     @Override
     protected void finalize() throws Throwable {
-        close();
+        IoUtils.closeQuietly(this);
         super.finalize();
     }
 
@@ -230,7 +234,6 @@ public final class MemoryIntArray implements Parcelable, Closeable {
     private native int nativeGet(int fd, long memoryAddr, int index, boolean owner);
     private native void nativeSet(int fd, long memoryAddr, int index, int value, boolean owner);
     private native int nativeSize(int fd);
-    private native static int nativeGetMemoryPageSize();
 
     /**
      * @return The max array size.
@@ -246,7 +249,8 @@ public final class MemoryIntArray implements Parcelable, Closeable {
             try {
                 return new MemoryIntArray(parcel);
             } catch (IOException ioe) {
-                throw new RuntimeException(ioe);
+                Log.e(TAG, "Error unparceling MemoryIntArray");
+                return null;
             }
         }
 
