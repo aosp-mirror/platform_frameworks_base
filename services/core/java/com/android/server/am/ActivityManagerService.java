@@ -6167,6 +6167,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (DEBUG_PROCESSES) Slog.d(TAG_PROCESSES,
             "Force removing proc " + app.toShortString() + " (" + name + "/" + uid + ")");
 
+        ProcessRecord old = mProcessNames.get(name, uid);
+        if (old != app) {
+            // This process is no longer active, so nothing to do.
+            Slog.w(TAG, "Ignoring remove of inactive process: " + app);
+            return false;
+        }
         removeProcessNameLocked(name, uid);
         if (mHeavyWeightProcess == app) {
             mHandler.sendMessage(mHandler.obtainMessage(CANCEL_HEAVY_NOTIFICATION_MSG,
@@ -20467,7 +20473,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         && app.curReceiver == null && app.services.size() == 0) {
                     Slog.i(
                         TAG, "Exiting empty application process "
-                        + app.processName + " ("
+                        + app.toShortString() + " ("
                         + (app.thread != null ? app.thread.asBinder() : null)
                         + ")\n");
                     if (app.pid > 0 && app.pid != MY_PID) {
