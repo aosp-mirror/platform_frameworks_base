@@ -123,6 +123,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private final Rect mTouchRegion = new Rect();
     private boolean mAnimatingForIme;
     private boolean mAdjustedForIme;
+    private int mImeHeight;
     private WindowState mDelayedImeWin;
     private boolean mAdjustedForDivider;
     private float mDividerAnimationStart;
@@ -296,8 +297,9 @@ public class DockedStackDividerController implements DimLayerUser {
 
     void setAdjustedForIme(
             boolean adjustedForIme, boolean adjustedForDivider,
-            boolean animate, WindowState imeWin) {
-        if (mAdjustedForIme != adjustedForIme || mAdjustedForDivider != adjustedForDivider) {
+            boolean animate, WindowState imeWin, int imeHeight) {
+        if (mAdjustedForIme != adjustedForIme || (adjustedForIme && mImeHeight != imeHeight)
+                || mAdjustedForDivider != adjustedForDivider) {
             if (animate) {
                 startImeAdjustAnimation(adjustedForIme, adjustedForDivider, imeWin);
             } else {
@@ -305,8 +307,13 @@ public class DockedStackDividerController implements DimLayerUser {
                 notifyAdjustedForImeChanged(adjustedForIme || adjustedForDivider, 0 /* duration */);
             }
             mAdjustedForIme = adjustedForIme;
+            mImeHeight = imeHeight;
             mAdjustedForDivider = adjustedForDivider;
         }
+    }
+
+    int getImeHeightAdjustedFor() {
+        return mImeHeight;
     }
 
     void positionDockedStackedDivider(Rect frame) {
