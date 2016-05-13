@@ -19,6 +19,7 @@ trainingnavtop=true
     <ul>
     <li><a href="{@docRoot}distribute/tools/localization-checklist.html">Localization Checklist</a></li>
       <li><a href="{@docRoot}guide/topics/resources/localization.html">Localization with Resources</a></li>
+      <li><a href="https://support.google.com/l10n/answer/6359997">App Translation Service</a></li>
     </ul>
   </div>
 </div>
