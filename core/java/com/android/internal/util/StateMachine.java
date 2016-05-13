@@ -29,8 +29,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -1642,7 +1642,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what) {
+    public void sendMessage(int what) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1655,7 +1655,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, Object obj) {
+    public void sendMessage(int what, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1668,7 +1668,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1) {
+    public void sendMessage(int what, int arg1) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1681,7 +1681,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1, int arg2) {
+    public void sendMessage(int what, int arg1, int arg2) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1694,7 +1694,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(int what, int arg1, int arg2, Object obj) {
+    public void sendMessage(int what, int arg1, int arg2, Object obj) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1707,7 +1707,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessage(Message msg) {
+    public void sendMessage(Message msg) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1720,7 +1720,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, long delayMillis) {
+    public void sendMessageDelayed(int what, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1733,7 +1733,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
+    public void sendMessageDelayed(int what, Object obj, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1746,7 +1746,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, long delayMillis) {
+    public void sendMessageDelayed(int what, int arg1, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1759,7 +1759,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, int arg2, long delayMillis) {
+    public void sendMessageDelayed(int what, int arg1, int arg2, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
@@ -1772,7 +1772,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
+    public void sendMessageDelayed(int what, int arg1, int arg2, Object obj,
             long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
@@ -1786,7 +1786,7 @@ public class StateMachine {
      *
      * Message is ignored if state machine has quit.
      */
-    public final void sendMessageDelayed(Message msg, long delayMillis) {
+    public void sendMessageDelayed(Message msg, long delayMillis) {
         // mSmHandler can be null if the state machine has quit.
         SmHandler smh = mSmHandler;
         if (smh == null) return;
