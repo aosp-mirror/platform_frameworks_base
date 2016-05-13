@@ -79,7 +79,7 @@ interface IInputManager {
     void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
 
-    void setPointerIconShape(int shapeId);
+    void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
 
     void setPointerIconDetached(boolean detached);

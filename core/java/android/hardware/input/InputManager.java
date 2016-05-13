@@ -872,13 +872,13 @@ public final class InputManager {
      * Changes the mouse pointer's icon shape into the specified id.
      *
      * @param iconId The id of the pointer graphic, as a value between
-     * {@link PointerIcon.STYLE_ARROW} and {@link PointerIcon.STYLE_GRABBING}.
+     * {@link PointerIcon.TYPE_ARROW} and {@link PointerIcon.TYPE_GRABBING}.
      *
      * @hide
      */
-    public void setPointerIconShape(int iconId) {
+    public void setPointerIconType(int iconId) {
         try {
-            mIm.setPointerIconShape(iconId);
+            mIm.setPointerIconType(iconId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

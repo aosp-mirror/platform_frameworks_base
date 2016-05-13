@@ -1700,9 +1700,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        final float x = event.getX(pointerIndex);
+        final float y = event.getY(pointerIndex);
         if (isOnScrollbarThumb(x, y) || isDraggingScrollBar()) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.STYLE_ARROW);
+            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
         }
         // Check what the child under the pointer says about the pointer.
         final int childrenCount = mChildrenCount;
@@ -1716,7 +1718,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final View child = getAndVerifyPreorderedView(preorderedList, children, childIndex);
                 final PointF point = getLocalPoint();
                 if (isTransformedTouchPointInView(x, y, child, point)) {
-                    final PointerIcon pointerIcon = child.getPointerIcon(event, point.x, point.y);
+                    final PointerIcon pointerIcon =
+                            dispatchResolvePointerIcon(event, pointerIndex, child);
                     if (pointerIcon != null) {
                         if (preorderedList != null) preorderedList.clear();
                         return pointerIcon;
@@ -1729,7 +1732,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // The pointer is not a child or the child has no preferences, returning the default
         // implementation.
-        return super.getPointerIcon(event, x, y);
+        return super.onResolvePointerIcon(event, pointerIndex);
+    }
+
+    private PointerIcon dispatchResolvePointerIcon(MotionEvent event, int pointerIndex,
+            View child) {
+        final PointerIcon pointerIcon;
+        if (!child.hasIdentityMatrix()) {
+            MotionEvent transformedEvent = getTransformedMotionEvent(event, child);
+            pointerIcon = child.onResolvePointerIcon(transformedEvent, pointerIndex);
+            transformedEvent.recycle();
+        } else {
+            final float offsetX = mScrollX - child.mLeft;
+            final float offsetY = mScrollY - child.mTop;
+            event.offsetLocation(offsetX, offsetY);
+            pointerIcon = child.onResolvePointerIcon(event, pointerIndex);
+            event.offsetLocation(-offsetX, -offsetY);
+        }
+        return pointerIcon;
     }
 
     private int getAndVerifyPreorderedIndex(int childrenCount, int i, boolean customOrder) {
@@ -2110,22 +2130,39 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @return {@code true} if the child handled the event.
      */
     private boolean dispatchTransformedGenericPointerEvent(MotionEvent event, View child) {
-        final float offsetX = mScrollX - child.mLeft;
-        final float offsetY = mScrollY - child.mTop;
-
         boolean handled;
         if (!child.hasIdentityMatrix()) {
-            MotionEvent transformedEvent = MotionEvent.obtain(event);
-            transformedEvent.offsetLocation(offsetX, offsetY);
-            transformedEvent.transform(child.getInverseMatrix());
+            MotionEvent transformedEvent = getTransformedMotionEvent(event, child);
             handled = child.dispatchGenericMotionEvent(transformedEvent);
             transformedEvent.recycle();
         } else {
+            final float offsetX = mScrollX - child.mLeft;
+            final float offsetY = mScrollY - child.mTop;
             event.offsetLocation(offsetX, offsetY);
             handled = child.dispatchGenericMotionEvent(event);
             event.offsetLocation(-offsetX, -offsetY);
         }
         return handled;
+    }
+
+    /**
+     * Returns a MotionEvent that's been transformed into the child's local coordinates.
+     *
+     * It's the responsibility of the caller to recycle it once they're finished with it.
+     * @param event The event to transform.
+     * @param child The view whose coordinate space is to be used.
+     * @return A copy of the the given MotionEvent, transformed into the given View's coordinate
+     *         space.
+     */
+    private MotionEvent getTransformedMotionEvent(MotionEvent event, View child) {
+        final float offsetX = mScrollX - child.mLeft;
+        final float offsetY = mScrollY - child.mTop;
+        final MotionEvent transformedEvent = MotionEvent.obtain(event);
+        transformedEvent.offsetLocation(offsetX, offsetY);
+        if (!child.hasIdentityMatrix()) {
+            transformedEvent.transform(child.getInverseMatrix());
+        }
+        return transformedEvent;
     }
 
     @Override

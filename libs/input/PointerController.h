@@ -105,7 +105,7 @@ public:
             const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
     virtual void clearSpots();
 
-    void updatePointerShape(int32_t iconId);
+    void updatePointerIcon(int32_t iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setDisplayViewport(int32_t width, int32_t height, int32_t orientation);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
@@ -180,7 +180,7 @@ private:
         std::map<int32_t, SpriteIcon> additionalMouseResources;
         std::map<int32_t, PointerAnimation> animationResources;
 
-        int32_t requestedPointerShape;
+        int32_t requestedPointerType;
 
         int32_t buttonState;
 

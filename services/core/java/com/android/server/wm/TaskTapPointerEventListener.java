@@ -26,12 +26,12 @@ import android.view.WindowManagerPolicy.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 
-import static android.view.PointerIcon.STYLE_NOT_SPECIFIED;
-import static android.view.PointerIcon.STYLE_DEFAULT;
-import static android.view.PointerIcon.STYLE_HORIZONTAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.STYLE_VERTICAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
-import static android.view.PointerIcon.STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_NOT_SPECIFIED;
+import static android.view.PointerIcon.TYPE_DEFAULT;
+import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
 
 public class TaskTapPointerEventListener implements PointerEventListener {
 
@@ -43,7 +43,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     private boolean mTwoFingerScrolling;
     private boolean mInGestureDetection;
     private GestureDetector mGestureDetector;
-    private int mPointerIconShape = STYLE_NOT_SPECIFIED;
+    private int mPointerIconType = TYPE_NOT_SPECIFIED;
 
     public TaskTapPointerEventListener(WindowManagerService service,
             DisplayContent displayContent) {
@@ -91,39 +91,39 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                 final Task task = mDisplayContent.findTaskForControlPoint(x, y);
                 InputDevice inputDevice = motionEvent.getDevice();
                 if (task == null || inputDevice == null) {
-                    mPointerIconShape = STYLE_NOT_SPECIFIED;
+                    mPointerIconType = TYPE_NOT_SPECIFIED;
                     break;
                 }
                 task.getDimBounds(mTmpRect);
                 if (!mTmpRect.isEmpty() && !mTmpRect.contains(x, y)) {
-                    int iconShape = STYLE_DEFAULT;
+                    int iconType = TYPE_DEFAULT;
                     if (x < mTmpRect.left) {
-                        iconShape =
-                            (y < mTmpRect.top) ? STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW :
-                            (y > mTmpRect.bottom) ? STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW :
-                            STYLE_HORIZONTAL_DOUBLE_ARROW;
+                        iconType =
+                            (y < mTmpRect.top) ? TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW :
+                            (y > mTmpRect.bottom) ? TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW :
+                            TYPE_HORIZONTAL_DOUBLE_ARROW;
                     } else if (x > mTmpRect.right) {
-                        iconShape =
-                            (y < mTmpRect.top) ? STYLE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW :
-                            (y > mTmpRect.bottom) ? STYLE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW :
-                            STYLE_HORIZONTAL_DOUBLE_ARROW;
+                        iconType =
+                            (y < mTmpRect.top) ? TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW :
+                            (y > mTmpRect.bottom) ? TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW :
+                            TYPE_HORIZONTAL_DOUBLE_ARROW;
                     } else if (y < mTmpRect.top || y > mTmpRect.bottom) {
-                        iconShape = STYLE_VERTICAL_DOUBLE_ARROW;
+                        iconType = TYPE_VERTICAL_DOUBLE_ARROW;
                     }
-                    if (mPointerIconShape != iconShape) {
-                        mPointerIconShape = iconShape;
-                        inputDevice.setPointerShape(iconShape);
+                    if (mPointerIconType != iconType) {
+                        mPointerIconType = iconType;
+                        inputDevice.setPointerType(iconType);
                     }
                 } else {
-                    mPointerIconShape = STYLE_NOT_SPECIFIED;
+                    mPointerIconType = TYPE_NOT_SPECIFIED;
                 }
             } break;
 
             case MotionEvent.ACTION_HOVER_EXIT:
-                mPointerIconShape = STYLE_NOT_SPECIFIED;
+                mPointerIconType = TYPE_NOT_SPECIFIED;
                 InputDevice inputDevice = motionEvent.getDevice();
                 if (inputDevice != null) {
-                    inputDevice.setPointerShape(STYLE_DEFAULT);
+                    inputDevice.setPointerType(TYPE_DEFAULT);
                 }
                 break;
 

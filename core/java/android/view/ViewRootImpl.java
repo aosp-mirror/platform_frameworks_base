@@ -359,7 +359,7 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
 
-    private int mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+    private int mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
     private PointerIcon mCustomPointerIcon = null;
 
     /**
@@ -3168,7 +3168,7 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void setPointerCapture(View view) {
+    void requestPointerCapture(View view) {
         if (!mAttachInfo.mHasWindowFocus) {
             Log.w(mTag, "Can't set capture if it's not focused.");
             return;
@@ -3178,6 +3178,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         mCapturingView = view;
         InputManager.getInstance().setPointerIconDetached(true);
+        return;
     }
 
     void releasePointerCapture(View view) {
@@ -4445,19 +4446,18 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private void maybeUpdatePointerIcon(MotionEvent event) {
-            if (event.getPointerCount() == 1
-                    && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            if (event.getPointerCount() == 1 && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                 if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
                         || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
-                    // Other apps or the window manager may change the icon shape outside of
-                    // this app, therefore the icon shape has to be reset on enter/exit event.
-                    mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+                    // Other apps or the window manager may change the icon type outside of
+                    // this app, therefore the icon type has to be reset on enter/exit event.
+                    mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
                 }
 
                 if (event.getActionMasked() != MotionEvent.ACTION_HOVER_EXIT) {
                     if (!updatePointerIcon(event) &&
                             event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE) {
-                        mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+                        mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
                     }
                 }
             }
@@ -4484,13 +4484,14 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void resetPointerIcon(MotionEvent event) {
-        mPointerIconShape = PointerIcon.STYLE_NOT_SPECIFIED;
+        mPointerIconType = PointerIcon.TYPE_NOT_SPECIFIED;
         updatePointerIcon(event);
     }
 
     private boolean updatePointerIcon(MotionEvent event) {
-        final float x = event.getX();
-        final float y = event.getY();
+        final int pointerIndex = 0;
+        final float x = event.getX(pointerIndex);
+        final float y = event.getY(pointerIndex);
         if (mView == null) {
             // E.g. click outside a popup to dismiss it
             Slog.d(mTag, "updatePointerIcon called after view was removed");
@@ -4501,19 +4502,19 @@ public final class ViewRootImpl implements ViewParent,
             Slog.d(mTag, "updatePointerIcon called with position out of bounds");
             return false;
         }
-        final PointerIcon pointerIcon = mView.getPointerIcon(event, x, y);
-        final int pointerShape = (pointerIcon != null) ?
-                pointerIcon.getStyle() : PointerIcon.STYLE_DEFAULT;
+        final PointerIcon pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
+        final int pointerType = (pointerIcon != null) ?
+                pointerIcon.getType() : PointerIcon.TYPE_DEFAULT;
 
-        if (mPointerIconShape != pointerShape) {
-            mPointerIconShape = pointerShape;
-            if (mPointerIconShape != PointerIcon.STYLE_CUSTOM) {
+        if (mPointerIconType != pointerType) {
+            mPointerIconType = pointerType;
+            if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
                 mCustomPointerIcon = null;
-                InputManager.getInstance().setPointerIconShape(pointerShape);
+                InputManager.getInstance().setPointerIconType(pointerType);
                 return true;
             }
         }
-        if (mPointerIconShape == PointerIcon.STYLE_CUSTOM &&
+        if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
                 !pointerIcon.equals(mCustomPointerIcon)) {
             mCustomPointerIcon = pointerIcon;
             InputManager.getInstance().setCustomPointerIcon(mCustomPointerIcon);
