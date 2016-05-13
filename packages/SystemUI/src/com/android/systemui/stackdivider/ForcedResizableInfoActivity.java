@@ -78,6 +78,12 @@ public class ForcedResizableInfoActivity extends Activity implements OnTouchList
     }
 
     @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(0, R.anim.forced_resizable_exit);
+    }
+
+    @Override
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
         // Do nothing
     }
