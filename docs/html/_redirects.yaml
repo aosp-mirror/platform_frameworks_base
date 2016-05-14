@@ -1069,6 +1069,8 @@ redirects:
   to: /studio/test/index.html
 - from: /tools/testing/testing_otheride.html
   to: /studio/test/command-line.html
+- from: /tools/help/android.html
+  to: /studio/tools/help/android.html
 
 # Files moved out of studio
 - from: /tools/sdk/ndk/...
@@ -1079,8 +1081,6 @@ redirects:
 # Removed files
 - from: /tools/help/project-mgmt.html
   to: /studio/projects/index.html
-- from: /tools/help/android.html
-  to: /studio/projects/index.html
 - from: /tools/help/hprof-conv.html
   to: /studio/profile/investigate-ram.html
 - from: /tools/studio/code-tools.html
@@ -1090,9 +1090,9 @@ redirects:
 - from: /tools/help/avd-manager.html
   to: /studio/run/managing-avds.html
 - from: /tools/devices/managing-avds-cmdline.html
-  to: /studio/run/managing-avds.html
+  to: /studio/tools/help/android.html
 - from: /tools/projects/projects-cmdline.html
-  to: /studio/projects/index.html
+  to: /studio/tools/help/android.html
 - from: /tools/help/dmtracedump.html
   to: /studio/profile/traceview.html
 - from: /tools/help/lint.html
