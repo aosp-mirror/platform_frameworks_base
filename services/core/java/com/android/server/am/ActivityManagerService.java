@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import com.android.internal.telephony.TelephonyIntents;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.android.internal.R;
@@ -17246,7 +17247,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     || Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
-                    || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
+                    || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
+                    || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)) {
                 // Broadcast is either protected, or it's a public action that
                 // we've relaxed, so it's fine for system internals to send.
             } else {
