@@ -239,6 +239,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -11088,8 +11089,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     .getPackageInfo(pkgName, matchFlags, userId);
                             if (pkgInfo != null && !ArrayUtils.isEmpty(pkgInfo.providers)) {
                                 for (ProviderInfo provInfo : pkgInfo.providers) {
-                                    Log.v(TAG, "Installing " + provInfo);
-                                    app.thread.scheduleInstallProvider(provInfo);
+                                    if (Objects.equals(provInfo.processName, app.processName)) {
+                                        Log.v(TAG, "Installing " + provInfo);
+                                        app.thread.scheduleInstallProvider(provInfo);
+                                    } else {
+                                        Log.v(TAG, "Skipping " + provInfo);
+                                    }
                                 }
                             }
                         } catch (RemoteException ignored) {
