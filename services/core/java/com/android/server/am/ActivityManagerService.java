@@ -18333,8 +18333,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /**
      * Decide based on the configuration whether we should shouw the ANR,
-     * crash, etc dialogs.  The idea is that if there is no affordnace to
-     * press the on-screen buttons, we shouldn't show the dialog.
+     * crash, etc dialogs.  The idea is that if there is no affordence to
+     * press the on-screen buttons, or the user experience would be more
+     * greatly impacted than the crash itself, we shouldn't show the dialog.
      *
      * A thought: SystemUI might also want to get told about this, the Power
      * dialog / global actions also might want different behaviors.
@@ -18343,9 +18344,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                                    && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
-        final boolean uiIsNotCarType = !((config.uiMode & Configuration.UI_MODE_TYPE_MASK)
-                                    == Configuration.UI_MODE_TYPE_CAR);
-        return inputMethodExists && uiIsNotCarType && !inVrMode;
+        int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
+        final boolean uiModeSupportsDialogs = (modeType != Configuration.UI_MODE_TYPE_CAR
+                && modeType != Configuration.UI_MODE_TYPE_WATCH);
+        return inputMethodExists && uiModeSupportsDialogs && !inVrMode;
     }
 
     @Override
