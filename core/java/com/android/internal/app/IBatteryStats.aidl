@@ -90,7 +90,7 @@ interface IBatteryStats {
     void noteWakeUp(String reason, int reasonUid);
     void noteInteractive(boolean interactive);
     void noteConnectivityChanged(int type, String extra);
-    void noteMobileRadioPowerState(int powerState, long timestampNs);
+    void noteMobileRadioPowerState(int powerState, long timestampNs, int uid);
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);
