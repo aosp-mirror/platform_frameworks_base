@@ -42,6 +42,7 @@ public class QSDetailItems extends FrameLayout {
     private static final String TAG = "QSDetailItems";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final int mQsDetailIconOverlaySize;
     private final Context mContext;
     private final H mHandler = new H();
     private final Adapter mAdapter = new Adapter();
@@ -60,6 +61,8 @@ public class QSDetailItems extends FrameLayout {
         super(context, attrs);
         mContext = context;
         mTag = TAG;
+        mQsDetailIconOverlaySize = (int) getResources().getDimension(
+                R.dimen.qs_detail_icon_overlay_size);
     }
 
     public static QSDetailItems convertOrInflate(Context context, View convert, ViewGroup parent) {
@@ -182,8 +185,7 @@ public class QSDetailItems extends FrameLayout {
             iv.setImageResource(item.icon);
             iv.getOverlay().clear();
             if (item.overlay != null) {
-                item.overlay.setBounds(0, 0, item.overlay.getIntrinsicWidth(),
-                        item.overlay.getIntrinsicHeight());
+                item.overlay.setBounds(0, 0, mQsDetailIconOverlaySize, mQsDetailIconOverlaySize);
                 iv.getOverlay().add(item.overlay);
             }
             final TextView title = (TextView) view.findViewById(android.R.id.title);

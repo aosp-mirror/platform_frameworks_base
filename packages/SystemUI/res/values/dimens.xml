@@ -216,6 +216,12 @@
     <dimen name="qs_expand_margin">0dp</dimen>
     <dimen name="qs_battery_padding">2dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
+    <dimen name="qs_detail_item_icon_size">24dp</dimen>
+    <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
+    <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
+
+    <!-- Desired qs icon overlay size. -->
+    <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
 
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
