@@ -46,7 +46,7 @@ redirects:
 - from: /tools/sdk/index.html
   to: /studio/index.html
 - from: /tools/index.html
-  to: /tools-moved.html
+  to: /studio/index.html
 - from: /tools/sdk/installing.html
   to: /studio/index.html
 - from: /tools/eclipse/installing-adt.html
