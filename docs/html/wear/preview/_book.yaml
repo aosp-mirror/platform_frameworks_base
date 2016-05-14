@@ -8,8 +8,10 @@ toc:
 - title: API Overview
   path: /wear/preview/api-overview.html
   section:
-  - title: Expanded Notifications
+  - title: Notification Improvements
     path: /wear/preview/features/notifications.html
+  - title: Input Method Framework 
+    path: /wear/preview/features/ime.html
   - title: Complications
     path: /wear/preview/features/complications.html
   - title: Wear Navigation and Actions
@@ -25,3 +27,6 @@ toc:
 
 - title: License Agreement
   path: /wear/preview/license.html
+
+- title: Support and Release Notes
+  path: /wear/preview/support.html
