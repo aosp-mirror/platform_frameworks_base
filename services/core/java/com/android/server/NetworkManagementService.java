@@ -468,7 +468,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      * Notify our observers of a change in the data activity state of the interface
      */
     private void notifyInterfaceClassActivity(int type, int powerState, long tsNanos,
-            boolean fromRadio) {
+            int uid, boolean fromRadio) {
         final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
         if (isMobile) {
             if (!fromRadio) {
@@ -484,7 +484,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (mLastPowerStateFromRadio != powerState) {
                 mLastPowerStateFromRadio = powerState;
                 try {
-                    getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos);
+                    getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
             }
@@ -845,9 +845,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         throw new IllegalStateException(errorMessage);
                     }
                     long timestampNanos = 0;
-                    if (cooked.length == 5) {
+                    int processUid = -1;
+                    if (cooked.length >= 5) {
                         try {
                             timestampNanos = Long.parseLong(cooked[4]);
+                            if (cooked.length == 6) {
+                                processUid = Integer.parseInt(cooked[5]);
+                            }
                         } catch(NumberFormatException ne) {}
                     } else {
                         timestampNanos = SystemClock.elapsedRealtimeNanos();
@@ -855,7 +859,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     boolean isActive = cooked[2].equals("active");
                     notifyInterfaceClassActivity(Integer.parseInt(cooked[3]),
                             isActive ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW, timestampNanos, false);
+                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
+                            timestampNanos, processUid, false);
                     return true;
                     // break;
             case NetdResponseCode.InterfaceAddressChange:
@@ -1599,7 +1604,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 @Override public void run() {
                     notifyInterfaceClassActivity(type,
                             DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH,
-                            SystemClock.elapsedRealtimeNanos(), false);
+                            SystemClock.elapsedRealtimeNanos(), -1, false);
                 }
             });
         }
@@ -1628,7 +1633,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 @Override public void run() {
                     notifyInterfaceClassActivity(params.type,
                             DataConnectionRealTimeInfo.DC_POWER_STATE_LOW,
-                            SystemClock.elapsedRealtimeNanos(), false);
+                            SystemClock.elapsedRealtimeNanos(), -1, false);
                 }
             });
         }
