@@ -46,8 +46,8 @@ page.image=images/cards/card-n-support_2x.png
 
   <dt><a href="{@docRoot}preview/api-overview.html#tile_api">Quick
     Settings Tile API</a></dt>
-  <dd>Tile mode is now controlled by the activity's metadata. (Previously, tile
-    mode was controlled by the return value of
+  <dd>The system now uses the activity's metadata to decide on the tile mode.
+    (Previously, tile mode was determined by the return value of
     <code>TileService.onTileAdded()</code>.) For more information, see
     <code>TileService.META_DATA_ACTIVE_TILE</code> in the downloadable
     <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
