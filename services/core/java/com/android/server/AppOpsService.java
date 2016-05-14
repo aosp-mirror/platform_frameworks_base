@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,7 +58,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -110,21 +110,8 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /*
      * These are app op restrictions imposed per user from various parties.
-     *
-     * This is organized as follows:
-     *
-     * ArrayMap w/ mapping:
-     *  IBinder (for client imposing restriction) --> SparseArray w/ mapping:
-     *    User handle --> Pair containing:
-     *       - Array w/ index = AppOp code, value = restricted status boolean
-     *       - SparseArray w/ mapping:
-     *          AppOp code --> Set of packages that are not restricted for this code
-     *
-     * For efficiency, a core assumption here is that the number of per-package exemptions stored
-     * here will be relatively small.  If this changes, this data structure should be revisited.
      */
-    private final ArrayMap<IBinder, SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>>>
-            mOpUserRestrictions = new ArrayMap<>();
+    private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
 
     private static final class UidState {
         public final int uid;
@@ -1328,42 +1315,16 @@ public class AppOpsService extends IAppOpsService.Stub {
         for (int i = 0; i < restrictionSetCount; i++) {
             // For each client, check that the given op is not restricted, or that the given
             // package is exempt from the restriction.
-
-            SparseArray<Pair<boolean[],SparseArray<ArraySet<String>>>> perUserRestrictions =
-                    mOpUserRestrictions.valueAt(i);
-
-            Pair<boolean[],SparseArray<ArraySet<String>>> restrictions =
-                    perUserRestrictions.get(userHandle);
-            if (restrictions == null) {
-                continue; // No restrictions set by this client
-            }
-
-            boolean[] opRestrictions = restrictions.first;
-            SparseArray<ArraySet<String>> opExceptions = restrictions.second;
-
-            if (opRestrictions == null) {
-                continue; // No restrictions set by this client
-            }
-
-            if (opRestrictions[code]) {
-
-                if (opExceptions != null) {
-                    ArraySet<String> ex = opExceptions.get(code);
-                    if (ex != null && ex.contains(packageName)) {
-                        continue; // AppOps code is restricted, but this package is exempt
+            ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
+            if (restrictionState.hasRestriction(code, packageName, userHandle)
+                    && AppOpsManager.opAllowSystemBypassRestriction(code)) {
+                // If we are the system, bypass user restrictions for certain codes
+                synchronized (this) {
+                    Ops ops = getOpsRawLocked(uid, packageName, true);
+                    if ((ops != null) && ops.isPrivileged) {
+                        return false;
                     }
                 }
-
-                if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
-                    // If we are the system, bypass user restrictions for certain codes
-                    synchronized (this) {
-                        Ops ops = getOpsRawLocked(uid, packageName, true);
-                        if ((ops != null) && ops.isPrivileged) {
-                            return false;
-                        }
-                    }
-                }
-
                 return true;
             }
         }
@@ -2216,12 +2177,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         checkSystemUid("setUserRestrictions");
         Preconditions.checkNotNull(restrictions);
         Preconditions.checkNotNull(token);
-        final boolean[] opRestrictions = getOrCreateUserRestrictionsForToken(token, userHandle);
-        for (int i = 0; i < opRestrictions.length; ++i) {
+        for (int i = 0; i < AppOpsManager._NUM_OP; i++) {
             String restriction = AppOpsManager.opToRestriction(i);
-            final boolean restricted = restriction != null
-                    && restrictions.getBoolean(restriction, false);
-            setUserRestrictionNoCheck(i, restricted, token, userHandle);
+            if (restriction != null && restrictions.getBoolean(restriction, false)) {
+                setUserRestrictionNoCheck(i, true, token, userHandle, null);
+            }
         }
     }
 
@@ -2247,45 +2207,26 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
-            int userHandle) {
-        setUserRestrictionNoCheck(code, restricted, token, userHandle, /*exceptionPackages*/null);
-    }
-
-    private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
             int userHandle, String[] exceptionPackages) {
+        ClientRestrictionState restrictionState = mOpUserRestrictions.get(token);
 
-        final boolean[] opRestrictions = getOrCreateUserRestrictionsForToken(token, userHandle);
-
-        if (restricted) {
-            final SparseArray<ArraySet<String>> opExceptions =
-                    getUserPackageExemptionsForToken(token, userHandle);
-
-            ArraySet<String> exceptions = opExceptions.get(code);
-            if (exceptionPackages != null && exceptionPackages.length > 0) {
-                if (exceptions == null) {
-                    exceptions = new ArraySet<>(exceptionPackages.length);
-                    opExceptions.put(code, exceptions);
-                } else {
-                    exceptions.clear();
-                }
-
-                for (String p : exceptionPackages) {
-                    exceptions.add(p);
-                }
-            } else {
-                opExceptions.remove(code);
+        if (restrictionState == null) {
+            try {
+                restrictionState = new ClientRestrictionState(token);
+            } catch (RemoteException e) {
+                return;
             }
+            mOpUserRestrictions.put(token, restrictionState);
         }
 
-        if (opRestrictions[code] == restricted) {
-            return;
-        }
-        opRestrictions[code] = restricted;
-        if (!restricted) {
-            pruneUserRestrictionsForToken(token, userHandle);
+        if (restrictionState.setRestriction(code, restricted, exceptionPackages, userHandle)) {
+            notifyWatchersOfChange(code);
         }
 
-        notifyWatchersOfChange(code);
+        if (restrictionState.isDefault()) {
+            mOpUserRestrictions.remove(token);
+            restrictionState.destroy();
+        }
     }
 
     private void notifyWatchersOfChange(int code) {
@@ -2300,7 +2241,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         // There are components watching for mode changes such as window manager
         // and location manager which are in our process. The callbacks in these
-        // components may require permissions our remote caller does not have.
+        // components may require permissions our remote caller does not have.s
         final long identity = Binder.clearCallingIdentity();
         try {
             final int callbackCount = clonedCallbacks.size();
@@ -2322,108 +2263,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         checkSystemUid("removeUser");
         final int tokenCount = mOpUserRestrictions.size();
         for (int i = tokenCount - 1; i >= 0; i--) {
-            SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>> opRestrictions =
-                    mOpUserRestrictions.valueAt(i);
-            if (opRestrictions != null) {
-                opRestrictions.remove(userHandle);
-                if (opRestrictions.size() <= 0) {
-                    mOpUserRestrictions.removeAt(i);
-                }
-            }
+            ClientRestrictionState opRestrictions = mOpUserRestrictions.valueAt(i);
+            opRestrictions.removeUser(userHandle);
         }
-    }
-
-
-    private void pruneUserRestrictionsForToken(IBinder token, int userHandle) {
-        SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>> perTokenRestrictions =
-                mOpUserRestrictions.get(token);
-        if (perTokenRestrictions != null) {
-            final Pair<boolean[], SparseArray<ArraySet<String>>> restrictions =
-                    perTokenRestrictions.get(userHandle);
-
-            if (restrictions != null) {
-                final boolean[] opRestrictions = restrictions.first;
-                final SparseArray<ArraySet<String>> opExceptions = restrictions.second;
-                boolean stillHasRestrictions = false;
-                if (opRestrictions != null) {
-                    for (int i = 0; i < opRestrictions.length; i++) {
-                        boolean restriction = opRestrictions[i];
-                        if (restriction) {
-                            stillHasRestrictions = true;
-                        } else {
-                            opExceptions.remove(i);
-                        }
-                    }
-                }
-
-                if (stillHasRestrictions) {
-                    return;
-                }
-
-                // No restrictions set for this client
-                perTokenRestrictions.remove(userHandle);
-                if (perTokenRestrictions.size() <= 0) {
-                    mOpUserRestrictions.remove(token);
-                }
-            }
-        }
-    }
-
-    /**
-     * Get or create the user restrictions array for a given client if it doesn't already exist.
-     *
-     * @param token the binder client creating the restriction.
-     * @param userHandle the user handle to create a restriction for.
-     *
-     * @return the array of restriction states for each AppOps code.
-     */
-    private boolean[] getOrCreateUserRestrictionsForToken(IBinder token, int userHandle) {
-        SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>> perTokenRestrictions =
-                mOpUserRestrictions.get(token);
-
-        if (perTokenRestrictions == null) {
-            perTokenRestrictions =
-                    new SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>>();
-            mOpUserRestrictions.put(token, perTokenRestrictions);
-        }
-
-        Pair<boolean[], SparseArray<ArraySet<String>>> restrictions =
-                perTokenRestrictions.get(userHandle);
-
-        if (restrictions == null) {
-            restrictions = new Pair<boolean[], SparseArray<ArraySet<String>>>(
-                    new boolean[AppOpsManager._NUM_OP], new SparseArray<ArraySet<String>>());
-            perTokenRestrictions.put(userHandle, restrictions);
-        }
-
-        return restrictions.first;
-    }
-
-    /**
-     * Get the per-package exemptions for each AppOps code for a given client and userHandle.
-     *
-     * @param token the binder client to get the exemptions for.
-     * @param userHandle the user handle to get the exemptions for.
-     *
-     * @return a mapping from the AppOps code to a set of packages exempt for that code.
-     */
-    private SparseArray<ArraySet<String>> getUserPackageExemptionsForToken(IBinder token,
-            int userHandle) {
-        SparseArray<Pair<boolean[], SparseArray<ArraySet<String>>>> perTokenRestrictions =
-                mOpUserRestrictions.get(token);
-
-        if (perTokenRestrictions == null) {
-            return null; // Don't create user restrictions accidentally
-        }
-
-        Pair<boolean[], SparseArray<ArraySet<String>>> restrictions =
-                perTokenRestrictions.get(userHandle);
-
-        if (restrictions == null) {
-            return null; // Don't create user restrictions accidentally
-        }
-
-        return restrictions.second;
     }
 
     private void checkSystemUid(String function) {
@@ -2455,5 +2297,135 @@ public class AppOpsService extends IAppOpsService.Stub {
             return EmptyArray.STRING;
         }
         return packageNames;
+    }
+
+    private final class ClientRestrictionState implements DeathRecipient {
+        private final IBinder token;
+        SparseArray<boolean[]> perUserRestrictions;
+        SparseArray<String[]> perUserExcludedPackages;
+
+        public ClientRestrictionState(IBinder token)
+                throws RemoteException {
+            token.linkToDeath(this, 0);
+            this.token = token;
+        }
+
+        public boolean setRestriction(int code, boolean restricted,
+                String[] excludedPackages, int userId) {
+            boolean changed = false;
+
+            if (perUserRestrictions == null && restricted) {
+                perUserRestrictions = new SparseArray<>();
+            }
+
+            if (perUserRestrictions != null) {
+                boolean[] userRestrictions = perUserRestrictions.get(userId);
+                if (userRestrictions == null && restricted) {
+                    userRestrictions = new boolean[AppOpsManager._NUM_OP];
+                    perUserRestrictions.put(userId, userRestrictions);
+                }
+                if (userRestrictions != null && userRestrictions[code] != restricted) {
+                    userRestrictions[code] = restricted;
+                    if (!restricted && isDefault(userRestrictions)) {
+                        perUserRestrictions.remove(userId);
+                        userRestrictions = null;
+                    }
+                    changed = true;
+                }
+
+                if (userRestrictions != null) {
+                    final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackages);
+                    if (perUserExcludedPackages == null && !noExcludedPackages) {
+                        perUserExcludedPackages = new SparseArray<>();
+                    }
+                    if (perUserExcludedPackages != null && !Arrays.equals(excludedPackages,
+                            perUserExcludedPackages.get(userId))) {
+                        if (noExcludedPackages) {
+                            perUserExcludedPackages.remove(userId);
+                            if (perUserExcludedPackages.size() <= 0) {
+                                perUserExcludedPackages = null;
+                            }
+                        } else {
+                            perUserExcludedPackages.put(userId, excludedPackages);
+                        }
+                        changed = true;
+                    }
+                }
+            }
+
+            return changed;
+        }
+
+        public boolean hasRestriction(int restriction, String packageName, int userId) {
+            if (perUserRestrictions == null) {
+                return false;
+            }
+            boolean[] restrictions = perUserRestrictions.get(userId);
+            if (restrictions == null) {
+                return false;
+            }
+            if (!restrictions[restriction]) {
+                return false;
+            }
+            if (perUserExcludedPackages == null) {
+                return true;
+            }
+            String[] perUserExclusions = perUserExcludedPackages.get(userId);
+            if (perUserExclusions == null) {
+                return true;
+            }
+            return !ArrayUtils.contains(perUserExclusions, packageName);
+        }
+
+        public void removeUser(int userId) {
+            if (perUserExcludedPackages != null) {
+                perUserExcludedPackages.remove(userId);
+                if (perUserExcludedPackages.size() <= 0) {
+                    perUserExcludedPackages = null;
+                }
+            }
+        }
+
+        public boolean isDefault() {
+            return perUserRestrictions == null || perUserRestrictions.size() <= 0;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (AppOpsService.this) {
+                mOpUserRestrictions.remove(token);
+                if (perUserRestrictions == null) {
+                    return;
+                }
+                final int userCount = perUserRestrictions.size();
+                for (int i = 0; i < userCount; i++) {
+                    final boolean[] restrictions = perUserRestrictions.valueAt(i);
+                    final int restrictionCount = restrictions.length;
+                    for (int j = 0; j < restrictionCount; j++) {
+                        if (restrictions[j]) {
+                            final int changedCode = j;
+                            mHandler.post(() -> notifyWatchersOfChange(changedCode));
+                        }
+                    }
+                }
+                destroy();
+            }
+        }
+
+        public void destroy() {
+            token.unlinkToDeath(this, 0);
+        }
+
+        private boolean isDefault(boolean[] array) {
+            if (ArrayUtils.isEmpty(array)) {
+                return true;
+            }
+            for (boolean value : array) {
+                if (value) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
