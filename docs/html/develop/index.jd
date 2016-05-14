@@ -9,61 +9,44 @@ tabbedList=1
 excludeFromSuggestions=true
 @jd:body
 
-<section class="dac-expand dac-hero dac-section-light">
+
+ <section class="dac-expand dac-hero dac-light">
   <div class="wrap">
     <div class="cols dac-hero-content">
       <div class="col-1of2 col-push-1of2 dac-hero-figure">
-        <!--
-        <iframe width="448" height="252"
-            src="//www.youtube.com/embed/Z98hXV9GmzY?autohide=1&amp;showinfo=0"
-            frameborder="0" allowfullscreen=""
-            style="float: right;"></iframe>
-        -->
-        <a href="{@docRoot}studio/index.html">
-        <img class="dac-hero-image" src="{@docRoot}images/tools/studio/studio-feature-instant-run_2x.png" />
-        </a>
+        <img class="dac-hero-image" src="/images/develop/hero_image_studio5_2x.png" srcset="/images/develop/hero_image_studio5.png 1x, /images/develop/hero_image_studio5_2x.png 2x">
       </div>
-      <div class="col-1of2 col-pull-1of2">
+      <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
         <h1 class="dac-hero-title">
             <a style="color:inherit" href="{@docRoot}studio/index.html">
             Android Studio 2.1,<br>now available!</a></h1>
-        <p class="dac-hero-description">
-        The latest version of Android Studio is the biggest update yet.
-        It includes new features like <strong>Instant Run</strong>, which
-        dramatically speeds up your edit, build, and run cycles, keeping
-        you "in the flow."</p>
-        </p>
-        <div class="cols">
-          <div class="col-1of2">
-            <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
-              <span class="dac-sprite dac-auto-chevron"></span>
-              Get Android Studio
-            </a><br>
-            <a class="dac-hero-cta" href="{@docRoot}training/index.html">
-              <span class="dac-sprite dac-auto-chevron"></span>
-              Build your first app
-            </a>
-          </div>
-          <div class="col-1of2">
-            <a class="dac-hero-cta" href="{@docRoot}guide/index.html">
-              <span class="dac-sprite dac-auto-chevron"></span>
-              Learn about Android
-            </a><br>
-            <a class="dac-hero-cta" href="{@docRoot}samples/index.html">
-              <span class="dac-sprite dac-auto-chevron"></span>
-              See sample projects
-            </a>
-          </div>
+
+<p class="dac-hero-description">Android Studio provides the fastest tools for
+building apps on every type of Android device.</p>
+
+<p class="dac-hero-description">The latest version, Android Studio 2.1, adds
+support for N Preview development on top of the faster Android Emulator and
+Instant Run feature from 2.0.</p>
+
+<div class="cols">
+  <div class="col-1of2">
+    <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get Android Studio
+    </a>
+  </div>
+  <div class="col-1of2">
+    <a class="dac-hero-cta" href="{@docRoot}studio/releases/index.html">
+    <span class="dac-sprite dac-auto-chevron"></span>
+    See the release notes</a>
+  </div>
+</div>
+
       </div>
     </div>
-    <!--<div class="dac-section dac-small">
-      <div class="resource-widget resource-flow-layout col-16"
-           data-query="collection:develop/landing/mainlinks"
-           data-cardSizes="6x2"
-           data-maxResults="6"></div>
-    </div>-->
   </div>
 </section>
+
 <div class="wrap dac-offset-parent">
   <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
     <i class="dac-sprite dac-arrow-down-gray"></i>
