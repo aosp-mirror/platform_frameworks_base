@@ -426,4 +426,10 @@ public class TelephonyIntents {
      */
     public static final String ACTION_REQUEST_NETWORK_FAILED =
             "android.intent.action.REQUEST_NETWORK_FAILED";
+
+    /**
+     * Broadcast action to trigger CI OMA-DM Session.
+     */
+    public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
+            "com.android.omadm.service.CONFIGURATION_UPDATE";
 }
