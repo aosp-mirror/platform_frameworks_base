@@ -334,7 +334,6 @@ public class SystemServicesProxy {
             isExcluded |= quietProfileIds.contains(t.userId);
             if (isExcluded && (!isFirstValidTask || !includeFrontMostExcludedTask)) {
                 iter.remove();
-                continue;
             }
 
             isFirstValidTask = false;
