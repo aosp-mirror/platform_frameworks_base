@@ -3538,7 +3538,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumConnectivityChange++;
     }
 
-    public void noteMobileRadioPowerState(int powerState, long timestampNs) {
+    public void noteMobileRadioPowerState(int powerState, long timestampNs, int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mMobileRadioPowerState != powerState) {
