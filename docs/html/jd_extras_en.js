@@ -4936,17 +4936,17 @@ METADATA['en'].collections = {
   "wear/preview/landing": {
     "title": "",
     "resources": [
-      "preview/api-overview.html",
-      "preview/download.html",
-      "preview/setup-sdk.html"
+      "wear/preview/api-overview.html",
+      "wear/preview/downloads.html",
+      "wear/preview/start.html"
     ]
   },
   "wear/preview/landing/resources": {
     "title": "",
     "resources": [
-      "design/wear/index.html",
-      "training/building-wearables.html",
-      "training/wearables/ui/index.html"
+      "wear/preview/features/complications.html",
+      "wear/preview/features/notifications.html",
+      "wear/preview/features/ui-nav-actions.html"
     ]
   },
   "design/auto/auto_ui_guidelines": {
