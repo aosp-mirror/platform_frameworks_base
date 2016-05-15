@@ -18,7 +18,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/building-wearables.html",
       "training/material/index.html",
-      "sdk/index.html"
+      "studio/index.html"
     ]
   },
   "index/secondary/carousel": {
@@ -1876,7 +1876,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
     "tools/studio/index.html",
     "tools/studio/studio-features.html",
-    "sdk/installing/studio-tips.html",
+    "studio/intro/index.html",
     ]
   },
   "tools/landing/latest": {
