@@ -128,7 +128,7 @@ public void testWithBoundService() throws TimeoutException {
 
 <h2 id="run">Run Integration Tests for Services</h2>
 <p>
-You can run integration tests from <a href="{@docRoot}sdk/index.html">Android Studio</a> or
+You can run integration tests from <a href="{@docRoot}studio/index.html">Android Studio</a> or
 from the command-line. Make sure to specify
 <a href="{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">
   {@code AndroidJUnitRunner}</a> as the default instrumentation runner in your project.

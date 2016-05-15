@@ -63,7 +63,7 @@ communicate with Auto.</p>
 <p>Before you begin building apps for Auto, you must:</p>
 
 <ul>
-<li><strong><a href="{@docRoot}sdk/installing/create-project.html">Create or
+<li><strong><a href="{@docRoot}studio/projects/create-project.html">Create or
 update your app project</a></strong> - Android 5.0 (API level 21) provides new
 APIs for implementing audio playback and messaging that is compatible with Auto.
 To access the new APIs, create a project or modify an existing project to target

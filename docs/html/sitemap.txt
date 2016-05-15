@@ -13,7 +13,7 @@ http://developer.android.com/training/index.html
 http://developer.android.com/guide/components/index.html
 http://developer.android.com/reference/packages.html
 http://developer.android.com/tools/index.html
-http://developer.android.com/sdk/index.html
+http://developer.android.com/studio/index.html
 http://developer.android.com/google/index.html
 http://developer.android.com/distribute/googleplay/publish/index.html
 http://developer.android.com/distribute/googleplay/promote/index.html
@@ -79,10 +79,10 @@ http://developer.android.com/downloads/design/Roboto_Hinted_20120823.zip
 http://developer.android.com/downloads/design/Roboto_Specimen_Book_20111129.pdf
 http://developer.android.com/downloads/design/Android_Design_Color_Swatches_20120229.zip
 http://developer.android.com/sdk/installing/bundle.html
-http://developer.android.com/sdk/installing/index.html
+http://developer.android.com/studio/install.html
 http://developer.android.com/sdk/installing/installing-adt.html
-http://developer.android.com/sdk/installing/adding-packages.html
-http://developer.android.com/sdk/exploring.html
+http://developer.android.com/studio/intro/update.html
+http://developer.android.com/studio/intro/update.html
 http://developer.android.com/tools/sdk/ndk/index.html
 http://developer.android.com/tools/workflow/index.html
 http://developer.android.com/tools/devices/index.html
@@ -4183,7 +4183,7 @@ http://developer.android.com/reference/android/support/v4/database/DatabaseUtils
 http://developer.android.com/reference/org/json/JSONArray.html
 http://developer.android.com/reference/org/json/JSONStringer.html
 http://developer.android.com/reference/org/json/JSONTokener.html
-http://developer.android.com/sdk/win-usb.html
+http://developer.android.com/studio/run/win-usb.html
 http://developer.android.com/reference/android/media/effect/EffectUpdateListener.html
 http://developer.android.com/reference/javax/xml/validation/Schema.html
 http://developer.android.com/reference/android/support/v4/os/ParcelableCompatCreatorCallbacks.html
@@ -4958,7 +4958,7 @@ http://developer.android.com/sdk/api_diff/9/changes/java.util.concurrent.TimeUni
 http://developer.android.com/sdk/api_diff/9/changes/java.security.UnrecoverableKeyException.html
 http://developer.android.com/sdk/api_diff/3/changes/jdiff_statistics.html
 http://developer.android.com/reference/android/telephony/cdma/CdmaCellLocation.html
-http://developer.android.com/sdk/installing.html
+http://developer.android.com/studio/index.html
 http://developer.android.com/tools/sdk/ndk/overview.html
 http://developer.android.com/reference/dalvik/system/DexClassLoader.html
 http://developer.android.com/sdk/api_diff/13/changes/jdiff_topleftframe.html
