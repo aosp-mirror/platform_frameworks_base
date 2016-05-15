@@ -56,7 +56,7 @@ most notable APIs.</p>
 
 <h3 id="Start">Start developing</h3>
 
-<p>To start building apps for Android 6.0, you must first <a href="{@docRoot}sdk/index.html">get
+<p>To start building apps for Android 6.0, you must first <a href="{@docRoot}studio/index.html">get
 the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
 to download the Android 6.0 SDK Platform and System Images.</p>
 

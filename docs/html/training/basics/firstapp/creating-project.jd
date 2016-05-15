@@ -37,10 +37,9 @@ app.</p>
 shows how to create a new project either using Android Studio or using the
 SDK tools from a command line.</p>
 
-<p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
-you're using Android Studio, you should also have <a href="{@docRoot}sdk/installing/studio.html">
-Android Studio</a> installed. If you don't have these, follow the guide to <a
-href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> before you start this
+<p class="note"><strong>Note:</strong> You should already have Android Studio or the Android SDK
+command-line tools installed. If not, <a
+href="{@docRoot}studio/index.html">download them</a> before you start this
 lesson.</p>
 
 
@@ -139,7 +138,7 @@ moment to review the most important of these:</p>
       <li><code>compiledSdkVersion</code> is the platform version against which you will compile
         your app. By default, this is set to the latest version of Android available in your SDK.
         (It should be Android 4.1 or greater; if you don't have such a version available, you must
-        install one using the <a href="{@docRoot}sdk/installing/adding-packages.html">SDK Manager</a>.)
+        install one using the <a href="{@docRoot}studio/intro/update.html">SDK Manager</a>.)
         You can still build your app to support older versions, but setting this to the latest
         version allows you to enable new features and optimize your app for a great user experience
         on the latest devices.</li>
@@ -154,7 +153,7 @@ moment to review the most important of these:</p>
         <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
           Platform Versions</a>.</li>
     </ul>
-    <p>See <a href="{@docRoot}sdk/installing/studio-build.html">Building Your Project with Gradle</a>
+    <p>See <a href="{@docRoot}studio/build/index.html">Building Your Project with Gradle</a>
     for more information about Gradle.</p></dd>
 </dl>
 

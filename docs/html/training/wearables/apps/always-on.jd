@@ -62,7 +62,7 @@ your development project. Follow these steps to make the necessary changes:</p>
   <li>Update your SDK to include the Android 5.1 (API 22) or higher platform, which provides the
   APIs to allow activities to go into ambient mode. For more information on how to update your SDK,
   see
-  <a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">Adding SDK Packages</a>.
+  <a href="{@docRoot}studio/intro/update.html#GetTools">Adding SDK Packages</a>.
   </li>
   <li> Create a project or modify an existing project to target Android 5.1 or higher. This means
   you must set the manifest

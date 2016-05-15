@@ -109,16 +109,9 @@ color themes, bugs fixed in shared code), which improves your development time a
 likelihood of mistakes that could have been easily avoided.</p>
 
 <p class="note"><strong>Note:</strong>  While the implementation details of how to create and
-include library projects are beyond the scope of this lesson, you can get up to speed quickly on
-their creation at the following links:</p>
-<ul>
-<li><a
-href="{@docRoot}sdk/installing/create-project.html#SettingUpLibraryModule">Managing Projects
-from Android Studio</a></li>
-<li><a
-href="{@docRoot}tools/projects/projects-cmdline.html#SettingUpLibraryProject">Managing Projects
-from the Command Line</a></li>
-</ul>
+include library projects are beyond the scope of this lesson, you can get up to speed
+by reading <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 <p>If you’re converting an existing application to use multiple APK support,
 scour your codebase for every localized string file, list of values, theme

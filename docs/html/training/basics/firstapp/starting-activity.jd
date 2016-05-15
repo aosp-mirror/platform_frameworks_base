@@ -25,13 +25,6 @@ helpoutsWidget=true
   <li><a href="#DisplayMessage">Display the Message</a></li>
 </ol>
 
-<h2>You should also read</h2>
-
-<ul>
-  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
-SDK</a></li>
-</ul>
-
 
 </div>
 </div>
@@ -406,7 +399,7 @@ the <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
 
 <p class="note"><strong>Note:</strong> Your Android SDK should already include
 the latest Android Support Library, which you installed during the
-<a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</a> step.
+<a href="{@docRoot}studio/intro/update.html">Adding SDK Packages</a> step.
 When using the templates in Android Studio, the Support Library is automatically added to your app project
 (you can see the library's JAR file listed under <em>Android Dependencies</em>). If you're not using
 Android Studio, you need to manually add the library to your project&mdash;follow the guide for <a

@@ -70,7 +70,7 @@ provide a listener instead.</p>
 <code>Palette</code> class, such as <code>Palette.getVibrantColor</code>.</p>
 
 <p>To use the {@link android.support.v7.graphics.Palette} class in your project, add the following
-<a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle dependency</a> to your
+<a href="{@docRoot}studio/build/index.html#dependencies">Gradle dependency</a> to your
 app's module:</p>
 
 <pre>

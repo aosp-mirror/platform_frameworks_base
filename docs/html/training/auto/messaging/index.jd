@@ -280,7 +280,7 @@ User Actions</a>. </p>
 <p>
   After you have updated the support libraries, import them into your Android Studio development
   project by adding this dependency to your
-  <a href="{@docRoot}sdk/installing/studio-build.html#configBuild">build.gradle</a> file:
+  <a href="{@docRoot}studio/build/index.html#configBuild">build.gradle</a> file:
 </p>
 
 <pre>

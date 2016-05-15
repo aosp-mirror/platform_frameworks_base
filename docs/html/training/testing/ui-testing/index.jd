@@ -32,7 +32,7 @@ tests such that user actions are performed in an automated way. The automated ap
 you to run your tests quickly and reliably in a repeatable manner.</p>
 
 <p class="note"><strong>Note: </strong>It is strongly encouraged that you use
-<a href="{@docRoot}sdk/installing/studio.html">Android Studio</a> for
+<a href="{@docRoot}studio/index.html">Android Studio</a> for
 building your test apps, because it provides project setup, library inclusion, and packaging
 conveniences. This class assumes you are using Android Studio.</p>
 
