@@ -52,7 +52,7 @@ for your applications.</p>
 
   <ol>
     <li>Unpack the downloaded project package.</li>
-    <li>In <a href="{@docRoot}sdk/installing/studio.html">Android Studio</a>, chose
+    <li>In <a href="{@docRoot}studio/index.html">Android Studio</a>, chose
     <strong>File &gt; Import Project</strong> and select the root folder of the unpacked project.
       <p>Android Studio may ask you to choose the type of project you are importing.
         If this is the case, make sure to choose <strong>Import project from

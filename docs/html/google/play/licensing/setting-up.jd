@@ -250,9 +250,8 @@ the LVL library project and the example application into these directories: </p>
 <code>&lt;<em>sdk</em>&gt;/extras/google/market_licensing/sample/</code>&nbsp;&nbsp;(the example
 application)</p>
 
-<p>If you aren't familiar with how to download packess into your SDK, see the
-<a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>
-document. </p>
+<p>If you aren't familiar with how to download packages into your SDK, learn how to
+<a href="{@docRoot}studio/intro/update.html">update the SDK tools</a>. </p>
 
 
 <h3 id="lvl-setup">Setting Up the Licensing Verification Library</h3>
@@ -324,8 +323,7 @@ then select <strong>Next</strong>.</li>
 </ol>
 
 <p>For more information about how to work with library modules in Android Studio, see
-<a href="{@docRoot}sdk/installing/create-project.html#SettingUpLibraryModule">Managing Projects from
-Android Studio</a>.</p>
+<a href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</p>
 
 
 <h4>Copying the LVL sources to your application</h4>

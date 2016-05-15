@@ -49,7 +49,7 @@ both your wearable and handheld apps.
 </ul>
 
 <p>To update your SDK with these components, see
-<a href="{@docRoot}sdk/installing/adding-packages.html#GetTools"> Get the latest SDK tools</a>.</p>
+<a href="{@docRoot}studio/intro/update.html#GetTools"> Get the latest SDK tools</a>.</p>
 
 <p class="note"><strong>Note:</strong> If you plan to make your Wear apps available for China,
   you must use the special release version 7.8.87 of the Google Play services client library to handle
@@ -139,7 +139,7 @@ wearable. The wearable should also be listed when you run the <code>adb devices<
 <p>To begin development, create an app project that contains
  wearable and handheld app modules. In Android Studio, click <b>File</b> >
  <b>New Project</b> and follow the Project Wizard instructions, as described in
- <a href="{@docRoot}sdk/installing/create-project.html">Creating a
+ <a href="{@docRoot}studio/projects/create-project.html">Creating a
 Project</a>. As you follow the wizard, enter the following information:</p>
 
 <ol>

@@ -218,7 +218,7 @@ page.tags="preview", "developer", "android"
 
 <h3 id="sdk_tools">SDK tools</h3>
 
-<p>You can download these components through the SDK Manager in <a href="{@docRoot}sdk/installing/adding-packages.html">Android Studio</a>:</p>
+<p>You can download these components through the SDK Manager in <a href="{@docRoot}studio/intro/update.html">Android Studio</a>:</p>
 
 <ul>
   <li> N Developer Preview <strong>SDK and tools</strong>
