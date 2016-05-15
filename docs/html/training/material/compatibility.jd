@@ -127,7 +127,7 @@ the Android v7 Support Library with these limitations:</p>
 
 <p>To use these features in versions of Android earlier than 5.0 (API level 21), include the
 Android v7 Support Library in your project as a <a
-href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle dependency</a>:</p>
+href="{@docRoot}/studio/build/index.html#dependencies">Gradle dependency</a>:</p>
 
 <pre>
 dependencies {

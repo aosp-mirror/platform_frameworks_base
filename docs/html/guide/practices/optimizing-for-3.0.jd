@@ -105,11 +105,8 @@ for tablets and similar devices.</li>
 <p>To start testing and developing your application on Android 3.0, set up your existing Android
 SDK with the new platform:</p>
 
-<p>(If you don't have an existing Android SDK, <a href="{@docRoot}sdk/index.html">download the
-SDK starter package now</a>.)</p>
-
 <ol>
-  <li><a href="{@docRoot}sdk/exploring.html#launching">Launch the Android SDK
+  <li><a href="{@docRoot}studio/intro/update.html#launching">Launch the Android SDK
 Manager</a> and install the following:
     <ul>
       <li>SDK Platform Android 3.0</li>
@@ -421,7 +418,7 @@ href="{@docRoot}about/versions/android-3.0.html">Android 3.0 Platform</a> docume
 <p>Many of the new features and APIs that are described above and in the <a
 href="{@docRoot}about/versions/android-3.0.html#api">Android 3.0 Platform</a> document also have accompanying
 samples that allow you to preview the effects and can help you understand how to use them. To get
-the samples, download them from the SDK repository <a href="{@docRoot}sdk/exploring.html"
+the samples, download them from the SDK repository <a href="{@docRoot}studio/intro/update.html"
 >using the Android SDK Manager</a>. After downloading the samples ("Samples for SDK API
 11"), you can find them in <code>&lt;sdk_root&gt;/samples/android-11/</code>. The following list
 provides links to the browsable source code for some of the samples:</p>

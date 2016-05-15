@@ -200,5 +200,5 @@ dependencies {
 reference documentation</a> for the classes above.</p>
 
 <p class="note"><strong>Note:</strong> We recommend using <a
-href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development, as
+href="{@docRoot}studio/index.html">Android Studio</a> for Android Wear development, as
 it provides project setup, library inclusion, and packaging conveniences.</p>
