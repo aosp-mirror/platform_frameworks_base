@@ -37,7 +37,7 @@ startpage=true
 
 <p class="note">
   <strong>Note:</strong> You are encouraged to use <a href=
-  "{@docRoot}sdk/installing/studio.html">Android Studio</a> for building TV apps, because it
+  "{@docRoot}studio/index.html">Android Studio</a> for building TV apps, because it
   provides project setup, library inclusion, and packaging conveniences. This training assumes you
   are using Android Studio.
 </p>

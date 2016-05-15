@@ -629,5 +629,5 @@ android {
 
   <p>
   For more information about Android Studio and to download it, see
-  <a href="{@docRoot}sdk/index.html">Download Android Studio and SDK Tools</a>.
+  <a href="{@docRoot}studio/index.html">Download Android Studio and SDK Tools</a>.
   </p>
