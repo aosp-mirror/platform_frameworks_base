@@ -77,17 +77,17 @@ supported by Android TV.</p>
 <p>Before you begin building apps for TV, you must:</p>
 
 <ul>
-  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">
+  <li><strong><a href="{@docRoot}studio/intro/update.html#GetTools">
     Update your SDK tools to version 24.0.0 or higher</a></strong>
     <br>
     The updated SDK tools enable you to build and test apps for TV.
   </li>
-  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">
+  <li><strong><a href="{@docRoot}studio/intro/update.html#GetTools">
     Update your SDK with Android 5.0 (API 21) or higher</a></strong>
     <br>
     The updated platform version provides new APIs for TV apps.
   </li>
-  <li><strong><a href="{@docRoot}sdk/installing/create-project.html">
+  <li><strong><a href="{@docRoot}studio/projects/create-project.html">
     Create or update your app project</a></strong>
     <br>
     In order to access new APIs for TV devices, you must create a project or modify an existing
@@ -364,6 +364,6 @@ supported by Android TV.</p>
 <p>
   For more information about using emulators see, <a href="{@docRoot}tools/devices/emulator.html">
   Using the Emulator</a>. For more information on deploying apps from Android Studio to virtual
-  devices, see <a href="{@docRoot}sdk/installing/studio-debug.html">Debugging with Android
+  devices, see <a href="{@docRoot}studio/debug/index.html">Debugging with Android
   Studio</a>.
 </p>

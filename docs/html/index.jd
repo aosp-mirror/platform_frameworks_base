@@ -55,7 +55,7 @@ nonavpage=true
     </a>
     <ul class="dac-actions">
       <li class="dac-action">
-        <a class="dac-action-link" href="{@docRoot}sdk/index.html">
+        <a class="dac-action-link" href="{@docRoot}studio/index.html">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Get Android Studio
         </a>
@@ -82,7 +82,7 @@ nonavpage=true
       <i class="dac-sprite dac-arrow-down-gray"></i>
     </a>
     <div class="actions">
-      <div><a href="{@docRoot}sdk/index.html">
+      <div><a href="{@docRoot}studio/index.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Get Android Studio
       </a></div>

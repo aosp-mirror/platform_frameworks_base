@@ -78,9 +78,8 @@ git clone https://android.googlesource.com/platform/frameworks/volley
 </li>
 
 <li>Import the downloaded source into your app project as an Android library module
-(as described in <a href="{@docRoot}sdk/installing/create-project.html#SettingUpLibraryModule">
-Managing Projects from Android Studio</a>, if you're using Android Studio) or make a
-<a href="{@docRoot}guide/faq/commontasks.html#addexternallibrary"><code>.jar</code> file</a>.</li>
+as described in <a
+href="{@docRoot}studio/projects/android-library.html">Create an Android Library</a>.</li>
 </ol>
 
 <h2>Lessons</h2>

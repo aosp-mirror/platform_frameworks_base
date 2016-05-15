@@ -38,7 +38,7 @@ tools</li>
 
 <h3>If you've downloaded the Android SDK for the first time</h3>
 
-<p>Follow the guide to <a href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>, which
+<p>Follow the guide to <a href="{@docRoot}studio/install.html">Installing the Android SDK</a>, which
 will help you setup your development environment.</p>
 
 <h3>If you've installed new SDK components using the Android SDK Manager</h3>
