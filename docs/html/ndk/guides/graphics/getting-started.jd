@@ -48,7 +48,7 @@ Before getting started, you must download several tools and other software.
 
 <ol style="1">
    <li>If you don’t already have Android Studio,
-   <a href="{@docRoot}sdk/index.html">download it.</a></li>
+   <a href="{@docRoot}studio/index.html">download it.</a></li>
 
 <li><a href="https://github.com/android-ndk/ndk/wiki">Download</a> NDK r12-beta.</li>
 

@@ -33,7 +33,7 @@ information on that topic, see the
 <h2 id="install">Installation</h2>
 <p>To install and configure the NDK, follow these steps:</p>
 <ol type="1">
-<li>Get and install the <a href="{@docRoot}sdk/index.html">Android SDK</a>.</li>
+<li>Get and install the <a href="{@docRoot}studio/index.html">Android SDK</a>.</li>
 <li><a href="{@docRoot}ndk/downloads/index.html">Download</a> and
 <a href="{@docRoot}ndk/downloads/index.html#extract">extract</a> the NDK,
 making sure to download the correct version for your development platform. You may place the

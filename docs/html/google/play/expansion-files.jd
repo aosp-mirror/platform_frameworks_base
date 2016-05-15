@@ -450,7 +450,7 @@ receives updates about the download progress.</li>
 download two packages from the SDK Manager and add the appropriate libraries to your
 application.</p>
 
-<p>First, open the <a href="{@docRoot}sdk/exploring.html">Android SDK Manager</a>
+<p>First, open the <a href="{@docRoot}studio/intro/update.html">Android SDK Manager</a>
 (<strong>Tools > Android > SDK Manager</strong>), and under
 <em>Appearance & Behavior > System Settings > Android SDK</em>, select
 the <em>SDK Tools</em> tab to select and download:</p>
