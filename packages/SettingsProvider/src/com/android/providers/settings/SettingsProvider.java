@@ -203,9 +203,6 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private HandlerThread mHandlerThread;
 
-    @GuardedBy("mLock")
-    private Handler mBackgroundHandler;
-
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
@@ -254,7 +251,6 @@ public class SettingsProvider extends ContentProvider {
             mHandlerThread = new HandlerThread(LOG_TAG,
                     Process.THREAD_PRIORITY_BACKGROUND);
             mHandlerThread.start();
-            mBackgroundHandler = new Handler(mHandlerThread.getLooper());
             mSettingsRegistry = new SettingsRegistry();
         }
         registerBroadcastReceivers();
@@ -1680,7 +1676,7 @@ public class SettingsProvider extends ContentProvider {
             if (mSettingsStates.get(key) == null) {
                 final int maxBytesPerPackage = getMaxBytesPerPackageForType(getTypeFromKey(key));
                 SettingsState settingsState = new SettingsState(mLock, getSettingsFile(key), key,
-                        maxBytesPerPackage, mBackgroundHandler);
+                        maxBytesPerPackage, mHandlerThread.getLooper());
                 mSettingsStates.put(key, settingsState);
             }
         }
