@@ -30,6 +30,7 @@ import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.icu.text.DisplayContext;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.text.TextPaint;
@@ -184,6 +185,7 @@ class SimpleMonthView extends View {
     private void updateMonthYearLabel() {
         final String format = DateFormat.getBestDateTimePattern(mLocale, MONTH_YEAR_FORMAT);
         final SimpleDateFormat formatter = new SimpleDateFormat(format, mLocale);
+        formatter.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
         mMonthYearLabel = formatter.format(mCalendar.getTime());
     }
 
