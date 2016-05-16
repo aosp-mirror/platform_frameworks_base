@@ -347,8 +347,8 @@ public final class TvInputManagerService extends SystemService {
             TvInputState inputState = userState.inputMap.get(info.getId());
             if (inputState == null) {
                 inputState = new TvInputState();
-                inputState.info = info;
             }
+            inputState.info = info;
             inputMap.put(info.getId(), inputState);
         }
 
