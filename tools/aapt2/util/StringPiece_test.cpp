@@ -59,4 +59,36 @@ TEST(StringPieceTest, PiecesHaveCorrectSortOrderUtf8) {
     EXPECT_TRUE(StringPiece(car) > banana);
 }
 
+TEST(StringPieceTest, ContainsOtherStringPiece) {
+    StringPiece text("I am a leaf on the wind.");
+    StringPiece startNeedle("I am");
+    StringPiece endNeedle("wind.");
+    StringPiece middleNeedle("leaf");
+    StringPiece emptyNeedle("");
+    StringPiece missingNeedle("soar");
+    StringPiece longNeedle("This string is longer than the text.");
+
+    EXPECT_TRUE(text.contains(startNeedle));
+    EXPECT_TRUE(text.contains(endNeedle));
+    EXPECT_TRUE(text.contains(middleNeedle));
+    EXPECT_TRUE(text.contains(emptyNeedle));
+    EXPECT_FALSE(text.contains(missingNeedle));
+    EXPECT_FALSE(text.contains(longNeedle));
+
+    StringPiece16 text16(u"I am a leaf on the wind.");
+    StringPiece16 startNeedle16(u"I am");
+    StringPiece16 endNeedle16(u"wind.");
+    StringPiece16 middleNeedle16(u"leaf");
+    StringPiece16 emptyNeedle16(u"");
+    StringPiece16 missingNeedle16(u"soar");
+    StringPiece16 longNeedle16(u"This string is longer than the text.");
+
+    EXPECT_TRUE(text16.contains(startNeedle16));
+    EXPECT_TRUE(text16.contains(endNeedle16));
+    EXPECT_TRUE(text16.contains(middleNeedle16));
+    EXPECT_TRUE(text16.contains(emptyNeedle16));
+    EXPECT_FALSE(text16.contains(missingNeedle16));
+    EXPECT_FALSE(text16.contains(longNeedle16));
+}
+
 } // namespace aapt

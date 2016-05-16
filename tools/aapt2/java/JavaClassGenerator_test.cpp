@@ -289,4 +289,37 @@ TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent)
     EXPECT_NE(std::string::npos, actual.find(util::utf16ToUtf8(styleable.getComment())));
 }
 
+TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
+    Attribute attr(false);
+    attr.setComment(StringPiece16(u"@removed"));
+
+
+    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
+            .setPackageId(u"android", 0x01)
+            .addValue(u"@android:attr/one", util::make_unique<Attribute>(attr))
+            .build();
+
+    std::unique_ptr<IAaptContext> context = test::ContextBuilder()
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .setNameManglerPolicy(NameManglerPolicy{ u"android" })
+            .build();
+    JavaClassGeneratorOptions options;
+    options.useFinal = false;
+    JavaClassGenerator generator(context.get(), table.get(), options);
+    std::stringstream out;
+    ASSERT_TRUE(generator.generate(u"android", &out));
+    std::string actual = out.str();
+
+    std::cout << actual << std::endl;
+
+    EXPECT_EQ(std::string::npos, actual.find("@attr name android:one"));
+    EXPECT_EQ(std::string::npos, actual.find("@attr description"));
+
+    // We should find @removed only in the attribute javadoc and not anywhere else (i.e. the class
+    // javadoc).
+    const size_t pos = actual.find("@removed");
+    EXPECT_NE(std::string::npos, pos);
+    EXPECT_EQ(std::string::npos, actual.find("@removed", pos + 1));
+}
+
 } // namespace aapt
