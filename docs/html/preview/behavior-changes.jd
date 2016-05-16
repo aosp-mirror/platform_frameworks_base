@@ -19,9 +19,6 @@ page.image=images/cards/card-n-changes_2x.png
     </ol>
   </li>
   <li><a href="#perm">Permissions Changes</a>
-    <ol>
-      <li><a href="#permfilesys">File System Permission Changes</a></li>
-    </ol>
   </li>
   <li><a href="#accessibility">Accessibility Improvements</a>
     <ol>
@@ -188,29 +185,16 @@ page.image=images/cards/card-n-changes_2x.png
 <h2 id="perm">Permissions Changes</h2>
 
 <p>
-  Android N includes changes to permissions that may affect your app,
-  including user accounts permissions and a new permission for writing to
-  external storage. Here is a summary of the permissions that have changed in
-  the preview:
+  Android N includes changes to permissions that may affect your app.
 </p>
-
-<ul>
-  <li>{@code GET_ACCOUNTS} (Deprecated)
-    <p>
-      The GET_ACCOUNTS permission is now deprecated. The system ignores this
-      permission for apps that target Android N.
-    </p>
-  </li>
-
-</ul>
 
 <h3 id="permfilesys">File system permission changes</h3>
 
 <p>
   In order to improve the security of private files, the private directory of
-  apps targeting Android N or higher has restricted access (0700). This prevents
-  leakage of metadata of private files, such as their size or existence. This
-  has multiple side effects:
+  apps targeting Android N or higher has restricted access (<code>0700</code>).
+  This change prevents leakage of metadata of private files, such as their size
+  or existence. This change has multiple side effects:
 </p>
 
 <ul>
@@ -246,14 +230,17 @@ page.image=images/cards/card-n-changes_2x.png
     Legacy applications that set the download location to a public location by
     using
     {@link
-    android.app.DownloadManager.Request#setDestinationInExternalFilesDir} or
+    android.app.DownloadManager.Request#setDestinationInExternalFilesDir
+    DownloadManager.Request.setDestinationInExternalFilesDir()} or
     {@link
-    android.app.DownloadManager.Request#setDestinationInExternalPublicDir}
+    android.app.DownloadManager.Request#setDestinationInExternalPublicDir
+    DownloadManager.Request.setDestinationInExternalPublicDir()}
     can still access the path in
     {@link android.app.DownloadManager#COLUMN_LOCAL_FILENAME}, however, this
     method is strongly discouraged. The preferred way of accessing a file
     exposed by the {@link android.app.DownloadManager} is using
-    {@link android.content.ContentResolver#openFileDescriptor}.
+    {@link android.content.ContentResolver#openFileDescriptor
+    ContentResolver.openFileDescriptor()}.
   </li>
 </ul>
 
