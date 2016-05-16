@@ -384,6 +384,9 @@ public class TelephonyIntents {
      *   <li><em>phones radio access family </em> - A RadioAccessFamily
      *   array, contain phone ID and new radio access family for each phone.</li>
      * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
      */
     public static final String ACTION_SET_RADIO_CAPABILITY_DONE =
             "android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE";
