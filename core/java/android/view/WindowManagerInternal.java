@@ -261,6 +261,13 @@ public abstract class WindowManagerInternal {
     public abstract void saveLastInputMethodWindowForTransition();
 
     /**
+     * Clears last input method window for transition.
+     *
+     * Note that it is assumed that this method is called only by InputMethodManagerService.
+     */
+    public abstract void clearLastInputMethodWindowForTransition();
+
+    /**
       * Returns true when the hardware keyboard is available.
       */
     public abstract boolean isHardKeyboardAvailable();
