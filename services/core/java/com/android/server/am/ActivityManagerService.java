@@ -18346,7 +18346,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
         int modeType = config.uiMode & Configuration.UI_MODE_TYPE_MASK;
         final boolean uiModeSupportsDialogs = (modeType != Configuration.UI_MODE_TYPE_CAR
-                && modeType != Configuration.UI_MODE_TYPE_WATCH);
+                && (modeType != Configuration.UI_MODE_TYPE_WATCH || "eng".equals(Build.TYPE)));
         return inputMethodExists && uiModeSupportsDialogs && !inVrMode;
     }
 
