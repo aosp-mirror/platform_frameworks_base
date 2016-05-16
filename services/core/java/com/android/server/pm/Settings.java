@@ -4014,8 +4014,6 @@ final class Settings {
         }
         synchronized (mPackages) {
             applyDefaultPreferredAppsLPw(service, userHandle);
-            writePackageRestrictionsLPr(userHandle);
-            writePackageListLPr(userHandle);
         }
     }
 
