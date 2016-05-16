@@ -3182,19 +3182,127 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"Android for Work",
-    "category":"Enterprise",
-    "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
-    "url":"https://www.android.com/work/",
+    "titleFriendly":"",
+    "summary": "Develop apps for Android for Work to take advantage of security and management features built into Android.",
+    "url":"https://developer.android.com/work",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"images/cards/card-android-work_2x.png",
+    "image":"images/work/cards/briefcase_600px.png",
+    "lang":"en",
+    "type":"work"
+  },
+  {
+    "title":"Android for Work Developer Overview",
+    "titleFriendly":"",
+    "summary": "Learn how to build Android apps for the enterprise and take advantage of Google's Android for Work program.",
+    "url":"https://developer.android.com/work/overview.html",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/briefcase_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Android for Work Developer Guide",
+    "titleFriendly":"",
+    "summary": "Android for Work provides organizations with a secure, flexible, and unified Android mobility platform combining devices, applications, and management.",
+    "url":"https://developer.android.com/work/guide.html",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/android-studio_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Set up App Restrictions",
+    "titleFriendly":"",
+    "summary": "Learn how to implement app restrictions and configuration settings that can be changed by other apps on the same device.",
+    "url":"https://developer.android.com/work/app-restrictions.html",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/briefcase_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Set up Managed Profiles",
+    "titleFriendly":"",
+    "summary": "Learn how to make sure your apps operate smoothly in a corporate environment by following some best practices.",
+    "url":"https://developer.android.com/work/managed-profiles.html",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/briefcase_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Set up Single-Purpose Devices",
+    "titleFriendly":"",
+    "summary": "Learn how to develop single-use solutions for Android devices.",
+    "url":"https://developer.android.com/work/cosu.html",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/briefcase_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Join the Android for Work DevHub",
+    "titleFriendly":"",
+    "summary":"The Android for Work DevHub is a place to help developers keep up with Android in the workplace.",
+    "url":"https://connect.googleforwork.com/community/applicants/android/isv",
+    "group":"",
+    "keywords": ["work", "enterprise", "isv", "devhub"],
+    "tags": [],
+    "image":"images/work/cards/work-devhub_600px.png",
+    "lang":"en",
+    "type":"Community"
+  },
+  {
+    "title":"Enterprise Mobility Managers",
+    "titleFriendly":"",
+    "summary":"Integrate Android for Work into your enterprise mobility management (EMM) solution.",
+    "url":"https://developers.google.com/android/work/",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/work-cloud_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Learn More About Android for Work",
+    "titleFriendly":"",
+    "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
+    "url":"https://www.google.com/work/android/",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/work-profile_600px.png",
     "lang":"en",
     "type":"about"
   },
   {
-    "title":"Android for Work DevBytes",
-    "category":"Enterprise",
+    "title":"Build a Device Policy Controller",
+    "titleFriendly":"",
+    "summary":"Learn how to develop a Device Policy Controller to create and administer a managed profile on an employee's device.",
+    "url":"https://developers.google.com/android/work/build-dpc",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/work-folder_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Android for Work for Developers",
+    "titleFriendly":"",
     "summary":"Watch the videos in this playlist to understand more about Android for Work and get tips on developing enterprise apps.",
     "url":"https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
     "group":"",
@@ -3202,11 +3310,11 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "image":"https://i1.ytimg.com/vi/jQWB_-o1kz4/maxresdefault.jpg",
     "lang":"en",
-    "type":"video"
+    "type":"youtube"
   },
   {
     "title":"App Configurations, Testing and Launchers",
-    "category":"Enterprise",
+    "titleFriendly":"",
     "summary":"With Android for Work you can make your apps remotely configurable. We also cover how to test your app in a managed environment.",
     "url":"https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
     "group":"",
@@ -3214,23 +3322,23 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "image":"https://i1.ytimg.com/vi/39NkpWkaH8M/maxresdefault.jpg",
     "lang":"en",
-    "type":"video"
+    "type":"youtube"
   },
   {
-    "title":"Building an enterprise ready app",
-    "category":"Enterprise",
+    "title":"Building an Enterprise Ready App",
+    "titleFriendly":"",
     "summary":"A holistic view of Android for Work for developers.",
-    "url":"https://www.youtube.com/watch?v=dH41OutAMNM",
+    "url":"https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
     "image":"https://i1.ytimg.com/vi/dH41OutAMNM/maxresdefault.jpg",
     "lang":"en",
-    "type":"video"
+    "type":"youtube"
   },
   {
     "title":"Android for Work: Single Use Devices",
-    "category":"Enterprise",
+    "titleFriendly":"",
     "summary":"Single-purpose computers are everywhere, and Android can meet that need.",
     "url":"https://www.youtube.com/watch?v=j3QC6hcpy90",
     "group":"",
@@ -3238,7 +3346,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "tags": [],
     "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
-    "type":"video"
+    "type":"youtube"
   },
   {
     "title":"Discover YouTube cards",
@@ -3908,7 +4016,7 @@ METADATA['en'].collections = {
     "resources": [
       "https://www.android.com/work/",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "training/enterprise/index.html"
+      "work/index.html"
     ]
   },
   "distribute/essentials": {
@@ -5078,26 +5186,6 @@ METADATA['en'].collections = {
       "training/monitoring-device-state/index.html"
     ]
   },
-  "training/work/apps": {
-    "title": "",
-    "resources": [
-      "training/enterprise/app-compatibility.html",
-      "training/enterprise/app-restrictions.html",
-      "training/enterprise/cosu.html",
-      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "samples/AppRestrictionSchema/index.html",
-      "https://www.youtube.com/watch?v=dH41OutAMNM",
-      "samples/AppRestrictionEnforcer/index.html"
-    ]
-  },
-  "training/work/admin": {
-    "title": "",
-    "resources": [
-      "training/enterprise/work-policy-ctrl.html",
-      "samples/BasicManagedProfile/index.html",
-      "https://www.youtube.com/watch?v=j3QC6hcpy90"
-    ]
-  },
 "tools/help/log": {
     "title": "",
     "resources": [
@@ -5250,6 +5338,47 @@ METADATA['en'].collections = {
       "preview/features/scoped-folder-access.html",
       "preview/features/picture-in-picture.html",
       "preview/features/tv-recording-api.html"
+    ]
+  },
+  "work/landing/primary": {
+    "title": "",
+    "resources": [
+      "work/overview.html",
+      "work/guide.html",
+      "https://connect.googleforwork.com/community/applicants/android/isv",
+      "work/app-restrictions.html",
+      "work/cosu.html",
+      "work/managed-profiles.html"
+    ]
+  },
+  "work/landing/resources": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/",
+      "https://www.google.com/work/android/",
+      "https://developers.google.com/android/work/build-dpc",
+      "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX"
+    ]
+  },
+  "work/apps": {
+    "title": "",
+    "resources": [
+      "work/managed-profiles.html",
+      "work/app-restrictions.html",
+      "work/cosu.html",
+      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "samples/AppRestrictionSchema/index.html",
+      "samples/AppRestrictionEnforcer/index.html"
+    ]
+  },
+  "work/admin": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/android/work/build-dpc",
+      "samples/BasicManagedProfile/index.html",
+      "https://www.youtube.com/watch?v=j3QC6hcpy90"
     ]
   }
 };

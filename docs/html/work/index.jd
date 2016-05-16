@@ -1,0 +1,55 @@
+page.title=Android for Work
+page.tags="android for work, work",
+meta.tags="android for work, work",
+fullpage=true
+section.landing=true
+header.hide=1
+footer.hide=1
+@jd:body
+
+<section class="dac-expand dac-hero dac-light" >
+  <div class="wrap">
+    <div class="cols dac-hero-content">
+      <div class="col-9of16 col-push-7of16 dac-hero-figure">
+        <img class="dac-hero-image" src="{@docRoot}images/work/hero_650px_2x.png"
+             srcset="{@docRoot}images/work/hero_650px.png 1x,
+             {@docRoot}images/work/hero_650px_2x.png 2x">
+      </div>
+      <div class="col-7of16 col-pull-9of16">
+        <h1 class="dac-hero-title">Android for Work</h1>
+        <p class="dac-hero-description">
+          Develop apps for Android for Work to take advantage of
+          security and management features built into Android.
+        </p>
+
+        <a class="dac-hero-cta" href="{@docRoot}work/overview.html">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Get Started
+        </a>
+      </div>
+    </div>
+    <div class="dac-section dac-small">
+      <div class="resource-widget resource-flow-layout col-16"
+           data-query="collection:work/landing/primary"
+           data-cardSizes="6x2"
+           data-maxResults="6"></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap dac-offset-parent">
+  <a class="dac-fab dac-scroll-button" data-scroll-button href="#resources">
+    <i class="dac-sprite dac-arrow-down-gray"></i>
+  </a>
+</div>
+
+<section class="dac-section dac-gray dac-small" id="resources">
+  <div class="wrap">
+    <h2 class="norule">Resources</h1>
+
+    <div class="resource-widget resource-flow-layout col-16"
+         data-query="collection:work/landing/resources"
+         data-cardSizes="6x6"
+         data-maxResults="16"></div>
+  </div>
+</section>

@@ -3270,19 +3270,55 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"distribute"
   },
   {
-    "title":"Android for Work",
+    "title":"Join the Android for Work DevHub",
     "titleFriendly":"",
-    "summary":"Learn more about how Android for Work makes your favorite phones and tablets the perfect business tools.",
-    "url":"https://www.android.com/work/",
+    "summary":"The Android for Work DevHub is a place to help developers keep up with Android in the workplace.",
+    "url":"https://connect.googleforwork.com/community/applicants/android/isv",
+    "group":"",
+    "keywords": ["work", "enterprise", "isv", "devhub"],
+    "tags": [],
+    "image":"images/work/cards/work-devhub_600px.png",
+    "lang":"en",
+    "type":"Community"
+  },
+  {
+    "title":"Enterprise Mobility Managers",
+    "titleFriendly":"",
+    "summary":"Integrate Android for Work into your enterprise mobility management (EMM) solution.",
+    "url":"https://developers.google.com/android/work/",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
-    "image":"images/cards/card-android-work_2x.png",
+    "image":"images/work/cards/work-cloud_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Learn More About Android for Work",
+    "titleFriendly":"",
+    "summary":"Android for Work makes your favorite phones and tablets the perfect business tools.",
+    "url":"https://www.google.com/work/android/",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/work-profile_600px.png",
     "lang":"en",
     "type":"about"
   },
   {
-    "title":"Android for Work DevBytes",
+    "title":"Build a Device Policy Controller",
+    "titleFriendly":"",
+    "summary":"Create and administer a managed profile on an employee's device.",
+    "url":"https://developers.google.com/android/work/build-dpc",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"images/work/cards/work-folder_600px.png",
+    "lang":"en",
+    "type":"guide"
+  },
+  {
+    "title":"Android for Work for Developers",
     "titleFriendly":"",
     "summary":"Watch the videos in this playlist to understand more about Android for Work and get tips on developing enterprise apps.",
     "url":"https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
@@ -3306,10 +3342,10 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"youtube"
   },
   {
-    "title":"Building an enterprise ready app",
+    "title":"Building an Enterprise Ready App",
     "titleFriendly":"",
     "summary":"A holistic view of Android for Work for developers.",
-    "url":"https://www.youtube.com/watch?v=dH41OutAMNM",
+    "url":"https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
@@ -3434,18 +3470,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["Marshmallow"],
     "tags": [],
     "image":"https://i1.ytimg.com/vi/vcSj8ln-BlE/maxresdefault.jpg",
-    "lang":"en",
-    "type":"Video"
-  },
-  {
-    "title":"Android for Work: Single Use Devices",
-    "titleFriendly":"",
-    "summary":"Android M is bringing the power of Android to all kinds of workplaces.",
-    "url":"https://www.youtube.com/watch?v=j3QC6hcpy90",
-    "group":"",
-    "keywords": ["Marshmallow"],
-    "tags": [],
-    "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
     "lang":"en",
     "type":"Video"
   },
