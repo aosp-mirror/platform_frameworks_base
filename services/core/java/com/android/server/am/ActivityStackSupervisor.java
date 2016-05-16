@@ -2014,8 +2014,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         try {
             resizeStackUncheckedLocked(stack, bounds, tempTaskBounds, tempTaskInsetBounds);
             if (!deferResume) {
-                ensureConfigurationAndResume(
-                        stack, stack.topRunningActivityLocked(), preserveWindows);
+                stack.ensureVisibleActivitiesConfigurationLocked(
+                        stack.topRunningActivityLocked(), preserveWindows);
             }
         } finally {
             mWindowManager.continueSurfaceLayout();
@@ -2089,18 +2089,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         stack.mFullscreen = mWindowManager.resizeStack(stack.mStackId, bounds, mTmpConfigs,
                 mTmpBounds, mTmpInsetBounds);
         stack.setBounds(bounds);
-    }
-
-    private void ensureConfigurationAndResume(ActivityStack stack, ActivityRecord r,
-            boolean preserveWindows) {
-        if (r == null || !r.visible) {
-            return;
-        }
-        final boolean updated = stack.ensureActivityConfigurationLocked(r, 0,
-                preserveWindows);
-        if (!updated) {
-            resumeFocusedStackTopActivityLocked();
-        }
     }
 
     void moveTasksToFullscreenStackLocked(int fromStackId, boolean onTop) {
@@ -2204,7 +2192,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     }
                 }
             }
-            ensureConfigurationAndResume(stack, r, preserveWindows);
+            stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
         } finally {
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
@@ -2230,7 +2218,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             ActivityRecord r = stack.topRunningActivityLocked();
             resizeStackUncheckedLocked(stack, pinnedBounds, tempPinnedTaskBounds,
                     null);
-            ensureConfigurationAndResume(stack, r, false);
+            stack.ensureVisibleActivitiesConfigurationLocked(r, false);
         } finally {
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
