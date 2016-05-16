@@ -2325,6 +2325,8 @@
   <java-symbol type="layout" name="floating_popup_overflow_list_item" />
   <java-symbol type="layout" name="floating_popup_overflow_image_list_item" />
   <java-symbol type="layout" name="floating_popup_overflow_button" />
+  <java-symbol type="string" name="floating_toolbar_open_overflow_description" />
+  <java-symbol type="string" name="floating_toolbar_close_overflow_description" />
   <java-symbol type="dimen" name="floating_toolbar_height" />
   <java-symbol type="dimen" name="floating_toolbar_menu_button_side_padding" />
   <java-symbol type="dimen" name="floating_toolbar_overflow_side_padding" />
