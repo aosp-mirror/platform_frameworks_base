@@ -1,26 +1,19 @@
-page.title=Ensuring Compatibility with Managed Profiles
+page.title=Set up Managed Profiles
 page.metaDescription=Learn how to make sure your apps operate smoothly in a corporate environment by following some best practices.
+page.image=images/work/cards/briefcase_600px.png
 
 @jd:body
 
-<div id="tb-wrapper">
-<div id="tb">
-
-<h2>This lesson teaches you to</h2>
-<ol>
- <li><a href="#prevent_failed_intents">Prevent Failed Intents</a></li>
- <li><a href="#sharing_files">Share Files Across Profiles</a></li>
- <li><a href="#testing_apps">Test your App for Compatibility with Managed
-    Profiles</a></li>
-</ol>
-
-<!-- related docs (NOT javadocs) -->
-<h2>Resources</h2>
-<ul>
-  <li><a href="{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile</a></li>
-</ul>
-
-</div>
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#prevent_failed_intents">Prevent Failed Intents</a></li>
+      <li><a href="#sharing_files">Share Files Across Profiles</a></li>
+      <li><a href="#testing_apps">
+        Test your App for Compatibility with Managed Profiles</a></li>
+    </ol>
+  </div>
 </div>
 
 <p>The Android platform allows devices to have
