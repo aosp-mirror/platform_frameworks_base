@@ -20049,8 +20049,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
-    void newUserCreated(final int userHandle) {
-        mDefaultPermissionPolicy.grantDefaultPermissions(userHandle);
+    void onBeforeUserStartUninitialized(final int userId) {
+        synchronized (mPackages) {
+            if (mSettings.areDefaultRuntimePermissionsGrantedLPr(userId)) {
+                return;
+            }
+        }
+        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         // If permission review for legacy apps is required, we represent
         // dagerous permissions for such apps as always granted runtime
         // permissions to keep per user flag state whether review is needed.
