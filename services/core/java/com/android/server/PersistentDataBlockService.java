@@ -443,13 +443,15 @@ public class PersistentDataBlockService extends SystemService {
             if (ActivityManager.isUserAMonkey()) {
                 return;
             }
+
+            enforceOemUnlockPermission();
+            enforceIsAdmin();
+
             // Do not allow oem unlock modification if it has been disallowed.
             if (Settings.Global.getInt(getContext().getContentResolver(),
                     Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
                 throw new SecurityException("OEM unlock has been disallowed.");
             }
-            enforceOemUnlockPermission();
-            enforceIsAdmin();
 
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);
