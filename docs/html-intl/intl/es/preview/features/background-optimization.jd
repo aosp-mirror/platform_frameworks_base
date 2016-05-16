@@ -1,6 +1,8 @@
 page.title=Optimizaciones en segundo plano
 page.metaDescription=Nuevas restricciones para difusiones implícitas.
 page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
 @jd:body
 
 <div id="qv-wrapper">
