@@ -683,6 +683,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
             });
         } else if (resultCode == RESULT_CANCELED) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "[state]" + STATE_CONFIGURING);
+            }
+
             mState = STATE_CONFIGURING;
 
             // The previous update might have been canceled
@@ -898,9 +902,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private void setState(int state) {
         if (isFinalState(mState)) {
             if (isFinalState(state)) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "[state]" + state);
+                }
                 mState = state;
             }
         } else {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "[state]" + state);
+            }
             mState = state;
         }
     }
@@ -2896,13 +2906,20 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         public int cancel() {
-            if (!mPosted) {
-                return getStateAfterCancel();
-            }
-            mPosted = false;
-            mHandler.removeCallbacks(this);
+            int state;
 
-            return getStateAfterCancel();
+            if (!mPosted) {
+                state = getStateAfterCancel();
+            } else {
+                mPosted = false;
+                mHandler.removeCallbacks(this);
+
+                state = getStateAfterCancel();
+            }
+
+            mPreviousState = -1;
+
+            return state;
         }
 
         @Override
