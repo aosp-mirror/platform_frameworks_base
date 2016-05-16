@@ -5,6 +5,34 @@ page.image=images/cards/card-n-support_2x.png
 
 @jd:body
 
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">General advisories</a></li>
+      <li><a href="#new">New in DP3</a></li>
+      <li><a href="#ki">Known issues</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
 <p>
   Two primary support channels are available to you when developing and testing
   with the Android N Developer Preview: Please file bugs at <a href=
@@ -23,67 +51,451 @@ page.image=images/cards/card-n-support_2x.png
   <div class="cols">
     <div class="col-6of12">
       <p>
-        <em>Date: April 2016<br>
-        Builds: TODO<br>
+        <em>Date: May 2016<br>
+        Builds: NPD35K<br>
         Emulator support: x86 &amp; ARM (32/64-bit)<br>
-        Google Play services: TODO</em>
+        Google Play services: 8.4</em>
       </p>
     </div>
   </div>
 </div>
 
+<h3 id="general">General advisories</h3>
+
+<p>
+  This Developer Preview release is for <strong>app developers and other early
+  adopters</strong> and is available for daily use, development, or
+  compatibility testing. Please be aware of these general notes about the
+  release:
+</p>
+
+<ul>
+  <li>This release may have various <strong>stability issues</strong> on
+    supported devices. Users may encounter system instability, such as kernel
+    panics and crashes.
+  </li>
+
+  <li>Some apps <strong>may not function as expected</strong> on the new
+  platform version. This includes Google’s apps as well as other apps. You can
+  let developers know about app compatibility issues using the <a href=
+  "{@docRoot}preview/bugs">N Developer Preview issue tracker</a>.
+  </li>
+
+  <li>Developer Preview 3 is <strong>Compatibility Test Suite (CTS)
+  approved</strong> on these devices: Nexus 5X, Nexus 6, Nexus 6P, and Pixel
+  C. Apps that depend on CTS approved builds should
+  work normally on these devices (Android Pay for example).
+  </li>
+
+  <li>Developer Preview 3 is <strong>available on all supported
+  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
+  C, General Mobile 4G (Android One), as well as Sony Xperia Z3 (D6603 and
+  D6653 models).
+
+  </li>
+</ul>
+
+
 <h3 id="new">New in DP3</h3>
 
+<h4 id="">VR Mode for Android</h4>
 
-<h4 id="api-changes">API changes</h4>
+<p>
+  Android N adds platform support and optimizations for a new VR Mode to let
+  developers build high quality mobile VR experiences for users. There are a
+  number of performance enhancements, including access to an exclusive CPU core
+  for VR apps. Within your apps, you can take advantage of intelligent
+  head-tracking, and stereo notifications that work for VR. Most importantly,
+  Android N provides for very low latency graphics.
+</p>
+
+<p>
+  For more information, see the <a href=
+  "https://developers.google.com/vr/android/">Google VR SDK for Android</a>.
+</p>
+
+<h4 id="">Sustained performance mode</h4>
+
+<p>
+  Android N includes optional support for <a href=
+  "{@docRoot}preview/api-overview.html#sustained_performance_api">sustained
+  performance mode</a>, enabling OEMs to provide hints on device performance
+  capabilities for long running applications. App developers can then use these
+  hints to tune applications for a predictable, consistent level of device
+  performance over long periods of time. App developers can try out this new
+  API in the developer preview on Nexus 6P devices only.
+</p>
+
+<h4>Multiprocess WebView</h4>
+
+<p>
+  Starting with version 51 in Android N, WebView will run web content in a
+  separate sandboxed process when the developer option "Multiprocess WebView"
+  is enabled. The WebView team is looking for feedback on compatibility and
+  runtime performance in N before enabling multiprocess WebView in a future
+  version of Android. In this version, regressions in startup time, total
+  memory usage and software rendering performance are expected.
+</p>
+
+<p>
+  If you find unexpected issues in multiprocess mode we’d like to hear about
+  them. Please get in touch with the WebView team by <a href=
+  "https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">
+  filing a bug</a>.
+</p>
+
+<h4 id="">Keyboard Shortcuts helper</h4>
+
+<p>
+  Android N lets users press <code>Meta+/</code> to trigger a <strong>Keyboard
+  Shortcuts</strong> screen that displays all shortcuts available both from the
+  system and from the app in focus. Developers can add their own shortcuts or
+  trigger the Shortcuts screen from their apps. See <a href=
+  "{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Keyboard
+  Shortcuts helper</a> for details.
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  DP3 introduces a new <a href=
+  "{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a>
+  that allows an app to monitor its UI rendering performance by exposing a
+  streaming pubsub API to transfer frame timing info for the application’s
+  current window. <code>FrameMetricsListener</code> can be used to measure
+  interaction-level UI performance in production with higher granularity and
+  without the need for a USB connection.
+</p>
+
+<h4 id="api-changes">Feature and API changes</h4>
 
 <dl>
-  <dt><a href="{@docRoot}preview/api-overview.html#number-blocking"
-    >Number-blocking</a></dt>
-  <dd>If an unauthorized user attempts to block or unblock a number, the operation
-    now fails with {@link java.lang.SecurityException}. (Previously, the
-    operation threw {@link java.lang.UnsupportedOperationException}.)</dd>
+  <dt>
+    Launcher Shortcuts and the Launcher Shortcuts API
+  </dt>
 
-  <dt><a href="{@docRoot}preview/api-overview.html#tile_api">Quick
-    Settings Tile API</a></dt>
-  <dd>The system now uses the activity's metadata to decide on the tile mode.
+  <dd>
+    We’ve decided to defer this feature to a future release of Android. We plan
+    to remove the Launcher Shortcuts APIs (ShortcutManager and others) from the
+    public Android N API starting in the next developer preview.
+  </dd>
+
+  <dt>
+    WebView Javascript run before page load
+  </dt>
+
+  <dd>
+    Starting with apps targeting Android N, the Javascript context is reset
+    when a new page is loaded. Currently, the context is carried over for the
+    first page loaded in a new {@link android.webkit.WebView} instance.
+    Developers looking to inject Javascript into the {@link
+    android.webkit.WebView} should execute the script after the page has
+    started to load.
+  </dd>
+
+  <dt>
+    WebView Geolocation on insecure origins
+  </dt>
+
+  <dd>
+    Starting with apps targeting Android N, the geolocation API will only be
+    allowed on secure origins (over HTTPS.) This policy is designed to protect
+    users' private information when they're using an insecure connection.
+  </dd>
+
+  <dt>
+    Data Saver
+  </dt>
+
+  <dd>
+    Starting in Developer Preview 3, apps can use use an intent to display a
+    system dialog that lets the user directly add the app to the Data Saver
+    exemption whitelist. See the <a href=
+    "{@docRoot}preview/api-overview.html#data_saver">Data Saver
+    documentation</a> for details.
+  </dd>
+
+  <dt>
+    <a href=
+    "{@docRoot}preview/api-overview.html#number-blocking">Number-blocking</a>
+  </dt>
+
+  <dd>
+    If an unauthorized user attempts to block or unblock a number, the
+    operation now fails with {@link java.lang.SecurityException}. (Previously,
+    the operation threw {@link java.lang.UnsupportedOperationException}.)
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">Quick Settings Tile
+    API</a>
+  </dt>
+
+  <dd>
+    The system now uses the activity's metadata to decide on the tile mode.
     (Previously, tile mode was determined by the return value of
     <code>TileService.onTileAdded()</code>.) For more information, see
-    <code>TileService.META_DATA_ACTIVE_TILE</code> in the downloadable
-    <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+    <code>TileService.META_DATA_ACTIVE_TILE</code> in the downloadable <a href=
+    "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
   </dd>
 </dl>
 
-<h4 id="dp2-fixes">Fixes for issues reported by developers</h4>
+<h4 id="dp3-fixes">Fixes for issues reported by developers</h4>
 
 <p>
   A number of issues reported by developers have been fixed, including:
 </p>
 
 <ul>
-  <li>TODO</li>
+  <li>Bluetooth Audio playback interrupted after 1 song (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=206889">206889</a>)
+  </li>
+
+  <li>Pixel C Consistently Crashes (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=206962">206962</a>)
+  </li>
+
+  <li>Clock and Toast notification issues (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=203094">203094</a>)
+  </li>
+
+  <li>Pixel C reboots when connected to MacBook Pro via USB C Cable (bug
+  <a href=
+  "https://code.google.com/p/android/issues/detail?id=205432">205432</a>)
+  </li>
+
+  <li>Calandar offset by one day (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=203002">203002</a>)
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo returning invalid data (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=203022">203022</a>)
+  </li>
+
+  <li>Nexus 6p, Bluetooth keeps disconnecting (bug <a href=
+  "https://code.google.com/p/android/issues/detail?id=208062">208062</a>)
+  </li>
 </ul>
 
-<h3 id="general">General advisories</h3>
-
-<p>
-  This Developer Preview release is for <strong>app developers only</strong>
-  and is designed for use in compatibility testing and early development only.
-  Please be aware of these general notes about the release:
-</p>
-
-<ul>
-
-  <li>TODO</li>
-</ul>
+<p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
+issue tracker</a>.</p>
 
 <h3 id="ki">Known Issues</h3>
 
-<p>TODO</p>
+<h4>Accessibility</h4>
 
+<ul>
+  <li>Unable to listen to TTS output when pitch is set near maximum level.
+  </li>
+
+  <li>Accessibility features and settings may be disrupted with the user adds a
+  Work profile, including magnification gesture and setting. Accessibility
+  state is restored when the user next touches the associated settings.
+  </li>
+</ul>
+
+<h4>Camera</h4>
+
+<ul>
+  <li>The Camera app has exhibited instability; it may crash in various
+    circumstances, such as when launched in multi-window mode.
+  </li>
+
+  <li>Pressing the shutter continuously in panorama mode may cause the Camera
+  app to crash.
+  </li>
+</ul>
+
+<h4>Audio</h4>
+<ul>
+  <li>A platform audio player issue prevents some apps from functioning
+  normally. For example, Skype and other apps are affected by this issue.
+  </li>
+</ul>
+
+<h4>Connectivity</h4>
+
+
+<ul>
+  <li>When a Bluetooth Low Energy (BLE) peripheral role device advertises a
+  service and a BLE central role device connects, the peripheral role device
+  disconnects very quickly.
+  </li>
+
+  <li>Wi-Fi connection may be dropped when the screen is off.
+  </li>
+
+  <li>RFCOMM connections are unstable and may result in data corruption and
+  dangling connections.
+  </li>
+
+  <li>The active network state ({@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} and {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}) might return incorrect values during some
+  restricted background scenarios.
+  </li>
+</ul>
+
+
+<h4>
+  Launcher
+</h4>
+
+<ul>
+  <li>The default launcher’s All Apps tray may become unresponsive after
+  cycling screen off / screen on. Returning to the homescreen and relaunching
+  the All Apps tray may resolve this issue.
+  </li>
+</ul>
+
+<h4>
+  Keyboard
+</h4>
+
+<ul>
+  <li>When updating a device running Android 6.0 or earlier to the N Developer
+  Preview, Google Keyboard does not preserve preferences data such as recent
+  emoji and sound settings.
+  </li>
+
+  <li>Google Indic Managed Keyboard may be unstable.
+  </li>
+
+  <li>When entering text in a password field, the user can select Russian as
+  the input language but the keyboard remains in English. This prevents the
+  user from entering Russian-language passwords.
+  </li>
+</ul>
+
+<h4>
+  Locale and languages
+</h4>
+
+<ul>
+  <li>When using a right-to-left (RTL) locale, the system may unexpectedly
+  switch to left-to-right (LTR) presentation after restarting the device.
+  </li>
+</ul>
+
+<h4>Media</h4>
+
+<ul>
+  <li>Media playback be be unreliable on Nexus 9 and Nexus Player, including
+  issues playing HD video.
+  </li>
+</ul>
+
+<h4>
+  Multi-window mode
+</h4>
+
+<ul>
+  <li>Device may freeze when changing orientation in multi-window mode.
+  </li>
+
+  <li>Several apps currently have issues with multi-window mode:
+    <ul>
+      <li>The system UI may crash when docking Settings &gt; Display &gt;
+      Screen brightness to multi-window.
+      </li>
+
+      <li>The Camera app may crash when launched in multi-window mode.
+      </li>
+
+      <li>YouTube may crash when launched into multi-window mode. To fix the
+      issue, you can clear the YouTube app’s data at Storage &gt; Apps &gt;
+      YouTube.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play services
+</h4>
+
+<ul>
+  <li>Apps using Google Cast through Google Play services may be unstable when
+  the user selects a system locale that uses letters and numbers outside of the
+  ASCII range.
+  </li>
+</ul>
+
+<h4>
+  Work and enterprise
+</h4>
+
+<ul>
+  <li>The Device Policy app may crash when the user unlocks the device with the
+  "device policy status" screen pinned.
+  </li>
+
+  <li>After setting up a work profile with file-based encryption enabled and
+  then turning off Work, users must unlock primary profile screen lock to once
+  again access Work apps.
+  </li>
+
+  <li>Cannot open work apps after reboot in file-based-encryption with work
+  mode off.
+  </li>
+
+  <li>Device reboots when removing the security pattern lock and opening work
+  app/personal app in the multi-window.
+  </li>
+
+  <li>Setting DISALLOW_VPN_CONFIG is causing the consent dialog to appear in
+  always-on-vpn set by Device Policy Client.
+  </li>
+
+  <li>Traffic is not locked down until VPN is connected in always-on-vpn mode.
+  </li>
+</ul>
+
+<h4>
+  External storage
+</h4>
+
+<ul>
+  <li>Apps may become unstable when the user moves them from internal storage
+  to adoptable external storage (this can include SD card or devices attached
+  over USB).
+  </li>
+</ul>
+
+<h4>
+  Screen zoom and multiple APKs in Google Play
+</h4>
+
+<ul>
+  <li>On devices running Android N, Google Play services 9.0.83 incorrectly reports
+  the current screen density rather than the stable screen density. When screen
+  zoom is enabled on these devices, this can cause Google Play to select a
+  version of a multi-APK app that’s designed for smaller screens. This issue is
+  fixed in the next version of Google Play services and will be included in a
+  later Developer Preview release.
+  </li>
+
+  <li>On devices running Android N, Google Play services 9.0.83 currently reports
+  Vulkan support but not Vulkan version. This can cause Google Play to select a
+  version of a multi-APK app that’s designed for lower Vulkan support on
+  devices with higher version support. Currently, the Google Play Store does
+  not accept uploads of Apps which use Vulkan version targeting. This support
+  will be added to the Google Play Store in the future and fixed in the next
+  version of Google Play services (to be included in a later Developer Preview
+  release) any N devices using the version of Google Play services 9.0.83 will
+  continue to receive versions of Apps targeting basic Vulkan support.
+  </li>
+</ul>
+
+<h4 id="">Notifications</h4>
+
+<ul>
+  <li>MessagingStyle does not show notifications with "null" (self) sender.
+  </li>
+</ul>
+
+<!-- TODO, if any
 <h4>Device-specific issues</h4>
-
-<p>TODO</p>
 
 <dl>
   <dt>
@@ -98,6 +510,8 @@ page.image=images/cards/card-n-support_2x.png
     Issue 2
   </dd>
 </dl>
+
+-->
 
 <!-- DP2 Release Notes Archive -->
 
