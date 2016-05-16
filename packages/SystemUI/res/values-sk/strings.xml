@@ -174,7 +174,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"Pracovný režim"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Zrušiť aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Zavrieť aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikácia <xliff:g id="APP">%s</xliff:g> bola zrušená."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Všetky nedávne aplikácie boli odmietnuté."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Otvoriť informácie o aplikácii <xliff:g id="APP">%s</xliff:g>"</string>

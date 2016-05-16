@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Washa"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Washa kiokoa betri"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mipangilio"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Mtandao-Hewa"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Skrini ijizungushe kiotomatiki"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"PUUZA"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"KIOTOMATIKI"</string>
@@ -378,7 +378,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Mwondoe mtumiaji wa sasa"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ONDOA MTUMIAJI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Unapomwongeza mtumiaji mpya, mtu huyo anahitaji kusanidi nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa ajili ya watumiaji wengine wote."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Mtumiaji mpya unayemwongeza anahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya watumiaji wengine wote."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Je, ungependa kuondoa mtumiaji?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Programu na data yote ya mtumiaji huyu itafutwa."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Ondoa"</string>
@@ -491,7 +491,7 @@
     <string name="high_importance" msgid="3441537905162782568">"Umuhimu wa Arifa: Kiwango cha 4"</string>
     <string name="max_importance" msgid="4880179829869865275">"Umuhimu wa Arifa: Kiwango cha 5"</string>
     <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Programu hubaini umuhimu wa kila arifa."</string>
-    <string name="notification_importance_blocked" msgid="4237497046867398057">"Usionyeshe kamwe arifa kutoka programu hii."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Usionyeshe arifa zozote kutoka programu hii."</string>
     <string name="notification_importance_min" msgid="7844224511187027155">"Usiruhusu ukatizaji wa skrini nzima, arifa za kuchungulia, sauti au mtetemo. Usionyeshe katika skrini iliyofungwa na sehemu ya kuonyesha hali."</string>
     <string name="notification_importance_low" msgid="7950291702044409847">"Usiruhusu ukatizaji wa skrini nzima, arifa za kuchungulia, sauti au mtetemo."</string>
     <string name="notification_importance_default" msgid="5924405820269074915">"Usiruhusu arifa za kuchungulia au ukatizaji wa skrini nzima."</string>
