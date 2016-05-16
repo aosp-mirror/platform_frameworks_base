@@ -207,7 +207,6 @@ public:
     void setPointerIconType(int32_t iconId);
     void reloadPointerIcons();
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setPointerIconDetached(bool detached);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -710,14 +709,6 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationH
     sp<InputApplicationHandle> applicationHandle =
             android_server_InputApplicationHandle_getHandle(env, applicationHandleObj);
     mInputManager->getDispatcher()->setFocusedApplication(applicationHandle);
-}
-
-void NativeInputManager::setPointerIconDetached(bool detached) {
-    AutoMutex _l(mLock);
-    sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != NULL) {
-        controller->detachPointerIcon(detached);
-    }
 }
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
@@ -1332,12 +1323,6 @@ static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
     im->setFocusedApplication(env, applicationHandleObj);
 }
 
-static void nativeSetPointerIconDetached(JNIEnv* env, jclass /* clazz */, jlong ptr,
-        jboolean detached) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    im->setPointerIconDetached(detached);
-}
-
 static void nativeSetInputDispatchMode(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr, jboolean enabled, jboolean frozen) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1520,8 +1505,6 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetInputWindows },
     { "nativeSetFocusedApplication", "(JLcom/android/server/input/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
-    { "nativeSetPointerIconDetached", "(JZ)V",
-            (void*) nativeSetPointerIconDetached },
     { "nativeSetInputDispatchMode", "(JZZ)V",
             (void*) nativeSetInputDispatchMode },
     { "nativeSetSystemUiVisibility", "(JI)V",

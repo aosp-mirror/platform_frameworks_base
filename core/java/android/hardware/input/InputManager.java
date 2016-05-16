@@ -893,24 +893,6 @@ public final class InputManager {
         }
     }
 
-    /**
-     * Update the pointer icon status. When detached, the pointer icon disappears, and further
-     * mouse location will be stuck at the current point. Mouse movement events will still arrive,
-     * and movement should be handled through {@link MotionEvent.AXIS_RELATIVE_X} and
-     * {@link MotionEvent.AXIS_RELATIVE_Y}.
-     *
-     * @param detached true if the icon will be detached from the actual mouse movement.
-     *
-     * @hide
-     */
-    public void setPointerIconDetached(boolean detached) {
-        try {
-            mIm.setPointerIconDetached(detached);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
     private void populateInputDevicesLocked() {
         if (mInputDevicesChangedListener == null) {
             final InputDevicesChangedListener listener = new InputDevicesChangedListener();
