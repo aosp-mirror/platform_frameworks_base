@@ -219,6 +219,11 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
+    public void clearLastInputMethodWindowForTransition(IBinder arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
