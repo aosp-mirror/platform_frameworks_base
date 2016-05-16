@@ -938,7 +938,11 @@ public interface WindowManagerPolicy {
      * be correct.
      *
      * @param attrs The LayoutParams of the window.
-     * @param rotation Rotation of the display.
+     * @param taskBounds The bounds of the task this window is on or {@code null} if no task is
+     *                   associated with the window.
+     * @param displayRotation Rotation of the display.
+     * @param displayWidth The width of the display.
+     * @param displayHeight The height of the display.
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
@@ -946,8 +950,9 @@ public interface WindowManagerPolicy {
      * @return Whether to always consume the navigation bar.
      *         See {@link #isNavBarForcedShownLw(WindowState)}.
      */
-    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, int rotation,
-            Rect outContentInsets, Rect outStableInsets, Rect outOutsets);
+    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
+            int displayRotation, int displayWidth, int displayHeight, Rect outContentInsets,
+            Rect outStableInsets, Rect outOutsets);
 
     /**
      * Called when layout of the windows is finished.  After this function has
