@@ -631,7 +631,7 @@ class Task implements DimLayer.DimLayerUser {
                     // windows since they aren't at the base layer and could be moved around anyway.
                     if (!win.computeDragResizing() && win.mAttrs.type == TYPE_BASE_APPLICATION &&
                             !mStack.getBoundsAnimating() && !win.isGoneForLayoutLw()) {
-                        win.mResizedWhileNotDragResizing = true;
+                        win.setResizedWhileNotDragResizing(true);
                     }
                 }
                 if (win.isGoneForLayoutLw()) {

@@ -486,12 +486,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean mResizedWhileGone = false;
 
-    /**
-     * Indicates whether we got resized but drag resizing flag was false. In this case, we also
-     * need to recreate the surface and defer surface bound updates in order to make sure the
-     * buffer contents and the positioning/size stay in sync.
-     */
-    boolean mResizedWhileNotDragResizing;
+    /** @see #isResizedWhileNotDragResizing(). */
+    private boolean mResizedWhileNotDragResizing;
+
+    /** @see #isResizedWhileNotDragResizingReported(). */
+    private boolean mResizedWhileNotDragResizingReported;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
@@ -2324,6 +2323,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mVisibleInsetsChanged = false;
             mStableInsetsChanged = false;
             mOutsetsChanged = false;
+            mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
         } catch (RemoteException e) {
             mOrientationChanging = false;
@@ -2424,6 +2424,32 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     void resetDragResizingChangeReported() {
         mDragResizingChangeReported = false;
+    }
+
+    /**
+     * Set whether we got resized but drag resizing flag was false.
+     * @see #isResizedWhileNotDragResizing().
+     */
+    void setResizedWhileNotDragResizing(boolean resizedWhileNotDragResizing) {
+        mResizedWhileNotDragResizing = resizedWhileNotDragResizing;
+        mResizedWhileNotDragResizingReported = !resizedWhileNotDragResizing;
+    }
+
+    /**
+     * Indicates whether we got resized but drag resizing flag was false. In this case, we also
+     * need to recreate the surface and defer surface bound updates in order to make sure the
+     * buffer contents and the positioning/size stay in sync.
+     */
+    boolean isResizedWhileNotDragResizing() {
+        return mResizedWhileNotDragResizing;
+    }
+
+    /**
+     * @return Whether we reported "resize while not drag resizing" to the application.
+     * @see #isResizedWhileNotDragResizing()
+     */
+    boolean isResizedWhileNotDragResizingReported() {
+        return mResizedWhileNotDragResizingReported;
     }
 
     int getResizeMode() {
