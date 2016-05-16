@@ -164,7 +164,6 @@ import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
-import android.net.INetworkPolicyManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -1043,6 +1042,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int CHECK_PENDING_VERIFICATION = 16;
     static final int START_INTENT_FILTER_VERIFICATIONS = 17;
     static final int INTENT_FILTER_VERIFIED = 18;
+    static final int WRITE_PACKAGE_LIST = 19;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1665,6 +1665,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 } break;
+                case WRITE_PACKAGE_LIST: {
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+                    synchronized (mPackages) {
+                        removeMessages(WRITE_PACKAGE_LIST);
+                        mSettings.writePackageListLPr(msg.arg1);
+                    }
+                    Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                } break;
                 case CHECK_PENDING_VERIFICATION: {
                     final int verificationId = msg.arg1;
                     final PackageVerificationState state = mPendingVerification.get(verificationId);
@@ -2109,6 +2117,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     void scheduleWriteSettingsLocked() {
         if (!mHandler.hasMessages(WRITE_SETTINGS)) {
             mHandler.sendEmptyMessageDelayed(WRITE_SETTINGS, WRITE_SETTINGS_DELAY);
+        }
+    }
+
+    void scheduleWritePackageListLocked(int userId) {
+        if (!mHandler.hasMessages(WRITE_PACKAGE_LIST)) {
+            Message msg = mHandler.obtainMessage(WRITE_PACKAGE_LIST);
+            msg.arg1 = userId;
+            mHandler.sendMessageDelayed(msg, WRITE_SETTINGS_DELAY);
         }
     }
 
@@ -20043,13 +20059,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     /** Called by UserManagerService */
-    void createNewUser(int userHandle) {
+    void createNewUser(int userId) {
         synchronized (mInstallLock) {
-            mSettings.createNewUserLI(this, mInstaller, userHandle);
+            mSettings.createNewUserLI(this, mInstaller, userId);
         }
         synchronized (mPackages) {
-            applyFactoryDefaultBrowserLPw(userHandle);
-            primeDomainVerificationsLPw(userHandle);
+            scheduleWritePackageRestrictionsLocked(userId);
+            scheduleWritePackageListLocked(userId);
+            applyFactoryDefaultBrowserLPw(userId);
+            primeDomainVerificationsLPw(userId);
         }
     }
 
