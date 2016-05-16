@@ -284,6 +284,13 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
                 continue;
             }
 
+            StringPiece16 attrCommentLine = entry.symbol->attribute->getComment();
+            if (attrCommentLine.contains(StringPiece16(u"@removed"))) {
+                // Removed attributes are public but hidden from the documentation, so don't emit
+                // them as part of the class documentation.
+                continue;
+            }
+
             const ResourceName& attrName = entry.attrRef->name.value();
             styleableComment << "<tr><td>";
             styleableComment << "<code>{@link #"
@@ -299,7 +306,6 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
             // Only use the comment up until the first '.'. This is to stay compatible with
             // the way old AAPT did it (presumably to keep it short and to avoid including
             // annotations like @hide which would affect this Styleable).
-            StringPiece16 attrCommentLine = entry.symbol->attribute->getComment();
             auto iter = std::find(attrCommentLine.begin(), attrCommentLine.end(), u'.');
             if (iter != attrCommentLine.end()) {
                 attrCommentLine = attrCommentLine.substr(
@@ -348,6 +354,17 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
             continue;
         }
 
+        StringPiece16 comment = styleableAttr.attrRef->getComment();
+        if (styleableAttr.symbol->attribute && comment.empty()) {
+            comment = styleableAttr.symbol->attribute->getComment();
+        }
+
+        if (comment.contains(StringPiece16(u"@removed"))) {
+            // Removed attributes are public but hidden from the documentation, so don't emit them
+            // as part of the class documentation.
+            continue;
+        }
+
         const ResourceName& attrName = styleableAttr.attrRef->name.value();
 
         StringPiece16 packageName = attrName.package;
@@ -359,11 +376,6 @@ void JavaClassGenerator::addMembersToStyleableClass(const StringPiece16& package
                 sortedAttributes[i].fieldName, static_cast<uint32_t>(i));
 
         AnnotationProcessor* attrProcessor = indexMember->getCommentBuilder();
-
-        StringPiece16 comment = styleableAttr.attrRef->getComment();
-        if (styleableAttr.symbol->attribute && comment.empty()) {
-            comment = styleableAttr.symbol->attribute->getComment();
-        }
 
         if (!comment.empty()) {
             attrProcessor->appendComment("<p>\n@attr description");
