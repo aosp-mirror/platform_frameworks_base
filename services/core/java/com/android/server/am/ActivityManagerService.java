@@ -18551,6 +18551,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.systemNoUi = true;
             if (app == TOP_APP) {
                 app.systemNoUi = false;
+                app.curSchedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+                app.adjType = "pers-top-activity";
             } else if (activitiesSize > 0) {
                 for (int j = 0; j < activitiesSize; j++) {
                     final ActivityRecord r = app.activities.get(j);
