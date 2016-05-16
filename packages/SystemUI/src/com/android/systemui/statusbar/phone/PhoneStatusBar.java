@@ -1505,6 +1505,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mHeadsUpEntriesToRemoveOnSwitch.add(mHeadsUpManager.getEntry(key));
             return;
         }
+        Entry entry = mNotificationData.get(key);
+        if (entry != null && entry.row != null) {
+            entry.row.setRemoved(true);
+        }
         // Let's remove the children if this was a summary
         handleGroupSummaryRemoved(key, ranking);
         StatusBarNotification old = removeNotificationViews(key, ranking);
@@ -1544,12 +1548,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 // always cancelled. We only remove them if they were dismissed by the user.
                 return;
             }
-            entry.row.setRemoved(true);
             List<ExpandableNotificationRow> notificationChildren =
                     entry.row.getNotificationChildren();
             ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>(notificationChildren);
             for (int i = 0; i < toRemove.size(); i++) {
                 toRemove.get(i).setKeepInParent(true);
+                // we need to set this state earlier as otherwise we might generate some weird
+                // animations
                 toRemove.get(i).setRemoved(true);
             }
             for (int i = 0; i < toRemove.size(); i++) {
