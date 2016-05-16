@@ -80,7 +80,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਮਿਟਾ ਰਿਹਾ ਹੈ।</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਮਿਟਾ ਰਿਹਾ ਹੈ।</item>
     </plurals>
-    <string name="undo" msgid="7905788502491742328">"ਪਹਿਲਾਂ ਵਰਗਾ ਕਰੋ"</string>
+    <string name="undo" msgid="7905788502491742328">"ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>

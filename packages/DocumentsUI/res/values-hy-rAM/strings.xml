@@ -32,7 +32,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"Ջնջել"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Ընտրել բոլորը"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Պատճենել…"</string>
-    <string name="menu_move" msgid="1828090633118079817">"Տեղափոխում դեպի…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"Տեղափոխել…"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Նոր պատուհան"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Պատճենել"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Տեղադրել"</string>
@@ -59,7 +59,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Դյուրանցումներ"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Սարքեր"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Հավելյալ ծրագրեր"</string>
-    <string name="empty" msgid="7858882803708117596">"Տարրեր չկան"</string>
+    <string name="empty" msgid="7858882803708117596">"Ոչինչ չկա"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s-ում համընկնումներ չկան"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Հնարավոր չէ բացել ֆայլը"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Անհնար է ջնջել որոշ փաստաթղթեր"</string>
