@@ -553,6 +553,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpStableFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
     static final Rect mTmpOutsetFrame = new Rect();
+    private static final Rect mTmpRect = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
     WindowState mTopFullscreenOpaqueOrDimmingWindowState;
@@ -3797,8 +3798,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, int displayRotation,
-            Rect outContentInsets, Rect outStableInsets, Rect outOutsets) {
+    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
+            int displayRotation, int displayWidth, int displayHeight, Rect outContentInsets,
+            Rect outStableInsets, Rect outOutsets) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int systemUiVisibility = (sysuiVis | attrs.subtreeSystemUiVisibility);
@@ -3852,11 +3854,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             outStableInsets.set(mStableLeft, mStableTop,
                     availRight - mStableRight, availBottom - mStableBottom);
+            if (taskBounds != null) {
+                calculateRelevantTaskInsets(taskBounds, outContentInsets,
+                        displayWidth, displayHeight);
+                calculateRelevantTaskInsets(taskBounds, outStableInsets,
+                        displayWidth, displayHeight);
+            }
             return mForceShowSystemBars;
         }
         outContentInsets.setEmpty();
         outStableInsets.setEmpty();
         return mForceShowSystemBars;
+    }
+
+    /**
+     * For any given task bounds, the insets relevant for these bounds given the insets relevant
+     * for the entire display.
+     */
+    private void calculateRelevantTaskInsets(Rect taskBounds, Rect inOutInsets, int displayWidth,
+            int displayHeight) {
+        mTmpRect.set(0, 0, displayWidth, displayHeight);
+        mTmpRect.inset(inOutInsets);
+        mTmpRect.intersect(taskBounds);
+        int leftInset = mTmpRect.left - taskBounds.left;
+        int topInset = mTmpRect.top - taskBounds.top;
+        int rightInset = taskBounds.right - mTmpRect.right;
+        int bottomInset = taskBounds.bottom - mTmpRect.bottom;
+        inOutInsets.set(leftInset, topInset, rightInset, bottomInset);
     }
 
     private boolean shouldUseOutsets(WindowManager.LayoutParams attrs, int fl) {
