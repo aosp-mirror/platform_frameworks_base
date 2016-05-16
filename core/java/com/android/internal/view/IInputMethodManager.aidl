@@ -79,5 +79,7 @@ interface IInputMethodManager {
     boolean setInputMethodEnabled(String id, boolean enabled);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
+    void clearLastInputMethodWindowForTransition(in IBinder token);
+
     oneway void notifyUserAction(int sequenceNumber);
 }
