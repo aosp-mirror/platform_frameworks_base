@@ -38,11 +38,11 @@
     <string name="invalid_charger" msgid="4549105996740522523">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണയ്ക്കുന്നില്ല.\nഅതിന്റെ അനുബന്ധ ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ചാർജ്ജുചെയ്യൽ പിന്തുണച്ചില്ല."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"വിതരണം ചെയ്‌ത ചാർജ്ജർ മാത്രം ഉപയോഗിക്കുക."</string>
-    <string name="battery_low_why" msgid="4553600287639198111">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="battery_low_why" msgid="4553600287639198111">"ക്രമീകരണം"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ബാറ്ററി സേവർ ഓണാക്കണോ?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ഓൺ ചെയ്യുക"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ബാറ്ററി സേവർ ഓണാക്കുക"</string>
-    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ക്രമീകരണം"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"വൈഫൈ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"സ്‌ക്രീൻ സ്വയമേതിരിക്കുക"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"മ്യൂട്ടുചെയ്യുക"</string>
@@ -180,7 +180,7 @@
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"അറിയിപ്പ് ഷെയ്‌ഡ്."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ലോക്ക് സ്‌ക്രീൻ."</string>
-    <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="accessibility_desc_settings" msgid="3417884241751434521">"ക്രമീകരണം"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"കാഴ്ച."</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"അടയ്‌ക്കുക"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ഉപയോക്താവ് <xliff:g id="USER">%s</xliff:g>."</string>
@@ -246,7 +246,7 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"എല്ലാ വിവരങ്ങളും മായ്‌ക്കുക."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"അറിയിപ്പ് ക്രമീകരണങ്ങൾ"</string>
-    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണങ്ങൾ"</string>
+    <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണം"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ യാന്ത്രികമായി തിരിയും."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"സ്‌ക്രീൻ ലാൻഡ്‌സ്‌കേപ്പ് ഓറിയന്റേഷനിൽ ലോക്കുചെയ്‌തു."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"സ്‌ക്രീൻ പോർട്രെയ്‌റ്റ് ഓറിയന്റേഷനിൽ ലോക്കുചെയ്‌തു."</string>
@@ -277,7 +277,7 @@
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"മീഡിയ ഉപകരണം"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"അടിയന്തിര കോളുകൾ മാത്രം"</string>
-    <string name="quick_settings_settings_label" msgid="5326556592578065401">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"ക്രമീകരണം"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"സമയം"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ഞാന്‍"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ഉപയോക്താവ്"</string>

@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ລຶບ"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"ເອົາອອກຈາກລາຍການ"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ຂໍ້ມູນແອັບຯ"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Your recent screens appear here"</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ໜ້າຈໍຫຼ້າສຸດຂອງທ່ານຈະປາກົດຢູ່ບ່ອນນີ້"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ປິດແອັບຯຫຼ້າສຸດທີ່ໃຊ້"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d ໜ້າ​ຈໍ​ຢູ່​ໃນ​ພາບ​ລວມ</item>
@@ -359,7 +359,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ປ່ຽນຜູ່ໃຊ້, ຜູ່ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ຜູ້ໃຊ້ປະຈຸບັນ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"​ສະ​ແດງ​ໂປຣ​ໄຟລ໌"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"ເພີ່ມຜູ່ໃຊ້"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"ເພີ່ມຜູ້ໃຊ້"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ຜູ່ໃຊ້ໃໝ່"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ແຂກ"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"ເພີ່ມແຂກ"</string>
@@ -378,7 +378,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"ອອກ​ຈາກ​ຜູ້​ໃຊ້​ປະ​ຈຸ​ບັນ"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ເອົາຜູ້ໃຊ້ອອກຈາກລະບົບ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່​ບໍ?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່, ຜູ່​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ່​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯ​ຂອງ​ຜູ່​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້ໃຊ້​ໃໝ່, ຜູ້ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯຂອງ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ລຶບຜູ້ໃຊ້ອອກບໍ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ເອົາ​ອອກ"</string>
@@ -595,7 +595,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"ປຸ່ມ Keycode ອະນຸຍາດໃຫ້ເພີ່ມປຸ່ມແປ້ນພິມໃສ່ແຖບການນຳທາງ. ເມື່ອກົດແລ້ວພວກມັນຈະຮຽນແບບປຸ່ມແປ້ນພິມທີ່ເລືອກ. ທຳອິດຕ້ອງເລືອກປຸ່ມແປ້ນພິມສຳລັບປຸ່ມນັ້ນ, ຕາມດ້ວຍຮູບທີ່ຈະປາກົດຂຶ້ນເທິງປຸ່ມນັ້ນ."</string>
     <string name="select_keycode" msgid="7413765103381924584">"ເລືອກປຸ່ມແປ້ນພິມ"</string>
     <string name="preview" msgid="9077832302472282938">"ສະແດງຕົວຢ່າງ"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄທລ໌"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄອຄອນ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ລາກມາບ່ອນນີ້ເພື່ອລຶບອອກ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>
     <string name="tuner_time" msgid="6572217313285536011">"ເວລາ"</string>

@@ -98,7 +98,7 @@
     <string name="voice_assist_label" msgid="3956854378310019854">"адкрыць галасавую дапамогу"</string>
     <string name="camera_label" msgid="7261107956054836961">"адкрыць камеру"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Выберыце новы макет заданняў"</string>
-    <string name="cancel" msgid="6442560571259935130">"Адмяніць"</string>
+    <string name="cancel" msgid="6442560571259935130">"Скасаваць"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Кнопка сумяшчальнасці маштаба."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Маштабаванне малых элементаў для большага экрана."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-сувязь."</string>
@@ -431,7 +431,7 @@
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Схаваць"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> хоча быць дыялогам гучнасці."</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Дазволіць"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Адхiлiць"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Адмовіць"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> з\'яўляецца дыялогам гучнасці"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"Дакраніцеся, каб аднавіць арыгінал."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Вы выкарыстоўваеце свой працоўны профіль"</string>
@@ -599,7 +599,7 @@
     <string name="keycode" msgid="7335281375728356499">"Код клавішы"</string>
     <string name="keycode_description" msgid="1403795192716828949">"Кнопка Код клавішы дазваляе дадаваць клавішы ў Панэль навігацыі. Пры націску гэтай кнопкі эмулюецца выбраная клавіша. Спачатку трэба выбраць клавішу для кнопкі, а потым відарыс, які будзе паказвацца на кнопцы."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Выберыце клавішу клавіятуры"</string>
-    <string name="preview" msgid="9077832302472282938">"Папярэдні прагляд"</string>
+    <string name="preview" msgid="9077832302472282938">"Перадпрагляд"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Перацягніце, каб дадаць пліткі"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перацягніце сюды, каб выдаліць"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Рэдагаваць"</string>
