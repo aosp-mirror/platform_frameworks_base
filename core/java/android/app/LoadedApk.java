@@ -450,9 +450,6 @@ public final class LoadedApk {
             }
         }
 
-        final List<String> zipPaths = new ArrayList<>();
-        final List<String> libPaths = new ArrayList<>();
-
         if (mRegisterPackage) {
             try {
                 ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
@@ -461,8 +458,10 @@ public final class LoadedApk {
             }
         }
 
+        final List<String> zipPaths = new ArrayList<>();
+        final List<String> libPaths = new ArrayList<>();
         makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
-        final String zip = mIncludeCode ? TextUtils.join(File.pathSeparator, zipPaths) : "";
+
         final boolean isBundledApp = mApplicationInfo.isSystemApp()
                 && !mApplicationInfo.isUpdatedSystemApp();
 
@@ -476,10 +475,28 @@ public final class LoadedApk {
 
         final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
 
+        // If we're not asked to include code, we construct a classloader that has
+        // no code path included. We still need to set up the library search paths
+        // and permitted path because NativeActivity relies on it (it attempts to
+        // call System.loadLibrary() on a classloader from a LoadedApk with
+        // mIncludeCode == false).
+        if (!mIncludeCode) {
+            if (mClassLoader == null) {
+                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(
+                    "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
+                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+
+            return;
+        }
+
         /*
-         * With all the combination done (if necessary, actually
-         * create the class loader.
+         * With all the combination done (if necessary, actually create the java class
+         * loader and set up JIT profiling support if necessary.
          */
+        final String zip = TextUtils.join(File.pathSeparator, zipPaths);
 
         if (ActivityThread.localLOGV)
             Slog.v(ActivityThread.TAG, "Class path: " + zip +
