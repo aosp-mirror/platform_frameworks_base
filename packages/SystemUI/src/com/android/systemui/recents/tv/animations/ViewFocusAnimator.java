@@ -89,7 +89,7 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         });
     }
 
-    public void setFocusProgress(float level) {
+    private void setFocusProgress(float level) {
         mFocusProgress = level;
 
         float scale = mUnselectedScale + (level * mSelectedScaleDelta);
@@ -107,31 +107,17 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         mTargetView.getDismissIconView().setZ(z);
     }
 
-    public float getFocusProgress() {
-        return mFocusProgress;
-    }
-
-    public void animateFocus(boolean focused) {
+    private void animateFocus(boolean focused) {
         if (mFocusAnimation.isStarted()) {
             mFocusAnimation.cancel();
         }
 
         float target = focused ? 1.0f : 0.0f;
 
-        if (getFocusProgress() != target) {
-            mFocusAnimation.setFloatValues(getFocusProgress(), target);
+        if (mFocusProgress != target) {
+            mFocusAnimation.setFloatValues(mFocusProgress, target);
             mFocusAnimation.start();
         }
-    }
-
-    public void setFocusImmediate(boolean focused) {
-        if (mFocusAnimation.isStarted()) {
-            mFocusAnimation.cancel();
-        }
-
-        float target = focused ? 1.0f : 0.0f;
-
-        setFocusProgress(target);
     }
 
     @Override
@@ -142,21 +128,27 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         changeSize(hasFocus);
     }
 
-    protected void changeSize(boolean hasFocus) {
+    /**
+     * Changes the size of the {@link TaskCardView} to show its focused state.
+     */
+    public void changeSize(boolean hasFocus) {
         ViewGroup.LayoutParams lp = mTargetView.getLayoutParams();
         int width = lp.width;
         int height = lp.height;
 
         if (width < 0 && height < 0) {
             mTargetView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-            height = mTargetView.getMeasuredHeight();
         }
 
         if (mTargetView.isAttachedToWindow() && mTargetView.hasWindowFocus() &&
                 mTargetView.getVisibility() == View.VISIBLE) {
             animateFocus(hasFocus);
         } else {
-            setFocusImmediate(hasFocus);
+            // Set focus immediately.
+            if (mFocusAnimation.isStarted()) {
+                mFocusAnimation.cancel();
+            }
+            setFocusProgress(hasFocus ? 1.0f : 0.0f);
         }
     }
 }

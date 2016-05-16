@@ -29,11 +29,11 @@ import com.android.systemui.recents.tv.views.TaskCardView;
  * Recents row's focus animation with PIP controls.
  */
 public class RecentsRowFocusAnimationHolder {
-    private View mView;
-    private View mTitleView;
+    private final View mView;
+    private final View mTitleView;
 
     private AnimatorSet mFocusGainAnimatorSet;
-    private AnimatorSet mFocusLoseAnimatorSet;
+    private AnimatorSet mFocusLossAnimatorSet;
 
     public RecentsRowFocusAnimationHolder(View view, View titleView) {
         mView = view;
@@ -50,28 +50,45 @@ public class RecentsRowFocusAnimationHolder {
         mFocusGainAnimatorSet.setDuration(duration);
         mFocusGainAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
 
-        mFocusLoseAnimatorSet = new AnimatorSet();
-        mFocusLoseAnimatorSet.playTogether(
+        mFocusLossAnimatorSet = new AnimatorSet();
+        mFocusLossAnimatorSet.playTogether(
                 // Animation doesn't start from the current value (1f) sometimes,
                 // so specify the desired initial value here.
                 ObjectAnimator.ofFloat(mView, "alpha", 1f, dimAlpha),
                 ObjectAnimator.ofFloat(mTitleView, "alpha", 0f));
-        mFocusLoseAnimatorSet.setDuration(duration);
-        mFocusLoseAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        mFocusLossAnimatorSet.setDuration(duration);
+        mFocusLossAnimatorSet.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
     }
 
     /**
-     * Returns the Recents row's focus change animation.
+     * Starts the Recents row's focus gain animation.
      */
-    public Animator getFocusChangeAnimator(boolean hasFocus) {
-        return hasFocus ? mFocusGainAnimatorSet : mFocusLoseAnimatorSet;
+    public void startFocusGainAnimation() {
+        cancelAnimator(mFocusLossAnimatorSet);
+        mFocusGainAnimatorSet.start();
     }
 
     /**
-     * Resets the views to the initial state immediately.
+     * Starts the Recents row's focus loss animation.
+     */
+    public void startFocusLossAnimation() {
+        cancelAnimator(mFocusGainAnimatorSet);
+        mFocusLossAnimatorSet.start();
+    }
+
+    /**
+     * Resets the views immediately and ends the animations.
      */
     public void reset() {
+        cancelAnimator(mFocusLossAnimatorSet);
+        cancelAnimator(mFocusGainAnimatorSet);
         mView.setAlpha(1f);
         mTitleView.setAlpha(1f);
+    }
+
+    private static void cancelAnimator(Animator animator) {
+        if (animator.isStarted()) {
+            animator.cancel();
+        }
     }
 }
