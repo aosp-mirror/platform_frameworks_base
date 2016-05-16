@@ -227,7 +227,7 @@ public class Tethering extends BaseNetworkObserver {
 
         int ifaceTypes[] = mContext.getResources().getIntArray(
                 com.android.internal.R.array.config_tether_upstream_types);
-        Collection<Integer> upstreamIfaceTypes = new ArrayList();
+        Collection<Integer> upstreamIfaceTypes = new ArrayList<>();
         for (int i : ifaceTypes) {
             upstreamIfaceTypes.add(new Integer(i));
         }
@@ -644,23 +644,23 @@ public class Tethering extends BaseNetworkObserver {
         boolean bluetoothTethered = false;
 
         synchronized (mPublicSync) {
-            Set ifaces = mIfaces.keySet();
-            for (Object iface : ifaces) {
+            Set<String> ifaces = mIfaces.keySet();
+            for (String iface : ifaces) {
                 TetherInterfaceSM sm = mIfaces.get(iface);
                 if (sm != null) {
                     if (sm.isErrored()) {
-                        erroredList.add((String)iface);
+                        erroredList.add(iface);
                     } else if (sm.isAvailable()) {
-                        availableList.add((String)iface);
+                        availableList.add(iface);
                     } else if (sm.isTethered()) {
-                        if (isUsb((String)iface)) {
+                        if (isUsb(iface)) {
                             usbTethered = true;
-                        } else if (isWifi((String)iface)) {
+                        } else if (isWifi(iface)) {
                             wifiTethered = true;
-                      } else if (isBluetooth((String)iface)) {
+                      } else if (isBluetooth(iface)) {
                             bluetoothTethered = true;
                         }
-                        activeList.add((String)iface);
+                        activeList.add(iface);
                     }
                 }
             }
@@ -952,11 +952,11 @@ public class Tethering extends BaseNetworkObserver {
     public String[] getTetheredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
-            Set keys = mIfaces.keySet();
-            for (Object key : keys) {
+            Set<String> keys = mIfaces.keySet();
+            for (String key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
                 if (sm.isTethered()) {
-                    list.add((String)key);
+                    list.add(key);
                 }
             }
         }
@@ -970,11 +970,11 @@ public class Tethering extends BaseNetworkObserver {
     public String[] getTetherableIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
-            Set keys = mIfaces.keySet();
-            for (Object key : keys) {
+            Set<String> keys = mIfaces.keySet();
+            for (String key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
                 if (sm.isAvailable()) {
-                    list.add((String)key);
+                    list.add(key);
                 }
             }
         }
@@ -992,11 +992,11 @@ public class Tethering extends BaseNetworkObserver {
     public String[] getErroredIfaces() {
         ArrayList<String> list = new ArrayList<String>();
         synchronized (mPublicSync) {
-            Set keys = mIfaces.keySet();
-            for (Object key : keys) {
+            Set<String> keys = mIfaces.keySet();
+            for (String key : keys) {
                 TetherInterfaceSM sm = mIfaces.get(key);
                 if (sm.isErrored()) {
-                    list.add((String)key);
+                    list.add(key);
                 }
             }
         }
@@ -1076,6 +1076,7 @@ public class Tethering extends BaseNetworkObserver {
             setInitialState(mInitialState);
         }
 
+        @Override
         public String toString() {
             String res = new String();
             res += mIfaceName + " - ";
@@ -1442,7 +1443,7 @@ public class Tethering extends BaseNetworkObserver {
      * could/should be moved here.
      */
     class UpstreamNetworkMonitor {
-        final HashMap<Network, NetworkState> mNetworkMap = new HashMap();
+        final HashMap<Network, NetworkState> mNetworkMap = new HashMap<>();
         NetworkCallback mDefaultNetworkCallback;
         NetworkCallback mDunTetheringCallback;
 
@@ -1519,12 +1520,6 @@ public class Tethering extends BaseNetworkObserver {
         // machine thread on behalf of the UpstreamNetworkMonitor.
         static final int EVENT_UPSTREAM_LINKPROPERTIES_CHANGED  = BASE_MASTER + 5;
         static final int EVENT_UPSTREAM_LOST                    = BASE_MASTER + 6;
-
-        // This indicates what a timeout event relates to.  A state that
-        // sends itself a delayed timeout event and handles incoming timeout events
-        // should inc this when it is entered and whenever it sends a new timeout event.
-        // We do not flush the old ones.
-        private int mSequenceNumber;
 
         private State mInitialState;
         private State mTetherModeAliveState;
@@ -1845,17 +1840,17 @@ public class Tethering extends BaseNetworkObserver {
                                 config_mobile_hotspot_provision_app_no_ui).isEmpty() == false) {
                             ArrayList<Integer> tethered = new ArrayList<Integer>();
                             synchronized (mPublicSync) {
-                                Set ifaces = mIfaces.keySet();
-                                for (Object iface : ifaces) {
+                                Set<String> ifaces = mIfaces.keySet();
+                                for (String iface : ifaces) {
                                     TetherInterfaceSM sm = mIfaces.get(iface);
                                     if (sm != null && sm.isTethered()) {
-                                        if (isUsb((String)iface)) {
+                                        if (isUsb(iface)) {
                                             tethered.add(new Integer(
                                                     ConnectivityManager.TETHERING_USB));
-                                        } else if (isWifi((String)iface)) {
+                                        } else if (isWifi(iface)) {
                                             tethered.add(new Integer(
                                                     ConnectivityManager.TETHERING_WIFI));
-                                        } else if (isBluetooth((String)iface)) {
+                                        } else if (isBluetooth(iface)) {
                                             tethered.add(new Integer(
                                                     ConnectivityManager.TETHERING_BLUETOOTH));
                                         }
@@ -2080,9 +2075,11 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        // Binder.java closes the resource for us.
+        @SuppressWarnings("resource")
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump ConnectivityService.Tether " +
@@ -2108,6 +2105,5 @@ public class Tethering extends BaseNetworkObserver {
             pw.decreaseIndent();
         }
         pw.decreaseIndent();
-        return;
     }
 }
