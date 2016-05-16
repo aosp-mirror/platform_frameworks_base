@@ -5482,6 +5482,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * @param forceParentCheck true to guarantee that this call will propagate to all ancestors,
+     *      false otherwise
+     *
      * @hide
      */
     public boolean getChildVisibleRect(
@@ -5541,7 +5544,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 (int) Math.ceil(rect.right), (int) Math.ceil(rect.bottom));
 
         if ((forceParentCheck || rectIsVisible) && mParent != null) {
-            rectIsVisible = mParent.getChildVisibleRect(this, r, offset);
+            if (mParent instanceof ViewGroup) {
+                rectIsVisible = ((ViewGroup) mParent)
+                        .getChildVisibleRect(this, r, offset, forceParentCheck);
+            } else {
+                rectIsVisible = mParent.getChildVisibleRect(this, r, offset);
+            }
         }
         return rectIsVisible;
     }
