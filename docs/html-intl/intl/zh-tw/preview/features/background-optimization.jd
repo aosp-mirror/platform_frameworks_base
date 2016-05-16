@@ -1,6 +1,8 @@
 page.title=背景最佳化
 page.metaDescription=對隱含式廣播的新限制。
 page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
 @jd:body
 
 <div id="qv-wrapper">

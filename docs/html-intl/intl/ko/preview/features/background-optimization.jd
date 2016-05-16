@@ -1,6 +1,8 @@
 page.title=백그라운드 최적화
 page.metaDescription=암시적 브로드캐스트에 대한 새로운 제한.
 page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
 @jd:body
 
 <div id="qv-wrapper">
