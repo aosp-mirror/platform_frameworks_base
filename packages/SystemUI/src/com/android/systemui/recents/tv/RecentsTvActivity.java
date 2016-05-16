@@ -413,6 +413,9 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.reset();
+
+        // Workaround for b/28333917.
+        finish();
     }
 
     @Override
