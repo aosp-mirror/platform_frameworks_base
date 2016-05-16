@@ -3365,6 +3365,10 @@ public class ConnectivityManager {
     /**
      * Determines if the calling application is subject to metered network restrictions while
      * running on background.
+     *
+     * @return {@link #RESTRICT_BACKGROUND_STATUS_DISABLED},
+     * {@link #RESTRICT_BACKGROUND_STATUS_ENABLED},
+     * or {@link #RESTRICT_BACKGROUND_STATUS_WHITELISTED}
      */
     public @RestrictBackgroundStatus int getRestrictBackgroundStatus() {
         try {
