@@ -1495,7 +1495,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN berria"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Berretsi PIN berria"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Konfiguratu debekuak aldatu ahal izateko idatzi beharko den PIN kodea"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINak ez datoz bat. Saiatu berriro."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN kodeak ez datoz bat. Saiatu berriro."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PINa laburregia da. 4 digitu izan behar ditu gutxienez."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other">Saiatu berriro <xliff:g id="COUNT">%d</xliff:g> segundo igarotakoan</item>

@@ -600,15 +600,15 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Cits"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Atzvanīšana"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Automobiļa"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Uzņēmuma galvenais tālruņa numurs"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Darba tālrunis"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Galvenais"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Cits faksa numurs"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telekss"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Teletaips/surdotālrunis"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobilā tālruņa numurs darbā"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peidžera numurs darbā"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Darba peidžers"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Palīgs"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"Multiziņa"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Pielāgoti"</string>

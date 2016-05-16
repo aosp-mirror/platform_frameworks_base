@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"傳送和查看短訊"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存空間"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"在您的裝置上存取相片、媒體和檔案"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄音"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
@@ -616,7 +616,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"住宅"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"公司"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"其他"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"流動電郵"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"流動"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"自訂"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"住宅"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"公司"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式仍可以存取資料，但存取頻率可能會降低。例如，除非您輕按圖片，否則系統可能不會顯示相關圖片。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式雖可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

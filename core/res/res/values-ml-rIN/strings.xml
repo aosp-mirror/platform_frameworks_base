@@ -231,7 +231,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ഫ്ലൈറ്റ് മോഡ്"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ഫ്ലൈറ്റ് മോഡ് ഓണാണ്"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ഫ്ലൈറ്റ് മോഡ് ഓഫാണ്"</string>
-    <string name="global_action_settings" msgid="1756531602592545966">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="global_action_settings" msgid="1756531602592545966">"ക്രമീകരണം"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"അസിസ്റ്റ്"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"വോയ്‌സ് സഹായം"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ഇപ്പോൾ ലോക്കുചെയ്യുക"</string>
@@ -245,7 +245,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യുക"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ഈ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ആക്സസ് ചെയ്യാൻ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"കലണ്ടർ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -556,7 +556,7 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"വീട്ടിലെ ഇമെയിൽ"</item>
-    <item msgid="7084237356602625604">"ഔദ്യോഗിക ഇമെയിൽ"</item>
+    <item msgid="7084237356602625604">"ഓഫീസ്"</item>
     <item msgid="1112044410659011023">"മറ്റുള്ളവ"</item>
     <item msgid="2374913952870110618">"ഇഷ്‌ടാനുസൃതം"</item>
   </string-array>
@@ -597,14 +597,14 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"മറ്റുള്ളവ"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"കോള്‍ബാക്ക്"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"കാര്‍‌"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"കമ്പനിയിലെ പ്രധാന നമ്പർ"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"ഓഫീസ് നമ്പർ"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"പ്രധാന നമ്പർ"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"മറ്റുള്ള ഫാക്‌സ്"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"റേഡിയോ"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"ടെലക്‌സ്"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ഔദ്യോഗിക മൊബൈല്‍‌"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"ഓഫീസ് മൊബൈല്‍"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"ഔദ്യോഗിക പേജര്‍‌"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"അസിസ്റ്റന്‍റ്"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -614,7 +614,7 @@
     <string name="eventTypeOther" msgid="7388178939010143077">"മറ്റുള്ളവ"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"ഇഷ്‌ടാനുസൃതം"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"ഹോം"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"ഔദ്യോഗിക ഇമെയിൽ"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"ഓഫീസ്"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"മറ്റുള്ളവ"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"മൊബൈൽ"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"ഇഷ്‌ടാനുസൃതം"</string>
@@ -1024,7 +1024,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"അറിയിപ്പ് വോളിയം"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"സ്ഥിര റിംഗ്‌ടോൺ"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"സ്ഥിര റിംഗ്‌ടോൺ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"ഒന്നുമില്ല"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"ഒന്നും വേണ്ട"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"റിംഗ്ടോണുകൾ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"അജ്ഞാത റിംഗ്‌ടോൺ"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1335,7 +1335,7 @@
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ഉപകരണത്തിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"സ്‌ക്രീൻ ഉപകരണത്തിലേക്ക് കാസ്റ്റുചെയ്യുക"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ഉപകരണങ്ങൾക്കായി തിരയുന്നു…"</string>
-    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ക്രമീകരണങ്ങൾ"</string>
+    <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ക്രമീകരണം"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"വിച്ഛേദിക്കുക"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"സ്‌കാൻ ചെയ്യുന്നു..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"കണക്റ്റുചെയ്യുന്നു..."</string>
