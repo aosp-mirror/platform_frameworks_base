@@ -24,6 +24,8 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.icu.text.DisplayContext;
+import android.icu.text.SimpleDateFormat;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -38,7 +40,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.DayPickerView.OnDaySelectedListener;
 import android.widget.YearPickerView.OnYearSelectedListener;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -303,6 +304,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         // Update the date formatter.
         final String datePattern = DateFormat.getBestDateTimePattern(locale, "EMMMd");
         mMonthDayFormat = new SimpleDateFormat(datePattern, locale);
+        mMonthDayFormat.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
         mYearFormat = new SimpleDateFormat("y", locale);
 
         // Update the header text.
