@@ -341,8 +341,6 @@ redirects:
   to: https://www.google.com/design/spec/style/typography.html
 - from: /design/style/writing.html
   to: https://www.google.com/design/spec/style/writing.html
-- from: /wear/preview/start.html
-  to: /training/building-wearables.html
 - from: /wear/design/user-interface.html
   to: /design/wear/index.html
 - from: /wear/design/index.html
@@ -1134,6 +1132,11 @@ redirects:
 - from: /tools/revisions/index.html
   to: /studio/releases/index.html
 
+# Wear Preview related (remove in mnc-io-docs)
+- from: /wear/preview/start.html
+  to: /training/building-wearables.html
+- from: /wear/preview/index.html
+  to: /patience.html
 
 # Just incase something was missed, go to intro page
 - from: /tools/...
