@@ -90,7 +90,6 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.lastFrameUpdatedTime = 0;
 
     mLocked.buttonState = 0;
-    mLocked.iconDetached = false;
 
     mPolicy->loadPointerIcon(&mLocked.pointerIcon);
 
@@ -185,10 +184,6 @@ void PointerController::setPosition(float x, float y) {
 }
 
 void PointerController::setPositionLocked(float x, float y) {
-    if (mLocked.iconDetached) {
-        return;
-    }
-
     float minX, minY, maxX, maxY;
     if (getBoundsLocked(&minX, &minY, &maxX, &maxY)) {
         if (x <= minX) {
@@ -222,10 +217,6 @@ void PointerController::fade(Transition transition) {
     // Remove the inactivity timeout, since we are fading now.
     removeInactivityTimeoutLocked();
 
-    if (mLocked.iconDetached) {
-        return;
-    }
-
     // Start fading.
     if (transition == TRANSITION_IMMEDIATE) {
         mLocked.pointerFadeDirection = 0;
@@ -242,10 +233,6 @@ void PointerController::unfade(Transition transition) {
 
     // Always reset the inactivity timer.
     resetInactivityTimeoutLocked();
-
-    if (mLocked.iconDetached) {
-        return;
-    }
 
     // Start unfading.
     if (transition == TRANSITION_IMMEDIATE) {
@@ -360,22 +347,6 @@ void PointerController::reloadPointerResources() {
 
     mLocked.presentationChanged = true;
     updatePointerLocked();
-}
-
-void PointerController::detachPointerIcon(bool detached) {
-    AutoMutex _l(mLock);
-
-    if (mLocked.iconDetached == detached) {
-        return;
-    }
-
-    mLocked.iconDetached = detached;
-    if (detached) {
-        mLocked.pointerFadeDirection = -1;
-    } else {
-        mLocked.pointerFadeDirection = 1;
-    }
-    startAnimationLocked();
 }
 
 void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_t orientation) {
