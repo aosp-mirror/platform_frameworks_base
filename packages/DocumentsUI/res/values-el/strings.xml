@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"Χωρίς αντιστοιχίσεις στο %1$s"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Δεν είναι δυνατό το άνοιγμα του αρχείου"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Δεν είναι δυνατή η διαγραφή ορισμένων εγγράφων"</string>
-    <string name="share_via" msgid="8966594246261344259">"Κοινή χρήση μέσω"</string>
+    <string name="share_via" msgid="8966594246261344259">"Κοινοποίηση μέσω"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Αντιγραφή αρχείων"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Μετακίνηση αρχείων"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"Διαγραφή αρχείων"</string>

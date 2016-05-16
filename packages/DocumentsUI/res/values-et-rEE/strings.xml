@@ -18,12 +18,12 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumendid"</string>
     <string name="downloads_label" msgid="959113951084633612">"Allalaadimised"</string>
-    <string name="title_open" msgid="4353228937663917801">"Ava:"</string>
+    <string name="title_open" msgid="4353228937663917801">"Ava asukohast:"</string>
     <string name="title_save" msgid="2433679664882857999">"Salvesta:"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Uus kaust"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Ruudustikkuva"</string>
     <string name="menu_list" msgid="7279285939892417279">"Loendikuva"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Sortimisalus:"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Sortimisalus"</string>
     <string name="menu_search" msgid="3816712084502856974">"Otsing"</string>
     <string name="menu_settings" msgid="8239065133341597825">"Salvestusruumi seaded"</string>
     <string name="menu_open" msgid="432922957274920903">"Ava"</string>
@@ -31,8 +31,8 @@
     <string name="menu_share" msgid="3075149983979628146">"Jaga"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Kustuta"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Vali kõik"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"Kopeeri asukohta ..."</string>
-    <string name="menu_move" msgid="1828090633118079817">"Teisaldamine kohta ..."</string>
+    <string name="menu_copy" msgid="3612326052677229148">"Kopeeri asukohta..."</string>
+    <string name="menu_move" msgid="1828090633118079817">"Teisalda asukohta..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Uus aken"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopeeri"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Kleebi"</string>
