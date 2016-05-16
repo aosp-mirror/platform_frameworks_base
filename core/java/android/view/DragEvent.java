@@ -160,6 +160,8 @@ public class DragEvent implements Parcelable {
      * ACTION_DRAG_STARTED.
      * </p>
      * @see #ACTION_DRAG_ENDED
+     * @see #getX()
+     * @see #getY()
      */
     public static final int ACTION_DRAG_STARTED = 1;
 
@@ -323,17 +325,16 @@ public class DragEvent implements Parcelable {
 
     /**
      * Gets the X coordinate of the drag point. The value is only valid if the event action is
-     * {@link #ACTION_DRAG_LOCATION} or {@link #ACTION_DROP}.
-     * @return The current drag point's Y coordinate
+     * {@link #ACTION_DRAG_STARTED}, {@link #ACTION_DRAG_LOCATION} or {@link #ACTION_DROP}.
+     * @return The current drag point's X coordinate
      */
     public float getX() {
         return mX;
     }
 
     /**
-     * Gets the Y coordinate of the drag point. The value is valid if the
-     * event action is {@link #ACTION_DRAG_ENTERED}, {@link #ACTION_DRAG_LOCATION},
-     * {@link #ACTION_DROP}, or {@link #ACTION_DRAG_EXITED}.
+     * Gets the Y coordinate of the drag point. The value is only valid if the event action is
+     * {@link #ACTION_DRAG_STARTED}, {@link #ACTION_DRAG_LOCATION} or {@link #ACTION_DROP}.
      * @return The current drag point's Y coordinate
      */
     public float getY() {
