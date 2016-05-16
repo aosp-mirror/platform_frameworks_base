@@ -40,6 +40,7 @@ public class ColorFilter {
             super.finalize();
         } finally {
             destroyFilter(native_instance);
+            native_instance = 0;
         }
     }
 
