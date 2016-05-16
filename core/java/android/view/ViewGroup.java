@@ -1579,7 +1579,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             Log.d(View.VIEW_LOG_TAG, "Sending drag-started to view: " + child);
         }
 
+        final float tx = mCurrentDragStartEvent.mX;
+        final float ty = mCurrentDragStartEvent.mY;
+
+        final float[] point = getTempPoint();
+        point[0] = tx;
+        point[1] = ty;
+        transformPointToViewLocal(point, child);
+
+        mCurrentDragStartEvent.mX = point[0];
+        mCurrentDragStartEvent.mY = point[1];
         final boolean canAccept = child.dispatchDragEvent(mCurrentDragStartEvent);
+        mCurrentDragStartEvent.mX = tx;
+        mCurrentDragStartEvent.mY = ty;
         if (canAccept) {
             mChildrenInterestedInDrag.add(child);
             if (!child.canAcceptDrag()) {
