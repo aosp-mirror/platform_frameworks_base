@@ -1691,7 +1691,7 @@ public class Activity extends ContextThemeWrapper
      * Request the Keyboard Shortcuts screen to show up. If it succeeds, this will trigger
      * {@link #onProvideKeyboardShortcuts} to retrieve the shortcuts for the foreground activity.
      */
-    public final void requestKeyboardShortcutsHelper() {
+    public final void requestShowKeyboardShortcuts() {
         Intent intent = new Intent(Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS);
         intent.setComponent(new ComponentName(KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME,
                 KEYBOARD_SHORTCUTS_RECEIVER_CLASS_NAME));
