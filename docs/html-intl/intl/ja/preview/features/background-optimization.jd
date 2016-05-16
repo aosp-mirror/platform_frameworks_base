@@ -1,6 +1,8 @@
 page.title=バックグラウンド処理の最適化
 page.metaDescription=暗黙的なブロードキャストに対する新しい制限。
 page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
 @jd:body
 
 <div id="qv-wrapper">
