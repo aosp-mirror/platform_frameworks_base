@@ -256,7 +256,7 @@
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запис на звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"прави снимки и записва видеоклипове"</string>
-    <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"телефона"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
@@ -1096,7 +1096,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Не се изискват разрешения"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"това може да ви струва пари"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"През USB се зарежда това устройство"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Това устройство се зарежда през USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"През USB се зарежда свързаното устройство"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за прехвърляне на файлове"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за прехвърляне на снимки"</string>

@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Fără titlu&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Niciun număr de telefon)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Necunoscut"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesaj vocal"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesagerie vocală"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problemă de conexiune sau cod MMI nevalid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operația este limitată la numerele cu apelări restricționate."</string>
@@ -258,7 +258,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze imagini"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
@@ -1542,7 +1542,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți în prezent poate să acceseze datele, dar o poate face mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

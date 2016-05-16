@@ -188,7 +188,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"Ovozsiz usul"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Simsiz tarmoqchi yoqish"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Simsiz tarmoqni o‘chirish"</string>
-    <string name="screen_lock" msgid="799094655496098153">"Ekranni qulflash"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Ekran qulfi"</string>
     <string name="power_off" msgid="4266614107412865048">"O‘chirish"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Jiringlovchi o‘chirilgan"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Jiringlab tebranish"</string>
@@ -1329,7 +1329,7 @@
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Taglik karnaylar"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Tizim"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth audio"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Ovozni Bluetooth orqali chiqarish"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Simsiz monitor"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Translatsiya qilish"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Qurilmaga ulanish"</string>

@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medier og filer på enheten din"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medieinnhold og filer på enheten din"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spill inn lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -605,7 +605,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Teksttelefon"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobil arbeid"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Personsøker arbeid"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Personsøker jobb"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Egendefinert"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Slettet av administratoren"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"For å forlenge batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"For å bidra til å redusere databruk blir enkelte apper hindret av Datasparing i å sende eller motta data i bakgrunnen. Apper du bruker for øyeblikket har tilgang til data, men utnytter ikke dette like ofte. Dette betyr for eksempel at bilder ikke vises før du trykker på dem."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå på"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

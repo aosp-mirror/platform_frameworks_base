@@ -23,7 +23,7 @@
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Кб"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Мб"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Гб"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Тб"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -211,7 +211,7 @@
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Закрыць?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Перазагрузка ў бяспечным рэжыме"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Хочаце перазагрузіцца ў бяспечным рэжыме? Гэта дазволіць адключыць усе іншыя ўсталяваныя прыкладанні. Пасля перазагрузкi iх праца будзе адноўлена."</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"Апошнія"</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Нядаўнія"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Няма апошніх прыкладанняў."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Параметры планшэта"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Параметры ТБ"</string>
@@ -530,12 +530,12 @@
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Сачыць за колькасцю няправільна набраных пароляў падчас разблакіроўкі экрана і блакіраваць тэлефон або сцерці ўсе даныя гэтага карыстальніка, калі няправільны пароль набраны занадта шмат разоў."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Змяніць блакіроўку экрана"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змяніць блакіроўку экрана."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Заблакаваць экран"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Кіраванне часам і спосабам блакавання экрана"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Сцерці ўсе дадзеныя"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Выдаліць дадзеныя з планшэта без папярэджання, выканаўшы скід налад."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Заблакіраваць экран"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Кіраваць як і калі блакіруецца экран."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Сцерці ўсе даныя"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Cцерці даныя з планшэта без папярэджання, выканаўшы скід да заводскіх даных."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сцерці даныя з тэлевізара без папярэджання, выканаўшы скід да заводскіх налад."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Выдаліць дадзеныя з тэлефона без папярэджання, выканаўшы скід налад."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Сцерці даныя з тэлефона без папярэджання, выканаўшы скід да заводскіх налад."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Сцерці карыстальніцкія даныя"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Сцерці даныя гэтага карыстальніка на дадзеным планшэце без папярэджання."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Сцерці даныя гэтага карыстальніка на дадзеным тэлевізары без папярэджання."</string>
@@ -846,7 +846,7 @@
     <string name="days" msgid="4774547661021344602">"д."</string>
     <string name="hour" msgid="2126771916426189481">"гадзіна"</string>
     <string name="hours" msgid="894424005266852993">"г."</string>
-    <string name="minute" msgid="9148878657703769868">"хв."</string>
+    <string name="minute" msgid="9148878657703769868">"хв"</string>
     <string name="minutes" msgid="5646001005827034509">"хв."</string>
     <string name="second" msgid="3184235808021478">"с."</string>
     <string name="seconds" msgid="3161515347216589235">"с."</string>
@@ -954,9 +954,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"Прыкладанне <xliff:g id="APP_NAME">%1$s</xliff:g> працуе"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Дакраніцеся, каб атрымаць дадатковую інфармацыю або спыніць праграму."</string>
     <string name="ok" msgid="5970060430562524910">"ОК"</string>
-    <string name="cancel" msgid="6442560571259935130">"Адмяніць"</string>
+    <string name="cancel" msgid="6442560571259935130">"Скасаваць"</string>
     <string name="yes" msgid="5362982303337969312">"ОК"</string>
-    <string name="no" msgid="5141531044935541497">"Адмяніць"</string>
+    <string name="no" msgid="5141531044935541497">"Скасаваць"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Увага"</string>
     <string name="loading" msgid="7933681260296021180">"Загрузка..."</string>
     <string name="capital_on" msgid="1544682755514494298">"Уключыць"</string>
@@ -1052,8 +1052,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Гучнасць выкліка"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Гучнасць прайгравальніка"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Гучнасць апавяшчэнняў"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Рынгтон па змаўчаннi"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Рынгтон па змаўчаннi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Стандартны рынгтон"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Стандартны рынгтон (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Няма"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Рынгтоны"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Невядомы рынгтон"</string>
@@ -1100,12 +1100,12 @@
     <string name="sms_control_title" msgid="7296612781128917719">"Адпраўка SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; дасылае вялікую колькасць SMS-паведамленняў. Дазволіць гэтаму прыкладанню працягваць адпраўляць паведамленні?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Дазволіць"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Забараніць"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Адмовіць"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; хоча адправiць паведамленне на адрас &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Гэта "<b>"можа прывесці да спагнання аплаты"</b>" з рахунку вашага мабільнага тэлефона."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Гэта прывядзе да спагнання аплаты з рахунку вашага мабільнага тэлефона."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Адправiць"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Адмена"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Скасаваць"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Захаваць мой выбар"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Пазней гэта можна змянiць у раздзеле \"Налады &gt; Прыкладаннi\""</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Заўсёды дазваляць"</string>
@@ -1121,8 +1121,8 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ ЗАРАЗ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Устаўлена новая SIM-карта"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Краніце, каб наладзіць"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Усталяваць час"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Усталяваць дату"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаць час"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаць дату"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаць"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Гатова"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"НОВАЕ: "</font></string>
@@ -1130,15 +1130,15 @@
     <string name="no_permissions" msgid="7283357728219338112">"Дазволу не патрабуецца"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"за гэта можа спаганяцца плата"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Па USB зараджаецца гэта прыладу"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Праз USB зараджаецца гэта прылада"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Па USB падачецца сілкаванне падключанай прыладзе"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB для перадачы файлаў"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB для перадачы фота"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB для MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Падключаны да USB-прылады"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Дакраніцеся, каб атрымаць іншыя параметры."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Прылада адладкі USB падключана"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Дакраніцеся, каб адключыць адладку USB."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Адладка па USB падключана"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Дакраніцеся, каб адключыць адладку па USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Стварэнне справаздачы пра памылку…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Падзяліцца справаздачай пра памылку?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Перадача справаздачы пра памылку..."</string>
@@ -1211,7 +1211,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Дазволіць гэты запыт?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Запыт на доступ"</string>
     <string name="allow" msgid="7225948811296386551">"Дазволіць"</string>
-    <string name="deny" msgid="2081879885755434506">"Забараніць"</string>
+    <string name="deny" msgid="2081879885755434506">"Адмовіць"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Дазвол запытаны"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Запытаны дазвол\nдля ўліковага запісу <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Вы выкарыстоўваеце гэту праграму па-за межамі свайго працоўнага профілю"</string>
@@ -1292,7 +1292,7 @@
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Папярэдні месяц"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"Наступны месяц"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Адмена"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Скасаваць"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Выдаліць"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Гатова"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Змена рэжыму"</string>
@@ -1334,11 +1334,11 @@
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Дакраніцеся, каб зняць абмежав."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертыфікат бяспекі"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Гэты сертыфікат сапраўдны."</string>
-    <string name="issued_to" msgid="454239480274921032">"Выдадзены:"</string>
+    <string name="issued_to" msgid="454239480274921032">"Каму выдадзена:"</string>
     <string name="common_name" msgid="2233209299434172646">"Звычайнае імя:"</string>
     <string name="org_name" msgid="6973561190762085236">"Арганізацыя:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Аддзел арганізацыі:"</string>
-    <string name="issued_by" msgid="2647584988057481566">"Выдана:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Хто выдаў:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Тэрмін дзеяння:"</string>
     <string name="issued_on" msgid="5895017404361397232">"Выдадзены:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Заканчваецца:"</string>

@@ -1023,7 +1023,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Média hangereje"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Értesítés hangereje"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Alapértelmezett csengőhang"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Alapértelmezett csengőhang (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Alap csengőhang (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Egyik sem"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Csengőhangok"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ismeretlen csengőhang"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Az akkumulátoridő növelése érdekében az energiatakarékos mód csökkenti az eszköz teljesítményét, és korlátozza a rezgést, a helyszolgáltatásokat, valamint a legtöbb háttéradatot is. Előfordulhat, hogy azok az e-mail-, üzenetküldő és egyéb alkalmazások, amelyek szinkronizálására számít, csak akkor frissítenek, ha megnyitja azokat.\n\nAz energiatakarékos mód automatikusan kikapcsol, ha eszköze töltőn van."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de ezt sokkal ritkábban tesszük meg. Ez például azt jelentheti, hogy a képek csak azt követően jelennek meg, hogy rájuk koppintott."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Az adatforgalom csökkentése érdekében az Adatforgalom-csökkentő megakadályozza, hogy egyes alkalmazások adatokat küldjenek vagy fogadjanak a háttérben. Az Ön által aktuálisan használt alkalmazások hozzáférhetnek az adatokhoz, de csak ritkábban. Ez például azt jelentheti, hogy a képek csak rákoppintás után jelennek meg."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bekapcsolja az Adatforgalom-csökkentőt?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bekapcsolás"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
