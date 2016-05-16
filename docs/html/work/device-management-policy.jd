@@ -24,7 +24,7 @@ parent.link=index.html
 <h2>Try it out</h2>
 
 <div class="download-box">
- <a href="http://developer.android.com/shareables/training/DeviceManagement.zip"
+ <a href="{@docRoot}shareables/training/DeviceManagement.zip"
 class="button">Download the sample</a>
  <p class="filename">DeviceManagement.zip</p>
 </div>
