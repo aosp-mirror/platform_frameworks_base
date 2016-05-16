@@ -2255,6 +2255,9 @@ static status_t writeLayoutClasses(
                 if (comment.size() <= 0) {
                     comment = getAttributeComment(assets, name8);
                 }
+                if (comment.contains(u"@removed")) {
+                    continue;
+                }
                 if (comment.size() > 0) {
                     const char16_t* p = comment.string();
                     while (*p != 0 && *p != '.') {
