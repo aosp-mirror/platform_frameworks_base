@@ -706,6 +706,42 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type":"youtube"
   },
   {
+    "title":"Enable Android Studio's &quot;Dex In Process&quot; for Faster App Builds",
+    "category":"",
+    "summary":"Android Studio 2.1 enables Dex In Process, a feature that can dramatically improve all your build times. To take advantage of Dex In Process, you’ll need to modify your gradle.properties file and increase the amount of memory allocated to the Gradle Daemon VM by 1 Gb, to a minimum of 2 Gb, using the org.gradle.jvmargs property.",
+    "url":"https://www.youtube.com/watch?v=-SY5nkNVUn0&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/-SY5nkNVUn0/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
+    "title":"Configuring Parallel Canary / Stable Android Studio Installations",
+    "category":"",
+    "summary":"Android Tool Time Protip: Maintain parallel Android Studio installations on canary and stable channels to take advantage of all the new hotness, without risking your stable dev environment.",
+    "url":"https://www.youtube.com/watch?v=SBbWGxXCMqQ&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/SBbWGxXCMqQ/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
+    "title":"What’s New in Android Studio 2.0",
+    "category":"",
+    "summary":"Android Studio 2.0 is focused on making your workflow faster. Faster builds, faster deployment, faster emulators. Everything. Faster.",
+    "url":"https://www.youtube.com/watch?v=xxx3Fn7EowU&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+    "group":"",
+    "keywords": ["studio", "tools"],
+    "tags": [
+    ],
+    "image":"https://i1.ytimg.com/vi/xxx3Fn7EowU/maxresdefault.jpg",
+    "type":"youtube"
+  },
+  {
     "title":"Google Play Services 7.5",
     "category":"",
     "summary":"This update brings App Invites, topics to GCM, GCMNetworkManager, Cast Remote Display API, Smart Lock for Passwords, Maps API for Android Wear, Google Fit extensions and more.",
@@ -3887,10 +3923,16 @@ METADATA['en'].collections = {
   "develop/landing/tools": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=StqAZ1OQbqA&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
       "https://www.youtube.com/watch?v=ZOz_yr8Yxq8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
       "https://www.youtube.com/watch?v=eOV2owswDkE&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
-      "https://www.youtube.com/watch?v=4rI4tTd7-J8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa"
+      "https://www.youtube.com/watch?v=StqAZ1OQbqA&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=-SY5nkNVUn0&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=4rI4tTd7-J8&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=SBbWGxXCMqQ&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=xxx3Fn7EowU&list=PLWz5rJ2EKKc_w6fodMGrA1_tsI3pqPbqa",
+      "https://www.youtube.com/watch?v=cD7NPxuuXYY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=2I6fuD20qlY&list=PLWz5rJ2EKKc8I9gHTMh5yKkwRRGE8BjbQ",
+      "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
     ]
   },
   "google/landing/services": {
@@ -5336,6 +5378,7 @@ METADATA['en'].collections = {
       "preview/features/icu4j-framework.html",
       "preview/features/multilingual-support.html",
       "preview/features/scoped-folder-access.html",
+      "preview/features/security-config.html",
       "preview/features/picture-in-picture.html",
       "preview/features/tv-recording-api.html"
     ]
