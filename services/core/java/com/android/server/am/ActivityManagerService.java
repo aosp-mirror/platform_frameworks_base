@@ -15284,7 +15284,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ProcessList.VISIBLE_APP_ADJ, ProcessList.PERCEPTIBLE_APP_ADJ,
             ProcessList.BACKUP_APP_ADJ, ProcessList.HEAVY_WEIGHT_APP_ADJ,
             ProcessList.SERVICE_ADJ, ProcessList.HOME_APP_ADJ,
-            ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MAX_ADJ
+            ProcessList.PREVIOUS_APP_ADJ, ProcessList.SERVICE_B_ADJ, ProcessList.CACHED_APP_MIN_ADJ
     };
     static final String[] DUMP_MEM_OOM_LABEL = new String[] {
             "Native",
