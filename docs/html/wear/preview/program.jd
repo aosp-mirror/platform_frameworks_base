@@ -35,7 +35,7 @@ page.image=images/cards/card-n-sdk_2x.png
             </h5>
 
             <p>
-              We’ll provide monthly updates during the preview, so you'll be
+              We'll provide frequent updates during the preview, so you'll be
               testing against the latest platform changes.
             </p>
           </div>
@@ -126,7 +126,7 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <p>
       The first three milestones provide an early test and development
-      environment to helps you identify compatibility issues in your current
+      environment to help you identify compatibility issues in your current
       apps and plan migration or feature work needed to target the new
       platform. This is the priority period in which to give us your feedback
       on features and APIs and file compatibility issues — for all of these,
