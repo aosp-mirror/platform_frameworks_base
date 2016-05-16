@@ -49,7 +49,7 @@ public abstract class AlertActivity extends Activity implements DialogInterface 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAlert = new AlertController(this, this, getWindow());
+        mAlert = AlertController.create(this, this, getWindow());
         mAlertParams = new AlertController.AlertParams(this);
     }
 
