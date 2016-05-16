@@ -450,6 +450,26 @@ interface ITelephony {
      */
     int getVoiceMessageCountForSubscriber(int subId);
 
+    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
+    void setVisualVoicemailSmsFilterEnabled(int subId, boolean value);
+
+    boolean isVisualVoicemailSmsFilterEnabled(String packageName, int subId);
+
+    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
+    void setVisualVoicemailSmsFilterClientPrefix(int subId, String prefix);
+
+    String getVisualVoicemailSmsFilterClientPrefix(String packageName, int subId);
+
+    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
+    void setVisualVoicemailSmsFilterOriginatingNumbers(int subId, in String[] numbers);
+
+    String[] getVisualVoicemailSmsFilterOriginatingNumbers(String packageName, int subId);
+
+    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
+    void setVisualVoicemailSmsFilterDestinationPort(int subId, int port);
+
+    int getVisualVoicemailSmsFilterDestinationPort(String packageName, int subId);
+
     /**
      * Returns the network type for data transmission
      * Legacy call, permission-free
