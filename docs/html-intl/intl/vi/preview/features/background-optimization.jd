@@ -1,6 +1,8 @@
 page.title=Tối ưu hóa Chạy ngầm
 page.metaDescription=Các hạn chế mới đối với truyền phát không biểu thị.
 page.keywords="android N", "implicit broadcasts", "job scheduler"
+page.image=images/cards/card-nyc_2x.jpg
+
 @jd:body
 
 <div id="qv-wrapper">
