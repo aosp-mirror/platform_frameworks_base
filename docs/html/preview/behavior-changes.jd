@@ -193,8 +193,8 @@ page.image=images/cards/card-n-changes_2x.png
 <p>
   In order to improve the security of private files, the private directory of
   apps targeting Android N or higher has restricted access (<code>0700</code>).
-  This change prevents leakage of metadata of private files, such as their size
-  or existence. This change has multiple side effects:
+  This setting prevents leakage of metadata of private files, such as their size
+  or existence. This permission change has multiple side effects:
 </p>
 
 <ul>
