@@ -1132,12 +1132,6 @@ redirects:
 - from: /tools/revisions/index.html
   to: /studio/releases/index.html
 
-# Wear Preview related (remove in mnc-io-docs)
-- from: /wear/preview/start.html
-  to: /training/building-wearables.html
-- from: /wear/preview/index.html
-  to: /patience.html
-
 # Just incase something was missed, go to intro page
 - from: /tools/...
   to: /studio/intro/index.html
