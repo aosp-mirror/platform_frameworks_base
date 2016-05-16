@@ -5672,7 +5672,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Shutting down backup manager service permanently.
             long ident = mInjector.binderClearCallingIdentity();
             try {
-                mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, false);
+                if (mInjector.getIBackupManager() != null) {
+                    mInjector.getIBackupManager()
+                            .setBackupServiceActive(UserHandle.USER_SYSTEM, false);
+                }
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed deactivating backup service.", e);
             } finally {
