@@ -329,7 +329,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.removeNotification(row);
         }
-        mHeaderUtil.restoreNotificationHeader(row);
+        if (!row.isRemoved()) {
+            mHeaderUtil.restoreNotificationHeader(row);
+        }
         onChildrenCountChanged();
         row.setIsChildInGroup(false, null);
     }
@@ -644,7 +646,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 continue;
             }
             mChildrenContainer.removeNotification(row);
-            mHeaderUtil.restoreNotificationHeader(row);
+            if (!row.isRemoved()) {
+                mHeaderUtil.restoreNotificationHeader(row);
+            }
             row.setIsChildInGroup(false, null);
         }
         onChildrenCountChanged();
@@ -1338,6 +1342,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     protected View getContentView() {
+        if (mIsSummaryWithChildren) {
+            return mChildrenContainer;
+        }
         return getShowingLayout();
     }
 

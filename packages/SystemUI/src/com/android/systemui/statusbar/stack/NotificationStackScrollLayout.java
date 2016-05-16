@@ -2188,7 +2188,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private void onViewRemovedInternal(View child, ViewGroup transientContainer) {
+    private void onViewRemovedInternal(View child, ViewGroup container) {
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
@@ -2200,10 +2200,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         boolean animationGenerated = generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child)) {
-                getOverlay().add(child);
+                container.getOverlay().add(child);
             } else if (Math.abs(expandableView.getTranslation()) != expandableView.getWidth()) {
-                transientContainer.addTransientView(child, 0);
-                expandableView.setTransientContainer(transientContainer);
+                container.addTransientView(child, 0);
+                expandableView.setTransientContainer(container);
             }
         } else {
             mSwipedOutViews.remove(child);
@@ -2885,21 +2885,23 @@ public class NotificationStackScrollLayout extends ViewGroup
             mPhoneStatusBar.resetUserExpandedStates();
 
             // lets make sure nothing is in the overlay / transient anymore
-            clearTransientViews(this);
+            clearTemporaryViews(this);
             for (int i = 0; i < getChildCount(); i++) {
                 ExpandableView child = (ExpandableView) getChildAt(i);
                 if (child instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                    clearTransientViews(row.getChildrenContainer());
+                    clearTemporaryViews(row.getChildrenContainer());
                 }
             }
-            getOverlay().clear();
         }
     }
 
-    private void clearTransientViews(ViewGroup viewGroup) {
+    private void clearTemporaryViews(ViewGroup viewGroup) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
             viewGroup.removeTransientView(viewGroup.getTransientView(0));
+        }
+        if (viewGroup != null) {
+            viewGroup.getOverlay().clear();
         }
     }
 
@@ -3020,7 +3022,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void clearViewOverlays() {
         for (View view : mClearOverlayViewsWhenFinished) {
-            getOverlay().remove(view);
+            StackStateAnimator.removeFromOverlay(view);
         }
     }
 
