@@ -63,14 +63,14 @@
             android:id="@+id/importance_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="-6dp"
+            android:paddingStart="3dp"
             android:paddingTop="4dp"
             android:paddingEnd="8dp" >
         <RadioButton
                 android:id="@+id/silent_importance"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:paddingStart="32dp"
+                android:paddingStart="22dp"
                 android:text="@string/show_silently"
                 style="@style/TextAppearance.NotificationGuts.Radio"
                 android:buttonTint="@color/notification_guts_buttons" />
@@ -78,7 +78,7 @@
                 android:id="@+id/block_importance"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:paddingStart="32dp"
+                android:paddingStart="22dp"
                 android:text="@string/block"
                 style="@style/TextAppearance.NotificationGuts.Radio"
                 android:buttonTint="@color/notification_guts_buttons" />
@@ -86,7 +86,7 @@
                 android:id="@+id/reset_importance"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:paddingStart="32dp"
+                android:paddingStart="22dp"
                 style="@style/TextAppearance.NotificationGuts.Radio"
                 android:buttonTint="@color/notification_guts_buttons" />
     </RadioGroup>
