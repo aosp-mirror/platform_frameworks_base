@@ -28,19 +28,16 @@ building apps on every type of Android device.</p>
 support for N Preview development on top of the faster Android Emulator and
 Instant Run feature from 2.0.</p>
 
-<div class="cols">
-  <div class="col-1of2">
+<p style="margin-top:24px">
     <a class="dac-hero-cta" href="{@docRoot}studio/index.html">
       <span class="dac-sprite dac-auto-chevron"></span>
       Get Android Studio
     </a>
-  </div>
-  <div class="col-1of2">
+  &nbsp;&nbsp;&nbsp;&nbsp;<wbr>
     <a class="dac-hero-cta" href="{@docRoot}studio/releases/index.html">
     <span class="dac-sprite dac-auto-chevron"></span>
     See the release notes</a>
-  </div>
-</div>
+</p>
 
       </div>
     </div>
