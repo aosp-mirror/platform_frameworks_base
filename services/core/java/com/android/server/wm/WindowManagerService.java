@@ -2123,8 +2123,17 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (displayContent.isDefaultDisplay) {
-                if (mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
-                        outOutsets)) {
+                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+                final Rect taskBounds;
+                if (atoken != null && atoken.mTask != null) {
+                    taskBounds = mTmpRect;
+                    atoken.mTask.getBounds(mTmpRect);
+                } else {
+                    taskBounds = null;
+                }
+                if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, mRotation,
+                        displayInfo.logicalWidth, displayInfo.logicalHeight, outContentInsets,
+                        outStableInsets, outOutsets)) {
                     res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
                 }
             } else {
