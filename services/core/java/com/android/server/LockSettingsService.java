@@ -43,6 +43,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.Parcel;
@@ -118,6 +119,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final Object mSeparateChallengeLock = new Object();
 
     private final Context mContext;
+    private final Handler mHandler;
     private final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
 
@@ -219,6 +221,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     public LockSettingsService(Context context) {
         mContext = context;
+        mHandler = new Handler();
         mStrongAuth = new LockSettingsStrongAuth(context);
         // Open the database
 
@@ -339,10 +342,20 @@ public class LockSettingsService extends ILockSettings.Stub {
         hideEncryptionNotification(new UserHandle(userId));
     }
 
-    public void onUnlockUser(int userId) {
+    public void onUnlockUser(final int userId) {
         // Hide notification first, as tie managed profile lock takes time
         hideEncryptionNotification(new UserHandle(userId));
-        tieManagedProfileLockIfNecessary(userId, null);
+
+        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+            // As tieManagedProfileLockIfNecessary() may try to unlock user, we should not do it
+            // in onUnlockUser() synchronously, otherwise it may cause a deadlock
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    tieManagedProfileLockIfNecessary(userId, null);
+                }
+            });
+        }
 
         // Now we have unlocked the parent user we should show notifications
         // about any profiles that exist.
