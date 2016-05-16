@@ -25,9 +25,13 @@ import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.system.ErrnoException;
 import android.util.ArraySet;
 import android.util.Log;
+import libcore.io.Libcore;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -162,5 +166,17 @@ public class PackageManagerServiceUtils {
         }
 
         return result;
+    }
+
+    /**
+     * Returns the canonicalized path of {@code path} as per {@code realpath(3)}
+     * semantics.
+     */
+    public static String realpath(File path) throws IOException {
+        try {
+            return Libcore.os.realpath(path.getAbsolutePath());
+        } catch (ErrnoException ee) {
+            throw ee.rethrowAsIOException();
+        }
     }
 }
