@@ -55,6 +55,7 @@ import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.text.TextUtils;
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -293,7 +294,9 @@ public class ZenModeHelper {
 
         ZenModeConfig newConfig;
         synchronized (mConfig) {
-            if (mConfig == null) return null;
+            if (mConfig == null) {
+                throw new AndroidRuntimeException("Could not create rule");
+            }
             if (DEBUG) {
                 Log.d(TAG, "addAutomaticZenRule rule= " + automaticZenRule + " reason=" + reason);
             }
@@ -304,7 +307,7 @@ public class ZenModeHelper {
             if (setConfigLocked(newConfig, reason, true)) {
                 return rule.id;
             } else {
-                return null;
+                throw new AndroidRuntimeException("Could not create rule");
             }
         }
     }
