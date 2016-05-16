@@ -11308,6 +11308,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void clearLastInputMethodWindowForTransition() {
+            synchronized (mWindowMap) {
+                mPolicy.setLastInputMethodWindowLw(null, null);
+            }
+        }
+
+        @Override
         public boolean isHardKeyboardAvailable() {
             synchronized (mWindowMap) {
                 return mHardKeyboardAvailable;
