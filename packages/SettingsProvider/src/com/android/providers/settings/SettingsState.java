@@ -17,6 +17,7 @@
 package com.android.providers.settings;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -27,7 +28,6 @@ import android.util.Base64;
 import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.BackgroundThread;
 import libcore.io.IoUtils;
 import libcore.util.Objects;
 import org.xmlpull.v1.XmlPullParser;
@@ -135,14 +135,14 @@ final class SettingsState {
     private long mNextId;
 
     public SettingsState(Object lock, File file, int key, int maxBytesPerAppPackage,
-            Handler handler) {
+            Looper looper) {
         // It is important that we use the same lock as the settings provider
         // to ensure multiple mutations on this state are atomicaly persisted
         // as the async persistence should be blocked while we make changes.
         mLock = lock;
         mStatePersistFile = file;
         mKey = key;
-        mHandler = handler;
+        mHandler = new MyHandler(looper);
         if (maxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_LIMITED) {
             mMaxBytesPerAppPackage = maxBytesPerAppPackage;
             mPackageToMemoryUsage = new ArrayMap<>();
@@ -548,8 +548,8 @@ final class SettingsState {
     private final class MyHandler extends Handler {
         public static final int MSG_PERSIST_SETTINGS = 1;
 
-        public MyHandler() {
-            super(BackgroundThread.getHandler().getLooper());
+        public MyHandler(Looper looper) {
+            super(looper);
         }
 
         @Override
