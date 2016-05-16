@@ -166,8 +166,9 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         public void trimMemory(int level) {
-            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
-                    mBackground != null) {
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW
+                    && level <= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
+                    && mBackground != null) {
                 if (DEBUG) {
                     Log.d(TAG, "trimMemory");
                 }
