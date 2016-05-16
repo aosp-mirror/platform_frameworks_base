@@ -69,10 +69,9 @@ Instant Run feature from 2.0.</p>
   <div class="resource-widget resource-flow-layout col-16"
        data-query="collection:develop/landing/tools"
        data-cardSizes="6x6"
-       data-maxResults="15"
+       data-maxResults="24"
        data-initial-results="3"
-       data-items-per-page="6"
-       data-sortOrder="random"></div>
+       data-items-per-page="6"></div>
 </div></section>
 
 <section class="dac-section dac-gray"><div class="wrap">
