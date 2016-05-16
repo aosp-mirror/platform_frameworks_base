@@ -1187,37 +1187,6 @@
   </li>
   <!-- End: Building for Auto -->
 
-
-  <!-- Start: Building for Work -->
-  <li class="nav-section">
-    <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>training/enterprise/index.html">
-      <span class="small">Building Apps for</span><br/>
-              Work
-      </a>
-    </div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
-        Ensuring Compatibility with Managed Profiles
-      </a>
-      </li>
-      <li><a href="<?cs var:toroot ?>training/enterprise/app-restrictions.html">
-        Implementing App Restrictions
-      </a>
-      </li>
-      <li><a href="<?cs var:toroot ?>training/enterprise/work-policy-ctrl.html">
-        Building a Device Policy Controller
-      </a>
-      </li>
-      <li><a href="<?cs var:toroot ?>training/enterprise/cosu.html">
-        Configuring Corporate-Owned, Single-Use Devices
-      </a>
-      </li>
-    </ul>
-  </li>
-  <!-- End: Building for Work -->
-
-
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/best-ux.html">
@@ -2118,7 +2087,7 @@ results."
       </li>
 
       <li>
-        <a href="<?cs var:toroot ?>training/enterprise/device-management-policy.html"
+        <a href="<?cs var:toroot ?>work/device-management-policy.html"
             description="How to create an application that enforces security policies on devices."
             >Enhancing Security with Device Management Policies</a>
       </li>
