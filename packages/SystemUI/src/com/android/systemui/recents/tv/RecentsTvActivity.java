@@ -73,6 +73,8 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private final static boolean DEBUG = false;
 
     public final static int EVENT_BUS_PRIORITY = Recents.EVENT_BUS_PRIORITY + 1;
+    private final static String RECENTS_HOME_INTENT_EXTRA =
+            "com.android.systemui.recents.tv.RecentsTvActivity.RECENTS_HOME_INTENT_EXTRA";
 
     private boolean mFinishedOnStartup;
     private RecentsPackageMonitor mPackageMonitor;
@@ -320,6 +322,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         homeIntent.addCategory(Intent.CATEGORY_HOME);
         homeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        homeIntent.putExtra(RECENTS_HOME_INTENT_EXTRA, true);
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent);
 
         mPipManager.addListener(mPipListener);
