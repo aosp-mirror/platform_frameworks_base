@@ -464,6 +464,14 @@ package android.view {
 
 }
 
+package android.webkit {
+
+  public class WebViewClient {
+    method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);
+  }
+
+}
+
 package android.widget {
 
   public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
