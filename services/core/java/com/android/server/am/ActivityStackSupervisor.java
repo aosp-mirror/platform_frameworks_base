@@ -4423,6 +4423,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 && task.getRootActivity() != null) {
             mActivityMetricsLogger.notifyActivityLaunching();
             mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
+            mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
+                    task.getTopActivity());
 
             // If we are launching the task in the docked stack, put it into resizing mode so
             // the window renders full-screen with the background filling the void. Also only

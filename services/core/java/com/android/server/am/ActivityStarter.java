@@ -846,40 +846,11 @@ class ActivityStarter {
                 }
             }
 
-            final String componentName = outRecord[0] != null ? outRecord[0].shortComponentName
-                    : null;
             final ActivityRecord launchedActivity = mReusedActivity != null
                     ? mReusedActivity : outRecord[0];
-            final ProcessRecord processRecord = launchedActivity != null
-                    ? mService.mProcessNames.get(launchedActivity.processName,
-                            launchedActivity.appInfo.uid)
-                    : null;
-            final boolean processRunning = processRecord != null;
-
-            // We consider this a "process switch" if the process of the activity that gets launched
-            // didn't have an activity that was in started state. In this case, we assume that lot
-            // of caches might be purged so the time until it produces the first frame is very
-            // interesting.
-            final boolean processSwitch = processRecord == null
-                    || !hasStartedActivity(processRecord, launchedActivity);
-            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, componentName,
-                    processRunning, processSwitch);
+            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, launchedActivity);
             return res;
         }
-    }
-
-    final boolean hasStartedActivity(ProcessRecord record, ActivityRecord launchedActivity) {
-        final ArrayList<ActivityRecord> activities = record.activities;
-        for (int i = activities.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = activities.get(i);
-            if (launchedActivity == activity) {
-                continue;
-            }
-            if (!activity.stopped) {
-                return true;
-            }
-        }
-        return false;
     }
 
     final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
