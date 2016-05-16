@@ -641,6 +641,10 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
+    boolean isAddressAllocated() {
+        return mAddressAllocated;
+    }
+
     // Initialize HDMI port information. Combine the information from CEC and MHL HAL and
     // keep them in one place.
     @ServiceThreadOnly
