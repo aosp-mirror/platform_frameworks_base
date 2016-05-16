@@ -38,7 +38,7 @@ nonavpage=true
         </a><br>-->
       </a>
     </div>
-    <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:0em;padding-right:1.5em;">
+    <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
       <a href="{@docRoot}preview/index.html">
         <img style="" class="dac-hero-image" src="/images/home/n-preview-hero.png"
              srcset="/images/home/n-preview-hero.png 1x,
