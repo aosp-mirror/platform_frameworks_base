@@ -1,27 +1,18 @@
-page.title=Implementing App Restrictions
+page.title=Set up App Restrictions
 page.metaDescription=Learn how to implement app restrictions and configuration settings that can be changed by other apps on the same device.
+page.image=images/work/cards/briefcase_600px.png
+
 @jd:body
 
-<div id="tb-wrapper">
-<div id="tb">
-
-<h2>This lesson teaches you to</h2>
-<ol>
- <li><a href="#define_restrictions">Define App Restrictions</a></li>
- <li><a href="#check_restrictions">Check App Restrictions</a></li>
- <li><a href="#listen">Listen for App Restriction Changes</a></li>
-</ol>
-
-<!-- related docs (NOT javadocs) -->
-<h2>Resources</h2>
-<ul>
-  <li><a href="{@docRoot}samples/AppRestrictionSchema/index.html">AppRestrictionSchema</a>
-    sample app</li>
-  <li><a href="{@docRoot}samples/AppRestrictionEnforcer/index.html">AppRestrictionEnforcer</a>
-    sample app</li>
-</ul>
-
-</div>
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#define_restrictions">Define App Restrictions</a></li>
+      <li><a href="#check_restrictions">Check App Restrictions</a></li>
+      <li><a href="#listen">Listen for App Restriction Changes</a></li>
+    </ol>
+  </div>
 </div>
 
 <p>If you are developing apps for the enterprise market, you may need to satisfy
@@ -152,10 +143,10 @@ enterprise administrator to:</p>
 &lt;restrictions xmlns:android="http://schemas.android.com/apk/res/android" &gt;
 
   &lt;restriction
-    android:key="download_on_cell"
-    android:title="@string/download_on_cell_title"
+    android:key="downloadOnCellular"
+    android:title="App is allowed to download data via cellular"
     android:restrictionType="bool"
-    android:description="@string/download_on_cell_description"
+    android:description="If 'false', app can only download data via Wi-Fi"
     android:defaultValue="true" /&gt;
 
 &lt;/restrictions&gt;
@@ -164,12 +155,6 @@ enterprise administrator to:</p>
 <p>
   The supported types for the <code>android:restrictionType</code> element are
   documented in the reference for {@link android.content.RestrictionsManager}.
-</p>
-
-<p class="note">
-  <strong>Note:</strong> <code>bundle</code> and
-  <code>bundle_array</code> restriction types are not supported by Google Play
-  for Work.
 </p>
 
 <p>
@@ -217,7 +202,7 @@ enterprise administrator to:</p>
   </li>
 
   <li>When the app is notified of a restriction change, as described in
-    <a href="#listen">Listen for App Configuration
+    <a href="#listen">Listen for Device Configuration
     Changes</a>
   </li>
 </ul>
@@ -260,29 +245,8 @@ enterprise administrator to:</p>
   the {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
   ACTION_APPLICATION_RESTRICTIONS_CHANGED} intent to find out if restrictions
   change while your app is active, as described in <a href="#listen">Listen for
-  App Restriction Changes</a>.
+  Device Configuration Changes</a>.
 </p>
-
-<p>
-  When your app checks for restrictions using
- {@link android.content.RestrictionsManager#getApplicationRestrictions
- RestrictionsManager.getApplicationRestrictions()}, we recommend that you
- check to see if the enterprise administrator has set the key-value pair
- {@link android.os.UserManager#KEY_RESTRICTIONS_PENDING} to true. If so, you
- should block the user from using the app, and prompt them to contact their
- enterprise administrator. The app should then proceed as normal, registering
- for the {@link android.content.Intent#ACTION_APPLICATION_RESTRICTIONS_CHANGED
- ACTION_APPLICATION_RESTRICTIONS_CHANGED} broadcast.
-</p>
-
-<img src="{@docRoot}images/training/enterprise/app_restrictions_diagram.png"
-width="620" srcset="{@docRoot}images/training/enterprise/app_restrictions_diagram.png 1x,
-{@docRoot}images/training/enterprise/app_restrictions_diagram_2x.png 2x" />
-
- <p class="img-caption">
-   <strong>Figure 1.</strong> Checking whether restrictions are pending before
-   registering for the broadcast.
- </p>
 
 <h3 id="read_restrictions">
   Reading and applying restrictions
@@ -293,11 +257,11 @@ width="620" srcset="{@docRoot}images/training/enterprise/app_restrictions_diagra
   getApplicationRestrictions()} method returns a {@link android.os.Bundle}
   containing a key-value pair for each restriction that has been set. The
   values are all of type <code>Boolean</code>, <code>int</code>,
-  <code>String</code>, <code>String[]</code>, <code>Bundle</code>, and
-  <code>Bundle[]</code>. Once you have the restrictions {@link android.os.Bundle},
-  you can check the current restrictions settings with the standard
-  {@link android.os.Bundle} methods for those data types, such as
-  {@link android.os.Bundle#getBoolean getBoolean()} or
+  <code>String</code>, and <code>String[]</code>. Once you have the
+  restrictions {@link android.os.Bundle}, you can check the current
+  restrictions settings with the standard {@link android.os.Bundle} methods for
+  those data types, such as {@link android.os.Bundle#getBoolean getBoolean()}
+  or
   {@link android.os.Bundle#getString getString()}.
 </p>
 
@@ -311,11 +275,10 @@ width="620" srcset="{@docRoot}images/training/enterprise/app_restrictions_diagra
 
 <p>
   It is up to your app to take appropriate action based on the current
-  restrictions settings. For example, if your app has a restriction schema
-  to specify whether it can download over a cellular connection (like the
-  example in <a href="#define_restrictions">Define App Restrictions</a>),
-  and you find that the restriction is set to false, you would have to disable
-  data download except when the device has a Wi-Fi connection, as shown in the
+  restrictions settings. For example, if your app has a restriction specifying
+  whether it can download data over a cellular connection, and you find that
+  the restriction is set to <code>false</code>, you would have to disable data
+  download except when the device has a Wi-Fi connection, as shown in the
   following example code:
 </p>
 
@@ -334,13 +297,6 @@ if (!appCanUseCellular) {
     // ...turn off app's cellular-download functionality
     // ...show appropriate notices to user
 }</pre>
-
-<p class="note">
-   <strong>Note:</strong> The restrictions schema should be
-   backward and forward compatible, since Google Play for Work
-   gives the EMM only one version of the App Restrictions
-   Schema per app.
- </p>
 
 <h2 id="listen">
   Listen for App Restriction Changes
@@ -389,8 +345,8 @@ registerReceiver(restrictionsReceiver, restrictionsFilter);
   <strong>Note:</strong> Ordinarily, your app does not need to be notified
   about restriction changes when it is paused. Instead, you should unregister
   your broadcast receiver when the app is paused. When the app resumes, you
-  first check for the current restrictions (as discussed in
-  <a href="#check_restrictions">Check App Restrictions</a>), then register
-  your broadcast receiver to make sure you're notified about restriction changes
+  first check for the current restrictions (as discussed in <a href=
+  "#check_restrictions">Check Device Restrictions</a>), then register your
+  broadcast receiver to make sure you're notified about restriction changes
   that happen while the app is active.
 </p>
