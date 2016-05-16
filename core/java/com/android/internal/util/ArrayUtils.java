@@ -162,6 +162,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(@Nullable boolean[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
