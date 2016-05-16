@@ -22,6 +22,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 
 import com.android.systemui.Interpolators;
@@ -797,7 +798,7 @@ public class StackStateAnimator {
     private void onAnimationFinished() {
         mHostLayout.onChildAnimationFinished();
         for (View v : mChildrenToClearFromOverlay) {
-            mHostLayout.getOverlay().remove(v);
+            removeFromOverlay(v);
         }
         mChildrenToClearFromOverlay.clear();
     }
@@ -829,7 +830,7 @@ public class StackStateAnimator {
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
                 if (changingView.getVisibility() == View.GONE) {
-                    mHostLayout.getOverlay().remove(changingView);
+                    removeFromOverlay(changingView);
                     continue;
                 }
 
@@ -854,7 +855,7 @@ public class StackStateAnimator {
                     @Override
                     public void run() {
                         // remove the temporary overlay
-                        mHostLayout.getOverlay().remove(changingView);
+                        removeFromOverlay(changingView);
                     }
                 });
             } else if (event.animationType ==
@@ -906,6 +907,13 @@ public class StackStateAnimator {
                 }
             }
             mNewEvents.add(event);
+        }
+    }
+
+    public static void removeFromOverlay(View changingView) {
+        ViewGroup parent = (ViewGroup) changingView.getParent();
+        if (parent != null) {
+            parent.removeView(changingView);
         }
     }
 
