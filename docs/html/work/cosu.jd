@@ -1,27 +1,20 @@
-page.title=Configuring Corporate-Owned, Single-Use Devices
+page.title=Set up Single-Purpose Devices
+page.tags=work, cosu
+page.keywords=cosu, work
 page.metaDescription=Learn how to develop single-use solutions for Android devices.
+page.image=images/work/cards/briefcase_600px.png
 
 @jd:body
 
-<div id="tb-wrapper">
-<div id="tb">
-
-<h2>This lesson teaches you to</h2>
-<ol>
- <li><a href="#locktask">How to use LockTask mode</a></li>
- <li><a href="#cosu-solutions">Build COSU solutions</a></li>
- <li><a href="#create-dpc">Create your own DPC app</a></li>
-</ol>
-
-<!-- related docs (NOT javadocs) -->
-<h2>You should also read</h2>
-<ul>
-  <li><a href="{@docRoot}training/enterprise/work-policy-ctrl.html">
-Building a Device Policy Controller</a>
-  </li>
-</ul>
-
-</div>
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#locktask">How to use LockTask mode</a></li>
+      <li><a href="#cosu-solutions">Build COSU solutions</a></li>
+      <li><a href="#create-dpc">Create your own DPC app</a></li>
+    </ol>
+  </div>
 </div>
 
 <p>
@@ -73,9 +66,9 @@ a more robust way to manage COSU devices, as discussed below.
 This graphic compares the features of app pinning and lock task mode:
 </p>
 
-<img src="{@docRoot}images/training/enterprise/pinning_vs_locktaskmode.png"
-width="640" srcset="{@docRoot}images/training/enterprise/pinning_vs_locktaskmode.png 1x,
-{@docRoot}images/training/enterprise/pinning_vs_locktaskmode_2x.png 2x" />
+<img src="{@docRoot}images/work/cosu-pinning_vs_locktaskmode.png"
+width="640" srcset="{@docRoot}images/work/cosu-pinning_vs_locktaskmode.png 1x,
+{@docRoot}images/work/cosu-pinning_vs_locktaskmode_2x.png 2x" />
 
  <p class="img-caption">
    <strong>Figure 1.</strong> Comparing the features of app pinning in Lollipop
@@ -422,7 +415,7 @@ public class CosuActivity extends Activity {
         // set System Update policy
 
         if (active){
-        	mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName, 
+          mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName,
                 SystemUpdatePolicy.createWindowedInstallPolicy(60,120));
         }
         else
@@ -431,7 +424,7 @@ public class CosuActivity extends Activity {
         // set this Activity as a lock task package
 
         mDevicePolicyManager.setLockTaskPackages(mAdminComponentName,
-    	    active ? new String[]{getPackageName()} : new String[]{});
+          active ? new String[]{getPackageName()} : new String[]{});
 
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MAIN);
         intentFilter.addCategory(Intent.CATEGORY_HOME);
@@ -460,18 +453,18 @@ public class CosuActivity extends Activity {
     }
 
     private void enableStayOnWhilePluggedIn(boolean enabled) {
-    	if (enabled) {
-    		mDevicePolicyManager.setGlobalSetting(
-    			mAdminComponentName, 
-                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-    			BatteryManager.BATTERY_PLUGGED_AC 
-    			| BatteryManager.BATTERY_PLUGGED_USB 
-    			| BatteryManager.BATTERY_PLUGGED_WIRELESS);
-    	} else {
-    		mDevicePolicyManager.setGlobalSetting(
-    			mAdminComponentName, 
-                        Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
-    	}
+      if (enabled) {
+        mDevicePolicyManager.setGlobalSetting(
+          mAdminComponentName,
+          Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+          BatteryManager.BATTERY_PLUGGED_AC
+          | BatteryManager.BATTERY_PLUGGED_USB
+          | BatteryManager.BATTERY_PLUGGED_WIRELESS);
+      } else {
+        mDevicePolicyManager.setGlobalSetting(
+          mAdminComponentName,
+          Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
+      }
 
     }
 
