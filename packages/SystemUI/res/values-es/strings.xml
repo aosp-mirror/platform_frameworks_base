@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí aparecerán tus pantallas recientes"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignorar aplicaciones recientes"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Descartar aplicaciones recientes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d pantallas en Visión general</item>
       <item quantity="one">1 pantalla en Visión general</item>
@@ -172,7 +172,7 @@
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
     <string name="accessibility_work_mode" msgid="2478631941714607225">"Modo de trabajo"</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Ignorar <xliff:g id="APP">%s</xliff:g>."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Descartar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Se ha eliminado <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Se han ignorado todas las aplicaciones recientes."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Abre la información de la aplicación <xliff:g id="APP">%s</xliff:g>."</string>
@@ -311,11 +311,11 @@
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Uso de datos"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Datos restantes"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Límite superado"</string>
-    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> utilizado"</string>
+    <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> usado"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límite de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertencia de <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modo de trabajo"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Ningún elemento reciente"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"No hay elementos recientes"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Has rechazado todo"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Información de la aplicación"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fijación de pantalla"</string>
@@ -572,9 +572,9 @@
     <string name="headset" msgid="4534219457597457353">"Auriculares"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Auriculares conectados"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Auriculares conectados"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Economizador de datos"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Economizador de datos activado"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economizador de datos desactivado"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Economizador de Datos"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Economizador de Datos activado"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Economizador de Datos desactivado"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Sí"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"No"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
@@ -597,9 +597,9 @@
     <string name="keycode_description" msgid="1403795192716828949">"Con los botones del código de teclado puedes añadir teclas a la barra de navegación que, al pulsarlas, emulan la tecla seleccionada. Primero debes seleccionar la tecla para el botón y, a continuación, la imagen que se va a mostrar en él."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona un botón de teclado"</string>
     <string name="preview" msgid="9077832302472282938">"Vista previa"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastrar para añadir mosaicos"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastrar aquí para eliminar"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"Cambiar"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastra para añadir funciones"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra aquí para quitar una función"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Mostrar horas, minutos y segundos"</item>

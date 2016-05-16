@@ -96,7 +96,7 @@
     <string name="voice_assist_label" msgid="3956854378310019854">"အသံ အကူအညီအား ဖွင့်ရန်"</string>
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"အလုပ်သစ်စီစဥ်မှုကို ရွေးပါ။"</string>
-    <string name="cancel" msgid="6442560571259935130">"ထားတော့"</string>
+    <string name="cancel" msgid="6442560571259935130">"ဖျက်သိမ်းရန်"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံ့ဝင်သောချုံ့ချဲ့ခလုတ်"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ချဲ့ခြင်း"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>

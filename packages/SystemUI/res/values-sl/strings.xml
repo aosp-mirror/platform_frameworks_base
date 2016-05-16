@@ -495,7 +495,7 @@
     <string name="high_importance" msgid="3441537905162782568">"Pomembnost: stopnja 4"</string>
     <string name="max_importance" msgid="4880179829869865275">"Pomembnost: stopnja 5"</string>
     <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"Aplikacija določi pomembnost za posamezno obvestilo."</string>
-    <string name="notification_importance_blocked" msgid="4237497046867398057">"Nikoli ne pokaži obvestil za to aplikacijo."</string>
+    <string name="notification_importance_blocked" msgid="4237497046867398057">"Nikoli ne pokaži obvestil te aplikacije."</string>
     <string name="notification_importance_min" msgid="7844224511187027155">"Brez prekinitev, predog., zvoka ali vibrir. v celoz. načinu. Skrij na zakl. zasl. in v vrst. stanja."</string>
     <string name="notification_importance_low" msgid="7950291702044409847">"Brez prekinitev, hitrih predogledov, zvoka ali vibriranja v celozaslonskem načinu."</string>
     <string name="notification_importance_default" msgid="5924405820269074915">"Brez prekinitev ali hitrih predogledov v celozaslonskem načinu."</string>

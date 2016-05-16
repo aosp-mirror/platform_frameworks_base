@@ -231,8 +231,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"작업 모드가 사용 설정되었습니다."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"작업 모드가 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"작업 모드가 사용 설정되었습니다."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"데이터 세이버를 사용 중지했습니다."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"데이터 세이버를 사용 설정했습니다."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"데이터 절약 모드를 사용 중지했습니다."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"데이터 절약 모드를 사용 설정했습니다."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"디스플레이 밝기"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 데이터 사용 중지됨"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
@@ -572,9 +572,9 @@
     <string name="headset" msgid="4534219457597457353">"헤드셋"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"헤드폰 연결됨"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"헤드셋 연결됨"</string>
-    <string name="data_saver" msgid="5037565123367048522">"데이터 세이버"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"데이터 세이버 사용"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"데이터 세이버 사용 안함"</string>
+    <string name="data_saver" msgid="5037565123367048522">"데이터 절약 모드"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"데이터 절약 모드 사용"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"데이터 절약 모드 사용 안함"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"사용"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"사용 안함"</string>
     <string name="nav_bar" msgid="1993221402773877607">"탐색 메뉴"</string>

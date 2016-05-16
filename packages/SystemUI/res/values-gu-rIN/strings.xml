@@ -22,7 +22,7 @@
     <string name="app_label" msgid="7164937344850004466">"સિસ્ટમ UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"સાફ કરો"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"સૂચિમાંથી દૂર કરો"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"એપ્લિકેશન માહિતી"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ઍપ્લિકેશન માહિતી"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"તમારી તાજેતરની સ્ક્રીન્સ અહીં દેખાય છે"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"તાજેતરની એપ્લિકેશનો કાઢી નાખો."</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
@@ -79,7 +79,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"મીડિયા પ્લેયર તરીકે માઉન્ટ કરો (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"કૅમેરા તરીકે માઉન્ટ કરો (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac માટે Android ફાઇલ ટ્રાન્સફર એપ્લિકેશન ઇન્સ્ટોલ કરો"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Mac માટે Android ફાઇલ ટ્રાન્સફર ઍપ્લિકેશન ઇન્સ્ટોલ કરો"</string>
     <string name="accessibility_back" msgid="567011538994429120">"પાછળ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"હોમ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"મેનુ"</string>
@@ -279,7 +279,7 @@
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"ફક્ત કટોકટીના કૉલ્સ"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"સેટિંગ્સ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"સમય"</string>
-    <string name="quick_settings_user_label" msgid="5238995632130897840">"મારા"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"હું"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"વપરાશકર્તા"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"નવો વપરાશકર્તા"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
@@ -315,7 +315,7 @@
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"કાર્ય મોડ"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"કોઇ તાજેતરની આઇટમ્સ નથી"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"તમે બધું સાફ કર્યું"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"એપ્લિકેશન માહિતી"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"ઍપ્લિકેશન માહિતી"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"સ્ક્રીન પિનિંગ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"શોધ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> પ્રારંભ કરી શકાયું નથી."</string>
@@ -381,7 +381,7 @@
     <string name="user_add_user_title" msgid="4553596395824132638">"નવા વપરાશકર્તાને ઉમેરીએ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"વપરાશકર્તાને દૂર કરીએ?"</string>
-    <string name="user_remove_user_message" msgid="1453218013959498039">"આ વપરાશકર્તાની તમામ એપ્લિકેશન્સ અને ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="user_remove_user_message" msgid="1453218013959498039">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"દૂર કરો"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"બેટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"પ્રદર્શન અને પૃષ્ઠભૂમિ ડેટા ઘટાડે છે"</string>
@@ -400,7 +400,7 @@
     <string name="disable_vpn" msgid="4435534311510272506">"VPN અક્ષમ કરો"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN ડિસ્કનેક્ટ કરો"</string>
     <string name="monitoring_description_device_owned" msgid="5780988291898461883">"તમારું ઉપકરણ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે.\n\nતમારા વ્યવસ્થાપક સેટિંગ્સ, કોર્પોરેટ ઍક્સેસ, એપ્લિકેશનો, તમારા ઉપકરણ સાથે સંકળાયેલ ડેટા અને તમારા ઉપકરણની સ્થાન માહિતી મોનિટર અને સંચાલિત કરી શકે છે. વધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"તમે VPN કનેક્શન સેટ કરવા માટે એપ્લિકેશન પરવાનગી આપી.\n\nઆ એપ્લિકેશન ઇમેઇલ્સ, એપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારા ઉપકરણ અને નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"તમે VPN કનેક્શન સેટ કરવા માટે ઍપ્લિકેશન પરવાનગી આપી.\n\nઆ ઍપ્લિકેશન ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારા ઉપકરણ અને નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"તમારું ઉપકરણ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે.\n\nતમારા વ્યવસ્થાપક સેટિંગ્સ, કોર્પોરેટ ઍક્સેસ, એપ્લિકેશનો, તમારા ઉપકરણ સાથે સંકળાયેલ ડેટા અને તમારા ઉપકરણની સ્થાન માહિતી મોનિટર અને સંચાલિત કરી શકે છે.\n\nતમે VPN સાથે કનેક્ટ થયેલા છો જે ઇમેઇલ્સ, એપ્લિકેશનો અને વેબસાઇટ્સ સહિતની, તમારી નેટવર્ક પ્રવૃત્તિ મોનિટર કરી શકે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"તમારી કાર્ય પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે.\n\nતમારા વ્યવસ્થાપક ઇમેઇલ્સ, એપ્લિકેશનો અને વેબસાઇટ્સ સહિતની તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરવામાં સમર્થ છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો.\n\nતમે VPN સાથે પણ કનેક્ટ છો, જે તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
@@ -465,7 +465,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"અભિનંદન! સિસ્ટમ UI ટ્યૂનરને સેટિંગ્સમાં ઉમેરવામાં આવ્યું છે"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"સેટિંગ્સમાંથી દૂર કરો"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"સેટિંગ્સમાંથી સિસ્ટમ UI ટ્યૂનર દૂર કરી અને તેની તમામ સુવિધાઓનો ઉપયોગ કરવાનું બંધ કરીએ?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"તમારા ઉપકરણ પર એપ્લિકેશન ઇન્સ્ટોલ થયેલ નથી"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"તમારા ઉપકરણ પર ઍપ્લિકેશન ઇન્સ્ટોલ થયેલ નથી"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"ઘડિયાળ સેકન્ડ બતાવો"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ઘડિયાળ સેકન્ડ સ્થિતિ બારમાં બતાવો. બૅટરીની આવરદા પર અસર કરી શકે છે."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ઝડપી સેટિંગ્સને ફરીથી ગોઠવો"</string>
@@ -515,7 +515,7 @@
     <string name="night_mode_disclaimer" msgid="598914896926759578">"ઘાટી થીમને Android OS ના મુખ્ય ક્ષેત્રો પર લાગુ કરે છે જે સામાન્ય રીતે સેટિંગ્સ જેવી લાઇટ થીમમાં પ્રદર્શિત કરવામાં આવે છે."</string>
     <string name="color_apply" msgid="9212602012641034283">"લાગુ કરો"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"સેટિંગ્સની પુષ્ટિ કરો"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"કેટલીક રંગ સેટિંગ્સ આ ઉપકરણને બિનઉપયોગી બનાવી શકે છે. આ રંગ સેટિંગ્સની પુષ્ટિ કરવા માટે ઑકે ક્લિક કરો, અન્યથા 10 સેકંડ પછી આ સેટિંગ્સ ફરીથી સેટ થશે."</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"કેટલીક રંગ સેટિંગ્સ આ ઉપકરણને બિનઉપયોગી બનાવી શકે છે. આ રંગ સેટિંગ્સની પુષ્ટિ કરવા માટે ઓકે ક્લિક કરો, અન્યથા 10 સેકંડ પછી આ સેટિંગ્સ ફરીથી સેટ થશે."</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"બૅટરી વપરાશ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ચાર્જિંગ દરમિયાન બૅટરી બચતકર્તા ઉપલબ્ધ નથી"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"બૅટરી બચતકર્તા"</string>

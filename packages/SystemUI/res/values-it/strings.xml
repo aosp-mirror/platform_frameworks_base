@@ -597,8 +597,8 @@
     <string name="keycode_description" msgid="1403795192716828949">"I pulsanti keycode consentono di aggiungere tasti della tastiera alla barra di navigazione. Quando vengono premuti, emulano il tasto selezionato. Innanzitutto è necessario selezionare il tasto da associare al pulsante, poi un\'immagine da mostrare sul pulsante."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Seleziona il tasto della tastiera"</string>
     <string name="preview" msgid="9077832302472282938">"Anteprima"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Trascina per aggiungere i riquadri"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trascinali qui per rimuoverli"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Trascina per aggiungere le funzioni"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Trascina qui per rimuovere"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Modifica"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Ora"</string>
   <string-array name="clock_options">
