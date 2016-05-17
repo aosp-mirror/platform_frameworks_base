@@ -178,6 +178,11 @@ public class ConnectivityController extends StateController implements
         public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
             updateTrackedJobs(uid);
         }
+
+        @Override
+        public void onRestrictBackgroundBlacklistChanged(int uid, boolean blacklisted) {
+            updateTrackedJobs(uid);
+        }
     };
 
     @Override
