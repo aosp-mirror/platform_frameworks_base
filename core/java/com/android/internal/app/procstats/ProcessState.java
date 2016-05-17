@@ -277,7 +277,7 @@ public final class ProcessState {
         if (!mDead) {
             return;
         }
-        Slog.wtfStack(TAG, "ProcessState dead: name=" + mName
+        Slog.w(TAG, "ProcessState dead: name=" + mName
                 + " pkg=" + mPackage + " uid=" + mUid + " common.name=" + mCommonProcess.mName);
     }
 
