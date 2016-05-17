@@ -1075,11 +1075,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mAnimateAfterRecentsDrawn = false;
             updateDockSide();
 
-            // Delay switching resizing mode because this might cause jank in recents animation
-            // that's long than this animation.
-            stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(),
-                    mLongPressEntraceAnimDuration, Interpolators.FAST_OUT_SLOW_IN,
-                    200 /* endDelay */);
+            post(() -> {
+                // Delay switching resizing mode because this might cause jank in recents animation
+                // that's longer than this animation.
+                stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(),
+                        mLongPressEntraceAnimDuration, Interpolators.FAST_OUT_SLOW_IN,
+                        200 /* endDelay */);
+            });
         }
         if (mGrowAfterRecentsDrawn) {
             mGrowAfterRecentsDrawn = false;
