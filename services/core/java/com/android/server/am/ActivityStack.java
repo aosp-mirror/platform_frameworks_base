@@ -1725,13 +1725,9 @@ final class ActivityStack {
                     continue;
                 }
                 aboveTop = false;
-                // mLaunchingBehind: Activities launching behind are at the back of the task stack
-                // but must be drawn initially for the animation as though they were visible.
-                final boolean activityVisibleBehind =
-                        (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
-                final boolean isVisible = (!behindFullscreenActivity || r.mLaunchTaskBehind
-                        || activityVisibleBehind) && okToShowLocked(r);
-                if (isVisible) {
+
+                if (shouldBeVisible(r, behindTranslucentActivity, stackVisibleBehind,
+                        visibleBehind, behindFullscreenActivity)) {
                     if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
                             + " finishing=" + r.finishing + " state=" + r.state);
                     // First: if this is not the current activity being started, make
@@ -1817,6 +1813,31 @@ final class ActivityStack {
             // Nothing is getting drawn or everything was already visible, don't wait for timeout.
             notifyActivityDrawnLocked(null);
         }
+    }
+
+    /** Return true if the input activity should be made visible */
+    private boolean shouldBeVisible(ActivityRecord r, boolean behindTranslucentActivity,
+            boolean stackVisibleBehind, ActivityRecord visibleBehind,
+            boolean behindFullscreenActivity) {
+        // mLaunchingBehind: Activities launching behind are at the back of the task stack
+        // but must be drawn initially for the animation as though they were visible.
+        final boolean activityVisibleBehind =
+                (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
+
+        if (!okToShowLocked(r)) {
+            return false;
+        }
+
+        boolean isVisible =
+                !behindFullscreenActivity || r.mLaunchTaskBehind || activityVisibleBehind;
+
+        if (isVisible && r.isRecentsActivity()) {
+            // Recents activity can only be visible if the home stack isn't fullscreen or is the
+            // focused stack.
+            isVisible = !mFullscreen || mStackSupervisor.isFocusedStack(this);
+        }
+
+        return isVisible;
     }
 
     private void checkTranslucentActivityWaiting(ActivityRecord top) {
