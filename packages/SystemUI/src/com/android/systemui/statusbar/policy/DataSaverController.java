@@ -93,6 +93,9 @@ public class DataSaverController {
         @Override
         public void onRestrictBackgroundWhitelistChanged(int uid, boolean whitelisted) {
         }
+        @Override
+        public void onRestrictBackgroundBlacklistChanged(int uid, boolean blacklisted) {
+        }
     };
 
     public interface Listener {
