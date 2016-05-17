@@ -899,6 +899,8 @@ public final class FloatingToolbar {
                 mOverflowPanel.setAlpha(1);
                 mOverflowPanel.setVisibility(View.VISIBLE);
                 mOverflowButton.setImageDrawable(mArrow);
+                mOverflowButton.setContentDescription(mContext.getString(
+                        R.string.floating_toolbar_close_overflow_description));
 
                 // Update x-coordinates depending on RTL state.
                 if (isRTL()) {
@@ -940,6 +942,8 @@ public final class FloatingToolbar {
                 mOverflowPanel.setAlpha(0);
                 mOverflowPanel.setVisibility(View.INVISIBLE);
                 mOverflowButton.setImageDrawable(mOverflow);
+                mOverflowButton.setContentDescription(mContext.getString(
+                        R.string.floating_toolbar_open_overflow_description));
 
                 if (hasOverflow()) {
                     // Update x-coordinates depending on RTL state.
