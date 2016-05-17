@@ -7051,6 +7051,32 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public int sendIntentSender(IIntentSender target, int code, Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+        if (target instanceof PendingIntentRecord) {
+            return ((PendingIntentRecord)target).sendWithResult(code, intent, resolvedType,
+                    finishedReceiver, requiredPermission, options);
+        } else {
+            try {
+                target.send(code, intent, resolvedType, null, requiredPermission, options);
+            } catch (RemoteException e) {
+            }
+            // Platform code can rely on getting a result back when the send is done, but if
+            // this intent sender is from outside of the system we can't rely on it doing that.
+            // So instead we don't give it the result receiver, and instead just directly
+            // report the finish immediately.
+            if (finishedReceiver != null) {
+                try {
+                    finishedReceiver.performReceive(intent, 0,
+                            null, null, false, false, UserHandle.getCallingUserId());
+                } catch (RemoteException e) {
+                }
+            }
+            return 0;
+        }
+    }
+
+    @Override
     public void cancelIntentSender(IIntentSender sender) {
         if (!(sender instanceof PendingIntentRecord)) {
             return;

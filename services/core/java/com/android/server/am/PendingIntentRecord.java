@@ -198,16 +198,21 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         ref = new WeakReference<PendingIntentRecord>(this);
     }
 
-    public int send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
-            String requiredPermission, Bundle options) throws TransactionTooLargeException {
+    public void send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+            String requiredPermission, Bundle options) {
+        sendInner(code, intent, resolvedType, finishedReceiver,
+                requiredPermission, null, null, 0, 0, 0, options, null);
+    }
+
+    public int sendWithResult(int code, Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         return sendInner(code, intent, resolvedType, finishedReceiver,
                 requiredPermission, null, null, 0, 0, 0, options, null);
     }
 
     int sendInner(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options, IActivityContainer container)
-            throws TransactionTooLargeException {
+            int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
 
@@ -253,6 +258,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 if (userId == UserHandle.USER_CURRENT) {
                     userId = owner.mUserController.getCurrentOrTargetUserIdLocked();
                 }
+                int res = 0;
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:
                         if (options == null) {
@@ -312,21 +318,23 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                     resolvedType, key.packageName, userId);
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startService intent", e);
+                        } catch (TransactionTooLargeException e) {
+                            res = ActivityManager.START_CANCELED;
                         }
                         break;
                 }
 
-                if (sendFinish) {
+                if (sendFinish && res != ActivityManager.START_CANCELED) {
                     try {
                         finishedReceiver.performReceive(new Intent(finalIntent), 0,
                                 null, null, false, false, key.userId);
                     } catch (RemoteException e) {
                     }
                 }
-                
+
                 Binder.restoreCallingIdentity(origId);
-                
-                return 0;
+
+                return res;
             }
         }
         return ActivityManager.START_CANCELED;
