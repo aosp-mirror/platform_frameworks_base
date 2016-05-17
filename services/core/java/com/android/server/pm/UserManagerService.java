@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -30,7 +31,9 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -142,6 +145,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_USER = "user";
     private static final String TAG_RESTRICTIONS = "restrictions";
     private static final String TAG_DEVICE_POLICY_RESTRICTIONS = "device_policy_restrictions";
+    private static final String TAG_GLOBAL_RESTRICTION_OWNER_ID = "globalRestrictionOwnerUserId";
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
@@ -273,6 +277,12 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @GuardedBy("mRestrictionsLock")
     private Bundle mDevicePolicyGlobalUserRestrictions;
+
+    /**
+     * Id of the user that set global restrictions.
+     */
+    @GuardedBy("mRestrictionsLock")
+    private int mGlobalRestrictionOwnerUserId = UserHandle.USER_NULL;
 
     /**
      * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
@@ -995,6 +1005,13 @@ public class UserManagerService extends IUserManager.Stub {
                 if (globalChanged) {
                     mDevicePolicyGlobalUserRestrictions = global;
                 }
+                // Remember the global restriction owner userId to be able to make a distinction
+                // in getUserRestrictionSource on who set local policies.
+                mGlobalRestrictionOwnerUserId = userId;
+            } else {
+                // When profile owner sets restrictions it passes null global bundle and we reset 
+                // global restriction owner userId.
+                mGlobalRestrictionOwnerUserId = UserHandle.USER_NULL;
             }
             {
                 // Update local.
@@ -1075,6 +1092,54 @@ public class UserManagerService extends IUserManager.Stub {
         }
         Bundle restrictions = getEffectiveUserRestrictions(userId);
         return restrictions != null && restrictions.getBoolean(restrictionKey);
+    }
+
+    /**
+     * @hide
+     *
+     * Returns who set a user restriction on a user.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @param restrictionKey the string key representing the restriction
+     * @param userId the id of the user for whom to retrieve the restrictions.
+     * @return The source of user restriction. Any combination of
+     *         {@link UserManager#RESTRICTION_NOT_SET},
+     *         {@link UserManager#RESTRICTION_SOURCE_SYSTEM},
+     *         {@link UserManager#RESTRICTION_SOURCE_DEVICE_OWNER}
+     *         and {@link UserManager#RESTRICTION_SOURCE_PROFILE_OWNER}
+     */
+    @Override
+    public int getUserRestrictionSource(String restrictionKey, int userId) {
+        checkManageUsersPermission("getUserRestrictionSource");
+        int result = UserManager.RESTRICTION_NOT_SET;
+
+        // Shortcut for the most common case
+        if (!hasUserRestriction(restrictionKey, userId)) {
+            return result;
+        }
+
+        if (hasBaseUserRestriction(restrictionKey, userId)) {
+            result |= UserManager.RESTRICTION_SOURCE_SYSTEM;
+        }
+
+        synchronized(mRestrictionsLock) {
+            Bundle localRestrictions = mDevicePolicyLocalUserRestrictions.get(userId);
+            if (!UserRestrictionsUtils.isEmpty(localRestrictions)
+                    && localRestrictions.getBoolean(restrictionKey)) {
+                // Local restrictions may have been set by device owner the userId of which is
+                // stored in mGlobalRestrictionOwnerUserId.
+                if (mGlobalRestrictionOwnerUserId == userId) {
+                    result |= UserManager.RESTRICTION_SOURCE_DEVICE_OWNER;
+                } else {
+                    result |= UserManager.RESTRICTION_SOURCE_PROFILE_OWNER;
+                }
+            }
+            if (!UserRestrictionsUtils.isEmpty(mDevicePolicyGlobalUserRestrictions)
+                    && mDevicePolicyGlobalUserRestrictions.getBoolean(restrictionKey)) {
+                result |= UserManager.RESTRICTION_SOURCE_DEVICE_OWNER;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -1474,6 +1539,11 @@ public class UserManagerService extends IUserManager.Stub {
                                 break;
                             }
                         }
+                    } else if (name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
+                        String ownerUserId = parser.getAttributeValue(null, ATTR_ID);
+                        if (ownerUserId != null) {
+                            mGlobalRestrictionOwnerUserId = Integer.parseInt(ownerUserId);
+                        }
                     }
                 }
             }
@@ -1733,6 +1803,9 @@ public class UserManagerService extends IUserManager.Stub {
                 UserRestrictionsUtils.writeRestrictions(serializer,
                         mDevicePolicyGlobalUserRestrictions, TAG_DEVICE_POLICY_RESTRICTIONS);
             }
+            serializer.startTag(null, TAG_GLOBAL_RESTRICTION_OWNER_ID);
+            serializer.attribute(null, ATTR_ID, Integer.toString(mGlobalRestrictionOwnerUserId));
+            serializer.endTag(null, TAG_GLOBAL_RESTRICTION_OWNER_ID);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
                 userIdsToWrite = new int[mUsers.size()];
@@ -2971,6 +3044,8 @@ public class UserManagerService extends IUserManager.Stub {
                 UserRestrictionsUtils
                         .dumpRestrictions(pw, "    ", mDevicePolicyGlobalUserRestrictions);
             }
+            pw.println();
+            pw.println("  Global restrictions owner id:" + mGlobalRestrictionOwnerUserId);
             pw.println();
             pw.println("  Guest restrictions:");
             synchronized (mGuestRestrictions) {
