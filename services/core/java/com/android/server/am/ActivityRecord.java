@@ -202,6 +202,7 @@ final class ActivityRecord {
     static final int STARTING_WINDOW_SHOWN = 1;
     static final int STARTING_WINDOW_REMOVED = 2;
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
+    boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
 
     boolean mUpdateTaskThumbnailWhenHidden;
     ActivityContainer mInitialActivityContainer;
@@ -1388,6 +1389,17 @@ final class ActivityRecord {
     void clearVoiceSessionLocked() {
         voiceSession = null;
         pendingVoiceInteractionStart = false;
+    }
+
+    void showStartingWindow(ActivityRecord prev, boolean createIfNeeded) {
+        final CompatibilityInfo compatInfo =
+                service.compatibilityInfoForPackageLocked(info.applicationInfo);
+        final boolean shown = service.mWindowManager.setAppStartingWindow(
+                appToken, packageName, theme, compatInfo, nonLocalizedLabel, labelRes, icon,
+                logo, windowFlags, prev != null ? prev.appToken : null, createIfNeeded);
+        if (shown) {
+            mStartingWindowState = STARTING_WINDOW_SHOWN;
+        }
     }
 
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
