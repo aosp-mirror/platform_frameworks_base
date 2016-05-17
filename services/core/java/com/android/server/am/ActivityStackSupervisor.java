@@ -123,7 +123,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -3406,12 +3405,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     private StackInfo getStackInfoLocked(ActivityStack stack) {
+        final ActivityDisplay display = mActivityDisplays.get(Display.DEFAULT_DISPLAY);
         StackInfo info = new StackInfo();
         mWindowManager.getStackBounds(stack.mStackId, info.bounds);
         info.displayId = Display.DEFAULT_DISPLAY;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;
         info.visible = stack.getStackVisibilityLocked(null) == STACK_VISIBLE;
+        info.position = display != null
+                ? display.mStacks.indexOf(stack)
+                : 0;
 
         ArrayList<TaskRecord> tasks = stack.getAllTasks();
         final int numTasks = tasks.size();
