@@ -58,6 +58,7 @@ interface IUserManager {
     boolean canHaveRestrictedProfile(int userHandle);
     int getUserSerialNumber(int userHandle);
     int getUserHandle(int userSerialNumber);
+    int getUserRestrictionSource(String restrictionKey, int userHandle);
     Bundle getUserRestrictions(int userHandle);
     boolean hasBaseUserRestriction(String restrictionKey, int userHandle);
     boolean hasUserRestriction(in String restrictionKey, int userHandle);
