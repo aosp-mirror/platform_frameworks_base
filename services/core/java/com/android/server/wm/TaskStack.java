@@ -1089,7 +1089,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
         setAdjustedBounds(mTmpAdjustedBounds);
 
-        final boolean isImeTarget = (mService.getImeTargetStackLocked() == this);
+        final boolean isImeTarget = (mService.getImeFocusStackLocked() == this);
         if (mAdjustedForIme && adjust && !isImeTarget) {
             final float alpha = Math.max(mAdjustImeAmount, mAdjustDividerAmount)
                     * IME_ADJUST_DIM_AMOUNT;
