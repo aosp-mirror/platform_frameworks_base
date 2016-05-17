@@ -42,8 +42,13 @@ import android.util.Log;
  * exactly one System Code and one NFCID2. For details about the use of
  * System Code and NFCID2, see the NFC Forum Digital specification.</p>
  * <p>To statically register a System Code and NFCID2 with the service, a {@link #SERVICE_META_DATA}
- * entry must be included in the declaration of the service. An example of a HostNfcFService
- * manifest declaration is shown below:
+ * entry must be included in the declaration of the service.
+ *
+ * <p>All {@link HostNfcFService HostNfcFService} declarations in the manifest must require the
+ * {@link android.Manifest.permission#BIND_NFC_SERVICE} permission
+ * in their &lt;service&gt; tag, to ensure that only the platform can bind to your service.</p>
+ *
+ * <p>An example of a HostNfcFService manifest declaration is shown below:
  *
  * <pre> &lt;service android:name=".MyHostNfcFService" android:exported="true" android:permission="android.permission.BIND_NFC_SERVICE"&gt;
  *     &lt;intent-filter&gt;
