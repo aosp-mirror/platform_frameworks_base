@@ -1445,6 +1445,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         + whitelisted + ")");
             }
         }
+        @Override
+        public void onRestrictBackgroundBlacklistChanged(int uid, boolean blacklisted) {
+            if (LOGD_RULES) {
+                // caller is NPMS, since we only register with them
+                log("onRestrictBackgroundBlacklistChanged(uid=" + uid + ", blacklisted="
+                        + blacklisted + ")");
+            }
+        }
     };
 
     /**
