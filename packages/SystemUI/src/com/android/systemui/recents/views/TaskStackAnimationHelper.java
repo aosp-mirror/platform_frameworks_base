@@ -276,12 +276,13 @@ public class TaskStackAnimationHelper {
                     tv.onStartFrontTaskEnterAnimation(mStackView.mScreenPinningEnabled);
                 }
             } else if (launchState.launchedViaDockGesture) {
-                // Animate the tasks up
+                // Animate the tasks up - add some delay to match the divider animation
                 AnimationProps taskAnimation = new AnimationProps()
                         .setDuration(AnimationProps.BOUNDS, dockGestureAnimDuration +
                                 (taskIndexFromBack * DOUBLE_FRAME_OFFSET_MS))
                         .setInterpolator(AnimationProps.BOUNDS,
                                 ENTER_WHILE_DOCKING_INTERPOLATOR)
+                        .setStartDelay(AnimationProps.BOUNDS, 48)
                         .setListener(postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
                 mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
