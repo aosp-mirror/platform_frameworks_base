@@ -2046,6 +2046,13 @@ i
         <attr name="showTitle" format="boolean" />
         <!-- @hide Whether fullDark, etc. should use default values if null. -->
         <attr name="needsDefaultBackgrounds" format="boolean" />
+        <!-- @hide Workaround until we replace AlertController with custom layout. -->
+        <attr name="controllerType">
+            <!-- The default controller. -->
+            <enum name="normal" value="0" />
+            <!-- Controller for micro specific layout. -->
+            <enum name="micro" value="1" />
+        </attr>
     </declare-styleable>
 
     <!-- @hide -->

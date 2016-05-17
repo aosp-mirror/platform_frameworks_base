@@ -64,11 +64,11 @@ public class AlertController {
 
     private final Context mContext;
     private final DialogInterface mDialogInterface;
-    private final Window mWindow;
+    protected final Window mWindow;
 
     private CharSequence mTitle;
-    private CharSequence mMessage;
-    private ListView mListView;
+    protected CharSequence mMessage;
+    protected ListView mListView;
     private View mView;
 
     private int mViewLayoutResId;
@@ -91,14 +91,14 @@ public class AlertController {
     private CharSequence mButtonNeutralText;
     private Message mButtonNeutralMessage;
 
-    private ScrollView mScrollView;
+    protected ScrollView mScrollView;
 
     private int mIconId = 0;
     private Drawable mIcon;
 
     private ImageView mIconView;
     private TextView mTitleView;
-    private TextView mMessageView;
+    protected TextView mMessageView;
     private View mCustomTitleView;
 
     private boolean mForceInverseBackground;
@@ -176,7 +176,19 @@ public class AlertController {
         return outValue.data != 0;
     }
 
-    public AlertController(Context context, DialogInterface di, Window window) {
+    public static final AlertController create(Context context, DialogInterface di, Window window) {
+        final TypedArray a = context.obtainStyledAttributes(
+                null, R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
+        int controllerType = a.getInt(R.styleable.AlertDialog_controllerType, 0);
+        a.recycle();
+
+        switch (controllerType) {
+            default:
+                return new AlertController(context, di, window);
+        }
+    }
+
+    protected AlertController(Context context, DialogInterface di, Window window) {
         mContext = context;
         mDialogInterface = di;
         mWindow = window;
@@ -643,7 +655,7 @@ public class AlertController {
         }
     }
 
-    private void setupContent(ViewGroup contentPanel) {
+    protected void setupContent(ViewGroup contentPanel) {
         mScrollView = (ScrollView) contentPanel.findViewById(R.id.scrollView);
         mScrollView.setFocusable(false);
 
