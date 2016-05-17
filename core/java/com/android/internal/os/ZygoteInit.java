@@ -241,24 +241,6 @@ public class ZygoteInit {
     }
 
     /**
-     * Warm up the providers that are already registered.
-     *
-     * By doing it here we avoid that each app does it when requesting a service from the
-     * provider for the first time.
-     */
-    private static void warmUpJcaProviders() {
-        long startTime = SystemClock.uptimeMillis();
-        Trace.traceBegin(
-                Trace.TRACE_TAG_DALVIK, "Starting warm up of JCA providers");
-        for (Provider p : Security.getProviders()) {
-            p.warmUpServiceProvision();
-        }
-        Log.i(TAG, "Warmed up JCA providers in "
-                + (SystemClock.uptimeMillis()-startTime) + "ms.");
-        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
-    }
-
-    /**
      * Performs Zygote process initialization. Loads and initializes
      * commonly used classes.
      *
