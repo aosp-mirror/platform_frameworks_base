@@ -69,7 +69,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     public void reset() {
         // start fresh
         mDismissing = false;
-        resetPasswordText(false /* animate */);
+        resetPasswordText(false /* animate */, false /* announce */);
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
                 KeyguardUpdateMonitor.getCurrentUser());
@@ -169,10 +169,10 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                 mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
             }
         }
-        resetPasswordText(true /* animate */);
+        resetPasswordText(true /* animate */, !matched /* announce deletion if no match */);
     }
 
-    protected abstract void resetPasswordText(boolean animate);
+    protected abstract void resetPasswordText(boolean animate, boolean announce);
     protected abstract String getPasswordText();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
     protected abstract void setPasswordEntryInputEnabled(boolean enabled);

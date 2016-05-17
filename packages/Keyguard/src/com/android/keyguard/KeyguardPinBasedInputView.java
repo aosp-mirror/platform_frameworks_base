@@ -159,8 +159,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected void resetPasswordText(boolean animate) {
-        mPasswordEntry.reset(animate);
+    protected void resetPasswordText(boolean animate, boolean announce) {
+        mPasswordEntry.reset(animate, announce);
     }
 
     @Override
@@ -214,7 +214,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             public boolean onLongClick(View v) {
                 // check for time-based lockouts
                 if (mPasswordEntry.isEnabled()) {
-                    resetPasswordText(true /* animate */);
+                    resetPasswordText(true /* animate */, true /* announce */);
                 }
                 doHapticKeyClick();
                 return true;
