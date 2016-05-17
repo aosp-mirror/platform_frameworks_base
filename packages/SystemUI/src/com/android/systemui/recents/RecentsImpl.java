@@ -829,7 +829,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         boolean useThumbnailTransition = (runningTask != null) && !isHomeStackVisible && hasRecentTasks;
 
         // Update the launch state that we need in updateHeaderBarLayout()
-        launchState.launchedFromHome = !useThumbnailTransition;
+        launchState.launchedFromHome = !useThumbnailTransition && !mLaunchedWhileDocking;
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;

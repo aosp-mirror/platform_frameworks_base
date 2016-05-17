@@ -31,6 +31,7 @@ import android.graphics.Region.Op;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.renderscript.Matrix4f;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
@@ -310,8 +311,6 @@ public class ImageWallpaper extends WallpaperService {
                 Log.d(TAG, "onSurfaceRedrawNeeded");
             }
             super.onSurfaceRedrawNeeded(holder);
-
-            mLastSurfaceHeight = mLastSurfaceWidth = -1;
             drawFrame();
         }
 
@@ -325,6 +324,7 @@ public class ImageWallpaper extends WallpaperService {
                 return;
             }
             try {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "drawWallpaper");
                 DisplayInfo displayInfo = getDefaultDisplayInfo();
                 int newRotation = displayInfo.rotation;
 
@@ -419,6 +419,7 @@ public class ImageWallpaper extends WallpaperService {
                     drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
                 }
             } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 if (FIXED_SIZED_SURFACE && !mIsHwAccelerated) {
                     // If the surface is fixed-size, we should only need to
                     // draw it once and then we'll let the window manager
