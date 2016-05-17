@@ -268,7 +268,7 @@ public class PasswordTextView extends View {
         return charState;
     }
 
-    public void reset(boolean animated) {
+    public void reset(boolean animated, boolean announce) {
         String textbefore = mText;
         mText = "";
         int length = mTextChars.size();
@@ -297,7 +297,9 @@ public class PasswordTextView extends View {
         if (!animated) {
             mTextChars.clear();
         }
-        sendAccessibilityEventTypeViewTextChanged(textbefore, 0, textbefore.length(), 0);
+        if (announce) {
+            sendAccessibilityEventTypeViewTextChanged(textbefore, 0, textbefore.length(), 0);
+        }
     }
 
     void sendAccessibilityEventTypeViewTextChanged(String beforeText, int fromIndex,
