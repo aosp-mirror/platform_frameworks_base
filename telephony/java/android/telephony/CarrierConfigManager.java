@@ -592,6 +592,14 @@ public class CarrierConfigManager {
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
 
     /**
+     * The Component Name of the activity that can setup the emergency addrees for WiFi Calling
+     * as per carrier requirement.
+     * @hide
+     */
+     public static final String KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING =
+            "wfc_emergency_address_carrier_app_string";
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -802,6 +810,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
 
         // MMS defaults
