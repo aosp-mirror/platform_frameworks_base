@@ -17509,12 +17509,39 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 throw new IllegalArgumentException(
                         "Unknown component: " + packageName + "/" + className);
             }
+            // Don't allow other apps to disable an active profile owner
+            if (!UserHandle.isSameApp(uid, pkgSetting.appId)) {
+                final DevicePolicyManagerInternal dpmi = LocalServices
+                        .getService(DevicePolicyManagerInternal.class);
+                if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+                    throw new SecurityException("Cannot disable a device owner or a profile owner");
+                }
+            }
             // Allow root and verify that userId is not being specified by a different user
             if (!allowedByPermission && !UserHandle.isSameApp(uid, pkgSetting.appId)) {
                 throw new SecurityException(
                         "Permission Denial: attempt to change component state from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
+            }
+            if (uid == Process.SHELL_UID) {
+                // Shell can only change whole packages between ENABLED and DISABLED_USER states
+                int oldState = pkgSetting.getEnabled(userId);
+                if (className == null
+                    &&
+                    (oldState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                     || oldState == COMPONENT_ENABLED_STATE_DEFAULT
+                     || oldState == COMPONENT_ENABLED_STATE_ENABLED)
+                    &&
+                    (newState == COMPONENT_ENABLED_STATE_DISABLED_USER
+                     || newState == COMPONENT_ENABLED_STATE_DEFAULT
+                     || newState == COMPONENT_ENABLED_STATE_ENABLED)) {
+                    // ok
+                } else {
+                    throw new SecurityException(
+                            "Shell cannot change component state for " + packageName + "/"
+                            + className + " to " + newState);
+                }
             }
             if (className == null) {
                 // We're dealing with an application/package level state change
