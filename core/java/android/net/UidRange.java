@@ -48,6 +48,17 @@ public final class UidRange implements Parcelable {
         return start / PER_USER_RANGE;
     }
 
+    public boolean contains(int uid) {
+        return start <= uid && uid <= stop;
+    }
+
+    /**
+     * @return {@code true} if this range contains every UID contained by the {@param other} range.
+     */
+    public boolean containsRange(UidRange other) {
+        return start <= other.start && other.stop <= stop;
+    }
+
     @Override
     public int hashCode() {
         int result = 17;
