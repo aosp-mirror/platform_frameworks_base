@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivdir. Keçid etmək üçün basın."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"İşləyən xidmətlər"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Hazırda prosesdə olan xidmətləri görüntüləyin və onlara nəzarət edin"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Çox prosesli WebView\'nu aktiv edin"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView rendererləri təcrid olunmuş prosesdə işlədin."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Çox prosesli WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView rendererləri ayrıca işə salın"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView icrası"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView icrasını ayarlayın"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Bu seçim artıq etibarlı deyil. Yenidən cəhd edin."</string>

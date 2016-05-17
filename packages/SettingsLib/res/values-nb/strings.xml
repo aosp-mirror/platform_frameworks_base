@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trykk for å slå av/på."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører for øyeblikket"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Slå på WebView for flere prosesser"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Kjør WebView-gjengivelser i en isolert prosess."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView for flere prosesser"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Kjør WebView-gjengivere separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-implementering"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Angi WebView-implementering"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Dette valget er ikke gyldig lenger. Prøv på nytt."</string>

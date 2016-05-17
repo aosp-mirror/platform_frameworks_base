@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktyvi. Palieskite, kad perjungtumėte."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Vykdomos paslaugos"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Žiūrėti ir valdyti dabar vykdomas paslaugas"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Įgal. kelių procesų „WebView“"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Paleisti „WebView“ pateikimo priemones vienam procesui."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Kelių procesų „WebView“"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Paleisti „WebView“ pateikimo priemones atskirai"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"„WebView“ diegimas"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"„WebView“ diegimo nustatymas"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Šios parinkties nebegalima pasirinkti. Bandykite dar kartą."</string>

@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"فعال کردن وب‌نمای چندپردازشی"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"اجرای تولیدکننده تصویر وب‌نما در یک پردازش مجزا."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"وب‌نمای چندپردازشی"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"اجرای تولیدکننده تصویر وب‌نما"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"اجرای وب‌نما"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"تنظیم اجرای وب‌نما"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"این انتخاب دیگر معتبر نیست. دوباره امتحان کنید."</string>

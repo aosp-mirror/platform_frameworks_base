@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Не атрымлiваецца выканаць сканаванне для сетак"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Няма"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Захавана"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Адключаная"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Адключана"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Збой канфігурацыі IP"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Збой падлучэння Wi-Fi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Праблема аўтэнтыфікацыі"</string>
@@ -71,7 +71,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Выкарыстоўваць для ўводу"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Падлучыць"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"СПАЛУЧЫЦЬ"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Адмена"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Скасаваць"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Спалучэнне дае доступ да вашых кантактаў і гісторыі выклікаў пры падлучэнні."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не атрымалася падключыцца да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не атрымалася спалучыцца з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, таму што PIN-код або пароль няправiльныя."</string>
@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Некат. параметры па змаўч. усталяваныя"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Параметры па змаўчанні не ўсталяваныя"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Налады Text-to-speech"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Выводзіць праз Text-to-speech"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Сінтэз маўлення"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Хуткасць гаворкі"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Хуткасць, з якой кажуць тэкст"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Тон"</string>
@@ -139,7 +139,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"Выбраць профіль"</string>
     <string name="category_personal" msgid="1299663247844969448">"Асабісты"</string>
     <string name="category_work" msgid="8699184680584175622">"Рабочы"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Опцыі распрацоўшчыка"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Налада параметраў для распрацоўкі прыкладанняў"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Параметры распрацоўшчыка недаступныя для гэтага карыстальніка"</string>
@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Уключэнне слядоў OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Адключыць аўдыёмаршрутызацыю USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Адкл. аўт. перанакір. на перыфер. USB-прыл. аўдыё"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Паказаць межы размяшчэння"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Паказаць межы макета"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Паказаць межы кліпу, палі і г. д."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Прымусовая раскладка справа налева"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Прымусовая раскладка экрана справа налева для ўсіх рэгіянальных налад"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Прымусовае выкананне 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Уключыць 4x MSAA у прыкладаннях з OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Адладка аперацый непрамавугольнага кліпа"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Апрацоўка профілю GPU"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Профіль рэндэрінгу GPU"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Маштаб анімацыі акна"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Маштаб перадачы анімацыі"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Шкала працягласці анiматара"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Актыўная. Краніце, каб пераключыць."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Прагляд запушчаных службаў i кіраванне iмi"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Уключыць шматпрацэсны WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Запусціць апрацоўшчыкі WebView у ізаляваным працэсе."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Шматпрацэсны WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Запусціць апрацоўшчыкі WebView асобна"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Рэалізацыя WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Наладзіць рэалізацыю WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Гэты варыянт больш не даступны. Паспрабуйце яшчэ раз."</string>

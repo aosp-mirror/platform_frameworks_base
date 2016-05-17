@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Jõusta 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Luba 4x MSAA OpenGL ES 2.0 rakendustes"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Silu klipi mittetäisnurksed toimingud"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Profiili GPU renderdamine"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU renderduse profiil"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Akna animatsiooni skaala"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Ülemineku animats. skaala"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animaatori kestuse skaala"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiivne. Puudutage vahetamiseks."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Käitatud teenused"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Praegu käitatud teenuste vaatamine ja juhtimine"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Luba mitme protsessiga WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView\' renderdajad käitatakse eraldi protsessis."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Mitme protsessiga WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Käita WebView\' renderdajaid eraldi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView\' rakendamine"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView\' rakendamise seadistamine"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"See valik ei kehti enam. Proovige uuesti."</string>
@@ -293,7 +293,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaalia (punane-roheline)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaalia (punane-roheline)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanomaalia (sinine-kollane)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Värviparandus"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Värvide korrigeerimine"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"See funktsioon on katseline ja võib mõjutada toimivust."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Alistas <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="4400068916452346544">"Umbes <xliff:g id="TIME">%1$s</xliff:g> on jäänud"</string>
@@ -327,7 +327,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> tagasi"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> on jäänud"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Väike"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Vaikimisi"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Vaikeseade"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Suur"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Suurem"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Suurim"</string>

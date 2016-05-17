@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"සක්‍රියයි. ටොගල කිරීමට තට්ටු කරන්න."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"බහු සැකසීම් WebView සබල කරන්න"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"හුදකලා වූ ක්‍රියාවලියක WebView විදහා දැක්වීම් ධාවනය කරන්න."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"බහු සැකසීම් WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView විදහා දැක්වීම් ධාවනය කරන්න"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ක්‍රියාත්මක කිරීම"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ක්‍රියාත්මක කිරීම සකසන්න"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"මෙම තෝරා ගැනීම තව දුරටත් වලංගු නැත. නැවත උත්සාහ කරන්න."</string>

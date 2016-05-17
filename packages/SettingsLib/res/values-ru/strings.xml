@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Включено. Нажмите, чтобы отключить."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Работающие приложения"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Просмотр и управление работающими приложениями"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Включить многопроц. WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Выполнять обработчики WebView в изолированном процессе"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Многопроцессорный WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Выполнять обработчики WebView отдельно"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Настройки сервиса WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Вариант недействителен. Повторите попытку."</string>

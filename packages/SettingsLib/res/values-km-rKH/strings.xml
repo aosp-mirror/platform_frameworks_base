@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"សកម្ម។ ប៉ះដើម្បីបិទ/បើក។"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"សេវាកម្ម​កំពុង​ដំណើរការ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"មើល និង​គ្រប់គ្រង​សេវាកម្ម​កំពុង​ដំណើរការ​បច្ចុប្បន្ន"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"បើកដំណើរការ WebView ដែលមានអង្គដំណើរការច្រើន"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ដំណើរការកម្មវិធីបំលែង WebView ក្នុងដំណើរការដាច់ដោយឡែក"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView ដែលមានអង្គដំណើរការច្រើន"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ដំណើរការកម្មវិធីបម្លែង WebView ដោយឡែក"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ជម្រើសនេះលែងមានសុពលភាពទៀតហើយ ព្យាយាមម្តងទៀត"</string>

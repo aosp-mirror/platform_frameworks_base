@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ለአውታረመረቦች መቃኘት አይቻልም"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"የለም"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ተቀምጧል"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"ተሰነክሏል"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"ተሰናክሏል"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"የአይ.ፒ. ውቅረት መሰናከል"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"የWiFi ግንኙነት መሰናከል"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"የማረጋገጫ ችግር"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ገቢር። ለመቀያየር ነካ ያድርጉ።"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"አሂድ አገልግሎቶች"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"በአሁኑጊዜ እየሄዱ ያሉ አገልግሎቶችን ተቆጣጠር እና እይ"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"ባለብዙ-ሂደት WebViewን አንቃ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"የWebView ምስል ሰሪዎችን በተገለለ ሂደት ውስጥ አሂድ።"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"ባለብዙ-ሂደት ድር እይታ"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"የድር እይታ ምስል ሰሪዎችን በተናጥል አሂድ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"የWebView ትግበራ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"የWebView ትግበራን ያዘጋጁ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ይህ ምርጫ ከአሁን በኋላ የሚሰራ አይደለም። እንደገና ይሞክሩ።"</string>

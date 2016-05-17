@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Kveikja á OpenGL-rakningu"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Slökkva á USB-hljóðbeiningu"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Slökkva á sjálfvirkri beiningu til USB-hljóðtækja"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Sýna mörk í uppsetningu"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Sýna uppsetningarmörk"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Sýna skurðlínur, spássíur o.s.frv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Þvinga umbrot frá hægri til vinstri"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Þvinga umbrot skjás frá hægri til vinstri fyrir alla tungumálskóða"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Þvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Virkja 4x MSAA í OpenGL ES 2.0 forritum"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Villuleita klippt svæði sem ekki eru rétthyrnd"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Greina teiknun skjákorts"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Greina skjákortsteiknun"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Kvarði gluggahreyfinga"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Lengd hreyfiumbreytinga"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Tímalengd hreyfiáhrifa"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Virkt. Ýttu til að breyta."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Þjónustur í gangi"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Skoða og stjórna þjónustum í gangi"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Virkja WebView í fjölvinnslu"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Keyra WebView teiknun í lokuðu ferli."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView í fjölvinnslu"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Keyra WebView teiknun í aðskildu lagi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Innleiðing WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Stilla innleiðingu WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Þetta val er ekki lengur gilt. Reyndu aftur."</string>
@@ -323,7 +323,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Stjórnað af kerfisstjóra"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Virkjað af stjórnanda"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Stjórnandi gerði óvirkt"</string>
-    <string name="home" msgid="3256884684164448244">"Aðalsíða stillinga"</string>
+    <string name="home" msgid="3256884684164448244">"Stillingar"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"Fyrir <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> eftir"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Lítið"</string>
