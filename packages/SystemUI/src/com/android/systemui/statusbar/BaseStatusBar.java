@@ -960,30 +960,37 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected View bindVetoButtonClickListener(View row, final StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        final String _pkg = n.getPackageName();
-        final String _tag = n.getTag();
-        final int _id = n.getId();
-        final int _userId = n.getUserId();
         vetoButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Accessibility feedback
                 v.announceForAccessibility(
                         mContext.getString(R.string.accessibility_notification_dismissed));
-                try {
-                    mBarService.onNotificationClear(_pkg, _tag, _id, _userId);
-                    if (FORCE_REMOTE_INPUT_HISTORY
-                            && mKeysKeptForRemoteInput.contains(n.getKey())) {
-                        removeNotification(n.getKey(), null);
-                        mKeysKeptForRemoteInput.remove(n.getKey());
-                    }
-
-                } catch (RemoteException ex) {
-                    // system process is dead if we're here.
-                }
+                performRemoveNotification(n, false /* removeView */);
             }
         });
         vetoButton.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         return vetoButton;
+    }
+
+    private void performRemoveNotification(StatusBarNotification n, boolean removeView) {
+        final String pkg = n.getPackageName();
+        final String tag = n.getTag();
+        final int id = n.getId();
+        final int userId = n.getUserId();
+        try {
+            mBarService.onNotificationClear(pkg, tag, id, userId);
+            if (FORCE_REMOTE_INPUT_HISTORY
+                    && mKeysKeptForRemoteInput.contains(n.getKey())) {
+                mKeysKeptForRemoteInput.remove(n.getKey());
+                removeView = true;
+            }
+            if (removeView) {
+                removeNotification(n.getKey(), null);
+            }
+
+        } catch (RemoteException ex) {
+            // system process is dead if we're here.
+        }
     }
 
 
@@ -1830,6 +1837,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, afterKeyguardGone);
     }
 
+    public void addPostCollapseAction(Runnable r) {
+    }
+
+    public boolean isCollapsing() {
+        return false;
+    }
+
     private final class NotificationClicker implements View.OnClickListener {
         public void onClick(final View v) {
             if (!(v instanceof ExpandableNotificationRow)) {
@@ -1879,6 +1893,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                         HeadsUpManager.setIsClickedNotification(row, true);
                         mHeadsUpManager.releaseImmediately(notificationKey);
                     }
+                    StatusBarNotification parentToCancel = null;
+                    if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {
+                        StatusBarNotification summarySbn = mGroupManager.getLogicalGroupSummary(sbn)
+                                        .getStatusBarNotification();
+                        if (shouldAutoCancel(summarySbn)) {
+                            parentToCancel = summarySbn;
+                        }
+                    }
+                    final StatusBarNotification parentToCancelFinal = parentToCancel;
                     new Thread() {
                         @Override
                         public void run() {
@@ -1934,6 +1957,28 @@ public abstract class BaseStatusBar extends SystemUI implements
                             } catch (RemoteException ex) {
                                 // system process is dead if we're here.
                             }
+                            if (parentToCancelFinal != null) {
+                                // We have to post it to the UI thread for synchronization
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Runnable removeRunnable = new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                performRemoveNotification(parentToCancelFinal,
+                                                        true);
+                                            }
+                                        };
+                                        if (isCollapsing()) {
+                                            // To avoid lags we're only performing the remove
+                                            // after the shade was collapsed
+                                            addPostCollapseAction(removeRunnable);
+                                        } else {
+                                            removeRunnable.run();
+                                        }
+                                    }
+                                });
+                            }
                         }
                     }.start();
 
@@ -1945,6 +1990,17 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return true;
                 }
             }, afterKeyguardGone);
+        }
+
+        private boolean shouldAutoCancel(StatusBarNotification sbn) {
+            int flags = sbn.getNotification().flags;
+            if ((flags & Notification.FLAG_AUTO_CANCEL) != Notification.FLAG_AUTO_CANCEL) {
+                return false;
+            }
+            if ((flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                return false;
+            }
+            return true;
         }
 
         public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {

@@ -3828,10 +3828,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateMediaMetaData(true /* metaDataChanged */, true);
     }
 
+    @Override
     public boolean isCollapsing() {
         return mNotificationPanel.isCollapsing();
     }
 
+    @Override
     public void addPostCollapseAction(Runnable r) {
         mPostCollapseRunnables.add(r);
     }
