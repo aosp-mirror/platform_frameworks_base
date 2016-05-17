@@ -16,21 +16,22 @@
 
 #include <gtest/gtest.h>
 
-#include <RecordedOp.h>
 #include <BakedOpDispatcher.h>
 #include <BakedOpRenderer.h>
 #include <FrameBuilder.h>
-#include <SkBlurDrawLooper.h>
+#include <LayerUpdateQueue.h>
 #include <hwui/Paint.h>
+#include <RecordedOp.h>
 #include <tests/common/TestUtils.h>
+#include <utils/Color.h>
 
+#include <SkBlurDrawLooper.h>
 #include <SkDashPathEffect.h>
 
 using namespace android::uirenderer;
 
 static BakedOpRenderer::LightInfo sLightInfo;
 const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
-static Rect sBaseClip(100, 100);
 
 class ValidatingBakedOpRenderer : public BakedOpRenderer {
 public:
@@ -55,7 +56,7 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
         std::function<void(const Glop& glop)> glopVerifier) {
     // Create op, and wrap with basic state.
     LinearAllocator allocator;
-    auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), sBaseClip);
+    auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 100));
     auto state = BakedOpState::tryConstruct(allocator, *snapshot, *op);
     ASSERT_NE(nullptr, state);
 
@@ -194,4 +195,84 @@ RENDERTHREAD_TEST(BakedOpDispatcher, renderTextWithShadow) {
 
     frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
     ASSERT_EQ(3, glopCount) << "Exactly three glops expected";
+}
+
+static void validateLayerDraw(renderthread::RenderThread& renderThread,
+        std::function<void(const Glop& glop)> validator) {
+    auto node = TestUtils::createNode(0, 0, 100, 100,
+            [](RenderProperties& props, TestCanvas& canvas) {
+        props.mutateLayerProperties().setType(LayerType::RenderLayer);
+
+        // provide different blend mode, so decoration draws contrast
+        props.mutateLayerProperties().setXferMode(SkXfermode::Mode::kSrc_Mode);
+        canvas.drawColor(Color::Black, SkXfermode::Mode::kSrcOver_Mode);
+    });
+    OffscreenBuffer** layerHandle = node->getLayerHandle();
+
+    auto syncedNode = TestUtils::getSyncedNode(node);
+
+    // create RenderNode's layer here in same way prepareTree would
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 100, 100);
+    *layerHandle = &layer;
+    {
+        LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
+        layerUpdateQueue.enqueueLayerWithDamage(node.get(), Rect(0, 0, 100, 100));
+
+        ValidatingBakedOpRenderer renderer(renderThread.renderState(), validator);
+        FrameBuilder frameBuilder(SkRect::MakeWH(100, 100), 100, 100,
+                sLightGeometry, Caches::getInstance());
+        frameBuilder.deferLayers(layerUpdateQueue);
+        frameBuilder.deferRenderNode(*syncedNode);
+        frameBuilder.replayBakedOps<BakedOpDispatcher>(renderer);
+    }
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    *layerHandle = nullptr;
+}
+
+static FloatColor makeFloatColor(uint32_t color) {
+    FloatColor c;
+    c.set(color);
+    return c;
+}
+
+RENDERTHREAD_TEST(BakedOpDispatcher, layerUpdateProperties) {
+    for (bool debugOverdraw : { false, true }) {
+        for (bool debugLayersUpdates : { false, true }) {
+            ScopedProperty<bool> ovdProp(Properties::debugOverdraw, debugOverdraw);
+            ScopedProperty<bool> lupProp(Properties::debugLayersUpdates, debugLayersUpdates);
+
+            int glopCount = 0;
+            validateLayerDraw(renderThread, [&glopCount, &debugLayersUpdates](const Glop& glop) {
+                if (glopCount == 0) {
+                    // 0 - Black layer fill
+                    EXPECT_TRUE(glop.fill.colorEnabled);
+                    EXPECT_EQ(makeFloatColor(Color::Black), glop.fill.color);
+                } else if (glopCount == 1) {
+                    // 1 - Uncolored (textured) layer draw
+                    EXPECT_FALSE(glop.fill.colorEnabled);
+                } else if (glopCount == 2) {
+                    // 2 - layer overlay, if present
+                    EXPECT_TRUE(glop.fill.colorEnabled);
+                    // blend srcover, different from that of layer
+                    EXPECT_EQ(GLenum(GL_ONE), glop.blend.src);
+                    EXPECT_EQ(GLenum(GL_ONE_MINUS_SRC_ALPHA), glop.blend.dst);
+                    EXPECT_EQ(makeFloatColor(debugLayersUpdates ? 0x7f00ff00 : 0),
+                            glop.fill.color) << "Should be transparent green if debugLayersUpdates";
+                } else if (glopCount < 7) {
+                    // 3 - 6 - overdraw indicator overlays, if present
+                    EXPECT_TRUE(glop.fill.colorEnabled);
+                    uint32_t expectedColor = Caches::getInstance().getOverdrawColor(glopCount - 2);
+                    ASSERT_EQ(makeFloatColor(expectedColor), glop.fill.color);
+                } else {
+                    ADD_FAILURE() << "Too many glops observed";
+                }
+                glopCount++;
+            });
+            int expectedCount = 2;
+            if (debugLayersUpdates || debugOverdraw) expectedCount++;
+            if (debugOverdraw) expectedCount += 4;
+            EXPECT_EQ(expectedCount, glopCount);
+        }
+    }
 }
