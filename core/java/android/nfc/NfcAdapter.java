@@ -393,6 +393,7 @@ public final class NfcAdapter {
 
     /**
      * A callback that is invoked when a tag is removed from the field.
+     * @see NfcAdapter#ignore
      */
     public interface OnTagRemovedListener {
         void onTagRemoved();
