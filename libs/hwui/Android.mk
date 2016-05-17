@@ -258,6 +258,7 @@ LOCAL_SRC_FILES += \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \
+    tests/unit/TestUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
     tests/unit/VectorDrawableTests.cpp
 

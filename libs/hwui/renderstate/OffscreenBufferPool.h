@@ -77,6 +77,8 @@ public:
     // vbo / size of mesh
     GLsizei elementCount = 0;
     GLuint vbo = 0;
+
+    bool hasRenderedSinceRepaint;
 };
 
 /**
