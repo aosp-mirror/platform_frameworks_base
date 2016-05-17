@@ -52,6 +52,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Security;
+import java.security.Provider;
 import java.util.ArrayList;
 
 /**
@@ -193,6 +195,7 @@ public class ZygoteInit {
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
         // for memory sharing purposes.
         WebViewFactory.prepareWebViewInZygote();
+        warmUpJcaProviders();
         Log.d(TAG, "end preload");
     }
 
@@ -211,6 +214,24 @@ public class ZygoteInit {
 
     private static void preloadTextResources() {
         Hyphenator.init();
+    }
+
+    /**
+     * Warm up the providers that are already registered.
+     *
+     * By doing it here we avoid that each app does it when requesting a service from the
+     * provider for the first time.
+     */
+    private static void warmUpJcaProviders() {
+        long startTime = SystemClock.uptimeMillis();
+        Trace.traceBegin(
+                Trace.TRACE_TAG_DALVIK, "Starting warm up of JCA providers");
+        for (Provider p : Security.getProviders()) {
+            p.warmUpServiceProvision();
+        }
+        Log.i(TAG, "Warmed up JCA providers in "
+                + (SystemClock.uptimeMillis()-startTime) + "ms.");
+        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
     }
 
     /**
