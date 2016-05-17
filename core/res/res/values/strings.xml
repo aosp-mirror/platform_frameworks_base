@@ -2725,9 +2725,7 @@
     <!-- Text of the alert that is displayed when a process has crashed repeatedly. -->
     <string name="aerr_process_repeated"><xliff:g id="process">%1$s</xliff:g> keeps stopping</string>
     <!-- Button that restarts a crashed application -->
-    <string name="aerr_restart">Restart app</string>
-    <!-- Button that clears cache and restarts a crashed application -->
-    <string name="aerr_reset">Reset and restart app</string>
+    <string name="aerr_restart">Open app again</string>
     <!-- Button that sends feedback about a crashed application -->
     <string name="aerr_report">Send feedback</string>
     <!-- Button that closes a crashed application -->
