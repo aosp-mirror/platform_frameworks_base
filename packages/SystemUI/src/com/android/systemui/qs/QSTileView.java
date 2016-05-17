@@ -32,7 +32,6 @@ import libcore.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
-    protected final Context mContext;
     private final int mTileSpacingPx;
     private int mTilePaddingTopPx;
 
@@ -46,7 +45,6 @@ public class QSTileView extends QSTileBaseView {
     public QSTileView(Context context, QSIconView icon, boolean collapsedView) {
         super(context, icon, collapsedView);
 
-        mContext = context;
         final Resources res = context.getResources();
         mTileSpacingPx = res.getDimensionPixelSize(R.dimen.qs_tile_spacing);
 
