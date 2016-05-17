@@ -216,6 +216,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP = 0;
     static final int SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME = 1;
 
+    static final int PENDING_KEY_NULL = -1;
+
     // Controls navigation bar opacity depending on which workspace stacks are currently
     // visible.
     // Nav bar is always opaque when either the freeform stack or docked stack is visible.
@@ -406,6 +408,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mGoingToSleep;
     volatile boolean mRecentsVisible;
     volatile boolean mTvPictureInPictureVisible;
+
+    // Used to hold the last user key used to wake the device.  This helps us prevent up events
+    // from being passed to the foregrounded app without a corresponding down event
+    volatile int mPendingWakeKey = PENDING_KEY_NULL;
 
     int mRecentAppsHeldModifiers;
     boolean mLanguageSwitchKeyPressed;
@@ -5429,18 +5435,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // key to the application.
             result = ACTION_PASS_TO_USER;
             isWakeKey = false;
-        } else if (!interactive && shouldDispatchInputWhenNonInteractive()) {
+
+            if (interactive) {
+                // If the screen is awake, but the button pressed was the one that woke the device
+                // then don't pass it to the application
+                if (keyCode == mPendingWakeKey && !down) {
+                    result = 0;
+                }
+                // Reset the pending key
+                mPendingWakeKey = PENDING_KEY_NULL;
+            }
+        } else if (!interactive && shouldDispatchInputWhenNonInteractive(event)) {
             // If we're currently dozing with the screen on and the keyguard showing, pass the key
             // to the application but preserve its wake key status to make sure we still move
             // from dozing to fully interactive if we would normally go from off to fully
             // interactive.
             result = ACTION_PASS_TO_USER;
+            // Since we're dispatching the input, reset the pending key
+            mPendingWakeKey = PENDING_KEY_NULL;
         } else {
             // When the screen is off and the key is not injected, determine whether
             // to wake the device but don't pass the key to the application.
             result = 0;
             if (isWakeKey && (!down || !isWakeKeyWhenScreenOff(keyCode))) {
                 isWakeKey = false;
+            }
+            // Cache the wake key on down event so we can also avoid sending the up event to the app
+            if (isWakeKey && down) {
+                mPendingWakeKey = keyCode;
             }
         }
 
@@ -5789,7 +5811,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (shouldDispatchInputWhenNonInteractive()) {
+        if (shouldDispatchInputWhenNonInteractive(null)) {
             return ACTION_PASS_TO_USER;
         }
 
@@ -5804,7 +5826,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
-    private boolean shouldDispatchInputWhenNonInteractive() {
+    private boolean shouldDispatchInputWhenNonInteractive(KeyEvent event) {
         final boolean displayOff = (mDisplay == null || mDisplay.getState() == Display.STATE_OFF);
 
         if (displayOff && !mHasFeatureWatch) {
@@ -5814,6 +5836,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Send events to keyguard while the screen is on and it's showing.
         if (isKeyguardShowingAndNotOccluded() && !displayOff) {
             return true;
+        }
+
+        // Watches handle BACK specially
+        if (mHasFeatureWatch
+                && event != null
+                && (event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                        || event.getKeyCode() == KeyEvent.KEYCODE_STEM_PRIMARY)) {
+            return false;
         }
 
         // Send events to a dozing dream even if the screen is off since the dream
