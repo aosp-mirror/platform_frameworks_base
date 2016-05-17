@@ -2658,7 +2658,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userHandle = params[0];
 
             if (userHandle == UserHandle.USER_ALL) {
-                for (UserInfo userInfo : mUserManager.getUsers()) {
+                for (UserInfo userInfo : mUserManager.getUsers(true)) {
                     manageNotification(userInfo.getUserHandle());
                 }
             } else {
@@ -2668,7 +2668,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         private void manageNotification(UserHandle userHandle) {
-            if (!mUserManager.isUserRunning(userHandle)) {
+            if (!mUserManager.isUserUnlocked(userHandle)) {
                 return;
             }
 
