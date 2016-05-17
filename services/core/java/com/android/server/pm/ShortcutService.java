@@ -32,6 +32,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -110,12 +111,18 @@ import java.util.function.Predicate;
 
 /**
  * TODO:
+ * - Manifest shortcuts.
+ *
+ * - Implement disableShortcuts().
+ *
+ * - Implement reportShortcutUsed().
+ *
+ * - Ranks should be recalculated after each update.
+ *
+ * - When the system locale changes, update timestamps for shortcuts with string resources,
+ *   and notify the launcher.
  *
  * - Default launcher check does take a few ms.  Worth caching.
- *
- * - Clear data -> remove all dynamic?  but not the pinned?
- *
- * - Scan and remove orphan bitmaps (just in case).
  *
  * - Detect when already registered instances are passed to APIs again, which might break
  *   internal bitmap handling.
@@ -1515,6 +1522,18 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
+    public void disableShortcuts(String packageName, List shortcutIds,
+            String disabledMessage, int disabledMessageResId, @UserIdInt int userId) {
+        verifyCaller(packageName, userId);
+        Preconditions.checkNotNull(shortcutIds, "shortcutIds must be provided");
+
+        synchronized (mLock) {
+            // TODO implement it.
+        }
+        packageShortcutsChanged(packageName, userId);
+    }
+
+    @Override
     public void removeDynamicShortcuts(String packageName, List shortcutIds,
             @UserIdInt int userId) {
         verifyCaller(packageName, userId);
@@ -1599,12 +1618,19 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public int getIconMaxDimensions(String packageName, int userId) throws RemoteException {
+    public int getIconMaxDimensions(String packageName, int userId) {
         verifyCaller(packageName, userId);
 
         synchronized (mLock) {
             return mMaxIconDimension;
         }
+    }
+
+    @Override
+    public void reportShortcutUsed(String packageName, String shortcutId, int userId) {
+        verifyCaller(packageName, userId);
+
+        // TODO Implement it.
     }
 
     /**
@@ -1792,10 +1818,10 @@ public class ShortcutService extends IShortcutService.Stub {
                 @Nullable ComponentName componentName,
                 int queryFlags, int userId) {
             final ArrayList<ShortcutInfo> ret = new ArrayList<>();
-            final int cloneFlag =
-                    ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) == 0)
-                            ? ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER
-                            : ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO;
+            final boolean cloneKeyFieldOnly =
+                    ((queryFlags & ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY) != 0);
+            final int cloneFlag = cloneKeyFieldOnly ? ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO
+                    : ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER;
             if (packageName == null) {
                 shortcutIds = null; // LauncherAppsService already threw for it though.
             }
@@ -1815,6 +1841,21 @@ public class ShortcutService extends IShortcutService.Stub {
                                 callingPackage, p.getPackageName(), shortcutIdsF, changedSince,
                                 componentName, queryFlags, userId, ret, cloneFlag);
                     });
+                }
+            }
+            // Resolve all strings if needed.
+            if (!cloneKeyFieldOnly) {
+                final long token = injectClearCallingIdentity();
+                try {
+                    for (int i = ret.size() - 1; i >= 0; i--) {
+                        try {
+                            ret.get(i).resolveStringsRequiringCrossUser(mContext);
+                        } catch (NameNotFoundException e) {
+                            continue;
+                        }
+                    }
+                } finally {
+                    injectRestoreCallingIdentity(token);
                 }
             }
             return ret;
