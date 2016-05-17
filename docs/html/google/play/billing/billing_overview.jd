@@ -132,11 +132,11 @@ type, pricing, description, and how Google Play should handle and track
 purchases for that product.</p>
 <p>If you sell several of your apps or in-app products at the same price, you
 can add <em>pricing templates</em> to manage these price points from a
-centralized location. When using pricing templates, you can include the local
-tax within the prices you provide, or you can provide prices and have the system
+centralized location. When using pricing templates, you can include local taxes
+within the prices you provide, or you can provide prices and have the system
 add local taxes to these prices. You can make changes to the prices in your
-templates&mdash;such as refreshing the exchange rates for certain
-countries&mdash;and your changes are applied to the apps and in-app products
+pricing templates, such as refreshing the exchange rates for certain
+countries, and your changes are applied to the apps and in-app products
 that you link to the template.</p>
 <p>You can also create test accounts to authorize
 access for testing applications that are unpublished.</p>
