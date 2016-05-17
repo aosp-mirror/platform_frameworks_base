@@ -161,10 +161,10 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
 
     /**
-     * See {@link #setAvoidMoveToFront}.
+     * See {@link #setTaskOverlay}.
      * @hide
      */
-    private static final String KEY_DONT_MOVE_TO_FRONT = "android.activity.dontMoveToFront";
+    private static final String KEY_TASK_OVERLAY = "android.activity.taskOverlay";
 
     /**
      * Where the docked stack should be positioned.
@@ -239,7 +239,7 @@ public class ActivityOptions {
     private int mLaunchStackId = INVALID_STACK_ID;
     private int mLaunchTaskId = -1;
     private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-    private boolean mAvoidMoveToFront;
+    private boolean mTaskOverlay;
     private AppTransitionAnimationSpec mAnimSpecs[];
 
     /**
@@ -782,7 +782,7 @@ public class ActivityOptions {
         }
         mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
-        mAvoidMoveToFront = opts.getBoolean(KEY_DONT_MOVE_TO_FRONT, false);
+        mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
             Parcelable[] specs = opts.getParcelableArray(KEY_ANIM_SPECS);
@@ -961,20 +961,20 @@ public class ActivityOptions {
     }
 
     /**
-     * Set's whether the task should be moved to the front. This is different from
-     * {@link #getLaunchTaskBehind()} as we don't want to have an animation at all when launching
-     * an activity that shouldn't be moved to the front.
+     * Set's whether the activity launched with this option should be a task overlay. That is the
+     * activity will always be the top activity of the task and doesn't cause the task to be moved
+     * to the front when it is added.
      * @hide
      */
-    public void setAvoidMoveToFront(boolean avoidMoveToFront) {
-        mAvoidMoveToFront = avoidMoveToFront;
+    public void setTaskOverlay(boolean taskOverlay) {
+        mTaskOverlay = taskOverlay;
     }
 
     /**
      * @hide
      */
-    public boolean getAvoidMoveToFront() {
-        return mAvoidMoveToFront;
+    public boolean getTaskOverlay() {
+        return mTaskOverlay;
     }
 
     /** @hide */
@@ -1130,7 +1130,7 @@ public class ActivityOptions {
         }
         b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
-        b.putBoolean(KEY_DONT_MOVE_TO_FRONT, mAvoidMoveToFront);
+        b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
