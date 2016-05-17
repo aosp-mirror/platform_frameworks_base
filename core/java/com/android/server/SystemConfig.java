@@ -119,6 +119,9 @@ public class SystemConfig {
     // These are the components that are enabled by default as VR mode listener services.
     final ArraySet<ComponentName> mDefaultVrComponents = new ArraySet<>();
 
+    // These are the permitted backup transport service components
+    final ArraySet<ComponentName> mBackupTransportWhitelist = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -174,6 +177,10 @@ public class SystemConfig {
 
     public ArraySet<ComponentName> getDefaultVrComponents() {
         return mDefaultVrComponents;
+    }
+
+    public ArraySet<ComponentName> getBackupTransportWhitelist() {
+        return mBackupTransportWhitelist;
     }
 
     SystemConfig() {
@@ -450,6 +457,23 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mDefaultVrComponents.add(new ComponentName(pkgname, clsname));
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("backup-transport-whitelisted-service".equals(name) && allowFeatures) {
+                    String serviceName = parser.getAttributeValue(null, "service");
+                    if (serviceName == null) {
+                        Slog.w(TAG, "<backup-transport-whitelisted-service> without service in "
+                                + permFile + " at " + parser.getPositionDescription());
+                    } else {
+                        ComponentName cn = ComponentName.unflattenFromString(serviceName);
+                        if (cn == null) {
+                            Slog.w(TAG,
+                                    "<backup-transport-whitelisted-service> with invalid service name "
+                                    + serviceName + " in "+ permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mBackupTransportWhitelist.add(cn);
+                        }
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else {
