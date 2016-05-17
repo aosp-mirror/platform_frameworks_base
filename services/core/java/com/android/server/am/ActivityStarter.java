@@ -1122,7 +1122,8 @@ class ActivityStarter {
             }
             final ActivityRecord topTaskActivity = mStartActivity.task.topRunningActivityLocked();
             if (!mTargetStack.isFocusable()
-                    || (topTaskActivity != null && topTaskActivity.mTaskOverlay)) {
+                    || (topTaskActivity != null && topTaskActivity.mTaskOverlay
+                    && mStartActivity != topTaskActivity)) {
                 // If the activity is not focusable, we can't resume it, but still would like to
                 // make sure it becomes visible as it starts (this will also trigger entry
                 // animation). An example of this are PIP activities.
