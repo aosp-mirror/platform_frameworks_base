@@ -613,7 +613,13 @@ public class UsbDeviceManager {
 
             if (mConfigured && enteringAccessoryMode) {
                 // successfully entered accessory mode
-
+                if (mCurrentAccessory != null) {
+                    Slog.w(TAG, "USB accessory re-attached, detach was not announced!");
+                    if (mBootCompleted) {
+                        getCurrentSettings().accessoryDetached(mCurrentAccessory);
+                    }
+                    mCurrentAccessory = null;
+                }
                 if (mAccessoryStrings != null) {
                     mCurrentAccessory = new UsbAccessory(mAccessoryStrings);
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
