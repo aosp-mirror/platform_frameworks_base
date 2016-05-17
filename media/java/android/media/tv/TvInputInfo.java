@@ -48,6 +48,7 @@ import android.util.Xml;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
@@ -875,10 +876,8 @@ public final class TvInputInfo implements Parcelable {
          * for the {@link TvInputService} this TV input implements.
          *
          * @return TvInputInfo containing information about this TV input.
-         * @throws IOException If there was an I/O error.
-         * @throws XmlPullParserException If there was an XML parsing error.
          */
-        public TvInputInfo build() throws IOException, XmlPullParserException {
+        public TvInputInfo build() {
             ComponentName componentName = new ComponentName(mResolveInfo.serviceInfo.packageName,
                     mResolveInfo.serviceInfo.name);
             String id;
@@ -925,15 +924,14 @@ public final class TvInputInfo implements Parcelable {
                     + tvInputHardwareInfo.getDeviceId();
         }
 
-        private void parseServiceMetadata(int inputType)
-                throws XmlPullParserException, IOException {
+        private void parseServiceMetadata(int inputType) {
             ServiceInfo si = mResolveInfo.serviceInfo;
             PackageManager pm = mContext.getPackageManager();
             try (XmlResourceParser parser =
                          si.loadXmlMetaData(pm, TvInputService.SERVICE_META_DATA)) {
                 if (parser == null) {
-                    throw new XmlPullParserException("No " + TvInputService.SERVICE_META_DATA
-                            + " meta-data for " + si.name);
+                    throw new IllegalStateException("No " + TvInputService.SERVICE_META_DATA
+                            + " meta-data found for " + si.name);
                 }
 
                 Resources res = pm.getResourcesForApplication(si.applicationInfo);
@@ -946,26 +944,19 @@ public final class TvInputInfo implements Parcelable {
 
                 String nodeName = parser.getName();
                 if (!XML_START_TAG_NAME.equals(nodeName)) {
-                    throw new XmlPullParserException(
-                            "Meta-data does not start with tv-input-service tag in " + si.name);
+                    throw new IllegalStateException("Meta-data does not start with "
+                            + XML_START_TAG_NAME + " tag for " + si.name);
                 }
 
                 TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.TvInputService);
                 mSetupActivity = sa.getString(
                         com.android.internal.R.styleable.TvInputService_setupActivity);
-                if (DEBUG) {
-                    Log.d(TAG, "Setup activity loaded. [" + mSetupActivity + "] for " + si.name);
-                }
                 if (inputType == TYPE_TUNER && TextUtils.isEmpty(mSetupActivity)) {
-                    throw new XmlPullParserException("Setup activity not found in " + si.name);
+                    throw new IllegalStateException("Setup activity not found for " + si.name);
                 }
                 mSettingsActivity = sa.getString(
                         com.android.internal.R.styleable.TvInputService_settingsActivity);
-                if (DEBUG) {
-                    Log.d(TAG, "Settings activity loaded. [" + mSettingsActivity + "] for "
-                            + si.name);
-                }
                 if (mCanRecord == null) {
                     mCanRecord = sa.getBoolean(
                             com.android.internal.R.styleable.TvInputService_canRecord, false);
@@ -975,8 +966,10 @@ public final class TvInputInfo implements Parcelable {
                             com.android.internal.R.styleable.TvInputService_tunerCount, 1);
                 }
                 sa.recycle();
+            } catch (IOException | XmlPullParserException e) {
+                throw new IllegalStateException("Failed reading meta-data for " + si.packageName, e);
             } catch (NameNotFoundException e) {
-                throw new XmlPullParserException("Unable to create context for: " + si.packageName);
+                throw new IllegalStateException("No resources found for " + si.packageName, e);
             }
         }
     }
