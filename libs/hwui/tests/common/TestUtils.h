@@ -74,6 +74,28 @@ typedef DisplayListCanvas TestCanvas;
     }; \
     void test_case_name##_##test_name##_RenderThreadTest::doTheThing(renderthread::RenderThread& renderThread)
 
+/**
+ * Sets a property value temporarily, generally for the duration of a test, restoring the previous
+ * value when going out of scope.
+ *
+ * Can be used e.g. to test behavior only active while Properties::debugOverdraw is enabled.
+ */
+template <typename T>
+class ScopedProperty {
+public:
+    ScopedProperty(T& property, T newValue)
+        : mPropertyPtr(&property)
+        , mOldValue(property) {
+        property = newValue;
+    }
+    ~ScopedProperty() {
+        *mPropertyPtr = mOldValue;
+    }
+private:
+    T* mPropertyPtr;
+    T mOldValue;
+};
+
 class TestUtils {
 public:
     class SignalingDtor {

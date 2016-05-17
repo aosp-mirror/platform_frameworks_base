@@ -55,6 +55,7 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
     }
 
     mRenderTarget.offscreenBuffer = offscreenBuffer;
+    mRenderTarget.offscreenBuffer->hasRenderedSinceRepaint = false;
 
     // create and bind framebuffer
     mRenderTarget.frameBufferId = mRenderState.createFramebuffer();

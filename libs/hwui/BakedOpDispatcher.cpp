@@ -791,6 +791,16 @@ void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const Textur
     renderer.renderGlop(state, glop);
 }
 
+void renderRectForLayer(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state,
+        int color, SkXfermode::Mode mode, SkColorFilter* colorFilter) {
+    SkPaint paint;
+    paint.setColor(color);
+    paint.setXfermodeMode(mode);
+    paint.setColorFilter(colorFilter);
+    RectOp rectOp(op.unmappedBounds, op.localMatrix, op.localClip, &paint);
+    BakedOpDispatcher::onRectOp(renderer, rectOp, state);
+}
+
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
     // Note that we don't use op->paint in this function - it's never set on a LayerOp
     OffscreenBuffer* buffer = *op.layerHandle;
@@ -798,12 +808,9 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
     if (CC_UNLIKELY(!buffer)) {
         // Layer was not allocated, which can occur if there were no draw ops inside. We draw the
         // equivalent by drawing a rect with the same layer properties (alpha/xfer/filter).
-        SkPaint paint;
-        paint.setAlpha(op.alpha * 255);
-        paint.setXfermodeMode(op.mode);
-        paint.setColorFilter(op.colorFilter);
-        RectOp rectOp(op.unmappedBounds, op.localMatrix, op.localClip, &paint);
-        BakedOpDispatcher::onRectOp(renderer, rectOp, state);
+        int color = SkColorSetA(SK_ColorTRANSPARENT, op.alpha * 255);
+        renderRectForLayer(renderer, op, state,
+                color, op.mode, op.colorFilter);
     } else {
         float layerAlpha = op.alpha * state.alpha;
         Glop glop;
@@ -816,6 +823,19 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
                         Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
                 .build();
         renderer.renderGlop(state, glop);
+    }
+
+    if (buffer && !buffer->hasRenderedSinceRepaint) {
+        buffer->hasRenderedSinceRepaint = true;
+        if (CC_UNLIKELY(Properties::debugLayersUpdates)) {
+            // render debug layer highlight
+            renderRectForLayer(renderer, op, state,
+                    0x7f00ff00, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+        } else if (CC_UNLIKELY(Properties::debugOverdraw)) {
+            // render transparent to increment overdraw for repaint area
+            renderRectForLayer(renderer, op, state,
+                    SK_ColorTRANSPARENT, SkXfermode::Mode::kSrcOver_Mode, nullptr);
+        }
     }
 }
 
