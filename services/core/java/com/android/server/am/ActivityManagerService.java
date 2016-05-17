@@ -13804,8 +13804,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     dumpAssociationsLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
-                synchronized (this) {
-                    mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
+                if (dumpClient) {
+                    ActiveServices.ServiceDumper dumper;
+                    synchronized (this) {
+                        dumper = mServices.newServiceDumperLocked(fd, pw, args, opti, true,
+                                dumpPackage);
+                    }
+                    dumper.dumpWithClient();
+                } else {
+                    synchronized (this) {
+                        mServices.newServiceDumperLocked(fd, pw, args, opti, true,
+                                dumpPackage).dumpLocked();
+                    }
                 }
             } else if ("locks".equals(cmd)) {
                 LockGuard.dump(fd, pw, args);
@@ -13827,50 +13837,105 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // No piece of data specified, dump everything.
-        synchronized (this) {
-            dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            mServices.dumpServicesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpRecentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-            pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
-            }
-            dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-            if (mAssociations.size() > 0) {
+        if (dumpClient) {
+            ActiveServices.ServiceDumper sdumper;
+            synchronized (this) {
+                dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                sdumper = mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll,
+                        dumpPackage);
             }
+            sdumper.dumpWithClient();
             pw.println();
-            if (dumpAll) {
-                pw.println("-------------------------------------------------------------------------------");
+            synchronized (this) {
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpRecentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                if (mAssociations.size() > 0) {
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
+                    dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                }
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
             }
-            dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+
+        } else {
+            synchronized (this) {
+                dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll, dumpPackage)
+                        .dumpLocked();
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpRecentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                if (mAssociations.size() > 0) {
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
+                    dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                }
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            }
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -16175,8 +16240,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             catPw.println();
             dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null);
             catPw.println();
-            mServices.dumpServicesLocked(null, catPw, emptyArgs, 0,
-                    false, false, null);
+            mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
+                    false, null).dumpLocked();
             catPw.println();
             dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
             catPw.flush();

@@ -2805,28 +2805,63 @@ public final class ActiveServices {
     /**
      * Prints a list of ServiceRecords (dumpsys activity services)
      */
-    void dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
-        boolean needSep = false;
-        boolean printedAnything = false;
-
-        ItemMatcher matcher = new ItemMatcher();
-        matcher.build(args, opti);
-
-        pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
-        try {
-            if (mLastAnrDump != null) {
-                pw.println("  Last ANR service:");
-                pw.print(mLastAnrDump);
-                pw.println();
+    List<ServiceRecord> collectServicesToDumpLocked(ItemMatcher matcher, String dumpPackage) {
+        final ArrayList<ServiceRecord> services = new ArrayList<>();
+        final int[] users = mAm.mUserController.getUsers();
+        for (int user : users) {
+            ServiceMap smap = getServiceMap(user);
+            if (smap.mServicesByName.size() > 0) {
+                for (int si=0; si<smap.mServicesByName.size(); si++) {
+                    ServiceRecord r = smap.mServicesByName.valueAt(si);
+                    if (!matcher.match(r, r.name)) {
+                        continue;
+                    }
+                    if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                        continue;
+                    }
+                    services.add(r);
+                }
             }
-            int[] users = mAm.mUserController.getUsers();
+        }
+
+        return services;
+    }
+
+    final class ServiceDumper {
+        private final FileDescriptor fd;
+        private final PrintWriter pw;
+        private final String[] args;
+        private final int opti;
+        private final boolean dumpAll;
+        private final String dumpPackage;
+        private final ItemMatcher matcher;
+        private final ArrayList<ServiceRecord> services = new ArrayList<>();
+
+        private final long nowReal = SystemClock.elapsedRealtime();
+
+        private boolean needSep = false;
+        private boolean printedAnything = false;
+        private boolean printed = false;
+
+        /**
+         * Note: do not call directly, use {@link #newServiceDumperLocked} instead (this
+         * must be called with the lock held).
+         */
+        ServiceDumper(FileDescriptor fd, PrintWriter pw, String[] args,
+                int opti, boolean dumpAll, String dumpPackage) {
+            this.fd = fd;
+            this.pw = pw;
+            this.args = args;
+            this.opti = opti;
+            this.dumpAll = dumpAll;
+            this.dumpPackage = dumpPackage;
+            matcher = new ItemMatcher();
+            matcher.build(args, opti);
+
+            final int[] users = mAm.mUserController.getUsers();
             for (int user : users) {
                 ServiceMap smap = getServiceMap(user);
-                boolean printed = false;
                 if (smap.mServicesByName.size() > 0) {
-                    long nowReal = SystemClock.elapsedRealtime();
-                    needSep = false;
                     for (int si=0; si<smap.mServicesByName.size(); si++) {
                         ServiceRecord r = smap.mServicesByName.valueAt(si);
                         if (!matcher.match(r, r.name)) {
@@ -2835,213 +2870,323 @@ public final class ActiveServices {
                         if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
                             continue;
                         }
-                        if (!printed) {
-                            if (printedAnything) {
-                                pw.println();
+                        services.add(r);
+                    }
+                }
+            }
+        }
+
+        private void dumpHeaderLocked() {
+            pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
+            if (mLastAnrDump != null) {
+                pw.println("  Last ANR service:");
+                pw.print(mLastAnrDump);
+                pw.println();
+            }
+        }
+
+        void dumpLocked() {
+            dumpHeaderLocked();
+
+            try {
+                int[] users = mAm.mUserController.getUsers();
+                for (int user : users) {
+                    // Find the first service for this user.
+                    int serviceIdx = 0;
+                    while (serviceIdx < services.size() && services.get(serviceIdx).userId != user) {
+                        serviceIdx++;
+                    }
+                    printed = false;
+                    if (serviceIdx < services.size()) {
+                        needSep = false;
+                        while (serviceIdx < services.size()) {
+                            ServiceRecord r = services.get(serviceIdx);
+                            serviceIdx++;
+                            if (r.userId != user) {
+                                break;
                             }
-                            pw.println("  User " + user + " active services:");
-                            printed = true;
+                            dumpServiceLocalLocked(r);
                         }
-                        printedAnything = true;
-                        if (needSep) {
-                            pw.println();
-                        }
-                        pw.print("  * ");
-                        pw.println(r);
-                        if (dumpAll) {
-                            r.dump(pw, "    ");
-                            needSep = true;
-                        } else {
-                            pw.print("    app=");
-                            pw.println(r.app);
-                            pw.print("    created=");
-                            TimeUtils.formatDuration(r.createTime, nowReal, pw);
-                            pw.print(" started=");
-                            pw.print(r.startRequested);
-                            pw.print(" connections=");
-                            pw.println(r.connections.size());
-                            if (r.connections.size() > 0) {
-                                pw.println("    Connections:");
-                                for (int conni=0; conni<r.connections.size(); conni++) {
-                                    ArrayList<ConnectionRecord> clist = r.connections.valueAt(conni);
-                                    for (int i = 0; i < clist.size(); i++) {
-                                        ConnectionRecord conn = clist.get(i);
-                                        pw.print("      ");
-                                        pw.print(conn.binding.intent.intent.getIntent()
-                                                .toShortString(false, false, false, false));
-                                        pw.print(" -> ");
-                                        ProcessRecord proc = conn.binding.client;
-                                        pw.println(proc != null ? proc.toShortString() : "null");
-                                    }
-                                }
+                        needSep |= printed;
+                    }
+
+                    dumpUserRemainsLocked(user);
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in dumpServicesLocked", e);
+            }
+
+            dumpRemainsLocked();
+        }
+
+        void dumpWithClient() {
+            synchronized(mAm) {
+                dumpHeaderLocked();
+            }
+
+            try {
+                int[] users = mAm.mUserController.getUsers();
+                for (int user : users) {
+                    // Find the first service for this user.
+                    int serviceIdx = 0;
+                    while (serviceIdx < services.size() && services.get(serviceIdx).userId != user) {
+                        serviceIdx++;
+                    }
+                    printed = false;
+                    if (serviceIdx < services.size()) {
+                        needSep = false;
+                        while (serviceIdx < services.size()) {
+                            ServiceRecord r = services.get(serviceIdx);
+                            serviceIdx++;
+                            if (r.userId != user) {
+                                break;
                             }
-                        }
-                        if (dumpClient && r.app != null && r.app.thread != null) {
-                            pw.println("    Client:");
-                            pw.flush();
-                            try {
-                                TransferPipe tp = new TransferPipe();
-                                try {
-                                    r.app.thread.dumpService(tp.getWriteFd().getFileDescriptor(),
-                                            r, args);
-                                    tp.setBufferPrefix("      ");
-                                    // Short timeout, since blocking here can
-                                    // deadlock with the application.
-                                    tp.go(fd, 2000);
-                                } finally {
-                                    tp.kill();
-                                }
-                            } catch (IOException e) {
-                                pw.println("      Failure while dumping the service: " + e);
-                            } catch (RemoteException e) {
-                                pw.println("      Got a RemoteException while dumping the service");
+                            synchronized(mAm) {
+                                dumpServiceLocalLocked(r);
                             }
-                            needSep = true;
+                            dumpServiceClient(r);
+                        }
+                        needSep |= printed;
+                    }
+
+                    synchronized(mAm) {
+                        dumpUserRemainsLocked(user);
+                    }
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in dumpServicesLocked", e);
+            }
+
+            synchronized(mAm) {
+                dumpRemainsLocked();
+            }
+        }
+
+        private void dumpUserHeaderLocked(int user) {
+            if (!printed) {
+                if (printedAnything) {
+                    pw.println();
+                }
+                pw.println("  User " + user + " active services:");
+                printed = true;
+            }
+            printedAnything = true;
+            if (needSep) {
+                pw.println();
+            }
+        }
+
+        private void dumpServiceLocalLocked(ServiceRecord r) {
+            dumpUserHeaderLocked(r.userId);
+            pw.print("  * ");
+            pw.println(r);
+            if (dumpAll) {
+                r.dump(pw, "    ");
+                needSep = true;
+            } else {
+                pw.print("    app=");
+                pw.println(r.app);
+                pw.print("    created=");
+                TimeUtils.formatDuration(r.createTime, nowReal, pw);
+                pw.print(" started=");
+                pw.print(r.startRequested);
+                pw.print(" connections=");
+                pw.println(r.connections.size());
+                if (r.connections.size() > 0) {
+                    pw.println("    Connections:");
+                    for (int conni=0; conni<r.connections.size(); conni++) {
+                        ArrayList<ConnectionRecord> clist = r.connections.valueAt(conni);
+                        for (int i = 0; i < clist.size(); i++) {
+                            ConnectionRecord conn = clist.get(i);
+                            pw.print("      ");
+                            pw.print(conn.binding.intent.intent.getIntent()
+                                    .toShortString(false, false, false, false));
+                            pw.print(" -> ");
+                            ProcessRecord proc = conn.binding.client;
+                            pw.println(proc != null ? proc.toShortString() : "null");
                         }
                     }
-                    needSep |= printed;
                 }
+            }
+        }
+
+        private void dumpServiceClient(ServiceRecord r) {
+            final ProcessRecord proc = r.app;
+            if (proc == null) {
+                return;
+            }
+            final IApplicationThread thread = proc.thread;
+            if (thread == null) {
+                return;
+            }
+            pw.println("    Client:");
+            pw.flush();
+            try {
+                TransferPipe tp = new TransferPipe();
+                try {
+                    thread.dumpService(tp.getWriteFd().getFileDescriptor(), r, args);
+                    tp.setBufferPrefix("      ");
+                    // Short timeout, since blocking here can
+                    // deadlock with the application.
+                    tp.go(fd, 2000);
+                } finally {
+                    tp.kill();
+                }
+            } catch (IOException e) {
+                pw.println("      Failure while dumping the service: " + e);
+            } catch (RemoteException e) {
+                pw.println("      Got a RemoteException while dumping the service");
+            }
+            needSep = true;
+        }
+
+        private void dumpUserRemainsLocked(int user) {
+            ServiceMap smap = getServiceMap(user);
+            printed = false;
+            for (int si=0, SN=smap.mDelayedStartList.size(); si<SN; si++) {
+                ServiceRecord r = smap.mDelayedStartList.get(si);
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
+                if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                    continue;
+                }
+                if (!printed) {
+                    if (printedAnything) {
+                        pw.println();
+                    }
+                    pw.println("  User " + user + " delayed start services:");
+                    printed = true;
+                }
+                printedAnything = true;
+                pw.print("  * Delayed start "); pw.println(r);
+            }
+            printed = false;
+            for (int si=0, SN=smap.mStartingBackground.size(); si<SN; si++) {
+                ServiceRecord r = smap.mStartingBackground.get(si);
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
+                if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                    continue;
+                }
+                if (!printed) {
+                    if (printedAnything) {
+                        pw.println();
+                    }
+                    pw.println("  User " + user + " starting in background:");
+                    printed = true;
+                }
+                printedAnything = true;
+                pw.print("  * Starting bg "); pw.println(r);
+            }
+        }
+
+        private void dumpRemainsLocked() {
+            if (mPendingServices.size() > 0) {
                 printed = false;
-                for (int si=0, SN=smap.mDelayedStartList.size(); si<SN; si++) {
-                    ServiceRecord r = smap.mDelayedStartList.get(si);
+                for (int i=0; i<mPendingServices.size(); i++) {
+                    ServiceRecord r = mPendingServices.get(i);
                     if (!matcher.match(r, r.name)) {
                         continue;
                     }
                     if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                        continue;
-                    }
-                    if (!printed) {
-                        if (printedAnything) {
-                            pw.println();
-                        }
-                        pw.println("  User " + user + " delayed start services:");
-                        printed = true;
-                    }
-                    printedAnything = true;
-                    pw.print("  * Delayed start "); pw.println(r);
-                }
-                printed = false;
-                for (int si=0, SN=smap.mStartingBackground.size(); si<SN; si++) {
-                    ServiceRecord r = smap.mStartingBackground.get(si);
-                    if (!matcher.match(r, r.name)) {
-                        continue;
-                    }
-                    if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                        continue;
-                    }
-                    if (!printed) {
-                        if (printedAnything) {
-                            pw.println();
-                        }
-                        pw.println("  User " + user + " starting in background:");
-                        printed = true;
-                    }
-                    printedAnything = true;
-                    pw.print("  * Starting bg "); pw.println(r);
-                }
-            }
-        } catch (Exception e) {
-            Slog.w(TAG, "Exception in dumpServicesLocked", e);
-        }
-
-        if (mPendingServices.size() > 0) {
-            boolean printed = false;
-            for (int i=0; i<mPendingServices.size(); i++) {
-                ServiceRecord r = mPendingServices.get(i);
-                if (!matcher.match(r, r.name)) {
-                    continue;
-                }
-                if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                    continue;
-                }
-                printedAnything = true;
-                if (!printed) {
-                    if (needSep) pw.println();
-                    needSep = true;
-                    pw.println("  Pending services:");
-                    printed = true;
-                }
-                pw.print("  * Pending "); pw.println(r);
-                r.dump(pw, "    ");
-            }
-            needSep = true;
-        }
-
-        if (mRestartingServices.size() > 0) {
-            boolean printed = false;
-            for (int i=0; i<mRestartingServices.size(); i++) {
-                ServiceRecord r = mRestartingServices.get(i);
-                if (!matcher.match(r, r.name)) {
-                    continue;
-                }
-                if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                    continue;
-                }
-                printedAnything = true;
-                if (!printed) {
-                    if (needSep) pw.println();
-                    needSep = true;
-                    pw.println("  Restarting services:");
-                    printed = true;
-                }
-                pw.print("  * Restarting "); pw.println(r);
-                r.dump(pw, "    ");
-            }
-            needSep = true;
-        }
-
-        if (mDestroyingServices.size() > 0) {
-            boolean printed = false;
-            for (int i=0; i< mDestroyingServices.size(); i++) {
-                ServiceRecord r = mDestroyingServices.get(i);
-                if (!matcher.match(r, r.name)) {
-                    continue;
-                }
-                if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
-                    continue;
-                }
-                printedAnything = true;
-                if (!printed) {
-                    if (needSep) pw.println();
-                    needSep = true;
-                    pw.println("  Destroying services:");
-                    printed = true;
-                }
-                pw.print("  * Destroy "); pw.println(r);
-                r.dump(pw, "    ");
-            }
-            needSep = true;
-        }
-
-        if (dumpAll) {
-            boolean printed = false;
-            for (int ic=0; ic<mServiceConnections.size(); ic++) {
-                ArrayList<ConnectionRecord> r = mServiceConnections.valueAt(ic);
-                for (int i=0; i<r.size(); i++) {
-                    ConnectionRecord cr = r.get(i);
-                    if (!matcher.match(cr.binding.service, cr.binding.service.name)) {
-                        continue;
-                    }
-                    if (dumpPackage != null && (cr.binding.client == null
-                            || !dumpPackage.equals(cr.binding.client.info.packageName))) {
                         continue;
                     }
                     printedAnything = true;
                     if (!printed) {
                         if (needSep) pw.println();
                         needSep = true;
-                        pw.println("  Connection bindings to services:");
+                        pw.println("  Pending services:");
                         printed = true;
                     }
-                    pw.print("  * "); pw.println(cr);
-                    cr.dump(pw, "    ");
+                    pw.print("  * Pending "); pw.println(r);
+                    r.dump(pw, "    ");
+                }
+                needSep = true;
+            }
+
+            if (mRestartingServices.size() > 0) {
+                printed = false;
+                for (int i=0; i<mRestartingServices.size(); i++) {
+                    ServiceRecord r = mRestartingServices.get(i);
+                    if (!matcher.match(r, r.name)) {
+                        continue;
+                    }
+                    if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                        continue;
+                    }
+                    printedAnything = true;
+                    if (!printed) {
+                        if (needSep) pw.println();
+                        needSep = true;
+                        pw.println("  Restarting services:");
+                        printed = true;
+                    }
+                    pw.print("  * Restarting "); pw.println(r);
+                    r.dump(pw, "    ");
+                }
+                needSep = true;
+            }
+
+            if (mDestroyingServices.size() > 0) {
+                printed = false;
+                for (int i=0; i< mDestroyingServices.size(); i++) {
+                    ServiceRecord r = mDestroyingServices.get(i);
+                    if (!matcher.match(r, r.name)) {
+                        continue;
+                    }
+                    if (dumpPackage != null && !dumpPackage.equals(r.appInfo.packageName)) {
+                        continue;
+                    }
+                    printedAnything = true;
+                    if (!printed) {
+                        if (needSep) pw.println();
+                        needSep = true;
+                        pw.println("  Destroying services:");
+                        printed = true;
+                    }
+                    pw.print("  * Destroy "); pw.println(r);
+                    r.dump(pw, "    ");
+                }
+                needSep = true;
+            }
+
+            if (dumpAll) {
+                printed = false;
+                for (int ic=0; ic<mServiceConnections.size(); ic++) {
+                    ArrayList<ConnectionRecord> r = mServiceConnections.valueAt(ic);
+                    for (int i=0; i<r.size(); i++) {
+                        ConnectionRecord cr = r.get(i);
+                        if (!matcher.match(cr.binding.service, cr.binding.service.name)) {
+                            continue;
+                        }
+                        if (dumpPackage != null && (cr.binding.client == null
+                                || !dumpPackage.equals(cr.binding.client.info.packageName))) {
+                            continue;
+                        }
+                        printedAnything = true;
+                        if (!printed) {
+                            if (needSep) pw.println();
+                            needSep = true;
+                            pw.println("  Connection bindings to services:");
+                            printed = true;
+                        }
+                        pw.print("  * "); pw.println(cr);
+                        cr.dump(pw, "    ");
+                    }
                 }
             }
-        }
 
-        if (!printedAnything) {
-            pw.println("  (nothing)");
+            if (!printedAnything) {
+                pw.println("  (nothing)");
+            }
         }
+    }
+
+    ServiceDumper newServiceDumperLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        return new ServiceDumper(fd, pw, args, opti, dumpAll, dumpPackage);
     }
 
     /**
