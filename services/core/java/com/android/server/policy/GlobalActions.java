@@ -1145,7 +1145,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         public GlobalActionsDialog(Context context, AlertParams params) {
             super(context, getDialogTheme(context));
             mContext = getContext();
-            mAlert = new AlertController(mContext, this, getWindow());
+            mAlert = AlertController.create(mContext, this, getWindow());
             mAdapter = (MyAdapter) params.mAdapter;
             mWindowTouchSlop = ViewConfiguration.get(context).getScaledWindowTouchSlop();
             params.apply(mAlert);
