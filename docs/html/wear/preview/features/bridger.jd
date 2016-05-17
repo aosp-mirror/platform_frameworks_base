@@ -1,7 +1,7 @@
 page.title=Bridging Mode for Notifications
 meta.keywords="wear-preview"
 page.tags="wear-preview"
-page.image=images/cards/card-n-sdk_2x.png
+
 @jd:body
 
     <div id="qv-wrapper">
@@ -39,8 +39,8 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <ul>
       <li>Specifying in the standalone app's Android manifest file that
-      notifications from the corresponding phone app should <strong>not be
-      bridged</strong> to the watch
+      notifications from the corresponding phone app should not be
+      bridged to the watch
       </li>
 
       <li>Setting a dismissal ID so notification dismissals are synced across
@@ -60,7 +60,8 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <pre>
 com.google.android.wearable.notificationBridgeMode
-</pre>
+    </pre>
+
     <p>
       Setting that entry to <code>NO_BRIDGING</code> will prevent bridging:
     </p>
@@ -96,7 +97,7 @@ com.google.android.wearable.notificationBridgeMode
     </p>
 
     <p>
-      Thus, if bridging should be prevented <strong>when</strong> the watch app
+      Thus, if bridging should be prevented when the watch app
       is installed, use the <a href=
       "#preventing_bridging_with_the_bridging_mode_feature">Bridging mode
       feature</a>.
@@ -118,7 +119,7 @@ com.google.android.wearable.notificationBridgeMode
     <pre>
 public WearableExtender setDismissalId(String dismissalId)
 public String getDismissalId()
-</pre>
+    </pre>
     <p>
       To enable a dismissal to be synced, use the <code>setDismissalId()</code>
       method. For each notification, pass a globally unique ID, as a string,
@@ -140,7 +141,7 @@ Notification notification = new NotificationCompat.Builder(context)
 &lt;set other fields&gt;
 .extend(wearableExtender)
 .build();
-</pre>
+    </pre>
     <p>
       Dismissal IDs work if a watch is paired to an Android phone, but not if a
       watch is paired to an iPhone.
