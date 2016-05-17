@@ -20,6 +20,7 @@ page.image=images/cards/card-n-changes_2x.png
   </li>
   <li><a href="#perm">Permissions Changes</a>
   </li>
+  <li><a href="#sharing-files">Sharing Files Between Apps</a></li>
   <li><a href="#accessibility">Accessibility Improvements</a>
     <ol>
       <li><a href="#screen-zoom">Screen Zoom</a></li>
@@ -243,6 +244,23 @@ page.image=images/cards/card-n-changes_2x.png
     ContentResolver.openFileDescriptor()}.
   </li>
 </ul>
+
+<h2 id="sharing-files">Sharing Files Between Apps</h2>
+
+<p>
+For apps targeting Android N, the Android framework enforces
+the {@link android.os.StrictMode} API policy that prohibits exposing {@code file://} URIs
+outside your app. If an intent containing a file URI leaves your app, the app fails
+with a {@code FileUriExposedException} exception.
+</p>
+
+<p>
+To share files between applications, you should send a {@code content://} URI
+and grant a temporary access permission on the URI. The easiest way to grant this permission is by
+using the {@link android.support.v4.content.FileProvider} class. For more information
+on permissions and sharing files,
+see <a href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>.
+</p>
 
 <h2 id="accessibility">Accessibility Improvements</h2>
 
@@ -474,7 +492,7 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   running in device owner mode, the <code>DISALLOW_ADD_USER</code> restriction
   is automatically set. This prevents users from creating unmanaged secondary
   users. In addition, the <code>CreateUser()</code> and
-  <code>createAndInitial()</code> methods are deprecated; the new
+  <code>createAndInitializeUser()</code> methods are deprecated; the new
   <code>DevicePolicyManager.createAndManageUser()</code> method replaces them.
   </li>
 
@@ -483,6 +501,10 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
   <code>DevicePolicyManagewr.getWifiMacAddress()</code>. If Wi-Fi has never
   been enabled on the device, this method returns a value of {@code null}.
   </li>
+
+  <li>The Work Mode setting controls access to work apps. When work mode is off the
+  system launcher indicates work apps are unavailable by greying them out. Enabling
+  work mode again restores normal behavior.
 </ul>
 
 <p>
@@ -563,5 +585,33 @@ common example is storing too much data in
 which causes {@code ActivityThread.StopInfo} to throw a
 {@code RuntimeException} when your app targets Android N.
 </li>
+
+<li>
+If an app posts {@link java.lang.Runnable} tasks to a {@link android.view.View}, and
+the {@link android.view.View}
+is not attached to a window, the system
+queues the {@link java.lang.Runnable} task with the {@link android.view.View};
+the {@link java.lang.Runnable} task does not execute until the
+{@link android.view.View} is attached
+to a window. This behavior fixes the following bugs:
+<ul>
+   <li>If an app posted to a {@link android.view.View} from a thread other than the intended
+   window’s UI thread, the {@link java.lang.Runnable} may run on the wrong thread as a result.
+   </li>
+   <li>If the {@link java.lang.Runnable} task was posted from a thread other than
+   a looper thread, the app could expose the {@link java.lang.Runnable} task.</li>
+</ul>
+</li>
+
+<li>
+If an app on Android N with
+{@link android.Manifest.permission#DELETE_PACKAGES DELETE_PACKAGES}
+permission tries to delete a package, but a different app had installed that package,
+the system requires user confirmation. In this scenario, apps should expect
+{@link android.content.pm.PackageInstaller#STATUS_PENDING_USER_ACTION STATUS_PENDING_USER_ACTION}
+as the return status when they invoke
+{@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()}.
+</li>
+
 </ul>
 
