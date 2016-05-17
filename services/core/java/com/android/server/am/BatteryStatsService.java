@@ -1323,55 +1323,60 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         delta.mTimestamp = latest.getTimeStamp();
         delta.mStackState = latest.getStackState();
 
-        // These times seem to be the most reliable.
-        delta.mControllerTxTimeMs = latest.mControllerTxTimeMs - lastTxMs;
-        delta.mControllerRxTimeMs = latest.mControllerRxTimeMs - lastRxMs;
+        final long txTimeMs = latest.mControllerTxTimeMs - lastTxMs;
+        final long rxTimeMs = latest.mControllerRxTimeMs - lastRxMs;
+        final long idleTimeMs = latest.mControllerIdleTimeMs - lastIdleMs;
 
-        // WiFi calculates the idle time as a difference from the on time and the various
-        // Rx + Tx times. There seems to be some missing time there because this sometimes
-        // becomes negative. Just cap it at 0 and move on.
-        // b/21613534
-        delta.mControllerIdleTimeMs = Math.max(0, latest.mControllerIdleTimeMs - lastIdleMs);
-        delta.mControllerEnergyUsed = Math.max(0, latest.mControllerEnergyUsed - lastEnergy);
-
-        if (delta.mControllerTxTimeMs < 0 || delta.mControllerRxTimeMs < 0) {
+        if (txTimeMs < 0 || rxTimeMs < 0) {
             // The stats were reset by the WiFi system (which is why our delta is negative).
             // Returns the unaltered stats.
             delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
             delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
             delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
             delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
-
             Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + delta);
-        }
-
-        // There is some accuracy error in reports so allow some slop in the results.
-        final long SAMPLE_ERROR_MILLIS = 750;
-        final long totalTimeMs = delta.mControllerIdleTimeMs + delta.mControllerRxTimeMs +
-                delta.mControllerTxTimeMs;
-        if (totalTimeMs > timePeriodMs + SAMPLE_ERROR_MILLIS) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Total time ");
-            TimeUtils.formatDuration(totalTimeMs, sb);
-            sb.append(" is longer than sample period ");
-            TimeUtils.formatDuration(timePeriodMs, sb);
-            sb.append(".\n");
-            sb.append("Previous WiFi snapshot: ").append("idle=");
-            TimeUtils.formatDuration(lastIdleMs, sb);
-            sb.append(" rx=");
-            TimeUtils.formatDuration(lastRxMs, sb);
-            sb.append(" tx=");
-            TimeUtils.formatDuration(lastTxMs, sb);
-            sb.append(" e=").append(lastEnergy);
-            sb.append("\n");
-            sb.append("Current WiFi snapshot: ").append("idle=");
-            TimeUtils.formatDuration(latest.mControllerIdleTimeMs, sb);
-            sb.append(" rx=");
-            TimeUtils.formatDuration(latest.mControllerRxTimeMs, sb);
-            sb.append(" tx=");
-            TimeUtils.formatDuration(latest.mControllerTxTimeMs, sb);
-            sb.append(" e=").append(latest.mControllerEnergyUsed);
-            Slog.wtf(TAG, sb.toString());
+        } else {
+            final long totalActiveTimeMs = txTimeMs + rxTimeMs;
+            long maxExpectedIdleTimeMs;
+            // Active time can never be greater than the total time, the stats received seem
+            // to be corrupt.
+            if (totalActiveTimeMs > timePeriodMs) {
+                maxExpectedIdleTimeMs = timePeriodMs;
+                StringBuilder sb = new StringBuilder();
+                sb.append("Total Active time ");
+                TimeUtils.formatDuration(totalActiveTimeMs, sb);
+                sb.append(" is longer than sample period ");
+                TimeUtils.formatDuration(timePeriodMs, sb);
+                sb.append(".\n");
+                sb.append("Previous WiFi snapshot: ").append("idle=");
+                TimeUtils.formatDuration(lastIdleMs, sb);
+                sb.append(" rx=");
+                TimeUtils.formatDuration(lastRxMs, sb);
+                sb.append(" tx=");
+                TimeUtils.formatDuration(lastTxMs, sb);
+                sb.append(" e=").append(lastEnergy);
+                sb.append("\n");
+                sb.append("Current WiFi snapshot: ").append("idle=");
+                TimeUtils.formatDuration(latest.mControllerIdleTimeMs, sb);
+                sb.append(" rx=");
+                TimeUtils.formatDuration(latest.mControllerRxTimeMs, sb);
+                sb.append(" tx=");
+                TimeUtils.formatDuration(latest.mControllerTxTimeMs, sb);
+                sb.append(" e=").append(latest.mControllerEnergyUsed);
+                Slog.wtf(TAG, sb.toString());
+            } else {
+                maxExpectedIdleTimeMs = timePeriodMs - totalActiveTimeMs;
+            }
+            // These times seem to be the most reliable.
+            delta.mControllerTxTimeMs = txTimeMs;
+            delta.mControllerRxTimeMs = rxTimeMs;
+            // WiFi calculates the idle time as a difference from the on time and the various
+            // Rx + Tx times. There seems to be some missing time there because this sometimes
+            // becomes negative. Just cap it at 0 and ensure that it is less than the expected idle
+            // time from the difference in timestamps.
+            // b/21613534
+            delta.mControllerIdleTimeMs = Math.min(maxExpectedIdleTimeMs, Math.max(0, idleTimeMs));
+            delta.mControllerEnergyUsed = Math.max(0, latest.mControllerEnergyUsed - lastEnergy);
         }
 
         mLastInfo = latest;
