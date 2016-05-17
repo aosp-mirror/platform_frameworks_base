@@ -253,7 +253,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
+    <code>android:minHeight</code>, <code>android:minWidth</code>
   </dt>
 
   <dd>
@@ -275,8 +275,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalHeight="450dp"
-          android:minimalWidth="300dp" /&gt;
+          android:minHeight="450dp"
+          android:minWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
