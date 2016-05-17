@@ -1688,7 +1688,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Request the Keyboard Shortcuts screen to show up. If it succeeds, this will trigger
+     * Request the Keyboard Shortcuts screen to show up. This will trigger
      * {@link #onProvideKeyboardShortcuts} to retrieve the shortcuts for the foreground activity.
      */
     public final void requestShowKeyboardShortcuts() {
