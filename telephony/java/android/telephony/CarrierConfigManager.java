@@ -459,12 +459,13 @@ public class CarrierConfigManager {
     /**
      * Whether cellular data is required to access visual voicemail.
      */
-    public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOL = "vvm_cellular_data_required";
+    public static final String KEY_VVM_CELLULAR_DATA_REQUIRED_BOOL =
+        "vvm_cellular_data_required_bool";
 
     /**
      * Whether to prefetch audio data on new voicemail arrival, defaulted to true.
      */
-    public static final String KEY_VVM_PREFETCH_BOOL = "vvm_prefetch";
+    public static final String KEY_VVM_PREFETCH_BOOL = "vvm_prefetch_bool";
 
     /**
      * The package name of the carrier's visual voicemail app to ensure that dialer visual voicemail
