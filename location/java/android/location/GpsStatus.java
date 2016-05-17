@@ -32,6 +32,8 @@ import java.util.NoSuchElementException;
 @Deprecated
 public final class GpsStatus {
     private static final int NUM_SATELLITES = 255;
+    private static final int GLONASS_SVID_OFFSET = 64;
+    private static final int BEIDOU_SVID_OFFSET = 200;
 
     /* These package private values are modified by the LocationManager class */
     private int mTimeToFirstFix;
@@ -153,11 +155,22 @@ public final class GpsStatus {
             final int constellationType =
                     (svidWithFlags[i] >> GnssStatus.CONSTELLATION_TYPE_SHIFT_WIDTH)
                     & GnssStatus.CONSTELLATION_TYPE_MASK;
-            // Skip all non-GPS satellites.
-            if (constellationType != GnssStatus.CONSTELLATION_GPS) {
+            int prn = svidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH;
+            // Other satellites passed through these APIs before GnssSvStatus was availble.
+            // GPS, SBAS & QZSS can pass through at their nominally
+            // assigned prn number (as long as it fits in the valid 0-255 range below.)
+            // Glonass, and Beidou are passed through with the defacto standard offsets
+            // Other future constellation reporting (e.g. Galileo) needs to use
+            // GnssSvStatus on (N level) HAL & Java layers.
+            if (constellationType == GnssStatus.CONSTELLATION_GLONASS) {
+                prn += GLONASS_SVID_OFFSET;
+            } else if (constellationType == GnssStatus.CONSTELLATION_BEIDOU) {
+                prn += BEIDOU_SVID_OFFSET;
+            } else if ((constellationType != GnssStatus.CONSTELLATION_GPS) &&
+                    (constellationType != GnssStatus.CONSTELLATION_QZSS) &&
+                    (constellationType != GnssStatus.CONSTELLATION_SBAS)) {
                 continue;
             }
-            int prn = svidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH;
             if (prn > 0 && prn <= NUM_SATELLITES) {
                 GpsSatellite satellite = mSatellites.get(prn);
                 if (satellite == null) {
