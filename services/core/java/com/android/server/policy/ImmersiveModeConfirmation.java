@@ -380,6 +380,10 @@ public class ImmersiveModeConfirmation {
         @Override
         public void onVrStateChanged(boolean enabled) throws RemoteException {
             mVrModeEnabled = enabled;
+            if (mVrModeEnabled) {
+                mHandler.removeMessages(H.SHOW);
+                mHandler.sendEmptyMessage(H.HIDE);
+            }
         }
     };
 }
