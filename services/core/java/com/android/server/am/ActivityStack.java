@@ -4383,14 +4383,49 @@ final class ActivityStack {
     }
 
     /**
-     * Make sure the given activity matches the current configuration.  Returns
-     * false if the activity had to be destroyed.  Returns true if the
-     * configuration is the same, or the activity will remain running as-is
-     * for whatever reason.  Ensures the HistoryRecord is updated with the
+     * Ensures all visible activities at or below the input activity have the right configuration.
+     */
+    void ensureVisibleActivitiesConfigurationLocked(ActivityRecord start, boolean preserveWindow) {
+        if (start == null || !start.visible) {
+            return;
+        }
+
+        final TaskRecord startTask = start.task;
+        boolean behindFullscreen = false;
+        boolean updatedConfig = false;
+
+        for (int taskIndex = mTaskHistory.indexOf(startTask); taskIndex >= 0; --taskIndex) {
+            final TaskRecord task = mTaskHistory.get(taskIndex);
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            int activityIndex =
+                    (start.task == task) ? activities.indexOf(start) : activities.size() - 1;
+            for (; activityIndex >= 0; --activityIndex) {
+                final ActivityRecord r = activities.get(activityIndex);
+                updatedConfig |= ensureActivityConfigurationLocked(r, 0, preserveWindow);
+                if (r.fullscreen) {
+                    behindFullscreen = true;
+                    break;
+                }
+            }
+            if (behindFullscreen) {
+                break;
+            }
+        }
+        if (updatedConfig) {
+            // Ensure the resumed state of the focus activity if we updated the confiugaration of
+            // any activity.
+            mStackSupervisor.resumeFocusedStackTopActivityLocked();
+        }
+    }
+
+    /**
+     * Make sure the given activity matches the current configuration. Returns false if the activity
+     * had to be destroyed.  Returns true if the configuration is the same, or the activity will
+     * remain running as-is for whatever reason. Ensures the HistoryRecord is updated with the
      * correct configuration and all other bookkeeping is handled.
      */
-    final boolean ensureActivityConfigurationLocked(ActivityRecord r, int globalChanges,
-            boolean preserveWindow) {
+    boolean ensureActivityConfigurationLocked(
+            ActivityRecord r, int globalChanges, boolean preserveWindow) {
         if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + r);
