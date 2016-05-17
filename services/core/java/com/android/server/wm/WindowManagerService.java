@@ -7587,7 +7587,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final WindowState imeWin = mInputMethodWindow;
         final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw();
         final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
-        final TaskStack imeTargetStack = getImeTargetStackLocked();
+        final TaskStack imeTargetStack = getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?
                 imeTargetStack.getDockSide() : DOCKED_INVALID;
         final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
@@ -7756,10 +7756,13 @@ public class WindowManagerService extends IWindowManager.Stub
         return mCurrentFocus;
     }
 
-    TaskStack getImeTargetStackLocked() {
-        // Don't use WindowState.getStack() because it returns home stack for system windows.
-        Task imeTask = mInputMethodTarget != null ? mInputMethodTarget.getTask() : null;
-        return imeTask != null ? imeTask.mStack : null;
+    TaskStack getImeFocusStackLocked() {
+        // Don't use mCurrentFocus.getStack() because it returns home stack for system windows.
+        // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
+        // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
+        // to make room for IME, but the window is not the focused window that's taking input.
+        return (mFocusedApp != null && mFocusedApp.mTask != null) ?
+                mFocusedApp.mTask.mStack : null;
     }
 
     private void showAuditSafeModeNotification() {
