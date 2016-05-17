@@ -266,6 +266,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED = 9;
     private static final int MSG_UPDATE_INTERFACE_QUOTA = 10;
     private static final int MSG_REMOVE_INTERFACE_QUOTA = 11;
+    private static final int MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED = 12;
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1707,9 +1708,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void setUidPolicyUncheckedLocked(int uid, int oldPolicy, int policy, boolean persist) {
         setUidPolicyUncheckedLocked(uid, policy, persist);
 
+        final boolean isBlacklisted = policy == POLICY_REJECT_METERED_BACKGROUND;
+        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED, uid,
+                isBlacklisted ? 1 : 0).sendToTarget();
+
+        final boolean wasBlacklisted = oldPolicy == POLICY_REJECT_METERED_BACKGROUND;
         // Checks if app was added or removed to the blacklist.
-        if ((oldPolicy == POLICY_NONE && policy == POLICY_REJECT_METERED_BACKGROUND)
-                || (oldPolicy == POLICY_REJECT_METERED_BACKGROUND && policy == POLICY_NONE)) {
+        if ((oldPolicy == POLICY_NONE && isBlacklisted)
+                || (wasBlacklisted && policy == POLICY_NONE)) {
             mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 1, null)
                     .sendToTarget();
         }
@@ -3096,6 +3102,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void dispatchRestrictBackgroundBlacklistChanged(INetworkPolicyListener listener,
+            int uid, boolean blacklisted) {
+        if (listener != null) {
+            try {
+                listener.onRestrictBackgroundBlacklistChanged(uid, blacklisted);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
     private Handler.Callback mHandlerCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
@@ -3186,7 +3202,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         }
                         mListeners.finishBroadcast();
                     }
-
                     final PackageManager pm = mContext.getPackageManager();
                     final String[] packages = pm.getPackagesForUid(uid);
                     if (changed && packages != null) {
@@ -3200,6 +3215,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
                         }
                     }
+                    return true;
+                }
+                case MSG_RESTRICT_BACKGROUND_BLACKLIST_CHANGED: {
+                    final int uid = msg.arg1;
+                    final boolean blacklisted = msg.arg2 == 1;
+
+                    dispatchRestrictBackgroundBlacklistChanged(mConnectivityListener, uid,
+                            blacklisted);
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        dispatchRestrictBackgroundBlacklistChanged(listener, uid,
+                                blacklisted);
+                    }
+                    mListeners.finishBroadcast();
                     return true;
                 }
                 case MSG_ADVISE_PERSIST_THRESHOLD: {
