@@ -25,7 +25,7 @@ page.image=images/cards/card-n-sdk_2x.png
             </h5>
 
             <p>
-              Run and test your apps on a range of devices or on an emulator.
+              Run and test your apps on supported Wear devices or the emulator.
             </p>
           </div>
 
@@ -71,8 +71,10 @@ page.image=images/cards/card-n-sdk_2x.png
             </h5>
 
             <p>
-              Report issues and give us feedback using our issue tracker.
-              Connect with other developers in the Wear Developer Community.
+              Report issues and give us feedback using our
+              <a href="https://g.co/wearpreviewbug">issue tracker</a>.
+              Connect with other developers in
+              the <a href="https://g.co/androidweardev">Wear Developer Community</a>.
             </p>
           </div>
 
@@ -128,7 +130,8 @@ page.image=images/cards/card-n-sdk_2x.png
       apps and plan migration or feature work needed to target the new
       platform. This is the priority period in which to give us your feedback
       on features and APIs and file compatibility issues — for all of these,
-      please use the issue tracker. You can expect some API changes across
+      please use the <a href="https://g.co/wearpreviewbug">issue tracker</a>.
+      You can expect some API changes across
       these updates.
     </p>
 
@@ -144,8 +147,6 @@ page.image=images/cards/card-n-sdk_2x.png
     <p>
       As you test and develop on Android Wear 2.0, we strongly recommend
       keeping your development environment up-to-date as updates are released.
-      Updated preview images will be available that you can download and flash
-      manually.
     </p>
 
     <p>
@@ -195,17 +196,24 @@ page.image=images/cards/card-n-sdk_2x.png
     </h3>
 
     <p>
-      You can download these hardware system images for Nexus devices from the
-      Downloads page:
+      You can download these hardware system images at <a href=
+      "{@docRoot}wear/preview/downloads.html">Download and Test with a
+      Device</a>:
     </p>
 
     <ul>
-      <li>LG Watch Urbane 2nd Edition “nemo”
+      <li>LGE Watch Urbane 2nd Edition
       </li>
 
-      <li>Huawei Watch “sturgeon”
+      <li>Huawei Watch
       </li>
     </ul>
+
+    <p>
+     Please keep in mind that the Developer Preview system images
+     are for app developers only, and for compatibility testing and
+     early development only, and are not ready for day-to-day use.
+    </p>
 
     <h3 id="documentation_and_sample_code">
       Documentation and sample code
@@ -216,17 +224,22 @@ page.image=images/cards/card-n-sdk_2x.png
     </p>
 
     <ul>
-      <li>[comment placeholder] Get Started has step-by-step instructions for
+      <li><a href=
+      "{@docRoot}wear/preview/start.html">Get Started</a>
+      has step-by-step instructions for
       setting up the SDK.
       </li>
 
-      <li>Documentation of new APIs, including an API Overview, downloadable
-      API Reference, and developer guides on key features such as
-      complications, design patterns for Wear, and building standalone Android
-      Wear apps.
+      <li>Documentation of new APIs, including an
+      <a href="{@docRoot}wear/preview/api-overview.html">API Overview</a>,
+      downloadable
+      <a href="{@docRoot}wear/preview/start.html#get_the_preview_reference_documentation">API Reference</a>,
+      and developer guides on key features such as
+      <a href="{@docRoot}wear/preview/features/complications.html">complications</a>
+      and design patterns for Wear.
       </li>
 
-      <li>Sample code that demonstrates how to implement [comment placeholder]
+      <li>Sample code that demonstrates how to implement
       complications and other new features.
       </li>
     </ul>
@@ -241,7 +254,8 @@ page.image=images/cards/card-n-sdk_2x.png
     </p>
 
     <ul>
-      <li>Wear Developer Preview Issue Tracker is your primary feedback
+      <li>Wear Developer Preview
+      <a href="https://g.co/wearpreviewbug">Issue Tracker</a> is your primary feedback
       channel. You can report bugs, performance issues, and general feedback
       through the issue tracker. You can also check for known issues and find
       workaround steps.

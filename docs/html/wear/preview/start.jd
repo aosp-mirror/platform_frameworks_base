@@ -1,4 +1,4 @@
-page.title=Get Started with the Android Wear 2.0 Developer Preview
+page.title=Get Started with the Preview
 meta.keywords="wear-preview"
 page.tags="wear-preview"
 page.image=images/cards/card-n-sdk_2x.png
@@ -28,8 +28,8 @@ page.image=images/cards/card-n-sdk_2x.png
     </div>
 
     <p>
-      If you want an environment for basic <strong>compatibility
-      testing</strong> of your app, you can use your current APK and a
+      If you want an environment for basic compatibility
+      testing of your app, you can use your current APK and a
       supported watch or an emulator. You don't necessarily need to update your
       full development environment to do basic testing. To simply test your
       app's compatibility with a preview system image, see <a href=
@@ -97,19 +97,20 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <table>
       <tr>
-        <th scope="col">
+        <th style="width:300px">
           Reference documentation
         </th>
-        <th scope="col">
-          Notes
+        <th>
+          Checksums
         </th>
       </tr>
 
       <tr>
         <td>
-          [zip file name]
+          <a href="http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/wearable-support-preview-1-docs.zip">wearable-support-preview-1-docs.zip</a>
         </td>
-        <td>
+        <td>MD5: eff101c848aff7d0fa7a0812c7670145<br>
+            SHA-1: da1eba1869aaaf8bde30ecfb7e0d624125a41586
         </td>
       </tr>
     </table>
@@ -137,8 +138,8 @@ page.image=images/cards/card-n-sdk_2x.png
       </li>
 
       <li>If prompted by the Android SDK Manager for the SDK version to use for
-      the project, select <strong>Use</strong> <strong>Android Studio's
-      SDK</strong>. &lt;//li&gt;
+      the project, select <strong>Use Android Studio's
+      SDK</strong>.
       </li>
 
       <li>If prompted to update the Gradle plugin, update the version of the
@@ -151,12 +152,10 @@ page.image=images/cards/card-n-sdk_2x.png
       'com.google.android.support:wearable:1.4.0'</code>) by changing it to the
       following, which requires that your the Google Repository <a href=
       "#install_android_studio_and_the_latest_packages">is the latest
-      version</a>::
-
-        <pre>
-        compile 'com.google.android.support:wearable:2.0.0-alpha1'
-
-</pre>
+      version</a>:
+      <pre>
+compile 'com.google.android.support:wearable:2.0.0-alpha1'
+      </pre>
       </li>
 
       <li>See the following page for setting up a watch or emulator with a
@@ -195,11 +194,9 @@ page.image=images/cards/card-n-sdk_2x.png
       <code>dependencies</code> section, update the existing reference to the
       Wearable Support Library (perhaps <code>compile
       'com.google.android.support:wearable:1.4.0'</code>) to:
-
-        <pre>
-      compile 'com.google.android.support:wearable:2.0.0-alpha1'
-
-</pre>
+      <pre>
+compile 'com.google.android.support:wearable:2.0.0-alpha1'
+      </pre>
       </li>
 
       <li>See the following page for setting up a watch or emulator with a
