@@ -1120,17 +1120,22 @@ class ActivityStarter {
                 // activity.
                 mService.setFocusedActivityLocked(mStartActivity, "startedActivity");
             }
-            if (mTargetStack.isFocusable()) {
-                mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
-                        mOptions);
-            } else {
+            final ActivityRecord topTaskActivity = mStartActivity.task.topRunningActivityLocked();
+            if (!mTargetStack.isFocusable()
+                    || (topTaskActivity != null && topTaskActivity.mTaskOverlay)) {
                 // If the activity is not focusable, we can't resume it, but still would like to
                 // make sure it becomes visible as it starts (this will also trigger entry
                 // animation). An example of this are PIP activities.
+                // Also, we don't want to resume activities in a task that currently has an overlay
+                // as the starting activity just needs to be in the visible paused state until the
+                // over is removed.
                 mTargetStack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 // Go ahead and tell window manager to execute app transition for this activity
                 // since the app transition will not be triggered through the resume channel.
                 mWindowManager.executeAppTransition();
+            } else {
+                mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
+                        mOptions);
             }
         } else {
             mTargetStack.addRecentActivityLocked(mStartActivity);
@@ -1197,7 +1202,8 @@ class ActivityStarter {
             mDoResume = false;
         }
 
-        if (mOptions != null && mOptions.getLaunchTaskId() != -1 && mOptions.getAvoidMoveToFront()) {
+        if (mOptions != null && mOptions.getLaunchTaskId() != -1 && mOptions.getTaskOverlay()) {
+            r.mTaskOverlay = true;
             final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
             final ActivityRecord top = task != null ? task.getTopActivity() : null;
             if (top != null && !top.visible) {

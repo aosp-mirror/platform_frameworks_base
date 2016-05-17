@@ -4032,7 +4032,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setAppStartingWindow(IBinder token, String pkg,
+    public boolean setAppStartingWindow(IBinder token, String pkg,
             int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo,
             int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
@@ -4049,18 +4049,18 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken wtoken = findAppWindowToken(token);
             if (wtoken == null) {
                 Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + token);
-                return;
+                return false;
             }
 
             // If the display is frozen, we won't do anything until the
             // actual window is displayed so there is no reason to put in
             // the starting window.
             if (!okToDisplay()) {
-                return;
+                return false;
             }
 
             if (wtoken.startingData != null) {
-                return;
+                return false;
             }
 
             // If this is a translucent window, then don't
@@ -4075,7 +4075,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (ent == null) {
                     // Whoops!  App doesn't exist.  Um.  Okay.  We'll just
                     // pretend like we didn't see that.
-                    return;
+                    return false;
                 }
                 final boolean windowIsTranslucent = ent.array.getBoolean(
                         com.android.internal.R.styleable.Window_windowIsTranslucent, false);
@@ -4089,33 +4089,33 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " Floating=" + windowIsFloating
                         + " ShowWallpaper=" + windowShowWallpaper);
                 if (windowIsTranslucent) {
-                    return;
+                    return false;
                 }
                 if (windowIsFloating || windowDisableStarting) {
-                    return;
+                    return false;
                 }
                 if (windowShowWallpaper) {
                     if (mWallpaperControllerLocked.getWallpaperTarget() == null) {
                         // If this theme is requesting a wallpaper, and the wallpaper
-                        // is not curently visible, then this effectively serves as
+                        // is not currently visible, then this effectively serves as
                         // an opaque window and our starting window transition animation
                         // can still work.  We just need to make sure the starting window
                         // is also showing the wallpaper.
                         windowFlags |= FLAG_SHOW_WALLPAPER;
                     } else {
-                        return;
+                        return false;
                     }
                 }
             }
 
             if (transferStartingWindow(transferFrom, wtoken)) {
-                return;
+                return true;
             }
 
             // There is no existing starting window, and the caller doesn't
             // want us to create one, so that's it!
             if (!createIfNeeded) {
-                return;
+                return false;
             }
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Creating StartingData");
@@ -4128,6 +4128,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
             mH.sendMessageAtFrontOfQueue(m);
         }
+        return true;
     }
 
     private boolean transferStartingWindow(IBinder transferFrom, AppWindowToken wtoken) {

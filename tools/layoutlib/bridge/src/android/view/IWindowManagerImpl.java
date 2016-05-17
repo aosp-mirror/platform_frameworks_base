@@ -336,10 +336,11 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setAppStartingWindow(IBinder arg0, String arg1, int arg2, CompatibilityInfo arg3,
+    public boolean setAppStartingWindow(IBinder arg0, String arg1, int arg2, CompatibilityInfo arg3,
             CharSequence arg4, int arg5, int arg6, int arg7, int arg8, IBinder arg9, boolean arg10)
             throws RemoteException {
         // TODO Auto-generated method stub
+        return false;
     }
 
     @Override
