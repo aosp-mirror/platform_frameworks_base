@@ -38,7 +38,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
