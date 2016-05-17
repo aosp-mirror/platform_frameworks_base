@@ -163,7 +163,12 @@ interface IWindowManager
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback startedCallback,
             boolean scaleUp);
     void executeAppTransition();
-    void setAppStartingWindow(IBinder token, String pkg, int theme,
+
+    /**
+     * Called to set the starting window for the input token and returns true if the starting
+     * window was set for the token.
+     */
+    boolean setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int logo, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
     void setAppVisibility(IBinder token, boolean visible);
