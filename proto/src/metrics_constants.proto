@@ -2235,6 +2235,10 @@ message MetricsEvent {
     // Subtype: Index of selection
     ACTION_APP_DISAMBIG_TAP = 457;
 
+    // OPEN: Settings > Internal storage > Storage manager
+    // CATEGORY: SETTINGS
+    STORAGE_MANAGER_SETTINGS = 458;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
