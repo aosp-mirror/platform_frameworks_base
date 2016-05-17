@@ -620,6 +620,10 @@ class ActivityStarter {
                 .getSystemService(Context.KEYGUARD_SERVICE);
         final Intent credential =
                 km.createConfirmDeviceCredentialIntent(null, null, userId);
+        // For safety, check null here in case users changed the setting after the checking.
+        if (credential == null) {
+            return;
+        }
         final ActivityRecord activityRecord = targetStack.topRunningActivityLocked();
         if (activityRecord != null) {
             final IIntentSender target = mService.getIntentSenderLocked(
