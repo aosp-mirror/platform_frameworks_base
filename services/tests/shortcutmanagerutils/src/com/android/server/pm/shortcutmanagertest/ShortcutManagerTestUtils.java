@@ -383,6 +383,14 @@ public class ShortcutManagerTestUtils {
         return actualShortcuts;
     }
 
+    public static List<ShortcutInfo> assertAllStringsResolved(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.hasStringResourcesResolved());
+        }
+        return actualShortcuts;
+    }
+
     public static void assertDynamicOnly(ShortcutInfo si) {
         assertTrue(si.isDynamic());
         assertFalse(si.isPinned());
