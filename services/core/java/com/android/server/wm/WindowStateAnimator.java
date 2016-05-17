@@ -1298,6 +1298,9 @@ class WindowStateAnimator {
         if (!finalClipRect.equals(mLastFinalClipRect)) {
             mLastFinalClipRect.set(finalClipRect);
             mSurfaceController.setFinalCropInTransaction(finalClipRect);
+            if (mDestroyPreservedSurfaceUponRedraw && mPendingDestroySurface != null) {
+                mPendingDestroySurface.setFinalCropInTransaction(finalClipRect);
+            }
         }
     }
 
@@ -1370,7 +1373,8 @@ class WindowStateAnimator {
 
         // If we are animating, we either apply the clip before applying all the animation
         // transformation or after all the transformation.
-        final boolean useFinalClipRect = isAnimationSet() && stackClip == STACK_CLIP_AFTER_ANIM;
+        final boolean useFinalClipRect = isAnimationSet() && stackClip == STACK_CLIP_AFTER_ANIM
+                || mDestroyPreservedSurfaceUponRedraw;
 
         // We need to do some acrobatics with surface position, because their clip region is
         // relative to the inside of the surface, but the stack bounds aren't.
