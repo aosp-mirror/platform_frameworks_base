@@ -2977,6 +2977,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+        case SEND_INTENT_SENDER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IIntentSender sender = IIntentSender.Stub.asInterface(data.readStrongBinder());
+            int scode = data.readInt();
+            Intent intent = data.readInt() != 0 ? Intent.CREATOR.createFromParcel(data) : null;
+            String resolvedType = data.readString();
+            IIntentReceiver finishedReceiver = IIntentReceiver.Stub.asInterface(
+                    data.readStrongBinder());
+            String requiredPermission = data.readString();
+            Bundle options = data.readInt() != 0 ? Bundle.CREATOR.createFromParcel(data) : null;
+            int result = sendIntentSender(sender, scode, intent, resolvedType, finishedReceiver,
+                    requiredPermission, options);
+            reply.writeNoException();
+            reply.writeInt(result);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6971,6 +6987,38 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public int sendIntentSender(IIntentSender target, int code, Intent intent, String resolvedType,
+            IIntentReceiver finishedReceiver, String requiredPermission, Bundle options)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(target.asBinder());
+        data.writeInt(code);
+        if ((intent!=null)) {
+            data.writeInt(1);
+            intent.writeToParcel(data, 0);
+        }
+        else {
+            data.writeInt(0);
+        }
+        data.writeString(resolvedType);
+        data.writeStrongBinder((((finishedReceiver!=null))?(finishedReceiver.asBinder()):(null)));
+        data.writeString(requiredPermission);
+        if ((options!=null)) {
+            data.writeInt(1);
+            options.writeToParcel(data, 0);
+        }
+        else {
+            data.writeInt(0);
+        }
+        mRemote.transact(SEND_INTENT_SENDER_TRANSACTION, data, reply, 0);
+        final int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
     }
 
     private IBinder mRemote;
