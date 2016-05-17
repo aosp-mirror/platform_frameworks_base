@@ -2730,6 +2730,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
+                    clearAppProfilesLIF(ps.pkg, UserHandle.USER_ALL);
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
@@ -7587,15 +7588,61 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void destroyAppProfilesLIF(PackageParser.Package pkg) {
+    private void destroyAppProfilesLIF(PackageParser.Package pkg, int userId) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
         destroyAppProfilesLeafLIF(pkg);
+        destroyAppReferenceProfileLeafLIF(pkg, userId);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             destroyAppProfilesLeafLIF(pkg.childPackages.get(i));
+            destroyAppReferenceProfileLeafLIF(pkg.childPackages.get(i), userId);
+        }
+    }
+
+    private void destroyAppReferenceProfileLeafLIF(PackageParser.Package pkg, int userId) {
+        if (pkg.isForwardLocked()) {
+            return;
+        }
+
+        for (String path : pkg.getAllCodePathsExcludingResourceOnly()) {
+            try {
+                path = new File(path).getCanonicalPath();
+            } catch (IOException e) {
+                // TODO: Should we return early here ?
+                Slog.w(TAG, "Failed to get canonical path", e);
+            }
+
+            final String useMarker = path.replace('/', '@');
+            for (int realUserId : resolveUserIds(userId)) {
+                File profileDir = Environment.getDataProfilesDeForeignDexDirectory(realUserId);
+                File foreignUseMark = new File(profileDir, useMarker);
+                if (foreignUseMark.exists()) {
+                    if (!foreignUseMark.delete()) {
+                        Slog.w(TAG, "Unable to delete foreign user mark for package: "
+                            + pkg.packageName);
+                    }
+                }
+
+                File[] markers = profileDir.listFiles();
+                if (markers != null) {
+                    final String searchString = "@" + pkg.packageName + "@";
+                    // We also delete all markers that contain the package name we're
+                    // uninstalling. These are associated with secondary dex-files belonging
+                    // to the package. Reconstructing the path of these dex files is messy
+                    // in general.
+                    for (File marker : markers) {
+                        if (marker.getName().indexOf(searchString) > 0) {
+                            if (!marker.delete()) {
+                                Slog.w(TAG, "Unable to delete foreign user mark for package: "
+                                    + pkg.packageName);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -7607,12 +7654,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void clearAppProfilesLIF(PackageParser.Package pkg) {
+    private void clearAppProfilesLIF(PackageParser.Package pkg, int userId) {
         if (pkg == null) {
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
         clearAppProfilesLeafLIF(pkg);
+        destroyAppReferenceProfileLeafLIF(pkg, userId);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             clearAppProfilesLeafLIF(pkg.childPackages.get(i));
@@ -7816,7 +7864,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // DELETE_DATA_ON_FAILURES is only used by frozen paths
                 destroyAppDataLIF(pkg, UserHandle.USER_ALL,
                         StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-                destroyAppProfilesLIF(pkg);
+                destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
             }
         }
     }
@@ -14164,7 +14212,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-            clearAppProfilesLIF(pkg);
+            clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, policyFlags,
@@ -14290,7 +14338,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Successfully disabled the old package. Now proceed with re-installation
         clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                 | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-        clearAppProfilesLIF(pkg);
+        clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -15534,7 +15582,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-            destroyAppProfilesLIF(resolvedPkg);
+            destroyAppProfilesLIF(resolvedPkg, UserHandle.USER_ALL);
             if (outInfo != null) {
                 outInfo.dataRemoved = true;
             }
@@ -16072,6 +16120,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             destroyAppDataLIF(pkg, userId,
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            destroyAppProfilesLIF(pkg, userId);
             removeKeystoreDataIfNeeded(nextUserId, ps.appId);
             schedulePackageCleaning(ps.name, nextUserId, false);
             synchronized (mPackages) {
@@ -16177,7 +16226,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         try (PackageFreezer freezer = freezePackage(packageName, "clearApplicationProfileData")) {
             synchronized (mInstallLock) {
-                clearAppProfilesLIF(pkg);
+                clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
             }
         }
     }
