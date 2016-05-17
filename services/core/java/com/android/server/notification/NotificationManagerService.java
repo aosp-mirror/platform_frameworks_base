@@ -93,6 +93,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -176,6 +177,7 @@ public class NotificationManagerService extends SystemService {
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
+    static final float MAX_PACKAGE_ENQUEUE_RATE = 50f;
 
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
@@ -218,6 +220,7 @@ public class NotificationManagerService extends SystemService {
 
     /** notification_enqueue status value for an ignored notification. */
     private static final int EVENTLOG_ENQUEUE_STATUS_IGNORED = 2;
+    private static final long MIN_PACKAGE_OVERRATE_LOG_INTERVAL = 5000; // milliseconds
     private String mRankerServicePackageName;
 
     private IActivityManager mAm;
@@ -297,6 +300,7 @@ public class NotificationManagerService extends SystemService {
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
     private RankingHandler mRankingHandler;
+    private long mLastOverRateLogTime;
 
     private static class Archive {
         final int mBufferSize;
@@ -2496,6 +2500,18 @@ public class NotificationManagerService extends SystemService {
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationList) {
+                final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
+                if (appEnqueueRate > MAX_PACKAGE_ENQUEUE_RATE) {
+                    mUsageStats.registerOverRateQuota(pkg);
+                    final long now = SystemClock.elapsedRealtime();
+                    if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
+                        Slog.e(TAG, "Package enqueue rate is " + appEnqueueRate
+                                + ". Shedding events. package=" + pkg);
+                        mLastOverRateLogTime = now;
+                    }
+                    return;
+                }
+
                 int count = 0;
                 final int N = mNotificationList.size();
                 for (int i=0; i<N; i++) {
@@ -2506,6 +2522,7 @@ public class NotificationManagerService extends SystemService {
                         }
                         count++;
                         if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                            mUsageStats.registerOverCountQuota(pkg);
                             Slog.e(TAG, "Package has already posted " + count
                                     + " notifications.  Not showing more.  package=" + pkg);
                             return;
