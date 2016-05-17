@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Haiwezi kutambaza mitandao"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Hamna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Imehifadhiwa"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Imelemazwa"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"Imezimwa"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Haikuweza Kusanidi IP"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"Haikuweza Kuunganisha kwenye WiFi"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"Tatizo la uthibitishaji"</string>
@@ -34,7 +34,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Imeunganishwa kupitia %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Inapatikana kupitia %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Imeunganishwa, hakuna Intaneti"</string>
-    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Imetenganishwa"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Haijaunganishwa"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Inatenganisha..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Inaunganisha…"</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Umeunganishwa"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Inatumika. Gonga ili ugeuze."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Huduma zinazoendeshwa"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Onyesha na dhibiti huduma zinazoendeshwa kwa sasa"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Washa WebView ya michakato mingi"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Tekeleza vitoaji huduma vya WebView katika mchakato mahususi."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Mwonekano wa Wavuti wa michakato mingi"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Tekeleza vitoaji huduma vya Mwonekano wa Wavuti kando"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Utekelezaji wa WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Weka utekelezaji wa WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Chaguo hili halipo tena. Jaribu tena."</string>

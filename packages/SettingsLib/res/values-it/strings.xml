@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Attiva. Tocca per attivare/disattivare."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Servizi in esecuzione"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visualizza e controlla i servizi attualmente in esecuzione"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Attiva WebView multiprocesso"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Esegui renderer WebView in un processo isolato."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView multiprocesso"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Esegui renderer WebView separatamente"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementazione di WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"La selezione non è più valida. Riprova."</string>
@@ -327,7 +327,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> fa"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> rimanenti"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Piccolo"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predefinito"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Predefinite"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Grande"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Più grande"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Massimo"</string>

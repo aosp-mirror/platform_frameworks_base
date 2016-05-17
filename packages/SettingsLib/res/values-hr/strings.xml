@@ -146,9 +146,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Postavke VPN-a nisu dostupne ovom korisniku"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Postavke dijeljenja veze nisu dostupne ovom korisniku"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Postavke pristupne točke nisu dostupne ovom korisniku"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Uklanjanje pogrešaka putem USB-a"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"Uklanjanje pogrešaka s priključenim USB-om"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Opoziv autorizacija za uklanjanje pogrešaka putem USB-a"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Otklanjanje pogrešaka putem USB-a"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Otklanjanje pogrešaka s priključenim USB-om"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Opoziv autorizacija za otklanjanje pogrešaka putem USB-a"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Prečac izvješća o pogreškama"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Prikaži gumb u izborniku napajanja za izradu izvješća o programskim pogreškama"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Ne pokreći mirovanje"</string>
@@ -182,8 +182,8 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Upotrebljavajte DHCP klijent iz Lollipopa umjesto novog Android DHCP klijenta."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Neka mobilni podaci uvijek budu aktivni, čak i kada je Wi‑Fi aktivan (za brzo prebacivanje s jedne na drugu mrežu)."</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti uklanjanje pogrešaka putem USB-a?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"Uklanjanje pogrešaka putem USB-a namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaju bez obavijesti i za čitanje dnevničkih zapisa."</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje pogrešaka putem USB-a?"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje pogrešaka putem USB-a namijenjeno je samo u razvojne svrhe. Može se upotrijebiti za kopiranje podataka s računala na uređaj i obrnuto, instalaciju aplikacija na uređaju bez obavijesti i za čitanje dnevničkih zapisa."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Želite li opozvati pristup uklanjanju pogrešaka putem USB-a sa svih računala koja ste prethodno autorizirali?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Dopustiti postavke razvojnih programera?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ove su postavke namijenjene samo razvojnim programerima. One mogu uzrokovati kvar ili neželjeno ponašanje vašeg uređaja i aplikacija na njemu."</string>
@@ -194,14 +194,14 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući aplikaciju terminala koja nudi pristup lokalnoj ovojnici"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjera"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Postav. ponaš. HDCP prov."</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Uklanjanje pogrešaka"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Aplikacija za uklanjanje pogrešaka"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Nema aplikacije za uklanjanje pogrešaka"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Aplikacija za uklanjanje pogrešaka: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Otklanjanje pogrešaka"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Aplikacija za otklanjanje pogrešaka"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Nema aplikacije za otklanjanje pogrešaka"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"Aplikacija za otklanjanje pogrešaka: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Odaberite aplikaciju"</string>
     <string name="no_application" msgid="2813387563129153880">"Ništa"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Čeka se program za uklanjanje pogrešaka"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija čeka priključivanje programa za uklanjanje pogrešaka"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Čeka se program za otklanjanje pogrešaka"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Aplikacija čeka priključivanje programa za otklanjanje pogrešaka"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ulaz"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Crtež"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Hardverski ubrzano renderiranje"</string>
@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Omogući OpenGL praćenja"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Onemogući USB audiousmj."</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući aut. usmjeravanje na USB audioperiferiju"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Prikaži granice izgleda"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Prikaži okvir prikaza"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Prikazuju se obrubi, margine itd. isječaka."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Nametni zdesna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dodirnite da biste to promijenili."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Pogledajte i nadzirite pokrenute procese"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Omogući višeprocesni WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Pokreni ispunjivače WebViewa u izoliranim procesima."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Višeprocesni web-prikaz"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ispunjivače web-prikaza pokreni zasebno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Postavi implementaciju WebViewa"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Taj izbor više nije važeći. Pokušajte ponovo."</string>

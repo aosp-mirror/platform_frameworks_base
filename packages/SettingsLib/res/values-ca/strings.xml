@@ -86,11 +86,11 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicacions eliminades"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicacions i usuaris eliminats"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Ancoratge d\'USB"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Zona Wi-Fi portàtil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Ancoratge de Bluetooth"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Ancoratge a xarxa"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Ancoratge a la xarxa i zona Wi-Fi"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Compartició de xarxa per USB"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Punt d\'accés Wi-Fi"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Compartició de xarxa per Bluetooth"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartició de xarxa"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Compartició de xarxa i punt d\'accés Wi-Fi"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Totes les aplic. de feina"</string>
     <string name="user_guest" msgid="8475274842845401871">"Convidat"</string>
     <string name="unknown" msgid="1592123443519355854">"Desconegut"</string>
@@ -144,7 +144,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"Defineix les opcions per al desenvolupament d\'aplicacions"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Les opcions per a desenvolupadors no estan disponibles per a aquest usuari."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"La configuració de la VPN no està disponible per a aquest usuari."</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"La configuració d\'ancoratge no està disponible per a aquest usuari."</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"La configuració de compartició de xarxa no està disponible per a aquest usuari."</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"La configuració del nom del punt d\'accés no està disponible per a aquest usuari."</string>
     <string name="enable_adb" msgid="7982306934419797485">"Depuració USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Activa el mode de depuració quan el dispositiu estigui connectat per USB"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aplicació activa. Toca per desactivar-la."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visualitza i controla els serveis en execució"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Activa WebView amb multiprocés"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Executa els renderitzadors de WebView en un procés aïllat."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView amb multiprocés"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Executa els renderitzadors de WebView per separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementació de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Configura la implementació de WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Aquesta opció ja no és vàlida. Torna-ho a provar."</string>

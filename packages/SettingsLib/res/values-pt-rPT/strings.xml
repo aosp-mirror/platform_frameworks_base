@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Algumas predefinições definidas"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Nenhuma predefinição definida"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Definições de texto para voz"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Saída de texto para voz"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Saída de síntese de voz"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Taxa de voz"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Velocidade a que o texto é falado"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonalidade"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ativo. Toque para ativar/desativar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Ver e controlar os serviços actualmente em execução"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Ativar WebView multiprocessos"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Executar renderizadores WebView num processo isolado."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView multiprocessos"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Executar renderizadores WebView separadamente"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementação WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Definir implementação WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Esta opção já não é válida. Tente novamente."</string>

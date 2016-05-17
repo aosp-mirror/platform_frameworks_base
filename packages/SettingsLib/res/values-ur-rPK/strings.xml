@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال۔ ٹوگل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"چل رہی سروسز"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"فی الحال چل رہی سروسز دیکھیں اور انہیں کنٹرول کریں"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"‏ملٹی پراسیس WebView بحال کریں"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"‏WebView رینڈررز کو ایک علیحدہ پراسیس میں چلائیں۔"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"‏ملٹی پراسیس WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"‏WebView رینڈررز کو علیحدہ علیحدہ چلائیں"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏WebView کا نفاذ سیٹ کریں"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"یہ انتخاب اب درست نہیں رہا۔ دوبارہ کوشش کریں۔"</string>

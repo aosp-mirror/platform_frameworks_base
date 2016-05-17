@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ಸಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"ಬಹುಪ್ರಕ್ರಿಯೆ WebView ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ಪ್ರತ್ಯೇಕಗೊಳಿಸಿದ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ WebView ರೆಂಡರರ್‌‌ ರನ್‌ ಮಾಡಿ."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"ಬಹುಪ್ರಕ್ರಿಯೆ WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ರೆಂಡರರ್‌‌‌ಗಳನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ರನ್‌ ಮಾಡಿ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ಅನುಷ್ಠಾನಗೊಳಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ಈ ಆಯ್ಕೆಯು ಇನ್ನು ಮುಂದೆ ಮಾನ್ಯವಾಗಿರುವುದಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -332,5 +332,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ಸ್ವಲ್ಪ ದೊಡ್ಡ"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"ದೊಡ್ಡ"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ಕಸ್ಟಮ್ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ &amp; amp; ಪ್ರತಿಕ್ರಿಯೆ"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"ಸಹಾಯ &amp; ಪ್ರತಿಕ್ರಿಯೆ"</string>
 </resources>

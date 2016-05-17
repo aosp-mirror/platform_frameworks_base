@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivní. Klepnutím možnost přepnete."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Povolit WebView ve více procesech"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Spouštět moduly vykreslení WebView jako samostatné procesy."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView ve více procesech"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Spouštět moduly vykreslení WebView samostatně"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementace WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastavte implementaci WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Tato volba již není platná. Zkuste to znovu."</string>

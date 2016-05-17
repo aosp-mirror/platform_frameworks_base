@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ນຳໃຊ້ຢູ່. ແຕະເພື່ອສັບປ່ຽນ."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ບໍລິການທີ່ເຮັດວຽກຢູ່"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ເບິ່ງ ແລະຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"ອະນຸຍາດໃຫ້ມີໂປຣເຊສ WebView ຫຼາຍອັນໄດ້"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ເປີດໃຊ້ຕົວປະມວນ WebView ໃນໂປຣເຊສທີ່ແຍກຈາກກັນໄດ້."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Multiprocess WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ໃຊ້ຕົວເຣນເດີ WebView ແຍກຕ່າງຫາກ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ຕັ້ງການຈັດຕັ້ງປະຕິບັດ WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ບໍ່ສາມາດໃຊ້ການເລືອກນີ້ໄດ້ອີກຕໍ່ໄປແລ້ວ. ກະລຸນາລອງໃໝ່."</string>

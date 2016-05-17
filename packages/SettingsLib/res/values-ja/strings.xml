@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"有効です。タップすると切り替わります。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"現在実行中のサービスを表示して制御する"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"複数プロセス WebView を有効化"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"別個のプロセスで WebView レンダラを実行します。"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"マルチプロセス WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView レンダラを別個に実行"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"この選択は無効になりました。もう一度お試しください。"</string>
