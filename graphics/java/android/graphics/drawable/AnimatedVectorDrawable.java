@@ -158,7 +158,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
     /** Local, mutable animator set. */
-    private VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimatorUI(this);
+    private VectorDrawableAnimator mAnimatorSet;
 
     /**
      * The resources against which this drawable was created. Used to attempt
@@ -183,6 +183,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     private AnimatedVectorDrawable(AnimatedVectorDrawableState state, Resources res) {
         mAnimatedVectorState = new AnimatedVectorDrawableState(state, mCallback, res);
+        mAnimatorSet = new VectorDrawableAnimatorRT(this);
         mRes = res;
     }
 
@@ -1033,7 +1034,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private WeakReference<RenderNode> mLastSeenTarget = null;
         private int mLastListenerId = 0;
         private final IntArray mPendingAnimationActions = new IntArray();
-        private final Drawable mDrawable;
+        private final AnimatedVectorDrawable mDrawable;
 
         VectorDrawableAnimatorRT(AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
@@ -1052,6 +1053,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
             mShouldIgnoreInvalidAnim = shouldIgnoreInvalidAnimation();
             parseAnimatorSet(set, 0);
+            long vectorDrawableTreePtr = mDrawable.mAnimatedVectorState.mVectorDrawable
+                    .getNativeTree();
+            nSetVectorDrawableTarget(mSetPtr, vectorDrawableTreePtr);
             mInitialized = true;
             mIsInfinite = set.getTotalDuration() == Animator.DURATION_INFINITE;
 
@@ -1288,16 +1292,19 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
          * to the last seen RenderNode target and start right away.
          */
         protected void recordLastSeenTarget(DisplayListCanvas canvas) {
-            mLastSeenTarget = new WeakReference<RenderNode>(
-                    RenderNodeAnimatorSetHelper.getTarget(canvas));
-            if (mPendingAnimationActions.size() > 0 && useLastSeenTarget()) {
-                if (DBG_ANIMATION_VECTOR_DRAWABLE) {
-                    Log.d(LOGTAG, "Target is set in the next frame");
+            final RenderNode node = RenderNodeAnimatorSetHelper.getTarget(canvas);
+            mLastSeenTarget = new WeakReference<RenderNode>(node);
+            // Add the animator to the list of animators on every draw
+            if (mInitialized || mPendingAnimationActions.size() > 0) {
+                if (useTarget(node)) {
+                    if (DBG_ANIMATION_VECTOR_DRAWABLE) {
+                        Log.d(LOGTAG, "Target is set in the next frame");
+                    }
+                    for (int i = 0; i < mPendingAnimationActions.size(); i++) {
+                        handlePendingAction(mPendingAnimationActions.get(i));
+                    }
+                    mPendingAnimationActions.clear();
                 }
-                for (int i = 0; i < mPendingAnimationActions.size(); i++) {
-                    handlePendingAction(mPendingAnimationActions.get(i));
-                }
-                mPendingAnimationActions.clear();
             }
         }
 
@@ -1319,10 +1326,15 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private boolean useLastSeenTarget() {
             if (mLastSeenTarget != null) {
                 final RenderNode target = mLastSeenTarget.get();
-                if (target != null && target.isAttached()) {
-                    target.addAnimator(this);
-                    return true;
-                }
+                return useTarget(target);
+            }
+            return false;
+        }
+
+        private boolean useTarget(RenderNode target) {
+            if (target != null && target.isAttached()) {
+                target.registerVectorDrawableAnimator(this);
+                return true;
             }
             return false;
         }
@@ -1517,6 +1529,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     }
 
     private static native long nCreateAnimatorSet();
+    private static native void nSetVectorDrawableTarget(long animatorPtr, long vectorDrawablePtr);
     private static native void nAddAnimator(long setPtr, long propertyValuesHolder,
              long nativeInterpolator, long startDelay, long duration, int repeatCount);
 

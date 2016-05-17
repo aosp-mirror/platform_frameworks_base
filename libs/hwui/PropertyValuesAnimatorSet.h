@@ -43,6 +43,7 @@ private:
     float mLatestFraction = 0.0f;
 };
 
+// TODO: This class should really be named VectorDrawableAnimator
 class ANDROID_API PropertyValuesAnimatorSet : public BaseRenderNodeAnimator {
 public:
     friend class PropertyAnimatorSetListener;
@@ -50,11 +51,19 @@ public:
 
     void start(AnimationListener* listener);
     void reverse(AnimationListener* listener);
+    virtual void reset() override;
+    virtual void end() override;
 
     void addPropertyAnimator(PropertyValuesHolder* propertyValuesHolder,
             Interpolator* interpolators, int64_t startDelays,
             nsecs_t durations, int repeatCount);
     virtual uint32_t dirtyMask();
+    bool isInfinite() { return mIsInfinite; }
+    void setVectorDrawable(VectorDrawableRoot* vd) { mVectorDrawable = vd; }
+    VectorDrawableRoot* getVectorDrawable() const { return mVectorDrawable; }
+    AnimationListener* getOneShotListener() { return mOneShotListener.get(); }
+    void clearOneShotListener() { mOneShotListener = nullptr; }
+    uint32_t getRequestId() const { return mRequestId; }
 
 protected:
     virtual float getValue(RenderNode* target) const override;
@@ -69,6 +78,11 @@ private:
     std::vector< std::unique_ptr<PropertyAnimator> > mAnimators;
     float mLastFraction = 0.0f;
     bool mInitialized = false;
+    VectorDrawableRoot* mVectorDrawable = nullptr;
+    bool mIsInfinite = false;
+    // This request id gets incremented (on UI thread only) when a new request to modfiy the
+    // lifecycle of an animation happens, namely when start/end/reset/reverse is called.
+    uint32_t mRequestId = 0;
 };
 
 class PropertyAnimatorSetListener : public AnimationListener {
