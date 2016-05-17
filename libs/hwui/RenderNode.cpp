@@ -419,6 +419,14 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     prepareSubTree(info, childFunctorsNeedLayer, mDisplayList);
     pushLayerUpdate(info);
 
+    for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
+        // If any vector drawable in the display list needs update, damage the node.
+        if (vectorDrawable->isDirty()) {
+            damageSelf(info);
+        }
+        vectorDrawable->setPropertyChangeWillBeConsumed(true);
+    }
+
     info.damageAccumulator->popTransform();
 }
 
@@ -477,8 +485,8 @@ void RenderNode::syncDisplayList(TreeObserver* observer) {
         for (auto& iter : mDisplayList->getFunctors()) {
             (*iter.functor)(DrawGlInfo::kModeSync, nullptr);
         }
-        for (size_t i = 0; i < mDisplayList->getPushStagingFunctors().size(); i++) {
-            (*mDisplayList->getPushStagingFunctors()[i])();
+        for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
+            vectorDrawable->syncProperties();
         }
     }
 }
