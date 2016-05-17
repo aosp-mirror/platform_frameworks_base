@@ -111,13 +111,13 @@ method calls.</p>
           <li>Select <strong>File > New > Directory</strong> and enter {@code aidl} in the
           <em>New Directory</em> window, then select <strong>OK</strong>.
 
-          <li>Select <strong>File > New > Package</strong> and enter 
+          <li>Select <strong>File > New > Package</strong> and enter
           {@code com.android.vending.billing} in the <em>New Package</em> window, then select
           <strong>OK</strong>.</li>
 
-          <li>Using your operating system file explorer, navigate to 
-          {@code &lt;sdk&gt;/extras/google/play_billing/}, copy the 
-          {@code IInAppBillingService.aidl} file, and paste it into the 
+          <li>Using your operating system file explorer, navigate to
+          {@code &lt;sdk&gt;/extras/google/play_billing/}, copy the
+          {@code IInAppBillingService.aidl} file, and paste it into the
           {@code com.android.vending.billing} package in your project.
           </li>
         </ol>
@@ -137,7 +137,7 @@ method calls.</p>
   </li>
 </ol>
 
-<h2 id="billing-permission">Updating Your Application's Manifest</h2>
+<h2 id="billing-permission">Updating Your App's Manifest</h2>
 
 <p>
   In-app billing relies on the Google Play application, which handles all
