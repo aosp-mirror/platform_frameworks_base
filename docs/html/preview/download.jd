@@ -302,72 +302,72 @@ This is the Android SDK Preview License Agreement (the “License Agreement”).
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >bullhead-npc91k-factory-d09b15b5.tgz</a><br>
-      MD5: f5aa4b0b10213435569ed4833dd973f8<br>
-      SHA-1: d09b15b5f8978e2fee3fbd799554de90b7012d64
+      >bullhead-npd35k-factory-5ba40535.tgz</a><br>
+      MD5: b6c5d79a21815ee21db41822dcf61e9f<br>
+      SHA-1: 5ba4053577007d15c96472206e3a79bc80ab194c
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >shamu-npc91k-factory-7c9936dc.tgz</a><br>
-      MD5: 271b758d01f61cdef71a3e4c14e90e85<br>
-      SHA-1: 7c9936dca492dd9a5b279612962e3439031fcc06
+      >shamu-npd35k-factory-a33bf20c.tgz</a><br>
+      MD5: e1cf9c57cfb11bebe7f1f5bfbf05d7ab<br>
+      SHA-1: a33bf20c719206bcf08d1edd8da6c0ff9d50f69c
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >angler-npc91k-factory-dcd13c44.tgz</a><br>
-      MD5: 3f304dc1d5044768af26c8503d3fbf18<br>
-      SHA-1: dcd13c44e7254916fcf7cb7fa31e0dc03737a3f5
+      >angler-npd35k-factory-81c341d5.tgz</a><br>
+      MD5: e93de7949433339856124c3729c15ebb<br>
+      SHA-1: 81c341d57ef2cd139569b055d5d59e9e592a7abd
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantis-npc91k-factory-ed835af7.tgz</a><br>
-      MD5: 466a9873111a320e5a19891de61e5609<br>
-      SHA-1: ed835af7bebf26d4c12b5c30c8b1a337c06c9623
+      >volantis-npd35k-factory-2b50e19d.tgz</a><br>
+      MD5: 565be87ebb2d5937e2abe1a42645864b<br>
+      SHA-1: 2b50e19dae2667b27f911e3c61ed64860caf43e1
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >volantisg-npc91k-factory-6f20b9f6.tgz</a><br>
-      MD5: 419f76cdf886b18d2e7281915b9c77b0<br>
-      SHA-1: 6f20b9f6b0d77dc17793db32cd2da5a0b0aa63c9
+      >volantisg-npd35k-factory-2e89ebe6.tgz</a><br>
+      MD5: a8464e15c6683fe2afa378a63e205fda<br>
+      SHA-1: 2e89ebe67a46b2f3beb050746c13341cd11fa678
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >fugu-npc91o-factory-3b8e3f56.tgz</a><br>
-      MD5: b88b70ecbfb80c983c90b97cb243628b<br>
-      SHA-1: 3b8e3f56a4c35b559783c2928e740df2aab8b377
+      >fugu-npd35k-factory-1de74874.tgz</a><br>
+      MD5: c0dbb7db671f61b2785da5001cedefcb<br>
+      SHA-1: 1de74874f8d83e14d642f13b5a2130fc2aa55873
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >ryu-npc91k-factory-463030f2.tgz</a><br>
-      MD5: 24e8981a3c95637867eb768c0f84c96c<br>
-      SHA-1: 463030f2ecdcfe9e92ddf9f3a224ac7aa5ed5866
+      >ryu-npd35k-factory-b4eed85d.tgz</a><br>
+      MD5: bdcb6f770e753668b5fadff2a6678e0d<br>
+      SHA-1: b4eed85de0d42c200348a8629084f78e24f72ac2
     </td>
   </tr>
 
   <tr id="seed">
     <td>General Mobile 4G (Android One) <br>"seed"</td>
     <td><a href="#top" onclick="onDownload(this)"
-      >seed_l8150-npc91k-factory-7026d89d.tgz</a><br>
-      MD5: a614984799c887d9b5af2d366fefc8e3<br>
-      SHA-1: 7026d89d79decd8421da8df844a1fcd9e27df163
+      >seed_l8150-npd35k-factory-5ab1212b.tgz</a><br>
+      MD5: 7d34a9774fdd6e025d485ce6cfc23c4c<br>
+      SHA-1: 5ab1212bc9417269d391aacf1e672fff24b4ecc5
     </td>
   </tr>
 
