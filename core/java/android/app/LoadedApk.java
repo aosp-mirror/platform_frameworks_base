@@ -1046,11 +1046,17 @@ public final class LoadedApk {
             @Override
             public void performReceive(Intent intent, int resultCode, String data,
                     Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-                LoadedApk.ReceiverDispatcher rd = mDispatcher.get();
+                final LoadedApk.ReceiverDispatcher rd;
+                if (intent == null) {
+                    Log.wtf(TAG, "Null intent received");
+                    rd = null;
+                } else {
+                    rd = mDispatcher.get();
+                }
                 if (ActivityThread.DEBUG_BROADCAST) {
                     int seq = intent.getIntExtra("seq", -1);
-                    Slog.i(ActivityThread.TAG, "Receiving broadcast " + intent.getAction() + " seq=" + seq
-                            + " to " + (rd != null ? rd.mReceiver : null));
+                    Slog.i(ActivityThread.TAG, "Receiving broadcast " + intent.getAction()
+                            + " seq=" + seq + " to " + (rd != null ? rd.mReceiver : null));
                 }
                 if (rd != null) {
                     rd.performReceive(intent, resultCode, data, extras,

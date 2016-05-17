@@ -7057,6 +7057,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             return ((PendingIntentRecord)target).sendWithResult(code, intent, resolvedType,
                     finishedReceiver, requiredPermission, options);
         } else {
+            if (intent == null) {
+                // Weird case: someone has given us their own custom IIntentSender, and now
+                // they have someone else trying to send to it but of course this isn't
+                // really a PendingIntent, so there is no base Intent, and the caller isn't
+                // supplying an Intent... but we never want to dispatch a null Intent to
+                // a receiver, so um...  let's make something up.
+                Slog.wtf(TAG, "Can't use null intent with direct IIntentSender call");
+                intent = new Intent(Intent.ACTION_MAIN);
+            }
             try {
                 target.send(code, intent, resolvedType, null, requiredPermission, options);
             } catch (RemoteException e) {
