@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"已啟用。輕觸即可切換。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"正在運作的服務"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看並管理目前正在執行的服務"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"啟用多重處理程序 WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在獨立的處理程序中執行 WebView 轉譯器。"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"多重處理程序 WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"個別執行 WebView 轉譯器"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 實作"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"設定 WebView 實作"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"這個選項已失效，請再試一次。"</string>
@@ -323,7 +323,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"已由管理員停用"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"已由管理員啟用"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"已由管理員停用"</string>
-    <string name="home" msgid="3256884684164448244">"「設定」主畫面"</string>
+    <string name="home" msgid="3256884684164448244">"設定主畫面"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"還剩 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"小"</string>

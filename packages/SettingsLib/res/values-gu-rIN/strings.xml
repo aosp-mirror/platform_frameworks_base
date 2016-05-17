@@ -141,7 +141,7 @@
     <string name="category_work" msgid="8699184680584175622">"કાર્યાલય"</string>
     <string name="development_settings_title" msgid="215179176067683667">"વિકાસકર્તાનાં વિકલ્પો"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"વિકાસકર્તાનાં વિકલ્પો સક્ષમ કરો"</string>
-    <string name="development_settings_summary" msgid="1815795401632854041">"એપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"ઍપ્લિકેશન વિકાસ માટે વિકલ્પો સેટ કરો"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"આ વપરાશકર્તા માટે વિકાસકર્તા વિકલ્પો ઉપલબ્ધ નથી"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"આ વપરાશકર્તા માટે VPN સેટિંગ્સ ઉપલબ્ધ નથી"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"આ વપરાશકર્તા માટે ટિથરિંગ સેટિંગ્સ ઉપલબ્ધ નથી"</string>
@@ -159,9 +159,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"બુટલોડર અનલૉક કરવાની મંજૂરી આપો"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ને અનલૉક કરવાની મંજૂરી આપીએ?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ચેતવણી: જ્યારે આ સેટિંગ ચાલુ હોય ત્યારે આ ઉપકરણ પર ઉપકરણ સંરક્ષણ સુવિધાઓ કાર્ય કરશે નહીં."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"મોક સ્થાન એપ્લિકેશન પસંદ કરો"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"કોઈ મોક સ્થાન એપ્લિકેશન સેટ કરાયેલ નથી"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"મોક સ્થાન એપ્લિકેશન: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"મોક સ્થાન ઍપ્લિકેશન પસંદ કરો"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"કોઈ મોક સ્થાન ઍપ્લિકેશન સેટ કરાયેલ નથી"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"મોક સ્થાન ઍપ્લિકેશન: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"નેટવર્કિંગ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"બિનતારી પ્રદર્શન પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi વર્બોઝ લૉગિંગ સક્ષમ કરો"</string>
@@ -195,10 +195,10 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP તપાસણી"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP તપાસણીની વર્તણૂક બદલો"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"ડીબગિંગ"</string>
-    <string name="debug_app" msgid="8349591734751384446">"ડીબગ એપ્લિકેશન પસંદ કરો"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"કોઇ ડીબગ એપ્લિકેશન સેટ કરેલી નથી"</string>
+    <string name="debug_app" msgid="8349591734751384446">"ડીબગ ઍપ્લિકેશન પસંદ કરો"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"કોઇ ડીબગ ઍપ્લિકેશન સેટ કરેલી નથી"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"એપ્લિકેશનને ડીબગ કરી રહ્યું છે: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="5156029161289091703">"એપ્લિકેશન પસંદ કરો"</string>
+    <string name="select_application" msgid="5156029161289091703">"ઍપ્લિકેશન પસંદ કરો"</string>
     <string name="no_application" msgid="2813387563129153880">"કંઈ નહીં"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ડીબગર માટે રાહ જુઓ"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ડીબગ કરેલ એપ્લિકેશનો ક્રિયાન્વિત થતા પહેલાં ડીબગર જોડાઈ તેની રાહ જુએ છે"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ને ફરજ પાડો"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 એપ્લિકેશન્સમાં 4x MSAA સક્ષમ કરો"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"બિન-લંબચોરસ ક્લિપ કામગીરી ડીબગ કરો"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"પ્રોફાઇલ GPU પ્રદર્શિત થાય છે"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"પ્રોફાઇલ GPU રેન્ડરિંગ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"વિંડો એનિમેશન સ્કેલ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"સંક્રમણ એનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"એનિમેટર અવધિ સ્કેલ"</string>
@@ -247,7 +247,7 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"જેવો વપરાશકર્તા તેને છોડે, તરત જ દરેક પ્રવૃત્તિ નષ્ટ કરો"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"પૃષ્ઠભૂમિ પ્રક્રિયા સીમા"</string>
     <string name="show_all_anrs" msgid="28462979638729082">"બધા ANR બતાવો"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"પૃષ્ઠભૂમિ એપ્લિકેશનો માટે એપ્લિકેશન પ્રતિસાદ આપતી નથી સંવાદ બતાવો"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"પૃષ્ઠભૂમિ ઍપ્લિકેશનો માટે ઍપ્લિકેશન પ્રતિસાદ આપતી નથી સંવાદ બતાવો"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"બાહ્ય પર એપ્લિકેશનોને મંજૂરી આપવાની ફરજ પાડો"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"સક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ચાલુ સેવાઓ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"હાલમાં ચાલતી સેવાઓ જુઓ અને નિયંત્રિત કરો"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"મલ્ટિપ્રોસેસ WebView સક્ષમ કરો"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"પૃથક પ્રક્રિયામાં WebView રેંડરર્સ ચલાવો."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"મલ્ટિપ્રોસેસ WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView રેંડરર્સ અલગથી ચલાવો"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView અમલીકરણ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView અમલીકરણ સેટ કરો"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"આ વિકલ્પ હવે માન્ય નથી. ફરી પ્રયાસ કરો."</string>
@@ -292,7 +292,7 @@
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"મોનોક્રોમેસી"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"ડીયુટેરેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ટ્રિટાનોમેલી(વાદળી-પીળો)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"રંગ સુધારણા"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"આ સુવિધા પ્રાયોગિક છે અને કામગીરી પર અસર કરી શકે છે."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>

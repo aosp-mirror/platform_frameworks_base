@@ -88,7 +88,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Арилгасан апп-ууд болон хэрэглэгчид"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB модем болгох"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Зөөврийн сүлжээний цэг"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Блютүүт модем болгох"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth модем болгох"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Модем болгох"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Модем болгох &amp; зөөврийн сүлжээний цэг"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Ажлын бүх апп"</string>
@@ -153,7 +153,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Цэсэнд согогийн репорт авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Блютүүт HCI снүүп логыг идэвхжүүлэх"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Файл доторх бүх блютүүт HCI пакетуудыг унших"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM түгжээ тайлагч"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Bootloader-н түгжээг тайлахыг зөвшөөрөх"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Идэвхтэй байна. Унтраах/асаахын тулд дарна уу."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"WebView-н олон боловсруулалтыг идэвхжүүлэх"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView хөрвүүлэгчийг тусдаа боловсруулалтаар ажиллуулна уу."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Олон боловсруулалттай WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView хөрвүүлэгчийг тусад нь ажиллуулах"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView хэрэгжилт"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView хэрэгжилтийг тохируулах"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Энэ сонголт хүчингүй байна. Дахин оролдоно уу."</string>

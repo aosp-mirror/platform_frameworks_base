@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Vsili 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"V aplikacijah OpenGL ES 2.0 omogoči 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Odpr. težav s postopki nepravokotnega izrezovanja"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Upod. profilov z GPE-jem"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Upod. profilov z GPE"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Merilo animacije okna"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Merilo animacije prehoda"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Lestvica trajanja animacije"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dotaknite se za preklop."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Zagnane storitve"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Preglejte in nadzorujte storitve, ki so trenutno zagnane"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Omogoči večprocesni WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Izvajanje upodabljalnikov za WebView v ločenem procesu."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Večprocesni WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Izvajanje upodabljalnikov za WebView ločeno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Izvedba spletnega pogleda"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Nastavitev izvedbe spletnega pogleda"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ta izbira ni več veljavna. Poskusite znova."</string>

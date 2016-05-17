@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktīva. Pieskarieties, lai pārslēgtu."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktīvie pakalpojumi"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Pašreiz darbojošos pakalpojumu skatīšana un vadība"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Iespējot vairākprocesu WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Atsevišķā procesā tiek palaisti WebView renderētāji."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Vairākprocesu WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Palaist WebView renderētājus atsevišķi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ieviešana"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Iestatīt WebView ieviešanu"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Šī iespēja vairs nav derīga. Mēģiniet vēlreiz."</string>
