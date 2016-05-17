@@ -2017,6 +2017,9 @@ final class ActivityStack {
     void cancelInitializingActivities() {
         final ActivityRecord topActivity = topRunningActivityLocked();
         boolean aboveTop = true;
+        // We don't want to clear starting window for activities that aren't behind fullscreen
+        // activities as we need to display their starting window until they are done initializing.
+        boolean behindFullscreenActivity = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
@@ -2025,16 +2028,20 @@ final class ActivityStack {
                     if (r == topActivity) {
                         aboveTop = false;
                     }
+                    behindFullscreenActivity |= r.fullscreen;
                     continue;
                 }
 
                 if (r.state == ActivityState.INITIALIZING
-                        && r.mStartingWindowState == STARTING_WINDOW_SHOWN) {
+                        && r.mStartingWindowState == STARTING_WINDOW_SHOWN
+                        && behindFullscreenActivity) {
                     if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY,
                             "Found orphaned starting window " + r);
                     r.mStartingWindowState = STARTING_WINDOW_REMOVED;
                     mWindowManager.removeAppStartingWindow(r.appToken);
                 }
+
+                behindFullscreenActivity |= r.fullscreen;
             }
         }
     }
