@@ -55,11 +55,9 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
@@ -867,8 +865,9 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: whether the chronometer set on the notification should count down
      * instead of counting up. Is only relevant if key {@link #EXTRA_SHOW_CHRONOMETER} is present.
+     * This extra is a boolean. The default is false.
      */
-    public static final String EXTRA_CHRONOMETER_COUNTS_DOWN = "android.chronometerCountsDown";
+    public static final String EXTRA_CHRONOMETER_COUNT_DOWN = "android.chronometerCountDown";
 
     /**
      * {@link #extras} key: whether {@link #when} should be shown,
@@ -934,12 +933,13 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: the username to be displayed for all messages sent by the user including
      * direct replies
-     * {@link android.app.Notification.MessagingStyle} notification.
+     * {@link android.app.Notification.MessagingStyle} notification. This extra is a
+     * {@link CharSequence}
      */
     public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
 
     /**
-     * {@link #extras} key: a {@link String} to be displayed as the title to a conversation
+     * {@link #extras} key: a {@link CharSequence} to be displayed as the title to a conversation
      * represented by a {@link android.app.Notification.MessagingStyle}
      */
     public static final String EXTRA_CONVERSATION_TITLE = "android.conversationTitle";
@@ -947,7 +947,8 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: an array of {@link android.app.Notification.MessagingStyle.Message}
      * bundles provided by a
-     * {@link android.app.Notification.MessagingStyle} notification.
+     * {@link android.app.Notification.MessagingStyle} notification. This extra is a parcelable
+     * array of bundles.
      */
     public static final String EXTRA_MESSAGES = "android.messages";
 
@@ -2337,11 +2338,11 @@ public class Notification implements Parcelable
          * Useful when showing an elapsed time (like an ongoing phone call).
          *
          * The counter can also be set to count down to <code>when</code> when using
-         * {@link #setChronometerCountsDown(boolean)}.
+         * {@link #setChronometerCountDown(boolean)}.
          *
          * @see android.widget.Chronometer
          * @see Notification#when
-         * @see #setChronometerCountsDown(boolean)
+         * @see #setChronometerCountDown(boolean)
          */
         public Builder setUsesChronometer(boolean b) {
             mN.extras.putBoolean(EXTRA_SHOW_CHRONOMETER, b);
@@ -2356,8 +2357,8 @@ public class Notification implements Parcelable
          *
          * @see #setUsesChronometer(boolean)
          */
-        public Builder setChronometerCountsDown(boolean countsDown) {
-            mN.extras.putBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN, countsDown);
+        public Builder setChronometerCountDown(boolean countDown) {
+            mN.extras.putBoolean(EXTRA_CHRONOMETER_COUNT_DOWN, countDown);
             return this;
         }
 
@@ -3288,7 +3289,7 @@ public class Notification implements Parcelable
                     contentView.setLong(R.id.chronometer, "setBase",
                             mN.when + (SystemClock.elapsedRealtime() - System.currentTimeMillis()));
                     contentView.setBoolean(R.id.chronometer, "setStarted", true);
-                    boolean countsDown = mN.extras.getBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN);
+                    boolean countsDown = mN.extras.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN);
                     contentView.setChronometerCountDown(R.id.chronometer, countsDown);
                 } else {
                     contentView.setViewVisibility(R.id.time, View.VISIBLE);
@@ -3559,8 +3560,8 @@ public class Notification implements Parcelable
                     savedBundle.getBoolean(EXTRA_SHOW_WHEN));
             publicExtras.putBoolean(EXTRA_SHOW_CHRONOMETER,
                     savedBundle.getBoolean(EXTRA_SHOW_CHRONOMETER));
-            publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN,
-                    savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN));
+            publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNT_DOWN,
+                    savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNT_DOWN));
             publicExtras.putCharSequence(EXTRA_TITLE,
                     mContext.getString(R.string.notification_hidden_text));
             mN.extras = publicExtras;
@@ -4459,8 +4460,8 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             mMessages.clear();
-            mUserDisplayName = extras.getString(EXTRA_SELF_DISPLAY_NAME);
-            mConversationTitle = extras.getString(EXTRA_CONVERSATION_TITLE);
+            mUserDisplayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
+            mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
             Parcelable[] parcelables = extras.getParcelableArray(EXTRA_MESSAGES);
             if (parcelables != null && parcelables instanceof Parcelable[]) {
                 mMessages = Message.getMessagesFromBundleArray(parcelables);
