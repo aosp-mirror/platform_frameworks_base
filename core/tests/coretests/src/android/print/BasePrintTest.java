@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.CancellationSignal;
+import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.print.PrintAttributes;
@@ -43,7 +44,6 @@ import android.printservice.PrintJob;
 import android.printservice.PrintService;
 import android.test.InstrumentationTestCase;
 import android.util.DisplayMetrics;
-import android.util.LocaleList;
 
 import org.mockito.stubbing.Answer;
 

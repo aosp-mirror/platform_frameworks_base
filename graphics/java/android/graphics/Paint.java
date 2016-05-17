@@ -19,11 +19,11 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Size;
+import android.os.LocaleList;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
-import android.util.LocaleList;
 
 import com.android.internal.annotations.GuardedBy;
 

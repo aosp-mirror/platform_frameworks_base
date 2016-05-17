@@ -18,7 +18,7 @@ package com.android.server.input;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.LocaleList;
+import android.os.LocaleList;
 import android.view.Display;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
