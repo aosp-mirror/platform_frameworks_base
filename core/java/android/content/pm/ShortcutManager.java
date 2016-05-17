@@ -28,6 +28,8 @@ import java.util.List;
 
 // TODO Enhance javadoc
 /**
+ * <b>TODO: Update to reflect DR changes.</b><br>
+ *
  * {@link ShortcutManager} manages shortcuts created by applications.
  *
  * <h3>Dynamic shortcuts and pinned shortcuts</h3>
@@ -228,6 +230,45 @@ public class ShortcutManager {
     }
 
     /**
+     * TODO Javadoc
+     */
+    public void disableShortcuts(@NonNull List<String> shortcutIds) {
+        try {
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+                    /* disabledMessage =*/ null, /* disabledMessageResId =*/ 0,
+                    injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * TODO Javadoc
+     */
+    public void disableShortcuts(@NonNull List<String> shortcutIds, int disabledMessageResId) {
+        try {
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+                    /* disabledMessage =*/ null, disabledMessageResId,
+                    injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * TODO Javadoc
+     */
+    public void disableShortcuts(@NonNull List<String> shortcutIds, String disabledMessage) {
+        try {
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+                    disabledMessage, /* disabledMessageResId =*/ 0,
+                    injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the max number of dynamic shortcuts that each application can have at a time.
      */
     public int getMaxDynamicShortcutCount() {
@@ -272,6 +313,15 @@ public class ShortcutManager {
     public int getIconMaxDimensions() {
         try {
             return mService.getIconMaxDimensions(mContext.getPackageName(), injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    public void reportShortcutUsed(String shortcutId) {
+        try {
+            mService.reportShortcutUsed(mContext.getPackageName(), shortcutId,
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

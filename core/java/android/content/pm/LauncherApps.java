@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -552,6 +553,16 @@ public class LauncherApps {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** TODO Javadoc */
+    public Drawable getShortcutIconDrawable(int density) {
+        throw new RuntimeException("TODO implement it");
+    }
+
+    /** TODO Javadoc */
+    public Drawable getShortcutBadgedIconDrawable(int density) {
+        throw new RuntimeException("TODO implement it");
     }
 
     /**
