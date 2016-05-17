@@ -21,11 +21,36 @@
         <item name="textViewStyle">@style/Widget.Micro.TextView</item>
         <item name="numberPickerStyle">@style/Widget.Micro.NumberPicker</item>
         <item name="windowAnimationStyle">@style/Animation.Micro.Activity</item>
-        <item name="windowBackground">@color/black</item>
+        <item name="windowBackground">@color/background_micro_dark</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowIsFloating">false</item>
         <!-- Required to force windowInsets dispatch through application UI. -->
         <item name="windowOverscan">true</item>
+
+        <item name="textAppearance">@style/TextAppearance.Micro</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Micro.Inverse</item>
+
+        <item name="textAppearanceLarge">@style/TextAppearance.Micro.Large</item>
+        <item name="textAppearanceMedium">@style/TextAppearance.Micro.Medium</item>
+        <item name="textAppearanceSmall">@style/TextAppearance.Micro.Small</item>
+
+        <item name="textAppearanceListItem">@style/TextAppearance.Micro.Subtitle</item>
+        <item name="textAppearanceListItemSmall">@style/TextAppearance.Micro.Body1</item>
+        <item name="textAppearanceListItemSecondary">@style/TextAppearance.Micro.Body2</item>
+        <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_micro</item>
+        <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_micro</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_micro</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_micro</item>
+
+        <!-- Dialog styling -->
+        <item name="buttonBarStyle">@style/Widget.Micro.ButtonBar</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Micro.Button.ButtonBar.AlertDialog</item>
+
+        <!-- Color palette -->
+        <item name="colorPrimaryDark">@color/primary_dark_micro_dark</item>
+        <item name="colorPrimary">@color/primary_micro_dark</item>
+        <item name="colorAccent">@color/accent_micro_dark</item>
+        <item name="colorEdgeEffect">?attr/colorPrimary</item>
     </style>
 
     <style name="Theme.Micro" parent="Theme.MicroBase">
@@ -49,12 +74,29 @@
     <style name="Theme.Micro.Light" parent="Theme.Micro.LightBase">
     </style>
 
-    <style name="Theme.Micro.DialogBase" parent="Theme.Material.Light.Dialog">
-        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Micro</item>
+    <style name="Theme.Micro.DialogBase">
+        <item name="colorBackground">?attr/colorBackgroundFloating</item>
+
+        <item name="windowFrame">@null</item>
+        <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
+        <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+
+        <item name="colorBackgroundCacheHint">@null</item>
+
+        <item name="listDivider">@null</item>
+
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Micro</item>
         <item name="windowIsFloating">false</item>
         <item name="windowFullscreen">true</item>
-        <item name="textAppearance">@style/TextAppearance.Micro</item>
-        <item name="textAppearanceInverse">@style/TextAppearance.Micro</item>
+        <item name="windowBackground">@color/background_micro_dark</item>
         <!-- Required to force windowInsets dispatch through application UI. -->
         <item name="windowOverscan">true</item>
     </style>
@@ -67,21 +109,17 @@
         <item name="windowTitleStyle">@style/DialogWindowTitle.Micro</item>
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
         <item name="windowIsFloating">false</item>
-        <item name="windowBackground">@android:color/transparent</item>
         <item name="windowOverscan">true</item>
         <item name="windowContentOverlay">@null</item>
-        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+        <item name="windowMinWidthMajor">@dimen/dialog_min_width_major</item>
+        <item name="windowMinWidthMinor">@dimen/dialog_min_width_minor</item>
     </style>
 
     <style name="Theme.Micro.Dialog.AppError" parent="Theme.Micro.Dialog">
-        <item name="windowBackground">@null</item>
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
+        <item name="textAppearance">@style/TextAppearance.Micro.Large</item>
         <item name="windowOverscan">true</item>
         <item name="windowCloseOnTouchOutside">false</item>
-        <item name="textSize">20sp</item>
-        <item name="fontFamily">sans-serif-condensed-light</item>
-        <item name="textColor">@color/micro_text_light</item>
     </style>
 
    <style name="Theme.Micro.Panel" parent="Theme.Material.Panel"  />
