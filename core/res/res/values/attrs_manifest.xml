@@ -2281,6 +2281,8 @@
          activities launched in the task. That is if the root activity of a task set minimal width,
          then the system will set the same minimal width on all other activities in the task. It
          will also ignore any other minimal width attributes of non-root activities. -->
+        <attr name="minWidth" format="dimension" />
+        <!-- @removed -->
         <attr name="minimalWidth" format="dimension" />
         <!-- Minimal height of the activity.
 
@@ -2288,6 +2290,8 @@
          activities launched in the task. That is if the root activity of a task set minimal height,
          then the system will set the same minimal height on all other activities in the task. It
          will also ignore any other minimal height attributes of non-root activities. -->
+        <attr name="minHeight" format="dimension" />
+        <!-- @removed -->
         <attr name="minimalHeight" format="dimension" />
     </declare-styleable>
 

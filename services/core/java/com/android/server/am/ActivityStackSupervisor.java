@@ -123,7 +123,6 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
@@ -410,7 +409,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
-    int mDefaultMinimalSizeOfResizeableTask = -1;
+    int mDefaultMinSizeOfResizeableTask = -1;
 
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
@@ -3376,7 +3375,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     private void calculateDefaultMinimalSizeOfResizeableTasks(ActivityDisplay display) {
-        mDefaultMinimalSizeOfResizeableTask =
+        mDefaultMinSizeOfResizeableTask =
                 mService.mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.default_minimal_size_resizable_task);
     }
