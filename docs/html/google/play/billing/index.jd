@@ -18,7 +18,8 @@ and features, and more. You can use In-app Billing to sell products as</p>
     apps and in-app products that they distribute to multiple countries, the
     system automatically sets local prices for different currencies using
     today’s exchange rates and country-specific pricing patterns. To satisfy
-    specific pricing needs, developers can also adjust these prices manually.</li>
+    particular pricing needs, developers can also adjust these prices manually.
+  </li>
   <li><strong>Pricing Templates</strong>&mdash;Developers can add pricing
     templates and link these templates to app prices or in-app product prices.
     These templates include local prices across all markets. By using a
