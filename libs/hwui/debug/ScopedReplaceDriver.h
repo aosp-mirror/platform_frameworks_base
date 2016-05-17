@@ -14,15 +14,33 @@
  * limitations under the License.
  */
 
-// #include'ing this file is bad, bad things should be compile errors
-#ifdef HWUI_GLES_WRAP_ENABLED
-#error wrap_gles.h should only be used as an auto-included header, don't directly #include it
-#endif
-#define HWUI_GLES_WRAP_ENABLED
+#pragma once
 
 #include "GlesDriver.h"
 
-#define GL_ENTRY(ret, api, ...) ret api(__VA_ARGS__);
+namespace android {
+namespace uirenderer {
+namespace debug {
 
-#include "gles_decls.in"
-#undef GL_ENTRY
+template <typename Driver>
+class ScopedReplaceDriver {
+public:
+    ScopedReplaceDriver() {
+        std::unique_ptr<Driver> glDriver = std::make_unique<Driver>();
+        mCurrentDriver = glDriver.get();
+        mOldDriver = GlesDriver::replace(std::move(glDriver));
+    }
+
+    Driver& get() { return *mCurrentDriver; }
+
+    ~ScopedReplaceDriver() {
+        GlesDriver::replace(std::move(mOldDriver));
+    }
+private:
+    std::unique_ptr<GlesDriver> mOldDriver;
+    Driver* mCurrentDriver;
+};
+
+} // namespace debug
+} // namespace uirenderer
+} // namespace android

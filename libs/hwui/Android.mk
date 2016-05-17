@@ -108,6 +108,14 @@ hwui_test_common_src_files := \
     tests/common/TestScene.cpp \
     tests/common/TestUtils.cpp
 
+hwui_debug_common_src_files := \
+    debug/wrap_gles.cpp \
+    debug/DefaultGlesDriver.cpp \
+    debug/GlesErrorCheckWrapper.cpp \
+    debug/GlesDriver.cpp \
+    debug/FatalBaseDriver.cpp \
+    debug/NullGlesDriver.cpp
+
 hwui_cflags := \
     -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES \
     -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\" \
@@ -160,14 +168,6 @@ ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
         frameworks/rs
 endif
 
-ifeq (true, $(HWUI_ENABLE_OPENGL_VALIDATION))
-    hwui_cflags += -include debug/wrap_gles.h
-    hwui_src_files += debug/wrap_gles.cpp
-    hwui_c_includes += frameworks/native/opengl/libs/GLES2
-    hwui_cflags += -DDEBUG_OPENGL=3
-endif
-
-
 # ------------------------
 # static library
 # ------------------------
@@ -178,6 +178,13 @@ LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 LOCAL_MODULE := libhwui_static
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_SRC_FILES := $(hwui_src_files)
+
+ifeq (true, $(HWUI_ENABLE_OPENGL_VALIDATION))
+    LOCAL_CFLAGS += -include debug/wrap_gles.h
+    LOCAL_CFLAGS += -DDEBUG_OPENGL=3
+    LOCAL_SRC_FILES += $(hwui_debug_common_src_files)
+endif
+
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
         $(LOCAL_PATH) \
@@ -193,14 +200,15 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_CLASS := STATIC_LIBRARIES
-LOCAL_MODULE := libhwui_static_null_gpu
+LOCAL_MODULE := libhwui_static_debug
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
+        -include debug/wrap_gles.h \
         -DHWUI_NULL_GPU
 LOCAL_SRC_FILES := \
         $(hwui_src_files) \
-        debug/nullegl.cpp \
-        debug/nullgles.cpp
+        $(hwui_debug_common_src_files) \
+        debug/nullegl.cpp
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
 LOCAL_EXPORT_C_INCLUDE_DIRS := \
         $(LOCAL_PATH) \
@@ -231,10 +239,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
-LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
+LOCAL_STATIC_LIBRARIES := libgmock libhwui_static_debug
 LOCAL_SHARED_LIBRARIES := libmemunreachable
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
+        -include debug/wrap_gles.h \
         -DHWUI_NULL_GPU
 LOCAL_C_INCLUDES := $(hwui_c_includes)
 
@@ -253,6 +262,7 @@ LOCAL_SRC_FILES += \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
     tests/unit/MatrixTests.cpp \
+    tests/unit/MeshStateTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/RenderNodeTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
@@ -293,7 +303,7 @@ LOCAL_MODULE_STEM_64 := hwuitest64
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_C_INCLUDES := $(hwui_c_includes)
 
-# set to libhwui_static_null_gpu to skip actual GL commands
+# set to libhwui_static_debug to skip actual GL commands
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
 
 LOCAL_SRC_FILES += \
@@ -318,11 +328,12 @@ LOCAL_MODULE_STEM_32 := hwuimicro
 LOCAL_MODULE_STEM_64 := hwuimicro64
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
+        -include debug/wrap_gles.h \
         -DHWUI_NULL_GPU
 
 LOCAL_C_INCLUDES := $(hwui_c_includes)
 
-LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_null_gpu
+LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_debug
 LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
 
 LOCAL_SRC_FILES += \

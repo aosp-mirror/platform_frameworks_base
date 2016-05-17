@@ -15,19 +15,27 @@
  */
 
 #include "GlesDriver.h"
+#include "DefaultGlesDriver.h"
+#include "GlesErrorCheckWrapper.h"
 
-using namespace android::uirenderer::debug;
+namespace android {
+namespace uirenderer {
+namespace debug {
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+static DefaultGlesDriver sDefaultDriver;
 
-#define API_ENTRY(x) x
-#define CALL_GL_API(api, ...) GlesDriver::get()->api##_(__VA_ARGS__)
-#define CALL_GL_API_RETURN(api, ...) return GlesDriver::get()->api##_(__VA_ARGS__)
+static std::unique_ptr<GlesDriver> sGlesDriver(new GlesErrorCheckWrapper(sDefaultDriver));
 
-#include "gles_stubs.in"
+GlesDriver* GlesDriver::get() {
+    return sGlesDriver.get();
+}
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+std::unique_ptr<GlesDriver> GlesDriver::replace(std::unique_ptr<GlesDriver>&& driver) {
+    std::unique_ptr<GlesDriver> ret = std::move(sGlesDriver);
+    sGlesDriver = std::move(driver);
+    return ret;
+}
+
+} // namespace debug
+} // namespace uirenderer
+} // namespace android

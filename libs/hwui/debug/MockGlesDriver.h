@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-#include "GlesDriver.h"
+#pragma once
 
-using namespace android::uirenderer::debug;
+#include "FatalBaseDriver.h"
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+#include <gmock/gmock.h>
 
-#define API_ENTRY(x) x
-#define CALL_GL_API(api, ...) GlesDriver::get()->api##_(__VA_ARGS__)
-#define CALL_GL_API_RETURN(api, ...) return GlesDriver::get()->api##_(__VA_ARGS__)
+namespace android {
+namespace uirenderer {
+namespace debug {
 
-#include "gles_stubs.in"
+class MockGlesDriver : public FatalBaseDriver {
+public:
+    MOCK_METHOD2(glBindBuffer_, void(GLenum target, GLuint buffer));
+    MOCK_METHOD4(glBufferData_, void(GLenum target, GLsizeiptr size, const void *data, GLenum usage));
+    MOCK_METHOD2(glGenBuffers_, void(GLsizei n, GLuint *buffers));
+};
 
-#undef API_ENTRY
-#undef CALL_GL_API
-#undef CALL_GL_API_RETURN
+} // namespace debug
+} // namespace uirenderer
+} // namespace android
