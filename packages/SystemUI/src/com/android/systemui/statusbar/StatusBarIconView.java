@@ -328,7 +328,7 @@ public class StatusBarIconView extends AnimatedImageView {
         Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
         String appName = builder.loadHeaderAppName();
 
-        CharSequence title = n.extras.getString(Notification.EXTRA_TITLE);
+        CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence ticker = n.tickerText;
 
         CharSequence desc = !TextUtils.isEmpty(ticker) ? ticker
