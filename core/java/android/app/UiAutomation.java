@@ -322,7 +322,10 @@ public final class UiAutomation {
     /**
      * Destroy this UiAutomation. After calling this method, attempting to use the object will
      * result in errors.
+     *
+     * @hide
      */
+    @TestApi
     public void destroy() {
         disconnect();
         mIsDestroyed = true;
