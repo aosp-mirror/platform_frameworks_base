@@ -247,86 +247,86 @@ var VERSION_NAMES =
   {"api":0},{"api":1},{"api":2},{"api":3},
   {
     "api":4,
-    "link":"<a href='/about/versions/android-1.6.html'>1.6</a>",
+    "link":'<a href="/about/versions/android-1.6.html">1.6</a>',
     "codename":"Donut",
   },
   { "api":5},
   { "api":6},
   {
     "api":7,
-    "link":"<a href='/about/versions/android-2.1.html'>2.1</a>",
+    "link":'<a href="/about/versions/android-2.1.html">2.1</a>',
     "codename":"Eclair",
   },
   {
     "api":8,
-    "link":"<a href='/about/versions/android-2.2.html'>2.2</a>",
+    "link":'<a href="/about/versions/android-2.2.html">2.2</a>',
     "codename":"Froyo"
   },
   {
     "api":9,
-    "link":"<a href='/about/versions/android-2.3.html'>2.3 -<br>2.3.2</a>",
+    "link":'<a href="/about/versions/android-2.3.html">2.3 -<br>2.3.2</a>',
     "codename":"Gingerbread"
   },
   {
     "api":10,
-    "link":"<a href='/about/versions/android-2.3.3.html'>2.3.3 -<br>2.3.7</a>",
+    "link":'<a href="/about/versions/android-2.3.3.html">2.3.3 -<br>2.3.7</a>',
     "codename":"Gingerbread"
   },
   { "api":11},
   {
     "api":12,
-    "link":"<a href='/about/versions/android-3.1.html'>3.1</a>",
+    "link":'<a href="/about/versions/android-3.1.html">3.1</a>',
     "codename":"Honeycomb"
   },
   {
     "api":13,
-    "link":"<a href='/about/versions/android-3.2.html'>3.2</a>",
+    "link":'<a href="/about/versions/android-3.2.html">3.2</a>',
     "codename":"Honeycomb"
   },
   { "api":14},
   {
     "api":15,
-    "link":"<a href='/about/versions/android-4.0.html'>4.0.3 -<br>4.0.4</a>",
+    "link":'<a href="/about/versions/android-4.0.html">4.0.3 -<br>4.0.4</a>',
     "codename":"Ice Cream Sandwich"
   },
   {
     "api":16,
-    "link":"<a href='/about/versions/android-4.1.html'>4.1.x</a>",
+    "link":'<a href="/about/versions/android-4.1.html">4.1.x</a>',
     "codename":"Jelly Bean"
   },
   {
     "api":17,
-    "link":"<a href='/about/versions/android-4.2.html'>4.2.x</a>",
+    "link":'<a href="/about/versions/android-4.2.html">4.2.x</a>',
     "codename":"Jelly Bean"
   },
   {
     "api":18,
-    "link":"<a href='/about/versions/android-4.3.html'>4.3</a>",
+    "link":'<a href="/about/versions/android-4.3.html">4.3</a>',
     "codename":"Jelly Bean"
   },
   {
     "api":19,
-    "link":"<a href='/about/versions/android-4.4.html'>4.4</a>",
+    "link":'<a href="/about/versions/android-4.4.html">4.4</a>',
     "codename":"KitKat"
   },
   {
     "api":20,
-    "link":"<a href='/about/versions/android-4.4.html'>4.4W</a>",
+    "link":'<a href="/about/versions/android-4.4.html">4.4W</a>',
     "codename":"KitKat for Wear"
   },
   {
     "api":21,
-    "link":"<a href='/about/versions/android-5.0.html'>5.0</a>",
+    "link":'<a href="/about/versions/android-5.0.html">5.0</a>',
     "codename":"Lollipop"
   },
   {
     "api":22,
-    "link":"<a href='/about/versions/android-5.1.html'>5.1</a>",
+    "link":'<a href="/about/versions/android-5.1.html">5.1</a>',
     "codename":"Lollipop"
   },
   {
     "api":23,
-    "link":"<a href='/about/versions/marshmallow/index.html'>6.0</a>",
+    "link":'<a href="/about/versions/marshmallow/index.html">6.0</a>',
     "codename":"Marshmallow"
   }
 ];
