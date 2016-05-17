@@ -38,6 +38,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#scoped_directory_access">Scoped directory access</a></li>
         <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
         <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
+        <li><a href="#vr">VR Support</a></li>
         <li><a href="#print_svc">Print service enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
         <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
@@ -85,6 +86,7 @@ interacts with other apps.</li>
 <p class="img-caption">
   <strong>Figure 1.</strong> Apps running in split-screen mode.
 </p>
+
   </div>
 
 <p>Especially on tablets and other larger-screen devices, multi-window support
@@ -401,7 +403,7 @@ displayed &mdash; users can add or move tiles just by dragging and dropping them
 </p>
 
 <p>
-  For information about creating an app tile, see the
+  For information about creating an app tile, see the documentation for
   <code>android.service.quicksettings.Tile</code> in the downloadable <a href=
   "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
 </p>
@@ -474,8 +476,9 @@ available to users. It offers more than 25 variants each for commonly used
 languages such as English, Spanish, French, and Arabic. It also adds partial
 support for more than 100 new languages.</p>
 
-<p>Apps can get the list of locales set by the user by calling <code>LocaleList.GetDefault()</code>.  To support the expanded number of locales, Android N is changing the way
-that it resolves resources. Make sure that you test and verify that your apps
+<p>Apps can get the list of locales set by the user by calling
+<code>LocaleList.GetDefault()</code>.  To support the expanded number of locales, Android N is
+changing the way that it resolves resources. Make sure that you test and verify that your apps
 working as expected with the new resource resolution logic.</p>
 
 <p>To learn about the new resource-resolution behavior and the best practices you
@@ -550,7 +553,8 @@ should follow, see <a href="{@docRoot}preview/features/multilingual-support.html
 
 <ul>
   <li> All extensions from the <a class="external-link"
-href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">Android Extension Pack</a></a> (AEP) except for <code>EXT_texture_sRGB_decode</code>.
+href="https://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
+Android Extension Pack</a></a> (AEP) except for <code>EXT_texture_sRGB_decode</code>.
   <li> Floating-point framebuffers for HDR and deferred shading.
   <li> BaseVertex draw calls to enable better batching and streaming.
   <li> Robust buffer access control to reduce WebGL overhead.
@@ -850,22 +854,18 @@ Directory Access</a> developer documentation.</p>
 <h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
 
 <p>
-In Android N, the user can press Meta+/ to trigger a Keyboard Shortcuts
+In Android N, the user can press "Alt + /" to trigger a <em>Keyboard Shortcuts</em>
 screen that displays all shortcuts available both from the system and from
 the app in focus. These are retrieved automatically from the app’s menu if
 available, but developers can provide their own fine-tuned shortcuts lists
-for the screen. This is done simply by overriding the following method
-in {@code Activity.java}:
+for the screen. You can do this by overriding the new
+<code>Activity.onProvideKeyboardShortcuts()</code> method, described in the downloadable
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
 </p>
-
-<pre>
-public void onProvideKeyboardShortcuts(
-     List<KeyboardShortcutGroup> data, Menu menu, int deviceId)
-</pre>
 
 <p>
 To trigger the Keyboard Shortcuts Helper from anywhere in your app,
-call {@code requestKeyboardShortcutsHelper} for the relevant activity.
+call {@code Activity.requestKeyboardShortcutsHelper()} for the relevant activity.
 </p>
 
 <h2 id="sustained_performance_api">Sustained Performance API</h2>
@@ -879,9 +879,9 @@ developers creating high-performance, long-running apps.
 
 <p>
 To address these limitations, Android N includes support for
-<em>sustained performance mode</em>, enabling OEMs to provide hints on
-device-performance capabilities for long-running applications. App developers
-can use these hints to tune applications for a predictable,
+<em>sustained performance mode</em>, enabling OEMs to provide hints about
+device-performance capabilities for long-running apps. App developers
+can use these hints to tune apps for a predictable,
 consistent level of device performance over long periods of time.
 </p>
 
@@ -890,9 +890,19 @@ App developers can try out this new API in the N Developer Preview on
 Nexus 6P devices only. To use this feature,
 set the sustained performance window flag for the window
 you want to run in sustained performance mode. Set this flag using the
-{@code setSustainedPerformanceMode(boolean)} method. The system automatically
+{@code Window.setSustainedPerformanceMode()} method. The system automatically
 disables this mode when the window is no longer in focus.
 </p>
+
+<h2 id="vr">VR Support</h2>
+
+<p>
+Leveraging the <a href="#sustained_performance_api">Sustained Performance API</a>
+and newly introduced {@code VrListenerService} class, Android N provides support for
+VR apps developed using the <a href="https://developers.google.com/cardboard/overview">Cardboard
+SDK</a>. For more information about the {@code VrListenerService} class, see the relevant section
+of the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+
 
 <h2 id="print_svc">Print Service Enhancements</h2>
 
@@ -939,9 +949,10 @@ disables this mode when the window is no longer in focus.
 
 <p>
 The FrameMetricsListener API allows an app to monitor its UI rendering
-performance by exposing a streaming pubsub API to transfer frame
+performance. The API provides this capability by exposing a streaming Pub/Sub API to transfer frame
 timing info for the app's current window. The data returned is
-equivalent to that displayed by {@code adb shell dumpsys gfxinfo framestats},
+equivalent to that displayed by {@code
+<a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a> dumpsys gfxinfo framestats},
 but is not limited to the past 120 frames.
 </p>
 
@@ -958,25 +969,20 @@ for real use cases within an app.
 </p>
 
 <p>
-The API provides a callback interface to be implemented and
-registered on the window that you wish to monitor:
+To monitor a window, implement the <code>FrameMetricsListener.onMetricsAvailable()</code>
+callback method and register it on that window. For more information, refer to
+the {@code FrameMetricsListener} class documentation in
+the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
 </p>
 
-<pre>
- public interface FrameMetricsListener {
-        void onMetricsAvailable(Window window, FrameMetrics frameMetrics,
-                int dropCountSinceLastInvocation);
-    }
-</pre>
-
 <p>
-The API returns a FrameMetrics object, which contains timing data that
+The API provides a {@code FrameMetrics} object, which contains timing data that
 the rendering subsystem reports for various milestones in a frame lifecycle.
 The supported metrics are: {@code UNKNOWN_DELAY_DURATION},
 {@code INPUT_HANDLING_DURATION}, {@code ANIMATION_DURATION},
 {@code LAYOUT_MEASURE_DURATION}, {@code DRAW_DURATION}, {@code SYNC_DURATION},
 {@code COMMAND_ISSUE_DURATION}, {@code SWAP_BUFFERS_DURATION},
-{@code TOTAL_DURATION}, and {@code FIRST_DRAW_FRAME}
+{@code TOTAL_DURATION}, and {@code FIRST_DRAW_FRAME}.
 </p>
 
 
