@@ -72,6 +72,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 context, android.R.interpolator.fast_out_linear_in);
     }
 
+    @Override
     protected void resetState() {
         mSecurityMessageDisplay.setMessage(R.string.kg_password_instructions, false);
         final boolean wasDisabled = mPasswordEntry.isEnabled();
@@ -159,6 +160,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
         // Poke the wakelock any time the text is selected or modified
         mPasswordEntry.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View v) {
                 mCallback.userActivity();
             }
@@ -175,6 +177,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             switchImeButton.setVisibility(View.VISIBLE);
             imeOrDeleteButtonVisible = true;
             switchImeButton.setOnClickListener(new OnClickListener() {
+                @Override
                 public void onClick(View v) {
                     mCallback.userActivity(); // Leave the screen on a bit longer
                     // Do not show auxiliary subtypes in password lock screen.
@@ -202,7 +205,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected void resetPasswordText(boolean animate) {
+    protected void resetPasswordText(boolean animate, boolean announce) {
         mPasswordEntry.setText("");
     }
 
