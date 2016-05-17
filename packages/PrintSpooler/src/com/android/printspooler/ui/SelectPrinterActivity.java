@@ -319,7 +319,7 @@ public final class SelectPrinterActivity extends Activity implements
         }
         TextView titleView = (TextView) findViewById(R.id.title);
         View progressBar = findViewById(R.id.progress_bar);
-        if (mEnabledPrintServices.size() > 0) {
+        if (mEnabledPrintServices.size() == 0) {
             titleView.setText(R.string.print_no_print_services);
             progressBar.setVisibility(View.GONE);
         } else if (adapter.getUnfilteredCount() <= 0) {
