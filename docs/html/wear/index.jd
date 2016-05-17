@@ -68,14 +68,43 @@ nonavpage=true
         </div>
       </div> <!-- end .wrap -->
       <div class="landing-scroll-down-affordance">
-        <a class="landing-down-arrow" href="#extending-android-to-wearables">
+        <a class="landing-down-arrow" href="#next-section">
           <img src="{@docRoot}wear/images/carrot.png" alt="Scroll down to read more">
         </a>
       </div>
     </div> <!-- end .landing-section .landing-hero -->
 
 
-    <div class="landing-rest-of-page">
+    <div class="landing-rest-of-page" id="next-section">
+
+
+      <section class="dac-expand dac-hero dac-light" style="background-color:#FFFFFF">
+        <div class="wrap" style="max-width:1100px;margin-top:0">
+          <div class="cols dac-hero-content" style="padding-bottom:1em;">
+
+            <div class="col-7of16 col-push-9of16" style="padding-left:2em">
+              <h1 class="dac-hero-title">Android Wear 2.0 Developer Preview</h1>
+              <p class="dac-hero-description">
+                Get ready for the next version of Android Wear!
+                Support stand-alone Wear devices and apps.
+                Create enhanced user interaction and glanceable experiences.
+                Test your apps on Wear devices.
+              </p>
+
+              <a class="dac-hero-cta" href="{@docRoot}wear/preview/index.html">
+                <span class="dac-sprite dac-auto-chevron"></span>
+                Get started
+              </a>
+            </div>
+            <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
+              <img class="dac-hero-image" src="{@docRoot}wear/preview/images/hero-1x.png"
+                   srcset="{@docRoot}wear/preview/images/hero-1x.png 1x,
+                   {@docRoot}wear/preview/images/hero-2x.png 2x">
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="landing-section" id="extending-android-to-wearables">
         <div class="wrap">
           <div class="landing-section-header">
