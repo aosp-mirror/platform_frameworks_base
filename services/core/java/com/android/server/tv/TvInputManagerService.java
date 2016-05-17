@@ -331,7 +331,7 @@ public final class TvInputManagerService extends SystemService {
                 try {
                     TvInputInfo info = new TvInputInfo.Builder(mContext, ri).build();
                     inputList.add(info);
-                } catch (XmlPullParserException | IOException e) {
+                } catch (Exception e) {
                     Slog.e(TAG, "failed to load TV input " + si.name, e);
                     continue;
                 }
