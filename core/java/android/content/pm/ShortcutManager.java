@@ -28,7 +28,7 @@ import java.util.List;
 
 // TODO Enhance javadoc
 /**
- * <b>TODO: Update to reflect DR changes.</b><br>
+ * <b>TODO: Update to reflect DR changes, such as manifest shortcuts.</b><br>
  *
  * {@link ShortcutManager} manages shortcuts created by applications.
  *
@@ -36,8 +36,8 @@ import java.util.List;
  *
  * An application can publish shortcuts with {@link #setDynamicShortcuts(List)} and
  * {@link #addDynamicShortcuts(List)}.  There can be at most
- * {@link #getMaxDynamicShortcutCount()} number of dynamic shortcuts at a time from the same
- * application.
+ * {@link #getMaxShortcutCountForActivity()} number of dynamic shortcuts at a time from the
+ * same application.
  * A dynamic shortcut can be deleted with {@link #removeDynamicShortcuts(List)}, and apps
  * can also use {@link #removeAllDynamicShortcuts()} to delete all dynamic shortcuts.
  *
@@ -51,7 +51,8 @@ import java.util.List;
  * <p>The number of pinned shortcuts does not affect the number of dynamic shortcuts that can be
  * published by an application at a time.
  * No matter how many pinned shortcuts that Launcher has for an application, the
- * application can still always publish {@link #getMaxDynamicShortcutCount()} number of dynamic
+ * application can still always publish {@link #getMaxShortcutCountForActivity()} number of
+ * dynamic
  * shortcuts.
  *
  * <h3>Shortcut IDs</h3>
@@ -132,7 +133,7 @@ public class ShortcutManager {
      * @return {@code true} if the call has succeeded. {@code false} if the call is rate-limited.
      *
      * @throws IllegalArgumentException if {@code shortcutInfoList} contains more than
-     * {@link #getMaxDynamicShortcutCount()} shortcuts.
+     * {@link #getMaxShortcutCountForActivity()} shortcuts.
      */
     public boolean setDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
@@ -145,12 +146,25 @@ public class ShortcutManager {
 
     /**
      * Return all dynamic shortcuts from the caller application.  The number of result items
-     * will not exceed the value returned by {@link #getMaxDynamicShortcutCount()}.
+     * will not exceed the value returned by {@link #getMaxShortcutCountForActivity()}.
      */
     @NonNull
     public List<ShortcutInfo> getDynamicShortcuts() {
         try {
             return mService.getDynamicShortcuts(mContext.getPackageName(), injectMyUserId())
+                    .getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * TODO Javadoc
+     */
+    @NonNull
+    public List<ShortcutInfo> getManifestShortcuts() {
+        try {
+            return mService.getManifestShortcuts(mContext.getPackageName(), injectMyUserId())
                     .getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -269,9 +283,21 @@ public class ShortcutManager {
     }
 
     /**
-     * Return the max number of dynamic shortcuts that each application can have at a time.
+     * TODO Javadoc
      */
-    public int getMaxDynamicShortcutCount() {
+    public void enableShortcuts(@NonNull List<String> shortcutIds) {
+        try {
+            mService.enableShortcuts(mContext.getPackageName(), shortcutIds, injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the max number of dynamic shortcuts + manifest shortcuts that each launcehr icon
+     * can have at a time.
+     */
+    public int getMaxShortcutCountForActivity() {
         try {
             return mService.getMaxDynamicShortcutCount(mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
@@ -308,10 +334,23 @@ public class ShortcutManager {
     }
 
     /**
-     * Return the max width and height for icons, in pixels.
+     * Return the max width for icons, in pixels.
      */
-    public int getIconMaxDimensions() {
+    public int getIconMaxWidth() {
         try {
+            // TODO Implement it properly using xdpi.
+            return mService.getIconMaxDimensions(mContext.getPackageName(), injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the max height for icons, in pixels.
+     */
+    public int getIconMaxHeight() {
+        try {
+            // TODO Implement it properly using ydpi.
             return mService.getIconMaxDimensions(mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

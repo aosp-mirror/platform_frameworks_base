@@ -70,13 +70,16 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_KEY_FIELDS_ONLY = 1 << 4;
 
     /* @hide */
-    public static final int FLAG_FROM_MANIFEST = 1 << 5;
+    public static final int FLAG_MANIFEST = 1 << 5;
 
     /* @hide */
     public static final int FLAG_DISABLED = 1 << 6;
 
     /* @hide */
     public static final int FLAG_STRINGS_RESOLVED = 1 << 7;
+
+    /* @hide */
+    public static final int FLAG_IMMUTABLE = 1 << 8;
 
     /** @hide */
     @IntDef(flag = true,
@@ -86,9 +89,10 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_HAS_ICON_RES,
             FLAG_HAS_ICON_FILE,
             FLAG_KEY_FIELDS_ONLY,
-            FLAG_FROM_MANIFEST,
+            FLAG_MANIFEST,
             FLAG_DISABLED,
             FLAG_STRINGS_RESOLVED,
+            FLAG_IMMUTABLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -133,7 +137,7 @@ public final class ShortcutInfo implements Parcelable {
     private final String mPackageName;
 
     @Nullable
-    private ComponentName mActivityComponent;
+    private ComponentName mActivity;
 
     @Nullable
     private Icon mIcon;
@@ -141,17 +145,17 @@ public final class ShortcutInfo implements Parcelable {
     private int mTitleResId;
 
     @Nullable
-    private String mTitle;
+    private CharSequence mTitle;
 
     private int mTextResId;
 
     @Nullable
-    private String mText;
+    private CharSequence mText;
 
     private int mDisabledMessageResId;
 
     @Nullable
-    private String mDisabledMessage;
+    private CharSequence mDisabledMessage;
 
     @Nullable
     private ArraySet<String> mCategories;
@@ -196,7 +200,7 @@ public final class ShortcutInfo implements Parcelable {
         // Note we can't do other null checks here because SM.updateShortcuts() takes partial
         // information.
         mPackageName = b.mContext.getPackageName();
-        mActivityComponent = b.mActivityComponent;
+        mActivity = b.mActivity;
         mIcon = b.mIcon;
         mTitle = b.mTitle;
         mTitleResId = b.mTitleResId;
@@ -229,7 +233,7 @@ public final class ShortcutInfo implements Parcelable {
      */
     public void enforceMandatoryFields() {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
-        Preconditions.checkNotNull(mActivityComponent, "activityComponent must be provided");
+        Preconditions.checkNotNull(mActivity, "activity must be provided");
         if (mTitle == null && mTitleResId == 0) {
             throw new IllegalArgumentException("Shortcut title must be provided");
         }
@@ -250,7 +254,7 @@ public final class ShortcutInfo implements Parcelable {
         mIconResourceId = source.mIconResourceId;
 
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
-            mActivityComponent = source.mActivityComponent;
+            mActivity = source.mActivity;
 
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
@@ -309,6 +313,17 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public void ensureUpdatableWith(ShortcutInfo source) {
+        Preconditions.checkState(mUserId == source.mUserId, "Owner User ID must match");
+        Preconditions.checkState(mId.equals(source.mId), "ID must match");
+        Preconditions.checkState(mPackageName.equals(source.mPackageName),
+                "Package name must match");
+        Preconditions.checkState(!isImmutable(), "Target ShortcutInfo is immutable");
+    }
+
+    /**
      * Copy non-null/zero fields from another {@link ShortcutInfo}.  Only "public" information
      * will be overwritten.  The timestamp will be updated.
      *
@@ -316,16 +331,15 @@ public final class ShortcutInfo implements Parcelable {
      * - mBitmapPath will not change
      * - Current time will be set to timestamp
      *
+     * @throws IllegalStateException if source is not compatible.
+     *
      * @hide
      */
     public void copyNonNullFieldsFrom(ShortcutInfo source) {
-        Preconditions.checkState(mUserId == source.mUserId, "Owner User ID must match");
-        Preconditions.checkState(mId.equals(source.mId), "ID must match");
-        Preconditions.checkState(mPackageName.equals(source.mPackageName),
-                "Package name must match");
+        ensureUpdatableWith(source);
 
-        if (source.mActivityComponent != null) {
-            mActivityComponent = source.mActivityComponent;
+        if (source.mActivity != null) {
+            mActivity = source.mActivity;
         }
 
         if (source.mIcon != null) {
@@ -401,21 +415,21 @@ public final class ShortcutInfo implements Parcelable {
 
         private String mId;
 
-        private ComponentName mActivityComponent;
+        private ComponentName mActivity;
 
         private Icon mIcon;
 
         private int mTitleResId;
 
-        private String mTitle;
+        private CharSequence mTitle;
 
         private int mTextResId;
 
-        private String mText;
+        private CharSequence mText;
 
         private int mDisabledMessageResId;
 
-        private String mDisabledMessage;
+        private CharSequence mDisabledMessage;
 
         private Set<String> mCategories;
 
@@ -451,8 +465,8 @@ public final class ShortcutInfo implements Parcelable {
          * a hint to the launcher app about which launcher icon to associate this shortcut with.
          */
         @NonNull
-        public Builder setActivityComponent(@NonNull ComponentName activityComponent) {
-            mActivityComponent = Preconditions.checkNotNull(activityComponent, "activityComponent");
+        public Builder setActivity(@NonNull ComponentName activity) {
+            mActivity = Preconditions.checkNotNull(activity, "activity");
             return this;
         }
 
@@ -476,7 +490,7 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /** TODO Javadoc */
+        /** @hide */
         public Builder setTitleResId(int titleResId) {
             Preconditions.checkState(mTitle == null, "title already set");
             mTitleResId = titleResId;
@@ -496,7 +510,7 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /** TODO Javadoc */
+        /** @hide */
         public Builder setTextResId(int textResId) {
             Preconditions.checkState(mText == null, "text already set");
             mTextResId = textResId;
@@ -516,7 +530,7 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /** TODO Javadoc */
+        /** @hide */
         public Builder setDisabledMessageResId(int disabledMessageResId) {
             Preconditions.checkState(mDisabledMessage == null, "disabledMessage already set");
             mDisabledMessageResId = disabledMessageResId;
@@ -595,7 +609,7 @@ public final class ShortcutInfo implements Parcelable {
      * Return the package name of the creator application.
      */
     @NonNull
-    public String getPackageName() {
+    public String getPackage() {
         return mPackageName;
     }
 
@@ -606,11 +620,11 @@ public final class ShortcutInfo implements Parcelable {
      * <p>This has nothing to do with the activity that this shortcut will launch.  This is
      * a hint to the launcher app that on which launcher icon this shortcut should be shown.
      *
-     * @see Builder#setActivityComponent
+     * @see Builder#setActivity
      */
     @Nullable
-    public ComponentName getActivityComponent() {
-        return mActivityComponent;
+    public ComponentName getActivity() {
+        return mActivity;
     }
 
     /**
@@ -634,7 +648,7 @@ public final class ShortcutInfo implements Parcelable {
      * {@link #hasKeyFieldsOnly()} is true.
      */
     @Nullable
-    public String getTitle() {
+    public CharSequence getTitle() {
         return mTitle;
     }
 
@@ -647,7 +661,7 @@ public final class ShortcutInfo implements Parcelable {
      * Return the shortcut text.
      */
     @Nullable
-    public String getText() {
+    public CharSequence getText() {
         return mText;
     }
 
@@ -660,7 +674,7 @@ public final class ShortcutInfo implements Parcelable {
      * Return the message that should be shown when a shortcut in disabled state is launched.
      */
     @Nullable
-    public String getDisabledMessage() {
+    public CharSequence getDisabledMessage() {
         return mDisabledMessage;
     }
 
@@ -788,16 +802,65 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return whether a shortcut is published via manifest or not.  If true, the shortcut is
-     * immutable.
+     * Return whether a shortcut is published via AndroidManifest.xml or not.  If {@code true},
+     * it's also {@link #isImmutable()}.
+     *
+     * <p>When an app is upgraded and a shortcut is no longer published from AndroidManifest.xml,
+     * this will be set to {@code false}.  If the shortcut is not pinned, then it'll just disappear.
+     * However, if it's pinned, it will still be alive, and {@link #isEnabled()} will be
+     * {@code false} and {@link #isImmutable()} will be {@code true}.
+     *
+     * <p>NOTE this is whether a shortcut is published from the <b>current version's</b>
+     * AndroidManifest.xml.
      */
-    public boolean isFromManifest() {
-        return hasFlags(FLAG_FROM_MANIFEST);
+    public boolean isManifestShortcut() {
+        return hasFlags(FLAG_MANIFEST);
     }
 
-    /** Return whether a shortcut is disabled by publisher or not. */
-    public boolean isDisabled() {
+    /**
+     * @return true if pinned but neither dynamic nor manifest.
+     * @hide
+     */
+    public boolean isFloating() {
+        return isPinned() && !(isDynamic() || isManifestShortcut());
+    }
+
+    /** @hide */
+    public boolean isOriginallyFromManifest() {
+        return hasFlags(FLAG_IMMUTABLE);
+    }
+
+    /**
+     * Return if a shortcut is immutable, in which case it cannot be modified with any of
+     * {@link ShortcutManager} APIs.
+     *
+     * <p>All manifest shortcuts are immutable.  When a manifest shortcut is pinned and then
+     * disabled because the app is upgraded and its AndroidManifest.xml no longer publishes it,
+     * {@link #isManifestShortcut} returns {@code false}, but it is still immutable.
+     *
+     * <p>All shortcuts originally published via the {@link ShortcutManager} APIs
+     * are all mutable.
+     */
+    public boolean isImmutable() {
+        return hasFlags(FLAG_IMMUTABLE);
+    }
+
+    /**
+     * Returns {@code false} if a shortcut is disabled with
+     * {@link ShortcutManager#disableShortcuts}.
+     */
+    public boolean isEnabled() {
         return !hasFlags(FLAG_DISABLED);
+    }
+
+    /** @hide */
+    public boolean isAlive() {
+        return hasFlags(FLAG_PINNED) || hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_MANIFEST);
+    }
+
+    /** @hide */
+    public boolean usesQuota() {
+        return hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_MANIFEST);
     }
 
     /**
@@ -833,7 +896,7 @@ public final class ShortcutInfo implements Parcelable {
      * following fields are available.
      * <ul>
      *     <li>{@link #getId()}
-     *     <li>{@link #getPackageName()}
+     *     <li>{@link #getPackage()}
      *     <li>{@link #getLastChangedTimestamp()}
      *     <li>{@link #isDynamic()}
      *     <li>{@link #isPinned()}
@@ -888,19 +951,31 @@ public final class ShortcutInfo implements Parcelable {
         mBitmapPath = bitmapPath;
     }
 
+    /** @hide */
+    public void setDisabledMessageResId(int disabledMessageResId) {
+        mDisabledMessageResId = disabledMessageResId;
+        mDisabledMessage = null;
+    }
+
+    /** @hide */
+    public void setDisabledMessage(String disabledMessage) {
+        mDisabledMessage = disabledMessage;
+        mDisabledMessageResId = 0;
+    }
+
     private ShortcutInfo(Parcel source) {
         final ClassLoader cl = getClass().getClassLoader();
 
         mUserId = source.readInt();
         mId = source.readString();
         mPackageName = source.readString();
-        mActivityComponent = source.readParcelable(cl);
+        mActivity = source.readParcelable(cl);
         mIcon = source.readParcelable(cl);
-        mTitle = source.readString();
+        mTitle = source.readCharSequence();
         mTitleResId = source.readInt();
-        mText = source.readString();
+        mText = source.readCharSequence();
         mTextResId = source.readInt();
-        mDisabledMessage = source.readString();
+        mDisabledMessage = source.readCharSequence();
         mDisabledMessageResId = source.readInt();
         mIntent = source.readParcelable(cl);
         mIntentPersistableExtras = source.readParcelable(cl);
@@ -927,13 +1002,13 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeInt(mUserId);
         dest.writeString(mId);
         dest.writeString(mPackageName);
-        dest.writeParcelable(mActivityComponent, flags);
+        dest.writeParcelable(mActivity, flags);
         dest.writeParcelable(mIcon, flags);
-        dest.writeString(mTitle);
+        dest.writeCharSequence(mTitle);
         dest.writeInt(mTitleResId);
-        dest.writeString(mText);
+        dest.writeCharSequence(mText);
         dest.writeInt(mTextResId);
-        dest.writeString(mDisabledMessage);
+        dest.writeCharSequence(mDisabledMessage);
         dest.writeInt(mDisabledMessageResId);
 
         dest.writeParcelable(mIntent, flags);
@@ -991,18 +1066,43 @@ public final class ShortcutInfo implements Parcelable {
         sb.append("id=");
         sb.append(secure ? "***" : mId);
 
+        sb.append(", flags=0x");
+        sb.append(Integer.toHexString(mFlags));
+        sb.append(" [");
+        if (!isEnabled()) {
+            sb.append("X");
+        }
+        if (isImmutable()) {
+            sb.append("Im");
+        }
+        if (isManifestShortcut()) {
+            sb.append("M");
+        }
+        if (isDynamic()) {
+            sb.append("D");
+        }
+        if (isPinned()) {
+            sb.append("P");
+        }
+        if (hasIconFile()) {
+            sb.append("If");
+        }
+        if (hasIconResource()) {
+            sb.append("Ir");
+        }
+        if (hasKeyFieldsOnly()) {
+            sb.append("K");
+        }
+        if (hasStringResourcesResolved()) {
+            sb.append("Sr");
+        }
+        sb.append("]");
+
         sb.append(", packageName=");
         sb.append(mPackageName);
 
-        if (isDynamic()) {
-            sb.append(", dynamic");
-        }
-        if (isPinned()) {
-            sb.append(", pinned");
-        }
-
         sb.append(", activity=");
-        sb.append(mActivityComponent);
+        sb.append(mActivity);
 
         sb.append(", title=");
         sb.append(secure ? "***" : mTitle);
@@ -1040,35 +1140,6 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", extras=");
         sb.append(mExtras);
 
-        sb.append(", flags=");
-        sb.append(mFlags);
-        sb.append(" [");
-        if (hasFlags(FLAG_DISABLED)) {
-            sb.append("X");
-        }
-        if (hasFlags(FLAG_FROM_MANIFEST)) {
-            sb.append("M");
-        }
-        if (hasFlags(FLAG_DYNAMIC)) {
-            sb.append("D");
-        }
-        if (hasFlags(FLAG_PINNED)) {
-            sb.append("P");
-        }
-        if (hasFlags(FLAG_HAS_ICON_FILE)) {
-            sb.append("If");
-        }
-        if (hasFlags(FLAG_HAS_ICON_RES)) {
-            sb.append("Ir");
-        }
-        if (hasFlags(FLAG_KEY_FIELDS_ONLY)) {
-            sb.append("K");
-        }
-        if (hasFlags(FLAG_STRINGS_RESOLVED)) {
-            sb.append("S");
-        }
-        sb.append("]");
-
         if (includeInternalData) {
 
             sb.append(", iconRes=");
@@ -1084,16 +1155,16 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public ShortcutInfo(
-            @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
-            Icon icon, String title, int titleResId, String text, int textResId,
-            String disabledMessage, int disabledMessageResId, Set<String> categories, Intent intent,
-            PersistableBundle intentPersistableExtras,
+            @UserIdInt int userId, String id, String packageName, ComponentName activity,
+            Icon icon, CharSequence title, int titleResId, CharSequence text, int textResId,
+            CharSequence disabledMessage, int disabledMessageResId, Set<String> categories,
+            Intent intent, PersistableBundle intentPersistableExtras,
             int rank, PersistableBundle extras, long lastChangedTimestamp,
             int flags, int iconResId, String bitmapPath) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
-        mActivityComponent = activityComponent;
+        mActivity = activity;
         mIcon = icon;
         mTitle = title;
         mTitleResId = titleResId;

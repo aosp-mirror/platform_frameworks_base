@@ -24,6 +24,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
@@ -40,6 +41,8 @@ import java.util.function.Consumer;
 
 /**
  * User information used by {@link ShortcutService}.
+ *
+ * All methods should be guarded by {@code #mService.mLock}.
  */
 class ShortcutUser {
     private static final String TAG = ShortcutService.TAG;
@@ -230,19 +233,16 @@ class ShortcutUser {
         }
     }
 
-    /**
-     * Called when a package is updated.
-     */
-    public void handlePackageUpdated(@NonNull String packageName,
-            int newVersionCode) {
-        if (!mPackages.containsKey(packageName)) {
-            return;
+    public void handlePackageAddedOrUpdated(@NonNull String packageName) {
+        final boolean isNewApp = !mPackages.containsKey(packageName);
+
+        final ShortcutPackage shortcutPackage = getPackageShortcuts(packageName);
+
+        if (!shortcutPackage.handlePackageAddedOrUpdated(isNewApp)) {
+            if (isNewApp) {
+                mPackages.remove(packageName);
+            }
         }
-        final ShortcutPackage p = getPackageShortcutsIfExists(packageName);
-        if (p == null) {
-            return; // No need to instantiate ShortcutPackage.
-        }
-        p.handlePackageUpdated(newVersionCode);
     }
 
     public void attemptToRestoreIfNeededAndSave(ShortcutService s, @NonNull String packageName,

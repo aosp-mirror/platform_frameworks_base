@@ -246,9 +246,20 @@ public class ShortcutManagerTestUtils {
             reset(o);
         }
     }
+
+    public static <T> List<T> assertEmpty(List<T> list) {
+        assertEquals(0, list.size());
+        return list;
+    }
+
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
             String expectedExceptionMessageRegex, Runnable r) {
         assertExpectException("", expectedExceptionType, expectedExceptionMessageRegex, r);
+    }
+
+    public static void assertCannotUpdateImmutable(Runnable r) {
+        assertExpectException(
+                IllegalArgumentException.class, "may not be manipulated via APIs", r);
     }
 
     public static void assertDynamicShortcutCountExceeded(Runnable r) {
@@ -383,6 +394,46 @@ public class ShortcutManagerTestUtils {
         return actualShortcuts;
     }
 
+    public static List<ShortcutInfo> assertAllManifest(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.isManifestShortcut());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllNotManifest(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId(), s.isManifestShortcut());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllDisabled(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), !s.isEnabled());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllEnabled(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.isEnabled());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllImmutable(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.isImmutable());
+        }
+        return actualShortcuts;
+    }
+
     public static List<ShortcutInfo> assertAllStringsResolved(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
@@ -398,6 +449,7 @@ public class ShortcutManagerTestUtils {
 
     public static void assertPinnedOnly(ShortcutInfo si) {
         assertFalse(si.isDynamic());
+        assertFalse(si.isManifestShortcut());
         assertTrue(si.isPinned());
     }
 

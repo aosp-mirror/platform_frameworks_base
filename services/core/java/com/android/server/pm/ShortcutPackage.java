@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
@@ -28,6 +29,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -44,6 +46,11 @@ import java.util.function.Predicate;
 
 /**
  * Package information used by {@link ShortcutService}.
+ * User information used by {@link ShortcutService}.
+ *
+ * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
+ *
+ * TODO Max dynamic shortcuts cap should be per activity.
  */
 class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -55,7 +62,6 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG_CATEGORIES = "categories";
 
     private static final String ATTR_NAME = "name";
-    private static final String ATTR_DYNAMIC_COUNT = "dynamic-count";
     private static final String ATTR_CALL_COUNT = "call-count";
     private static final String ATTR_LAST_RESET = "last-reset";
     private static final String ATTR_ID = "id";
@@ -82,11 +88,6 @@ class ShortcutPackage extends ShortcutPackageItem {
      * All the shortcuts from the package, keyed on IDs.
      */
     final private ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
-
-    /**
-     * # of dynamic shortcuts.
-     */
-    private int mDynamicShortcutCount = 0;
 
     /**
      * # of times the package has called rate-limited APIs.
@@ -129,19 +130,19 @@ class ShortcutPackage extends ShortcutPackageItem {
      * exists (as opposed to Launcher trying to fetch shortcuts from a non-existent package), so
      * we do some initialization for the package.
      */
-    private void onShortcutPublish() {
+    private void ensurePackageVersionInfo() {
         // Make sure we have the version code for the app.  We need the version code in
         // handlePackageUpdated().
         if (getPackageInfo().getVersionCode() < 0) {
             final ShortcutService s = mShortcutUser.mService;
 
-            final int versionCode = s.getApplicationVersionCode(getPackageName(), getOwnerUserId());
-            if (ShortcutService.DEBUG) {
-                Slog.d(TAG, String.format("Package %s version = %d", getPackageName(),
-                        versionCode));
-            }
-            if (versionCode >= 0) {
-                getPackageInfo().setVersionCode(versionCode);
+            final PackageInfo pi = s.getPackageInfo(getPackageName(), getOwnerUserId());
+            if (pi != null) {
+                if (ShortcutService.DEBUG) {
+                    Slog.d(TAG, String.format("Package %s version = %d", getPackageName(),
+                            pi.versionCode));
+                }
+                getPackageInfo().updateVersionInfo(pi);
                 s.scheduleSaveUser(getOwnerUserId());
             }
         }
@@ -168,17 +169,42 @@ class ShortcutPackage extends ShortcutPackageItem {
         return mShortcuts.get(id);
     }
 
-    private ShortcutInfo deleteShortcut(@NonNull String id) {
+    private void ensureNotImmutable(@Nullable ShortcutInfo shortcut) {
+        if (shortcut != null && shortcut.isImmutable()) {
+            throw new IllegalArgumentException(
+                    "Manifest shortcut ID=" + shortcut.getId()
+                            + " may not be manipulated via APIs");
+        }
+    }
+
+    private void ensureNotImmutable(@NonNull String id) {
+        ensureNotImmutable(mShortcuts.get(id));
+    }
+
+    public void ensureImmutableShortcutsNotIncludedWithIds(@NonNull List<String> shortcutIds) {
+        for (int i = shortcutIds.size() - 1; i >= 0; i--) {
+            ensureNotImmutable(shortcutIds.get(i));
+        }
+    }
+
+    public void ensureImmutableShortcutsNotIncluded(@NonNull List<ShortcutInfo> shortcuts) {
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            ensureNotImmutable(shortcuts.get(i).getId());
+        }
+    }
+
+    private ShortcutInfo deleteShortcutInner(@NonNull String id) {
         final ShortcutInfo shortcut = mShortcuts.remove(id);
         if (shortcut != null) {
             mShortcutUser.mService.removeIcon(getPackageUserId(), shortcut);
-            shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED);
+            shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
+                    | ShortcutInfo.FLAG_MANIFEST);
         }
         return shortcut;
     }
 
-    void addShortcut(@NonNull ShortcutInfo newShortcut) {
-        deleteShortcut(newShortcut.getId());
+    private void addShortcutInner(@NonNull ShortcutInfo newShortcut) {
+        deleteShortcutInner(newShortcut.getId());
         mShortcutUser.mService.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
         mShortcuts.put(newShortcut.getId(), newShortcut);
     }
@@ -188,39 +214,41 @@ class ShortcutPackage extends ShortcutPackageItem {
      *
      * It checks the max number of dynamic shortcuts.
      */
-    public void addDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
+    public void addOrUpdateDynamicShortcut(@NonNull ShortcutInfo newShortcut) {
 
-        onShortcutPublish();
+        Preconditions.checkArgument(newShortcut.isEnabled(),
+                "add/setDynamicShortcuts() cannot publish disabled shortcuts");
+
+        ensurePackageVersionInfo();
 
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
 
         final boolean wasPinned;
-        final int newDynamicCount;
 
         if (oldShortcut == null) {
             wasPinned = false;
-            newDynamicCount = mDynamicShortcutCount + 1; // adding a dynamic shortcut.
         } else {
+            // It's an update case.
+            // Make sure the target is updatable. (i.e. should be mutable.)
+            oldShortcut.ensureUpdatableWith(newShortcut);
+
             wasPinned = oldShortcut.isPinned();
-            if (oldShortcut.isDynamic()) {
-                newDynamicCount = mDynamicShortcutCount; // not adding a dynamic shortcut.
-            } else {
-                newDynamicCount = mDynamicShortcutCount + 1; // adding a dynamic shortcut.
+            if (!oldShortcut.isEnabled()) {
+                newShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
             }
         }
 
-        // Make sure there's still room.
-        mShortcutUser.mService.enforceMaxDynamicShortcuts(newDynamicCount);
+        // TODO Check max dynamic count.
+        // mShortcutUser.mService.enforceMaxDynamicShortcuts(newDynamicCount);
 
         // Okay, make it dynamic and add.
         if (wasPinned) {
             newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
         }
 
-        addShortcut(newShortcut);
-        mDynamicShortcutCount = newDynamicCount;
+        addShortcutInner(newShortcut);
     }
 
     /**
@@ -232,7 +260,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
 
-            if (si.isPinned() || si.isDynamic()) continue;
+            if (si.isAlive()) continue;
 
             if (removeList == null) {
                 removeList = new ArrayList<>();
@@ -241,7 +269,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
         if (removeList != null) {
             for (int i = removeList.size() - 1; i >= 0; i--) {
-                deleteShortcut(removeList.get(i));
+                deleteShortcutInner(removeList.get(i));
             }
         }
     }
@@ -250,29 +278,68 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Remove all dynamic shortcuts.
      */
     public void deleteAllDynamicShortcuts() {
+        boolean changed = false;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            mShortcuts.valueAt(i).clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (si.isDynamic()) {
+                changed = true;
+                si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+            }
         }
-        removeOrphans();
-        mDynamicShortcutCount = 0;
+        if (changed) {
+            removeOrphans();
+        }
     }
 
     /**
      * Remove a dynamic shortcut by ID.
      */
     public void deleteDynamicWithId(@NonNull String shortcutId) {
+        deleteOrDisableWithId(shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false);
+    }
+
+    public void disableWithId(@NonNull String shortcutId, String disabledMessage,
+            int disabledMessageResId, boolean overrideImmutable) {
+        final ShortcutInfo disabled = deleteOrDisableWithId(shortcutId, /* disable =*/ true,
+                overrideImmutable);
+
+        if (disabled != null) {
+            if (disabledMessage != null) {
+                disabled.setDisabledMessage(disabledMessage);
+            } else if (disabledMessageResId != 0) {
+                disabled.setDisabledMessageResId(disabledMessageResId);
+            }
+        }
+    }
+
+    @Nullable
+    private ShortcutInfo deleteOrDisableWithId(@NonNull String shortcutId, boolean disable,
+            boolean overrideImmutable) {
         final ShortcutInfo oldShortcut = mShortcuts.get(shortcutId);
 
-        if (oldShortcut == null) {
-            return;
+        if (oldShortcut == null || !oldShortcut.isEnabled()) {
+            return null; // Doesn't exist or already disabled.
         }
-        if (oldShortcut.isDynamic()) {
-            mDynamicShortcutCount--;
+        if (!overrideImmutable) {
+            ensureNotImmutable(oldShortcut);
         }
         if (oldShortcut.isPinned()) {
-            oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+            oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
+            if (disable) {
+                oldShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
+            }
+            return oldShortcut;
         } else {
-            deleteShortcut(shortcutId);
+            deleteShortcutInner(shortcutId);
+            return null;
+        }
+    }
+
+    public void enableWithId(@NonNull String shortcutId) {
+        final ShortcutInfo shortcut = mShortcuts.get(shortcutId);
+        if (shortcut != null) {
+            ensureNotImmutable(shortcut);
+            shortcut.clearFlags(ShortcutInfo.FLAG_DISABLED);
         }
     }
 
@@ -430,22 +497,19 @@ class ShortcutPackage extends ShortcutPackageItem {
         for (int i = 0; i < mShortcuts.size(); i++) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
 
-            // If it's called by non-launcher (i.e. publisher, always include -> true.
-            // Otherwise, only include non-dynamic pinned one, if the calling launcher has pinned
-            // it.
+            // Need to adjust PINNED flag depending on the caller.
+            // Basically if the caller is a launcher (callingLauncher != null) and the launcher
+            // isn't pinning it, then we need to clear PINNED for this caller.
             final boolean isPinnedByCaller = (callingLauncher == null)
                     || ((pinnedByCallerSet != null) && pinnedByCallerSet.contains(si.getId()));
-            if (!si.isDynamic()) {
-                if (!si.isPinned()) {
-                    s.wtf("Shortcut not pinned: package " + getPackageName()
-                            + ", user=" + getPackageUserId() + ", id=" + si.getId());
-                    continue;
-                }
+
+            if (si.isFloating()) {
                 if (!isPinnedByCaller) {
                     continue;
                 }
             }
             final ShortcutInfo clone = si.clone(cloneFlag);
+
             // Fix up isPinned for the caller.  Note we need to do it before the "test" callback,
             // since it may check isPinned.
             if (!isPinnedByCaller) {
@@ -486,32 +550,81 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Called when the package is updated.  If there are shortcuts with resource icons, update
-     * their timestamps.
+     * Called when the package is updated or added.
+     *
+     * Add case:
+     * - Publish manifest shortcuts.
+     *
+     * Update case:
+     * - Re-publish manifest shortcuts.
+     * - If there are shortcuts with resources (icons or strings), update their timestamps.
+     *
+     * @return TRUE if any shortcuts have been changed.
      */
-    public void handlePackageUpdated(int newVersionCode) {
-        if (getPackageInfo().getVersionCode() >= newVersionCode) {
-            // Version hasn't changed; nothing to do.
-            return;
-        }
-        if (ShortcutService.DEBUG) {
-            Slog.d(TAG, String.format("Package %s updated, version %d -> %d", getPackageName(),
-                    getPackageInfo().getVersionCode(), newVersionCode));
+    public boolean handlePackageAddedOrUpdated(boolean isNewApp) {
+        final PackageInfo pi = mShortcutUser.mService.getPackageInfo(
+                getPackageName(), getPackageUserId());
+        if (pi == null) {
+            return false; // Shouldn't happen.
         }
 
-        getPackageInfo().setVersionCode(newVersionCode);
+        if (!isNewApp) {
+            // Make sure the version code or last update time has changed.
+            // Otherwise, nothing to do.
+            if (getPackageInfo().getVersionCode() >= pi.versionCode
+                    && getPackageInfo().getLastUpdateTime() >= pi.lastUpdateTime) {
+                return false;
+            }
+        }
+
+        // Now prepare to publish manifest shortcuts.
+        List<ShortcutInfo> newManifestShortcutList = null;
+        try {
+            newManifestShortcutList = ShortcutParser.parseShortcuts(mShortcutUser.mService,
+                    getPackageName(), getPackageUserId());
+        } catch (IOException|XmlPullParserException e) {
+            Slog.e(TAG, "Failed to load shortcuts from AndroidManifest.xml.", e);
+        }
+        final int manifestShortcutSize = newManifestShortcutList == null ? 0
+                : newManifestShortcutList.size();
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Package %s has %d manifest shortcut(s)",
+                    getPackageName(), manifestShortcutSize));
+        }
+        if (isNewApp && (manifestShortcutSize == 0)) {
+            // If it's a new app, and it doesn't have manifest shortcuts, then nothing to do.
+
+            // If it's an update, then it may already have manifest shortcuts, which need to be
+            // disabled.
+            return false;
+        }
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Package %s %s, version %d -> %d", getPackageName(),
+                    (isNewApp ? "added" : "updated"),
+                    getPackageInfo().getVersionCode(), pi.versionCode));
+        }
+
+        getPackageInfo().updateVersionInfo(pi);
 
         final ShortcutService s = mShortcutUser.mService;
 
         boolean changed = false;
-        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
-            final ShortcutInfo si = mShortcuts.valueAt(i);
 
-            if (si.hasAnyResources()) {
-                changed = true;
-                si.setTimestamp(s.injectCurrentTimeMillis());
+        // For existing shortcuts, update timestamps if they have any resources.
+        if (!isNewApp) {
+            for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+                final ShortcutInfo si = mShortcuts.valueAt(i);
+
+                if (si.hasAnyResources()) {
+                    changed = true;
+                    si.setTimestamp(s.injectCurrentTimeMillis());
+                }
             }
         }
+
+        // (Re-)publish manifest shortcut.
+        changed |= publishManifestShortcuts(newManifestShortcutList);
+
         if (changed) {
             // This will send a notification to the launcher, and also save .
             s.packageShortcutsChanged(getPackageName(), getPackageUserId());
@@ -519,6 +632,97 @@ class ShortcutPackage extends ShortcutPackageItem {
             // Still save the version code.
             s.scheduleSaveUser(getPackageUserId());
         }
+        return changed;
+    }
+
+    private boolean publishManifestShortcuts(List<ShortcutInfo> newManifestShortcutList) {
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format(
+                    "Package %s: publishing manifest shortcuts", getPackageName()));
+        }
+        boolean changed = false;
+
+        // TODO: Check dynamic count
+
+        // TODO: Kick out dynamic if too many
+
+        // Keep the previous IDs.
+        ArraySet<String> toDisableList = null;
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+
+            if (si.isManifestShortcut()) {
+                if (toDisableList == null) {
+                    toDisableList = new ArraySet<>();
+                }
+                toDisableList.add(si.getId());
+            }
+        }
+
+        // Publish new ones.
+        if (newManifestShortcutList != null) {
+            final int newListSize = newManifestShortcutList.size();
+
+            for (int i = 0; i < newListSize; i++) {
+                changed = true;
+
+                final ShortcutInfo newShortcut = newManifestShortcutList.get(i);
+                final boolean newDisabled = !newShortcut.isEnabled();
+
+                final String id =  newShortcut.getId();
+                final ShortcutInfo oldShortcut = mShortcuts.get(id);
+
+                boolean wasPinned = false;
+
+                if (oldShortcut != null) {
+                    if (!oldShortcut.isOriginallyFromManifest()) {
+                        Slog.e(TAG, "Shortcut with ID=" + newShortcut.getId()
+                                + " exists but is not from AndroidManifest.xml, not updating.");
+                        continue;
+                    }
+                    // Take over the pinned flag.
+                    if (oldShortcut.isPinned()) {
+                        wasPinned = true;
+                        newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
+                    }
+                }
+                if (newDisabled && !wasPinned) {
+                    // If the shortcut is disabled, and it was *not* pinned, then this
+                    // just doesn't have to be published.
+                    // Just keep it in toDisableList, so the previous one would be removed.
+                    continue;
+                }
+                // TODO: Check dynamic count
+
+                // Note even if enabled=false, we still need to update all fields, so do it
+                // regardless.
+                addShortcutInner(newShortcut); // This will clean up the old one too.
+
+                if (!newDisabled && toDisableList != null) {
+                    // Still alive, don't remove.
+                    toDisableList.remove(id);
+                }
+            }
+        }
+
+        // Disable the previous manifest shortcuts that are no longer in the manifest.
+        if (toDisableList != null) {
+            if (ShortcutService.DEBUG) {
+                Slog.d(TAG, String.format(
+                        "Package %s: disabling %d stale shortcuts", getPackageName(),
+                        toDisableList.size()));
+            }
+            for (int i = toDisableList.size() - 1; i >= 0; i--) {
+                changed = true;
+
+                final String id = toDisableList.valueAt(i);
+
+                disableWithId(id, /* disable message =*/ null, /* disable message resid */ 0,
+                        /* overrideImmutable=*/ true);
+            }
+            removeOrphans();
+        }
+        return changed;
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -597,7 +801,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         out.startTag(null, TAG_ROOT);
 
         ShortcutService.writeAttr(out, ATTR_NAME, getPackageName());
-        ShortcutService.writeAttr(out, ATTR_DYNAMIC_COUNT, mDynamicShortcutCount);
         ShortcutService.writeAttr(out, ATTR_CALL_COUNT, mApiCallCount);
         ShortcutService.writeAttr(out, ATTR_LAST_RESET, mLastResetTime);
         getPackageInfo().saveToXml(out);
@@ -619,7 +822,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         out.startTag(null, TAG_SHORTCUT);
         ShortcutService.writeAttr(out, ATTR_ID, si.getId());
         // writeAttr(out, "package", si.getPackageName()); // not needed
-        ShortcutService.writeAttr(out, ATTR_ACTIVITY, si.getActivityComponent());
+        ShortcutService.writeAttr(out, ATTR_ACTIVITY, si.getActivity());
         // writeAttr(out, "icon", si.getIcon());  // We don't save it.
         ShortcutService.writeAttr(out, ATTR_TITLE, si.getTitle());
         ShortcutService.writeAttr(out, ATTR_TITLE_RES_ID, si.getTitleResId());
@@ -670,8 +873,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutPackage ret = new ShortcutPackage(shortcutUser,
                 shortcutUser.getUserId(), packageName);
 
-        ret.mDynamicShortcutCount =
-                ShortcutService.parseIntAttribute(parser, ATTR_DYNAMIC_COUNT);
         ret.mApiCallCount =
                 ShortcutService.parseIntAttribute(parser, ATTR_CALL_COUNT);
         ret.mLastResetTime =
