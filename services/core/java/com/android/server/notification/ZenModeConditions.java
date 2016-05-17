@@ -72,14 +72,17 @@ public class ZenModeConditions implements ConditionProviders.Callback {
             evaluateRule(automaticRule, current, processSubscriptions);
             updateSnoozing(automaticRule);
         }
-        final int N = mSubscriptions.size();
-        for (int i = N - 1; i >= 0; i--) {
-            final Uri id = mSubscriptions.keyAt(i);
-            final ComponentName component = mSubscriptions.valueAt(i);
-            if (processSubscriptions) {
-                if (!current.contains(id)) {
-                    mConditionProviders.unsubscribeIfNecessary(component, id);
-                    mSubscriptions.removeAt(i);
+
+        synchronized (mSubscriptions) {
+            final int N = mSubscriptions.size();
+            for (int i = N - 1; i >= 0; i--) {
+                final Uri id = mSubscriptions.keyAt(i);
+                final ComponentName component = mSubscriptions.valueAt(i);
+                if (processSubscriptions) {
+                    if (!current.contains(id)) {
+                        mConditionProviders.unsubscribeIfNecessary(component, id);
+                        mSubscriptions.removeAt(i);
+                    }
                 }
             }
         }
@@ -145,7 +148,9 @@ public class ZenModeConditions implements ConditionProviders.Callback {
         }
         if (processSubscriptions) {
             if (mConditionProviders.subscribeIfNecessary(rule.component, rule.conditionId)) {
-                mSubscriptions.put(rule.conditionId, rule.component);
+                synchronized (mSubscriptions) {
+                    mSubscriptions.put(rule.conditionId, rule.component);
+                }
             } else {
                 if (DEBUG) Log.d(TAG, "zmc failed to subscribe");
             }
