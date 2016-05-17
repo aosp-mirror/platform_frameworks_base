@@ -3273,7 +3273,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title":"Join the Android for Work DevHub",
     "titleFriendly":"",
     "summary":"The Android for Work DevHub is a place to help developers keep up with Android in the workplace.",
-    "url":"https://connect.googleforwork.com/community/applicants/android/isv",
+    "url":"https://www.google.com/work/android/developers/applyDevHub/",
     "group":"",
     "keywords": ["work", "enterprise", "isv", "devhub"],
     "tags": [],
