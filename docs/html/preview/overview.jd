@@ -153,7 +153,7 @@ page.tags="preview", "developer", "android"
 <ul>
   <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong> (initial release, alpha)</li>
   <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong> (incremental update, alpha)</li>
-  <li><strong>Preview 3</strong> (incremental update, beta)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp3">Preview 3</a></strong> (incremental update, beta)</li>
   <li><strong>Preview 4</strong> (final APIs and official SDK, Play publishing)</li>
   <li><strong>Preview 5</strong> (near-final system images for final testing)</li>
   <li><strong>Final release</strong> to AOSP and ecosystem</li>
