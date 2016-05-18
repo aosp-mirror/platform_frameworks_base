@@ -1481,7 +1481,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INSTALL_EPHEMERAL_PACKAGE
             = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
@@ -1495,7 +1494,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String ACTION_RESOLVE_EPHEMERAL_PACKAGE
             = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
@@ -3764,14 +3762,12 @@ public class Intent implements Parcelable, Cloneable {
      * A {@link IntentSender} to start after ephemeral installation success.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_EPHEMERAL_SUCCESS = "android.intent.extra.EPHEMERAL_SUCCESS";
 
     /**
      * A {@link IntentSender} to start after ephemeral installation failure.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_EPHEMERAL_FAILURE = "android.intent.extra.EPHEMERAL_FAILURE";
 
     /**
