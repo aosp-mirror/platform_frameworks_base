@@ -328,10 +328,11 @@ class PackageDexOptimizer {
 
         for (String apkPath : pkg.getAllCodePathsExcludingResourceOnly()) {
             try {
-                apkPath = new File(apkPath).getCanonicalPath();
+                apkPath = PackageManagerServiceUtils.realpath(new File(apkPath));
             } catch (IOException e) {
                 // Log an error but continue without it.
                 Slog.w(TAG, "Failed to get canonical path", e);
+                continue;
             }
             String useMarker = apkPath.replace('/', '@');
             final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
