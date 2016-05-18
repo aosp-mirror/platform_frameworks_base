@@ -1835,6 +1835,10 @@ i
         <enum name="KEYCODE_CUT" value="277" />
         <enum name="KEYCODE_COPY" value="278" />
         <enum name="KEYCODE_PASTE" value="279" />
+        <enum name="KEYCODE_FP_NAV_UP" value="280" />
+        <enum name="KEYCODE_FP_NAV_DOWN" value="281" />
+        <enum name="KEYCODE_FP_NAV_LEFT" value="282" />
+        <enum name="KEYCODE_FP_NAV_RIGHT" value="283" />
     </attr>
 
     <!-- ***************************************************************** -->
