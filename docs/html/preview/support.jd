@@ -76,9 +76,7 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 
   <li>Some apps <strong>may not function as expected</strong> on the new
-  platform version. This includes Google’s apps as well as other apps. You can
-  let developers know about app compatibility issues using the <a href=
-  "{@docRoot}preview/bugs">N Developer Preview issue tracker</a>.
+  platform version. This includes Google’s apps as well as other apps.
   </li>
 
   <li>Developer Preview 3 is <strong>Compatibility Test Suite (CTS)
