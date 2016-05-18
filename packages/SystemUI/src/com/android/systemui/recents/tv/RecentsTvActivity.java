@@ -335,12 +335,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        updatePipUI();
-    }
-
-    @Override
     public void onEnterAnimationComplete() {
         super.onEnterAnimationComplete();
         if(mLaunchedFromHome) {
@@ -391,6 +385,8 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         } else {
             mTaskStackHorizontalGridView.setSelectedPosition(0);
         }
+
+        updatePipUI();
     }
 
     @Override
