@@ -61,6 +61,7 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"ဤပရင်တာ အကြောင်း ပိုမိုလေ့လာပါ"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"ဖိုင်ဖန်တီး၍မရပါ"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"အချို့ပုံနှိပ်ဝန်ဆောင်မှုများကို ပိတ်ထားပါသည်"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"စာထုတ်စက်များကို ရှာနေပါသည်"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"ပုံနှိပ်ထုတ်ယူရေး ဝန်ဆောင်မှုများ ဖွင့်မထားပါ"</string>
@@ -80,7 +81,7 @@
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ကို ပယ်ဖျက်နေပါသည်"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"စာထုတ်စက်မှ အမှား <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ကိုစာထုတ်စက်ကငြင်းလိုက်သည်"</string>
-    <string name="cancel" msgid="4373674107267141885">"ပယ်ဖျက်"</string>
+    <string name="cancel" msgid="4373674107267141885">"ဖျက်သိမ်းရန်"</string>
     <string name="restart" msgid="2472034227037808749">"အစက ပြန်စရန်"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"စာထုတ်စက်နဲ့ ဆက်သွယ်ထားမှု မရှိပါ"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"အကြောင်းအရာ မသိရှိ"</string>

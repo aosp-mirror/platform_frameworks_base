@@ -33,8 +33,8 @@
     <string name="pages_range_example" msgid="8558694453556945172">"દા.ત. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"પ્રિન્ટ પૂર્વાવલોકન"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"પૂર્વાવલોકન માટે PDF દર્શક ઇન્સ્ટોલ કરો"</string>
-    <string name="printing_app_crashed" msgid="854477616686566398">"પ્રિન્ટીંગ એપ્લિકેશન ક્રેશ થઈ"</string>
-    <string name="generating_print_job" msgid="3119608742651698916">"પ્રિન્ટ જોબ બનાવી રહ્યું છે"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"પ્રિન્ટીંગ ઍપ્લિકેશન ક્રેશ થઈ"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"છાપ કાર્ય બનાવી રહ્યું છે"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"PDF તરીકે સાચવો"</string>
     <string name="all_printers" msgid="5018829726861876202">"બધા પ્રિન્ટર્સ…"</string>
     <string name="print_dialog" msgid="32628687461331979">"પ્રિન્ટ સંવાદ"</string>
@@ -61,6 +61,7 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"આ પ્રિન્ટર વિશે વધુ માહિતી"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"ફાઇલ બનાવી શક્યાં નથી"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"કેટલીક છાપવાની સેવાઓ અક્ષમ કરેલ છે"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"પ્રિન્ટર્સ માટે શોધી રહ્યું છે"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"કોઈ છાપ સેવાઓ સક્ષમ કરેલ નથી"</string>
