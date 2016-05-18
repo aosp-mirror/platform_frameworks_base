@@ -261,9 +261,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">nemo-nvd36h-factory-fb7a294a.tgz</a><br>
-          MD5: 9dd0572fdab02e474ea9c761d1d2b70b<br>
-          SHA-1: fb7a294a91ec71280262e7a1a60fcf940131e6c3
+        <td><a href="#top" onclick="onDownload(this)">nemo-nvd36i-factory-9cdd2ac0.tgz</a><br>
+          MD5: b33ba8e59780fbe5c83d8936b108640f<br>
+          SHA-1: 9cdd2ac01f2976cafe5a21958298dac159b7a325
         </td>
       </tr>
 
@@ -302,9 +302,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd36h-factory-fd1f1582.tgz</a><br>
-          MD5: b54f4ff5ebcd3d50d6d1bfde93056c2a<br>
-          SHA-1: fd1f158257dba0999738ca7e0bfacec97afe35df
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd36i-factory-2cbe5080.tgz</a><br>
+          MD5: ccc972cdc33cba778a2f624066ef5713<br>
+          SHA-1: 2cbe5080ded060ce43ba65ff27e2290b28981634
         </td>
       </tr>
       <tr id="sturgeon-non-preview">
