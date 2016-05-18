@@ -111,6 +111,7 @@ public final class KeyboardShortcuts {
 
     private Dialog mKeyboardShortcutsDialog;
     private KeyCharacterMap mKeyCharacterMap;
+    private KeyCharacterMap mBackupKeyCharacterMap;
 
     private KeyboardShortcuts(Context context) {
         this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
@@ -326,6 +327,7 @@ public final class KeyboardShortcuts {
      */
     private void retrieveKeyCharacterMap(int deviceId) {
         final InputManager inputManager = InputManager.getInstance();
+        mBackupKeyCharacterMap = inputManager.getInputDevice(-1).getKeyCharacterMap();
         if (deviceId != -1) {
             final InputDevice inputDevice = inputManager.getInputDevice(deviceId);
             if (inputDevice != null) {
@@ -343,8 +345,8 @@ public final class KeyboardShortcuts {
                 return;
             }
         }
-        final InputDevice inputDevice = inputManager.getInputDevice(-1);
-        mKeyCharacterMap = inputDevice.getKeyCharacterMap();
+        // Fall back to -1, the virtual keyboard.
+        mKeyCharacterMap = mBackupKeyCharacterMap;
     }
 
     private void showKeyboardShortcuts(int deviceId) {
@@ -675,7 +677,12 @@ public final class KeyboardShortcuts {
             if (displayLabel != 0) {
                 displayLabelString = String.valueOf(displayLabel);
             } else {
-                return null;
+                displayLabel = mBackupKeyCharacterMap.getDisplayLabel(info.getKeycode());
+                if (displayLabel != 0) {
+                    displayLabelString = String.valueOf(displayLabel);
+                } else {
+                    return null;
+                }
             }
         }
 
