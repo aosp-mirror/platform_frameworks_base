@@ -2484,4 +2484,7 @@
     <string-array translatable="false" name="config_defaultPinnerServiceFiles">
     </string-array>
 
+    <!-- Component that is the default launcher when demo mode is enabled. -->
+    <string name="config_demoModeLauncherComponent"></string>
+
 </resources>
