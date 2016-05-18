@@ -7609,10 +7609,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         for (String path : pkg.getAllCodePathsExcludingResourceOnly()) {
             try {
-                path = new File(path).getCanonicalPath();
+                path = PackageManagerServiceUtils.realpath(new File(path));
             } catch (IOException e) {
                 // TODO: Should we return early here ?
                 Slog.w(TAG, "Failed to get canonical path", e);
+                continue;
             }
 
             final String useMarker = path.replace('/', '@');
