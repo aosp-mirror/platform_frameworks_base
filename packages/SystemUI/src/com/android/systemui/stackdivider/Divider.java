@@ -169,10 +169,12 @@ public class Divider extends SystemUI {
                 if (mAdjustedForIme != adjustedForIme) {
                     mAdjustedForIme = adjustedForIme;
                     updateTouchable();
-                    if (animDuration > 0) {
-                        mView.setAdjustedForIme(adjustedForIme, animDuration);
-                    } else {
-                        mView.setAdjustedForIme(adjustedForIme);
+                    if (!mMinimized) {
+                        if (animDuration > 0) {
+                            mView.setAdjustedForIme(adjustedForIme, animDuration);
+                        } else {
+                            mView.setAdjustedForIme(adjustedForIme);
+                        }
                     }
                 }
             });
