@@ -12,6 +12,13 @@ page.image=images/cards/card-n-apis_2x.png
   <h2>Key developer features</h2>
   <ol>
       <ul style="list-style-type:none;">
+        <li><a href="#ui">User Interface Improvements</a>
+          <ol>
+            <li><a href="#complications">Complications</a></li>
+            <li><a href="#drawers">Navigation and Action Drawers</a></li>
+          </ol>
+        </li>
+
         <li><a href="#notify">Notifications and Input</a>
           <ol>
             <li><a href="#expanded">Expanded Notification</a></li>
@@ -23,17 +30,12 @@ page.image=images/cards/card-n-apis_2x.png
             <li><a href="#imf">Input Method Framework</a></li>
           </ol>
         </li>
+
         <li><a href="#stand-alone">Standalone Devices</a>
           <ol>
             <li><a href="#wear-apk">Wear-Specific APKs</a></li>
             <li><a href="#network">Network Access</a></li>
             <li><a href="#auth">Authentication</a></li>
-          </ol>
-        </li>
-        <li><a href="#ui">User Interface Improvements</a>
-          <ol>
-            <li><a href="#complications">Complications</a></li>
-            <li><a href="#drawers">Navigation and Action Drawers</a></li>
           </ol>
         </li>
       </ol>
@@ -48,6 +50,73 @@ page.image=images/cards/card-n-apis_2x.png
   highlight some of the new features for Wear developers.
 </p>
 
+
+<h2 id="ui">User Interface Improvements</h2>
+
+<p>The preview introduces powerful additions to the user interface, opening up
+exciting possibilities to developers.
+A complication is any feature in a watch face that displays more than hours and
+minutes. With the Complications API,
+ watch faces can display extra information and separate apps can expose complication
+  data.
+The navigation and action drawers provide users with new ways to interact with apps.
+</p>
+
+
+<h3 id="complications">Complications</h3>
+<img src="{@docRoot}wear/preview/images/complications-main-image.png"
+  height="320" style="float:right;margin:10px 0 0 40px" />
+
+<p>
+  A <a href=
+  "https://en.wikipedia.org/wiki/Complication_(horology)">complication</a> is a
+  feature of a watch face that displays more than hours and minutes, such as a
+  battery indicator or a step counter. The Complications API helps watch face
+  developers create these features visual features and data connections they
+  require.
+</p>
+
+<p>
+  Watch faces that use this API can display extra information without needing
+  code for getting the underlying data. Data providers can supply data to any
+  watch face using the API.
+</p>
+
+<p>For examples of how to use this feature,
+see <a href="{@docRoot}wear/preview/features/complications.html">
+ Watch Face Complications</a>.
+</p>
+
+
+<h3 id="drawers">Navigation and Action drawers</h3>
+
+<p>Wear 2.0 introduces two new widgets, navigation drawer and action drawer. These
+ widgets give your users new ways to interact with your app. The navigation drawer
+  appears at the top of the screen and allows users to navigate between app views.
+   The  action drawer appears at the bottom of the screen and allows users to choose
+    from a list of actions associated with the current usage context.  These drawers
+     are accessible to users when they edge swipe from the top or bottom of the
+     screen; they peek when users scroll in an opposite direction.
+</p>
+
+<div class="cols">
+  <div class="col-2of6">
+    <img src="{@docRoot}wear/preview/images/nav_drawer.gif"
+      height="240" alt="" style="padding:.5em">
+  </div>
+  <div class="col-2of6">
+    <img src="{@docRoot}wear/preview/images/action_drawer.gif"
+      height="240" alt="" style="padding:.5em;">
+  </div>
+</div>
+
+<p>
+  To learn how to add these widgets to your app, see
+  <a href="{@docRoot}wear/preview/features/ui-nav-actions.html">
+  Wear Navigation and Actions</a>.
+</p>
+
+
 <h2 id="notify">Notifications and Input</h2>
 
 <p>In Wear 2.0, we’ve redesigned the key experiences on the watch to be even more
@@ -56,16 +125,21 @@ page.image=images/cards/card-n-apis_2x.png
   <a href="{@docRoot}wear/preview/features/notifications.html">Notification Changes in Wear 2.0</a>.
 
 
-<img src="{@docRoot}wear/preview/images/expanded_diagram.png" height="240" style="float:right;margin:10px 0 0 40px" />
+<img src="{@docRoot}wear/preview/images/expanded_diagram.png" height="340"
+  style="float:left;margin:10px 20px 0 0" />
 <h3 id="expanded">Expanded notifications</h3>
 
-<p>When a user taps on a notification that is bridged from the phone to
-the watch or that lacks a <a href="{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContent
-Intent(android.app.PendingIntent)">{@code contentIntent}</a>, the user will be
-taken to the expanded view of that notification. When you
-<a href="{@docRoot}training/wearables/notifications/pages.html">specify additional
- content pages</a> and actions for a notification, those are available to the user
-  within the expanded notification. Each expanded notification follows <a href="https://google.com/design/wear">Material Design for Android Wear</a>, so the user gets an app-like experience.
+<p>
+  When a user taps on a notification that is bridged from the phone to the
+  watch or that lacks a
+  <a href="{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContentIntent(android.app.PendingIntent)">
+  {@code contentIntent}</a>, the user will be taken to the expanded view of
+  that notification. When you <a href=
+  "{@docRoot}training/wearables/notifications/pages.html">specify additional
+  content pages</a> and actions for a notification, those are available to the
+  user within the expanded notification. Each expanded notification follows
+  <a href="https://google.com/design/wear">Material Design for Android
+  Wear</a>, so the user gets an app-like experience.
 </p>
 
 
@@ -95,7 +169,8 @@ users a fast (single tap), discreet (no speaking aloud), and reliable way to res
  </p>
 
 
-<img src="{@docRoot}wear/preview/images/remoteinput.png" height="240" style="float:right;margin:10px 0 0 40px" />
+<img src="{@docRoot}wear/preview/images/remoteinput.png" height="350"
+  style="float:right;margin:10px 0 0 40px" />
 
 <h3 id="remote-input">Remote Input</h3>
 
@@ -254,61 +329,5 @@ AccountManager</a>, which will be accessible for syncing and storing account
  data, as it is on an Android phone.
 </p>
 
-<h2 id="ui">User Interface Improvements</h2>
-
-<p>The preview introduces powerful additions to the user interface, opening up
-exciting possibilities to developers.
-A complication is any feature in a watch face that displays more than hours and
-minutes. With the Complications API,
- watch faces can display extra information and separate apps can expose complication
-  data.
-The navigation and action drawers provide users with new ways to interact with apps.
-</p>
-
-<img src="/wear/preview/images/complications-main-image.png" height="240" style="float:right;margin:10px 0 0 40px" />
-
-<h3 id="complications">Complications</h3>
-
-<p>A complication is a feature of a watch face <a href="https://en.wikipedia.org/wiki/Complication_(horology)">
-that displays more than hours and minutes</a>. For
-example, a battery indicator is a complication. The Complications API is for
-both watch faces and data provider apps.</p>
-
-<p>Watch faces can display extra information without needing code for getting
-the underlying data. Data providers can supply data to any watch face using the
-API.</p>
-
-<p>For examples of how to use this feature,
-see <a href="{@docRoot}wear/preview/features/complications.html">
- Watch Face Complications</a>.
-</p>
-
-<h3 id="drawers">Navigation and Action drawers</h3>
-
-<p>Wear 2.0 introduces two new widgets, navigation drawer and action drawer. These
- widgets give your users new ways to interact with your app. The navigation drawer
-  appears at the top of the screen and allows users to navigate between app views.
-   The  action drawer appears at the bottom of the screen and allows users to choose
-    from a list of actions associated with the current usage context.  These drawers
-     are accessible to users when they edge swipe from the top or bottom of the
-     screen; they peek when users scroll in an opposite direction.
-</p>
-
-<div class="cols">
-<div class="col-2of6">
-  <img src="{@docRoot}wear/preview/images/nav_drawer.gif" height="240" alt="" style="padding:.5em">
-  <p class="img-caption">
-      <strong>Figure 1.</strong> Navigation and Action Drawers.
-    </p>
-</div>
-<div class="col-2of6">
-  <img src="{@docRoot}wear/preview/images/action_drawer.gif" height="240" alt="" style="padding:.5em;"">
-</div>
-</div>
-<div class="cols">
-<p>To learn how to add these widgets to your app, see <a href="{@docRoot}wear/preview/features/ui-nav-actions.html">
-Wear Navigation and Actions</a>.
-
-</p>
 
 
