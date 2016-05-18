@@ -307,6 +307,11 @@ public final class Call {
          */
         public static final int PROPERTY_IS_EXTERNAL_CALL = 0x00000040;
 
+        /**
+         * Indicates that the call has CDMA Enhanced Voice Privacy enabled.
+         */
+        public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 0x00000080;
+
         //******************************************************************************************
         // Next PROPERTY value: 0x00000100
         //******************************************************************************************
@@ -462,6 +467,9 @@ public final class Call {
             }
             if (hasProperty(properties, PROPERTY_IS_EXTERNAL_CALL)) {
                 builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+            }
+            if(hasProperty(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+                builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
             }
             builder.append("]");
             return builder.toString();
