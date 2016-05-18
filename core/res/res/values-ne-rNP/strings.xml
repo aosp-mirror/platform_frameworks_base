@@ -105,7 +105,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"फ्याक्स"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"सिङ्क गर्नुहोस्"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"सिंक गर्नुहोस्"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"प्याकेट"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"रोमिङ सूचक खुला"</string>
@@ -162,7 +162,7 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"धेरै नै अनुरोधहरू प्रक्रियामा छन्। पछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g>को लागि साइन इन त्रुटि"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"सिङक गर्नुहोस्"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"सिङ्क गर्नुहोस्"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"सिंक गर्नुहोस्"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"अति धेरै <xliff:g id="CONTENT_TYPE">%s</xliff:g> मेट्नुहोस्।"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ट्याब्लेट भण्डारण खाली छैन! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
@@ -454,10 +454,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिन्ट आइकन"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिङ्क सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिङ्क भएको नभएको निर्धारण गर्न सक्दछ।"</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिङ्क खुला र बन्द"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिङ्क सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिङ्क सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिङ्क तथ्याङ्कहरू पढ्नुहोस्"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिंक खुला र बन्द"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिंक सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिंक सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिंक तथ्याङ्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"अनुप्रयोगलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"आफ्नो USB भण्डारणको सामग्रीहरूहरु पढ्नुहोस्"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"आफ्नो SD कार्डको सामग्रीहरूहरु पढ्नुहोस्"</string>
@@ -597,7 +597,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"अन्य"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"कलब्याक"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"कार"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"कम्पनी मुख्य"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"मुख्य कम्पनी"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"मुख्य"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"अन्य फ्याक्स"</string>
@@ -1031,7 +1031,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"पूर्वनिर्धारित रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"पूर्वनिर्धारित रिङटोन (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"कुनै पनि होइन"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"घन्टीका स्वरहरू"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"रिङटोनहरू"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"अज्ञात रिङटोन"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi सञ्जालहरू उपलब्ध छन्</item>
@@ -1189,7 +1189,7 @@
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईँ तपाईँको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"सिंक गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वालपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वालपेपर परिवर्तन गर्नुहोस्"</string>

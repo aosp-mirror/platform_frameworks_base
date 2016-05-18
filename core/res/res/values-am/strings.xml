@@ -522,11 +522,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ጡባዊውን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ቴሌቪዥኑን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ስልኩን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"የማያ ገጹን መቆለፊያ ለውጥ"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"የማያ ገጹን መቆለፊያ መለወጥ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"የማያ ገጽ መቆለፊያውን ለውጥ።"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ማያ ቆልፍ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ማያው እንዴት እና መቼ እንደሚቆልፍ ተቆጣጠር።"</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"ሁሉንም ውሂብ ሰርዝ"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"ሁሉንም ውሂብ መሰረዝ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"የፋብሪካው ውሂብ ዳግም አስጀምርን በማከናወን፣ያለ ማስጠንቀቂያ የጡባዊውን ውሂብ አጥፋ።"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"የፋብሪካ ውሂብ ዳግም ማስጀመር በማከናወን ያለማስጠንቀቂያ የቴሌቪዥኑን ውሂብ ይደምስሱ።"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"የፋብሪካ ውሂብ ድጋሚ አስጀምር በማከናወን ያለ ማሰጠንቀቂያ የስልኩን ውሂብ ደምስስ።"</string>
@@ -579,7 +579,7 @@
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
-    <item msgid="7390473628275490700">"ዊንዶውዝ ቀጥታ ስርጭት"</item>
+    <item msgid="7390473628275490700">"Windows ቀጥታ ስርጭት"</item>
     <item msgid="7882877134931458217">"Yahoo"</item>
     <item msgid="5035376313200585242">"Skype"</item>
     <item msgid="7532363178459444943">"QQ"</item>
@@ -627,7 +627,7 @@
     <string name="imTypeOther" msgid="5377007495735915478">"ሌላ"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"ብጁ"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
-    <string name="imProtocolMsn" msgid="144556545420769442">"ዊንዶውዝ ቀጥታ ስርጭት"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"Windows ቀጥታ ስርጭት"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>

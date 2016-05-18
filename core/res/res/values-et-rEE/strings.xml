@@ -529,7 +529,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kõikide andmete kustutamine"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Kustutage tahvelarvuti andmed hoiatamata, lähtestades arvuti tehaseandmetele."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Teleri andmete hoiatamata kustutamine tehase andmetele lähtestamise abil."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Kustuta telefoniandmed hoiatuseta, lähtestades telefoni tehaseandmetele."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Telefoniandmete hoiatuseta kustutamine, lähtestades telefoni tehaseseadetele."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Kasutaja andmete kustutamine"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Kustutatakse selle kasutaja andmed sellest tahvelarvutist ilma hoiatamata."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Kustutatakse selle kasutaja andmed sellest telerist ilma hoiatamata."</string>
@@ -591,8 +591,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Kodune telefon"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobiil"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Töökoha telefon"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Töökoha faksinumber"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Kodune faksinumber"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Töö faks"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Kodu faks"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Piipar"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Muu"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Tagasihelistus"</string>
@@ -604,7 +604,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Raadiotelefon"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleksinumber"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Töökoha mobiiltelefon"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Töö mobiil"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Töökoha piipar"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -1096,7 +1096,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Lube pole vaja"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"see võib olla tasuline"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Laadimiseks ühendage USB"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Seadet laetakse USB kaudu"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Ühendatud seade saab toidet USB kaudu"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB failide edastamiseks"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB fotode edastamiseks"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Värskendas administraator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Kustutas teie administraator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmetele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
