@@ -38,7 +38,6 @@ public abstract class ExpandableView extends FrameLayout {
     protected int mClipTopAmount;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
-    private int mClipTopOptimization;
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
     private int mMinClipTopAmount = 0;
@@ -218,6 +217,7 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public void setClipTopAmount(int clipTopAmount) {
         mClipTopAmount = clipTopAmount;
+        updateClipping();
     }
 
     public int getClipTopAmount() {
@@ -306,7 +306,7 @@ public abstract class ExpandableView extends FrameLayout {
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         super.getBoundsOnScreen(outRect, clipToParent);
         outRect.bottom = outRect.top + getActualHeight();
-        outRect.top += getClipTopOptimization();
+        outRect.top += getClipTopAmount();
     }
 
     public boolean isSummaryWithChildren() {
@@ -319,7 +319,7 @@ public abstract class ExpandableView extends FrameLayout {
 
     private void updateClipping() {
         if (mClipToActualHeight) {
-            int top = mClipTopOptimization;
+            int top = getClipTopAmount();
             if (top >= getActualHeight()) {
                 top = getActualHeight() - 1;
             }
@@ -332,21 +332,6 @@ public abstract class ExpandableView extends FrameLayout {
 
     public void setClipToActualHeight(boolean clipToActualHeight) {
         mClipToActualHeight = clipToActualHeight;
-        updateClipping();
-    }
-
-    public int getClipTopOptimization() {
-        return mClipTopOptimization;
-    }
-
-    /**
-     * Set that the view will be clipped by a given amount from the top. Contrary to
-     * {@link #setClipTopAmount} this amount doesn't effect shadows and the background.
-     *
-     * @param clipTopOptimization the amount to clip from the top
-     */
-    public void setClipTopOptimization(int clipTopOptimization) {
-        mClipTopOptimization = clipTopOptimization;
         updateClipping();
     }
 

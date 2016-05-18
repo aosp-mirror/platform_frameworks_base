@@ -2212,7 +2212,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateAnimationState(false, child);
 
         // Make sure the clipRect we might have set is removed
-        expandableView.setClipTopOptimization(0);
+        expandableView.setClipTopAmount(0);
     }
 
     private boolean isChildInGroup(View child) {
@@ -3400,9 +3400,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setDismissAllInProgress(boolean dismissAllInProgress) {
         mDismissAllInProgress = dismissAllInProgress;
         mAmbientState.setDismissAllInProgress(dismissAllInProgress);
-        if (dismissAllInProgress) {
-            disableClipOptimization();
-        }
         handleDismissAllClipping();
     }
 
@@ -3420,17 +3417,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 child.setMinClipTopAmount(0);
             }
             previousChildWillBeDismissed = canChildBeDismissed(child);
-        }
-    }
-
-    private void disableClipOptimization() {
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            child.setClipTopOptimization(0);
         }
     }
 
