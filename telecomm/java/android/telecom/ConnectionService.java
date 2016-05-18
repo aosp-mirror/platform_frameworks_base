@@ -1367,12 +1367,14 @@ public abstract class ConnectionService extends Service {
 
     /** {@hide} */
     protected void removeConnection(Connection connection) {
-        String id = mIdByConnection.get(connection);
         connection.unsetConnectionService(this);
         connection.removeConnectionListener(mConnectionListener);
-        mConnectionById.remove(mIdByConnection.get(connection));
-        mIdByConnection.remove(connection);
-        mAdapter.removeCall(id);
+        String id = mIdByConnection.get(connection);
+        if (id != null) {
+            mConnectionById.remove(id);
+            mIdByConnection.remove(connection);
+            mAdapter.removeCall(id);
+        }
     }
 
     private String addConferenceInternal(Conference conference) {
