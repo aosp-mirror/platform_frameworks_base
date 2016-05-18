@@ -194,6 +194,12 @@ public class DisconnectCause {
      */
     public static final int VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED = 50;
 
+    /**
+     * The call was terminated because it was pulled to another device.
+     * {@hide}
+     */
+    public static final int CALL_PULLED = 51;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -318,7 +324,9 @@ public class DisconnectCause {
         case CDMA_ALREADY_ACTIVATED:
             return "CDMA_ALREADY_ACTIVATED";
         case VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED:
-                return "VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED";
+            return "VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED";
+        case CALL_PULLED:
+            return "CALL_PULLED";
         default:
             return "INVALID: " + cause;
         }
