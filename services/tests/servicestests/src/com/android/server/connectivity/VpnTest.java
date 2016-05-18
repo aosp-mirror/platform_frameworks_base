@@ -20,9 +20,11 @@ import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static org.mockito.AdditionalMatchers.*;
 import static org.mockito.Mockito.*;
 
 import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
@@ -65,16 +67,35 @@ public class VpnTest extends AndroidTestCase {
         managedProfileA.profileGroupId = primaryUser.id;
     }
 
+    /**
+     * Names and UIDs for some fake packages. Important points:
+     *  - UID is ordered increasing.
+     *  - One pair of packages have consecutive UIDs.
+     */
+    static final String[] PKGS = {"com.example", "org.example", "net.example", "web.vpn"};
+    static final int[] PKG_UIDS = {66, 77, 78, 400};
+
+    // Mock packages
+    static final Map<String, Integer> mPackages = new ArrayMap<>();
+    static {
+        for (int i = 0; i < PKGS.length; i++) {
+            mPackages.put(PKGS[i], PKG_UIDS[i]);
+        }
+    }
+
     @Mock private Context mContext;
     @Mock private UserManager mUserManager;
     @Mock private PackageManager mPackageManager;
     @Mock private INetworkManagementService mNetService;
+    @Mock private AppOpsManager mAppOps;
 
     @Override
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        setMockedPackages(mPackages);
         when(mContext.getSystemService(eq(Context.USER_SERVICE))).thenReturn(mUserManager);
+        when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         doNothing().when(mNetService).registerObserver(any());
     }
 
@@ -82,7 +103,7 @@ public class VpnTest extends AndroidTestCase {
     public void testRestrictedProfilesAreAddedToVpn() {
         setMockedUsers(primaryUser, secondaryUser, restrictedProfileA, restrictedProfileB);
 
-        final Vpn vpn = createVpn(primaryUser.id);
+        final Vpn vpn = new MockVpn(primaryUser.id);
         final Set<UidRange> ranges = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 null, null);
 
@@ -96,7 +117,7 @@ public class VpnTest extends AndroidTestCase {
     public void testManagedProfilesAreNotAddedToVpn() {
         setMockedUsers(primaryUser, managedProfileA);
 
-        final Vpn vpn = createVpn(primaryUser.id);
+        final Vpn vpn = new MockVpn(primaryUser.id);
         final Set<UidRange> ranges = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
                 null, null);
 
@@ -109,7 +130,7 @@ public class VpnTest extends AndroidTestCase {
     public void testAddUserToVpnOnlyAddsOneUser() {
         setMockedUsers(primaryUser, restrictedProfileA, managedProfileA);
 
-        final Vpn vpn = createVpn(primaryUser.id);
+        final Vpn vpn = new MockVpn(primaryUser.id);
         final Set<UidRange> ranges = new ArraySet<>();
         vpn.addUserToRanges(ranges, primaryUser.id, null, null);
 
@@ -120,42 +141,123 @@ public class VpnTest extends AndroidTestCase {
 
     @SmallTest
     public void testUidWhiteAndBlacklist() throws Exception {
-        final Map<String, Integer> packages = new ArrayMap<>();
-        packages.put("com.example", 66);
-        packages.put("org.example", 77);
-        packages.put("net.example", 78);
-        setMockedPackages(packages);
-
-        final Vpn vpn = createVpn(primaryUser.id);
+        final Vpn vpn = new MockVpn(primaryUser.id);
         final UidRange user = UidRange.createForUser(primaryUser.id);
+        final String[] packages = {PKGS[0], PKGS[1], PKGS[2]};
 
         // Whitelist
         final Set<UidRange> allow = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
-                new ArrayList<String>(packages.keySet()), null);
+                Arrays.asList(packages), null);
         assertEquals(new ArraySet<>(Arrays.asList(new UidRange[] {
-            new UidRange(user.start + 66, user.start + 66),
-            new UidRange(user.start + 77, user.start + 78)
+            new UidRange(user.start + PKG_UIDS[0], user.start + PKG_UIDS[0]),
+            new UidRange(user.start + PKG_UIDS[1], user.start + PKG_UIDS[2])
         })), allow);
 
         // Blacklist
         final Set<UidRange> disallow = vpn.createUserAndRestrictedProfilesRanges(primaryUser.id,
-                null, new ArrayList<String>(packages.keySet()));
+                null, Arrays.asList(packages));
         assertEquals(new ArraySet<>(Arrays.asList(new UidRange[] {
-            new UidRange(user.start, user.start + 65),
-            new UidRange(user.start + 67, user.start + 76),
-            new UidRange(user.start + 79, user.stop)
+            new UidRange(user.start, user.start + PKG_UIDS[0] - 1),
+            new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[1] - 1),
+            /* Empty range between UIDS[1] and UIDS[2], should be excluded, */
+            new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
         })), disallow);
     }
 
+    @SmallTest
+    public void testLockdownChangingPackage() throws Exception {
+        final MockVpn vpn = new MockVpn(primaryUser.id);
+        final UidRange user = UidRange.createForUser(primaryUser.id);
+
+        // Default state.
+        vpn.assertUnblocked(user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
+
+        // Set always-on without lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false));
+        vpn.assertUnblocked(user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
+
+        // Set always-on with lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+            new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
+            new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
+        }));
+        vpn.assertBlocked(user.start + PKG_UIDS[0], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
+        vpn.assertUnblocked(user.start + PKG_UIDS[1]);
+
+        // Switch to another app.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+            new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
+            new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
+        }));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+            new UidRange(user.start, user.start + PKG_UIDS[3] - 1),
+            new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
+        }));
+        vpn.assertBlocked(user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
+        vpn.assertUnblocked(user.start + PKG_UIDS[3]);
+    }
+
+    @SmallTest
+    public void testLockdownAddingAProfile() throws Exception {
+        final MockVpn vpn = new MockVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        // Make a copy of the restricted profile, as we're going to mark it deleted halfway through.
+        final UserInfo tempProfile = new UserInfo(restrictedProfileA.id, restrictedProfileA.name,
+                restrictedProfileA.flags);
+        tempProfile.restrictedProfileParentId = primaryUser.id;
+
+        final UidRange user = UidRange.createForUser(primaryUser.id);
+        final UidRange profile = UidRange.createForUser(tempProfile.id);
+
+        // Set lockdown.
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true));
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+            new UidRange(user.start, user.start + PKG_UIDS[3] - 1),
+            new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
+        }));
+
+        // Verify restricted user isn't affected at first.
+        vpn.assertUnblocked(profile.start + PKG_UIDS[0]);
+
+        // Add the restricted user.
+        setMockedUsers(primaryUser, tempProfile);
+        vpn.onUserAdded(tempProfile.id);
+        verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
+            new UidRange(profile.start, profile.start + PKG_UIDS[3] - 1),
+            new UidRange(profile.start + PKG_UIDS[3] + 1, profile.stop)
+        }));
+
+        // Remove the restricted user.
+        tempProfile.partial = true;
+        vpn.onUserRemoved(tempProfile.id);
+        verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
+            new UidRange(profile.start, profile.start + PKG_UIDS[3] - 1),
+            new UidRange(profile.start + PKG_UIDS[3] + 1, profile.stop)
+        }));
+    }
+
     /**
-     * @return A subclass of {@link Vpn} which is reliably:
-     * <ul>
-     *   <li>Associated with a specific user ID</li>
-     *   <li>Not in always-on mode</li>
-     * </ul>
+     * A subclass of {@link Vpn} with some of the fields pre-mocked.
      */
-    private Vpn createVpn(@UserIdInt int userId) {
-        return new Vpn(Looper.myLooper(), mContext, mNetService, userId);
+    private class MockVpn extends Vpn {
+        public MockVpn(@UserIdInt int userId) {
+            super(Looper.myLooper(), mContext, mNetService, userId);
+        }
+
+        public void assertBlocked(int... uids) {
+            for (int uid : uids) {
+                assertTrue("Uid " + uid + " should be blocked", isBlockingUid(uid));
+            }
+        }
+
+        public void assertUnblocked(int... uids) {
+            for (int uid : uids) {
+                assertFalse("Uid " + uid + " should not be blocked", isBlockingUid(uid));
+            }
+        }
     }
 
     /**
@@ -167,9 +269,19 @@ public class VpnTest extends AndroidTestCase {
             userMap.put(user.id, user);
         }
 
+        /**
+         * @see UserManagerService#getUsers(boolean)
+         */
         doAnswer(invocation -> {
-            return new ArrayList(userMap.values());
-        }).when(mUserManager).getUsers();
+            final boolean excludeDying = (boolean) invocation.getArguments()[0];
+            final ArrayList<UserInfo> result = new ArrayList<>(users.length);
+            for (UserInfo ui : users) {
+                if (!excludeDying || (ui.isEnabled() && !ui.partial)) {
+                    result.add(ui);
+                }
+            }
+            return result;
+        }).when(mUserManager).getUsers(anyBoolean());
 
         doAnswer(invocation -> {
             final int id = (int) invocation.getArguments()[0];
