@@ -102,6 +102,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -172,6 +173,7 @@ class ActivityStarter {
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
+    private boolean mPowerHintSent;
 
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
@@ -209,6 +211,8 @@ class ActivityStarter {
         mNoAnimation = false;
         mKeepCurTransition = false;
         mAvoidMoveToFront = false;
+
+        mPowerHintSent = false;
 
         mVoiceSession = null;
         mVoiceInteractor = null;
@@ -933,6 +937,20 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
+    void sendPowerHintForLaunchIfNeeded(boolean forceSend) {
+        // Trigger launch power hint if activity is not in the current task
+        final ActivityStack focusStack = mSupervisor.getFocusedStack();
+        final ActivityRecord curTop = (focusStack == null)
+            ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
+        if ((forceSend || (!mPowerHintSent && curTop != null &&
+                curTop.task != null && mStartActivity != null &&
+                curTop.task != mStartActivity.task )) &&
+                mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 0);
+            mPowerHintSent = true;
+        }
+    }
+
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask) {
@@ -993,6 +1011,8 @@ class ActivityStarter {
                             mStartActivity.launchedFromPackage);
                 }
             }
+
+            sendPowerHintForLaunchIfNeeded(false /* forceSend */);
 
             mReusedActivity = setTargetStackAndMoveToFrontIfNeeded(mReusedActivity);
 
@@ -1116,6 +1136,9 @@ class ActivityStarter {
         ActivityStack.logStartActivity(
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.task);
         mTargetStack.mLastPausedActivity = null;
+
+        sendPowerHintForLaunchIfNeeded(false /* forceSend */);
+
         mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
             if (!mLaunchTaskBehind) {

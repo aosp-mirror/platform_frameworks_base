@@ -4412,6 +4412,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Work Challenge is present) let startActivityInPackage handle the intercepting.
         if (!mService.mUserController.shouldConfirmCredentials(task.userId)
                 && task.getRootActivity() != null) {
+            mService.mActivityStarter.sendPowerHintForLaunchIfNeeded(true /* forceSend */);
             mActivityMetricsLogger.notifyActivityLaunching();
             mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
             mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
