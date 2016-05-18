@@ -404,7 +404,7 @@ public class TaskStackLayoutAlgorithm {
      * Sets the system insets.
      */
     public boolean setSystemInsets(Rect systemInsets) {
-        boolean changed = mSystemInsets.equals(systemInsets);
+        boolean changed = !mSystemInsets.equals(systemInsets);
         mSystemInsets.set(systemInsets);
         return changed;
     }
@@ -583,11 +583,25 @@ public class TaskStackLayoutAlgorithm {
         if (getInitialFocusState() == STATE_UNFOCUSED && mNumStackTasks > 1) {
             if (ignoreScrollToFront || (!launchState.launchedWithAltTab && !scrollToFront)) {
                 // Set the initial scroll to the predefined state (which differs from the stack)
-                float [] initialNormX = new float[] {
-                        getNormalizedXFromUnfocusedY(mSystemInsets.bottom + mInitialBottomOffset,
-                                FROM_BOTTOM),
-                        getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP)
-                };
+                float [] initialNormX = null;
+                float minBottomTaskNormX = getNormalizedXFromUnfocusedY(mSystemInsets.bottom +
+                        mInitialBottomOffset, FROM_BOTTOM);
+                float maxBottomTaskNormX = getNormalizedXFromUnfocusedY(mFocusedTopPeekHeight +
+                        mTaskRect.height() - mMinMargin, FROM_TOP);
+                if (mNumStackTasks <= 2) {
+                    // For small stacks, position the tasks so that they are top aligned to under
+                    // the action button, but ensure that it is at least a certain offset from the
+                    // bottom of the stack
+                    initialNormX = new float[] {
+                            Math.min(maxBottomTaskNormX, minBottomTaskNormX),
+                            getNormalizedXFromUnfocusedY(mFocusedTopPeekHeight, FROM_TOP)
+                    };
+                } else {
+                    initialNormX = new float[] {
+                            minBottomTaskNormX,
+                            getNormalizedXFromUnfocusedY(mInitialTopOffset, FROM_TOP)
+                    };
+                }
 
                 mUnfocusedRange.offset(0f);
                 List<Task> tasks = stack.getStackTasks();
@@ -881,14 +895,7 @@ public class TaskStackLayoutAlgorithm {
             TaskViewTransform frontTransform, boolean ignoreSingleTaskCase, boolean forceUpdate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
-        // Compute the focused and unfocused offset
-        float boundedStackScroll = Utilities.clamp(stackScroll, mMinScrollP, mMaxScrollP);
-        mUnfocusedRange.offset(boundedStackScroll);
-        mFocusedRange.offset(boundedStackScroll);
-        float boundedScrollUnfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
-        float boundedScrollFocusedRangeX = mFocusedRange.getNormalizedX(taskProgress);
-        float boundedScrollUnfocusedNonOverrideRangeX =
-                mUnfocusedRange.getNormalizedX(nonOverrideTaskProgress);
+        // Ensure that the task is in range
         mUnfocusedRange.offset(stackScroll);
         mFocusedRange.offset(stackScroll);
         boolean unfocusedVisible = mUnfocusedRange.isInRange(taskProgress);
@@ -900,8 +907,29 @@ public class TaskStackLayoutAlgorithm {
             return;
         }
 
+        // Map the absolute task progress to the normalized x at the stack scroll.  We use this to
+        // calculate positions along the curve.
+        mUnfocusedRange.offset(stackScroll);
+        mFocusedRange.offset(stackScroll);
         float unfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
         float focusedRangeX = mFocusedRange.getNormalizedX(taskProgress);
+
+        // Map the absolute task progress to the normalized x at the bounded stack scroll.  We use
+        // this to calculate bounded properties, like translationZ and outline alpha.
+        float boundedStackScroll = Utilities.clamp(stackScroll, mMinScrollP, mMaxScrollP);
+        mUnfocusedRange.offset(boundedStackScroll);
+        mFocusedRange.offset(boundedStackScroll);
+        float boundedScrollUnfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
+        float boundedScrollUnfocusedNonOverrideRangeX =
+                mUnfocusedRange.getNormalizedX(nonOverrideTaskProgress);
+
+        // Map the absolute task progress to the normalized x at the upper bounded stack scroll.
+        // We use this to calculate the dim, which is bounded only on one end.
+        float lowerBoundedStackScroll = Utilities.clamp(stackScroll, -Float.MAX_VALUE, mMaxScrollP);
+        mUnfocusedRange.offset(lowerBoundedStackScroll);
+        mFocusedRange.offset(lowerBoundedStackScroll);
+        float lowerBoundedUnfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
+        float lowerBoundedFocusedRangeX = mFocusedRange.getNormalizedX(taskProgress);
 
         int x = (mStackRect.width() - mTaskRect.width()) / 2;
         int y;
@@ -917,7 +945,8 @@ public class TaskStackLayoutAlgorithm {
             y = centerYOffset + getYForDeltaP(tmpP, 0);
             z = mMaxTranslationZ;
             dimAlpha = 0f;
-            viewOutlineAlpha = (OUTLINE_ALPHA_MIN_VALUE + OUTLINE_ALPHA_MAX_VALUE) / 2f;
+            viewOutlineAlpha = OUTLINE_ALPHA_MIN_VALUE +
+                    (OUTLINE_ALPHA_MAX_VALUE - OUTLINE_ALPHA_MIN_VALUE) / 2f;
 
         } else {
             // Otherwise, update the task to the stack layout
@@ -926,9 +955,22 @@ public class TaskStackLayoutAlgorithm {
             int focusedY = (int) ((1f - mFocusedCurveInterpolator.getInterpolation(
                     focusedRangeX)) * mStackRect.height());
             float unfocusedDim = mUnfocusedDimCurveInterpolator.getInterpolation(
-                    boundedScrollUnfocusedRangeX);
+                    lowerBoundedUnfocusedRangeX);
             float focusedDim = mFocusedDimCurveInterpolator.getInterpolation(
-                    boundedScrollFocusedRangeX);
+                    lowerBoundedFocusedRangeX);
+
+            // Special case, because we override the initial task positions differently for small
+            // stacks, we clamp the dim to 0 in the initial position, and then only modulate the
+            // dim when the task is scrolled back towards the top of the screen
+            if (mNumStackTasks <= 2 && nonOverrideTaskProgress == 0f) {
+                if (boundedScrollUnfocusedRangeX >= 0.5f) {
+                    unfocusedDim = 0f;
+                } else {
+                    float offset = mUnfocusedDimCurveInterpolator.getInterpolation(0.5f);
+                    unfocusedDim -= offset;
+                    unfocusedDim *= MAX_DIM / (MAX_DIM - offset);
+                }
+            }
 
             y = (mStackRect.top - mTaskRect.top) +
                     (int) Utilities.mapRange(focusState, unfocusedY, focusedY);
