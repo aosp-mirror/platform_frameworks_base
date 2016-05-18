@@ -24,9 +24,9 @@ page.image=/wear/preview/images/expanded_diagram.png
 </p>
 
 <p>The visual and interaction changes make it much easier for users to read and
-  interact with notifications from your application. Expanded notifications enable
+  interact with notifications from your app. Expanded notifications enable
   you to deliver Wear users an app-like experience even if you haven't built an
-  Android Wear application.
+  Android Wear app.
 </p>
 
 <p class="note">
@@ -78,7 +78,7 @@ material design</a> visual changes.
 </li>
 </ul>
 <h2 id="expanded">Expanded Notifications</h2>
-<p>Android Wear 2.0 introduces <i>expanded notifications</i>, which provides
+<p>Android Wear 2.0 introduces <i>expanded notifications</i>, which provide
   substantial additional content and actions for each notification.
 </p>
 <p>When you <a href="{@docRoot}training/wearables/notifications/pages.html">specify additional content pages</a>
@@ -158,7 +158,7 @@ action in the notification unless a different action is specified using
 </p>
 <p class="note">Note: <a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a> 
 expanded notifications require that you have at least version 1.5.0.2861804 of the
-  <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app">Android Wear application</a>
+  <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app">Android Wear app</a>
   on your paired Android phone. That version will be available within the next
   few weeks in the Play Store.
 </p>
