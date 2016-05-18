@@ -31,6 +31,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.ZygoteProcess;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -764,7 +765,8 @@ public class ZygoteInit {
                 Process.SECONDARY_ZYGOTE_SOCKET : Process.ZYGOTE_SOCKET;
         while (true) {
             try {
-                final Process.ZygoteState zs = Process.ZygoteState.connect(otherZygoteName);
+                final ZygoteProcess.ZygoteState zs =
+                        ZygoteProcess.ZygoteState.connect(otherZygoteName);
                 zs.close();
                 break;
             } catch (IOException ioe) {
