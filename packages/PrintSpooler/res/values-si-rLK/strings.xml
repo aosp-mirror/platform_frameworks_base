@@ -61,6 +61,7 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"මෙම මුද්‍රණ යන්ත්‍රය ගැන තවත් තොරතුරු"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"ගොනුව සෑදීමට නොහැකි විය"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"සමහර මුද්‍රණ සේවා අබලයි"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"මුද්‍රණ යන්ත්‍ර සොයමින්"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"මුද්‍රණ සේවා සබල නැත"</string>
