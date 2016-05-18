@@ -130,12 +130,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     // certain logic we would otherwise apply while resizing,
     // while resizing in the bounds animating mode.
     private boolean mBoundsAnimating = false;
-    // By default, movement animations are applied to all
-    // window movement. If this is true, animations will not
-    // be applied within this stack. This is useful for example
-    // if the windows are moving as the result of a stack animation,
-    // in which case a second window animation would cause jitter.
-    private boolean mFreezeMovementAnimations = false;
 
     // Temporary storage for the new bounds that should be used after the configuration change.
     // Will be cleared once the client retrieves the new bounds via getBoundsForNewConfiguration().
@@ -1361,7 +1355,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override  // AnimatesBounds
     public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
-            mFreezeMovementAnimations = true;
             mBoundsAnimating = true;
         }
     }
@@ -1369,7 +1362,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override  // AnimatesBounds
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
-            mFreezeMovementAnimations = false;
             mBoundsAnimating = false;
             mService.requestTraversal();
         }
@@ -1396,8 +1388,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         getDisplayContent().getContentRect(bounds);
     }
 
-    public boolean getFreezeMovementAnimations() {
-        return mFreezeMovementAnimations;
+    public boolean hasMovementAnimations() {
+        return StackId.hasMovementAnimations(mStackId);
     }
 
     public boolean getForceScaleToCrop() {

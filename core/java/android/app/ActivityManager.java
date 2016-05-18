@@ -702,6 +702,14 @@ public class ActivityManager {
         public static boolean windowsAreScaleable(int stackId) {
             return stackId == PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if windows in this stack should be given move animations
+         * by default.
+         */
+        public static boolean hasMovementAnimations(int stackId) {
+            return stackId != PINNED_STACK_ID;
+        }
     }
 
     /**
