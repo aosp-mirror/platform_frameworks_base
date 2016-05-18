@@ -7315,23 +7315,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public Bundle getUserRestrictionsForUser(ComponentName who, int userHandle) {
-        if (!mHasFeature) {
-            return null;
-        }
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        enforceFullCrossUsersPermission(userHandle);
-        enforceCanManageProfileAndDeviceOwners();
-        synchronized (this) {
-            ActiveAdmin activeAdmin = getActiveAdminUncheckedLocked(who, userHandle);
-            if (activeAdmin == null) {
-                return null;
-            }
-            return activeAdmin.userRestrictions;
-        }
-    }
-
-    @Override
     public boolean setApplicationHidden(ComponentName who, String packageName,
             boolean hidden) {
         Preconditions.checkNotNull(who, "ComponentName is null");
