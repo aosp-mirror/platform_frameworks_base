@@ -379,7 +379,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
 </pre>
   </li>
 
@@ -389,7 +389,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
 </pre>
   </li>
 </ul>
