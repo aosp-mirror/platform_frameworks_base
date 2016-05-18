@@ -325,9 +325,7 @@ public class DeviceIdleController extends SystemService
         @Override public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
-                    synchronized (DeviceIdleController.this) {
-                        updateConnectivityStateLocked(intent);
-                    }
+                    updateConnectivityState(intent);
                 } break;
                 case Intent.ACTION_BATTERY_CHANGED: {
                     synchronized (DeviceIdleController.this) {
@@ -1426,9 +1424,9 @@ public class DeviceIdleController extends SystemService
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
-                updateConnectivityStateLocked(null);
                 updateDisplayLocked();
             }
+            updateConnectivityState(null);
         }
     }
 
@@ -1707,9 +1705,17 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void updateConnectivityStateLocked(Intent connIntent) {
-        if (mConnectivityService != null) {
-            NetworkInfo ni = mConnectivityService.getActiveNetworkInfo();
+    void updateConnectivityState(Intent connIntent) {
+        ConnectivityService cm;
+        synchronized (this) {
+            cm = mConnectivityService;
+        }
+        if (cm == null) {
+            return;
+        }
+        // Note: can't call out to ConnectivityService with our lock held.
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        synchronized (this) {
             boolean conn;
             if (ni == null) {
                 conn = false;
