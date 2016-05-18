@@ -1872,7 +1872,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "work/overview.html",
       "work/guide.html",
-      "https://connect.googleforwork.com/community/applicants/android/isv",
+      "https://www.google.com/work/android/developers/applyDevHub/",
       "work/app-restrictions.html",
       "work/cosu.html",
       "work/managed-profiles.html"
