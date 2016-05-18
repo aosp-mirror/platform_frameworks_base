@@ -719,7 +719,7 @@ class WindowSurfacePlacer {
                                     || task.mStack.isAdjustedForIme());
                     if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                             && !w.isDragResizing() && !adjustedForMinimizedDockOrIme
-                            && (task == null || !w.getTask().mStack.getFreezeMovementAnimations())
+                            && (task == null || w.getTask().mStack.hasMovementAnimations())
                             && !w.mWinAnimator.mLastHidden) {
                         winAnimator.setMoveAnimation(left, top);
                     }
@@ -731,7 +731,9 @@ class WindowSurfacePlacer {
                     }
 
                     try {
-                        w.mClient.moved(left, top);
+                        if (task == null || task.mStack.getBoundsAnimating()) {
+                            w.mClient.moved(left, top);
+                        }
                     } catch (RemoteException e) {
                     }
                     w.mMovedByResize = false;
