@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"文件"</string>
-    <string name="downloads_label" msgid="959113951084633612">"下載內容"</string>
+    <string name="downloads_label" msgid="959113951084633612">"下載"</string>
     <string name="title_open" msgid="4353228937663917801">"開啟檔案"</string>
     <string name="title_save" msgid="2433679664882857999">"儲存至"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"新增資料夾"</string>
@@ -33,7 +33,7 @@
     <string name="menu_select_all" msgid="8323579667348729928">"全選"</string>
     <string name="menu_copy" msgid="3612326052677229148">"複製到…"</string>
     <string name="menu_move" msgid="1828090633118079817">"移至…"</string>
-    <string name="menu_new_window" msgid="1226032889278727538">"新視窗"</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"新增視窗"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"複製"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"貼上"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"顯示內部儲存空間"</string>
