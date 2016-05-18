@@ -1,0 +1,59 @@
+page.title=Support and Release Notes
+meta.keywords="preview", "wear"
+page.tags="preview", "developer preview"
+
+@jd:body
+
+  <p>If you experience problems when developing and testing with
+  the Wear 2.0 Developer Preview, please file bugs at <a href=
+  "https://developer.android.com/wear/preview/bug">https://developer.android.com/wear/preview/bug</a>
+  .</p>
+
+  <p>To discuss issues or ideas with other developers working with Android Wear, 
+  join the <a href="https://plus.sandbox.google.com/communities/113381227473021565406">
+  Wear Developer Google+ community</a>.
+
+  <h2 id="dp">Developer Preview 1</h2>
+
+  <div class="wrap">
+    <div class="cols">
+      <div class="col-6of12">
+        <p><em>Date: May 2016<br />
+        Builds: Wearable Support 2.0.0-alpha1, NVD36G <br />
+        Emulator support: x86 & ARM (32-bit)<br/>
+        </em></p>
+      </div>
+    </div>
+  </div>
+
+  <h3>General advisories</h3>
+
+  <p>This Developer Preview release is for app developers only and is designed 
+  for use in compatibility testing and early development only.</p>
+
+  <h3>Wear 2.0 Notifications</h3>
+
+  <h4>Notification groups</h4>
+
+  <p>The current release of Android Wear 2.0 does not include support for notification
+  groups, also known as <a href="{@docRoot}training/wearables/notifications/stacks.html">
+  stacks</a> and bundles. You should continue to use notification groups because
+   that support will be coming in a future version of Android Wear 2.0.</p>
+
+   <h4>Smart Reply</h4>
+
+   <p>The current version of Wear 2.0 does not generate any Smart Reply responses
+    even if you call <a href="https://android-dot-devsite.googleplex.com/wear/preview/start.html#get_the_preview_reference_documentation">{@code setAllowGeneratedReplies()}</a>.
+    This functionality will be added in a later version of Wear 2.0.
+    </p>
+
+  <h4>Fields that are deprecated in Wear 2.0</h4>
+
+  <ul>
+    <li>Notification.WearableExtender#setCustomSizePreset(int) no longer accepts
+    SIZE_FULL_SCREEN as it has no meaning in Wear 2.0.</li>
+
+    <li>Notification.WearableExtender#setContentIcon(int) is deprecated as it has no
+    meaning in Wear 2.0.</li>
+  </ul>
+
