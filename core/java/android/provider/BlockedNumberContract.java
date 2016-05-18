@@ -237,6 +237,8 @@ public class BlockedNumberContract {
      *
      * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
      * context {@code context}, this method will throw a {@link SecurityException}.
+     *
+     * @return {@code true} if the {@code phoneNumber} is blocked.
      */
     @WorkerThread
     public static boolean isBlocked(Context context, String phoneNumber) {
@@ -247,8 +249,6 @@ public class BlockedNumberContract {
 
     /**
      * Unblocks the {@code phoneNumber} if it is blocked.
-     *
-     * <p> Returns the number of rows deleted in the blocked number provider as a result of unblock.
      *
      * <p> This deletes all rows where the {@code phoneNumber} matches the
      * {@link BlockedNumbers#COLUMN_ORIGINAL_NUMBER} column or the E164 representation of the
@@ -261,6 +261,8 @@ public class BlockedNumberContract {
      *
      * <p> Note that if the {@link #canCurrentUserBlockNumbers} is {@code false} for the user
      * context {@code context}, this method will throw a {@link SecurityException}.
+     *
+     * @return the number of rows deleted in the blocked number provider as a result of unblock.
      */
     @WorkerThread
     public static int unblock(Context context, String phoneNumber) {
@@ -270,8 +272,10 @@ public class BlockedNumberContract {
     }
 
     /**
-     * Returns {@code true} if blocking numbers is supported for the current user.
+     * Checks if blocking numbers is supported for the current user.
      * <p> Typically, blocking numbers is only supported for one user at a time.
+     *
+     * @return {@code true} if the current user can block numbers.
      */
     public static boolean canCurrentUserBlockNumbers(Context context) {
         final Bundle res = context.getContentResolver().call(
