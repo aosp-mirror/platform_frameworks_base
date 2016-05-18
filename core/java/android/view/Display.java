@@ -1168,6 +1168,9 @@ public final class Display {
         public HdrCapabilities() {
         }
 
+        /**
+         * @hide
+         */
         public HdrCapabilities(int[] supportedHdrTypes, float maxLuminance,
                 float maxAverageLuminance, float minLuminance) {
             mSupportedHdrTypes = supportedHdrTypes;
