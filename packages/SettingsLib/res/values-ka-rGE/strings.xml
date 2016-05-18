@@ -182,7 +182,7 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"ნახვის ატრიბუტის ინსპექტირების ჩართვა"</string>
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"ახალი Android DHCP კლიენტის ნაცვლად, Lollipop-ის DHCP კლიენტის გამოყენება."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"მობილური მოწყობილობის მონაცემები ყოველთვის აქტიური დარჩეს, მაშინაც კი, როდესაც Wi-Fi აქტიურია (ქსელის სწრაფი გადართვისთვის)."</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"ჩავრთო USB გამართვა?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"ჩაირთოს USB გამართვა?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB გამართვა განკუთვნილია მხოლოდ დეველოპერული მიზნებისთვის. გამოიყენეთ კომპიუტერსა და თქვენ მოწყობილობას შორის მონაცემების გადასატანად, თქვენ მოწყობილობაზე აპების შეტყობინების გარეშე დასაყენებლად და ჟურნალის მონაცემების წასაკითხად."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"გავაუქმოთ ყველა იმ კომპიუტერიდან USB გამართვაზე წვდომა, რომლებიდანაც აქამდე განახორციელეთ შესვლა?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"გსურთ, დეველოპმენტის პარამეტრების ნების დართვა?"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"აქტიური. შეეხეთ გადასართავად."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"მიმდინარე სერვისები"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ამჟამად მოქმედი სერვისების ნახვა და მართვა"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"მრავალპროც. WebView-ს ჩართვა"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView ვიზუალიზატორების იზოლირებულ პროცესში გაშვება."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"მრავალპროცესიანი WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ვიზუალიზატორების განცალკევებულად გაშვება"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView რეალიზაცია"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView რეალიზაციის დაყენება"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"თქვენი არჩევანი აღარ მოქმედებს. ცადეთ ხელახლა."</string>
@@ -313,7 +313,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"იტენება"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"დატენვა ელკვებაზე"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"იტენება"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"დატენვა USB-ზე"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"იტენება USB-ზე"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"იტენება"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"დატენვა უსადენოდ"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"იტენება"</string>

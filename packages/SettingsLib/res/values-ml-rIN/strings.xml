@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"മൾട്ടിപ്രോസസ്സ് WebView പ്രവർത്തനക്ഷമമാക്കൂ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ഒറ്റപ്പെട്ടൊരു പ്രോസസ്സിൽ WebView റെൻഡററുകൾ റൺ ചെയ്യുക."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"മൾട്ടിപ്രോസസ്സ് WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView റെൻഡററുകൾ പ്രത്യേകമായി റൺ ചെയ്യുക"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ഈ തിരഞ്ഞെടുപ്പിന് തുടർന്നങ്ങോട്ട് സാധുതയില്ല. വീണ്ടും ശ്രമിക്കുക."</string>

@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktywna. Dotknij, by zmienić."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Uruchomione usługi"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Wyświetl obecnie uruchomione usługi i zarządzaj nimi"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Włącz wieloprocesowy WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Uruchom WebView jako izolowany proces."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Wieloprocesowy WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Uruchom mechanizmy renderowania WebView osobno"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacja WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ustaw implementację WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ta opcja nie jest już obsługiwana. Spróbuj ponownie."</string>

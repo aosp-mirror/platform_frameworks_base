@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"אפליקציה פעילה. הקש כדי להחליף מצב."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"שירותים פועלים"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"הצג ושלוט בשירותים הפועלים כעת"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"הפעל תצוגת אתר לריבוי עיבודים"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"הרץ מעבדי תצוגת אתר בהליך מבודד"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Multiprocess WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"‏הרץ כלי WebView לעיבוד/יצירת תמונה ממוחשבת בנפרד"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"אפשרות זו כבר אינה תקפה. נסה שוב."</string>

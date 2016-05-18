@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Иштеп турат. Которуштуруу үчүн таптап коюңуз."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Иштеп жаткан кызматтар"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Учурда иштеп жаткан кызматтарды көрүү жана көзөмөлдөө"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Көп процесстүү WebView иштт"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"WebView рендерерлерин корголгон процессте иштетүү."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Көп процесстүү WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView рендерерлерин өзүнчө иштетүү"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView аткарылышы"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView аткарылышын коюу"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Тандалган нерсе жараксыз болуп калган. Кайра аракет кылыңыз."</string>

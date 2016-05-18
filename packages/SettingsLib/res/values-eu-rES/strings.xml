@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktibo. Aldatzeko, sakatu hau."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Abian diren zerbitzuak"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Ikusi eta kontrolatu unean abian diren zerbitzuak"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Gaitu prozesu anitzeko WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Exekutatu WebView errendatzaileak prozesu isolatu batean."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"Prozesu anitzeko WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Exekutatu WebView errendatzaileak modu bereizian"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView implementation"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Set WebView implementation"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Jada ez dago erabilgarri aukera hori. Saiatu berriro."</string>
