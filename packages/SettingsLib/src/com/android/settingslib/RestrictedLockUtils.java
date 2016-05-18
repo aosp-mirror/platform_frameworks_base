@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -74,45 +73,31 @@ public class RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        ComponentName deviceOwner = dpm.getDeviceOwnerComponentOnAnyUser();
-        int deviceOwnerUserId = dpm.getDeviceOwnerUserId();
-        boolean enforcedByDeviceOwner = false;
-        if (deviceOwner != null && deviceOwnerUserId != UserHandle.USER_NULL) {
-            Bundle enforcedRestrictions =
-                    dpm.getUserRestrictionsForUser(deviceOwner, deviceOwnerUserId);
-            if (enforcedRestrictions != null
-                    && enforcedRestrictions.getBoolean(userRestriction, false)) {
-                enforcedByDeviceOwner = true;
-            }
-        }
+        UserManager um = UserManager.get(context);
+        int restrictionSource = um.getUserRestrictionSource(userRestriction,
+                UserHandle.of(userId));
 
-        ComponentName profileOwner = null;
-        boolean enforcedByProfileOwner = false;
-        if (userId != UserHandle.USER_NULL) {
-            profileOwner = dpm.getProfileOwnerAsUser(userId);
-            if (profileOwner != null) {
-                Bundle enforcedRestrictions =
-                        dpm.getUserRestrictionsForUser(profileOwner, userId);
-                if (enforcedRestrictions != null
-                        && enforcedRestrictions.getBoolean(userRestriction, false)) {
-                    enforcedByProfileOwner = true;
-                }
-            }
-        }
-
-        if (!enforcedByDeviceOwner && !enforcedByProfileOwner) {
+        // If the restriction is not enforced or enforced only by system then return null
+        if (restrictionSource == UserManager.RESTRICTION_NOT_SET
+                || restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
             return null;
         }
 
-        EnforcedAdmin admin = null;
-        if (enforcedByDeviceOwner && enforcedByProfileOwner) {
-            admin = new EnforcedAdmin();
+        final boolean enforcedByProfileOwner =
+                (restrictionSource & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
+        final boolean enforcedByDeviceOwner =
+                (restrictionSource & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
+        if (enforcedByProfileOwner) {
+            return getProfileOwner(context, userId);
         } else if (enforcedByDeviceOwner) {
-            admin = new EnforcedAdmin(deviceOwner, deviceOwnerUserId);
-        } else {
-            admin = new EnforcedAdmin(profileOwner, userId);
+            // When the restriction is enforced by device owner, return the device owner admin only
+            // if the admin is for the {@param userId} otherwise return a default EnforcedAdmin.
+            final EnforcedAdmin deviceOwner = getDeviceOwner(context);
+            return deviceOwner.userId == userId
+                    ? deviceOwner
+                    : EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
         }
-        return admin;
+        return null;
     }
 
     public static boolean hasBaseUserRestriction(Context context,
@@ -479,6 +464,9 @@ public class RestrictedLockUtils {
     public static EnforcedAdmin checkIfMaximumTimeToLockIsSet(Context context) {
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
         LockPatternUtils lockPatternUtils = new LockPatternUtils(context);
         EnforcedAdmin enforcedAdmin = null;
         final int userId = UserHandle.myUserId();
