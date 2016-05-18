@@ -4,6 +4,7 @@ page.tags="wear-preview"
 page.image=images/cards/card-n-sdk_2x.png
 
 @jd:body
+
 <div style="position:relative; min-height:600px">
 
   <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
@@ -192,17 +193,17 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </ul>
 
     <p>
-      If you want an environment for basic <strong>compatibility
-      testing</strong> of your app, you can use your current APK and a
+      If you want an environment for basic compatibility
+      testing of your app, you can use your current APK and a
       supported watch or an emulator. As described below, you don't necessarily
       need to update your full development environment to do basic testing.
     </p>
 
     <p>
-      However, if you want to <strong>modify</strong> your app to target
+      However, if you want to modify your app to target
       Android Wear 2.0 or use new APIs, you need to update your development
       environment. See <a href="{@docRoot}wear/preview/start.html">Get Started
-      with the Android Wear 2.0 Preview</a>.
+      with the Preview</a>.
     </p>
 
     <h2 id="set_up_a_watch">
@@ -211,7 +212,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
     <p>
       You can download a system image and manually flash it to a matching
-      watch. See the table below to download the system image for your test
+      watch. See the table below to download the image for your test
       watch.
     </p>
 
@@ -221,9 +222,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       testing.
     </p>
 
-    <p>
-      Installing a system image on a watch <strong>removes all data from the
-      watch</strong>, so you should back up your data first.
+    <p class="warning">
+      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
+      watch, so you should back up your data first.
     </p>
 
     <h3 id="preview_system_images">
@@ -240,78 +241,79 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       Preview image for LGE Watch Urbane 2nd Edition
     </h4>
 
-    <p>
-      <strong>Please note the following:</strong>
-      Flashing your device will
+    <p class="caution">
+      <strong>Caution:</strong> Flashing your device will
       require unlocking the bootloader which may
       void the device's warranty--proceed at your own risk.
      </p>
 
     <table>
       <tr>
-        <th scope="col">
+        <th style="width:300px">
           Type of LGE Watch Urbane 2nd Edition image
         </th>
-        <th scope="col">
+        <th>
           Download/Checksums
         </th>
       </tr>
-      <tr id="download-3-placeholder">
+
+      <tr id="nemo-preview">
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">download-3-placeholder.tgz</a><br>
-          MD5: [string]<br>
-          SHA-1: [string]
+        <td><a href="#top" onclick="onDownload(this)">nemo-nvd36h-factory-fb7a294a.tgz</a><br>
+          MD5: 9dd0572fdab02e474ea9c761d1d2b70b<br>
+          SHA-1: fb7a294a91ec71280262e7a1a60fcf940131e6c3
         </td>
       </tr>
-      <tr id="download-4-placeholder">
+
+      <tr id="nemo-non-preview">
         <td>
           Non-preview image (for after testing)
         </td>
-        <td><a href="#top" onclick="onDownload(this)">download-4-placeholder.tgz</a><br>
-          MD5: [string]<br>
-          SHA-1: [string]
+        <td><a href="#top" onclick="onDownload(this)">nemo-mnc40x-factory-fa528bec.tgz</a><br>
+          MD5: 0b8ba3653d5a93cb854f4d7409d7b6c9<br>
+          SHA-1: fa528bec8aba3bf6c7d901ba63cd6ea0a08dbeb0
         </td>
       </tr>
+
     </table>
 
     <h4 id="preview_image_for_huawei_watch">
       Preview image for Huawei Watch
     </h4>
 
-    <p>
-      <strong>Please note the following:</strong>
-      Flashing your device will require unlocking
+    <p class="caution">
+      <strong>Caution:</strong> Flashing your device will require unlocking
       the bootloader which
       shall void the device's warranty--proceed at your own risk.
     </p>
 
     <table>
       <tr>
-        <th scope="col">
+        <th style="width:300px">
           Type of Huawei Watch image
         </th>
-        <th scope="col">
+        <th>
           Download/Checksums
         </th>
       </tr>
-      <tr id="download-1-placeholder">
+      <tr id="sturgeon-preview">
         <td>
           Preview image for testing
         </td>
-        <td><a href="#top" onclick="onDownload(this)">download-1-placeholder.tgz</a><br>
-          MD5: [string]<br>
-          SHA-1: [string]
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-nvd36h-factory-fd1f1582.tgz</a><br>
+          MD5: b54f4ff5ebcd3d50d6d1bfde93056c2a<br>
+          SHA-1: fd1f158257dba0999738ca7e0bfacec97afe35df
         </td>
       </tr>
-      <tr id="download-2-placeholder">
+      <tr id="sturgeon-non-preview">
         <td>
           Non-preview image (for after testing)
         </td>
-        <td><a href="#top" onclick="onDownload(this)">download-2-placeholder.tgz</a><br>
-          MD5: [string]<br>
-          SHA-1: [string]
+        <td><a href="#top" onclick="onDownload(this)">sturgeon-mec23l-factory-48003078.tgz</a><br>
+          MD5: 417b5cbddb29a2262bce133e283d2732<br>
+          SHA-1: 4800307843580f818557dd7c43d8ba2161e289b2
         </td>
       </tr>
     </table>
@@ -323,10 +325,15 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     <p>
       The steps for flashing an image to a watch are similar to the <a href=
       "https://developers.google.com/android/nexus/images">steps provided for
-      flashing to a phone</a>. After you <strong>back up your watch
-      data</strong>, use steps in this section to flash the image to the
-      <strong>specific watch</strong> that matches the image (e.g., you must
+      flashing to a phone</a>. After you back up your watch
+      data, use steps in this section to flash the image to the
+      specific watch that matches the image (e.g., you must
       use an LGE Watch Urbane 2nd Edition for the corresponding image).
+    </p>
+
+    <p class="warning">
+      <strong>Warning:</strong> Installing a system image on a watch removes all data from the
+      watch, so you should back up your data first.
     </p>
 
     <h4 id="set_up_the_watch_to_be_flashed">
@@ -334,7 +341,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </h4>
 
     <p>
-      On the watch, enable the Developer Options menu and ADB debugging as
+      From the phone, unpair ("Forget") the watch.
+      Then on the watch, enable the Developer Options menu and ADB debugging as
       follows:
     </p>
 
@@ -386,8 +394,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </p>
 
     <ol>
-      <li>Download and unzip the appropriate system image from the "Preview
-      system image" column in the <a href="#preview_system_images">table
+      <li>Download and unzip the appropriate system image from a "Preview
+      image for testing" row in a <a href="#preview_system_images">table
       above</a>.
       </li>
 
@@ -404,9 +412,9 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <code>adb reboot bootloader</code>
       </li>
 
-      <li>If necessary, use <strong>one</strong> of following two commands to
-      unlock the device's bootloader. This step <strong>erases all data on the
-      device</strong>: <code>fastboot flashing unlock</code> or, for some
+      <li>If necessary, use one of following two commands to
+      unlock the device's bootloader. This step erases all data on the
+      device: <code>fastboot flashing unlock</code> or, for some
       devices, <code>fastboot oem unlock</code>
       </li>
 
@@ -420,8 +428,43 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       </li>
     </ol>
 
+
+    <h4 id="set_up_watch">
+      Set up the watch and begin testing
+    </h4>
+
+      <p>
+        After the <code>flash-all</code> script finishes, your watch reboots
+        and soon will be ready for testing with the preview image.
+      </p>
+
+    <ol>
+      <li>Attach the watch charger to the watch and plug the USB cord
+      into your computer, if it is not already plugged in.
+      </li>
+
+      <li>Use the following <a href="{@docRoot}tools/help/adb.html">adb
+      command</a> to confirm that the watch is available:
+      <code>adb devices</code>
+      </li>
+
+      <li>Use the following adb command to start the device in fastboot mode:
+      <code>adb reboot bootloader</code>
+      </li>
+
+      <li>Use the following command to
+      lock the device's bootloader: <code>fastboot flashing lock</code> or, for some
+      devices, <code>fastboot oem lock</code>
+      </li>
+
+      <li>On the watch, continue the boot by touching <strong>'0'</strong>.
+      </li>
+
+    </ol>
+
+
     <p>
-      After the script finishes, your watch reboots. Pair the watch with a
+      Pair the watch with a
       phone or tablet. The preview now is available for testing on the watch.
       Before installing an app, enable the Developer Options menu, and ADB
       debugging, on the watch as follows:
@@ -477,20 +520,21 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
     <p>
       When testing is completed, follow the steps for <a href=
-      "#uninstall_the_preview_from_a_watch">uninstalling the preview</a>.
+      "#remove_the_preview_from_a_watch">removing the preview</a>.
     </p>
 
-    <h3 id="uninstall_the_preview_from_a_watch">
-      Uninstall the preview from a watch
+    <h3 id="remove_the_preview_from_a_watch">
+      Remove the preview from a watch
     </h3>
 
     <p>
-      When testing with the preview is done, restore the watch as follows:
+      When testing with the preview is done, unpair ("Forget") the watch from the phone and
+      restore the watch as follows:
     </p>
 
     <ol>
-      <li>Download and unzip the appropriate system image from the "Non-preview
-      system image" column in the <a href="#preview_system_images">table
+      <li>Download and unzip the appropriate system image from a "Non-preview
+      image" row in a <a href="#preview_system_images">table
       above</a>.
       </li>
 
@@ -523,8 +567,10 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Click <strong>Create Virtual Device</strong>.
       </li>
 
-      <li>In the <strong>Category</strong> pane, select Wear, choose a name
-      (such as Android Wear Round), and click <strong>Next</strong>.
+      <li>In the <strong>Category</strong> pane, select Wear, choose a hardware profile,
+       and click <strong>Next</strong>. The Android Wear 2.0 Developer Preview
+       is only optimized for round devices currently, so we recommend not
+       using the square or chin profiles for now.
       </li>
 
       <li>Select an <strong>N</strong> image to download. The images may be on
@@ -554,7 +600,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
 
 
 <script>
-  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/wear/preview/";
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/wear-preview/";
   function onDownload(link) {
 
     $("#downloadForRealz").html("Download " + $(link).text());
