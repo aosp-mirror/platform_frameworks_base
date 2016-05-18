@@ -4937,6 +4937,7 @@ public final class ActivityThread {
             // Isolated processes aren't going to do UI.
             return;
         }
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupGraphicsSupport");
         try {
             int uid = Process.myUid();
             String[] packages = getPackageManager().getPackagesForUid(uid);
@@ -4949,6 +4950,8 @@ public final class ActivityThread {
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -5131,6 +5134,7 @@ public final class ActivityThread {
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
          */
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Setup proxies");
         final IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         if (b != null) {
             // In pre-boot mode (doing initial launch to collect password), not
@@ -5141,9 +5145,11 @@ public final class ActivityThread {
                 final ProxyInfo proxyInfo = service.getProxyForNetwork(null);
                 Proxy.setHttpProxySystemProperty(proxyInfo);
             } catch (RemoteException e) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 throw e.rethrowFromSystemServer();
             }
         }
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Instrumentation info affects the class loader, so load it before
         // setting up the app context.
@@ -5215,7 +5221,9 @@ public final class ActivityThread {
         // Install the Network Security Config Provider. This must happen before the application
         // code is loaded to prevent issues with instances of TLS objects being created before
         // the provider is installed.
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "NetworkSecurityConfigProvider.install");
         NetworkSecurityConfigProvider.install(appContext);
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Continue loading instrumentation.
         if (ii != null) {

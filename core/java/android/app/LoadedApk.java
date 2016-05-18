@@ -806,6 +806,8 @@ public final class LoadedApk {
             return mApplication;
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
+
         Application app = null;
 
         String appClass = mApplicationInfo.className;
@@ -816,7 +818,10 @@ public final class LoadedApk {
         try {
             java.lang.ClassLoader cl = getClassLoader();
             if (!mPackageName.equals("android")) {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "initializeJavaContextClassLoader");
                 initializeJavaContextClassLoader();
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             }
             ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
             app = mActivityThread.mInstrumentation.newApplication(
@@ -824,6 +829,7 @@ public final class LoadedApk {
             appContext.setOuterContext(app);
         } catch (Exception e) {
             if (!mActivityThread.mInstrumentation.onException(app, e)) {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 throw new RuntimeException(
                     "Unable to instantiate application " + appClass
                     + ": " + e.toString(), e);
@@ -837,6 +843,7 @@ public final class LoadedApk {
                 instrumentation.callApplicationOnCreate(app);
             } catch (Exception e) {
                 if (!instrumentation.onException(app, e)) {
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     throw new RuntimeException(
                         "Unable to create application " + app.getClass().getName()
                         + ": " + e.toString(), e);
@@ -856,6 +863,8 @@ public final class LoadedApk {
 
             rewriteRValues(getClassLoader(), packageIdentifiers.valueAt(i), id);
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return app;
     }
