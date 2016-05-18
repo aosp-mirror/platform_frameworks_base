@@ -585,7 +585,7 @@ class WindowStateAnimator {
                     + drawStateToString());
         }
 
-        mWin.clearAnimatingWithSavedSurface();
+        boolean layoutNeeded = mWin.clearAnimatingWithSavedSurface();
 
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
@@ -595,10 +595,10 @@ class WindowStateAnimator {
                 Slog.v(TAG, "Draw state now committed in " + mWin);
             }
             mDrawState = COMMIT_DRAW_PENDING;
-            return true;
+            layoutNeeded = true;
         }
 
-        return false;
+        return layoutNeeded;
     }
 
     // This must be called while inside a transaction.
