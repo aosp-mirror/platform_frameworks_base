@@ -915,6 +915,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean networkMetered;
         final int uidRules;
 
+        synchronized (mVpns) {
+            final Vpn vpn = mVpns.get(UserHandle.getUserId(uid));
+            if (vpn != null && vpn.isBlockingUid(uid)) {
+                return true;
+            }
+        }
+
         final String iface = (lp == null ? "" : lp.getInterfaceName());
         synchronized (mRulesLock) {
             networkMetered = mMeteredIfaces.contains(iface);
@@ -3368,23 +3375,42 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Sets up or tears down the always-on VPN for user {@param user} as appropriate.
+     * Starts the always-on VPN {@link VpnService} for user {@param userId}, which should perform
+     * some setup and then call {@code establish()} to connect.
      *
-     * @return {@code false} in case of errors; {@code true} otherwise.
+     * @return {@code true} if the service was started, the service was already connected, or there
+     *         was no always-on VPN to start. {@code false} otherwise.
      */
-    private boolean updateAlwaysOnVpn(int user) {
-        final String lockdownPackage = getAlwaysOnVpnPackage(user);
-        if (lockdownPackage == null) {
-            return true;
+    private boolean startAlwaysOnVpn(int userId) {
+        final String alwaysOnPackage;
+        synchronized (mVpns) {
+            Vpn vpn = mVpns.get(userId);
+            if (vpn == null) {
+                // Shouldn't happen as all codepaths that point here should have checked the Vpn
+                // exists already.
+                Slog.wtf(TAG, "User " + userId + " has no Vpn configuration");
+                return false;
+            }
+            alwaysOnPackage = vpn.getAlwaysOnPackage();
+            // Skip if there is no service to start.
+            if (alwaysOnPackage == null) {
+                return true;
+            }
+            // Skip if the service is already established. This isn't bulletproof: it's not bound
+            // until after establish(), so if it's mid-setup onStartCommand will be sent twice,
+            // which may restart the connection.
+            if (vpn.getNetworkInfo().isConnected()) {
+                return true;
+            }
         }
 
-        // Create an intent to start the VPN service declared in the app's manifest.
+        // Start the VPN service declared in the app's manifest.
         Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
-        serviceIntent.setPackage(lockdownPackage);
-
+        serviceIntent.setPackage(alwaysOnPackage);
         try {
-            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(user)) != null;
+            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(userId)) != null;
         } catch (RuntimeException e) {
+            Slog.w(TAG, "VpnService " + serviceIntent + " failed to start", e);
             return false;
         }
     }
@@ -3399,24 +3425,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return false;
         }
 
-        // If the current VPN package is the same as the new one, this is a no-op
-        final String oldPackage = getAlwaysOnVpnPackage(userId);
-        if (TextUtils.equals(oldPackage, packageName)) {
-            return true;
-        }
-
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            if (!vpn.setAlwaysOnPackage(packageName)) {
+            // If the current VPN package is the same as the new one, this is a no-op
+            if (TextUtils.equals(packageName, vpn.getAlwaysOnPackage())) {
+                return true;
+            }
+            if (!vpn.setAlwaysOnPackage(packageName, lockdown)) {
                 return false;
             }
-            if (!updateAlwaysOnVpn(userId)) {
-                vpn.setAlwaysOnPackage(null);
+            if (!startAlwaysOnVpn(userId)) {
+                vpn.setAlwaysOnPackage(null, false);
                 return false;
+            }
+
+            // Save the configuration
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final ContentResolver cr = mContext.getContentResolver();
+                Settings.Secure.putStringForUser(cr, Settings.Secure.ALWAYS_ON_VPN_APP,
+                        packageName, userId);
+                Settings.Secure.putIntForUser(cr, Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
+                        (lockdown ? 1 : 0), userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
         return true;
@@ -3688,11 +3724,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             userVpn = new Vpn(mHandler.getLooper(), mContext, mNetd, userId);
             mVpns.put(userId, userVpn);
+
+            final ContentResolver cr = mContext.getContentResolver();
+            String alwaysOnPackage = Settings.Secure.getStringForUser(cr,
+                    Settings.Secure.ALWAYS_ON_VPN_APP, userId);
+            final boolean alwaysOnLockdown = Settings.Secure.getIntForUser(cr,
+                    Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN, /* default */ 0, userId) != 0;
+            if (alwaysOnPackage != null) {
+                userVpn.setAlwaysOnPackage(alwaysOnPackage, alwaysOnLockdown);
+            }
         }
         if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
             updateLockdownVpn();
-        } else {
-            updateAlwaysOnVpn(userId);
         }
     }
 
@@ -3703,6 +3746,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Stopped user has no VPN");
                 return;
             }
+            userVpn.onUserStopped();
             mVpns.delete(userId);
         }
     }
@@ -3732,7 +3776,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
             updateLockdownVpn();
         } else {
-            updateAlwaysOnVpn(userId);
+            startAlwaysOnVpn(userId);
         }
     }
 
