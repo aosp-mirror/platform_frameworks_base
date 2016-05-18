@@ -80,6 +80,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private final StatusBarIconController mIconController;
     private final RotationLockController mRotationLockController;
     private final DataSaverController mDataSaver;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -95,7 +96,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private boolean mManagedProfileIconVisible = false;
     private boolean mManagedProfileInQuietMode = false;
 
-    private boolean mKeyguardVisible = true;
     private BluetoothController mBluetooth;
 
     public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
@@ -190,6 +190,11 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
                 context.getString(R.string.accessibility_data_saver_on));
         mIconController.setIconVisibility(mSlotDataSaver, false);
         mDataSaver.addListener(this);
+    }
+
+    public void setStatusBarKeyguardViewManager(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
     public void setZenMode(int zen) {
@@ -385,10 +390,9 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
     private void updateManagedProfile() {
         if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
-                + mManagedProfileFocused
-                + " mKeyguardVisible: " + mKeyguardVisible);
+                + mManagedProfileFocused);
         final boolean showIcon;
-        if (mManagedProfileFocused && !mKeyguardVisible) {
+        if (mManagedProfileFocused && !mStatusBarKeyguardViewManager.isShowing()) {
             showIcon = true;
             mIconController.setIcon(mSlotManagedProfile,
                     R.drawable.stat_sys_managed_profile_status,
@@ -446,8 +450,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         updateManagedProfile();
     }
 
-    public void setKeyguardShowing(boolean visible) {
-        mKeyguardVisible = visible;
+    public void notifyKeyguardShowingChanged() {
         updateManagedProfile();
     }
 
