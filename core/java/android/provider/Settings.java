@@ -48,6 +48,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -58,7 +59,6 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.LocaleList;
 import android.util.Log;
 
 import android.util.MemoryIntArray;
@@ -2661,7 +2661,7 @@ public final class Settings {
          * The serialized system locale value.
          *
          * Do not use this value directory.
-         * To get system locale, use {@link android.util.LocaleList#getDefault} instead.
+         * To get system locale, use {@link LocaleList#getDefault} instead.
          * To update system locale, use {@link com.android.internal.app.LocalePicker#updateLocales}
          * instead.
          * @hide

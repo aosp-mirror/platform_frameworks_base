@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package android.util;
+package android.os;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.icu.util.ULocale;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.android.internal.annotations.GuardedBy;
 

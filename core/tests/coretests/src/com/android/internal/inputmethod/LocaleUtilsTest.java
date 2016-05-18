@@ -16,9 +16,9 @@
 
 package com.android.internal.inputmethod;
 
+import android.os.LocaleList;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.LocaleList;
 
 import java.util.ArrayList;
 import java.util.Locale;
