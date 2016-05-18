@@ -302,7 +302,7 @@
     <string name="quick_settings_connected" msgid="1722253542984847487">"Connectat"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"S\'està connectant..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Ancoratge a xarxa"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Zona Wi-Fi"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Punt d\'accés Wi-Fi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificacions"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Llanterna"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Dades mòbils"</string>
@@ -455,7 +455,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"Hora: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"Dia: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Configuració ràpida, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Punt d\'accés Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil professional"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diversió per a uns quants, però no per a tothom"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"El Personalitzador d\'interfície d\'usuari presenta opcions addicionals per canviar i personalitzar la interfície d\'usuari d\'Android. És possible que aquestes funcions experimentals canviïn, deixin de funcionar o desapareguin en versions futures. Continua amb precaució."</string>
@@ -584,7 +584,7 @@
     <string name="select_button" msgid="1597989540662710653">"Tria un botó per afegir-lo"</string>
     <string name="add_button" msgid="4134946063432258161">"Afegeix un botó"</string>
     <string name="save" msgid="2311877285724540644">"Desa"</string>
-    <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
+    <string name="reset" msgid="2448168080964209908">"Restableix"</string>
     <string name="no_home_title" msgid="1563808595146071549">"No s\'ha trobat cap botó d\'inici"</string>
     <string name="no_home_message" msgid="5408485011659260911">"Per poder navegar per aquest dispositiu, cal un botó d\'inici. Afegeix-ne un abans de desar."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Ajusta l\'amplada del botó"</string>
@@ -595,7 +595,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"Amb els botons de codi de tecla es poden afegir tecles del teclat a la barra de navegació. En prémer aquests botons es duen a terme les mateixes accions que quan es prem la tecla corresponent. Primer cal seleccionar la tecla del botó i, a continuació, triar la imatge que es mostrarà."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona un botó de teclat"</string>
     <string name="preview" msgid="9077832302472282938">"Previsualització"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrossega per afegir camps"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrossega per afegir funcions"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega\'ls aquí per suprimir-los"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>

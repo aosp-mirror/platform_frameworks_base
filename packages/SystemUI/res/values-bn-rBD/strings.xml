@@ -43,12 +43,12 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"চালু করুন"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ব্যাটারি সঞ্চয়কারী চালু"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"সেটিংস"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ওয়াই-ফাই"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"স্বতঃ-ঘূর্ণায়মান স্ক্রীণ"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"নিঃশব্দ করুন"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"স্বতঃ"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"বিজ্ঞপ্তিগুলি"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth টিথার করা হয়েছে"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ব্লুটুথ টিথার করা হয়েছে"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতিগুলি সেট আপ করুন"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ফিজিক্যাল কীবোর্ড"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"এই <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপ্লিকেশানটিকে কি USB ডিভাইস অ্যাক্সেস করা মঞ্জুরি দেবেন?"</string>
@@ -99,8 +99,8 @@
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"সামঞ্জস্যের জুম বোতাম৷"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ছোট থেকে বৃহৎ স্ক্রীণে জুম করুন৷"</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth সংযুক্ত হয়েছে৷"</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ব্লুটুথ সংযোগ বিচ্ছিন্ন হয়েছে৷"</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"কোনো ব্যাটারি নেই৷"</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"এক দন্ড ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"দুই দন্ড ব্যাটারি রয়েছে৷"</string>
@@ -147,12 +147,12 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"রোমিং"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ওয়াই-ফাই"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"কোনো সিম নেই৷"</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"সেলুলার ডেটা"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"সেলুলার ডেটা চালু রয়েছে"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"সেলুলার ডেটা বন্ধ আছে"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth টিথারিং৷"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ব্লুটুথ টিথারিং৷"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"বিমান মোড৷"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"কোনো SIM কার্ড নেই।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"পরিষেবা প্রদানকারীর নেটওয়ার্ক পরিবর্তিত হচ্ছে।"</string>
@@ -200,13 +200,13 @@
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"“বিরক্ত করবেন না” বন্ধ৷"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"বিরক্ত করবেন না বন্ধ রয়েছে৷"</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"বিরক্ত করবেন না চালু রয়েছে৷"</string>
-    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth বন্ধ আছে।"</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth চালু আছে।"</string>
-    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Bluetooth সংযুক্ত হচ্ছে।"</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth সংযুক্ত হয়েছে৷"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Bluetooth বন্ধ হয়েছে।"</string>
-    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Bluetooth চালু হয়েছে।"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ব্লুটুথ"</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ব্লুটুথ বন্ধ আছে।"</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ব্লুটুথ চালু আছে।"</string>
+    <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"ব্লুটুথ সংযুক্ত হচ্ছে।"</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"ব্লুটুথ সংযুক্ত হয়েছে৷"</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"ব্লুটুথ বন্ধ হয়েছে।"</string>
+    <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"ব্লুটুথ চালু হয়েছে।"</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"অবস্থানের প্রতিবেদন বন্ধ আছে।"</string>
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"অবস্থানের প্রতিবেদন চালু আছে।"</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"অবস্থানের প্রতিবেদন বন্ধ হয়েছে।"</string>
@@ -239,7 +239,7 @@
     <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"আপনার সেট ডেটার সীমা অবধি পৌঁছনোর কারনে ডিভাইস এই চক্রের অবশিষ্টাংশের জন্য ডেটা ব্যবহারে বিরতি দেওয়া হয়েছে৷ \n\nপুনরায় চালু করা হলে পরিষেবা প্রদানকারীর দ্বারা চার্জের করা হতে পারে৷"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"পুনঃসূচনা করুন"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"কোনো ইন্টারনেট সংযোগ নেই"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi সংযুক্ত হয়েছে"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ওয়াই-ফাই সংযুক্ত হয়েছে"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS এর জন্য অনুসন্ধান করা হচ্ছে"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS এর দ্বারা সেট করা অবস্থান"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অবস্থান অনুরোধ সক্রিয় রয়েছে"</string>
@@ -260,9 +260,9 @@
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"শুধুমাত্র অ্যালার্মগুলি"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"একদম নিরব"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> টি ডিভাইস)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth বন্ধ"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ব্লুটুথ"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ব্লুটুথ (<xliff:g id="NUMBER">%d</xliff:g> টি ডিভাইস)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ব্লুটুথ বন্ধ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"যুক্ত করা কোন ডিভাইস উপলব্ধ নয়"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"উজ্জ্বলতা"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"স্বতঃ ঘূর্ণায়মান"</string>
@@ -282,12 +282,12 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"আমাকে"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"ব্যবহারকারী"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"নতুন ব্যবহারকারী"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"ওয়াই-ফাই"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"সংযুক্ত নয়"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"কোনো নেটওয়ার্ক নেই"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi বন্ধ"</string>
-    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi চালু আছে"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো Wi-Fi নেটওয়ার্ক উপলব্ধ নেই"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ওয়াই-ফাই বন্ধ"</string>
+    <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ওয়াই-ফাই চালু আছে"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো ওয়াই-ফাই নেটওয়ার্ক উপলব্ধ নেই"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাস্ট করুন"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাস্ট করা হচ্ছে"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নামবিহীন ডিভাইস"</string>
@@ -472,8 +472,8 @@
     <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"উপরের দিকে সোয়াইপ করে বিভক্ত-স্ক্রীনে প্রবেশ করার অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"\'এক নজরে\' বোতাম থেকে উপরের দিকে সোয়াইপ করে, বিভক্ত-স্ক্রীনে প্রবেশ করতে অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
-    <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
-    <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
+    <string name="enable_bluetooth_title" msgid="5027037706500635269">"ব্লুটুথ চালু করবেন?"</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে ব্লুটুথ চালু করতে হবে।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"চালু করুন"</string>
     <string name="show_silently" msgid="6841966539811264192">"নীরবভাবে বিজ্ঞপ্তিগুলি দেখায়"</string>
     <string name="block" msgid="2734508760962682611">"সমস্ত বিজ্ঞপ্তি অবরুদ্ধ করুন"</string>
