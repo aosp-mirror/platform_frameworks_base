@@ -17559,21 +17559,26 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 throw new IllegalArgumentException(
                         "Unknown component: " + packageName + "/" + className);
             }
-            // Don't allow other apps to disable an active profile owner
-            if (!UserHandle.isSameApp(uid, pkgSetting.appId)) {
-                final DevicePolicyManagerInternal dpmi = LocalServices
-                        .getService(DevicePolicyManagerInternal.class);
-                if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
-                    throw new SecurityException("Cannot disable a device owner or a profile owner");
-                }
-            }
-            // Allow root and verify that userId is not being specified by a different user
-            if (!allowedByPermission && !UserHandle.isSameApp(uid, pkgSetting.appId)) {
+        }
+
+        // Limit who can change which apps
+        if (!UserHandle.isSameApp(uid, pkgSetting.appId)) {
+            // Don't allow apps that don't have permission to modify other apps
+            if (!allowedByPermission) {
                 throw new SecurityException(
                         "Permission Denial: attempt to change component state from pid="
                         + Binder.getCallingPid()
                         + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
             }
+            // Don't allow changing profile and device owners. Calling into DPMS, so no locking.
+            final DevicePolicyManagerInternal dpmi = LocalServices
+                    .getService(DevicePolicyManagerInternal.class);
+            if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+                throw new SecurityException("Cannot disable a device owner or a profile owner");
+            }
+        }
+
+        synchronized (mPackages) {
             if (uid == Process.SHELL_UID) {
                 // Shell can only change whole packages between ENABLED and DISABLED_USER states
                 int oldState = pkgSetting.getEnabled(userId);
