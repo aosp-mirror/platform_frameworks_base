@@ -8538,6 +8538,15 @@ public final class Settings {
         public static final String SAFE_BOOT_DISALLOWED = "safe_boot_disallowed";
 
         /**
+         * Whether this device is currently in retail demo mode. If true, device
+         * usage is severely limited.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String DEVICE_DEMO_MODE = "device_demo_mode";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
