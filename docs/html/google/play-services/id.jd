@@ -178,7 +178,7 @@ import java.io.IOException;
 public void getIdThread() {
   Info adInfo = null;
   try {
-    adInfo = AdvertisingIdClient.getAdvertisingIdInfo(mContext);
+    adInfo = AdvertisingIdClient.getAdvertisingIdInfo(mContext.getApplicationContext());
   } catch (IOException e) {
     // Unrecoverable error connecting to Google Play services (e.g.,
     // the old version of the service doesn't support getting AdvertisingId).
