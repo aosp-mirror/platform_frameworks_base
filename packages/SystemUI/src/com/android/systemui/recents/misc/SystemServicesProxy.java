@@ -371,11 +371,19 @@ public class SystemServicesProxy {
         try {
             ActivityManager.StackInfo stackInfo = mIam.getStackInfo(
                     ActivityManager.StackId.HOME_STACK_ID);
+            ActivityManager.StackInfo fullscreenStackInfo = mIam.getStackInfo(
+                    ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID);
             ComponentName topActivity = stackInfo.topActivity;
-            if (isHomeStackVisible != null) {
-                isHomeStackVisible.value = stackInfo.visible;
+            boolean homeStackVisibleNotOccluded = stackInfo.visible;
+            if (fullscreenStackInfo != null) {
+                boolean isFullscreenStackOccludingHome = fullscreenStackInfo.visible &&
+                        fullscreenStackInfo.position > stackInfo.position;
+                homeStackVisibleNotOccluded &= !isFullscreenStackOccludingHome;
             }
-            return (stackInfo.visible && topActivity != null
+            if (isHomeStackVisible != null) {
+                isHomeStackVisible.value = homeStackVisibleNotOccluded;
+            }
+            return (homeStackVisibleNotOccluded && topActivity != null
                     && topActivity.getPackageName().equals(RecentsImpl.RECENTS_PACKAGE)
                     && (topActivity.getClassName().equals(RecentsImpl.RECENTS_ACTIVITY)
                         || topActivity.getClassName().equals(RecentsTvImpl.RECENTS_TV_ACTIVITY)));
