@@ -16,9 +16,14 @@
 
 package com.android.documentsui.bots;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.pressImeActionButton;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+
 import android.content.Context;
 import android.support.test.uiautomator.UiDevice;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 /**
  * A test helper class that provides support for keyboard manipulation.
@@ -43,8 +48,9 @@ public class KeyboardBot extends BaseBot {
     }
 
     public void pressEnter() {
-        waitForIdle();
-        mDevice.pressEnter();
-        waitForIdle();
+      //TODO: There seems to be a bug on N/Espresso that makes pressing Enter not work
+      // This is a temporary workaround that somehow works
+      // See b/28399576
+        onView(isAssignableFrom(EditText.class)).perform(pressImeActionButton());
     }
 }

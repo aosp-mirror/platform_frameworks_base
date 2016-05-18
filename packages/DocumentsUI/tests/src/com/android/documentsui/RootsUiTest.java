@@ -39,7 +39,7 @@ public class RootsUiTest extends ActivityTest<FilesActivity> {
 
     public void testRootTapped_GoToRootFromChildDir() throws Exception {
         bots.directory.openDocument(dirName1);
-        bots.main.assertWindowTitle(dirName1);
+        bots.main.assertBreadcrumbTitle(dirName1);
         bots.roots.openRoot(ROOT_0_ID);
         bots.main.assertWindowTitle(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
