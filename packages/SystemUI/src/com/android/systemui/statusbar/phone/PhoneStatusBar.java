@@ -1179,6 +1179,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardIndicationController.setStatusBarKeyguardViewManager(
                 mStatusBarKeyguardViewManager);
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+        mIconPolicy.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
 
         if (FORCE_REMOTE_INPUT_HISTORY) {
@@ -4072,12 +4073,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mScrimController.setKeyguardShowing(true);
-            mIconPolicy.setKeyguardShowing(true);
         } else {
             mScrimController.setKeyguardShowing(false);
-            mIconPolicy.setKeyguardShowing(false);
         }
-
+        mIconPolicy.notifyKeyguardShowingChanged();
         mNotificationPanel.setBarState(mState, mKeyguardFadingAway, goingToFullShade);
         updateDozingState();
         updatePublicMode();
