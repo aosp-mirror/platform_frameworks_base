@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"I-on ang pagtitipid ng baterya"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mga Setting"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"I-auto-rotate ang screen"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"I-auto rotate ang screen"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Mga Notification"</string>
@@ -383,7 +383,7 @@
     <string name="user_remove_user_message" msgid="1453218013959498039">"Made-delete ang lahat ng app at data ng user na ito."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Alisin"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Naka-on ang tagatipid ng baterya"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"Binabawasan ang pagganap at data sa background"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Binabawasan ang performance at data sa background"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"I-off ang pagtitipid ng baterya"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Sisimulan ng i-capture ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang lahat ng ipinapakita sa iyong screen."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Huwag ipakitang muli"</string>
@@ -518,7 +518,7 @@
     <string name="battery_panel_title" msgid="7944156115535366613">"Paggamit ng baterya"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>
-    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Binabawasan ang pagganap at data sa background"</string>
+    <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Binabawasan ang performance at data sa background"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Button na <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
     <string name="keyboard_key_back" msgid="2337450286042721351">"Back"</string>
