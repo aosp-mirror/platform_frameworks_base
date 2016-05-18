@@ -18247,8 +18247,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     void updateUserConfigurationLocked() {
         Configuration configuration = new Configuration(mConfiguration);
-        Settings.System.getConfigurationForUser(mContext.getContentResolver(), configuration,
-                mUserController.getCurrentUserIdLocked());
+        Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
+                mUserController.getCurrentUserIdLocked(), Settings.System.canWrite(mContext));
         updateConfigurationLocked(configuration, null, false);
     }
 
