@@ -66,7 +66,6 @@ import android.os.SystemClock;
 import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
@@ -128,6 +127,19 @@ public class Vpn {
     private final NetworkCapabilities mNetworkCapabilities;
 
     /**
+     * Whether to keep the connection active after rebooting, or upgrading or reinstalling. This
+     * only applies to {@link VpnService} connections.
+     */
+    private boolean mAlwaysOn = false;
+
+    /**
+     * Whether to disable traffic outside of this VPN even when the VPN is not connected. System
+     * apps can still bypass by choosing explicit networks. Has no effect if {@link mAlwaysOn} is
+     * not set.
+     */
+    private boolean mLockdown = false;
+
+    /**
      * List of UIDs that are set to use this VPN by default. Normally, every UID in the user is
      * added to this set but that can be changed by adding allowed or disallowed applications. It
      * is non-null iff the VPN is connected.
@@ -139,6 +151,14 @@ public class Vpn {
      */
     @GuardedBy("this")
     private Set<UidRange> mVpnUsers = null;
+
+    /**
+     * List of UIDs for which networking should be blocked until VPN is ready, during brief periods
+     * when VPN is not running. For example, during system startup or after a crash.
+     * @see mLockdown
+     */
+    @GuardedBy("this")
+    private Set<UidRange> mBlockedUsers = new ArraySet<>();
 
     // Handle of user initiating VPN.
     private final int mUserHandle;
@@ -194,9 +214,10 @@ public class Vpn {
      *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
      *    otherwise the call will fail.
      *
-     * @param newPackage the package to designate as always-on VPN supplier.
+     * @param packageName the package to designate as always-on VPN supplier.
+     * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
      */
-    public synchronized boolean setAlwaysOnPackage(String packageName) {
+    public synchronized boolean setAlwaysOnPackage(String packageName, boolean lockdown) {
         enforceControlPermissionOrInternalCaller();
 
         // Disconnect current VPN.
@@ -210,14 +231,9 @@ public class Vpn {
             prepareInternal(packageName);
         }
 
-        // Save the new package name in Settings.Secure.
-        final long token = Binder.clearCallingIdentity();
-        try {
-            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ALWAYS_ON_VPN_APP, packageName, mUserHandle);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mAlwaysOn = (packageName != null);
+        mLockdown = (mAlwaysOn && lockdown);
+        setVpnForcedLocked(mLockdown);
         return true;
     }
 
@@ -229,14 +245,7 @@ public class Vpn {
      */
     public synchronized String getAlwaysOnPackage() {
         enforceControlPermissionOrInternalCaller();
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            return Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ALWAYS_ON_VPN_APP, mUserHandle);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return (mAlwaysOn ? mPackage : null);
     }
 
     /**
@@ -258,6 +267,11 @@ public class Vpn {
      * @return true if the operation is succeeded.
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
+        // Stop an existing always-on VPN from being dethroned by other apps.
+        if (mAlwaysOn && !TextUtils.equals(mPackage, newPackage)) {
+            return false;
+        }
+
         if (oldPackage != null) {
             if (getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
                 // The package doesn't match. We return false (to obtain user consent) unless the
@@ -279,11 +293,6 @@ public class Vpn {
         if (newPackage == null || (!newPackage.equals(VpnConfig.LEGACY_VPN) &&
                 getAppUid(newPackage, mUserHandle) == mOwnerUID)) {
             return true;
-        }
-
-        // Stop an existing always-on VPN from being dethroned by other apps.
-        if (getAlwaysOnPackage() != null) {
-            return false;
         }
 
         // Check that the caller is authorized.
@@ -469,7 +478,7 @@ public class Vpn {
         mNetworkInfo.setDetailedState(DetailedState.CONNECTING, null, null);
 
         NetworkMisc networkMisc = new NetworkMisc();
-        networkMisc.allowBypass = mConfig.allowBypass;
+        networkMisc.allowBypass = mConfig.allowBypass && !mLockdown;
 
         long token = Binder.clearCallingIdentity();
         try {
@@ -685,7 +694,7 @@ public class Vpn {
             final long token = Binder.clearCallingIdentity();
             List<UserInfo> users;
             try {
-                users = UserManager.get(mContext).getUsers();
+                users = UserManager.get(mContext).getUsers(true);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -774,18 +783,22 @@ public class Vpn {
     public void onUserAdded(int userHandle) {
         // If the user is restricted tie them to the parent user's VPN
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle
-                && mVpnUsers != null) {
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
             synchronized(Vpn.this) {
-                try {
-                    addUserToRanges(mVpnUsers, userHandle, mConfig.allowedApplications,
-                            mConfig.disallowedApplications);
-                    if (mNetworkAgent != null) {
-                        final List<UidRange> ranges = uidRangesForUser(userHandle);
-                        mNetworkAgent.addUidRanges(ranges.toArray(new UidRange[ranges.size()]));
+                if (mVpnUsers != null) {
+                    try {
+                        addUserToRanges(mVpnUsers, userHandle, mConfig.allowedApplications,
+                                mConfig.disallowedApplications);
+                        if (mNetworkAgent != null) {
+                            final List<UidRange> ranges = uidRangesForUser(userHandle);
+                            mNetworkAgent.addUidRanges(ranges.toArray(new UidRange[ranges.size()]));
+                        }
+                    } catch (Exception e) {
+                        Log.wtf(TAG, "Failed to add restricted user to owner", e);
                     }
-                } catch (Exception e) {
-                    Log.wtf(TAG, "Failed to add restricted user to owner", e);
+                }
+                if (mAlwaysOn) {
+                    setVpnForcedLocked(mLockdown);
                 }
             }
         }
@@ -794,16 +807,98 @@ public class Vpn {
     public void onUserRemoved(int userHandle) {
         // clean up if restricted
         UserInfo user = UserManager.get(mContext).getUserInfo(userHandle);
-        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle
-                && mVpnUsers != null) {
+        if (user.isRestricted() && user.restrictedProfileParentId == mUserHandle) {
             synchronized(Vpn.this) {
-                try {
-                    removeVpnUserLocked(userHandle);
-                } catch (Exception e) {
-                    Log.wtf(TAG, "Failed to remove restricted user to owner", e);
+                if (mVpnUsers != null) {
+                    try {
+                        removeVpnUserLocked(userHandle);
+                    } catch (Exception e) {
+                        Log.wtf(TAG, "Failed to remove restricted user to owner", e);
+                    }
+                }
+                if (mAlwaysOn) {
+                    setVpnForcedLocked(mLockdown);
                 }
             }
         }
+    }
+
+    /**
+     * Called when the user associated with this VPN has just been stopped.
+     */
+    public synchronized void onUserStopped() {
+        // Switch off networking lockdown (if it was enabled)
+        setVpnForcedLocked(false);
+        mAlwaysOn = false;
+
+        // Quit any active connections
+        agentDisconnect();
+    }
+
+    /**
+     * Restrict network access from all UIDs affected by this {@link Vpn}, apart from the VPN
+     * service app itself, to only sockets that have had {@code protect()} called on them. All
+     * non-VPN traffic is blocked via a {@code PROHIBIT} response from the kernel.
+     *
+     * The exception for the VPN UID isn't technically necessary -- setup should use protected
+     * sockets -- but in practice it saves apps that don't protect their sockets from breaking.
+     *
+     * Calling multiple times with {@param enforce} = {@code true} will recreate the set of UIDs to
+     * block every time, and if anything has changed update using {@link #setAllowOnlyVpnForUids}.
+     *
+     * @param enforce {@code true} to require that all traffic under the jurisdiction of this
+     *                {@link Vpn} goes through a VPN connection or is blocked until one is
+     *                available, {@code false} to lift the requirement.
+     *
+     * @see #mBlockedUsers
+     */
+    @GuardedBy("this")
+    private void setVpnForcedLocked(boolean enforce) {
+        final Set<UidRange> removedRanges = new ArraySet<>(mBlockedUsers);
+        if (enforce) {
+            final Set<UidRange> addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
+                    /* allowedApplications */ null,
+                    /* disallowedApplications */ Collections.singletonList(mPackage));
+
+            removedRanges.removeAll(addedRanges);
+            addedRanges.removeAll(mBlockedUsers);
+
+            setAllowOnlyVpnForUids(false, removedRanges);
+            setAllowOnlyVpnForUids(true, addedRanges);
+        } else {
+            setAllowOnlyVpnForUids(false, removedRanges);
+        }
+    }
+
+    /**
+     * Either add or remove a list of {@link UidRange}s to the list of UIDs that are only allowed
+     * to make connections through sockets that have had {@code protect()} called on them.
+     *
+     * @param enforce {@code true} to add to the blacklist, {@code false} to remove.
+     * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
+     *               {@code true}) or to remove.
+     * @return {@code true} if all of the UIDs were added/removed. {@code false} otherwise,
+     *         including added ranges that already existed or removed ones that didn't.
+     */
+    @GuardedBy("this")
+    private boolean setAllowOnlyVpnForUids(boolean enforce, Collection<UidRange> ranges) {
+        if (ranges.size() == 0) {
+            return true;
+        }
+        final UidRange[] rangesArray = ranges.toArray(new UidRange[ranges.size()]);
+        try {
+            mNetd.setAllowOnlyVpnForUids(enforce, rangesArray);
+        } catch (RemoteException | RuntimeException e) {
+            Log.e(TAG, "Updating blocked=" + enforce
+                    + " for UIDs " + Arrays.toString(ranges.toArray()) + " failed", e);
+            return false;
+        }
+        if (enforce) {
+            mBlockedUsers.addAll(ranges);
+        } else {
+            mBlockedUsers.removeAll(ranges);
+        }
+        return true;
     }
 
     /**
@@ -952,6 +1047,21 @@ public class Vpn {
             return false;
         }
         for (UidRange uidRange : mVpnUsers) {
+            if (uidRange.contains(uid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if the set of users blocked whilst waiting for VPN to connect includes
+     *         the UID {@param uid}, {@code false} otherwise.
+     *
+     * @see #mBlockedUsers
+     */
+    public synchronized boolean isBlockingUid(int uid) {
+        for (UidRange uidRange : mBlockedUsers) {
             if (uidRange.contains(uid)) {
                 return true;
             }
