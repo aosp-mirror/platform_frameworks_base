@@ -18,11 +18,11 @@ package android.view.inputmethod;
 
 import android.annotation.Nullable;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.util.LocaleList;
 import android.util.Printer;
 
 /**
