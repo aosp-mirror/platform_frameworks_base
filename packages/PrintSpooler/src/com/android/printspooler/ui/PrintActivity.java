@@ -718,6 +718,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     SelectPrinterActivity.INTENT_EXTRA_PRINTER);
             if (printerInfo != null) {
                 mCurrentPrinter = printerInfo;
+                mPrintJob.setPrinterId(printerInfo.getId());
+                mPrintJob.setPrinterName(printerInfo.getName());
+
                 mDestinationSpinnerAdapter.ensurePrinterInVisibleAdapterPosition(printerInfo);
             }
         }
@@ -1964,7 +1967,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     public void onPrinterAvailable(PrinterInfo printer) {
-        if (mCurrentPrinter.equals(printer)) {
+        if (mCurrentPrinter != null && mCurrentPrinter.equals(printer)) {
             setState(STATE_CONFIGURING);
             if (canUpdateDocument()) {
                 updateDocument(false);
@@ -2459,12 +2462,15 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 PrinterHolder printerHolder = mPrinterHolders.get(i);
                 PrinterId oldPrinterId = printerHolder.printer.getId();
                 PrinterInfo updatedPrinter = newPrintersMap.remove(oldPrinterId);
+
                 if (updatedPrinter != null) {
                     printerHolder.printer = updatedPrinter;
                     printerHolder.removed = false;
+                    onPrinterAvailable(printerHolder.printer);
                     newPrinterHolders.add(printerHolder);
                 } else if (mCurrentPrinter != null && mCurrentPrinter.getId().equals(oldPrinterId)){
                     printerHolder.removed = true;
+                    onPrinterUnavailable(printerHolder.printer);
                     newPrinterHolders.add(printerHolder);
                 }
             }
