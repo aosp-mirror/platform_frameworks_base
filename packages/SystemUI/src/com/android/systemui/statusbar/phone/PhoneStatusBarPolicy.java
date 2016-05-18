@@ -432,6 +432,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            updateAlarm();
                             profileChanged(newUserId);
                             updateQuietState();
                             updateManagedProfile();
