@@ -1,46 +1,52 @@
 page.title=Watch Face Complications
 meta.keywords="wear-preview"
 page.tags="wear-preview"
-page.image=images/cards/card-n-sdk_2x.png
-
+page.image=/wear/preview/images/complications-main-image.png
 @jd:body
 
     <div id="qv-wrapper">
       <div id="qv">
-        <ol>
+    <h2>In this document</h2>
+      <ol>
           <li>
-            <a href=
-            "#adding_complications_to_a_watch_face">Adding Complications to a Watch Face</a>
+            <a href="#adding_complications_to_a_watch_face">Adding
+            Complications to a Watch Face</a>
           </li>
           <li>
-            <a href=
-            "#exposing_data_to_complications">Exposing Data to Complications</a>
+            <a href="#exposing_data_to_complications">Exposing Data to
+            Complications</a>
           </li>
           <li>
-            <a href=
-            "#using_complication_types">Using Complication Types</a>
+            <a href="#using_complication_types">Using Complication Types</a>
           </li>
           <li>
-            <a href=
-            "#using_fields_for_complication_data">Using Fields for Complication Data</a>
+            <a href="#using_fields_for_complication_data">Using Fields for
+            Complication Data</a>
           </li>
           <li>
-            <a href=
-            "#api_additions">API Additions</a>
+            <a href="#api_additions">API Additions</a>
           </li>
-        </ol>
+      </ol>
+    <h2>See Also</h2>
+      <ol>
+        <li><a class="external-link"
+          href="https://github.com/googlesamples/android-WatchFace">Watch
+          Face sample app with complications</a></li>
+      </ol>
       </div>
     </div>
 
     <p>
-      A complication is a feature of a watch face <a href=
-      "https://en.wikipedia.org/wiki/Complication_(horology)">beyond hours and
-      minutes</a>. For example, a battery indicator is a complication.
+      A complication is any feature in a watch face that displays <a href=
+      "https://en.wikipedia.org/wiki/Complication_(horology)">more than hours and
+      minutes</a>. For example, a battery indicator is a complication. The
+      Complications API is for both watch faces and data provider apps.
     </p>
 
-    <p>
-      The Complications API is for both watch faces and data provider apps.
-    </p>
+    <div class="col-4of10">
+      <img src="../images/complications-main-image.png" alt="Complications"
+      id="img-split-screen">
+    </div>
 
     <p>
       Watch faces can display extra information without needing code for
@@ -48,6 +54,36 @@ page.image=images/cards/card-n-sdk_2x.png
       battery level, weather, or step-count data) to any watch face using the
       API.
     </p>
+
+    <p>
+      Along with reviewing this page, download the Android Wear 2.0 Preview
+      Reference (see the Complications API <a href=
+      "#api_additions">additions</a>) and review the Javadoc for complications.
+    </p>
+
+    <p>
+      Apps that provide data to watch faces for complications are called
+      "complication data providers." These apps are not responsible for controlling
+      how their data is rendered on the watch face.
+      This allows a watch face to integrate the data naturally with the
+      watch face design.
+      The consuming watch faces are responsible for drawing
+      the complications.
+    </p>
+
+    <p>
+      Watch faces can receive complication data of
+      <a href="#using_complication_types">various types</a> (e.g. small text
+      data or icon data) and then display it.
+    </p>
+
+    <p>
+      As indicated in the diagram below, Android Wear mediates the flow of data
+      from providers to watch faces.
+    </p>
+
+    <img src="../images/complications-data-flow.png" width="" alt=
+    "Complications data flow" title="Complications data flow">
 
     <p>
       For creating or modifying watch faces, see <a href=
@@ -58,33 +94,6 @@ page.image=images/cards/card-n-sdk_2x.png
     <p>
       For writing apps that provide data to watch faces, see <a href=
       "#exposing_data_to_complications">Exposing data to complications</a>.
-    </p>
-
-    <p>
-      Along with reviewing this page, download the Android Wear 2.0 Preview
-      Reference and review the <a href="#api_additions">API additions</a> in
-      the Javadoc for complications.
-    </p>
-
-    <p>
-      Apps that provide data to watch faces for complications are called
-      "complication data providers." These apps lack control over how their
-      data is rendered. The consuming watch faces are responsible for drawing
-      the complications.
-    </p>
-
-    <p>
-      As indicated in the diagram below, Android Wear mediates the flow of data
-      from providers to watch faces.
-    </p>
-
-    <img src="../images/complications-data-flow.png" width="" alt="Complications data flow" title=
-    "Complications data flow">
-
-    <p>
-      Through this process, watch faces can receive complication data of
-      <a href="#using_complication_types">various types</a> (e.g. small text
-      data or icon data) and then display it.
     </p>
 
     <h2 id="adding_complications_to_a_watch_face">
@@ -205,15 +214,17 @@ android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST
     <p>
       The service's manifest entry should also include an
       <code>android:icon</code> attribute. The provided icon should be a
-      single-color white icon. This icon should represent the provider and will
-      be shown in the provider chooser.
+      single-color white icon. Vector drawables are recommended for the icons.
+      An icon should represent the provider and will be shown in the provider
+      chooser.
     </p>
 
     <p>
       Include metadata to specify the supported types, update period, and
       configuration action, if required; for details, download the Android Wear
       2.0 Preview Reference and see the keys listed for the
-      <code>ComplicationProviderService</code> class (in the Javadoc).
+      <code>ComplicationProviderService</code> class (in the Javadoc; see
+      <a href="#api_additions">API Additions</a>).
     </p>
 
     <h3 id="update_period">
@@ -266,11 +277,7 @@ android.support.wearable.complications.UPDATE_PERIOD_SECONDS
     <p>
       Then create the configuration activity with an intent filter for that
       action. The configuration activity must reside in the same package as the
-      provider.
-    </p>
-
-    <p>
-      The configuration activity must return <code>RESULT_OK</code> or
+      provider. The configuration activity must return <code>RESULT_OK</code> or
       <code>RESULT_CANCELED</code>, to tell the system whether the provider
       should be set.
     </p>
@@ -281,14 +288,15 @@ android.support.wearable.complications.UPDATE_PERIOD_SECONDS
     </p>
 
     <p>
-      For details, download the Android Wear 2.0 Preview Reference, containing
-      the Javadoc, and see the following in the
-      <code>ComplicationProviderService</code> class:
+      For details, download the Android Wear 2.0 Preview Reference (see
+      <a href="#api_additions">API Additions</a>), containing the Javadoc, and
+      see the following in the <code>ComplicationProviderService</code> class:
     </p>
 
     <pre>
 METADATA_KEY_PROVIDER_CONFIG_ACTION
-</pre>
+    </pre>
+
     <h2 id="using_complication_types">
       Using Complication Types
     </h2>
@@ -340,6 +348,16 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
       gauges can be shown without including text.
     </p>
 
+    <h3 id="examples_of_complication_types">
+      Examples of Complication Types
+    </h3>
+
+    <p>
+      The following shows examples of complication types:
+    </p>
+    <img src="../images/complication-type-exs.png" width="" alt=
+    "Complication types" title="Complications types - examples">
+
 
     <h3 id="types_and_fields">
       Types and fields
@@ -352,16 +370,16 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th scope="col">
+        <th>
           Type
         </th>
-        <th scope="col">
+        <th>
           Required fields
         </th>
-        <th scope="col">
+        <th>
           Optional fields
         </th>
-        <th scope="col">
+        <th>
           Notes
         </th>
       </tr>
@@ -374,42 +392,12 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           Short text
         </td>
         <td>
-          IconShort title
+          Icon<br>
+          Short title
         </td>
         <td>
           Exactly one of Icon/Short title is expected to be shown if either or
           both are provided.
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          LONG_TEXT
-        </td>
-        <td>
-          Long text
-        </td>
-        <td>
-          Long titleIcon*Small image
-        </td>
-        <td>
-          Title is expected to be shown if provided.
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          RANGED_VALUE
-        </td>
-        <td>
-          ValueMin valueMax value
-        </td>
-        <td>
-          IconShort textShort title
-        </td>
-        <td>
-          Optional fields are not guaranteed to be displayed. Uses include for
-          numerical data within bounds, such as for a percentage.
         </td>
       </tr>
 
@@ -425,6 +413,42 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
         <td>
           Used when text is not needed.The icon is expected to be single-color,
           and may be tinted by the watch face.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          RANGED_VALUE
+        </td>
+        <td>
+          Value<br>
+          Min value<br>
+          Max value
+        </td>
+        <td>
+          Icon<br>
+          Short text<br>
+          Short title
+        </td>
+        <td>
+          Optional fields are not guaranteed to be displayed.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          LONG_TEXT
+        </td>
+        <td>
+          Long text
+        </td>
+        <td>
+          Long title<br>
+          Icon<br>
+          Small image
+        </td>
+        <td>
+          Title is expected to be shown if provided.
         </td>
       </tr>
 
@@ -467,16 +491,16 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th scope="col">
+        <th>
           Type
         </th>
-        <th scope="col">
+        <th>
           Required fields
         </th>
-        <th scope="col">
+        <th>
           Optional fields
         </th>
-        <th scope="col">
+        <th>
           Notes
         </th>
       </tr>
@@ -514,16 +538,6 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
       </tr>
     </table>
 
-    <h3 id="examples_of_complication_types">
-      Examples of Complication Types
-    </h3>
-    <p>
-      The following shows examples of complication types:
-    </p>
-
-    <img src="../images/complication-type-exs.png" width=""
-    alt="Complication types" title="Complications types - examples">
-
     <h2 id="using_fields_for_complication_data">
       Using Fields for Complication Data
     </h2>
@@ -543,10 +557,10 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th scope="col">
+        <th>
           Field
         </th>
-        <th scope="col">
+        <th>
           Description
         </th>
       </tr>
@@ -563,11 +577,21 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
       <tr>
         <td>
+          Icon
+        </td>
+        <td>
+          A single-color image representing the data or the source of the data.
+          Must be tintable. Vector drawables are recommended for this field.
+        </td>
+      </tr>
+
+      <tr>
+        <td>
           Short title
         </td>
         <td>
-          Descriptive field for small complications.Should not exceed 7
-          characters.May only be meaningful in combination with <em>Short
+          Descriptive field for small complications. Should not exceed 7
+          characters. May only be meaningful in combination with <em>Short
           text</em>.
         </td>
       </tr>
@@ -586,7 +610,7 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           Long title
         </td>
         <td>
-          Descriptive field for large, text-based complications.May only be
+          Descriptive field for large, text-based complications. May only be
           meaningful in combination with <em>Long text</em>.
         </td>
       </tr>
@@ -596,7 +620,7 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           Value
         </td>
         <td>
-          A numerical (float) representation of the data.Expected to be
+          A numerical (float) representation of the data. Expected to be
           depicted relative to the bounds the <em>Min value</em> and <em>Max
           value</em> fields (but not required to be between those bounds).
         </td>
@@ -608,7 +632,7 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
         </td>
         <td>
           The lower bound for the range within which <em>Value</em> should be
-          depicted.Only meaningful in combination with <em>Value</em> and
+          depicted. Only meaningful in combination with <em>Value</em> and
           <em>Max value</em>.
         </td>
       </tr>
@@ -619,18 +643,8 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
         </td>
         <td>
           The upper bound for the range within which <em>value</em> should be
-          depicted.Only meaningful in combination with <em>Value</em> and
+          depicted. Only meaningful in combination with <em>Value</em> and
           <em>Min value</em>.
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          Icon
-        </td>
-        <td>
-          A single-color image representing the data or the source of the
-          data.Must be tintable.
         </td>
       </tr>
 
@@ -639,8 +653,8 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           Small image
         </td>
         <td>
-          A small image to represent the data or the source of the data.May be
-          full color.Not expected to fill the entire watch face.
+          A small image to represent the data or the source of the data. May be
+          full color. Not expected to fill the entire watch face.
         </td>
       </tr>
 
@@ -649,7 +663,7 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
           Large image
         </td>
         <td>
-          An image with sufficient resolution to fill the watch face.May be
+          An image with sufficient resolution to fill the watch face. May be
           full color.
         </td>
       </tr>
@@ -681,8 +695,10 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
     </h2>
 
     <p>
-      The Complications API includes the following new classes in the Wearable
-      Support Library:
+      The Complications API includes new classes in the Wearable Support
+      Library. For more information, download the <a href=
+      "{@docRoot}wear/preview/start.html#get_the_preview_reference_documentation">
+      Android Wear 2.0 Preview Reference</a>.
     </p>
 
     <ul>
