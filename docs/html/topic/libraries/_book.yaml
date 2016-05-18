@@ -6,8 +6,6 @@ toc:
     path: /topic/libraries/support-library/features.html
   - title: Setup
     path: /topic/libraries/support-library/setup.html
-  - title: Revision History
-    path: /topic/libraries/support-library/revisions.html
 
 - title: Data Binding Library
   path: /topic/libraries/data-binding/index.html
