@@ -16,7 +16,14 @@
 
 package com.android.documentsui;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import android.content.ClipData;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.view.DragEvent;
 import android.view.View;
 
@@ -25,14 +32,16 @@ import com.android.documentsui.testing.DragEvents;
 import com.android.documentsui.testing.TestTimer;
 import com.android.documentsui.testing.TestViews;
 
-import junit.framework.TestCase;
-
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ItemDragListenerTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class ItemDragListenerTest {
 
     private static final long DELAY_AFTER_HOVERING = ItemDragListener.SPRING_TIMEOUT + 1;
 
@@ -42,7 +51,7 @@ public class ItemDragListenerTest extends TestCase {
 
     private TestDragListener mListener;
 
-    @Override
+    @Before
     public void setUp() {
         mTestView = TestViews.createTestView();
 
