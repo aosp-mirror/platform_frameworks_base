@@ -17,9 +17,9 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.LocaleList;
 
 import java.util.Locale;
 

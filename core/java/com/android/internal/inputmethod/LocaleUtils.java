@@ -22,7 +22,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.icu.util.ULocale;
-import android.util.LocaleList;
+import android.os.LocaleList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
