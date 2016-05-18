@@ -53,7 +53,7 @@ page.tags="wear-preview"
     </h2>
 
     <p>
-      To prevent bridging of notifications from a phone app, you can use a
+      To prevent bridging of notifications from a phone app, you can use an
       entry in the manifest file of the watch app (e.g. the standalone watch
       app), as follows:
     </p>

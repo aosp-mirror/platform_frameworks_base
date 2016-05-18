@@ -34,12 +34,13 @@ methods for Wear.</p>
 
 <h2 id="creating">Creating an Input Method for Wear</h2>
 <p>The Android platform provides a standard framework for creating IMEs. To create
- a wear-specific IME, you need to optimize your IME for limited screen size.
+ a Wear-specific IME, you need to optimize your IME for limited screen size.
   </p>
 
-<p>This document provides guidance that can help you create a wear-specific IME.
-Before you continue with this guide, it's important that you first read the
-documentation for <a href="{@docRoot}guide/topics/text/creating-input-method.html">Creating an Input Method</a>
+<p>This document provides guidance that can help you create a Wear-specific IME.
+Before you continue with this guide, it's important that you read the
+documentation for
+<a href="{@docRoot}guide/topics/text/creating-input-method.html">Creating an Input Method</a>
  on handsets.
 </p>
 
@@ -49,17 +50,17 @@ If you are developing an IME for Wear, remember that the
 feature is supported only on Android 6.0 (API level 23) and higher versions of 
 the platform. 
 To ensure that your IME can only be installed on Wearables that support input 
-methods beyond voice, add the following to your application's manifest:
+methods beyond voice, add the following to your app's manifest:
 <pre>
 &lt;uses-sdk android:minSdkVersion="23" />
 </pre>
-This indicates that your application requires Android 6.0 or higher. 
+This indicates that your app requires Android 6.0 or higher. 
 For more information, see <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a>
  and the documentation for the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk></a> 
 element.
 <p>
-To control how your application is filtered from devices that do not support Wear
-IMEs (for example, on Phone), add the following to your application's manifest:
+To control how your app is filtered from devices that do not support Wear
+IMEs (for example, on Phone), add the following to your app's manifest:
 </p>
 <pre>
 &lt;uses-feature android:required="true" android:name="android.hardware.type.watch" />
@@ -80,7 +81,7 @@ IMEs (for example, on Phone), add the following to your application's manifest:
 
 <h2 id="considerations">General IME Considerations</h2>
 
-<p>Here are some things to consider when implementing IME for wear:</p>
+<p>Here are some things to consider when implementing IME for Wear:</p>
 
 <ul>
 <li><strong>Set Default Action</strong>
@@ -92,11 +93,11 @@ and Wear apps expect only single-line text entry. The ENTER key should always tr
   or action.</p>
 </li>
 
-<li><Strong>Use full screen mode IME</strong>
+<li><Strong>Use full-screen-mode IME</strong>
 <p>
-Input methods on Wear will consume most of the screen, leaving very little of the
- app visible; Using full-screen mode ensures an optimal user experience regardless
-  of the application UI.  In full screen mode, an 
+Input methods on Wear consume most of the screen, leaving very little of the
+ app visible; using full-screen mode ensures an optimal user experience regardless
+  of the app UI.  In full-screen mode, an 
   <a href="{@docRoot}reference/android/view/inputmethod/ExtractedText.html">{@code ExtractEditText}</a> provides a mirrored
    view of the text field being edited and can be styled to blend with the rest of
     the input method UI. For more details on full-screen mode, see 
@@ -121,7 +122,7 @@ regardless of the input language.  For more details, see
 Android allows users to easily switch between all IMEs supported by the platform.
  In your IME implementation, set the boolean 
  <a href="{@docRoot}guide/topics/text/creating-input-method.html#Switching">supportsSwitchingToNextInputMethod = true</a>
- to enable your IME to support switching mechanism 
+ to enable your IME to support the switching mechanism 
  (so that apps can switch to the next platform-supported IME).
 </p>
 </li>
