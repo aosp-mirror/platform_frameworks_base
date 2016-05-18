@@ -18,7 +18,7 @@ package com.android.internal.app;
 
 import android.icu.text.ListFormatter;
 import android.icu.util.ULocale;
-import android.util.LocaleList;
+import android.os.LocaleList;
 
 import java.text.Collator;
 import java.util.Comparator;

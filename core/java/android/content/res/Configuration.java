@@ -28,10 +28,10 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.os.Build;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.LocaleList;
 import android.view.View;
 
 import java.io.IOException;

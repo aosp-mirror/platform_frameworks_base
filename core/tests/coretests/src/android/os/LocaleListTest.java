@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.util;
+package android.os;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.LocaleList;
 
 import java.util.Locale;
 
