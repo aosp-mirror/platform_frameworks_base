@@ -4713,6 +4713,14 @@ public final class Settings {
         public static final String ALWAYS_ON_VPN_APP = "always_on_vpn_app";
 
         /**
+         * Whether to block networking outside of VPN connections while always-on is set.
+         * @see #ALWAYS_ON_VPN_APP
+         *
+         * @hide
+         */
+        public static final String ALWAYS_ON_VPN_LOCKDOWN = "always_on_vpn_lockdown";
+
+        /**
          * Whether applications can be installed for this user via the system's
          * {@link Intent#ACTION_INSTALL_PACKAGE} mechanism.
          *
