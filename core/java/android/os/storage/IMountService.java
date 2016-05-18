@@ -1233,8 +1233,8 @@ public interface IMountService extends IInterface {
             }
 
             @Override
-            public void changeUserKey(int userId, int serialNumber,
-                    byte[] token, byte[] oldSecret, byte[] newSecret) throws RemoteException {
+            public void addUserKeyAuth(int userId, int serialNumber,
+                    byte[] token, byte[] secret) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 try {
@@ -1242,9 +1242,23 @@ public interface IMountService extends IInterface {
                     _data.writeInt(userId);
                     _data.writeInt(serialNumber);
                     _data.writeByteArray(token);
-                    _data.writeByteArray(oldSecret);
-                    _data.writeByteArray(newSecret);
-                    mRemote.transact(Stub.TRANSACTION_changeUserKey, _data, _reply, 0);
+                    _data.writeByteArray(secret);
+                    mRemote.transact(Stub.TRANSACTION_addUserKeyAuth, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+            }
+
+            @Override
+            public void fixateNewestUserKeyAuth(int userId) throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeInt(userId);
+                    mRemote.transact(Stub.TRANSACTION_fixateNewestUserKeyAuth, _data, _reply, 0);
                     _reply.readException();
                 } finally {
                     _reply.recycle();
@@ -1489,7 +1503,9 @@ public interface IMountService extends IInterface {
 
         static final int TRANSACTION_mountAppFuse = IBinder.FIRST_CALL_TRANSACTION + 69;
 
-        static final int TRANSACTION_changeUserKey = IBinder.FIRST_CALL_TRANSACTION + 70;
+        static final int TRANSACTION_addUserKeyAuth = IBinder.FIRST_CALL_TRANSACTION + 70;
+
+        static final int TRANSACTION_fixateNewestUserKeyAuth = IBinder.FIRST_CALL_TRANSACTION + 71;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -2069,14 +2085,20 @@ public interface IMountService extends IInterface {
                     reply.writeNoException();
                     return true;
                 }
-                case TRANSACTION_changeUserKey: {
+                case TRANSACTION_addUserKeyAuth: {
                     data.enforceInterface(DESCRIPTOR);
                     int userId = data.readInt();
                     int serialNumber = data.readInt();
                     byte[] token = data.createByteArray();
-                    byte[] oldSecret = data.createByteArray();
-                    byte[] newSecret = data.createByteArray();
-                    changeUserKey(userId, serialNumber, token, oldSecret, newSecret);
+                    byte[] secret = data.createByteArray();
+                    addUserKeyAuth(userId, serialNumber, token, secret);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_fixateNewestUserKeyAuth: {
+                    data.enforceInterface(DESCRIPTOR);
+                    int userId = data.readInt();
+                    fixateNewestUserKeyAuth(userId);
                     reply.writeNoException();
                     return true;
                 }
@@ -2452,8 +2474,9 @@ public interface IMountService extends IInterface {
     public void createUserKey(int userId, int serialNumber, boolean ephemeral)
             throws RemoteException;
     public void destroyUserKey(int userId) throws RemoteException;
-    public void changeUserKey(int userId, int serialNumber,
-            byte[] token, byte[] oldSecret, byte[] newSecret) throws RemoteException;
+    public void addUserKeyAuth(int userId, int serialNumber,
+            byte[] token, byte[] secret) throws RemoteException;
+    public void fixateNewestUserKeyAuth(int userId) throws RemoteException;
 
     public void unlockUserKey(int userId, int serialNumber,
             byte[] token, byte[] secret) throws RemoteException;
