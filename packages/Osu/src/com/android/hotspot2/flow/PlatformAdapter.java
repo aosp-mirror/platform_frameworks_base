@@ -365,6 +365,13 @@ public class PlatformAdapter {
                 altSP = homeSP;
             }
             updateNetwork(altSP, caCert, clientCerts, privateKey);
+
+            if (privateKey != null) {
+                X509Certificate cltCert = getCert(certs, OSUCertType.Client);
+                mKeyStore.setKeyEntry(CERT_CLT_KEY_ALIAS + homeSP.getFQDN(),
+                        privateKey, null, new X509Certificate[]{cltCert});
+                mKeyStore.setCertificateEntry(CERT_CLT_CERT_ALIAS + homeSP.getFQDN(), cltCert);
+            }
         }
 
         Intent intent = new Intent(OSUService.REMEDIATION_DONE_ACTION);

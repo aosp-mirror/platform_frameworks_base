@@ -135,13 +135,17 @@ public class RemediationHandler implements AlarmManager.OnAlarmListener {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         try {
-            if (mActivePasspointConfig != null
-                    && update.matches(wifiInfo, mActivePasspointConfig.getHomeSP())) {
-                Log.d(OSUManager.TAG, "WNM frame received, remediating now");
+            if (mActivePasspointConfig == null) {
+                Log.d(OSUManager.TAG, String.format("WNM remediation frame '%s' through %012x " +
+                        "received, adding to outstanding remediations", url, bssid));
+                mOutstanding.addFirst(new PendingUpdate(bssid, url));
+            } else if (update.matches(wifiInfo, mActivePasspointConfig.getHomeSP())) {
+                Log.d(OSUManager.TAG, String.format("WNM remediation frame '%s' through %012x " +
+                        "received, remediating now", url, bssid));
                 update.remediate(wifiManager.getCurrentNetwork());
             } else {
-                Log.d(OSUManager.TAG, "WNM frame received, adding to outstanding remediations");
-                mOutstanding.addFirst(new PendingUpdate(bssid, url));
+                Log.w(OSUManager.TAG, String.format("WNM remediation frame '%s' through %012x " +
+                        "does not meet restriction", url, bssid));
             }
         } catch (IOException ioe) {
             Log.w(OSUManager.TAG, "Failed to remediate from WNM: " + ioe);
@@ -497,8 +501,8 @@ public class RemediationHandler implements AlarmManager.OnAlarmListener {
                 Log.d(OSUManager.TAG, String.format("Checking applicability of %s to %012x\n",
                         wifiInfo != null ? wifiInfo.getBSSID() : "-", mBssid));
                 return wifiInfo != null
-                        && Utils.parseMac(wifiInfo.getBSSID()) == mBssid;
-                        //&& passesRestriction(activeSP);   // !!! b/28600780
+                        && Utils.parseMac(wifiInfo.getBSSID()) == mBssid
+                        && passesRestriction(activeSP);   // !!! b/28600780
             } else {
                 return passesRestriction(mHomeSP);
             }
