@@ -1523,8 +1523,8 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"배터리 수명 개선을 위해, 배터리 세이버는 기기의 성능을 줄이고 진동, 위치 서비스 및 대부분의 백그라운드 데이터를 제한합니다. 이메일, 메시지 및 동기화에 의존하는 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n배터리 세이버는 기기를 충전 중일 때는 자동으로 사용 중지됩니다."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 세이버는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 즉, 예를 들어 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
-    <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 세이버를 사용할까요?"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 즉, 예를 들어 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
+    <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>

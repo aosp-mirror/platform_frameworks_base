@@ -249,13 +249,13 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"క్యాలెండర్"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"మీ క్యాలెండర్‌ను ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS సందేశాలను పంపుతుంది మరియు వీక్షిస్తుంది"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS సందేశాలను పంపడానికి మరియు వీక్షించడానికి"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"నిల్వ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైల్‌లను ప్రాప్యత చేయడానికి"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"మైక్రోఫోన్"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేస్తుంది"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"కెమెరా"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీస్తుంది మరియు వీడియోను రికార్డ్ చేస్తుంది"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లను చేయడానికి మరియు నిర్వహించడానికి"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>

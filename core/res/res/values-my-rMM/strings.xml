@@ -924,9 +924,9 @@
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> က အလုပ်လုပ်နေသည်။"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"နောက်ထပ်အချက်အလက်များကို ကြည့်ရန် သို့မဟုတ် အက်ပ်ကိုရပ်တန့်ရန် တို့ပါ။"</string>
     <string name="ok" msgid="5970060430562524910">"ကောင်းပြီ"</string>
-    <string name="cancel" msgid="6442560571259935130">"ထားတော့"</string>
+    <string name="cancel" msgid="6442560571259935130">"ဖျက်သိမ်းရန်"</string>
     <string name="yes" msgid="5362982303337969312">"ကောင်းပြီ"</string>
-    <string name="no" msgid="5141531044935541497">"ထားတော့"</string>
+    <string name="no" msgid="5141531044935541497">"ဖျက်သိမ်းရန်"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"သတိပြုရန်"</string>
     <string name="loading" msgid="7933681260296021180">"တင်နေ…"</string>
     <string name="capital_on" msgid="1544682755514494298">"ဖွင့်ရန်"</string>
@@ -1071,7 +1071,7 @@
     <string name="sms_short_code_details" msgid="5873295990846059400"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် "</b>" ကုန်ကျမှု ရှိလာနိုင်သည်။"</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"ဒါက သင့် မိုဘိုင်း အကောင့် အတွက် ကုန်ကျမှု ရှိလာနိုင်သည်။"</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"ပို့ရန်"</string>
-    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ထားတော့"</string>
+    <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"ဖျက်သိမ်းရန်"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"ကျွန်ပ်၏ရွေးချယ်မှုကို မှတ်ထားရန်"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"နောင်တွင် ဆက်တင် &gt; အပလီကေးရှင်းများ မှပြောင်းနိုင်သည်"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"အမြဲခွင့်ပြုရန်"</string>
@@ -1238,7 +1238,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ဖျက်ပီးသည်များကို ပယ်ဖျက်ရန်"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"လက်ရှိ ဘာမှမလုပ်ရန်"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"အကောင့် တစ်ခု ရွေးပါ"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"အကောင့် ထပ်ဖြည့်ပါ"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"အကောင့်တစ်ခုထည့်ရန်"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"အကောင့်ထပ်ထည့်ရန်"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"တိုးရန်"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"လျှော့ရန်"</string>
@@ -1259,7 +1259,7 @@
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"ပြီးခဲ့သော လ"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"လာမည့် လ"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Altခလုတ်"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ပယ်ဖျက်ရန်ခလုတ်"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"ဖျက်သိမ်းရန် ခလုတ်"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"ဖျက်ရန်ခလုတ်"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"ပြီးဆုံးသည့်ခလုတ်"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"စနစ်ပြောင်းခြင်းခလုတ်"</string>
@@ -1398,7 +1398,7 @@
     <string name="error_message_title" msgid="4510373083082500195">"အမှား"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"ဒီအပြောင်းအလဲမျိုးကို သင့် စီမံအုပ်ချုပ်သူမှ ခွင့်မပြုပါ"</string>
     <string name="app_not_found" msgid="3429141853498927379">"ဤလုပ်ဆောင်ချက်ကို ပြုလုပ်ပေးမည့် အပလီကေးရှင်း မရှိပါ။"</string>
-    <string name="revoke" msgid="5404479185228271586">"ထားတော့"</string>
+    <string name="revoke" msgid="5404479185228271586">"ဖျက်သိမ်းရန်"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"အိုက်အက်စ်အို အေ ဝ"</string>
     <string name="mediasize_iso_a1" msgid="3333060421529791786">"အိုက်အက်စ်အို အေ၁"</string>
     <string name="mediasize_iso_a2" msgid="3097535991925798280">"အိုက်အက်စ်အို အေ ၂"</string>

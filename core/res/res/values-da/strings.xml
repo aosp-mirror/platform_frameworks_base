@@ -597,15 +597,15 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Andet"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Tilbagekald"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Bil"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Virksomhed (hovednummer)"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Firma (hovednummer)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Hovednr."</string>
-    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Andre faxbeskeder"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Andet Faxnummer"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Arbejdsmobiltelefon"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Personsøger"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Arbejdsmobil"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Personsøger (job)"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"mms"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Tilpasset"</string>

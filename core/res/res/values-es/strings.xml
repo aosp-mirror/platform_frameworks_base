@@ -133,7 +133,7 @@
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"Llamada Wi-Fi de %s"</item>
   </string-array>
-    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"No"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por tu administrador"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado por tu administrador"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se está cargando."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"El Economizador de Datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, las imágenes no se mostrarán hasta que no las toques."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"El Economizador de Datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se muestren hasta que no las toques."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
