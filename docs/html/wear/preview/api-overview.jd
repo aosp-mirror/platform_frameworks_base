@@ -12,13 +12,6 @@ page.image=images/cards/card-n-apis_2x.png
   <h2>Key developer features</h2>
   <ol>
       <ul style="list-style-type:none;">
-        <li><a href="#stand-alone">Standalone Devices</a>
-          <ol>
-            <li><a href="#wear-apk">Wear-Specific APKs</a></li>
-            <li><a href="#network">Network Access</a></li>
-            <li><a href="#auth">Authentication</a></li>
-          </ol>
-        </li>
         <li><a href="#notify">Notifications and Input</a>
           <ol>
             <li><a href="#expanded">Expanded Notification</a></li>
@@ -28,6 +21,13 @@ page.image=images/cards/card-n-apis_2x.png
             <li><a href="#remote-input">Remote Input</a></li>
             <li><a href="#bridging">Bridging Mode</a></li>
             <li><a href="#imf">Input Method Framework</a></li>
+          </ol>
+        </li>
+        <li><a href="#stand-alone">Standalone Devices</a>
+          <ol>
+            <li><a href="#wear-apk">Wear-Specific APKs</a></li>
+            <li><a href="#network">Network Access</a></li>
+            <li><a href="#auth">Authentication</a></li>
           </ol>
         </li>
         <li><a href="#ui">User Interface Improvements</a>
@@ -48,10 +48,124 @@ page.image=images/cards/card-n-apis_2x.png
   highlight some of the new features for Wear developers.
 </p>
 
+<h2 id="notify">Notifications and Input</h2>
+
+<p>In Wear 2.0, we’ve redesigned the key experiences on the watch to be even more
+ intuitive and provide users new ways to respond to messages. Some of the highlights
+  are below; for a complete list of changes, see
+  <a href="{@docRoot}wear/preview/features/notifications.html">Notification Changes in Wear 2.0</a>.
+
+
+<img src="{@docRoot}wear/preview/images/expanded_diagram.png" height="240" style="float:right;margin:10px 0 0 40px" />
+<h3 id="expanded">Expanded notifications</h3>
+
+<p>When a user taps on a notification that is bridged from the phone to
+the watch or that lacks a <a href="{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContent
+Intent(android.app.PendingIntent)">{@code contentIntent}</a>, the user will be
+taken to the expanded view of that notification. When you
+<a href="{@docRoot}training/wearables/notifications/pages.html">specify additional
+ content pages</a> and actions for a notification, those are available to the user
+  within the expanded notification. Each expanded notification follows <a href="https://google.com/design/wear">Material Design for Android Wear</a>, so the user gets an app-like experience.
+</p>
+
+
+<h3 id="messaging">Messaging Style notification</h3>
+<p> If you have a chat messaging app, your notifications should use
+{@code Notification.MessagingStyle}, which is new in Android 6.0. Wear 2.0 uses
+the chat messages included in a
+<a href="{docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
+ notification
+(see {@code addMessage()}) to provide a rich chat app-like experience in the
+expanded notification.
+</p>
+
+
+<h3 id="smart-replies">Smart Reply</h3>
+
+<p>Android Wear 2.0 introduces support for Smart Reply in
+<a href="{@docRoot}wear/preview/features/notifications.html#messaging">{@code MessagingStyle}</a>
+ notifications. Smart Reply provides the user with contextually relevant,
+ touchable choices in the expanded notification and in
+ <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>.
+</p>
+
+<p>By enabling Smart Reply for your {@code MessagingStyle} notifications, you provide
+users a fast (single tap), discreet (no speaking aloud), and reliable way to respond
+ to chat messages they receive.
+ </p>
+
+
+<img src="{@docRoot}wear/preview/images/remoteinput.png" height="240" style="float:right;margin:10px 0 0 40px" />
+
+<h3 id="remote-input">Remote Input</h3>
+
+<p>Wear 2.0 users can choose between various input options from
+<a href="{@docRoot}reference/android/app/RemoteInput.html">Remote Input</a>.
+ These options include:
+</p>
+<ul>
+<li>Dictation</li>
+<li>Emoji</li>
+<li>Canned responses</li>
+<li>Smart Reply</i>
+<li>Default IME </i>
+</ul>
+
+<p>
+For messaging notifications with Smart Reply, the system-generated Smart Reply
+ appears within <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>
+  above the developer-provided list of canned responses.
+  You can also use the
+  <a href="{@docRoot}reference/android/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">setChoices()</a>
+   method in the {@code RemoteInput} API to enable users to select from a list
+   of canned responses.
+</p>
+
+<h3 id="bridging"> Bridging Mode </h3>
+<p>By default, notifications are
+<a href="{@docRoot}training/wearables/notifications/index.html">
+bridged</a> (shared) from an app on a companion phone
+to the watch. Since a phone app and a standalone watch app may be sources of the
+ same notifications, the Android Wear 2.0 Preview includes a Bridging mode feature.
+  Developers can begin planning to change the behavior of notifications with the
+  following:
+</p>
+
+<ul>
+<li>Specifying in the standalone app's Android manifest file that notifications from
+ the corresponding phone app should not be bridged to the watch. </li>
+<li>Setting a dismissal ID so notification dismissals (by users) are synced across
+devices.</li>
+</ul>
+
+<p>For an example of how to use this feature, see <a href="{@docRoot}wear/preview/features/bridger.html">
+Bridging Mode for Notifications</a>.</p>
+
+<h3 id="imf">Input Method Framework</h3>
+
+<p>Wear 2.0 extends the Android input method framework (IMF) to Android Wear.
+This allows users to enter text on Wear using the system default IME or third party
+ IMEs.  The Wear IME lets the user enter text via gesture typing as well as tapping
+  individual keys. The IMF APIs used for Wear devices are the same as other form
+  factors, though usage is slightly different due to limited screen real estate.
+</p>
+
+<p>Wear provides user settings on the watch that let the user:</p>
+<ul>
+<li>Enable multiple IMEs from the list of installed IMEs.</li>
+<li>Set a single default IME from the list of enabled IMEs.</li>
+<li>Change languages for various IMEs.</li>
+</ul>
+
+<p>To learn how to create an IME for Wear, see <a href="{@docRoot}wear/preview/features/ime.html">
+Input Method Framework</a>.
+</p>
+
+
 <h2 id="stand-alone">Standalone Devices</h2>
 
 <p>Standalone watches will enable Android Wear apps to work independently of phone
- apps. This means your app can continue to offer full functionality even if the 
+ apps. This means your app can continue to offer full functionality even if the
  paired phone is far away or turned off. </p>
 
 <h3 id="wear-apk">Wear-Specific APKs</h3>
@@ -61,7 +175,7 @@ phone app. This delivery method can result in an increased download size for use
  regardless of whether they have an Android Wear device.
 </p>
 
-<p>This delivery method is planned to change; the
+<p>With standalone devices, the
 <a href ="{@docRoot}google/play/publishing/multiple-apks.html">Multi-APK</a>
  delivery method will be used. Developers will have the ability to release Android
   Wear apps independently of the corresponding phone apps. Please stay tuned for
@@ -136,141 +250,22 @@ advertise a capability on the phone app and retrieve the capability on the watch
 
 <h4>Utilizing Account Manager</h4>
 Android Wear will include the <a href="{@docRoot}reference/android/accounts/AccountManager.html">
-AccountManager</a>; it is planned to be accessible for syncing and storing account
+AccountManager</a>, which will be accessible for syncing and storing account
  data, as it is on an Android phone.
-</p>
-
-
-
-<h2 id="notify">Notifications and Input</h2>
-
-<p>In Wear 2.0, we’ve redesigned the key experiences on the watch to be even more
- intuitive and provide users new ways to respond to messages. Some of the highlights
-  are below; for a complete list of changes, see
-  <a href="{@docRoot}wear/preview/features/notifications.html">Notification Changes in Wear 2.0</a>.
-
-<h3 id="expanded">Expanded notifications</h3>
-<p>When a user taps on a notification that is bridged from the phone to
-the watch or that lacks a <a href="{@docRoot}reference/android/support/v4/app/NotificationCompat.Builder.html#setContent
-Intent(android.app.PendingIntent)">{@code contentIntent}</a>, the user will be
-taken to the expanded view of that notification. When you
-<a href="{@docRoot}training/wearables/notifications/pages.html">specify additional
- content pages</a> and actions for a notification, those are available to the user
-  within the expanded notification. Each expanded notification follows <a href="https://google.com/design/wear">Material Design for Android Wear</a>, so the user gets an app-like experience.
-</p>
-<p><img src="{@docRoot}wear/preview/images/expanded_diagram.png"></p>
-<p><b>Figure 1</b>.An expanded notification</p>
-
-<h3 id="messaging">Messaging Style notification</h3>
-<p> If you have a chat messaging app, your notifications should use
-{@code Notification.MessagingStyle}, which is new in Android 6.0. Wear 2.0 uses
-the chat messages included in a 
-<a href="{docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
- notification
-(see {@code addMessage()}) to provide a rich chat app-like experience in the
-expanded notification.
-</p>
-
-
-<h3 id="smart-replies">Smart Reply</h3>
-<p>Android Wear 2.0 introduces support for Smart Reply in 
-<a href="{@docRoot}wear/preview/features/notifications.html#messaging">{@code MessagingStyle}</a>
- notifications. Smart Reply provides the user with contextually relevant,
- touchable choices in the expanded notification and in 
- <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>.
-</p>
-
-<p><img src="{@docRoot}wear/preview/images/messaging_style.png"></p>
-<p><b>Figure 2</b>.Messaging Style notification with smart replies</p>
-
-<p>By enabling Smart Reply for your {@code MessagingStyle} notifications, you provide
-users a fast (single tap), discreet (no speaking aloud), and reliable way to respond
- to chat messages they receive.
- </p>
-
-
-<h3 id="remote-input">Remote Input</h3>
-<div style="float:right;">
-<img src="{@docRoot}wear/preview/images/remoteinput.png" style="padding-left:1.5em;">
-
-<p class="img-caption" style="padding-left:2em;">
-  <strong>Figure 5.</strong> Remote Input.
-</p>
-
-
-  </div>
-<p>Wear 2.0 users can choose between various input options from 
-<a href="{@docRoot}reference/android/app/RemoteInput.html">Remote Input</a>.
- These options include:
-</p>
-<ul>
-<li>Dictation</li>
-<li>Emoji</li>
-<li>Canned responses</li>
-<li>Smart Reply</i>
-<li>Default IME </i>
-</ul>
-
-<p>
-For messaging notifications with Smart Reply, the system-generated Smart Reply
- appears within <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>
-  above the developer-provided list of canned responses.
-  You can also use the
-  <a href="{@docRoot}reference/android/app/RemoteInput.Builder.html#setChoices(java.lang.CharSequence[])">setChoices()</a>
-   method in the {@code RemoteInput} API to enable users to select from a list
-   of canned responses.
-</p>
-
-<h3 id="bridging"> Bridging Mode </h3>
-<p>By default, notifications are
-<a href="{@docRoot}training/wearables/notifications/index.html">
-bridged</a> (shared) from an app on a companiosubl apin phone
-to the watch. Since a phone app and a standalone watch app may be sources of the
- same notifications, the Android Wear 2.0 Preview includes a Bridging mode feature.
-  Developers can begin planning to change the behavior of notifications with the
-  following:
-</p>
-
-<ul>
-<li>Specifying in the standalone app's Android manifest file that notifications from
- the corresponding phone app should not be bridged to the watch. </li>
-<li>Setting a dismissal ID so notification dismissals (by users) are synced across
-devices.</li>
-</ul>
-
-<p>For an example of how to use this feature, see <a href="{@docRoot}wear/preview/features/bridger.html">
-Bridging Mode for Notifications</a>.</p>
-
-<h3 id="imf">Input Method Framework</h3>
-
-<p>Wear 2.0 extends the Android input method framework (IMF) to Android Wear.
-This allows users to enter text on Wear using the system default IME or third party
- IMEs.  The Wear IME lets the user enter text via gesture typing as well as tapping
-  individual keys. The IMF APIs used for Wear devices are the same as other form
-  factors, though usage is slightly different due to limited screen real estate.
-</p>
-
-<p>Wear provides user settings on the watch that let the user:</p>
-<ul>
-<li>Enable multiple IMEs from the list of installed IMEs.</li>
-<li>Set a single default IME from the list of enabled IMEs.</li>
-<li>Change languages for various IMEs.</li>
-</ul>
-
-<p>To learn how to create an IME for Wear, see <a href="{@docRoot}wear/preview/features/ime.html">
-Input Method Framework</a>.
 </p>
 
 <h2 id="ui">User Interface Improvements</h2>
 
 <p>The preview introduces powerful additions to the user interface, opening up
 exciting possibilities to developers.
-A complication is any feature in a watch face that displays more than hours and 
+A complication is any feature in a watch face that displays more than hours and
 minutes. With the Complications API,
  watch faces can display extra information and separate apps can expose complication
   data.
 The navigation and action drawers provide users with new ways to interact with apps.
 </p>
+
+<img src="/wear/preview/images/complications-main-image.png" height="240" style="float:right;margin:10px 0 0 40px" />
 
 <h3 id="complications">Complications</h3>
 
@@ -279,19 +274,11 @@ that displays more than hours and minutes</a>. For
 example, a battery indicator is a complication. The Complications API is for
 both watch faces and data provider apps.</p>
 
-<div style="float:right;">
-<img src="images/complications-main-image.png"" style="padding-left:1.5em;">
-
-<p class="img-caption" style="padding-left:2em;">
-  <strong>Figure 5.</strong> Watch face Complications.
-</p>
-  
-
 <p>Watch faces can display extra information without needing code for getting
 the underlying data. Data providers can supply data to any watch face using the
 API.</p>
 
-<p>For examples of how to use this feature, 
+<p>For examples of how to use this feature,
 see <a href="{@docRoot}wear/preview/features/complications.html">
  Watch Face Complications</a>.
 </p>
@@ -309,13 +296,13 @@ see <a href="{@docRoot}wear/preview/features/complications.html">
 
 <div class="cols">
 <div class="col-2of6">
-  <img src="{@docRoot}wear/preview/images/nav_drawer.gif" alt="" style="padding:.5em">
+  <img src="{@docRoot}wear/preview/images/nav_drawer.gif" height="240" alt="" style="padding:.5em">
   <p class="img-caption">
       <strong>Figure 1.</strong> Navigation and Action Drawers.
     </p>
 </div>
 <div class="col-2of6">
-  <img src="{@docRoot}wear/preview/images/action_drawer.gif" alt="" style="padding:.5em;"">
+  <img src="{@docRoot}wear/preview/images/action_drawer.gif" height="240" alt="" style="padding:.5em;"">
 </div>
 </div>
 <div class="cols">
