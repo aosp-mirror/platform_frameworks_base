@@ -300,7 +300,7 @@ public class DockedStackDividerController implements DimLayerUser {
             boolean animate, WindowState imeWin, int imeHeight) {
         if (mAdjustedForIme != adjustedForIme || (adjustedForIme && mImeHeight != imeHeight)
                 || mAdjustedForDivider != adjustedForDivider) {
-            if (animate) {
+            if (animate && !mAnimatingForMinimizedDockedStack) {
                 startImeAdjustAnimation(adjustedForIme, adjustedForDivider, imeWin);
             } else {
                 // Animation might be delayed, so only notify if we don't run an animation.
@@ -547,8 +547,6 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private void startImeAdjustAnimation(
             boolean adjustedForIme, boolean adjustedForDivider, WindowState imeWin) {
-        mAnimatingForIme = true;
-        mAnimationStarted = false;
 
         // If we're not in an animation, the starting point depends on whether we're adjusted
         // or not. If we're already in an animation, we start from where the current animation
@@ -562,6 +560,8 @@ public class DockedStackDividerController implements DimLayerUser {
             mAnimationStart = mLastAnimationProgress;
             mDividerAnimationStart = mLastDividerProgress;
         }
+        mAnimatingForIme = true;
+        mAnimationStarted = false;
         mAnimationTarget = adjustedForIme ? 1 : 0;
         mDividerAnimationTarget = adjustedForDivider ? 1 : 0;
 
