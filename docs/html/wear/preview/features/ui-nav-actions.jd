@@ -36,7 +36,7 @@ page.image=/wear/preview/images/card_drawer.png
 
 </div>
 </div>
-<p>As part of the <a href="http://www.google.com/design/wear">Material Design</a>
+<p>As part of the <a href="http://www.google.com/design/spec-wear">Material Design</a>
  for Android Wear, Wear 2.0 adds interactive navigation and action drawers. 
  The navigation drawer appears at the top of the screen and lets users jump to 
  different views within

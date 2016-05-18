@@ -36,7 +36,7 @@ page.image=/wear/preview/images/expanded_diagram.png
 
 <h2 id="visual">Visual Updates</h2>
 <p>Notifications receive important visual updates in Wear 2.0, with
-<a href="http://www.google.com/design/wear">
+<a href="http://www.google.com/design/spec-wear">
 material design</a> visual changes.
 </p>
 
@@ -84,7 +84,7 @@ material design</a> visual changes.
 <p>When you <a href="{@docRoot}training/wearables/notifications/pages.html">specify additional content pages</a>
  and actions for a notification, those are available to the user within the 
  expanded notification. Each expanded notification follows 
- <a href="http://www.google.com/design/wear">Material Design for Android Wear</a>,
+ <a href="http://www.google.com/design/spec-wear">Material Design for Android Wear</a>,
   so the user gets an app-like experience.
 </p>
 <p><img src="{@docRoot}wear/preview/images/expanded_diagram.png" /> </p>
@@ -190,7 +190,7 @@ following:
   <li>Use <a href="{@docRoot}preview/features/notification-updates.html#style">{@code Notification.MessagingStyle}</a>.
   </li>
   <li>Call the method 
-  <a href="https://android-dot-devsite.googleplex.com/wear/preview/start.html#get_the_preview_reference_documentation">{@code setAllowGeneratedReplies()}</a>
+  <a href="{@docRoot}wear/preview/start.html#get_the_preview_reference_documentation">{@code setAllowGeneratedReplies()}</a>
    for the notification action.</li>
   <li>Ensure that the notification action has a
     <a href="{@docRoot}reference/android/app/RemoteInput.html">{@code RemoteInput}</a>
