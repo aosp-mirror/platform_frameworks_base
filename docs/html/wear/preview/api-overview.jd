@@ -138,7 +138,7 @@ see <a href="{@docRoot}wear/preview/features/complications.html">
   "{@docRoot}training/wearables/notifications/pages.html">specify additional
   content pages</a> and actions for a notification, those are available to the
   user within the expanded notification. Each expanded notification follows
-  <a href="https://google.com/design/wear">Material Design for Android
+  <a href="https://google.com/design/spec-wear">Material Design for Android
   Wear</a>, so the user gets an app-like experience.
 </p>
 
