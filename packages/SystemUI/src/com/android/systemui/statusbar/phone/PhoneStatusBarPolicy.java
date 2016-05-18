@@ -415,20 +415,35 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
             new SynchronousUserSwitchObserver() {
                 @Override
                 public void onUserSwitching(int newUserId) throws RemoteException {
-                    mUserInfoController.reloadUserInfo();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUserInfoController.reloadUserInfo();
+                        }
+                    });
                 }
 
                 @Override
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
-                    updateAlarm();
-                    profileChanged(newUserId);
-                    updateQuietState();
-                    updateManagedProfile();
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateAlarm();
+                            profileChanged(newUserId);
+                            updateQuietState();
+                            updateManagedProfile();
+                        }
+                    });
                 }
 
                 @Override
                 public void onForegroundProfileSwitch(int newProfileId) {
-                    profileChanged(newProfileId);
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            profileChanged(newProfileId);
+                        }
+                    });
                 }
             };
 
