@@ -5062,26 +5062,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the system to get the user restrictions for a user.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param userHandle user id the admin is running as.
-     *
-     * @hide
-     */
-    public Bundle getUserRestrictionsForUser(@NonNull ComponentName admin, int userHandle) {
-        Bundle ret = null;
-        if (mService != null) {
-            try {
-                ret = mService.getUserRestrictionsForUser(admin, userHandle);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return ret == null ? new Bundle() : ret;
-    }
-
-    /**
      * Called by profile or device owners to hide or unhide packages. When a package is hidden it is
      * unavailable for use, but the data and actual package file remain.
      *
