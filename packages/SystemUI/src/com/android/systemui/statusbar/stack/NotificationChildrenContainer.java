@@ -393,7 +393,6 @@ public class NotificationChildrenContainer extends ViewGroup {
             childState.hideSensitive = parentState.hideSensitive;
             childState.belowSpeedBump = parentState.belowSpeedBump;
             childState.clipTopAmount = 0;
-            childState.topOverLap = 0;
             childState.alpha = 0;
             if (i < firstOverflowIndex) {
                 childState.alpha = 1;

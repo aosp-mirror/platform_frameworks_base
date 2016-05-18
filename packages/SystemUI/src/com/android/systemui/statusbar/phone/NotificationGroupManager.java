@@ -430,7 +430,6 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     private boolean isGroupNotFullyVisible(NotificationGroup notificationGroup) {
         return notificationGroup.summary == null
-                || notificationGroup.summary.row.getClipTopOptimization() > 0
                 || notificationGroup.summary.row.getClipTopAmount() > 0
                 || notificationGroup.summary.row.getTranslationY() < 0;
     }
