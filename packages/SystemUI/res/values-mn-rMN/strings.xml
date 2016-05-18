@@ -97,8 +97,8 @@
     <string name="cancel" msgid="6442560571259935130">"Цуцлах"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Тохиромжтой өсгөх товч."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Жижгээс том дэлгэцрүү өсгөх."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Блютүүт холбогдсон."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Блютүүт тасрав."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth холбогдсон."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth тасрав."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Батерей байхгүй."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Батерей нэг баганатай."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Батерей хоёр баганатай."</string>
@@ -150,7 +150,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобайл дата"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Мобайл дата асаалттай"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобайл датаг унтраасан байна"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Блютүүт модем болж байна."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth модем болж байна."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Нислэгийн горим"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM карт байхгүй."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Дамжуулагч сүлжээг өөрчилж байна."</string>
@@ -199,10 +199,10 @@
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Идэвхгүй болгох үйлдэлд бүү саад бол."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Идэвхжүүлэх үйлдэлд бүү саад бол."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
-    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Блютүүт идэвхгүй."</string>
-    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Блютүүт идэвхтэй."</string>
+    <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth идэвхгүй."</string>
+    <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth идэвхтэй."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Блютүүтийг холбож байна."</string>
-    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Блютүүт холбогдсон."</string>
+    <string name="accessibility_quick_settings_bluetooth_connected" msgid="4306637793614573659">"Bluetooth холбогдсон."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_off" msgid="2730003763480934529">"Блютүүтийг унтраасан."</string>
     <string name="accessibility_quick_settings_bluetooth_changed_on" msgid="8722351798763206577">"Блютүүтийг асаасан."</string>
     <string name="accessibility_quick_settings_location_off" msgid="5119080556976115520">"Байршил мэдээлэлт идэвхгүй."</string>
@@ -258,9 +258,9 @@
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Зөвхөн чухал зүйлс"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Зөвхөн сэрүүлэг"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Дуугүй болгох"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Блютүүт"</string>
-    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Блютүүт (<xliff:g id="NUMBER">%d</xliff:g> төхөөрөмж)"</string>
-    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Блютүүт унтраалттай"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> төхөөрөмж)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth унтраалттай"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Хослуулсан төхөөрөмж байхгүй"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Тодрол"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматаар эргэх"</string>

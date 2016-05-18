@@ -378,7 +378,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರನ್ನು ಲಾಗ್ಔಟ್ ಮಾಡಿ"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ಬಳಕೆದಾರರನ್ನು ಲಾಗ್ಔಟ್ ಮಾಡಿ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸುವುದೇ?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನವೀಕರಿಸಬಹುದು."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"ನೀವು ಒಬ್ಬ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ಸೇರಿಸಿದಾಗ, ಆ ವ್ಯಕ್ತಿಯು ಅವರ ಸ್ಥಳವನ್ನು ಸ್ಥಾಪಿಸಬೇಕಾಗುತ್ತದೆ.\n\nಯಾವುದೇ ಬಳಕೆದಾರರು ಎಲ್ಲಾ ಇತರೆ ಬಳಕೆದಾರರಿಗಾಗಿ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅಪ್‌ಡೇಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುವುದು."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ತೆಗೆದುಹಾಕಿ"</string>
@@ -570,9 +570,9 @@
     <string name="headset" msgid="4534219457597457353">"ಹೆಡ್‌ಸೆಟ್"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ಹೆಡ್‌ಫೋನ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ಹೆಡ್‌ಸೆಟ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
-    <string name="data_saver" msgid="5037565123367048522">"ಡೇಟಾ ಉಳಿಸುವಿಕೆ"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ಡೇಟಾ ಉಳಿಸುವಿಕೆ ಆನ್ ಆಗಿದೆ"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ಡೇಟಾ ಉಳಿಸುವಿಕೆ ಆಫ್ ಆಗಿದೆ"</string>
+    <string name="data_saver" msgid="5037565123367048522">"ಡೇಟಾ ಸೇವರ್"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ಡೇಟಾ ಸೇವರ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ಡೇಟಾ ಸೇವರ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ಆನ್"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"ಆಫ್"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್"</string>

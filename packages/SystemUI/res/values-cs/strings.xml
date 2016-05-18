@@ -600,7 +600,7 @@
     <string name="select_keycode" msgid="7413765103381924584">"Vyberte klávesu na klávesnici"</string>
     <string name="preview" msgid="9077832302472282938">"Náhled"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dlaždice přidáte přetažením"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Přetažením sem tituly odstraníte"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Přetažením sem dlaždice odstraníte"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Upravit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Čas"</string>
   <string-array name="clock_options">

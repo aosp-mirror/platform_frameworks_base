@@ -231,8 +231,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"Töörežiim on sees."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"Töörežiim on välja lülitatud."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"Töörežiim on sisse lülitatud."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Andmemahu säästja on välja lülitatud."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Andmemahu säästja on sisse lülitatud."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Andmeside mahu säästja on välja lülitatud."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Andmeside mahu säästja on sisse lülitatud."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekraani heledus"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G andmekasutus on peatatud"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G andmekasutus on peatatud"</string>
@@ -572,9 +572,9 @@
     <string name="headset" msgid="4534219457597457353">"Peakomplekt"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Kõrvaklapid on ühendatud"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Peakomplekt on ühendatud"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Andmemahu säästja"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Andmemahu säästja on sisse lülitatud"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Andmemahu säästja on välja lülitatud"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Andmeside mahu säästja"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Andmeside mahu säästja on sisse lülitatud"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Andmeside mahu säästja on välja lülitatud"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Sees"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Väljas"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigeerimisriba"</string>
@@ -599,7 +599,7 @@
     <string name="preview" msgid="9077832302472282938">"Eelvaade"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Lohistage paanide lisamiseks"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Lohistage eemaldamiseks siia"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"Muuda"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Muutmine"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Kellaaeg"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Kuva tunnid, minutid ja sekundid"</item>

@@ -27,5 +27,5 @@
     <string name="pip_onboarding_title" msgid="7850436557670253991">"Imagen en imagen"</string>
     <string name="pip_onboarding_description" msgid="4028124563309465267">"El vídeo estará visible hasta que reproduzcas otro. Mantén pulsado el botón "<b>"INICIO"</b>" para controlarlo."</string>
     <string name="pip_onboarding_button" msgid="3957426748484904611">"Entendido"</string>
-    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Ignorar"</string>
+    <string name="recents_tv_dismiss" msgid="3555093879593377731">"Descartar"</string>
 </resources>
