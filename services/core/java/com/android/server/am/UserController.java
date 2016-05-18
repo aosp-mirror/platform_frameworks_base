@@ -1468,7 +1468,7 @@ final class UserController {
         }
         final KeyguardManager km = (KeyguardManager) mService.mContext
                 .getSystemService(KEYGUARD_SERVICE);
-        return km.isDeviceLocked(userId);
+        return km.isDeviceLocked(userId) && km.isDeviceSecure(userId);
     }
 
     boolean isLockScreenDisabled(@UserIdInt int userId) {
