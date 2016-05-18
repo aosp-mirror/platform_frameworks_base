@@ -22,7 +22,6 @@ import static android.service.notification.NotificationRankerService.REASON_DELE
 import static android.service.notification.NotificationRankerService.REASON_DELEGATE_CANCEL_ALL;
 import static android.service.notification.NotificationRankerService.REASON_DELEGATE_CLICK;
 import static android.service.notification.NotificationRankerService.REASON_DELEGATE_ERROR;
-import static android.service.notification.NotificationRankerService.REASON_GROUP_OPTIMIZATION;
 import static android.service.notification.NotificationRankerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationRankerService.REASON_LISTENER_CANCEL;
 import static android.service.notification.NotificationRankerService.REASON_LISTENER_CANCEL_ALL;
@@ -164,7 +163,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -2221,8 +2219,14 @@ public class NotificationManagerService extends SystemService {
                 int userId = -1;
                 NotificationRecord summaryRecord = null;
                 synchronized (mNotificationList) {
-                    final StatusBarNotification adjustedSbn
-                            = mNotificationsByKey.get(adjustment.getKey()).sbn;
+                    NotificationRecord notificationRecord =
+                            mNotificationsByKey.get(adjustment.getKey());
+                    if (notificationRecord == null) {
+                        // The notification could have been cancelled again already. A successive
+                        // adjustment will post a summary if needed.
+                        return;
+                    }
+                    final StatusBarNotification adjustedSbn = notificationRecord.sbn;
                     userId = adjustedSbn.getUser().getIdentifier();
                     ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
                     if (summaries == null) {
@@ -2666,6 +2670,12 @@ public class NotificationManagerService extends SystemService {
             int callingUid, int callingPid) {
         StatusBarNotification sbn = r.sbn;
         Notification n = sbn.getNotification();
+        if (n.isGroupSummary() && !sbn.isAppGroup())  {
+            // notifications without a group shouldn't be a summary, otherwise autobundling can
+            // lead to bugs
+            n.flags &= ~Notification.FLAG_GROUP_SUMMARY;
+        }
+
         String group = sbn.getGroupKey();
         boolean isSummary = n.isGroupSummary();
 
