@@ -76,7 +76,9 @@ excludeFromSuggestions=true
   <div class="cols" style="margin-top:1em;">
     <div class="col-4of12 gif-container">
       <img class="partner-gifs"
-        src="/images/topic/instant-apps/s3-BandH-static.png">
+        src="/images/topic/instant-apps/s3-BandH-static.png"
+        data-stat="/images/topic/instant-apps/s3-BandH-static.png"
+        data-anim="/images/topic/instant-apps/s3-BandH-animated.gif">
       <p class="figure-caption">
         <em>B&amp;H Photo<br/>
             (via Google Search)</em>
@@ -85,7 +87,9 @@ excludeFromSuggestions=true
 
     <div class="col-4of12 gif-container">
       <img class="partner-gifs"
-        src="/images/topic/instant-apps/s3-BuzzFeed-static.png">
+        src="/images/topic/instant-apps/s3-BuzzFeed-static.png"
+        data-stat="/images/topic/instant-apps/s3-BuzzFeed-static.png"
+        data-anim="/images/topic/instant-apps/s3-BuzzFeed-animated.gif">
       <p class="figure-caption">
         <em>BuzzfeedVideo<br/>
             (via a shared link)</em>
@@ -94,7 +98,9 @@ excludeFromSuggestions=true
 
     <div class="col-4of12 gif-container">
       <img class="partner-gifs"
-        src="/images/topic/instant-apps/s3-ParkandPay-static.png">
+        src="/images/topic/instant-apps/s3-ParkandPay-static.png"
+        data-stat="/images/topic/instant-apps/s3-ParkandPay-static.png"
+        data-anim="/images/topic/instant-apps/s3-ParkandPay-animated.gif">
       <p class="figure-caption">
         <em>Park and Pay<br/>
             (via NFC)</em>
@@ -263,18 +269,30 @@ excludeFromSuggestions=true
 
 (function () {
 
-  function swapOnMouseover(evt) {
-    var target = evt.target;
-    var imageSrc = $(target).attr("src");
-
-    // Assumes that images are named *-static and *-animated.
-    if (imageSrc.indexOf("static") > -1) {
-      var newImageSrc = imageSrc.replace("static.png", "animated.gif");
-      $(target).attr("src", newImageSrc).removeAttr("onmouseenter");
+  function onMouseEnter(evt) {
+    if (evt.target.dataset && evt.target.dataset.anim) {
+      swap(evt.target, {
+        newStr: evt.target.dataset.anim
+      });
     }
   }
 
-  $(".partner-gifs").mouseenter(swapOnMouseover);
+  function onMouseOut(evt) {
+    if (evt.target.dataset && evt.target.dataset.stat) {
+      swap(evt.target, {
+        newStr: evt.target.dataset.stat
+      });
+    }
+  }
+
+  function swap(target, options) {
+    if (options && options.newStr) {
+      $(target).attr("src", options.newStr);
+    }
+  }
+
+  $(".partner-gifs").mouseenter(onMouseEnter);
+  $(".partner-gifs").mouseout(onMouseOut);
 
 })();
 
