@@ -45,8 +45,11 @@ import android.util.SparseArray;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -113,6 +116,11 @@ public class StorageManager {
     public static final int FLAG_REAL_STATE = 1 << 9;
     /** {@hide} */
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
+
+    private static final String INTERNAL_STORAGE_SIZE_PATH =
+            "/sys/block/mmcblk0/size";
+    private static final String INTERNAL_STORAGE_SECTOR_SIZE =
+            "/sys/block/mmcblk0/queue/hw_sector_size";
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -899,6 +907,23 @@ public class StorageManager {
      */
     public @NonNull StorageVolume getPrimaryStorageVolume() {
         return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+    }
+
+    /** {@hide} */
+    public long getPrimaryStorageSize() {
+        final long numberBlocks = readLong(INTERNAL_STORAGE_SIZE_PATH);
+        final long sectorSize = readLong(INTERNAL_STORAGE_SECTOR_SIZE);
+        return numberBlocks * sectorSize;
+    }
+
+    private long readLong(String path) {
+        try (final FileInputStream fis = new FileInputStream(path);
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(fis));) {
+            return Long.parseLong(reader.readLine());
+        } catch (Exception e) {
+            Slog.w("Could not read " + path, e);
+            return 0;
+        }
     }
 
     /** @removed */
