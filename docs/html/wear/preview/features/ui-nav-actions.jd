@@ -1,6 +1,7 @@
 page.title=Wear Navigation and Actions
 meta.tags="wear", "wear-preview", "navigation", "action"
 page.tags="wear"
+page.image=/wear/preview/images/card_drawer.png
 
 @jd:body
 
@@ -18,23 +19,27 @@ page.tags="wear"
 
    <h2>You should also read</h2>
    <ul>
-   <li><a href="https://spec.googleplex.com/wear/components/navigation-drawer.html">
+   <li><a href="http://www.google.com/design/wear-spec/components/navigation-drawer.html">
    Navigation Drawer Design</a> </li>
    <li>
-   <a href="https://spec.googleplex.com/wear/components/action-drawer.html">
+   <a href="http://www.google.com/design/wear-spec/components/action-drawer.html">
    Action Drawer Design</a>
    </ul>
 
-  <h2>Samples</h2>
+  <h2>See Also</h2>
   <ol>
-
+  <li>
+  <a href="https://github.com/googlesamples/android-WearDrawers">Sample app with
+  navigation and action drawers</a>
+  </li>
   </ol>
 
 </div>
 </div>
-<p>Wear 2.0 adds interactive navigation and action drawers that users can pull
-from the top or bottom edge of the window, respectively. The navigation drawer
-appears at the top of the screen and lets users jump to different views within
+<p>As part of the <a href="http://www.google.com/design/wear">Material Design</a>
+ for Android Wear, Wear 2.0 adds interactive navigation and action drawers. 
+ The navigation drawer appears at the top of the screen and lets users jump to 
+ different views within
 the app, similar to the navigation drawer on a phone. The action drawer appears
 at the bottom of the screen and provides context-specific actions for the user,
 similar to the action bar on a phone. These drawers are accessible when the user
