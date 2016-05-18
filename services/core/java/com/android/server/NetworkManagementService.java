@@ -556,7 +556,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // chain.
             if (DBG) Slog.d(TAG, "Pushing " + size + " active firewall " + name + "UID rules");
             for (int i = 0; i < rules.size(); i++) {
-                setFirewallUidRuleInternal(chain, rules.keyAt(i), rules.valueAt(i));
+                setFirewallUidRuleLocked(chain, rules.keyAt(i), rules.valueAt(i));
             }
         }
     }
@@ -2240,7 +2240,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             for (int index = uids.length - 1; index >= 0; --index) {
                 int uid = uids[index];
                 int rule = rules[index];
-                setFirewallUidRule(chain, uid, rule);
+                updateFirewallUidRuleLocked(chain, uid, rule);
                 newRules.put(uid, rule);
             }
             // collect the rules to remove.
@@ -2254,7 +2254,25 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // remove dead rules
             for (int index = rulesToRemove.size() - 1; index >= 0; --index) {
                 int uid = rulesToRemove.keyAt(index);
-                setFirewallUidRuleInternal(chain, uid, FIREWALL_RULE_DEFAULT);
+                updateFirewallUidRuleLocked(chain, uid, FIREWALL_RULE_DEFAULT);
+            }
+            try {
+                switch (chain) {
+                    case FIREWALL_CHAIN_DOZABLE:
+                        mNetdService.firewallReplaceUidChain("fw_dozable", true, uids);
+                        break;
+                    case FIREWALL_CHAIN_STANDBY:
+                        mNetdService.firewallReplaceUidChain("fw_standby", false, uids);
+                        break;
+                    case FIREWALL_CHAIN_POWERSAVE:
+                        mNetdService.firewallReplaceUidChain("fw_powersave", true, uids);
+                        break;
+                    case FIREWALL_CHAIN_NONE:
+                    default:
+                        Slog.d(TAG, "setFirewallUidRules() called on invalid chain: " + chain);
+                }
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Error flushing firewall chain " + chain, e);
             }
         }
     }
@@ -2262,42 +2280,46 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     @Override
     public void setFirewallUidRule(int chain, int uid, int rule) {
         enforceSystemUid();
-        setFirewallUidRuleInternal(chain, uid, rule);
+        synchronized (mQuotaLock) {
+            setFirewallUidRuleLocked(chain, uid, rule);
+        }
     }
 
-    private void setFirewallUidRuleInternal(int chain, int uid, int rule) {
-        synchronized (mQuotaLock) {
-            SparseIntArray uidFirewallRules = getUidFirewallRules(chain);
-
-            final int oldUidFirewallRule = uidFirewallRules.get(uid, FIREWALL_RULE_DEFAULT);
-            if (DBG) {
-                Slog.d(TAG, "oldRule = " + oldUidFirewallRule
-                        + ", newRule=" + rule + " for uid=" + uid + " on chain " + chain);
-            }
-            if (oldUidFirewallRule == rule) {
-                if (DBG) Slog.d(TAG, "!!!!! Skipping change");
-                // TODO: eventually consider throwing
-                return;
-            }
-
+    private void setFirewallUidRuleLocked(int chain, int uid, int rule) {
+        if (updateFirewallUidRuleLocked(chain, uid, rule)) {
             try {
-                String ruleName = getFirewallRuleName(chain, rule);
-                String oldRuleName = getFirewallRuleName(chain, oldUidFirewallRule);
-
-                if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-                    uidFirewallRules.delete(uid);
-                } else {
-                    uidFirewallRules.put(uid, rule);
-                }
-
-                if (!ruleName.equals(oldRuleName)) {
-                    mConnector.execute("firewall", "set_uid_rule", getFirewallChainName(chain), uid,
-                            ruleName);
-                }
+                mConnector.execute("firewall", "set_uid_rule", getFirewallChainName(chain), uid,
+                        getFirewallRuleName(chain, rule));
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }
         }
+    }
+
+    // TODO: now that netd supports batching, NMS should not keep these data structures anymore...
+    private boolean updateFirewallUidRuleLocked(int chain, int uid, int rule) {
+        SparseIntArray uidFirewallRules = getUidFirewallRules(chain);
+
+        final int oldUidFirewallRule = uidFirewallRules.get(uid, FIREWALL_RULE_DEFAULT);
+        if (DBG) {
+            Slog.d(TAG, "oldRule = " + oldUidFirewallRule
+                    + ", newRule=" + rule + " for uid=" + uid + " on chain " + chain);
+        }
+        if (oldUidFirewallRule == rule) {
+            if (DBG) Slog.d(TAG, "!!!!! Skipping change");
+            // TODO: eventually consider throwing
+            return false;
+        }
+
+        String ruleName = getFirewallRuleName(chain, rule);
+        String oldRuleName = getFirewallRuleName(chain, oldUidFirewallRule);
+
+        if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
+            uidFirewallRules.delete(uid);
+        } else {
+            uidFirewallRules.put(uid, rule);
+        }
+        return !ruleName.equals(oldRuleName);
     }
 
     private @NonNull String getFirewallRuleName(int chain, int rule) {
