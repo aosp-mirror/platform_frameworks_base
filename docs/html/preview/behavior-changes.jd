@@ -56,14 +56,13 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 
-<h2 id="perf">Performance Improvements</h2>
+<h2 id="perf">Battery and Memory</h2>
 
 <p>
-  Android N contains system behavior changes aimed at improving the battery
-  life of devices, RAM usage, and app performance. These changes can impact the
-  availability of system resources and system notifications to your app. You
-  should review these changes and evaluate how your app may need to adjust to
-  them.
+Android N includes system behavior changes aimed at improving the battery life
+of devices and reducing RAM usage. These changes can affect your app’s access to
+system resources, along with the way your app interacts with other apps via
+certain implicit intents.
 </p>
 
 <h3 id="doze">Doze</h3>
@@ -139,7 +138,7 @@ page.image=images/cards/card-n-changes_2x.png
 </p>
 
 <p>
-  Similarly, apps can register to receive implicit {@link
+  Similarly, in previous versions of Android, apps could register to receive implicit {@link
   android.hardware.Camera#ACTION_NEW_PICTURE} and {@link
   android.hardware.Camera#ACTION_NEW_VIDEO} broadcasts from other apps, such as
   Camera. When a user takes a picture with the Camera app, these apps wake up

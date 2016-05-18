@@ -897,11 +897,14 @@ disables this mode when the window is no longer in focus.
 <h2 id="vr">VR Support</h2>
 
 <p>
-Leveraging the <a href="#sustained_performance_api">Sustained Performance API</a>
-and newly introduced {@code VrListenerService} class, Android N provides support for
-VR apps developed using the <a href="https://developers.google.com/cardboard/overview">Cardboard
-SDK</a>. For more information about the {@code VrListenerService} class, see the relevant section
-of the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+Android N adds platform support and optimizations for a new VR Mode to let developers
+build high-quality mobile VR experiences for users. There are a number of performance
+enhancements, including access to an exclusive CPU core for VR apps.
+Within your apps, you can take advantage of intelligent head-tracking,
+and stereo notifications that work for VR. Most importantly, Android N provides for
+very low latency graphics. For complete information about building VR apps for Android N,
+see the <a href="https://developers.google.com/vr/android/">Google VR SDK for Android</a>.
+</p>
 
 
 <h2 id="print_svc">Print Service Enhancements</h2>
@@ -951,9 +954,8 @@ of the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Refer
 The FrameMetricsListener API allows an app to monitor its UI rendering
 performance. The API provides this capability by exposing a streaming Pub/Sub API to transfer frame
 timing info for the app's current window. The data returned is
-equivalent to that displayed by {@code
-<a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a> dumpsys gfxinfo framestats},
-but is not limited to the past 120 frames.
+equivalent to that which <code><a href="{@docRoot}tools/help/shell.html#shellcommands">adb shell</a>
+dumpsys gfxinfo framestats</code> displays, but is not limited to the past 120 frames.
 </p>
 
 <p>
