@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"已启用。点按即可切换。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"正在运行的服务"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看和控制当前正在运行的服务"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"启用多进程 WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在独立进程中运行 WebView 渲染程序。"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"多进程 WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"单独运行 WebView 渲染程序"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"此选项已失效，请重试。"</string>
@@ -323,7 +323,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"由管理员控制"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"已被管理员启用"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"已被管理员禁用"</string>
-    <string name="home" msgid="3256884684164448244">"设置首页"</string>
+    <string name="home" msgid="3256884684164448244">"设置主屏幕"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"还剩 <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"小"</string>

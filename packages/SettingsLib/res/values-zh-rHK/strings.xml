@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"已啟用。輕按即可切換。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"執行中的服務"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看並控制目前正在執行中的服務"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"啟用多重處理程序 WebView"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在獨立的處理程序中執行 WebView 轉譯器。"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"多重處理程序 WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"單獨執行 WebView 轉譯器"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 設置"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"設定 WebView 設置"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"此選擇已失效，請再試一次。"</string>

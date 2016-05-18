@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"பல செயல்முறை WebViewஐ இயக்கு"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"தனிப்படுத்தப்பட்ட செயல்முறையில் WebView ரெண்டரர்களை இயக்கு."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"பல செயல்முறை WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ரெண்டரர்களைத் தனித்தனியாக இயக்கு"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"இனி இந்தத் தேர்வைப் பயன்படுத்த முடியாது. மீண்டும் முயலவும்."</string>

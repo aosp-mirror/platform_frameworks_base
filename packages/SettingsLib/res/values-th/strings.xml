@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ใช้งานอยู่ แตะเพื่อสลับ"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"บริการที่ทำงานอยู่"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ดูและควบคุมบริการที่ทำงานอยู่"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"เปิดใช้ WebView แบบหลายขั้นตอน"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"เรียกใช้โหมดแสดงภาพ WebView ในการดำเนินการที่แยกออกมา"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView แบบหลายขั้นตอน"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"เรียกใช้โหมดแสดงภาพ WebView แยกต่างหาก"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"การใช้งาน WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ตั้งค่าการใช้งาน WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ตัวเลือกนี้ใช้ไม่ได้อีกต่อไป โปรดลองอีกครั้ง"</string>

@@ -139,7 +139,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"Alegeți un profil"</string>
     <string name="category_personal" msgid="1299663247844969448">"Personal"</string>
     <string name="category_work" msgid="8699184680584175622">"Serviciu"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Opțiuni dezvoltator"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Opțiuni pentru dezvoltatori"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Activați opțiunile pentru dezvoltatori"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Setați opțiuni pentru dezvoltarea aplicației"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opțiunile de dezvoltator nu sunt disponibile pentru acest utilizator"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Activă. Atingeți pentru a comuta."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Servicii în curs de funcționare"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Vedeți și controlați serviciile care funcționează în prezent"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Activați WebView cu mai multe procese"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Rulați programele de redare WebView într-un proces izolat."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView cu mai multe procese"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Rulați programele de redare WebView separat"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementare WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Setați implementarea WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Această opțiune nu mai este validă. Încercați din nou."</string>

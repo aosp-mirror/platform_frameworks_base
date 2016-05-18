@@ -71,7 +71,7 @@
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ထည့်သွင်းရန်အသုံးပြုသည်"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"အတူတွဲပါ"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ချိတ်တွဲရန်"</string>
-    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ထားတော့"</string>
+    <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"ဖျက်သိမ်းရန်"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"ချိတ်တွဲမှုက ချိတ်ဆက်ထားလျှင် သင်၏ အဆက်အသွယ်များ နှင့် ခေါ်ဆိုမှု မှတ်တမ်းကို ရယူခွင့် ပြုသည်။"</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ယခုအလုပ်လုပ်နေသောဝန်ဆောင်မှုကို ကြည့်ခြင်းနှင့် ထိန်းသိမ်းခြင်းအား ပြုလုပ်မည်လား?"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"လုပ်ငန်းဖြစ်စဉ်များစွာကြည့်နိုင်သည့် ဝဘ်မြင်ကွင်းကိုဖွင့်ပါ"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"တဘ်တစ်ခုထက်ပိုဖွင့်ထားနိုင်သော ​WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"WebView ပြင်ဆင်မှုစနစ်ကို သီးခြားဖွင့်ပါ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"ဤရွေးချယ်မှု မှန်ကန်မှု မရှိတော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -332,5 +332,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ပိုကြီး"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"အကြီးဆုံး"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"စိတ်ကြိုက် (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီ နှင့်တုံ့ပြန်ချက်"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီနှင့် တုံ့ပြန်ချက်"</string>
 </resources>
