@@ -264,12 +264,6 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    void onRootPicked(RootInfo root) {
-        super.onRootPicked(root);
-        mDrawer.setOpen(false);
-    }
-
-    @Override
     public void onDocumentsPicked(List<DocumentInfo> docs) {
         throw new UnsupportedOperationException();
     }

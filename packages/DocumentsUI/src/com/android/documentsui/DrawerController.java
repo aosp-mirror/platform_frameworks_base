@@ -20,7 +20,7 @@ import static com.android.documentsui.Shared.DEBUG;
 
 import android.annotation.IntDef;
 import android.app.Activity;
-import android.content.Context;
+import android.support.annotation.ColorRes;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -120,7 +120,8 @@ abstract class DrawerController implements DrawerListener {
     /**
      * Runtime controller that manages a real drawer.
      */
-    private static final class RuntimeDrawerController extends DrawerController {
+    private static final class RuntimeDrawerController extends DrawerController
+            implements ItemDragListener.DragHost {
         private final ActionBarDrawerToggle mToggle;
         private DrawerLayout mLayout;
         private View mDrawer;
@@ -138,6 +139,30 @@ abstract class DrawerController implements DrawerListener {
             mToggle = toggle;
 
             mLayout.setDrawerListener(this);
+
+            View edge = layout.findViewById(R.id.drawer_edge);
+            edge.setOnDragListener(new ItemDragListener<>(this));
+        }
+
+        @Override
+        public void runOnUiThread(Runnable runnable) {
+            mDrawer.post(runnable);
+        }
+
+        @Override
+        public void setDropTargetHighlight(View v, boolean highlight) {
+            assert (v.getId() == R.id.drawer_edge);
+
+            @ColorRes int id = highlight ? R.color.item_doc_background_selected :
+                android.R.color.transparent;
+            v.setBackgroundColor(id);
+        }
+
+        @Override
+        public void onViewHovered(View v) {
+            assert (v.getId() == R.id.drawer_edge);
+
+            setOpen(true);
         }
 
         @Override

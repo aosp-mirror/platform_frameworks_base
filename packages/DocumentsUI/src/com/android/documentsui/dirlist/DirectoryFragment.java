@@ -1274,12 +1274,18 @@ public class DirectoryFragment extends Fragment
      */
     @Override
     public void onViewHovered(View view) {
+        BaseActivity activity = (BaseActivity) getActivity();
         if (getModelId(view) != null) {
-            ((BaseActivity) getActivity()).springOpenDirectory(getDestination(view));
+           activity.springOpenDirectory(getDestination(view));
         }
+
+        activity.setRootsDrawerOpen(false);
     }
 
     public boolean handleDropEvent(View v, DragEvent event) {
+        BaseActivity activity = (BaseActivity) getActivity();
+        activity.setRootsDrawerOpen(false);
+
         ClipData clipData = event.getClipData();
         assert (clipData != null);
 

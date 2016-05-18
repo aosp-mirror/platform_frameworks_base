@@ -256,6 +256,8 @@ public abstract class BaseActivity extends Activity
         } else {
             new PickRootTask(this, root).executeOnExecutor(getExecutorForCurrentDirectory());
         }
+
+        mNavigator.revealRootsDrawer(false);
     }
 
     @Override
