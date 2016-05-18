@@ -82,6 +82,13 @@ import java.util.concurrent.locks.ReentrantLock;
  * and
  * {@link SurfaceHolder.Callback#surfaceDestroyed SurfaceHolder.Callback.surfaceDestroyed()}.
  * </ul>
+ *
+ * <p class="note"><strong>Note:</strong> Starting in platform version
+ * {@link android.os.Build.VERSION_CODES#N}, SurfaceView's window position is
+ * updated synchronously with other View rendering. This means that translating
+ * and scaling a SurfaceView on screen will not cause rendering artifacts. Such
+ * artifacts may occur on previous versions of the platform when its window is
+ * positioned asynchronously.</p>
  */
 public class SurfaceView extends View {
     static private final String TAG = "SurfaceView";
