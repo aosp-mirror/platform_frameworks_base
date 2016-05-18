@@ -5632,6 +5632,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
 
+            case KeyEvent.KEYCODE_FP_NAV_DOWN:
+                // fall through
+            case KeyEvent.KEYCODE_FP_NAV_UP:
+                // fall through
+            case KeyEvent.KEYCODE_FP_NAV_LEFT:
+                // fall through
+            case KeyEvent.KEYCODE_FP_NAV_RIGHT: {
+                interceptStatusBarKey(event);
+                break;
+            }
+
             case KeyEvent.KEYCODE_SLEEP: {
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false;
@@ -5750,6 +5761,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return result;
+    }
+
+    /**
+     * Handle statusbar expansion events.
+     * @param event
+     */
+    private void interceptStatusBarKey(KeyEvent event) {
+        final int e = event.getKeyCode();
+        if (event.getAction() == KeyEvent.ACTION_UP) {
+            boolean doOpen = false;
+            boolean doClose = false;
+            doOpen = (e == KeyEvent.KEYCODE_FP_NAV_DOWN);
+            doClose = (e == KeyEvent.KEYCODE_FP_NAV_UP);
+            IStatusBarService sbar = getStatusBarService();
+            if (sbar != null) {
+                try {
+                    if (doOpen) {
+                        sbar.expandNotificationsPanel();
+                    } else if (doClose) {
+                        sbar.collapsePanels();
+                    }
+                } catch (RemoteException e1) {
+                    // oops, no statusbar. Ignore event.
+                }
+            }
+        }
     }
 
     /**
