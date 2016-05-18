@@ -342,6 +342,14 @@ public abstract class Context {
      * {@link android.R.attr#isolatedProcess isolated},
      * {@link android.R.attr#externalService external} service.  This binds the service into the
      * calling application's package, rather than the package in which the service is declared.
+     * <p>
+     * When using this flag, the code for the service being bound will execute under the calling
+     * application's package name and user ID.  Because the service must be an isolated process,
+     * it will not have direct access to the application's data, though.
+     *
+     * The purpose of this flag is to allow applications to provide services that are attributed
+     * to the app using the service, rather than the application providing the service.
+     * </p>
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
