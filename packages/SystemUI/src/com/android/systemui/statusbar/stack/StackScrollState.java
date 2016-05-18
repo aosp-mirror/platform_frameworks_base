@@ -110,11 +110,11 @@ public class StackScrollState {
             }
             if (child instanceof DismissView) {
                 DismissView dismissView = (DismissView) child;
-                boolean visible = state.topOverLap < mClearAllTopPadding;
+                boolean visible = state.clipTopAmount < mClearAllTopPadding;
                 dismissView.performVisibilityAnimation(visible && !dismissView.willBeGone());
             } else if (child instanceof EmptyShadeView) {
                 EmptyShadeView emptyShadeView = (EmptyShadeView) child;
-                boolean visible = state.topOverLap <= 0;
+                boolean visible = state.clipTopAmount <= 0;
                 emptyShadeView.performVisibilityAnimation(
                         visible && !emptyShadeView.willBeGone());
             }
@@ -170,10 +170,6 @@ public class StackScrollState {
         float oldClipTopAmount = view.getClipTopAmount();
         if (oldClipTopAmount != state.clipTopAmount) {
             view.setClipTopAmount(state.clipTopAmount);
-        }
-        float oldClipTopOptimization = view.getClipTopOptimization();
-        if (oldClipTopOptimization != state.topOverLap) {
-            view.setClipTopOptimization(state.topOverLap);
         }
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;

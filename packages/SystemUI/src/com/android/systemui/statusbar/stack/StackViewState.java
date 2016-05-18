@@ -40,16 +40,10 @@ public class StackViewState extends ViewState {
     public float shadowAlpha;
 
     /**
-     * The amount which the view should be clipped from the top. This is calculated to
-     * perceive consistent shadows.
+     * How much the child overlaps with the previous child on top. This is used to
+     * show the background properly when the child on top is translating away.
      */
     public int clipTopAmount;
-
-    /**
-     * How much does the child overlap with the previous view on the top? Can be used for
-     * a clipping optimization
-     */
-    public int topOverLap;
 
     /**
      * The index of the view, only accounting for views not equal to GONE
@@ -75,7 +69,6 @@ public class StackViewState extends ViewState {
             hideSensitive = svs.hideSensitive;
             belowSpeedBump = svs.belowSpeedBump;
             clipTopAmount = svs.clipTopAmount;
-            topOverLap = svs.topOverLap;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
         }

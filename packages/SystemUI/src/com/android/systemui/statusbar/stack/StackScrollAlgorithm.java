@@ -138,11 +138,9 @@ public class StackScrollAlgorithm {
 
     private void updateClipping(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
-        boolean dismissAllInProgress = ambientState.isDismissAllInProgress();
         float drawStart = ambientState.getTopPadding() + ambientState.getStackTranslation();
         float previousNotificationEnd = 0;
         float previousNotificationStart = 0;
-        boolean previousNotificationIsSwiped = false;
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
@@ -153,36 +151,21 @@ public class StackScrollAlgorithm {
             }
             float newYTranslation = state.yTranslation;
             float newHeight = state.height;
-            // apply clipping and shadow
             float newNotificationEnd = newYTranslation + newHeight;
 
-            float clipHeight;
-            if (previousNotificationIsSwiped) {
-                // When the previous notification is swiped, we don't clip the content to the
-                // bottom of it.
-                clipHeight = newHeight;
+            if (newYTranslation < previousNotificationEnd) {
+                // The previous view is overlapping on top, clip!
+                float overlapAmount = previousNotificationEnd - newYTranslation;
+                state.clipTopAmount = (int) overlapAmount;
             } else {
-                clipHeight = newNotificationEnd - previousNotificationEnd;
-                clipHeight = Math.max(0.0f, clipHeight);
-            }
-
-            updateChildClippingAndBackground(state, newHeight, clipHeight,
-                    newHeight - (previousNotificationStart - newYTranslation));
-
-            if (dismissAllInProgress) {
-                state.clipTopAmount = Math.max(child.getMinClipTopAmount(), state.clipTopAmount);
+                state.clipTopAmount = 0;
             }
 
             if (!child.isTransparent()) {
                 // Only update the previous values if we are not transparent,
                 // otherwise we would clip to a transparent view.
-                if ((dismissAllInProgress && canChildBeDismissed(child))) {
-                    previousNotificationIsSwiped = true;
-                } else {
-                    previousNotificationIsSwiped = ambientState.getDraggedViews().contains(child);
-                    previousNotificationEnd = newNotificationEnd;
-                    previousNotificationStart =newYTranslation + state.clipTopAmount;
-                }
+                previousNotificationEnd = newNotificationEnd;
+                previousNotificationStart = newYTranslation;
             }
         }
     }
@@ -190,31 +173,6 @@ public class StackScrollAlgorithm {
     public static boolean canChildBeDismissed(View v) {
         final View veto = v.findViewById(R.id.veto);
         return (veto != null && veto.getVisibility() != View.GONE);
-    }
-
-    /**
-     * Updates the shadow outline and the clipping for a view.
-     *
-     * @param state the viewState to update
-     * @param realHeight the currently applied height of the view
-     * @param clipHeight the desired clip height, the rest of the view will be clipped from the top
-     * @param backgroundHeight the desired background height. The shadows of the view will be
-     *                         based on this height and the content will be clipped from the top
-     */
-    private void updateChildClippingAndBackground(StackViewState state, float realHeight,
-            float clipHeight, float backgroundHeight) {
-        if (realHeight > clipHeight) {
-            // Rather overlap than create a hole.
-            state.topOverLap = (int) Math.floor(realHeight - clipHeight);
-        } else {
-            state.topOverLap = 0;
-        }
-        if (realHeight > backgroundHeight) {
-            // Rather overlap than create a hole.
-            state.clipTopAmount = (int) Math.floor(realHeight - backgroundHeight);
-        } else {
-            state.clipTopAmount = 0;
-        }
     }
 
     /**
