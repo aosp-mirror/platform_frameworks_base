@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trokit për ta ndryshuar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Aktivizo WebView të multiprocesit"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Ekzekuto renderizuesit e WebView në një proces të izoluar."</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"WebView me shumë procese"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"Ekzekuto më vete interpretuesit e WebView"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Zbatimi i WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Cakto zbatimin e WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Kjo zgjedhje nuk është më e vlefshme. Provo përsëri."</string>
@@ -323,7 +323,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Aktivizuar nga administratori"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Çaktivizuar nga administratori"</string>
-    <string name="home" msgid="3256884684164448244">"Krey i cilësimeve"</string>
+    <string name="home" msgid="3256884684164448244">"Kreu i cilësimeve"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> më parë"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> të mbetura"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"I vogël"</string>

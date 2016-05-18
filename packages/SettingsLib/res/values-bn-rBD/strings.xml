@@ -30,7 +30,7 @@
     <string name="wifi_not_in_range" msgid="1136191511238508967">"পরিসরের মধ্যে নয়"</string>
     <string name="wifi_no_internet" msgid="9151470775868728896">"কোনো ইন্টারনেট অ্যাক্সেস শনাক্ত হয়নি, স্বয়ংক্রিয়ভাবে পুনরায় সংযোগ স্থাপন করবে না৷"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> দ্বারা সংরক্ষিত"</string>
-    <string name="connected_via_wfa" msgid="3805736726317410714">"Wi‑Fi সহায়ক-এর মাধ্যমে সংযুক্ত হয়েছে"</string>
+    <string name="connected_via_wfa" msgid="3805736726317410714">"ওয়াই-ফাই সহায়ক-এর মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"সংযুক্ত, ইন্টারনেট নেই"</string>
@@ -88,7 +88,7 @@
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB টেদারিং"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"পোর্টেবল হটস্পট"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth টেদারিং"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ব্লুটুথ টেদারিং"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"টেদারিং"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"টেদারিং ও পোর্টেবল হটস্পট"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"সমস্ত কাজের অ্যাপ্লিকেশান"</string>
@@ -153,7 +153,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"একটি ত্রুটি প্রতিবেদন গ্রহণের জন্য পাওয়ার মেনুতে একটি বোতাম দেখান"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রীন কখনই নিদ্রা মোডে যাবে না"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI স্নুপ লগ সক্ষম করুন"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"একটি ফাইলে সব bluetooth HCI প্যাকেট ক্যাপচার করুন"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
@@ -164,15 +164,15 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"অনুরূপ অবস্থান অ্যাপ্লিকেশান: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"নেটওয়ার্কিং"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ওয়্যারলেস ডিসপ্লে সার্টিফিকেশন"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ভারবোস লগিং সক্ষম করুন"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"Wi‑Fi থেকে সেলুলারে তৎপর পরিবর্তন"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"ওয়াই-ফাই ভারবোস লগিং সক্ষম করুন"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ওয়াই-ফাই থেকে সেলুলারে তৎপর পরিবর্তন"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"সেলুলার ডেটা সর্বদাই সক্রিয় থাকে"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
-    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi লগিং স্তর বাড়ান, Wi‑Fi চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"সক্ষম করা থাকলে, নিম্নমানের Wi‑Fi সিগন্যালের ক্ষেত্রে, সেলুলার-এ ডেটা সংযোগ প্রদান করতে Wi‑Fi আরো বেশি শক্তিশালীভাবে কাজ করবে"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ইন্টারফেসে উপস্থিত ডেটা ট্রাফিকের পরিমাণের উপরে ভিত্তি করে Wi‑Fi রোম স্ক্যানকে অনুমোদিত/অননুমোদিত করুন"</string>
+    <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
+    <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"সক্ষম করা থাকলে, নিম্নমানের ওয়াই-ফাই সিগন্যালের ক্ষেত্রে, সেলুলার-এ ডেটা সংযোগ প্রদান করতে ওয়াই-ফাই আরো বেশি শক্তিশালীভাবে কাজ করবে"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ইন্টারফেসে উপস্থিত ডেটা ট্রাফিকের পরিমাণের উপরে ভিত্তি করে ওয়াই-ফাই রোম স্ক্যানকে অনুমোদিত/অননুমোদিত করুন"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির নির্বাচন করুন"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB কনফিগারেশন নির্বাচন করুন"</string>
@@ -181,7 +181,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট পরিদর্শন দেখা সক্ষম করুন"</string>
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"নতুন Android DHCP ক্লায়েন্টের পরিবর্তে Lollipop এর থেকে DHCP ক্লায়েন্ট ব্যবহার করুন৷"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"ওয়াই-ফাই সক্রিয় থাকার সময়েও (দ্রুত নেটওয়ার্কে পাল্টানোর জন্য) সর্বদা মোবাইল ডেটা সক্রিয় রাখুন।"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ডিবাগিং মঞ্জুর করবেন?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB ডিবাগিং কেবলমাত্র বিকাশ করার উদ্দেশ্যে। আপনার কম্পিউটার এবং আপনার ডিভাইসের মধ্যে ডেটা অনুলিপি করতে এটি ব্যবহার করুন, বিজ্ঞপ্তি ছাড়া আপনার ডিভাইসে অ্যাপ্লিকেশানগুলি ইনস্টল করুন এবং ডেটা লগ পড়ুন।"</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"আপনি আগে যে সব কম্পিউটার USB ডিবাগিং এর অ্যাক্সেসের অনুমতি দিয়েছিলেন তা প্রত্যাহার করবেন?"</string>
@@ -189,7 +189,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB এর অ্যাপ্লিকেশানগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, Bluetooth চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP পরীক্ষণ"</string>
@@ -275,8 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"সক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
-    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"বহু-প্রক্রিয়া ওয়েবভিউ সক্ষম করুন"</string>
-    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"একটি বিচ্ছিন্ন প্রক্রিয়ায় ওয়েবভিউ রেন্ডারারগুলি চালান৷"</string>
+    <string name="enable_webview_multiprocess" msgid="3352660896640797330">"বহু-প্রক্রিয়া ওয়েবভিউ"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="2485604010404197724">"ওয়েবভিউ রেন্ডারারগুলি আলাদাভাবে চালান"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ওয়েবভিউ প্রয়োগ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"ওয়েবভিউ প্রয়োগ সেট করুন"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"এই পছন্দটি আর বৈধ নেই৷ আবার চেষ্টা করুন৷"</string>
@@ -290,9 +290,9 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ব্যবহার করুন"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"অক্ষম হয়েছে"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"মোনোক্রোমেসি"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"দেউতেরানমালি (লাল-সবুজ)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"প্রতানোমালি (লাল-সবুজ)"</string>
-    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ত্রিতানোমালি (নীল-হলুদ)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"বর্ণান্ধতা (লাল-সবুজ)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"প্রোটানোম্যালি (লাল-সবুজ)"</string>
+    <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ট্রিট্যানোম্যালি (নীল-হলুদ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"রঙ সংশোধন"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"এই বৈশিষ্ট্যটি পরীক্ষামূলক এবং এটি কার্য-সম্পাদনা প্রভাবিত করতে পারে।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
