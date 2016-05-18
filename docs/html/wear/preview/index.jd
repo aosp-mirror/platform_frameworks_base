@@ -25,14 +25,19 @@ footer.hide=1
         <h1 class="dac-hero-title">Android Wear 2.0 Developer Preview</h1>
         <p class="dac-hero-description">
           Get ready for the next version of Android Wear!
-          Support stand-alone Wear devices and apps.
-          Create enhanced user interaction and glanceable experiences.
-          Test your apps on Wear devices.
+          Support <strong>stand-alone</strong> Wear devices and apps.
+          Create <strong>enhanced user interaction</strong> and
+          <strong>glanceable experiences</strong>.
+          Test your apps on <strong>Wear devices</strong>.
         </p>
 
         <a class="dac-hero-cta" href="{@docRoot}wear/preview/program.html">
           <span class="dac-sprite dac-auto-chevron"></span>
-          Learn more
+          Learn about the Preview
+        </a>
+        <a class="dac-hero-cta" href="https://www.google.com/design/wear">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Material Design for Wear
         </a>
       </div>
       <div class="col-9of16 col-pull-7of16 dac-hero-figure" style="margin-top:1.5em;padding-right:1.5em;">
@@ -57,7 +62,7 @@ footer.hide=1
     </a>
     <ul class="dac-actions">
       <li class="dac-action">
-        <a class="dac-action-link" href="{@docRoot}wear/preview/bug">
+        <a class="dac-action-link" href="http://g.co/wearpreviewbug">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Report an issue
         </a>
