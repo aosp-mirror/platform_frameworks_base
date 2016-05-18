@@ -458,8 +458,14 @@ public final class LoadedApk {
             }
         }
 
-        final List<String> zipPaths = new ArrayList<>();
-        final List<String> libPaths = new ArrayList<>();
+        // Lists for the elements of zip/code and native libraries.
+        //
+        // Both lists are usually not empty. We expect on average one APK for the zip component,
+        // but shared libraries and splits are not uncommon. We expect at least three elements
+        // for native libraries (app-based, system, vendor). As such, give both some breathing
+        // space and initialize to a small value (instead of incurring growth code).
+        final List<String> zipPaths = new ArrayList<>(10);
+        final List<String> libPaths = new ArrayList<>(10);
         makePaths(mActivityThread, mApplicationInfo, zipPaths, libPaths);
 
         final boolean isBundledApp = mApplicationInfo.isSystemApp()
@@ -495,8 +501,11 @@ public final class LoadedApk {
         /*
          * With all the combination done (if necessary, actually create the java class
          * loader and set up JIT profiling support if necessary.
+         *
+         * In many cases this is a single APK, so try to avoid the StringBuilder in TextUtils.
          */
-        final String zip = TextUtils.join(File.pathSeparator, zipPaths);
+        final String zip = (zipPaths.size() == 1) ? zipPaths.get(0) :
+                TextUtils.join(File.pathSeparator, zipPaths);
 
         if (ActivityThread.localLOGV)
             Slog.v(ActivityThread.TAG, "Class path: " + zip +
