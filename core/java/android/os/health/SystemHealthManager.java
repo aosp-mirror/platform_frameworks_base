@@ -53,6 +53,8 @@ public class SystemHealthManager {
 
     /**
      * Obtain a SystemHealthManager object for the supplied context.
+     *
+     * @hide
      */
     public static SystemHealthManager from(Context context) {
         return (SystemHealthManager)context.getSystemService(Context.SYSTEM_HEALTH_SERVICE);
