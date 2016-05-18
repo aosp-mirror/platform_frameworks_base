@@ -212,12 +212,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 if (!packageNames.contains(pkg)) {
                     revokeNotificationListenerAccess(pkg);
                     revokeNotificationPolicyAccess(pkg);
+                    revokeCoarseLocationAccess(pkg, currentUserHandle);
                 }
             }
             for (String pkg : packageNames) {
                 if (!allowed.contains(pkg)) {
                     grantNotificationPolicyAccess(pkg);
                     grantNotificationListenerAccess(pkg, currentUserHandle);
+                    grantCoarseLocationAccess(pkg, currentUserHandle);
                 }
             }
 
@@ -585,8 +587,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() + " for user " +
                             mCurrentVrService.getUserId());
                     mCurrentVrService.disconnect();
-                    disableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
-                            new UserHandle(mCurrentVrService.getUserId()));
                     mCurrentVrService = null;
                 }
             } else {
@@ -595,19 +595,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                     if (mCurrentVrService.disconnectIfNotMatching(component, userId)) {
                         Slog.i(TAG, "Disconnecting " + mCurrentVrService.getComponent() +
                                 " for user " + mCurrentVrService.getUserId());
-                        disableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
-                                new UserHandle(mCurrentVrService.getUserId()));
                         createAndConnectService(component, userId);
-                        enableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
-                                new UserHandle(mCurrentVrService.getUserId()));
                         sendUpdatedCaller = true;
                     }
                     // The service with the correct component/user is bound
                 } else {
                     // Nothing was previously running, bind a new service
                     createAndConnectService(component, userId);
-                    enableImpliedPermissionsLocked(mCurrentVrService.getComponent(),
-                            new UserHandle(mCurrentVrService.getUserId()));
                     sendUpdatedCaller = true;
                 }
             }
@@ -636,93 +630,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    /**
-     * Enable the permission given in {@link #IMPLIED_VR_LISTENER_PERMISSIONS} for the given
-     * component package and user.
-     *
-     * @param component the component whose package should be enabled.
-     * @param userId the user that owns the given component.
-     */
-    private void enableImpliedPermissionsLocked(ComponentName component, UserHandle userId) {
-        if (mGuard) {
-            // Impossible
-            throw new IllegalStateException("Enabling permissions without disabling.");
-        }
-        mGuard = true;
-
-        PackageManager pm = mContext.getPackageManager();
-
-        String pName = component.getPackageName();
-        if (pm == null) {
-            Slog.e(TAG, "Couldn't set implied permissions for " + pName +
-                ", PackageManager isn't running");
-            return;
-        }
-
-        ApplicationInfo info = null;
-        try {
-            info = pm.getApplicationInfo(pName, PackageManager.GET_META_DATA);
-        } catch (NameNotFoundException e) {
-        }
-
-        if (info == null || !(info.isSystemApp() || info.isUpdatedSystemApp())) {
-            return;
-        }
-
-        mWasDefaultGranted = true;
-        AppOpsManager mgr = mContext.getSystemService(AppOpsManager.class);
-        if (mgr == null) {
-            Slog.e(TAG, "No AppOpsManager, failed to set permissions for: " + pName);
-            return;
-        }
-        grantCoarseLocationAccess(mgr, pName, info.uid);
-        grantOverlayAccess(mgr, pName, info.uid);
-    }
-
-    /**
-     * Disable the permission given in {@link #IMPLIED_VR_LISTENER_PERMISSIONS} for the given
-     * component package and user.
-     *
-     * @param component the component whose package should be disabled.
-     * @param userId the user that owns the given component.
-     */
-    private void disableImpliedPermissionsLocked(ComponentName component, UserHandle userId) {
-        if (!mGuard) {
-            // Impossible
-            throw new IllegalStateException("Disabling permissions without enabling.");
-        }
-        mGuard = false;
-
-        PackageManager pm = mContext.getPackageManager();
-
-        if (pm == null) {
-            Slog.e(TAG, "Couldn't remove implied permissions for " + component +
-                ", PackageManager isn't running");
-            return;
-        }
-
-        String pName = component.getPackageName();
-        if (mWasDefaultGranted) {
-            ApplicationInfo info = null;
-            try {
-                info = pm.getApplicationInfo(pName, PackageManager.GET_META_DATA);
-            } catch (NameNotFoundException e) {
-            }
-
-            if (info != null) {
-                AppOpsManager mgr = mContext.getSystemService(AppOpsManager.class);
-                if (mgr == null) {
-                    Slog.e(TAG, "No AppOpsManager, failed to set permissions for: " + pName);
-                    return;
-                }
-                revokeCoarseLocationAccess(mgr, pName, info.uid);
-                revokeOverlayAccess(mgr, pName, info.uid);
-            }
-            mWasDefaultGranted = false;
-        }
-
-    }
-
     private boolean isDefaultAllowed(String packageName) {
         PackageManager pm = mContext.getPackageManager();
 
@@ -738,41 +645,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         return true;
     }
 
-    private void grantCoarseLocationAccess(AppOpsManager mgr, String packageName, int uid) {
-        mPreviousCoarseLocationMode = mgr.checkOpNoThrow(AppOpsManager.OP_COARSE_LOCATION, uid,
-                packageName);
-
-        if (mPreviousCoarseLocationMode != AppOpsManager.MODE_ALLOWED) {
-            mgr.setMode(AppOpsManager.OP_COARSE_LOCATION, uid, packageName,
-                    AppOpsManager.MODE_ALLOWED);
-        }
+    private void grantCoarseLocationAccess(String pkg, UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        pm.grantRuntimePermission(pkg, android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                userId);
     }
 
-    private void revokeCoarseLocationAccess(AppOpsManager mgr, String packageName, int uid) {
-        if (mPreviousCoarseLocationMode != AppOpsManager.MODE_ALLOWED) {
-            mgr.setMode(AppOpsManager.OP_COARSE_LOCATION, uid, packageName,
-                    mPreviousCoarseLocationMode);
-            mPreviousCoarseLocationMode = INVALID_APPOPS_MODE;
-        }
-    }
-
-    private void grantOverlayAccess(AppOpsManager mgr, String packageName, int uid) {
-
-        mPreviousManageOverlayMode = mgr.checkOpNoThrow(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, uid,
-                packageName);
-
-        if (mPreviousManageOverlayMode != AppOpsManager.MODE_ALLOWED) {
-            mgr.setMode(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, uid, packageName,
-                    AppOpsManager.MODE_ALLOWED);
-        }
-    }
-
-    private void revokeOverlayAccess(AppOpsManager mgr, String packageName, int uid) {
-        if (mPreviousManageOverlayMode != AppOpsManager.MODE_ALLOWED) {
-            mgr.setMode(AppOpsManager.OP_SYSTEM_ALERT_WINDOW, uid, packageName,
-                    mPreviousManageOverlayMode);
-            mPreviousManageOverlayMode = INVALID_APPOPS_MODE;
-        }
+    private void revokeCoarseLocationAccess(String pkg, UserHandle userId) {
+        PackageManager pm = mContext.getPackageManager();
+        pm.revokeRuntimePermission(pkg,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION, userId);
     }
 
     private void grantNotificationPolicyAccess(String pkg) {
