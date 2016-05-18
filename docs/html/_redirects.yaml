@@ -834,11 +834,11 @@ redirects:
 - from: /r/studio-ui/avd-manager.html
   to: /studio/run/managing-avds.html
 - from: /r/studio-ui/rundebugconfig.html
-  to: /studio/run/emulator.html
+  to: /studio/run/index.html
 - from: /r/studio-ui/devicechooser.html
   to: /studio/run/emulator.html
 - from: /r/studio-ui/virtualdeviceconfig.html
-  to: /studio/run/emulator.html
+  to: /studio/run/managing-avds.html
 - from: /r/studio-ui/emulator.html
   to: /studio/run/emulator.html
 - from: /r/studio-ui/instant-run.html
@@ -983,6 +983,8 @@ redirects:
   to: /studio/test/monkeyrunner/index.html
 - from: /tools/help/MonkeyRunner.html
   to: /studio/test/monkeyrunner/MonkeyRunner.html
+- from: /tools/help/monitor.html
+  to: /studio/profile/monitor.html
 - from: /tools/help/proguard.html
   to: /studio/build/shrink-code.html
 - from: /tools/help/sdk-manager.html
