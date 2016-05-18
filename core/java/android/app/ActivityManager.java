@@ -2370,6 +2370,8 @@ public class ActivityManager {
         public int displayId;
         public int userId;
         public boolean visible;
+        // Index of the stack in the display's stack list, can be used for comparison of stack order
+        public int position;
 
         @Override
         public int describeContents() {
@@ -2397,6 +2399,7 @@ public class ActivityManager {
             dest.writeInt(displayId);
             dest.writeInt(userId);
             dest.writeInt(visible ? 1 : 0);
+            dest.writeInt(position);
             if (topActivity != null) {
                 dest.writeInt(1);
                 topActivity.writeToParcel(dest, 0);
@@ -2426,6 +2429,7 @@ public class ActivityManager {
             displayId = source.readInt();
             userId = source.readInt();
             visible = source.readInt() > 0;
+            position = source.readInt();
             if (source.readInt() > 0) {
                 topActivity = ComponentName.readFromParcel(source);
             }
