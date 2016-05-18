@@ -2115,14 +2115,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mWasVisibleBeforeClientHidden = false;
     }
 
-    void clearAnimatingWithSavedSurface() {
+    boolean clearAnimatingWithSavedSurface() {
         if (mAnimatingWithSavedSurface) {
             // App has drawn something to its windows, we're no longer animating with
             // the saved surfaces.
             if (DEBUG_ANIM) Slog.d(TAG,
                     "clearAnimatingWithSavedSurface(): win=" + this);
             mAnimatingWithSavedSurface = false;
+            return true;
         }
+        return false;
     }
 
     @Override
