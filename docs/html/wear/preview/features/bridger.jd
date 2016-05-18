@@ -25,15 +25,14 @@ page.tags="wear-preview"
     <p>
       By default, notifications <a href=
       "{@docRoot}training/wearables/notifications/index.html">are bridged
-      (shared)</a> from an app on a companion phone to the watch. Standalone
-      Android Wear apps are planned for Android Wear 2.0. Therefore, a phone
-      app and a standalone watch app may be sources of the same notifications.
-      The Android Wear 2.0 Preview includes a Bridging mode feature to handle
-      this problem of duplicate notifications.
+      (shared)</a> from an app on a companion phone to the watch. If you build
+      a standalone watch app and have a companion phone app, they may duplicate
+      notifications. The Android Wear 2.0 Preview includes a Bridging mode
+      feature to handle this problem of repeated notifications.
     </p>
 
     <p>
-      With the Android Wear 2.0 Preview, developers can plan to change the
+      With the Android Wear 2.0 Preview, developers can change the
       behavior of notifications with the following:
     </p>
 
