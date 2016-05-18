@@ -156,12 +156,10 @@ public class BoundsAnimationController {
                     + mTmpRect + " from=" + mFrom + " mTo=" + mTo + " value=" + value
                     + " remains=" + remains);
 
-            if (remains != 0) {
-                mTmpTaskBounds.set(mTmpRect.left, mTmpRect.top,
-                        mTmpRect.left + mFrozenTaskWidth, mTmpRect.top + mFrozenTaskHeight);
-            }
+            mTmpTaskBounds.set(mTmpRect.left, mTmpRect.top,
+                    mTmpRect.left + mFrozenTaskWidth, mTmpRect.top + mFrozenTaskHeight);
 
-            if (!mTarget.setPinnedStackSize(mTmpRect, remains != 0 ? mTmpTaskBounds : null)) {
+            if (!mTarget.setPinnedStackSize(mTmpRect, mTmpTaskBounds)) {
                 // Whoops, the target doesn't feel like animating anymore. Let's immediately finish
                 // any further animation.
                 animation.cancel();
@@ -205,11 +203,12 @@ public class BoundsAnimationController {
                 return;
             }
 
+            finishAnimation();
+
+            mTarget.setPinnedStackSize(mTo, null);
             if (mMoveToFullScreen && !mWillReplace) {
                 mTarget.moveToFullscreen();
             }
-
-            finishAnimation();
         }
 
         @Override
