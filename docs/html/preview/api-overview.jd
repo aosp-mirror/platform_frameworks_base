@@ -9,37 +9,37 @@ page.image=images/cards/card-n-apis_2x.png
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>Key developer features</h2>
+  <h2>Key Developer Features</h2>
   <ol>
       <ul style="list-style-type:none;">
-        <li><a href="#multi-window_support">Multi-window support</a></li>
+        <li><a href="#multi-window_support">Multi-window Support</a></li>
         <li><a href="#notification_enhancements">Notifications</a></li>
-        <li><a href="#jit_aot">JIT/AOT compilation</a></li>
-        <li><a href="#quick_path_to_app_install">Quick path to app install</a></li>
-        <li><a href="#doze_on_the_go">Doze on the go</a></li>
-        <li><a href="#background_optimizations">Background optimizations</a></li>
+        <li><a href="#jit_aot">JIT/AOT Compilation</a></li>
+        <li><a href="#quick_path_to_app_install">Quick Path to App Install</a></li>
+        <li><a href="#doze_on_the_go">Doze on the Go</a></li>
+        <li><a href="#background_optimizations">Background Optimizations</a></li>
         <li><a href="#data_saver">Data Saver</a></li>
         <li><a href="#vulkan">Vulkan API</a></li>
         <li><a href="#tile_api">Quick Settings Tile API</a></li>
-        <li><a href="#number-blocking">Number-blocking</a></li>
-        <li><a href="#call_screening">Call screening</a></li>
-        <li><a href="#multi-locale_languages">Locales and languages</a></li>
+        <li><a href="#number-blocking">Number Blocking</a></li>
+        <li><a href="#call_screening">Call Screening</a></li>
+        <li><a href="#multi-locale_languages">Locales and Languages</a></li>
         <li><a href="#emoji">New Emojis</a></li>
         <li><a href="#icu4">ICU4J APIs in Android</a></li>
         <li><a href="#gles_32">OpenGL ES 3.2 API</a></li>
-        <li><a href="#android_tv_recording">Android TV recording</a></li>
+        <li><a href="#android_tv_recording">Android TV Recording</a></li>
         <li><a href="#android_for_work">Android for Work</a></li>
         <li><a href="#accessibility_enhancements">Accessibility</a></li>
         <li><a href="#direct_boot">Direct Boot</a></li>
         <li><a href="#key_attestation">Key Attestation</a></li>
         <li><a href="#network_security_config">Network Security Config</a></li>
         <li><a href="#default_trusted_ca">Default Trusted CA</a></li>
-        <li><a href="#apk_signature_v2">APK signature scheme v2</a></li>
-        <li><a href="#scoped_directory_access">Scoped directory access</a></li>
+        <li><a href="#apk_signature_v2">APK Signature Scheme v2</a></li>
+        <li><a href="#scoped_directory_access">Scoped Directory Access</a></li>
         <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
         <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
         <li><a href="#vr">VR Support</a></li>
-        <li><a href="#print_svc">Print service enhancements</a></li>
+        <li><a href="#print_svc">Print Service Enhancements</a></li>
         <li><a href="#virtual_files">Virtual Files</a></li>
         <li><a href="#framemetrics_api">FrameMetricsListener API</a></li>
       </ol>
@@ -61,7 +61,7 @@ the new features for developers. </p>
   new APIs.
 </p>
 
-<h2 id="multi-window_support">Multi-window support</h2>
+<h2 id="multi-window_support">Multi-window Support</h2>
 
 
 <p>In Android N, we're introducing a new and much-requested multitasking feature
@@ -106,7 +106,7 @@ that size. You can also disable multi-window display for your app, which
   developer documentation.
 </p>
 
-<h2 id="notification_enhancements">Notification enhancements</h2>
+<h2 id="notification_enhancements">Notification Enhancements</h2>
 
 <p>In Android N we've redesigned notifications to make them easier and faster to
 use. Some of the changes include:</p>
@@ -172,7 +172,7 @@ use. Some of the changes include:</p>
 
 
 
-<h2 id="jit_aot">Profile-guided JIT/AOT compilation</h2>
+<h2 id="jit_aot">Profile-guided JIT/AOT Compilation</h2>
 
 <p>In Android N, we've added a Just in Time (JIT) compiler with code profiling to
 ART, which lets it constantly improve the performance of Android apps as they
@@ -194,14 +194,14 @@ binaries. This feature is especially important on low-memory devices.</p>
 device battery. It does precompilation only when then the device is idle and
 charging, saving time and battery by doing that work in advance.</p>
 
-<h2 id="quick_path_to_app_install">Quick path to app install</h2>
+<h2 id="quick_path_to_app_install">Quick Path to App Install</h2>
 
 <p>One of the most tangible benefits of ART's JIT compiler is the speed of app
 installs and system updates. Even large apps that required several minutes to
 optimize and install in Android 6.0 can now install in just a matter of
 seconds. System updates are also faster, since there's no more optimizing step. </p>
 
-<h2 id="doze_on_the_go">Doze on the go...</h2>
+<h2 id="doze_on_the_go">Doze on the Go...</h2>
 
 <p>Android 6.0 introduced Doze, a system mode that saves battery by deferring
 apps' CPU and network activities when the device is idle, such as when it's
@@ -239,7 +239,7 @@ handle Doze, you're all set. If not, start <a
 href="{@docRoot}training/monitoring-device-state/doze-standby.html#assessing_your_app">adapting
 your app to Doze</a> now.</p>
 
-<h2 id="background_optimizations">Project Svelte: Background optimizations</h2>
+<h2 id="background_optimizations">Project Svelte: Background Optimizations</h2>
 
 <p>Project Svelte is an ongoing effort to minimize RAM use by system and apps
 across the range of Android devices in the ecosystem. In Android N, Project
@@ -410,15 +410,15 @@ displayed &mdash; users can add or move tiles just by dragging and dropping them
 
 
 
-<h2 id="number-blocking">Number-blocking</h2>
+<h2 id="number-blocking">Number Blocking</h2>
 
-<p>Android N now supports number-blocking in the platform and provides a
+<p>Android N now supports number blocking in the platform and provides a
 framework API to let service providers maintain a blocked-number list. The
 default SMS app, the default phone app, and carrier apps can read from and
 write to the blocked-number list. The list is not accessible to other apps.</p>
 
-<p>By making number-blocking a standard feature of the platform, Android provides
-a consistent way for apps to support number-blocking across a wide range of
+<p>By making number blocking a standard feature of the platform, Android provides
+a consistent way for apps to support number blocking across a wide range of
 devices. Among the other benefits that apps can take advantage of are:</p>
 
 <ul>
@@ -439,7 +439,7 @@ through any medium, such as a VOIP endpoint or forwarding phones.</p>
   Reference</a>.
 </p>
 
-<h2 id="call_screening">Call screening</h2>
+<h2 id="call_screening">Call Screening</h2>
 
 <p>
   Android N allows the default phone app to screen incoming calls. The phone
@@ -461,7 +461,7 @@ through any medium, such as a VOIP endpoint or forwarding phones.</p>
 </p>
 
 
-<h2 id="multi-locale_languages">Multi-locale support, more languages</h2>
+<h2 id="multi-locale_languages">Multi-locale Support, More Languages</h2>
 
 
 <p>Android N now lets users select <strong>multiple locales</strong> in Settings,
@@ -570,7 +570,7 @@ supported OpenGL ES version at runtime, see the <a
 href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API guide</a>.</p>
 
 
-<h2 id="android_tv_recording">Android TV recording</h2>
+<h2 id="android_tv_recording">Android TV Recording</h2>
 
 <p>Android N adds the ability to record and playback content from Android TV input
 services via new recording APIs.  Building on top of existing time-shifting
@@ -653,7 +653,7 @@ action <code>android.net.VpnService</code>. </p>
   customizes the flow with a corporate logo.
 </p>
 
-<h2 id="accessibility_enhancements">Accessibility enhancements</h2>
+<h2 id="accessibility_enhancements">Accessibility Enhancements</h2>
 
 <p>Android N now offers Vision Settings directly on the Welcome screen for new
 device setup. This makes it much easier for users to discover and configure
@@ -674,7 +674,7 @@ meet the needs of those users.</p>
   in the downloadable <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.</p>
 
 
-<h2 id="direct_boot">Direct boot</h2>
+<h2 id="direct_boot">Direct Boot</h2>
 
 <p>Direct boot improves device startup times and lets registered
 apps have limited functionality even after an unexpected reboot.
@@ -779,7 +779,7 @@ N that wish to trust user-added CAs should use the
 <a href="{@docRoot}preview/features/security-config.html">Network Security Config</a> to
 specify how user CAs should be trusted.</p>
 
-<h2 id="apk_signature_v2">APK signature scheme v2</h2>
+<h2 id="apk_signature_v2">APK Signature Scheme v2</h2>
 
 <p>
   Android N introduces APK Signature Scheme v2, a new app-signing scheme that
@@ -830,7 +830,7 @@ specify how user CAs should be trusted.</p>
   the build file for signing apps</a> using the Android Plugin for Gradle.
 </p>
 
-<h2 id="scoped_directory_access">Scoped directory access</h2>
+<h2 id="scoped_directory_access">Scoped Directory Access</h2>
 
 <p>In Android N, apps can use new APIs to request access to specific <a
 href="{@docRoot}guide/topics/data/data-storage.html#filesExternal">external
