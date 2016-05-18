@@ -22,7 +22,7 @@ page.tags="preview", "developer preview"
   <div class="cols">
     <div class="col-6of12">
       <p><em>Date: May 2016<br />
-      Builds: Wearable Support 2.0.0-alpha1, NVD36G <br />
+      Builds: Wearable Support 2.0.0-alpha1, NVD36I <br />
       Emulator support: x86 & ARM (32-bit)<br/>
       </em></p>
     </div>
@@ -109,6 +109,8 @@ page.tags="preview", "developer preview"
   rest of the event card.
   </li>
   <li>Unable to turn off the Wifi on wearable.
+  </li>
+  <li>Voice transcription may not work reliably at this time.
   </li>
 </ul>
 
