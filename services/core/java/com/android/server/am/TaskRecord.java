@@ -127,14 +127,14 @@ final class TaskRecord {
     private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
-    private static final String ATTR_MINIMAL_WIDTH = "minimal_width";
-    private static final String ATTR_MINIMAL_HEIGHT = "minimal_height";
+    private static final String ATTR_MIN_WIDTH = "min_width";
+    private static final String ATTR_MIN_HEIGHT = "min_height";
 
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     static final int INVALID_TASK_ID = -1;
-    static final int INVALID_MINIMAL_SIZE = -1;
+    static final int INVALID_MIN_SIZE = -1;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -260,8 +260,8 @@ final class TaskRecord {
     Rect mLastNonFullscreenBounds = null;
     // Minimal width and height of this task when it's resizeable. -1 means it should use the
     // default minimal width/height.
-    int mMinimalWidth;
-    int mMinimalHeight;
+    int mMinWidth;
+    int mMinHeight;
 
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
@@ -331,7 +331,7 @@ final class TaskRecord {
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
             int resizeMode, boolean privileged, boolean _realActivitySuspended,
-            boolean userSetupComplete, int minimalWidth, int minimalHeight) {
+            boolean userSetupComplete, int minWidth, int minHeight) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -371,8 +371,8 @@ final class TaskRecord {
         mCallingPackage = callingPackage;
         mResizeMode = resizeMode;
         mPrivileged = privileged;
-        mMinimalWidth = minimalWidth;
-        mMinimalHeight = minimalHeight;
+        mMinWidth = minWidth;
+        mMinHeight = minHeight;
     }
 
     void touchActiveTime() {
@@ -481,11 +481,11 @@ final class TaskRecord {
     /** Sets the original minimal width and height. */
     private void setMinDimensions(ActivityInfo info) {
         if (info != null && info.windowLayout != null) {
-            mMinimalWidth = info.windowLayout.minimalWidth;
-            mMinimalHeight = info.windowLayout.minimalHeight;
+            mMinWidth = info.windowLayout.minWidth;
+            mMinHeight = info.windowLayout.minHeight;
         } else {
-            mMinimalWidth = INVALID_MINIMAL_SIZE;
-            mMinimalHeight = INVALID_MINIMAL_SIZE;
+            mMinWidth = INVALID_MIN_SIZE;
+            mMinHeight = INVALID_MIN_SIZE;
         }
     }
 
@@ -1180,8 +1180,8 @@ final class TaskRecord {
             out.attribute(
                     null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
         }
-        out.attribute(null, ATTR_MINIMAL_WIDTH, String.valueOf(mMinimalWidth));
-        out.attribute(null, ATTR_MINIMAL_HEIGHT, String.valueOf(mMinimalHeight));
+        out.attribute(null, ATTR_MIN_WIDTH, String.valueOf(mMinWidth));
+        out.attribute(null, ATTR_MIN_HEIGHT, String.valueOf(mMinHeight));
 
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
@@ -1246,8 +1246,8 @@ final class TaskRecord {
         int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         boolean privileged = false;
         Rect bounds = null;
-        int minimalWidth = INVALID_MINIMAL_SIZE;
-        int minimalHeight = INVALID_MINIMAL_SIZE;
+        int minWidth = INVALID_MIN_SIZE;
+        int minHeight = INVALID_MIN_SIZE;
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
@@ -1315,10 +1315,10 @@ final class TaskRecord {
                 privileged = Boolean.parseBoolean(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
                 bounds = Rect.unflattenFromString(attrValue);
-            } else if (ATTR_MINIMAL_WIDTH.equals(attrName)) {
-                minimalWidth = Integer.parseInt(attrValue);
-            } else if (ATTR_MINIMAL_HEIGHT.equals(attrName)) {
-                minimalHeight = Integer.parseInt(attrValue);
+            } else if (ATTR_MIN_WIDTH.equals(attrName)) {
+                minWidth = Integer.parseInt(attrValue);
+            } else if (ATTR_MIN_HEIGHT.equals(attrName)) {
+                minHeight = Integer.parseInt(attrValue);
             } else {
                 Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
             }
@@ -1379,7 +1379,7 @@ final class TaskRecord {
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
                 taskAffiliationColor, callingUid, callingPackage, resizeMode, privileged,
-                realActivitySuspended, userSetupComplete, minimalWidth, minimalHeight);
+                realActivitySuspended, userSetupComplete, minWidth, minHeight);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
@@ -1394,41 +1394,41 @@ final class TaskRecord {
         if (bounds == null) {
             return;
         }
-        int minimalWidth = mMinimalWidth;
-        int minimalHeight = mMinimalHeight;
+        int minWidth = mMinWidth;
+        int minHeight = mMinHeight;
         // If the task has no requested minimal size, we'd like to enforce a minimal size
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
         if (stack.mStackId != PINNED_STACK_ID) {
-            if (minimalWidth == INVALID_MINIMAL_SIZE) {
-                minimalWidth = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+            if (minWidth == INVALID_MIN_SIZE) {
+                minWidth = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             }
-            if (minimalHeight == INVALID_MINIMAL_SIZE) {
-                minimalHeight = mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask;
+            if (minHeight == INVALID_MIN_SIZE) {
+                minHeight = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
             }
         }
-        final boolean adjustWidth = minimalWidth > bounds.width();
-        final boolean adjustHeight = minimalHeight > bounds.height();
+        final boolean adjustWidth = minWidth > bounds.width();
+        final boolean adjustHeight = minHeight > bounds.height();
         if (!(adjustWidth || adjustHeight)) {
             return;
         }
 
         if (adjustWidth) {
             if (mBounds != null && bounds.right == mBounds.right) {
-                bounds.left = bounds.right - minimalWidth;
+                bounds.left = bounds.right - minWidth;
             } else {
                 // Either left bounds match, or neither match, or the previous bounds were
                 // fullscreen and we default to keeping left.
-                bounds.right = bounds.left + minimalWidth;
+                bounds.right = bounds.left + minWidth;
             }
         }
         if (adjustHeight) {
             if (mBounds != null && bounds.bottom == mBounds.bottom) {
-                bounds.top = bounds.bottom - minimalHeight;
+                bounds.top = bounds.bottom - minHeight;
             } else {
                 // Either top bounds match, or neither match, or the previous bounds were
                 // fullscreen and we default to keeping top.
-                bounds.bottom = bounds.top + minimalHeight;
+                bounds.bottom = bounds.top + minHeight;
             }
         }
     }
