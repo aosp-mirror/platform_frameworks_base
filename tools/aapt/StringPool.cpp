@@ -390,12 +390,12 @@ sp<AaptFile> StringPool::createStringBlock()
 
 #define ENCODE_LENGTH(str, chrsz, strSize) \
 { \
-    size_t maxMask = 1 << ((chrsz*8)-1); \
+    size_t maxMask = 1 << (((chrsz)*8)-1); \
     size_t maxSize = maxMask-1; \
-    if (strSize > maxSize) { \
-        *str++ = maxMask | ((strSize>>(chrsz*8))&maxSize); \
+    if ((strSize) > maxSize) { \
+        *(str)++ = maxMask | (((strSize)>>((chrsz)*8))&maxSize); \
     } \
-    *str++ = strSize; \
+    *(str)++ = strSize; \
 }
 
 status_t StringPool::writeStringBlock(const sp<AaptFile>& pool)
