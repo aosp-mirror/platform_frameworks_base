@@ -194,7 +194,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
     private boolean mScrollingEnabled;
-    private DismissView mDismissView;
+    protected DismissView mDismissView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
 
