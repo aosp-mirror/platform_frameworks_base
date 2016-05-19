@@ -36,7 +36,7 @@ public final class Shared {
 
     public static final String TAG = "Documents";
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     /** Intent action name to pick a copy destination. */
     public static final String ACTION_PICK_COPY_DESTINATION =
