@@ -65,7 +65,9 @@ class ApplicationLoaders {
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupVulkanLayerPath");
                 setupVulkanLayerPath(pathClassloader, librarySearchPath);
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
