@@ -43,6 +43,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.DeadSystemException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -76,7 +77,7 @@ import java.util.concurrent.TimeUnit;
  *
  * <p> An app can check whether wallpapers are supported for the current user, by calling
  * {@link #isWallpaperSupported()}, and whether setting of wallpapers is allowed, by calling
- * {@link #isWallpaperSettingAllowed()}.
+ * {@link #isSetWallpaperAllowed()}.
  */
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
@@ -483,7 +484,7 @@ public class WallpaperManager {
             float horizontalAlignment, float verticalAlignment, @SetWallpaperFlags int which) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return null;
+            throw new RuntimeException(new DeadSystemException());
         }
 
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
@@ -750,7 +751,7 @@ public class WallpaperManager {
 
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return null;
+            throw new RuntimeException(new DeadSystemException());
         } else {
             try {
                 Bundle outParams = new Bundle();
@@ -780,7 +781,7 @@ public class WallpaperManager {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
-                return null;
+                throw new RuntimeException(new DeadSystemException());
             } else {
                 return sGlobals.mService.getWallpaperInfo();
             }
@@ -792,6 +793,10 @@ public class WallpaperManager {
     /**
      * Get the ID of the current wallpaper of the given kind.  If there is no
      * such wallpaper configured, returns a negative number.
+     *
+     * <p>Every time the wallpaper image is set, a new ID is assigned to it.
+     * This method allows the caller to determine whether the wallpaper imagery
+     * has changed, regardless of how that change happened.
      *
      * @param which The wallpaper whose ID is to be returned.  Must be a single
      *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or
@@ -812,7 +817,7 @@ public class WallpaperManager {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
-                return -1;
+                throw new RuntimeException(new DeadSystemException());
             } else {
                 return sGlobals.mService.getWallpaperIdForUser(which, userId);
             }
@@ -914,7 +919,7 @@ public class WallpaperManager {
             throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return 0;
+            throw new RuntimeException(new DeadSystemException());
         }
         final Bundle result = new Bundle();
         final WallpaperSetCompletion completion = new WallpaperSetCompletion();
@@ -1027,7 +1032,7 @@ public class WallpaperManager {
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return 0;
+            throw new RuntimeException(new DeadSystemException());
         }
         final Bundle result = new Bundle();
         final WallpaperSetCompletion completion = new WallpaperSetCompletion();
@@ -1073,7 +1078,8 @@ public class WallpaperManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param bitmapData A stream containing the raw data to install as a wallpaper.
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.  This
+     *     data can be in any format handled by {@link BitmapRegionDecoder}.
      *
      * @throws IOException If an error occurs when attempting to set the wallpaper
      *     based on the provided image data.
@@ -1103,13 +1109,17 @@ public class WallpaperManager {
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#SET_WALLPAPER}.
      *
-     * @param bitmapData A stream containing the raw data to install as a wallpaper.
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.  This
+     *     data can be in any format handled by {@link BitmapRegionDecoder}.
      * @param visibleCropHint The rectangular subregion of the streamed image that should be
      *     displayed as wallpaper.  Passing {@code null} for this parameter means that
      *     the full image should be displayed if possible given the image's and device's
      *     aspect ratios, etc.
      * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
      *     image for restore to a future device; {@code false} otherwise.
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
+     *
+     * @see #getWallpaperId(int)
      *
      * @throws IOException If an error occurs when attempting to set the wallpaper
      *     based on the provided image data.
@@ -1125,7 +1135,8 @@ public class WallpaperManager {
      * Version of {@link #setStream(InputStream, Rect, boolean)} that allows the caller
      * to specify which of the supported wallpaper categories to set.
      *
-     * @param bitmapData A stream containing the raw data to install as a wallpaper.
+     * @param bitmapData A stream containing the raw data to install as a wallpaper.  This
+     *     data can be in any format handled by {@link BitmapRegionDecoder}.
      * @param visibleCropHint The rectangular subregion of the streamed image that should be
      *     displayed as wallpaper.  Passing {@code null} for this parameter means that
      *     the full image should be displayed if possible given the image's and device's
@@ -1133,7 +1144,9 @@ public class WallpaperManager {
      * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
      *     image for restore to a future device; {@code false} otherwise.
      * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
      *
+     * @see #getWallpaperId(int)
      * @see #FLAG_LOCK
      * @see #FLAG_SYSTEM
      *
@@ -1145,7 +1158,7 @@ public class WallpaperManager {
         validateRect(visibleCropHint);
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return 0;
+            throw new RuntimeException(new DeadSystemException());
         }
         final Bundle result = new Bundle();
         final WallpaperSetCompletion completion = new WallpaperSetCompletion();
@@ -1179,7 +1192,7 @@ public class WallpaperManager {
     public boolean hasResourceWallpaper(@RawRes int resid) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return false;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             Resources resources = mContext.getResources();
@@ -1207,7 +1220,7 @@ public class WallpaperManager {
     public int getDesiredMinimumWidth() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return 0;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             return sGlobals.mService.getWidthHint();
@@ -1233,7 +1246,7 @@ public class WallpaperManager {
     public int getDesiredMinimumHeight() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return 0;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             return sGlobals.mService.getHeightHint();
@@ -1294,6 +1307,7 @@ public class WallpaperManager {
 
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
+                throw new RuntimeException(new DeadSystemException());
             } else {
                 sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight,
                         mContext.getOpPackageName());
@@ -1316,6 +1330,7 @@ public class WallpaperManager {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
+                throw new RuntimeException(new DeadSystemException());
             } else {
                 sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName());
             }
@@ -1365,7 +1380,7 @@ public class WallpaperManager {
     public void clearWallpaper(@SetWallpaperFlags int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             sGlobals.mService.clearWallpaper(mContext.getOpPackageName(), which, userId);
@@ -1386,7 +1401,7 @@ public class WallpaperManager {
     public boolean setWallpaperComponent(ComponentName name) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return false;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName());
@@ -1466,6 +1481,7 @@ public class WallpaperManager {
     public boolean isWallpaperSupported() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
         } else {
             try {
                 return sGlobals.mService.isWallpaperSupported(mContext.getOpPackageName());
@@ -1473,7 +1489,6 @@ public class WallpaperManager {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return false;
     }
 
     /**
@@ -1483,17 +1498,17 @@ public class WallpaperManager {
      *
      * @see android.os.UserManager#DISALLOW_SET_WALLPAPER
      */
-    public boolean isWallpaperSettingAllowed() {
+    public boolean isSetWallpaperAllowed() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
         } else {
             try {
-                return sGlobals.mService.isWallpaperSettingAllowed(mContext.getOpPackageName());
+                return sGlobals.mService.isSetWallpaperAllowed(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return false;
     }
 
     /**
@@ -1621,7 +1636,7 @@ public class WallpaperManager {
     public boolean setLockWallpaperCallback(IWallpaperManagerCallback callback) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return false;
+            throw new RuntimeException(new DeadSystemException());
         }
 
         try {
@@ -1640,7 +1655,7 @@ public class WallpaperManager {
     public boolean isWallpaperBackupEligible() {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
-            return false;
+            throw new RuntimeException(new DeadSystemException());
         }
         try {
             return sGlobals.mService.isWallpaperBackupEligible(mContext.getUserId());

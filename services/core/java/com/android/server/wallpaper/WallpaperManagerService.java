@@ -1011,7 +1011,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public void clearWallpaper(String callingPackage, int which, int userId) {
         if (DEBUG) Slog.v(TAG, "clearWallpaper");
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
-        if (!isWallpaperSupported(callingPackage) || !isWallpaperSettingAllowed(callingPackage)) {
+        if (!isWallpaperSupported(callingPackage) || !isSetWallpaperAllowed(callingPackage)) {
             return;
         }
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
@@ -1326,11 +1326,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
 
         if ((which & (FLAG_LOCK|FLAG_SYSTEM)) == 0) {
-            Slog.e(TAG, "Must specify a valid wallpaper category to set");
-            return null;
+            final String msg = "Must specify a valid wallpaper category to set";
+            Slog.e(TAG, msg);
+            throw new IllegalArgumentException(msg);
         }
 
-        if (!isWallpaperSupported(callingPackage) || !isWallpaperSettingAllowed(callingPackage)) {
+        if (!isWallpaperSupported(callingPackage) || !isSetWallpaperAllowed(callingPackage)) {
             return null;
         }
 
@@ -1341,7 +1342,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (cropHint.isEmpty()
                     || cropHint.left < 0
                     || cropHint.top < 0) {
-                return null;
+                throw new IllegalArgumentException("Invalid crop rect supplied: " + cropHint);
             }
         }
 
@@ -1449,7 +1450,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     @Override
     public void setWallpaperComponentChecked(ComponentName name, String callingPackage) {
-        if (isWallpaperSupported(callingPackage) && isWallpaperSettingAllowed(callingPackage)) {
+        if (isWallpaperSupported(callingPackage) && isSetWallpaperAllowed(callingPackage)) {
             setWallpaperComponent(name);
         }
     }
@@ -1699,7 +1700,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     }
 
     @Override
-    public boolean isWallpaperSettingAllowed(String callingPackage) {
+    public boolean isSetWallpaperAllowed(String callingPackage) {
         final PackageManager pm = mContext.getPackageManager();
         String[] uidPackages = pm.getPackagesForUid(Binder.getCallingUid());
         boolean uidMatchPackage = Arrays.asList(uidPackages).contains(callingPackage);
