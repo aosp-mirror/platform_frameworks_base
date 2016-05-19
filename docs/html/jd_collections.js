@@ -744,6 +744,14 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/app-indexing/"
     ]
   },
+  "distribute/users/knowyouruser": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/optimizing-your-app.html",
+      "http://www.youtube.com/watch?v=RRelFvc6Czo",
+      "distribute/stories/games/rvappstudios-zombie.html"
+    ]
+  },
   "distribute/users/promotewithads": {
     "title": "",
     "resources": [
