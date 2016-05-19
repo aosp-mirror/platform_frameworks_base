@@ -3840,26 +3840,6 @@ METADATA['en'].collections = {
       "https://www.youtube.com/watch?v=5Be2mJzP-Uw&list=PLWz5rJ2EKKc9e0d55YHgJFHXNZbGHEXJX"
     ]
   },
-  "google/landing/services": {
-    "title": "",
-    "resources": [
-      "https://developers.google.com/analytics/devguides/collection/android/",
-      "https://developers.google.com/maps/documentation/android/",
-      "https://developers.google.com/identity/sign-in/android/",
-      "https://developers.google.com/mobile-ads-sdk/download",
-      "https://developers.google.com/cloud-messaging/gcm",
-      "https://developers.google.com/app-indexing/"
-    ]
-  },
-  "google/landing/videos": {
-    "title": "",
-    "resources": [
-      "https://www.youtube.com/watch?v=M3Udfu6qidk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
-      "https://www.youtube.com/watch?v=FOn64iqlphk&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
-      "https://www.youtube.com/watch?v=F0Kh_RnSM0w&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf",
-      "https://www.youtube.com/watch?v=fvtMtfCuEpw&list=PLWz5rJ2EKKc9Qk1_iCZNbBp6adYnJf9Vf"
-    ]
-  },
   "google/landing/googleplay": {
     "title": "",
     "resources": [
