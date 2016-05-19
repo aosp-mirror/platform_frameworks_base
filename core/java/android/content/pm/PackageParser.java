@@ -3712,15 +3712,15 @@ public class PackageParser {
         int gravity = sw.getInt(
                 com.android.internal.R.styleable.AndroidManifestLayout_gravity,
                 Gravity.CENTER);
-        int minimalWidth = sw.getDimensionPixelSize(
-                com.android.internal.R.styleable.AndroidManifestLayout_minimalWidth,
+        int minWidth = sw.getDimensionPixelSize(
+                com.android.internal.R.styleable.AndroidManifestLayout_minWidth,
                 -1);
-        int minimalHeight = sw.getDimensionPixelSize(
-                com.android.internal.R.styleable.AndroidManifestLayout_minimalHeight,
+        int minHeight = sw.getDimensionPixelSize(
+                com.android.internal.R.styleable.AndroidManifestLayout_minHeight,
                 -1);
         sw.recycle();
         a.info.windowLayout = new ActivityInfo.WindowLayout(width, widthFraction,
-                height, heightFraction, gravity, minimalWidth, minimalHeight);
+                height, heightFraction, gravity, minWidth, minHeight);
     }
 
     private Activity parseActivityAlias(Package owner, Resources res,
