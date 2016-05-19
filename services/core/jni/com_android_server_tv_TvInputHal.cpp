@@ -678,11 +678,11 @@ static const JNINativeMethod gTvInputHalMethods[] = {
 
 #define FIND_CLASS(var, className) \
         var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className)
+        LOG_FATAL_IF(! (var), "Unable to find class " className)
 
 #define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
         var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName)
+        LOG_FATAL_IF(! (var), "Unable to find method" methodName)
 
 int register_android_server_tv_TvInputHal(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "com/android/server/tv/TvInputHal",

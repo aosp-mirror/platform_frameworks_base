@@ -284,7 +284,7 @@ void HdmiCecController::onReceived(const hdmi_event_t* event, void* arg) {
 //------------------------------------------------------------------------------
 #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
+        LOG_FATAL_IF(! (var), "Unable to find method " methodName);
 
 static jlong nativeInit(JNIEnv* env, jclass clazz, jobject callbacksObj,
         jobject messageQueueObj) {
