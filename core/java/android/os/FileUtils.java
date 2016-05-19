@@ -380,7 +380,7 @@ public class FileUtils {
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File lhs, File rhs) {
-                return (int) (rhs.lastModified() - lhs.lastModified());
+                return Long.compare(rhs.lastModified(), lhs.lastModified());
             }
         });
 
