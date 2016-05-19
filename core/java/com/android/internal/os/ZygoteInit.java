@@ -31,6 +31,7 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -253,7 +254,7 @@ public class ZygoteInit {
     }
 
     /**
-     * Warm up the providers that are already registered.
+     * Register AndroidKeyStoreProvider and warm up the providers that are already registered.
      *
      * By doing it here we avoid that each app does it when requesting a service from the
      * provider for the first time.
@@ -261,12 +262,23 @@ public class ZygoteInit {
     private static void warmUpJcaProviders() {
         long startTime = SystemClock.uptimeMillis();
         Trace.traceBegin(
+                Trace.TRACE_TAG_DALVIK, "Starting installation of AndroidKeyStoreProvider");
+        // AndroidKeyStoreProvider.install() manipulates the list of JCA providers to insert
+        // preferred providers. Note this is not done via security.properties as the JCA providers
+        // are not on the classpath in the case of, for example, raw dalvikvm runtimes.
+        AndroidKeyStoreProvider.install();
+        Log.i(TAG, "Installed AndroidKeyStoreProvider in "
+                + (SystemClock.uptimeMillis() - startTime) + "ms.");
+        Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+
+        startTime = SystemClock.uptimeMillis();
+        Trace.traceBegin(
                 Trace.TRACE_TAG_DALVIK, "Starting warm up of JCA providers");
         for (Provider p : Security.getProviders()) {
             p.warmUpServiceProvision();
         }
         Log.i(TAG, "Warmed up JCA providers in "
-                + (SystemClock.uptimeMillis()-startTime) + "ms.");
+                + (SystemClock.uptimeMillis() - startTime) + "ms.");
         Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
     }
 
