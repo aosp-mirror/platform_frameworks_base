@@ -327,30 +327,6 @@ changed.</li>
         <td class="value_pos">18</td>
     </tr>
     <tr>
-        <td class="label_pos">drawArc()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">drawRoundRect()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">saveLayer() with RectF dimensions</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">saveLayer() with float dimensions</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">saveLayerAlpha() with RectF dimensions</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">saveLayerAlpha() with float dimensions</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
         <td colspan="5" class="s5">Paint</td>
     </tr>
     <tr>
@@ -396,26 +372,6 @@ changed.</li>
     <tr>
         <td class="label_neg">setSubpixelText()</td>
         <td class="value_neg">&#10007;</td>
-    </tr>
-    <tr>
-        <td class="label_pos">getFontFeatureSettings()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">isElegantTextHeight()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">isElegantTextHeight()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">setFontFeatureSettings()</td>
-        <td class="value_pos">21</td>
-    </tr>
-    <tr>
-        <td class="label_pos">setLetterSpacing()</td>
-        <td class="value_pos">21</td>
     </tr>
     <tr>
         <td colspan="5" class="s5">Xfermode</td>
