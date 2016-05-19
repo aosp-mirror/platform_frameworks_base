@@ -264,7 +264,7 @@ public class Tethering extends BaseNetworkObserver {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (up) {
                 if (sm == null) {
-                    sm = new TetherInterfaceSM(iface, mLooper, usb);
+                    sm = new TetherInterfaceSM(iface, mLooper, usb, mPublicSync);
                     mIfaces.put(iface, sm);
                     sm.start();
                 }
@@ -339,7 +339,7 @@ public class Tethering extends BaseNetworkObserver {
                 if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
                 return;
             }
-            sm = new TetherInterfaceSM(iface, mLooper, usb);
+            sm = new TetherInterfaceSM(iface, mLooper, usb, mPublicSync);
             mIfaces.put(iface, sm);
             sm.start();
         }
@@ -1041,28 +1041,26 @@ public class Tethering extends BaseNetworkObserver {
         // the upstream connection has changed
         static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IFACE + 12;
 
-        private State mDefaultState;
+        private final State mInitialState;
+        private final State mStartingState;
+        private final State mTetheredState;
+        private final State mUnavailableState;
 
-        private State mInitialState;
-        private State mStartingState;
-        private State mTetheredState;
+        private final boolean mUsb;
+        private final String mIfaceName;
 
-        private State mUnavailableState;
-
+        private final Object mMutex;  // Protects the fields below.
         private boolean mAvailable;
         private boolean mTethered;
-        int mLastError;
+        private int mLastError;
+        private String mMyUpstreamIfaceName;  // may change over time
 
-        String mIfaceName;
-        String mMyUpstreamIfaceName;  // may change over time
-
-        boolean mUsb;
-
-        TetherInterfaceSM(String name, Looper looper, boolean usb) {
+        TetherInterfaceSM(String name, Looper looper, boolean usb, Object mutex) {
             super(name, looper);
             mIfaceName = name;
             mUsb = usb;
             setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
+            mMutex = mutex;
 
             mInitialState = new InitialState();
             addState(mInitialState);
@@ -1085,20 +1083,20 @@ public class Tethering extends BaseNetworkObserver {
             if (current == mStartingState) res += "StartingState";
             if (current == mTetheredState) res += "TetheredState";
             if (current == mUnavailableState) res += "UnavailableState";
-            if (mAvailable) res += " - Available";
-            if (mTethered) res += " - Tethered";
-            res += " - lastError =" + mLastError;
+            if (isAvailable()) res += " - Available";
+            if (isTethered()) res += " - Tethered";
+            res += " - lastError =" + getLastError();
             return res;
         }
 
         public int getLastError() {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 return mLastError;
             }
         }
 
         private void setLastError(int error) {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 mLastError = error;
 
                 if (isErrored()) {
@@ -1112,31 +1110,31 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         public boolean isAvailable() {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 return mAvailable;
             }
         }
 
         private void setAvailable(boolean available) {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 mAvailable = available;
             }
         }
 
         public boolean isTethered() {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 return mTethered;
             }
         }
 
         private void setTethered(boolean tethered) {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 mTethered = tethered;
             }
         }
 
         public boolean isErrored() {
-            synchronized (Tethering.this.mPublicSync) {
+            synchronized (mMutex) {
                 return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
             }
         }
