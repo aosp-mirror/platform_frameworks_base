@@ -558,7 +558,16 @@ class ActivityStarter {
             startedActivityStackId = mTargetStack.mStackId;
         }
 
-        if (startedActivityStackId == DOCKED_STACK_ID && prevFocusedStackId == HOME_STACK_ID) {
+        // If we launched the activity from a no display activity that was launched from the home
+        // screen, we also need to start recents to un-minimize the docked stack, since the
+        // noDisplay activity will be finished shortly after.
+        // TODO: We should prevent noDisplay activities from affecting task/stack ordering and
+        // visibility instead of using this flag.
+        final boolean noDisplayActivityOverHome = mSourceRecord != null
+                && mSourceRecord.noDisplay
+                && mSourceRecord.task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE;
+        if (startedActivityStackId == DOCKED_STACK_ID
+                && (prevFocusedStackId == HOME_STACK_ID || noDisplayActivityOverHome)) {
             final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
             final ActivityRecord topActivityHomeStack = homeStack != null
                     ? homeStack.topRunningActivityLocked() : null;
