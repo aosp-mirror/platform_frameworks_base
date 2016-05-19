@@ -4923,8 +4923,8 @@ final class ActivityStack {
                     "    Task id #" + task.taskId + "\n" +
                     "    mFullscreen=" + task.mFullscreen + "\n" +
                     "    mBounds=" + task.mBounds + "\n" +
-                    "    mMinimalWidth=" + task.mMinimalWidth + "\n" +
-                    "    mMinimalHeight=" + task.mMinimalHeight + "\n" +
+                    "    mMinWidth=" + task.mMinWidth + "\n" +
+                    "    mMinHeight=" + task.mMinHeight + "\n" +
                     "    mLastNonFullscreenBounds=" + task.mLastNonFullscreenBounds);
             if (printed) {
                 header = null;
