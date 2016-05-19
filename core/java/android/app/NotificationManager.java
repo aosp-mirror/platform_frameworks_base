@@ -302,7 +302,7 @@ public class NotificationManager
         }
         fixLegacySmallIcon(notification, pkg);
         if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            if (notification.getSmallIcon() == null) {
+            if (notification.getSmallIcon() == null && !pkg.equals("com.android.settings")) {
                 throw new IllegalArgumentException("Invalid notification (no valid small icon): "
                         + notification);
             }
