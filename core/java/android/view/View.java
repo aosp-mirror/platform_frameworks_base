@@ -2644,7 +2644,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static final int PFLAG3_POINTER_ICON_NOT_SPECIFIED = 0 << PFLAG3_POINTER_ICON_LSHIFT;
 
     /**
-     * Value indicating {@link PointerIcon.STYLE_NULL}.
+     * Value indicating {@link PointerIcon.TYPE_NULL}.
      */
     private static final int PFLAG3_POINTER_ICON_NULL = 1 << PFLAG3_POINTER_ICON_LSHIFT;
 
@@ -4539,15 +4539,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         initializeScrollIndicators = true;
                     }
                     break;
-                case R.styleable.View_pointerShape:
+                case R.styleable.View_pointerIcon:
                     final int resourceId = a.getResourceId(attr, 0);
                     if (resourceId != 0) {
-                        setPointerIcon(PointerIcon.loadCustomIcon(
+                        setPointerIcon(PointerIcon.load(
                                 context.getResources(), resourceId));
                     } else {
-                        final int pointerShape = a.getInt(attr, PointerIcon.STYLE_NOT_SPECIFIED);
-                        if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
-                            setPointerIcon(PointerIcon.getSystemIcon(context, pointerShape));
+                        final int pointerType = a.getInt(attr, PointerIcon.TYPE_NOT_SPECIFIED);
+                        if (pointerType != PointerIcon.TYPE_NOT_SPECIFIED) {
+                            setPointerIcon(PointerIcon.getSystemIcon(context, pointerType));
                         }
                     }
                     break;
@@ -21788,19 +21788,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * The default implementation does not care the location or event types, but some subclasses
      * may use it (such as WebViews).
      * @param event The MotionEvent from a mouse
-     * @param x The x position of the event, local to the view
-     * @param y The y position of the event, local to the view
+     * @param pointerIndex The index of the pointer for which to retrieve the {@link PointerIcon}.
+     *                     This will be between 0 and {@link MotionEvent#getPointerCount()}.
      * @see PointerIcon
      */
-    public PointerIcon getPointerIcon(MotionEvent event, float x, float y) {
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        final float x = event.getX(pointerIndex);
+        final float y = event.getY(pointerIndex);
         if (isDraggingScrollBar() || isOnScrollbarThumb(x, y)) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.STYLE_ARROW);
+            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
         }
         return mPointerIcon;
     }
 
     /**
      * Set the pointer icon for the current view.
+     * Passing {@code null} will restore the pointer icon to its default value.
      * @param pointerIcon A PointerIcon instance which will be shown when the mouse hovers.
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
@@ -21815,10 +21818,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Gets the pointer icon for the current view.
+     */
+    public PointerIcon getPointerIcon() {
+        return mPointerIcon;
+    }
+
+
+    /**
      * Request capturing further mouse events.
      *
-     * When the view captures, the mouse pointer icon will disappear and will not change its
-     * position. Further mouse events will come to the capturing view, and the mouse movements
+     * When the view captures, the pointer icon will disappear and will not change its
+     * position. Further pointer events will come to the capturing view, and the pointer movements
      * will can be detected through {@link MotionEvent#AXIS_RELATIVE_X} and
      * {@link MotionEvent#AXIS_RELATIVE_Y}. Non-mouse events (touchscreens, or stylus) will not
      * be affected.
@@ -21830,10 +21841,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #releasePointerCapture()
      * @see #hasPointerCapture()
      */
-    public void setPointerCapture() {
+    public void requestPointerCapture() {
         final ViewRootImpl viewRootImpl = getViewRootImpl();
         if (viewRootImpl != null) {
-            viewRootImpl.setPointerCapture(this);
+            viewRootImpl.requestPointerCapture(this);
         }
     }
 
@@ -21842,7 +21853,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Release the current capture of mouse events.
      *
      * If the view does not have the capture, it will do nothing.
-     * @see #setPointerCapture()
+     * @see #requestPointerCapture()
      * @see #hasPointerCapture()
      */
     public void releasePointerCapture() {
@@ -21856,7 +21867,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Checks the capture status of mouse events.
      *
      * @return true if the view has the capture.
-     * @see #setPointerCapture()
+     * @see #requestPointerCapture()
      * @see #hasPointerCapture()
      */
     public boolean hasPointerCapture() {

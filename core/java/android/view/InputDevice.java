@@ -775,12 +775,12 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Sets the current pointer shape.
-     * @param pointerShape the id of the pointer icon.
+     * Sets the current pointer type.
+     * @param pointerType the type of the pointer icon.
      * @hide
      */
-    public void setPointerShape(int pointerShape) {
-        InputManager.getInstance().setPointerIconShape(pointerShape);
+    public void setPointerType(int pointerType) {
+        InputManager.getInstance().setPointerIconType(pointerType);
     }
 
     /**

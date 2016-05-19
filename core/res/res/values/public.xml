@@ -2685,7 +2685,7 @@
     <public type="attr" name="preferenceFragmentStyle" />
     <public type="attr" name="canControlMagnification" />
     <public type="attr" name="languageTag" />
-    <public type="attr" name="pointerShape" />
+    <public type="attr" name="pointerIcon" />
     <public type="attr" name="tickMark" />
     <public type="attr" name="tickMarkTint" />
     <public type="attr" name="tickMarkTintMode" />

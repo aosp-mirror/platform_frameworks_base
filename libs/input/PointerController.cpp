@@ -84,7 +84,7 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
-    mLocked.requestedPointerShape = mPolicy->getDefaultPointerIconId();
+    mLocked.requestedPointerType= mPolicy->getDefaultPointerIconId();
 
     mLocked.animationFrameIndex = 0;
     mLocked.lastFrameUpdatedTime = 0;
@@ -459,10 +459,10 @@ void PointerController::setDisplayViewport(int32_t width, int32_t height, int32_
     updatePointerLocked();
 }
 
-void PointerController::updatePointerShape(int32_t iconId) {
+void PointerController::updatePointerIcon(int32_t iconId) {
     AutoMutex _l(mLock);
-    if (mLocked.requestedPointerShape != iconId) {
-        mLocked.requestedPointerShape = iconId;
+    if (mLocked.requestedPointerType != iconId) {
+        mLocked.requestedPointerType = iconId;
         mLocked.presentationChanged = true;
         updatePointerLocked();
     }
@@ -473,7 +473,7 @@ void PointerController::setCustomPointerIcon(const SpriteIcon& icon) {
 
     const int32_t iconId = mPolicy->getCustomPointerIconId();
     mLocked.additionalMouseResources[iconId] = icon;
-    mLocked.requestedPointerShape = iconId;
+    mLocked.requestedPointerType = iconId;
     mLocked.presentationChanged = true;
 
     updatePointerLocked();
@@ -574,7 +574,7 @@ bool PointerController::doFadingAnimationLocked(nsecs_t timestamp) {
 
 bool PointerController::doBitmapAnimationLocked(nsecs_t timestamp) {
     std::map<int32_t, PointerAnimation>::const_iterator iter = mLocked.animationResources.find(
-            mLocked.requestedPointerShape);
+            mLocked.requestedPointerType);
     if (iter == mLocked.animationResources.end()) {
         return false;
     }
@@ -636,14 +636,14 @@ void PointerController::updatePointerLocked() {
 
     if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
         if (mLocked.presentation == PRESENTATION_POINTER) {
-            if (mLocked.requestedPointerShape == mPolicy->getDefaultPointerIconId()) {
+            if (mLocked.requestedPointerType== mPolicy->getDefaultPointerIconId()) {
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             } else {
                 std::map<int32_t, SpriteIcon>::const_iterator iter =
-                    mLocked.additionalMouseResources.find(mLocked.requestedPointerShape);
+                    mLocked.additionalMouseResources.find(mLocked.requestedPointerType);
                 if (iter != mLocked.additionalMouseResources.end()) {
                     std::map<int32_t, PointerAnimation>::const_iterator anim_iter =
-                            mLocked.animationResources.find(mLocked.requestedPointerShape);
+                            mLocked.animationResources.find(mLocked.requestedPointerType);
                     if (anim_iter != mLocked.animationResources.end()) {
                         mLocked.animationFrameIndex = 0;
                         mLocked.lastFrameUpdatedTime = systemTime(SYSTEM_TIME_MONOTONIC);
@@ -651,7 +651,7 @@ void PointerController::updatePointerLocked() {
                     }
                     mLocked.pointerSprite->setIcon(iter->second);
                 } else {
-                    ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerShape);
+                    ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerType);
                     mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
                 }
             }

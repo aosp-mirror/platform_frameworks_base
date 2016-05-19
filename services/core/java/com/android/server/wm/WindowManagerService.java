@@ -11098,7 +11098,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG_WM, "unable to restore pointer icon");
             }
         } else {
-            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
+            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_DEFAULT);
         }
     }
 
