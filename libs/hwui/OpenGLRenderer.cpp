@@ -838,7 +838,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect) {
  */
 #define DRAW_DOUBLE_STENCIL_IF(COND, DRAW_COMMAND) { \
         DRAW_COMMAND; \
-        if (CC_UNLIKELY(Properties::debugOverdraw && getTargetFbo() == 0 && COND)) { \
+        if (CC_UNLIKELY(Properties::debugOverdraw && getTargetFbo() == 0 && (COND))) { \
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); \
             DRAW_COMMAND; \
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE); \
