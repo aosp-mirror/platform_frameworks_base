@@ -32,7 +32,7 @@ namespace android {
 
 static struct {
     jclass clazz;
-    jfieldID mStyle;
+    jfieldID mType;
     jfieldID mBitmap;
     jfieldID mHotSpotX;
     jfieldID mHotSpotY;
@@ -78,7 +78,7 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
 
 status_t android_view_PointerIcon_getLoadedIcon(JNIEnv* env, jobject pointerIconObj,
         PointerIcon* outPointerIcon) {
-    outPointerIcon->style = env->GetIntField(pointerIconObj, gPointerIconClassInfo.mStyle);
+    outPointerIcon->style = env->GetIntField(pointerIconObj, gPointerIconClassInfo.mType);
     outPointerIcon->hotSpotX = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotX);
     outPointerIcon->hotSpotY = env->GetFloatField(pointerIconObj, gPointerIconClassInfo.mHotSpotY);
 
@@ -128,8 +128,8 @@ int register_android_view_PointerIcon(JNIEnv* env) {
     gPointerIconClassInfo.mBitmap = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mBitmap", "Landroid/graphics/Bitmap;");
 
-    gPointerIconClassInfo.mStyle = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
-            "mStyle", "I");
+    gPointerIconClassInfo.mType = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
+            "mType", "I");
 
     gPointerIconClassInfo.mHotSpotX = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mHotSpotX", "F");
