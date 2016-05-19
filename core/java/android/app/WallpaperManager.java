@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
@@ -85,6 +86,8 @@ public class WallpaperManager {
 
     /** {@hide} */
     private static final String PROP_WALLPAPER = "ro.config.wallpaper";
+    /** {@hide} */
+    private static final String PROP_LOCK_WALLPAPER = "ro.config.lock_wallpaper";
     /** {@hide} */
     private static final String PROP_WALLPAPER_COMPONENT = "ro.config.wallpaper_component";
 
@@ -157,7 +160,7 @@ public class WallpaperManager {
      */
     public static final String EXTRA_NEW_WALLPAPER_ID = "android.service.wallpaper.extra.ID";
 
-    // flags for which kind of wallpaper to set
+    // flags for which kind of wallpaper to act on
 
     /** @hide */
     @IntDef(flag = true, value = {
@@ -168,12 +171,12 @@ public class WallpaperManager {
     public @interface SetWallpaperFlags {}
 
     /**
-     * Flag: use the supplied imagery as the general system wallpaper.
+     * Flag: set or retrieve the general system wallpaper.
      */
     public static final int FLAG_SYSTEM = 1 << 0;
 
     /**
-     * Flag: use the supplied imagery as the lock-screen wallpaper.
+     * Flag: set or retrieve the lock-screen-specific wallpaper.
      */
     public static final int FLAG_LOCK = 1 << 1;
 
@@ -281,11 +284,13 @@ public class WallpaperManager {
             forgetLoadedWallpaper();
         }
 
-        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
-            return peekWallpaperBitmap(context, returnDefault, context.getUserId());
+        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
+                @SetWallpaperFlags int which) {
+            return peekWallpaperBitmap(context, returnDefault, which, context.getUserId());
         }
 
-        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault, int userId) {
+        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault,
+                @SetWallpaperFlags int which, int userId) {
             synchronized (this) {
                 if (mService != null) {
                     try {
@@ -312,7 +317,7 @@ public class WallpaperManager {
                 }
                 if (returnDefault) {
                     if (mDefaultWallpaper == null) {
-                        mDefaultWallpaper = getDefaultWallpaperLocked(context);
+                        mDefaultWallpaper = getDefaultWallpaperLocked(context, which);
                     }
                     return mDefaultWallpaper;
                 }
@@ -355,8 +360,8 @@ public class WallpaperManager {
             return null;
         }
 
-        private Bitmap getDefaultWallpaperLocked(Context context) {
-            InputStream is = openDefaultWallpaper(context);
+        private Bitmap getDefaultWallpaperLocked(Context context, @SetWallpaperFlags int which) {
+            InputStream is = openDefaultWallpaper(context, which);
             if (is != null) {
                 try {
                     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -410,7 +415,7 @@ public class WallpaperManager {
      * @return Returns a Drawable object that will draw the wallpaper.
      */
     public Drawable getDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -420,11 +425,22 @@ public class WallpaperManager {
     }
 
     /**
-     * Returns a drawable for the system built-in static wallpaper .
-     *
+     * Obtain a drawable for the built-in static system wallpaper.
      */
     public Drawable getBuiltInDrawable() {
-        return getBuiltInDrawable(0, 0, false, 0, 0);
+        return getBuiltInDrawable(0, 0, false, 0, 0, FLAG_SYSTEM);
+    }
+
+    /**
+     * Obtain a drawable for the specified built-in static system wallpaper.
+     *
+     * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
+     *     IllegalArgumentException if an invalid wallpaper is requested.
+     * @return A Drawable presenting the specified wallpaper image, or {@code null}
+     *     if no built-in default image for that wallpaper type exists.
+     */
+    public Drawable getBuiltInDrawable(@SetWallpaperFlags int which) {
+        return getBuiltInDrawable(0, 0, false, 0, 0, which);
     }
 
     /**
@@ -438,30 +454,61 @@ public class WallpaperManager {
      *        0 for left-aligned, 0.5 for horizontal center-aligned, and 1 for right-aligned
      * @param verticalAlignment A float value between 0 and 1 specifying where to crop the image;
      *        0 for top-aligned, 0.5 for vertical center-aligned, and 1 for bottom-aligned
-     *
+     * @return A Drawable presenting the built-in default system wallpaper image,
+     *        or {@code null} if no such default image is defined on this device.
      */
     public Drawable getBuiltInDrawable(int outWidth, int outHeight,
             boolean scaleToFit, float horizontalAlignment, float verticalAlignment) {
+        return getBuiltInDrawable(outWidth, outHeight, scaleToFit,
+                horizontalAlignment, verticalAlignment, FLAG_SYSTEM);
+    }
+
+    /**
+     * Returns a drawable for the built-in static wallpaper of the specified type.  Based on the
+     * parameters, the drawable can be cropped and scaled.
+     *
+     * @param outWidth The width of the returned drawable
+     * @param outWidth The height of the returned drawable
+     * @param scaleToFit If true, scale the wallpaper down rather than just cropping it
+     * @param horizontalAlignment A float value between 0 and 1 specifying where to crop the image;
+     *        0 for left-aligned, 0.5 for horizontal center-aligned, and 1 for right-aligned
+     * @param verticalAlignment A float value between 0 and 1 specifying where to crop the image;
+     *        0 for top-aligned, 0.5 for vertical center-aligned, and 1 for bottom-aligned
+     * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
+     *     IllegalArgumentException if an invalid wallpaper is requested.
+     * @return A Drawable presenting the built-in default wallpaper image of the given type,
+     *        or {@code null} if no default image of that type is defined on this device.
+     */
+    public Drawable getBuiltInDrawable(int outWidth, int outHeight, boolean scaleToFit,
+            float horizontalAlignment, float verticalAlignment, @SetWallpaperFlags int which) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return null;
         }
+
+        if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
+            throw new IllegalArgumentException("Must request exactly one kind of wallpaper");
+        }
+
         Resources resources = mContext.getResources();
         horizontalAlignment = Math.max(0, Math.min(1, horizontalAlignment));
         verticalAlignment = Math.max(0, Math.min(1, verticalAlignment));
 
-        InputStream is = new BufferedInputStream(openDefaultWallpaper(mContext));
-
-        if (is == null) {
-            Log.e(TAG, "default wallpaper input stream is null");
+        InputStream wpStream = openDefaultWallpaper(mContext, which);
+        if (wpStream == null) {
+            if (DEBUG) {
+                Log.w(TAG, "default wallpaper stream " + which + " is null");
+            }
             return null;
         } else {
+            InputStream is = new BufferedInputStream(wpStream);
             if (outWidth <= 0 || outHeight <= 0) {
                 Bitmap fullSize = BitmapFactory.decodeStream(is, null, null);
                 return new BitmapDrawable(resources, fullSize);
             } else {
                 int inWidth;
                 int inHeight;
+                // Just measure this time through...
                 {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
@@ -475,7 +522,9 @@ public class WallpaperManager {
                     }
                 }
 
-                is = new BufferedInputStream(openDefaultWallpaper(mContext));
+                // Reopen the stream to do the full decode.  We know at this point
+                // that openDefaultWallpaper() will return non-null.
+                is = new BufferedInputStream(openDefaultWallpaper(mContext, which));
 
                 RectF cropRectF;
 
@@ -523,16 +572,15 @@ public class WallpaperManager {
                 }
 
                 if (crop == null) {
-                    // BitmapRegionDecoder has failed, try to crop in-memory
-                    is = new BufferedInputStream(openDefaultWallpaper(mContext));
+                    // BitmapRegionDecoder has failed, try to crop in-memory. We know at
+                    // this point that openDefaultWallpaper() will return non-null.
+                    is = new BufferedInputStream(openDefaultWallpaper(mContext, which));
                     Bitmap fullSize = null;
-                    if (is != null) {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        if (scaleDownSampleSize > 1) {
-                            options.inSampleSize = scaleDownSampleSize;
-                        }
-                        fullSize = BitmapFactory.decodeStream(is, null, options);
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    if (scaleDownSampleSize > 1) {
+                        options.inSampleSize = scaleDownSampleSize;
                     }
+                    fullSize = BitmapFactory.decodeStream(is, null, options);
                     if (fullSize != null) {
                         crop = Bitmap.createBitmap(fullSize, roundedTrueCrop.left,
                                 roundedTrueCrop.top, roundedTrueCrop.width(),
@@ -598,7 +646,7 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -621,7 +669,7 @@ public class WallpaperManager {
      * @return Returns a Drawable object that will draw the wallpaper.
      */
     public Drawable getFastDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true);
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -636,7 +684,7 @@ public class WallpaperManager {
      * wallpaper or a null pointer if these is none.
      */
     public Drawable peekFastDrawable() {
-       Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+       Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -658,7 +706,7 @@ public class WallpaperManager {
      * @hide
      */
     public Bitmap getBitmapAsUser(int userId) {
-        return sGlobals.peekWallpaperBitmap(mContext, true, userId);
+        return sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, userId);
     }
 
     /**
@@ -676,7 +724,7 @@ public class WallpaperManager {
      * @see #FLAG_LOCK
      * @see #FLAG_SYSTEM
      */
-    public ParcelFileDescriptor getWallpaperFile(int which) {
+    public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which) {
         return getWallpaperFile(which, mContext.getUserId());
     }
 
@@ -695,7 +743,7 @@ public class WallpaperManager {
      *
      * @hide
      */
-    public ParcelFileDescriptor getWallpaperFile(int which, int userId) {
+    public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, int userId) {
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
             throw new IllegalArgumentException("Must request exactly one kind of wallpaper");
         }
@@ -751,7 +799,7 @@ public class WallpaperManager {
      * @return The positive numeric ID of the current wallpaper of the given kind,
      *     or a negative value if no such wallpaper is configured.
      */
-    public int getWallpaperId(int which) {
+    public int getWallpaperId(@SetWallpaperFlags int which) {
         return getWallpaperIdForUser(which, mContext.getUserId());
     }
 
@@ -760,7 +808,7 @@ public class WallpaperManager {
      * is no such wallpaper configured, returns a negative number.
      * @hide
      */
-    public int getWallpaperIdForUser(int which, int userId) {
+    public int getWallpaperIdForUser(@SetWallpaperFlags int which, int userId) {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
@@ -1314,7 +1362,7 @@ public class WallpaperManager {
      * @hide
      */
     @SystemApi
-    public void clearWallpaper(int which, int userId) {
+    public void clearWallpaper(@SetWallpaperFlags int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
@@ -1479,7 +1527,7 @@ public class WallpaperManager {
      * wallpaper.
      */
     public void clear() throws IOException {
-        setStream(openDefaultWallpaper(mContext));
+        setStream(openDefaultWallpaper(mContext, FLAG_SYSTEM), null, false);
     }
 
     /**
@@ -1492,7 +1540,7 @@ public class WallpaperManager {
      *   {@link #FLAG_LOCK}
      * @throws IOException If an error occurs reverting to the built-in wallpaper.
      */
-    public void clear(int which) throws IOException {
+    public void clear(@SetWallpaperFlags int which) throws IOException {
         if ((which & FLAG_SYSTEM) != 0) {
             clear();
         }
@@ -1504,10 +1552,22 @@ public class WallpaperManager {
     /**
      * Open stream representing the default static image wallpaper.
      *
+     * If the device defines no default wallpaper of the requested kind,
+     * {@code null} is returned.
+     *
      * @hide
      */
-    public static InputStream openDefaultWallpaper(Context context) {
-        final String path = SystemProperties.get(PROP_WALLPAPER);
+    public static InputStream openDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
+        final String whichProp;
+        final int defaultResId;
+        if (which == FLAG_LOCK) {
+            whichProp = PROP_LOCK_WALLPAPER;
+            defaultResId = com.android.internal.R.drawable.default_lock_wallpaper;
+        } else {
+            whichProp = PROP_WALLPAPER;
+            defaultResId = com.android.internal.R.drawable.default_wallpaper;
+        }
+        final String path = SystemProperties.get(whichProp);
         if (!TextUtils.isEmpty(path)) {
             final File file = new File(path);
             if (file.exists()) {
@@ -1518,8 +1578,12 @@ public class WallpaperManager {
                 }
             }
         }
-        return context.getResources().openRawResource(
-                com.android.internal.R.drawable.default_wallpaper);
+        try {
+            return context.getResources().openRawResource(defaultResId);
+        } catch (NotFoundException e) {
+            // no default defined for this device; this is not a failure
+        }
+        return null;
     }
 
     /**
