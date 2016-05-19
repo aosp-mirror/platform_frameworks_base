@@ -6543,7 +6543,7 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
 #define CHAR16_ARRAY_EQ(constant, var, len) \
-        ((len == (sizeof(constant)/sizeof(constant[0]))) && (0 == memcmp((var), (constant), (len))))
+        (((len) == (sizeof(constant)/sizeof((constant)[0]))) && (0 == memcmp((var), (constant), (len))))
 
 static void print_complex(uint32_t complex, bool isFraction)
 {
