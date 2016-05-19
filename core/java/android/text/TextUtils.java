@@ -309,14 +309,13 @@ public class TextUtils {
      */
     public static String join(CharSequence delimiter, Iterable tokens) {
         StringBuilder sb = new StringBuilder();
-        boolean firstTime = true;
-        for (Object token: tokens) {
-            if (firstTime) {
-                firstTime = false;
-            } else {
+        Iterator<?> it = tokens.iterator();
+        if (it.hasNext()) {
+            sb.append(it.next());
+            while (it.hasNext()) {
                 sb.append(delimiter);
+                sb.append(it.next());
             }
-            sb.append(token);
         }
         return sb.toString();
     }
