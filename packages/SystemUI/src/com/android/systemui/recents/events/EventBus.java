@@ -378,7 +378,7 @@ public class EventBus extends BroadcastReceiver {
 
     // Used for initializing the default bus
     private static final Object sLock = new Object();
-    private static EventBus sDefaultBus;
+    private static volatile EventBus sDefaultBus;
 
     // The handler to post all events
     private Handler mHandler;
