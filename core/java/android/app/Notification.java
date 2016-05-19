@@ -55,11 +55,9 @@ import android.text.style.RelativeSizeSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
@@ -3368,7 +3366,7 @@ public class Notification implements Parcelable
          *         otherwise
          */
         private boolean showsTimeOrChronometer() {
-            return mN.showsTimeOrChronometer();
+            return mN.showsTime() || mN.showsChronometer();
         }
 
         private void resetStandardTemplateWithActions(RemoteViews big) {
@@ -3864,12 +3862,19 @@ public class Notification implements Parcelable
     }
 
     /**
-     * @return true if the notification will show the time or the chronometer; false
-     *         otherwise
+     * @return true if the notification will show the time; false otherwise
      * @hide
      */
-    public boolean showsTimeOrChronometer() {
+    public boolean showsTime() {
         return when != 0 && extras.getBoolean(EXTRA_SHOW_WHEN);
+    }
+
+    /**
+     * @return true if the notification will show a chronometer; false otherwise
+     * @hide
+     */
+    public boolean showsChronometer() {
+        return when != 0 && extras.getBoolean(EXTRA_SHOW_CHRONOMETER);
     }
 
     /**
