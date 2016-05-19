@@ -265,7 +265,8 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         }
 
         // Set the desired width of item
-        lp.desiredWidth = (int) Layout.getDesiredWidth(getText(), getPaint());
+        lp.desiredWidth = (int) Layout.getDesiredWidth(getText(), 0, getText().length(),
+                getPaint(), getTextDirectionHeuristic());
 
         return lp;
     }

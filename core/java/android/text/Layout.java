@@ -103,8 +103,12 @@ public abstract class Layout {
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
     /**
-     * Return how wide a layout must be in order to display the
-     * specified text with one line per paragraph.
+     * Return how wide a layout must be in order to display the specified text with one line per
+     * paragraph.
+     *
+     * <p>As of O, Uses
+     * {@link TextDirectionHeuristics#FIRSTSTRONG_LTR} as the default text direction heuristics. In
+     * the earlier versions uses {@link TextDirectionHeuristics#LTR} as the default.</p>
      */
     public static float getDesiredWidth(CharSequence source,
                                         TextPaint paint) {
@@ -112,12 +116,25 @@ public abstract class Layout {
     }
 
     /**
+     * Return how wide a layout must be in order to display the specified text slice with one
+     * line per paragraph.
+     *
+     * <p>As of O, Uses
+     * {@link TextDirectionHeuristics#FIRSTSTRONG_LTR} as the default text direction heuristics. In
+     * the earlier versions uses {@link TextDirectionHeuristics#LTR} as the default.</p>
+     */
+    public static float getDesiredWidth(CharSequence source, int start, int end, TextPaint paint) {
+        return getDesiredWidth(source, start, end, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR);
+    }
+
+    /**
      * Return how wide a layout must be in order to display the
      * specified text slice with one line per paragraph.
+     *
+     * @hide
      */
-    public static float getDesiredWidth(CharSequence source,
-                                        int start, int end,
-                                        TextPaint paint) {
+    public static float getDesiredWidth(CharSequence source, int start, int end, TextPaint paint,
+            TextDirectionHeuristic textDir) {
         float need = 0;
 
         int next;
@@ -128,7 +145,7 @@ public abstract class Layout {
                 next = end;
 
             // note, omits trailing paragraph char
-            float w = measurePara(paint, source, i, next);
+            float w = measurePara(paint, source, i, next, textDir);
 
             if (w > need)
                 need = w;
@@ -1679,12 +1696,12 @@ public abstract class Layout {
     }
 
     /* package */
-    static float measurePara(TextPaint paint, CharSequence text, int start, int end) {
-
+    static float measurePara(TextPaint paint, CharSequence text, int start, int end,
+            TextDirectionHeuristic textDir) {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, TextDirectionHeuristics.LTR, null);
+            mt.setPara(text, start, end, textDir, null);
             Directions directions;
             int dir;
             if (mt.mEasy) {
@@ -1726,7 +1743,7 @@ public abstract class Layout {
                 }
             }
             tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops);
-            return margin + tl.metrics(null);
+            return margin + Math.abs(tl.metrics(null));
         } finally {
             TextLine.recycle(tl);
             MeasuredText.recycle(mt);
