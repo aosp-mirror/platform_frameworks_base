@@ -49,7 +49,7 @@ namespace android {
 // Debug
 static const bool kDebugGraphicBuffer = false;
 
-#define LOCK_CANVAS_USAGE GraphicBuffer::USAGE_SW_READ_OFTEN | GraphicBuffer::USAGE_SW_WRITE_OFTEN
+#define LOCK_CANVAS_USAGE (GraphicBuffer::USAGE_SW_READ_OFTEN | GraphicBuffer::USAGE_SW_WRITE_OFTEN)
 
 // ----------------------------------------------------------------------------
 // JNI Helpers

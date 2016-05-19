@@ -44,7 +44,7 @@
     typedef uint16_t glyph_t;
     #define TO_GLYPH(g) g
     #define GET_METRICS(cache, glyph) cache->getGlyphIDMetrics(glyph)
-    #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
+    #define GET_GLYPH(text) nextGlyph((const uint16_t**) &(text))
     #define IS_END_OF_STRING(glyph) false
 
     static inline glyph_t nextGlyph(const uint16_t** srcPtr) {

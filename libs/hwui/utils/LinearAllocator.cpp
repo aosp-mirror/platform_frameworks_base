@@ -48,8 +48,8 @@
 #define ALIGN_SZ (sizeof(int))
 #endif
 
-#define ALIGN(x) ((x + ALIGN_SZ - 1 ) & ~(ALIGN_SZ - 1))
-#define ALIGN_PTR(p) ((void*)(ALIGN((size_t)p)))
+#define ALIGN(x) (((x) + ALIGN_SZ - 1 ) & ~(ALIGN_SZ - 1))
+#define ALIGN_PTR(p) ((void*)(ALIGN((size_t)(p))))
 
 #if LOG_NDEBUG
 #define ADD_ALLOCATION(size)
