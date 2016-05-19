@@ -944,8 +944,8 @@ public class ActivityInfo extends ComponentInfo
             dest.writeInt(windowLayout.height);
             dest.writeFloat(windowLayout.heightFraction);
             dest.writeInt(windowLayout.gravity);
-            dest.writeInt(windowLayout.minimalWidth);
-            dest.writeInt(windowLayout.minimalHeight);
+            dest.writeInt(windowLayout.minWidth);
+            dest.writeInt(windowLayout.minHeight);
         } else {
             dest.writeInt(0);
         }
@@ -997,19 +997,19 @@ public class ActivityInfo extends ComponentInfo
      * @attr ref android.R.styleable#AndroidManifestLayout_defaultWidth
      * @attr ref android.R.styleable#AndroidManifestLayout_defaultHeight
      * @attr ref android.R.styleable#AndroidManifestLayout_gravity
-     * @attr ref android.R.styleable#AndroidManifestLayout_minimalWidth
-     * @attr ref android.R.styleable#AndroidManifestLayout_minimalHeight
+     * @attr ref android.R.styleable#AndroidManifestLayout_minWidth
+     * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
      */
     public static final class WindowLayout {
         public WindowLayout(int width, float widthFraction, int height, float heightFraction, int gravity,
-                int minimalWidth, int minimalHeight) {
+                int minWidth, int minHeight) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
             this.heightFraction = heightFraction;
             this.gravity = gravity;
-            this.minimalWidth = minimalWidth;
-            this.minimalHeight = minimalHeight;
+            this.minWidth = minWidth;
+            this.minHeight = minHeight;
         }
 
         WindowLayout(Parcel source) {
@@ -1018,8 +1018,8 @@ public class ActivityInfo extends ComponentInfo
             height = source.readInt();
             heightFraction = source.readFloat();
             gravity = source.readInt();
-            minimalWidth = source.readInt();
-            minimalHeight = source.readInt();
+            minWidth = source.readInt();
+            minHeight = source.readInt();
         }
 
         /**
@@ -1069,9 +1069,9 @@ public class ActivityInfo extends ComponentInfo
          * width, then the system will set the same minimal width on all other activities in the
          * task. It will also ignore any other minimal width attributes of non-root activities.
          *
-         * @attr ref android.R.styleable#AndroidManifestLayout_minimalWidth
+         * @attr ref android.R.styleable#AndroidManifestLayout_minWidth
          */
-        public final int minimalWidth;
+        public final int minWidth;
 
         /**
          * Minimal height of activity in pixels to be able to display its content.
@@ -1081,8 +1081,8 @@ public class ActivityInfo extends ComponentInfo
          * height, then the system will set the same minimal height on all other activities in the
          * task. It will also ignore any other minimal height attributes of non-root activities.
          *
-         * @attr ref android.R.styleable#AndroidManifestLayout_minimalHeight
+         * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
          */
-        public final int minimalHeight;
+        public final int minHeight;
     }
 }
