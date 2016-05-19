@@ -613,7 +613,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                                 "Need BLUETOOTH ADMIN permission");
         if (DBG) {
             Slog.d(TAG,"enable():  mBluetooth =" + mBluetooth +
-                    " mBinding = " + mBinding);
+                    " mBinding = " + mBinding + " mState = " + mState);
+        }
+        // We do not honor ON requests when the adapter is already turned ON or in the process of
+        // turning ON.
+        // As a protective mechanism to make sure that the native stack gets cleaned up properly
+        // before turning it back ON we ignore requests while the bluetooth is turning OFF.
+        // Bug: b/28318203
+        if (mState == BluetoothAdapter.STATE_BLE_TURNING_OFF ||
+            mState == BluetoothAdapter.STATE_TURNING_OFF ||
+            mState == BluetoothAdapter.STATE_ON ||
+            mState == BluetoothAdapter.STATE_BLE_ON ||
+            mState == BluetoothAdapter.STATE_TURNING_ON ||
+            mState == BluetoothAdapter.STATE_BLE_TURNING_ON) {
+            return false;
         }
 
         synchronized(mReceiver) {
