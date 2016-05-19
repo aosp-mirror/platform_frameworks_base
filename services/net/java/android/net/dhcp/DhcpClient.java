@@ -135,6 +135,7 @@ public class DhcpClient extends StateMachine {
     private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
     private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
     private static final int CMD_RENEW_DHCP       = PRIVATE_BASE + 4;
+    private static final int CMD_EXPIRE_DHCP      = PRIVATE_BASE + 5;
 
     // For message logging.
     private static final Class[] sMessageClasses = { DhcpClient.class };
@@ -176,6 +177,7 @@ public class DhcpClient extends StateMachine {
     private final WakeupMessage mKickAlarm;
     private final WakeupMessage mTimeoutAlarm;
     private final WakeupMessage mRenewAlarm;
+    private final WakeupMessage mExpiryAlarm;
     private final String mIfaceName;
 
     private boolean mRegisteredForPreDhcpNotification;
@@ -241,6 +243,7 @@ public class DhcpClient extends StateMachine {
         mTimeoutAlarm = makeWakeupMessage("TIMEOUT", CMD_TIMEOUT);
         // Used to schedule DHCP renews.
         mRenewAlarm = makeWakeupMessage("RENEW", CMD_RENEW_DHCP);
+        mExpiryAlarm = makeWakeupMessage("EXPIRY", CMD_EXPIRE_DHCP);
     }
 
     public void registerForPreDhcpNotification() {
@@ -403,15 +406,21 @@ public class DhcpClient extends StateMachine {
         return transmitPacket(packet, description, to);
     }
 
-    private void scheduleRenew() {
-        if (mDhcpLeaseExpiry != 0) {
-            long now = SystemClock.elapsedRealtime();
-            long alarmTime = (now + mDhcpLeaseExpiry) / 2;
-            mRenewAlarm.schedule(alarmTime);
-            Log.d(TAG, "Scheduling renewal in " + ((alarmTime - now) / 1000) + "s");
-        } else {
-            Log.d(TAG, "Infinite lease, no renewal needed");
+    private void scheduleLeaseTimers() {
+        if (mDhcpLeaseExpiry == 0) {
+            Log.d(TAG, "Infinite lease, no timer scheduling needed");
+            return;
         }
+
+        final long now = SystemClock.elapsedRealtime();
+        long renewTime = (now + mDhcpLeaseExpiry) / 2;
+        mRenewAlarm.schedule(renewTime);
+        long secondsHence = (renewTime - now) / 1000;
+        Log.d(TAG, "Scheduling renewal in " + secondsHence + "s");
+
+        mExpiryAlarm.schedule(mDhcpLeaseExpiry);
+        secondsHence = (mDhcpLeaseExpiry - now) / 1000;
+        Log.d(TAG, "Scheduling expiry in " + secondsHence + "s");
     }
 
     private void notifySuccess() {
@@ -421,6 +430,13 @@ public class DhcpClient extends StateMachine {
 
     private void notifyFailure() {
         mController.sendMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0, null);
+    }
+
+    private void acceptDhcpResults(DhcpResults results, String msg) {
+        mDhcpLease = results;
+        mOffer = null;
+        Log.d(TAG, msg + " lease: " + mDhcpLease);
+        notifySuccess();
     }
 
     private void clearDhcpState() {
@@ -720,11 +736,8 @@ public class DhcpClient extends StateMachine {
             if ((packet instanceof DhcpAckPacket)) {
                 DhcpResults results = packet.toDhcpResults();
                 if (results != null) {
-                    mDhcpLease = results;
-                    mOffer = null;
-                    Log.d(TAG, "Confirmed lease: " + mDhcpLease);
                     setDhcpLeaseExpiry(packet);
-                    notifySuccess();
+                    acceptDhcpResults(results, "Confirmed");
                     transitionTo(mConfiguringInterfaceState);
                 }
             } else if (packet instanceof DhcpNakPacket) {
@@ -749,7 +762,22 @@ public class DhcpClient extends StateMachine {
         }
 
         @Override
+        public boolean processMessage(Message message) {
+            super.processMessage(message);
+            switch (message.what) {
+                case CMD_EXPIRE_DHCP:
+                    Log.d(TAG, "Lease expired!");
+                    notifyFailure();
+                    transitionTo(mDhcpInitState);
+                    return HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
+        }
+
+        @Override
         public void exit() {
+            mExpiryAlarm.cancel();
             // Tell IpManager to clear the IPv4 address. There is no need to
             // wait for confirmation since any subsequent packets are sent from
             // INADDR_ANY anyway (DISCOVER, REQUEST).
@@ -797,7 +825,7 @@ public class DhcpClient extends StateMachine {
             super.enter();
             // TODO: DhcpStateMachine only supported renewing at 50% of the lease time,
             // and did not support rebinding. Now that the legacy DHCP client is gone, fix this.
-            scheduleRenew();
+            scheduleLeaseTimers();
         }
 
         @Override
@@ -849,22 +877,31 @@ public class DhcpClient extends StateMachine {
         protected void receivePacket(DhcpPacket packet) {
             if (!isValidPacket(packet)) return;
             if ((packet instanceof DhcpAckPacket)) {
-                setDhcpLeaseExpiry(packet);
-                notifySuccess();
-                transitionTo(mDhcpBoundState);
+                final DhcpResults results = packet.toDhcpResults();
+                if (results != null) {
+                    if (!mDhcpLease.ipAddress.equals(results.ipAddress)) {
+                        Log.d(TAG, "Renewed lease not for our current IP address!");
+                        notifyFailure();
+                        transitionTo(mDhcpInitState);
+                    }
+                    setDhcpLeaseExpiry(packet);
+                    // Updating our notion of DhcpResults here only causes the
+                    // DNS servers and routes to be updated in LinkProperties
+                    // in IpManager and by any overridden relevant handlers of
+                    // the registered IpManager.Callback.  IP address changes
+                    // are not supported here.
+                    acceptDhcpResults(results, "Renewed");
+                    transitionTo(mDhcpBoundState);
+                }
             } else if (packet instanceof DhcpNakPacket) {
+                Log.d(TAG, "Received NAK, returning to INIT");
+                notifyFailure();
                 transitionTo(mDhcpInitState);
             }
         }
-
-        @Override
-        protected void timeout() {
-            transitionTo(mDhcpInitState);
-            notifyFailure();
-        }
     }
 
-    // Not implemented. DhcpStateMachine did not implement it either.
+    // Not implemented--yet. DhcpStateMachine did not implement it either.
     class DhcpRebindingState extends LoggingState {
     }
 
