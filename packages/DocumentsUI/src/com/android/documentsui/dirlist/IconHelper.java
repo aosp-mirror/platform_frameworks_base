@@ -143,6 +143,7 @@ public class IconHelper {
         private final ImageView mIconMime;
         private final ImageView mIconThumb;
         private final Point mThumbSize;
+        private final long mLastModified;
 
         // A callback to apply animation to image views after the thumbnail is loaded.
         private final BiConsumer<View, View> mImageAnimator;
@@ -150,12 +151,13 @@ public class IconHelper {
         private final CancellationSignal mSignal;
 
         public LoaderTask(Uri uri, ImageView iconMime, ImageView iconThumb,
-                Point thumbSize, BiConsumer<View, View> animator) {
+                Point thumbSize, long lastModified, BiConsumer<View, View> animator) {
             mUri = uri;
             mIconMime = iconMime;
             mIconThumb = iconThumb;
             mThumbSize = thumbSize;
             mImageAnimator = animator;
+            mLastModified = lastModified;
             mSignal = new CancellationSignal();
             if (DEBUG) Log.d(TAG, "Starting icon loader task for " + mUri);
         }
@@ -184,7 +186,7 @@ public class IconHelper {
                 result = DocumentsContract.getDocumentThumbnail(client, mUri, mThumbSize, mSignal);
                 if (result != null) {
                     final ThumbnailCache cache = DocumentsApplication.getThumbnailCache(context);
-                    cache.putThumbnail(mUri, mThumbSize, result);
+                    cache.putThumbnail(mUri, mThumbSize, result, mLastModified);
                 }
             } catch (Exception e) {
                 if (!(e instanceof OperationCanceledException)) {
@@ -216,12 +218,13 @@ public class IconHelper {
      * @param mimeType The mime type of the file being represented.
      * @param docFlags Flags for the file being represented.
      * @param docIcon Custom icon (if any) for the file being requested.
+     * @param docLastModified the last modified value of the file being requested.
      * @param iconThumb The itemview's thumbnail icon.
      * @param iconMime The itemview's mime icon. Hidden when iconThumb is shown.
      * @param subIconMime The second itemview's mime icon. Always visible.
      * @return
      */
-    public void load(Uri uri, String mimeType, int docFlags, int docIcon,
+    public void load(Uri uri, String mimeType, int docFlags, int docIcon, long docLastModified,
             ImageView iconThumb, ImageView iconMime, @Nullable ImageView subIconMime) {
         boolean loadedThumbnail = false;
 
@@ -232,7 +235,8 @@ public class IconHelper {
                 || MimePredicate.mimeMatches(MimePredicate.VISUAL_MIMES, mimeType);
         final boolean showThumbnail = supportsThumbnail && allowThumbnail && mThumbnailsEnabled;
         if (showThumbnail) {
-            loadedThumbnail = loadThumbnail(uri, docAuthority, iconThumb, iconMime);
+            loadedThumbnail =
+                loadThumbnail(uri, docAuthority, docLastModified, iconThumb, iconMime);
         }
 
         final Drawable mimeIcon = getDocumentIcon(mContext, docAuthority,
@@ -250,18 +254,21 @@ public class IconHelper {
         }
     }
 
-    private boolean loadThumbnail(Uri uri, String docAuthority, ImageView iconThumb,
-            ImageView iconMime) {
+    private boolean loadThumbnail(Uri uri, String docAuthority, long docLastModified,
+            ImageView iconThumb, ImageView iconMime) {
         final Result result = mThumbnailCache.getThumbnail(uri, mCurrentSize);
 
         final Bitmap cachedThumbnail = result.getThumbnail();
         iconThumb.setImageBitmap(cachedThumbnail);
 
-        if (!result.isExactHit()) {
+        boolean stale = (docLastModified > result.getLastModified());
+        if (DEBUG) Log.d(TAG, String.format("Load thumbnail for %s, got result %d and stale %b.",
+                uri.toString(), result.getStatus(), stale));
+        if (!result.isExactHit() || stale) {
             final BiConsumer<View, View> animator =
                     (cachedThumbnail == null ? ANIM_FADE_IN : ANIM_NO_OP);
-            final LoaderTask task =
-                    new LoaderTask(uri, iconMime, iconThumb, mCurrentSize, animator);
+            final LoaderTask task = new LoaderTask(uri, iconMime, iconThumb, mCurrentSize,
+                    docLastModified, animator);
 
             iconThumb.setTag(task);
 

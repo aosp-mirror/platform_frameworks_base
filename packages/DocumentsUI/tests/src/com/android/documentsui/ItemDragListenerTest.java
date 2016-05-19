@@ -30,7 +30,7 @@ import android.view.View;
 import com.android.documentsui.testing.ClipDatas;
 import com.android.documentsui.testing.DragEvents;
 import com.android.documentsui.testing.TestTimer;
-import com.android.documentsui.testing.TestViews;
+import com.android.documentsui.testing.Views;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +53,7 @@ public class ItemDragListenerTest {
 
     @Before
     public void setUp() {
-        mTestView = TestViews.createTestView();
+        mTestView = Views.createTestView();
 
         mTestTimer = new TestTimer();
         mTestDragHost = new TestDragHost();
