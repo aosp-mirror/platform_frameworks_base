@@ -160,6 +160,9 @@ public class SparseArray<E> implements Cloneable {
 
     /**
      * Removes the mapping at the specified index.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>,
+     * the behavior is undefined.</p>
      */
     public void removeAt(int index) {
         if (mValues[index] != DELETED) {
@@ -173,6 +176,9 @@ public class SparseArray<E> implements Cloneable {
      *
      * @param index Index to begin at
      * @param size Number of mappings to remove
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>,
+     * the behavior is undefined.</p>
      */
     public void removeAtRange(int index, int size) {
         final int end = Math.min(mSize, index + size);
@@ -262,6 +268,9 @@ public class SparseArray<E> implements Cloneable {
      * be in ascending order, e.g., <code>keyAt(0)</code> will return the
      * smallest key and <code>keyAt(size()-1)</code> will return the largest
      * key.</p>
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>,
+     * the behavior is undefined.</p>
      */
     public int keyAt(int index) {
         if (mGarbage) {
@@ -281,6 +290,9 @@ public class SparseArray<E> implements Cloneable {
      * <code>valueAt(0)</code> will return the value associated with the
      * smallest key and <code>valueAt(size()-1)</code> will return the value
      * associated with the largest key.</p>
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>,
+     * the behavior is undefined.</p>
      */
     @SuppressWarnings("unchecked")
     public E valueAt(int index) {
@@ -295,6 +307,8 @@ public class SparseArray<E> implements Cloneable {
      * Given an index in the range <code>0...size()-1</code>, sets a new
      * value for the <code>index</code>th key-value mapping that this
      * SparseArray stores.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined.</p>
      */
     public void setValueAt(int index, E value) {
         if (mGarbage) {
