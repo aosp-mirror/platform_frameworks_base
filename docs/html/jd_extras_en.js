@@ -2213,6 +2213,19 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "http://www.youtube.com/watch?v=RRelFvc6Czo",
+    "timestamp": null,
+    "image": "https://i1.ytimg.com/vi/RRelFvc6Czo/maxresdefault.jpg",
+    "title": "Android Developer Story: Smule",
+    "summary": "The creators of AutoRap, Magic Piano, and Songify talk about their experiences launching on Android and the explosive global growth they've seen on Google Play.",
+    "keywords": ["success", "users"],
+    "type": "video",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://developers.google.com/analytics/solutions/mobile-implementation-guide",
     "timestamp": null,
     "image": "images/cards/analytics-mobile_2x.jpg",
@@ -4295,6 +4308,14 @@ METADATA['en'].collections = {
       "https://developers.google.com/app-invites/",
       "https://developers.google.com/identity/sign-in/android/",
       "https://developers.google.com/app-indexing/"
+    ]
+  },
+  "distribute/users/knowyouruser": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/optimizing-your-app.html",
+      "http://www.youtube.com/watch?v=RRelFvc6Czo",
+      "distribute/stories/games/rvappstudios-zombie.html"
     ]
   },
   "distribute/users/promotewithads": {
