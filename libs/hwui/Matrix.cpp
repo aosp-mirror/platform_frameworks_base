@@ -425,7 +425,7 @@ void Matrix4::mapPoint3d(Vector3& vec) const {
     vec.z = orig.x * data[2] + orig.y * data[6] + orig.z * data[kScaleZ] + data[kTranslateZ];
 }
 
-#define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)
+#define MUL_ADD_STORE(a, b, c) ((a) = (a) * (b) + (c))
 
 void Matrix4::mapPoint(float& x, float& y) const {
     if (isSimple()) {
