@@ -146,13 +146,11 @@ public final class GnssStatus {
      * <ul>
      * <li>GPS: 1-32</li>
      * <li>SBAS: 120-151, 183-192</li>
-     * <li>GLONASS:
+     * <li>GLONASS: One of: OSN, or FCN+100
      * <ul>
-     *   <li>The least significant 8 bits, signed, are the orbital slot number (OSN) in the range
-     *   from 1-24, if known, or -127 if unknown</li>
-     *   <li>The next least signficant 8 bits, signed, are the frequency channel number (FCN) in the
-     *   range from -7 to +6, if known, and -127, if unknown</li>
-     *   <li>At least one of the two (FCN &amp; OSN) shall be set to a known value</li>
+     *   <li>1-24 as the orbital slot number (OSN) (preferred, if known)</li>
+     *   <li>93-106 as the frequency channel number (FCN) (-7 to +6) plus 100.
+     *   i.e. encode FCN of -7 as 93, 0 as 100, and +6 as 106</li>
      * </ul></li>
      * <li>QZSS: 193-200</li>
      * <li>Galileo: 1-36</li>
