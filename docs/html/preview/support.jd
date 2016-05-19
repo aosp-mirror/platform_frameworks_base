@@ -420,7 +420,7 @@ issue tracker</a>.</p>
 </ul>
 
 <h4>
-  Work and enterprise
+  Android for Work and Google Apps Device Policy
 </h4>
 
 <ul>
@@ -431,10 +431,6 @@ issue tracker</a>.</p>
   <li>After setting up a work profile with file-based encryption enabled and
   then turning off Work, users must unlock primary profile screen lock to once
   again access Work apps.
-  </li>
-
-  <li>Cannot open work apps after reboot in file-based-encryption with work
-  mode off.
   </li>
 
   <li>Device reboots when removing the security pattern lock and opening work
@@ -492,7 +488,15 @@ issue tracker</a>.</p>
   </li>
 </ul>
 
-<!-- TODO, if any
+<h4 id="">Developer Tools</h4>
+
+<ul>
+  <li>
+    <code>adb</code> may sometimes disconnect while using JDWP debugging.
+  </li>
+</ul>
+
+<!-- TBA, if any
 <h4>Device-specific issues</h4>
 
 <dl>
@@ -510,6 +514,12 @@ issue tracker</a>.</p>
 </dl>
 
 -->
+
+
+
+
+
+
 
 <!-- DP2 Release Notes Archive -->
 
