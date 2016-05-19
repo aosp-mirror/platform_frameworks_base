@@ -113,6 +113,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -130,6 +131,8 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String LOG_TAG = "UserManagerService";
     static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
     private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
+    // Can be used for manual testing of id recycling
+    private static final boolean RELEASE_DELETED_USER_ID = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String TAG_NAME = "name";
     private static final String TAG_ACCOUNT = "account";
@@ -183,9 +186,15 @@ public class UserManagerService extends IUserManager.Stub {
             | UserInfo.FLAG_GUEST
             | UserInfo.FLAG_DEMO;
 
-    private static final int MIN_USER_ID = 10;
+    @VisibleForTesting
+    static final int MIN_USER_ID = 10;
     // We need to keep process uid within Integer.MAX_VALUE.
-    private static final int MAX_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+    @VisibleForTesting
+    static final int MAX_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;
+
+    // Max size of the queue of recently removed users
+    @VisibleForTesting
+    static final int MAX_RECENTLY_REMOVED_IDS_SIZE = 100;
 
     private static final int USER_VERSION = 6;
 
@@ -312,9 +321,16 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Set of user IDs being actively removed. Removed IDs linger in this set
      * for several seconds to work around a VFS caching issue.
+     * Use {@link #addRemovingUserIdLocked(int)} to add elements to this array
      */
     @GuardedBy("mUsersLock")
     private final SparseBooleanArray mRemovingUserIds = new SparseBooleanArray();
+
+    /**
+     * Queue of recently removed userIds. Used for recycling of userIds
+     */
+    @GuardedBy("mUsersLock")
+    private final LinkedList<Integer> mRecentlyRemovedIds = new LinkedList<>();
 
     @GuardedBy("mUsersLock")
     private int[] mUserIds;
@@ -401,9 +417,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    // TODO b/28848102 Add support for test dependencies injection
     @VisibleForTesting
-    UserManagerService(File dataDir) {
-        this(null, null, new Object(), dataDir);
+    UserManagerService(Context context) {
+        this(context, null, new Object(), context.getCacheDir());
     }
 
     /**
@@ -472,7 +489,7 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo ui = mUsers.valueAt(i).info;
                 if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
                     partials.add(ui);
-                    mRemovingUserIds.append(ui.id, true);
+                    addRemovingUserIdLocked(ui.id);
                     ui.partial = true;
                 }
             }
@@ -1791,11 +1808,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         // Create the system user
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags);
-        UserData userData = new UserData();
-        userData.info = system;
-        synchronized (mUsersLock) {
-            mUsers.put(system.id, userData);
-        }
+        UserData userData = putUserInfo(system);
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
 
@@ -2335,6 +2348,23 @@ public class UserManagerService extends IUserManager.Stub {
         return userInfo;
     }
 
+    @VisibleForTesting
+    UserData putUserInfo(UserInfo userInfo) {
+        final UserData userData = new UserData();
+        userData.info = userInfo;
+        synchronized (mUsers) {
+            mUsers.put(userInfo.id, userData);
+        }
+        return userData;
+    }
+
+    @VisibleForTesting
+    void removeUserInfo(int userId) {
+        synchronized (mUsers) {
+            mUsers.remove(userId);
+        }
+    }
+
     /**
      * @hide
      */
@@ -2451,10 +2481,7 @@ public class UserManagerService extends IUserManager.Stub {
                         return false;
                     }
 
-                    // We remember deleted user IDs to prevent them from being
-                    // reused during the current boot; they can still be reused
-                    // after a reboot.
-                    mRemovingUserIds.put(userHandle, true);
+                    addRemovingUserIdLocked(userHandle);
                 }
 
                 try {
@@ -2498,6 +2525,19 @@ public class UserManagerService extends IUserManager.Stub {
             return res == ActivityManager.USER_OP_SUCCESS;
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @VisibleForTesting
+    void addRemovingUserIdLocked(int userId) {
+        // We remember deleted user IDs to prevent them from being
+        // reused during the current boot; they can still be reused
+        // after a reboot or recycling of userIds.
+        mRemovingUserIds.put(userId, true);
+        mRecentlyRemovedIds.add(userId);
+        // Keep LRU queue of recently removed IDs for recycling
+        if (mRecentlyRemovedIds.size() > MAX_RECENTLY_REMOVED_IDS_SIZE) {
+            mRecentlyRemovedIds.removeFirst();
         }
     }
 
@@ -2586,6 +2626,11 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
         updateUserIds();
+        if (RELEASE_DELETED_USER_ID) {
+            synchronized (mUsers) {
+                mRemovingUserIds.delete(userHandle);
+            }
+        }
     }
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
@@ -2966,20 +3011,39 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Returns the next available user id, filling in any holes in the ids.
-     * TODO: May not be a good idea to recycle ids, in case it results in confusion
-     * for data and battery stats collection, or unexpected cross-talk.
      */
-    private int getNextAvailableId() {
+    @VisibleForTesting
+    int getNextAvailableId() {
+        int nextId;
         synchronized (mUsersLock) {
-            int i = MIN_USER_ID;
-            while (i < MAX_USER_ID) {
-                if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {
-                    return i;
+            nextId = scanNextAvailableIdLocked();
+            if (nextId >= 0) {
+                return nextId;
+            }
+            // All ids up to MAX_USER_ID were used. Remove all mRemovingUserIds,
+            // except most recently removed
+            if (mRemovingUserIds.size() > 0) {
+                Slog.i(LOG_TAG, "All available IDs are used. Recycling LRU ids.");
+                mRemovingUserIds.clear();
+                for (Integer recentlyRemovedId : mRecentlyRemovedIds) {
+                    mRemovingUserIds.put(recentlyRemovedId, true);
                 }
-                i++;
+                nextId = scanNextAvailableIdLocked();
             }
         }
-        throw new IllegalStateException("No user id available!");
+        if (nextId < 0) {
+            throw new IllegalStateException("No user id available!");
+        }
+        return nextId;
+    }
+
+    private int scanNextAvailableIdLocked() {
+        for (int i = MIN_USER_ID; i < MAX_USER_ID; i++) {
+            if (mUsers.indexOfKey(i) < 0 && !mRemovingUserIds.get(i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private String packageToRestrictionsFileName(String packageName) {
@@ -3284,6 +3348,10 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUsersLock) {
                 pw.println();
                 pw.println("  Device managed: " + mIsDeviceManaged);
+                if (mRemovingUserIds.size() > 0) {
+                    pw.println();
+                    pw.println("  Recently removed userIds: " + mRecentlyRemovedIds);
+                }
             }
             synchronized (mUserStates) {
                 pw.println("  Started users state: " + mUserStates);
