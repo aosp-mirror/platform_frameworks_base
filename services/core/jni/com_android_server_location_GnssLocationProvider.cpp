@@ -72,6 +72,18 @@ static const GnssConfigurationInterface* sGnssConfigurationInterface = NULL;
 #define GPS_MAX_SATELLITE_COUNT 32
 #define GNSS_MAX_SATELLITE_COUNT 64
 
+// Let these through, with ID remapped by offset
+#define GLONASS_SVID_OFFSET 64
+#define GLONASS_SVID_COUNT 24
+#define BEIDOU_SVID_OFFSET 200
+#define BEIDOU_SVID_COUNT 35
+
+// Let these through, with no ID remapping
+#define SBAS_SVID_MIN 120
+#define SBAS_SVID_MAX 151
+#define QZSS_SVID_MIN 193
+#define QZSS_SVID_MAX 200
+
 #define SVID_SHIFT_WIDTH 7
 #define CONSTELLATION_TYPE_SHIFT_WIDTH 3
 
@@ -134,8 +146,21 @@ static void sv_status_callback(GpsSvStatus* sv_status)
     for (size_t i = 0; i < sGnssSvListSize; i++) {
         GnssSvInfo& info = sGnssSvList[i];
         info.svid = sv_status->sv_list[i].prn;
+        // Defacto mapping from the overused API that was designed for GPS-only
         if (info.svid >=1 && info.svid <= 32) {
             info.constellation = GNSS_CONSTELLATION_GPS;
+        } else if (info.svid > GLONASS_SVID_OFFSET &&
+                   info.svid <= GLONASS_SVID_OFFSET + GLONASS_SVID_COUNT) {
+            info.constellation = GNSS_CONSTELLATION_GLONASS;
+            info.svid -= GLONASS_SVID_OFFSET;
+        } else if (info.svid > BEIDOU_SVID_OFFSET &&
+                   info.svid <= BEIDOU_SVID_OFFSET + BEIDOU_SVID_COUNT) {
+            info.constellation = GNSS_CONSTELLATION_BEIDOU;
+            info.svid -= BEIDOU_SVID_OFFSET;
+        } else if (info.svid >= SBAS_SVID_MIN && info.svid <= SBAS_SVID_MAX) {
+            info.constellation = GNSS_CONSTELLATION_SBAS;
+        } else if (info.svid >= QZSS_SVID_MIN && info.svid <= QZSS_SVID_MAX) {
+            info.constellation = GNSS_CONSTELLATION_QZSS;
         } else {
             ALOGD("Unknown constellation type with Svid = %d.", info.svid);
             info.constellation = GNSS_CONSTELLATION_UNKNOWN;
@@ -144,7 +169,8 @@ static void sv_status_callback(GpsSvStatus* sv_status)
         info.elevation = sv_status->sv_list[i].elevation;
         info.azimuth = sv_status->sv_list[i].azimuth;
         info.flags = GNSS_SV_FLAGS_NONE;
-        if (info.svid > 0 && info.svid <= 32) {
+        // Only GPS info is valid for these fields, as these masks are just 32 bits, by GPS prn
+        if (info.constellation == GNSS_CONSTELLATION_GPS) {
             int32_t this_svid_mask = (1 << (info.svid - 1));
             if ((ephemeris_mask & this_svid_mask) != 0) {
                 info.flags |= GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA;
