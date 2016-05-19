@@ -370,13 +370,13 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th>
+        <th style="width:175px">
           Type
         </th>
-        <th>
+        <th style="width:175px">
           Required fields
         </th>
-        <th>
+        <th style="width:175px">
           Optional fields
         </th>
         <th>
@@ -491,13 +491,13 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th>
+        <th style="width:175px">
           Type
         </th>
-        <th>
+        <th style="width:175px">
           Required fields
         </th>
-        <th>
+        <th style="width:175px">
           Optional fields
         </th>
         <th>
@@ -557,7 +557,7 @@ METADATA_KEY_PROVIDER_CONFIG_ACTION
 
     <table>
       <tr>
-        <th>
+        <th style="width:175px">
           Field
         </th>
         <th>
