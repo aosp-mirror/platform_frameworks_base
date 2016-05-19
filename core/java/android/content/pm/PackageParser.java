@@ -3536,6 +3536,12 @@ public class PackageParser {
             a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             final boolean appDefault = (owner.applicationInfo.privateFlags
                     & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
+            // This flag is used to workaround the issue with ignored resizeableActivity param when
+            // either targetSdkVersion is not set at all or <uses-sdk> tag is below <application>
+            // tag in AndroidManifest. If this param was explicitly set to 'false' we need to set
+            // corresponding resizeMode regardless of targetSdkVersion value at this point in time.
+            final boolean resizeableSetExplicitly
+                    = sa.hasValue(R.styleable.AndroidManifestActivity_resizeableActivity);
             final boolean resizeable = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_resizeableActivity, appDefault);
 
@@ -3546,7 +3552,8 @@ public class PackageParser {
                 } else {
                     a.info.resizeMode = RESIZE_MODE_RESIZEABLE;
                 }
-            } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+            } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N
+                    || resizeableSetExplicitly) {
                 a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             } else if (!a.info.isFixedOrientation() && (a.info.flags & FLAG_IMMERSIVE) == 0) {
                 a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
