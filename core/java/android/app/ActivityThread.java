@@ -102,7 +102,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.renderscript.RenderScriptCacheDir;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.ErrnoException;
@@ -5990,8 +5989,6 @@ public final class ActivityThread {
 
         // Set the reporter for event logging in libcore
         EventLogger.setReporter(new EventLoggingReporter());
-
-        AndroidKeyStoreProvider.install();
 
         // Make sure TrustedCertificateStore looks in the right place for CA certificates
         final File configDir = Environment.getUserConfigDirectory(UserHandle.myUserId());
