@@ -130,6 +130,7 @@ public class Chronometer extends TextView {
     @android.view.RemotableViewMethod
     public void setCountDown(boolean countDown) {
         mCountDown = countDown;
+        updateText(SystemClock.elapsedRealtime());
     }
 
     /**
