@@ -221,8 +221,11 @@ final class AccessibilityCache {
                     sortedWindows.put(window.getLayer(), window);
                 }
 
-                List<AccessibilityWindowInfo> windows = new ArrayList<>(windowCount);
-                for (int i = windowCount - 1; i >= 0; i--) {
+                // It's possible in transient conditions for two windows to share the same
+                // layer, which results in sortedWindows being smaller than mWindowCache
+                final int sortedWindowCount = sortedWindows.size();
+                List<AccessibilityWindowInfo> windows = new ArrayList<>(sortedWindowCount);
+                for (int i = sortedWindowCount - 1; i >= 0; i--) {
                     AccessibilityWindowInfo window = sortedWindows.valueAt(i);
                     windows.add(AccessibilityWindowInfo.obtain(window));
                     sortedWindows.removeAt(i);
