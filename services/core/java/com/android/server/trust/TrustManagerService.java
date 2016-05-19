@@ -159,6 +159,7 @@ public class TrustManagerService extends SystemService {
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             mTrustAgentsCanRun = true;
             refreshAgentList(UserHandle.USER_ALL);
+            refreshDeviceLockedForUser(UserHandle.USER_ALL);
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
             maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_SYSTEM);
         }
