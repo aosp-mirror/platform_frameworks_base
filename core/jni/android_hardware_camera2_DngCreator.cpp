@@ -74,7 +74,7 @@ using namespace img_utils;
     }
 
 #define BAIL_IF_EMPTY_RET_NULL_SP(entry, jnienv, tagId, writer) \
-    if (entry.count == 0) { \
+    if ((entry).count == 0) { \
         jniThrowExceptionFmt(jnienv, "java/lang/IllegalArgumentException", \
                 "Missing metadata fields for tag %s (%x)", (writer)->getTagName(tagId), (tagId)); \
         return nullptr; \
