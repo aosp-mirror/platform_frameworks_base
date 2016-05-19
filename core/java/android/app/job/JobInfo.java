@@ -88,7 +88,7 @@ public class JobInfo implements Parcelable {
      *
      * @return The minimum available interval for scheduling periodic jobs, in milliseconds.
      */
-    public static final long getMinimumPeriod() {
+    public static final long getMinPeriodMillis() {
         return MIN_PERIOD_MILLIS;
     }
 
@@ -99,7 +99,7 @@ public class JobInfo implements Parcelable {
      *
      * @return The minimum available flex time for scheduling periodic jobs, in milliseconds.
      */
-    public static final long getMinimumFlex() {
+    public static final long getMinFlexMillis() {
         return MIN_FLEX_MILLIS;
     }
 
@@ -306,7 +306,7 @@ public class JobInfo implements Parcelable {
      * job does not recur periodically.
      */
     public long getIntervalMillis() {
-        return intervalMillis >= getMinimumPeriod() ? intervalMillis : getMinimumPeriod();
+        return intervalMillis >= getMinPeriodMillis() ? intervalMillis : getMinPeriodMillis();
     }
 
     /**
@@ -316,7 +316,7 @@ public class JobInfo implements Parcelable {
     public long getFlexMillis() {
         long interval = getIntervalMillis();
         long percentClamp = 5 * interval / 100;
-        long clampedFlex = Math.max(flexMillis, Math.max(percentClamp, getMinimumFlex()));
+        long clampedFlex = Math.max(flexMillis, Math.max(percentClamp, getMinFlexMillis()));
         return clampedFlex <= interval ? clampedFlex : interval;
     }
 
@@ -682,9 +682,9 @@ public class JobInfo implements Parcelable {
          * Specify that this job should recur with the provided interval and flex. The job can
          * execute at any time in a window of flex length at the end of the period.
          * @param intervalMillis Millisecond interval for which this job will repeat. A minimum
-         *                       value of {@link #getMinimumPeriod()} is enforced.
+         *                       value of {@link #getMinPeriodMillis()} is enforced.
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
-         *                   {@link #getMinimumFlex()} or 5 percent of the period, whichever is
+         *                   {@link #getMinFlexMillis()} or 5 percent of the period, whichever is
          *                   higher.
          */
         public Builder setPeriodic(long intervalMillis, long flexMillis) {
