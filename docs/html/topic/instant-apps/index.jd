@@ -12,31 +12,46 @@ excludeFromSuggestions=true
 <!-- Hero section -->
 <section class="dac-expand dac-hero dac-section-light">
 <div class="wrap">
-<h1>Android Instant Apps</h1>
-<p class="sub-head">
-  Native Android apps, without the installation
-</p>
+  <div class="cols dac-hero-content">
 
-<p class="dac-hero-description">
-  An evolution in app sharing and discovery, Android Instant Apps enables
-  Android apps to run instantly, without requiring installation.
-  Instant Apps lets you experience what you love about apps &#8212 fast and
-  beautiful user interfaces, high performance, and great capabilities &#8212
-  with just a tap.
-</p>
+    <div class="col-1of2 col-push-1of2 dac-hero-figure">
+      <div class="dev-bytes-video">
+        <iframe width="560" height="350" src=
+        "https://www.youtube.com/embed/cosqlfqrpFA" frameborder="0"
+        allowfullscreen=""></iframe>
+      </div>
+    </div>
 
-<p class="dac-hero-description">
-  Request early access to the Instant Apps documentation today.
-</p>
+    <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
+      <h1>
+        Android Instant Apps
+      </h1>
 
-<p style="margin-top:24px">
-  <a class="landing-button green download-bundle-button"
-    href="https://docs.google.com/a/google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
-    target="_blank">
-    I'M INTERESTED IN ANDROID INSTANT APPS<br>
-  </a>
-</p>
-</div>
+      <p class="sub-head">
+        Native Android apps, without the installation
+      </p>
+
+      <p class="dac-hero-description">
+        An evolution in app sharing and discovery, Android Instant Apps enables
+        Android apps to run instantly, without requiring installation. Instant
+        Apps lets you experience what you love about apps&#8212fast and beautiful
+        user interfaces, high performance, and great capabilities&#8212with just a
+        tap.
+      </p>
+
+      <p class="dac-hero-description">
+        Request early access to the Instant Apps documentation today.
+      </p>
+
+      <p style="margin-top:24px">
+        <a class="landing-button green download-bundle-button" href=
+        "https://docs.google.com/a/google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
+        target="_blank">I'M INTERESTED IN ANDROID INSTANT APPS<br></a>
+      </p>
+    </div>
+
+  </div> <!-- end cols dac-hero-content -->
+</div> <!-- end .wrap -->
 </section>
 
 <!-- Second section -->
