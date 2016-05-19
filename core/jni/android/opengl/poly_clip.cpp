@@ -35,12 +35,12 @@
 
 namespace android {
 
-#define SWAP(a, b, temp)	{temp = a; a = b; b = temp;}
+#define SWAP(a, b, temp)	{(temp) = a; (a) = b; (b) = temp;}
 #define COORD(vert, i) ((float *)(vert))[i]
 
 #define CLIP_AND_SWAP(elem, sign, k, p, q, r) { \
-    poly_clip_to_halfspace(p, q, &v->elem-(float *)v, sign, sign*k); \
-    if (q->n==0) {p1->n = 0; return POLY_CLIP_OUT;} \
+    poly_clip_to_halfspace(p, q, &v->elem-(float *)v, sign, (sign)*(k)); \
+    if ((q)->n==0) {p1->n = 0; return POLY_CLIP_OUT;} \
     SWAP(p, q, r); \
 }
 
