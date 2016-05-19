@@ -224,9 +224,9 @@ enum DebugLevel {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Converts a number of mega-bytes into bytes
-#define MB(s) s * 1024 * 1024
+#define MB(s) ((s) * 1024 * 1024)
 // Converts a number of kilo-bytes into bytes
-#define KB(s) s * 1024
+#define KB(s) ((s) * 1024)
 
 enum class ProfileType {
     None,

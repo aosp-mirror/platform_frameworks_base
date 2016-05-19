@@ -621,8 +621,8 @@ public:
     }
 
 #define SET_TEXTURE(ptr, posRect, offsetRect, texCoordsRect, xDim, yDim) \
-    TextureVertex::set(ptr++, posRect.xDim - offsetRect.left, posRect.yDim - offsetRect.top, \
-            texCoordsRect.xDim, texCoordsRect.yDim)
+    TextureVertex::set((ptr)++, (posRect).xDim - (offsetRect).left, (posRect).yDim - (offsetRect).top, \
+            (texCoordsRect).xDim, (texCoordsRect).yDim)
 
     /**
      * This multi-draw operation builds a mesh on the stack by generating a quad
