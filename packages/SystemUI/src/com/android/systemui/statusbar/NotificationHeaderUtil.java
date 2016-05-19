@@ -198,7 +198,7 @@ public class NotificationHeaderUtil {
         }
         // in case no view is visible we make sure the time is visible
         int timeVisibility = !hasVisibleText
-                || mRow.getStatusBarNotification().getNotification().showsTimeOrChronometer()
+                || mRow.getStatusBarNotification().getNotification().showsTime()
                 ? View.VISIBLE : View.GONE;
         time.setVisibility(timeVisibility);
         View left = null;
