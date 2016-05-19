@@ -2796,7 +2796,7 @@ i
             <flag name="end" value="0x20" />
         </attr>
 
-        <attr name="pointerShape">
+        <attr name="pointerIcon">
             <!-- Null icon, pointer becomes invisible. -->
             <enum name="none" value="0" />
             <!-- The default icon of arrow pointer. -->
