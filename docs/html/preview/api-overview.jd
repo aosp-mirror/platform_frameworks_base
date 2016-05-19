@@ -824,9 +824,9 @@ specify how user CAs should be trusted.</p>
 
 <p>
   For more information, read the Android Studio documents that describe how to
-  <a href="{@docRoot}studio/tools/publishing/app-signing.html#release-mode">
+  <a href="{@docRoot}studio/publish/app-signing.html#release-mode">
   sign an app</a> in Android Studio and how to <a href=
-  "{@docRoot}studio/tools/building/configuring-gradle.html#signing"> configure
+  "{@docRoot}studio/build/build-variants.html#signing"> configure
   the build file for signing apps</a> using the Android Plugin for Gradle.
 </p>
 
