@@ -147,7 +147,7 @@ see <a href="{@docRoot}wear/preview/features/complications.html">
 <p> If you have a chat messaging app, your notifications should use
 {@code Notification.MessagingStyle}, which is new in Android 6.0. Wear 2.0 uses
 the chat messages included in a
-<a href="{docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
+<a href="{@docRoot}preview/features/notification-updates.html#style">{@code MessagingStyle}</a>
  notification
 (see {@code addMessage()}) to provide a rich chat app-like experience in the
 expanded notification.
