@@ -123,7 +123,7 @@ interface IWallpaperManager {
     /**
      * Check whether setting of wallpapers are allowed for the calling user.
      */
-    boolean isWallpaperSettingAllowed(in String callingPackage);
+    boolean isSetWallpaperAllowed(in String callingPackage);
 
     /*
      * Backup: is the current system wallpaper image eligible for off-device backup?
