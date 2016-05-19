@@ -717,7 +717,10 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTab
         // the SkImageInfo.
         mRecycledBitmap->reconfigure(mRecycledBitmap->info(), rowBytes, ctable);
 
-        // This call will give the bitmap the same pixelRef as mRecycledBitmap.
+        // Give the bitmap the same pixelRef as mRecycledBitmap.
+        // skbug.com/4538: We also need to make sure that the rowBytes on the pixel ref
+        //                 match the rowBytes on the bitmap.
+        bitmap->setInfo(bitmap->info(), rowBytes);
         bitmap->setPixelRef(mRecycledBitmap->refPixelRef())->unref();
 
         // Make sure that the recycled bitmap has the correct alpha type.
