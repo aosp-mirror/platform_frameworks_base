@@ -208,7 +208,7 @@ public final class LocalBluetoothAdapter {
         return false;
     }
 
-    public void setBluetoothEnabled(boolean enabled) {
+    public boolean setBluetoothEnabled(boolean enabled) {
         boolean success = enabled
                 ? mAdapter.enable()
                 : mAdapter.disable();
@@ -225,6 +225,7 @@ public final class LocalBluetoothAdapter {
 
             syncBluetoothState();
         }
+        return success;
     }
 
     public BluetoothDevice getRemoteDevice(String address) {
