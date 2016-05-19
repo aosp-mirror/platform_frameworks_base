@@ -104,6 +104,7 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
 
         mTargetView.getDismissIconView().setAlpha(mDismissIconAlpha * level);
         mTargetView.getThumbnailView().setZ(z);
+        mTargetView.getDismissIconView().setZ(z);
     }
 
     public float getFocusProgress() {
