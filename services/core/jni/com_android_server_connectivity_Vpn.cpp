@@ -51,8 +51,8 @@ static inline in_addr_t *as_in_addr(sockaddr *sa) {
 
 //------------------------------------------------------------------------------
 
-#define SYSTEM_ERROR -1
-#define BAD_ARGUMENT -2
+#define SYSTEM_ERROR (-1)
+#define BAD_ARGUMENT (-2)
 
 static int create_interface(int mtu)
 {

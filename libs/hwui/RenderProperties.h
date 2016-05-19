@@ -47,7 +47,7 @@ class RenderNode;
 class RenderProperties;
 
 // The __VA_ARGS__ will be executed if a & b are not equal
-#define RP_SET(a, b, ...) (a != b ? (a = b, ##__VA_ARGS__, true) : false)
+#define RP_SET(a, b, ...) ((a) != (b) ? ((a) = (b), ##__VA_ARGS__, true) : false)
 #define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
 
 // Keep in sync with View.java:LAYER_TYPE_*

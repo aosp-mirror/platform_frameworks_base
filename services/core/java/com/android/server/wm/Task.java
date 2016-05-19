@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
@@ -630,7 +631,8 @@ class Task implements DimLayer.DimLayerUser {
                     // Anyway we don't need to synchronize position and content updates for these
                     // windows since they aren't at the base layer and could be moved around anyway.
                     if (!win.computeDragResizing() && win.mAttrs.type == TYPE_BASE_APPLICATION &&
-                            !mStack.getBoundsAnimating() && !win.isGoneForLayoutLw()) {
+                            !mStack.getBoundsAnimating() && !win.isGoneForLayoutLw() &&
+                            !inPinnedWorkspace()) {
                         win.setResizedWhileNotDragResizing(true);
                     }
                 }
@@ -708,6 +710,10 @@ class Task implements DimLayer.DimLayerUser {
 
     boolean inDockedWorkspace() {
         return mStack != null && mStack.mStackId == DOCKED_STACK_ID;
+    }
+
+    boolean inPinnedWorkspace() {
+        return mStack != null && mStack.mStackId == PINNED_STACK_ID;
     }
 
     boolean isResizeableByDockedStack() {

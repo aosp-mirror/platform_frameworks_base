@@ -61,6 +61,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.BidiFormatter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -794,11 +795,15 @@ public class DirectoryFragment extends Fragment
 
         if (docs.size() == 1) {
             // Deleteing 1 file xor 1 folder in cwd
+
+            // Address b/28772371, where including user strings in message can result in
+            // broken bidirectional support.
+            String displayName = BidiFormatter.getInstance().unicodeWrap(docs.get(0).displayName);
             message = dirsCount == 0
                     ? getActivity().getString(R.string.delete_filename_confirmation_message,
-                            docs.get(0).displayName)
+                            displayName)
                     : getActivity().getString(R.string.delete_foldername_confirmation_message,
-                            docs.get(0).displayName);
+                            displayName);
         } else if (dirsCount == 0) {
             // Deleting only files in cwd
             message = Shared.getQuantityString(getActivity(),
