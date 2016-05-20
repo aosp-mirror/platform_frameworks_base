@@ -142,11 +142,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             }
         }
         mTileDividerIndex = mTiles.size();
-        if (mOtherTiles.size() != 0) {
-            mTiles.add(null);
-        }
+        mTiles.add(null);
         mTiles.addAll(mOtherTiles);
-        mEditIndex = mTiles.indexOf(null);
+        updateDividerLocations();
         notifyDataSetChanged();
     }
 
@@ -203,6 +201,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
         if (holder.getItemViewType() == TYPE_DIVIDER) {
+            holder.itemView.setVisibility(mTileDividerIndex < mTiles.size() - 1 ? View.VISIBLE
+                    : View.INVISIBLE);
             return;
         }
         if (holder.getItemViewType() == TYPE_EDIT) {
@@ -340,9 +340,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                         to = mTileDividerIndex;
                     }
                 } else {
-                    if (mTileDividerIndex == mTiles.size()) {
-                        notifyItemInserted(mTiles.size());
-                        mTiles.add(null);
+                    if (mTileDividerIndex == mTiles.size() - 1) {
+                        notifyItemChanged(mTileDividerIndex);
                     }
                     if (to <= mTileDividerIndex) {
                         to = mTileDividerIndex;
@@ -351,7 +350,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             } else {
                 if (to > mEditIndex) {
                     // Don't allow tiles to be dragged around when they aren't added.
-                    return false;
+                    to = from;
                 }
                 // Allow the case where to == mEditIndex to fall through and swap which
                 // side the tile is currently on.
@@ -362,6 +361,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         CharSequence fromLabel = mTiles.get(from).state.label;
         move(from, to, mTiles);
         updateDividerLocations();
+        if (to == from) {
+            return true;
+        }
         CharSequence announcement;
         if (to >= mEditIndex) {
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_QS_EDIT_REMOVE_SPEC,
@@ -405,12 +407,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             }
         }
         if (mTiles.size() - 1 == mTileDividerIndex) {
-            mTiles.remove(mTiles.size() - 1);
-            notifyItemRemoved(mTiles.size());
+            notifyItemChanged(mTileDividerIndex);
         }
     }
 
-    private String strip(TileInfo tileInfo) {
+    private static String strip(TileInfo tileInfo) {
         String spec = tileInfo.spec;
         if (spec.startsWith(CustomTile.PREFIX)) {
             ComponentName component = CustomTile.getComponentFromSpec(spec);
@@ -420,8 +421,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private <T> void move(int from, int to, List<T> list) {
-        list.add(from > to ? to : to + 1, list.get(from));
-        list.remove(from > to ? from + 1 : from);
+        list.add(to, list.remove(from));
         notifyItemMoved(from, to);
         notifyItemChanged(to);
     }
