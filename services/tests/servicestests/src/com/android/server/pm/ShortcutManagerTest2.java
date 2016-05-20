@@ -20,6 +20,13 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.parceled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.Manifest.permission;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -1416,6 +1423,48 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
+        });
+    }
+
+    public void testReportShortcutUsed() {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            reset(mMockUsageStatsManagerInternal);
+
+            // Report with an nonexistent shortcut.
+            mManager.reportShortcutUsed("s1");
+            verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                    anyString(), anyString(), anyInt());
+
+            // Publish s2, but s1 still doesn't exist.
+            mManager.setDynamicShortcuts(list(makeShortcut("s2")));
+            mManager.reportShortcutUsed("s1");
+            verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                    anyString(), anyString(), anyInt());
+
+            mManager.reportShortcutUsed("s2");
+            verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                    eq(CALLING_PACKAGE_1), eq("s2"), eq(USER_10));
+
+        });
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
+            // Try with a different package.
+            reset(mMockUsageStatsManagerInternal);
+
+            // Report with an nonexistent shortcut.
+            mManager.reportShortcutUsed("s2");
+            verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                    anyString(), anyString(), anyInt());
+
+            // Publish s2, but s1 still doesn't exist.
+            mManager.setDynamicShortcuts(list(makeShortcut("s3")));
+            mManager.reportShortcutUsed("s2");
+            verify(mMockUsageStatsManagerInternal, times(0)).reportShortcutUsage(
+                    anyString(), anyString(), anyInt());
+
+            mManager.reportShortcutUsed("s3");
+            verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
+                    eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_10));
+
         });
     }
 }

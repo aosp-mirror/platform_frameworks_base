@@ -36,6 +36,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.IUidObserver;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -450,6 +451,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManager mMockPackageManager;
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
+    protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -538,6 +540,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
+        mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
+
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
+        LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
 
         // Prepare injection values.
 

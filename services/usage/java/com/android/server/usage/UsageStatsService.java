@@ -1412,6 +1412,24 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void reportShortcutUsage(String packageName, String shortcutId, int userId) {
+            if (packageName == null || shortcutId == null) {
+                Slog.w(TAG, "Event reported without a package name or a shortcut ID");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = packageName.intern();
+            event.mShortcutId = shortcutId.intern();
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
+            event.mEventType = Event.SHORTCUT_INVOCATION;
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
         public void reportContentProviderUsage(String name, String packageName, int userId) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = name;
