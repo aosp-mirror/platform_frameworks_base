@@ -555,14 +555,17 @@ public class VoicemailContract {
 
         /**
          * Amount of resource that is used by existing voicemail in the visual voicemail inbox,
-         * or {@link #QUOTA_UNAVAILABLE}. Unit is not specified.
+         * or {@link #QUOTA_UNAVAILABLE} if the quota has never been updated before. This value is
+         * used to inform the client the situation on the remote server. Unit is not specified.
          * <P>Type: INTEGER</P>
          */
         public static final String QUOTA_OCCUPIED = "quota_occupied";
 
         /**
          * Total resource in the visual voicemail inbox that can be used, or
-         * {@link #QUOTA_UNAVAILABLE}. Unit is not specified.
+         * {@link #QUOTA_UNAVAILABLE} if server either has unlimited quota or does not provide quota
+         * information. This value is used to inform the client the situation on the remote server.
+         * Unit is not specified.
          * <P>Type: INTEGER</P>
          */
         public static final String QUOTA_TOTAL = "quota_total";
@@ -620,6 +623,8 @@ public class VoicemailContract {
          * @param accountHandle The handle for the account the source is associated with.
          * @param occupied See {@link Status#QUOTA_OCCUPIED}
          * @param total See {@link Status#QUOTA_TOTAL}
+         *
+         * @hide
          */
         public static void setQuota(Context context, PhoneAccountHandle accountHandle, int occupied,
                 int total) {
