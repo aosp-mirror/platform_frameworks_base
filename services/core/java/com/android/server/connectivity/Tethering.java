@@ -90,9 +90,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @hide
  *
- * Timeout
- *
- * TODO - look for parent classes and code sharing
+ * This class holds much of the business logic to allow Android devices
+ * to act as IP gateways via USB, BT, and WiFi interfaces.
  */
 public class Tethering extends BaseNetworkObserver implements IControlsTethering {
 

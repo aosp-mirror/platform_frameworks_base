@@ -80,7 +80,6 @@ public class TetherInterfaceSM extends StateMachine {
     public static final int CMD_TETHER_CONNECTION_CHANGED   = BASE_IFACE + 12;
 
     private final State mInitialState;
-    private final State mStartingState;
     private final State mTetheredState;
     private final State mUnavailableState;
 
@@ -111,8 +110,6 @@ public class TetherInterfaceSM extends StateMachine {
 
         mInitialState = new InitialState();
         addState(mInitialState);
-        mStartingState = new StartingState();
-        addState(mStartingState);
         mTetheredState = new TetheredState();
         addState(mTetheredState);
         mUnavailableState = new UnavailableState();
@@ -127,7 +124,6 @@ public class TetherInterfaceSM extends StateMachine {
         res += mIfaceName + " - ";
         IState current = getCurrentState();
         if (current == mInitialState) res += "InitialState";
-        if (current == mStartingState) res += "StartingState";
         if (current == mTetheredState) res += "TetheredState";
         if (current == mUnavailableState) res += "UnavailableState";
         if (isAvailable()) res += " - Available";
@@ -235,7 +231,7 @@ public class TetherInterfaceSM extends StateMachine {
                 case CMD_TETHER_REQUESTED:
                     setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
                     mTetherController.notifyInterfaceTetheringReadiness(true, TetherInterfaceSM.this);
-                    transitionTo(mStartingState);
+                    transitionTo(mTetheredState);
                     break;
                 case CMD_INTERFACE_DOWN:
                     transitionTo(mUnavailableState);
@@ -248,7 +244,7 @@ public class TetherInterfaceSM extends StateMachine {
         }
     }
 
-    class StartingState extends State {
+    class TetheredState extends State {
         @Override
         public void enter() {
             setAvailable(false);
@@ -261,51 +257,7 @@ public class TetherInterfaceSM extends StateMachine {
                     return;
                 }
             }
-            mTetherController.sendTetherStateChangedBroadcast();
 
-            // Skipping StartingState
-            transitionTo(mTetheredState);
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            maybeLogMessage(this, message.what);
-            boolean retValue = true;
-            switch (message.what) {
-                // maybe a parent class?
-                case CMD_TETHER_UNREQUESTED:
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceSM.this);
-                    if (mUsb) {
-                        if (!configureUsbIface(false, mIfaceName)) {
-                            setLastErrorAndTransitionToInitialState(
-                                ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
-                            break;
-                        }
-                    }
-                    transitionTo(mInitialState);
-                    break;
-                case CMD_CELL_DUN_ERROR:
-                case CMD_IP_FORWARDING_ENABLE_ERROR:
-                case CMD_IP_FORWARDING_DISABLE_ERROR:
-                case CMD_START_TETHERING_ERROR:
-                case CMD_STOP_TETHERING_ERROR:
-                case CMD_SET_DNS_FORWARDERS_ERROR:
-                    setLastErrorAndTransitionToInitialState(
-                            ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
-                    break;
-                case CMD_INTERFACE_DOWN:
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceSM.this);
-                    transitionTo(mUnavailableState);
-                    break;
-                default:
-                    retValue = false;
-            }
-            return retValue;
-        }
-    }
-
-    class TetheredState extends State {
-        @Override
-        public void enter() {
             try {
                 mNMService.tetherInterface(mIfaceName);
             } catch (Exception e) {
@@ -321,7 +273,6 @@ public class TetherInterfaceSM extends StateMachine {
                 return;
             }
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
-            setAvailable(false);
             setTethered(true);
             mTetherController.sendTetherStateChangedBroadcast();
         }
