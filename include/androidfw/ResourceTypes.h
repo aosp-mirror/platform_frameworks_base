@@ -1924,6 +1924,10 @@ private:
 
     void print_value(const Package* pkg, const Res_value& value) const;
 
+    template <typename Func>
+    void forEachConfiguration(bool ignoreMipmap, bool ignoreAndroidPackage,
+                              bool includeSystemConfigs, const Func& f) const;
+
     mutable Mutex               mLock;
 
     // Mutex that controls access to the list of pre-filtered configurations
