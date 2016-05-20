@@ -24,7 +24,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
@@ -90,6 +89,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         if (mDensity != newConfig.densityDpi) {
             mDensity = newConfig.densityDpi;
             createInflaters();
+            inflateChildren();
             clearViews();
             inflateLayout(mCurrentLayout);
         }
@@ -98,10 +98,23 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mRot0 = (FrameLayout) findViewById(R.id.rot0);
-        mRot90 = (FrameLayout) findViewById(R.id.rot90);
+        inflateChildren();
         clearViews();
         inflateLayout(getDefaultLayout());
+    }
+
+    private void inflateChildren() {
+        removeAllViews();
+        mRot0 = (FrameLayout) mLayoutInflater.inflate(R.layout.navigation_layout, this, false);
+        mRot0.setId(R.id.rot0);
+        addView(mRot0);
+        mRot90 = (FrameLayout) mLayoutInflater.inflate(R.layout.navigation_layout_rot90, this,
+                false);
+        mRot90.setId(R.id.rot90);
+        addView(mRot90);
+        if (getParent() instanceof NavigationBarView) {
+            ((NavigationBarView) getParent()).updateRotatedViews();
+        }
     }
 
     protected String getDefaultLayout() {
@@ -123,9 +136,6 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (NAV_BAR_VIEWS.equals(key)) {
-            if (newValue == null) {
-                newValue = getDefaultLayout();
-            }
             if (!Objects.equals(mCurrentLayout, newValue)) {
                 clearViews();
                 inflateLayout(newValue);
@@ -162,6 +172,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     protected void inflateLayout(String newLayout) {
         mCurrentLayout = newLayout;
+        if (newLayout == null) {
+            newLayout = getDefaultLayout();
+        }
         String[] sets = newLayout.split(GRAVITY_SEPARATOR, 3);
         String[] start = sets[0].split(BUTTON_SEPARATOR);
         String[] center = sets[1].split(BUTTON_SEPARATOR);

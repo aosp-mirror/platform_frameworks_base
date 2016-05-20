@@ -492,17 +492,7 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public void onFinishInflate() {
-        mRotatedViews[Surface.ROTATION_0] =
-        mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
-
-        mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
-
-        mRotatedViews[Surface.ROTATION_270] = mRotatedViews[Surface.ROTATION_90];
-
-        mCurrentView = mRotatedViews[Surface.ROTATION_0];
-        for (int i = 0; i < mButtonDisatchers.size(); i++) {
-            mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
-        }
+        updateRotatedViews();
         ((NavigationBarInflaterView) findViewById(R.id.navigation_inflater)).setButtonDispatchers(
                 mButtonDisatchers);
 
@@ -544,15 +534,16 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    private void updateRecentsIcon() {
-        getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
+    void updateRotatedViews() {
+        mRotatedViews[Surface.ROTATION_0] =
+                mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
+        mRotatedViews[Surface.ROTATION_270] =
+                mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
+
+        updateCurrentView();
     }
 
-    public boolean isVertical() {
-        return mVertical;
-    }
-
-    public void reorient() {
+    private void updateCurrentView() {
         final int rot = mDisplay.getRotation();
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
@@ -563,6 +554,18 @@ public class NavigationBarView extends LinearLayout {
             mButtonDisatchers.valueAt(i).setCurrentView(mCurrentView);
         }
         updateLayoutTransitionsEnabled();
+    }
+
+    private void updateRecentsIcon() {
+        getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
+    }
+
+    public boolean isVertical() {
+        return mVertical;
+    }
+
+    public void reorient() {
+        updateCurrentView();
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
