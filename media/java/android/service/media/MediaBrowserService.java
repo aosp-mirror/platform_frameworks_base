@@ -489,9 +489,15 @@ public abstract class MediaBrowserService extends Service {
 
     /**
      * Gets the root hints sent from the currently connected {@link MediaBrowser}.
+     * The root hints are service-specific arguments included in an optional bundle sent to the
+     * media browser service when connecting and retrieving the root id for browsing, or null if
+     * none. The contents of this bundle may affect the information returned when browsing.
      *
      * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren}
      *             or {@link #onLoadItem}
+     * @see MediaBrowserService.BrowserRoot#EXTRA_RECENT
+     * @see MediaBrowserService.BrowserRoot#EXTRA_OFFLINE
+     * @see MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public final Bundle getBrowserRootHints() {
         if (mCurConnection == null) {
