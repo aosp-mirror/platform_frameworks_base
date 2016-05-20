@@ -3864,6 +3864,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mScrimController.forceHideScrims(true /* hide */);
                 updateMediaMetaData(false, true);
                 mNotificationPanel.setAlpha(1);
+                mStackScroller.setParentFadingOut(true);
                 mNotificationPanel.animate()
                         .alpha(0)
                         .setStartDelay(FADE_KEYGUARD_START_DELAY)
