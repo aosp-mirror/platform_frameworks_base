@@ -42,7 +42,9 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IMountService;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -55,6 +57,7 @@ import com.android.internal.os.ZygoteInit;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.RetailDemoModeService;
 import com.android.server.audio.AudioService;
 import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
@@ -1174,6 +1177,11 @@ public final class SystemServer {
 
         // MMS service broker
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
+
+        if (Settings.Global.getInt(mContentResolver, Settings.Global.DEVICE_PROVISIONED, 0) == 0 ||
+                UserManager.isDeviceInDemoMode(mSystemContext)) {
+            mSystemServiceManager.startService(RetailDemoModeService.class);
+        }
 
         // It is now time to start up the app processes...
 
