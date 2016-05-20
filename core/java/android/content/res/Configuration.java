@@ -1485,6 +1485,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
+     * @hide
+     *
+     * Clears the locale without changing layout direction.
+     */
+    public void clearLocales() {
+        mLocaleList = LocaleList.getEmptyLocaleList();
+        locale = null;
+    }
+
+    /**
      * Return the layout direction. Will be either {@link View#LAYOUT_DIRECTION_LTR} or
      * {@link View#LAYOUT_DIRECTION_RTL}.
      *
