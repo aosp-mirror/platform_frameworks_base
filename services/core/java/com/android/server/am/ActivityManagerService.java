@@ -628,6 +628,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mShowDialogs && !mSleeping && !mShuttingDown;
     }
 
+    // it's a semaphore; boost when 0->1, reset when 1->0
+    static ThreadLocal<Integer> sIsBoosted = new ThreadLocal<Integer>() {
+        @Override protected Integer initialValue() {
+            return 0;
+        }
+    };
+
+    static void boostPriorityForLockedSection() {
+        if (sIsBoosted.get() == 0) {
+            // boost to prio 118 while holding a global lock
+            Process.setThreadPriority(Process.myTid(), -2);
+            //Log.e(TAG, "PRIORITY BOOST:  set priority on TID " + Process.myTid());
+        }
+        int cur = sIsBoosted.get();
+        sIsBoosted.set(cur + 1);
+    }
+
+    static void resetPriorityAfterLockedSection() {
+        sIsBoosted.set(sIsBoosted.get() - 1);
+        if (sIsBoosted.get() == 0) {
+            //Log.e(TAG, "PRIORITY BOOST:  reset priority on TID " + Process.myTid());
+            Process.setThreadPriority(Process.myTid(), 0);
+        }
+    }
     public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
         public final Bundle extras;
