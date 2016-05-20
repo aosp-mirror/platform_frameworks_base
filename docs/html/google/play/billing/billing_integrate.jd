@@ -150,8 +150,8 @@ method calls.</p>
 </p>
 
 <p>
-  To give your app the necessary permission, add this line in your {@code
-  Android.xml} manifest file:
+  To give your app the necessary permission, add this line in the {@code
+  AndroidManifest.xml} file:
 </p>
 
 <pre>
