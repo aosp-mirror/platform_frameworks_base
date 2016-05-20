@@ -89,7 +89,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"Network Monitor",
-    "summary":"The Network Monitor makes it possible to track when your application is making network requests. Using this tool, you can monitor how and when your app transfers data, and optimize the underlying code appropriately. By monitoring the frequency of data\u2026",
+    "summary":"Use the Network Monitor to analyze network requests, including how and when your app transfers data. Preserve battery life by optimizing network use.",
     "url":"studio/profile/am-network.html",
     "image":"images/tools/thumbnails/am-networkmon.png",
     "type":"studio",
@@ -99,7 +99,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"Memory Monitor",
-    "summary":"Android Studio provides a Memory Monitor so you can more easily monitor app performance and memory usage to find deallocated objects, locate memory leaks, and track the amount of memory the connected device is using. The Memory Monitor reports how your\u2026",
+    "summary":"Use the Memory Monitor to evaluate memory usage and find deallocated objects, locate memory leaks, and track the amount of memory the connected device is using.",
     "url":"studio/profile/am-memory.html",
     "image":"images/tools/thumbnails/am-memorymon.png",
     "type":"studio",
@@ -118,7 +118,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"CPU Monitor",
-    "summary":"The CPU Monitor lets you easily monitor the central processing unit (CPU) usage of your app. It displays CPU usage in real time and displays the percentage of total CPU time (including all cores) used by user and kernel mode. In user mode, the code must\u2026",
+    "summary":"Use the CPU Monitor to display CPU usage in real time and the percentage of total CPU time (including all cores) used in user and kernel mode.",
     "url":"studio/profile/am-cpu.html",
     "image":"images/tools/thumbnails/am-cpumon.png",
     "type":"studio",
@@ -137,7 +137,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"logcat Monitor",
-    "summary":"The Android logging system provides a mechanism for collecting and viewing system debug output. logcat Monitor displays messages that you added to your app by using the Log class, as well as system messages, such as stack traces when the emulator throws\u2026",
+    "summary":"Use the logcat Monitor to view system and user-defined log messages. You can filter the messages to display just the items that interest you.",
     "url":"studio/debug/am-logcat.html",
     "image":"images/tools/thumbnails/am-logcatmon2.png",
     "type":"studio",
@@ -147,7 +147,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
   },
   {
     "title":"GPU Monitor",
-    "summary":"The GPU Monitor gives you a quick visual representation of how much time it takes to render the frames of a UI window. It profiles the amount of time it takes for the render thread to prepare, process, and execute the draw commands. The GPU Monitor can\u2026",
+    "summary":"Use the GPU Monitor for a visual representation of how much time it takes to render the frames of a UI window. Use this information to optimize the code that displays graphics and conserve memory.",
     "url":"studio/profile/am-gpu.html",
     "image":"images/tools/thumbnails/am-gpumon.png",
     "type":"studio",
