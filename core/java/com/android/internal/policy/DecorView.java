@@ -908,7 +908,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             setBackgroundDrawable(drawable);
             if (drawable != null) {
                 mResizingBackgroundDrawable = drawable;
-                drawable.getPadding(mBackgroundPadding);
+            } else {
+                mResizingBackgroundDrawable = getResizingBackgroundDrawable(
+                        getContext(), 0, mWindow.mBackgroundFallbackResource);
+            }
+            if (mResizingBackgroundDrawable != null) {
+                mResizingBackgroundDrawable.getPadding(mBackgroundPadding);
             } else {
                 mBackgroundPadding.setEmpty();
             }
