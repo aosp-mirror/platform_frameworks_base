@@ -34,6 +34,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -47,6 +48,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
@@ -336,6 +339,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mFadingOut;
     private boolean mParentFadingOut;
     private boolean mGroupExpandedForMeasure;
+    private boolean mScrollable;
     private View mForcedScroll;
     private float mBackgroundFadeAmount = 1.0f;
     private static final Property<NotificationStackScrollLayout, Float> BACKGROUND_FADE =
@@ -443,7 +447,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void initView(Context context) {
         mScroller = new OverScroller(getContext());
-        setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
         setClipChildren(false);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
@@ -1728,6 +1731,15 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         mContentHeight = height + mTopPadding;
+        updateScrollability();
+    }
+
+    private void updateScrollability() {
+        boolean scrollable = getScrollRange() > 0;
+        if (scrollable != mScrollable) {
+            mScrollable = scrollable;
+            setFocusable(scrollable);
+        }
     }
 
     private void updateBackground() {
@@ -3532,6 +3544,68 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
         mPhoneStatusBar.requestNotificationUpdate();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
+        event.setScrollable(mScrollable);
+        event.setScrollX(mScrollX);
+        event.setScrollY(mOwnScrollY);
+        event.setMaxScrollX(mScrollX);
+        event.setMaxScrollY(getScrollRange());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        final int scrollRange = getScrollRange();
+        if (scrollRange > 0) {
+            info.setScrollable(true);
+            if (mScrollY > 0) {
+                info.addAction(
+                        AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
+            }
+            if (mScrollY < scrollRange) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
+            }
+        }
+    }
+
+    /** @hide */
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+        if (!isEnabled()) {
+            return false;
+        }
+        int direction = -1;
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                // fall through
+            case android.R.id.accessibilityActionScrollDown:
+                direction = 1;
+                // fall through
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                // fall through
+            case android.R.id.accessibilityActionScrollUp:
+                final int viewportHeight = getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
+                        - mBottomStackPeekSize - mBottomStackSlowDownHeight;
+                final int targetScrollY = Math.max(0,
+                        Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
+                if (targetScrollY != mOwnScrollY) {
+                    mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScrollY - mOwnScrollY);
+                    postInvalidateOnAnimation();
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     @Override
