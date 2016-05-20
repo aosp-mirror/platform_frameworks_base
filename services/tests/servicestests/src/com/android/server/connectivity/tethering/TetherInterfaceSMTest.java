@@ -129,10 +129,6 @@ public class TetherInterfaceSMTest {
         dispatchCommand(TetherInterfaceSM.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
-        // TODO: This broadcast should be removed.  When we send this, we are neither
-        //       available nor tethered, which is misleading, since we're transitioning
-        //       from one to the other.
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
         inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
 
@@ -168,10 +164,6 @@ public class TetherInterfaceSMTest {
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
         inOrder.verify(mNMService).getInterfaceConfig(IFACE_NAME);
         inOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
-        // TODO: This broadcast should be removed.  When we send this, we are neither
-        //       available nor tethered, which is misleading, since we're transitioning
-        //       from one to the other.
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
         inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
 
