@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.net.Uri;
+import android.service.carrier.CarrierIdentifier;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CellInfo;
@@ -1118,4 +1119,22 @@ interface ITelephony {
      * Or the calling app has carrier privileges.
      */
     List<TelephonyHistogram> getTelephonyHistograms();
+
+    /**
+     * Set the allowed carrier list for slotId
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return The number of carriers set successfully. Should match length of
+     * carriers on success.
+     */
+    int setAllowedCarriers(int slotId, in List<CarrierIdentifier> carriers);
+
+    /**
+     * Get the allowed carrier list for slotId.
+     * Require system privileges. In the future we may add this to carrier APIs.
+     *
+     * @return List of {@link android.service.carrier.CarrierIdentifier}; empty list
+     * means all carriers are allowed.
+     */
+    List<CarrierIdentifier> getAllowedCarriers(int slotId);
 }
