@@ -1939,6 +1939,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
+
+        // PasswordTransformationMethod always have LTR text direction heuristics returned by
+        // getTextDirectionHeuristic, needs reset
+        mTextDir = getTextDirectionHeuristic();
     }
 
     /**
