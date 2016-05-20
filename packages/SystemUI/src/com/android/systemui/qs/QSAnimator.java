@@ -252,8 +252,12 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     private void getRelativePositionInt(int[] loc1, View view, View parent) {
         if(view == parent || view == null) return;
-        loc1[0] += view.getX();
-        loc1[1] += view.getTop();
+        // Ignore tile pages as they can have some offset we don't want to take into account in
+        // RTL.
+        if (!(view instanceof PagedTileLayout.TilePage)) {
+            loc1[0] += view.getLeft();
+            loc1[1] += view.getTop();
+        }
         getRelativePositionInt(loc1, (View) view.getParent(), parent);
     }
 
