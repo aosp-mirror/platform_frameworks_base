@@ -27,12 +27,6 @@
     <com.android.systemui.statusbar.phone.NavigationBarInflaterView
         android:id="@+id/navigation_inflater"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <include android:id="@+id/rot0" layout="@layout/navigation_layout" />
-
-        <include android:id="@+id/rot90" layout="@layout/navigation_layout_rot90" />
-
-    </com.android.systemui.statusbar.phone.NavigationBarInflaterView>
+        android:layout_height="match_parent" />
 
 </com.android.systemui.statusbar.phone.NavigationBarView>
