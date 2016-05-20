@@ -227,6 +227,13 @@ public class PipManager {
     }
 
     /**
+     * Updates the PIP per configuration changed.
+     */
+    void onConfigurationChanged() {
+        mPipRecentsOverlayManager.onConfigurationChanged(mContext);
+    }
+
+    /**
      * Shows the picture-in-picture menu if an activity is in picture-in-picture mode.
      */
     public void showTvPictureInPictureMenu() {
