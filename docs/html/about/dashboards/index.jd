@@ -384,7 +384,7 @@ $(document).ready(function(){
     });
 
     // create chart image
-    var $chart = $('<img style="margin-left:30px" alt="" src="' + set.chart + '" />');
+    var $chart = $('<img style="margin-left:30px" alt="" data-dac-src="' + set.chart + '" />');
 
     // stack up and insert the elements
     $divtable.append($table);
@@ -451,9 +451,9 @@ $(document).ready(function(){
     $table.append($tr);
 
     // create charts
-    var $sizechart = $('<img style="float:left;width:380px" alt="" src="'
+    var $sizechart = $('<img style="float:left;width:380px" alt="" data-dac-src="'
             + set.layoutchart + '" />');
-    var $densitychart = $('<img style="float:left;width:380px" alt="" src="'
+    var $densitychart = $('<img style="float:left;width:380px" alt="" data-dac-src="'
             + set.densitychart + '" />');
 
     // stack up and insert the elements
@@ -461,6 +461,16 @@ $(document).ready(function(){
     $("#screens-chart").append($div);
   });
 
+  // TODO (akassay): Remove this.
+  // I replaced the src attributes in the javascript above with data-dac-src
+  // so the value would not be molested by the DevSite parser. So this code here
+  // moves that src value into a real src attribute at runtime. This should be
+  // removed once we either move this script out of the content body or update
+  // the parser to not modify src attributes in <script> tags.
+  $('img[data-dac-src]').each(function() {
+    var src = $(this).attr('data-dac-src');
+    $(this).attr('src', src);
+  });
 
 });
 
