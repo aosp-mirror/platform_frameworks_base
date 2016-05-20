@@ -1316,13 +1316,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             // For each client, check that the given op is not restricted, or that the given
             // package is exempt from the restriction.
             ClientRestrictionState restrictionState = mOpUserRestrictions.valueAt(i);
-            if (restrictionState.hasRestriction(code, packageName, userHandle)
-                    && AppOpsManager.opAllowSystemBypassRestriction(code)) {
-                // If we are the system, bypass user restrictions for certain codes
-                synchronized (this) {
-                    Ops ops = getOpsRawLocked(uid, packageName, true);
-                    if ((ops != null) && ops.isPrivileged) {
-                        return false;
+            if (restrictionState.hasRestriction(code, packageName, userHandle)) {
+                if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
+                    // If we are the system, bypass user restrictions for certain codes
+                    synchronized (this) {
+                        Ops ops = getOpsRawLocked(uid, packageName, true);
+                        if ((ops != null) && ops.isPrivileged) {
+                            return false;
+                        }
                     }
                 }
                 return true;
