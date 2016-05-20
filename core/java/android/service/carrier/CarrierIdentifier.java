@@ -126,4 +126,13 @@ public class CarrierIdentifier implements Parcelable {
         mGid1 = in.readString();
         mGid2 = in.readString();
     }
+
+    /** @hide */
+    public interface MatchType {
+        int ALL = 0;
+        int SPN = 1;
+        int IMSI_PREFIX = 2;
+        int GID1 = 3;
+        int GID2 = 4;
+    }
 }
