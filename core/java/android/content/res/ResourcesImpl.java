@@ -330,18 +330,43 @@ public class ResourcesImpl {
                 // doing the conversion here.  This impl should be okay because
                 // we make sure to return a compatible display in the places
                 // where there are public APIs to retrieve the display...  but
-                // it would be cleaner and more maintainble to just be
+                // it would be cleaner and more maintainable to just be
                 // consistently dealing with a compatible display everywhere in
                 // the framework.
                 mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
                 final @Config int configChanges = calcConfigChanges(config);
 
+                // If even after the update there are no Locales set, grab the default locales.
                 LocaleList locales = mConfiguration.getLocales();
                 if (locales.isEmpty()) {
-                    locales = LocaleList.getAdjustedDefault();
+                    locales = LocaleList.getDefault();
                     mConfiguration.setLocales(locales);
                 }
+
+                if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
+                    if (locales.size() > 1) {
+                        // The LocaleList has changed. We must query the AssetManager's available
+                        // Locales and figure out the best matching Locale in the new LocaleList.
+                        String[] availableLocales = mAssets.getNonSystemLocales();
+                        if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                            // No app defined locales, so grab the system locales.
+                            availableLocales = mAssets.getLocales();
+                            if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                                availableLocales = null;
+                            }
+                        }
+
+                        if (availableLocales != null) {
+                            final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
+                                    availableLocales);
+                            if (bestLocale != null && bestLocale != locales.get(0)) {
+                                mConfiguration.setLocales(new LocaleList(bestLocale, locales));
+                            }
+                        }
+                    }
+                }
+
                 if (mConfiguration.densityDpi != Configuration.DENSITY_DPI_UNDEFINED) {
                     mMetrics.densityDpi = mConfiguration.densityDpi;
                     mMetrics.density =
@@ -370,7 +395,7 @@ public class ResourcesImpl {
                 }
 
                 mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                        adjustLanguageTag(locales.get(0).toLanguageTag()),
+                        adjustLanguageTag(mConfiguration.getLocales().get(0).toLanguageTag()),
                         mConfiguration.orientation,
                         mConfiguration.touchscreen,
                         mConfiguration.densityDpi, mConfiguration.keyboard,
