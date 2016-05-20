@@ -104,7 +104,7 @@ public class VoicemailContract {
      * Broadcast intent to request all voicemail sources to perform a sync with the remote server.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SYNC_VOICEMAIL = "android.intent.action.SYNC_VOICEMAIL";
+    public static final String ACTION_SYNC_VOICEMAIL = "android.provider.action.SYNC_VOICEMAIL";
 
     /**
      * Broadcast intent to inform a new visual voicemail SMS has been received. This intent will
