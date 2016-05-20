@@ -2256,7 +2256,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if ((diff1 & StatusBarManager.DISABLE_CLOCK) != 0) {
             boolean visible = (state1 & StatusBarManager.DISABLE_CLOCK) == 0;
-            mIconController.setClockVisibility(visible);
+            mIconController.setClockVisibilityByPolicy(visible);
         }
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {

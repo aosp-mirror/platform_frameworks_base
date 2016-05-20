@@ -101,6 +101,9 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private long mTransitionDeferringStartTime;
     private long mTransitionDeferringDuration;
 
+    private boolean mClockVisibleByPolicy = true;
+    private boolean mClockVisibleByUser = true;
+
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
 
     private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
@@ -189,6 +192,10 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         for (int i = 0; i < views.size(); i++) {
             setIcon(views.get(i).getSlot(), views.get(i).getStatusBarIcon());
         }
+
+        setClockVisibleByUser(!StatusBarIconController.getIconBlacklist(newValue)
+                .contains("clock"));
+        updateClockVisibility();
     }
     private void loadDimens() {
         mIconSize = mContext.getResources().getDimensionPixelSize(
@@ -332,8 +339,20 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         animateShow(mNotificationIconAreaInner, animate);
     }
 
-    public void setClockVisibility(boolean visible) {
-        mClock.setVisibility(visible ? View.VISIBLE : View.GONE);
+    public void setClockVisibleByUser(boolean visible) {
+        mClockVisibleByUser = visible;
+        updateClockVisibility();
+    }
+
+    public void setClockVisibilityByPolicy(boolean visible) {
+        mClockVisibleByPolicy = visible;
+        updateClockVisibility();
+    }
+
+    private void updateClockVisibility() {
+        int visibility = (mClockVisibleByPolicy && mClockVisibleByUser)
+                ? View.VISIBLE : View.GONE;
+        mClock.setVisibility(visibility);
     }
 
     public void dump(PrintWriter pw) {
