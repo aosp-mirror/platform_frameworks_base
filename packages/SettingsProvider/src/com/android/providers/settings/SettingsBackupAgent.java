@@ -329,7 +329,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         final HashSet<Network> mKnownNetworks = new HashSet<Network>();
         final ArrayList<Network> mNetworks = new ArrayList<Network>(8);
 
-        public void readNetworks(BufferedReader in, List<WifiConfiguration> whitelist) {
+        public void readNetworks(BufferedReader in, List<WifiConfiguration> whitelist,
+                boolean acceptEapNetworks) {
             try {
                 String line;
                 while (in.ready()) {
@@ -348,7 +349,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                                 }
                             }
                             // Don't propagate EAP network definitions
-                            if (net.isEap) {
+                            if (net.isEap && !acceptEapNetworks) {
                                 if (DEBUG_BACKUP) {
                                     Log.v(TAG, "Skipping EAP network " + net.ssid + " / " + net.key_mgmt);
                                 }
@@ -1176,7 +1177,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
             WifiNetworkSettings fromFile = new WifiNetworkSettings();
             br = new BufferedReader(new FileReader(file));
-            fromFile.readNetworks(br, configs);
+            fromFile.readNetworks(br, configs, false);
 
             // Write the parsed networks into a packed byte array
             if (fromFile.mKnownNetworks.size() > 0) {
@@ -1204,7 +1205,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (supplicantFile.exists()) {
                 // Retain the existing APs; we'll append the restored ones to them
                 BufferedReader in = new BufferedReader(new FileReader(FILE_WIFI_SUPPLICANT));
-                supplicantImage.readNetworks(in, null);
+                supplicantImage.readNetworks(in, null, true);
                 in.close();
 
                 supplicantFile.delete();
@@ -1215,7 +1216,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 char[] restoredAsBytes = new char[size];
                 for (int i = 0; i < size; i++) restoredAsBytes[i] = (char) bytes[i];
                 BufferedReader in = new BufferedReader(new CharArrayReader(restoredAsBytes));
-                supplicantImage.readNetworks(in, null);
+                supplicantImage.readNetworks(in, null, false);
 
                 if (DEBUG_BACKUP) {
                     Log.v(TAG, "Final AP list:");
