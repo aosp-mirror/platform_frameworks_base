@@ -58,6 +58,7 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
@@ -3194,11 +3195,14 @@ public class Notification implements Parcelable
 
             bindNotificationHeader(contentView);
             bindLargeIcon(contentView);
+            boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
             if (title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
                 contentView.setTextViewText(R.id.title, title);
+                contentView.setViewLayoutWidth(R.id.title, showProgress
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : ViewGroup.LayoutParams.MATCH_PARENT);
             }
-            boolean showProgress = handleProgressBar(hasProgress, contentView, ex);
             if (text != null) {
                 int textId = showProgress ? com.android.internal.R.id.text_line_1
                         : com.android.internal.R.id.text;
