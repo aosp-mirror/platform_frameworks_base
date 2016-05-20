@@ -29,6 +29,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
@@ -74,6 +75,7 @@ public class NotificationUsageStats {
     // Guarded by synchronized(this).
     private final Map<String, AggregatedStats> mStats = new HashMap<>();
     private final ArrayDeque<AggregatedStats[]> mStatsArrays = new ArrayDeque<>();
+    private ArraySet<String> mStatExpiredkeys = new ArraySet<>();
     private final SQLiteLog mSQLiteLog;
     private final Context mContext;
     private final Handler mHandler;
@@ -102,12 +104,26 @@ public class NotificationUsageStats {
     /**
      * Called when a notification has been posted.
      */
+    public synchronized float getAppEnqueueRate(String packageName) {
+        AggregatedStats stats = getOrCreateAggregatedStatsLocked(packageName);
+        if (stats != null) {
+            return stats.getEnqueueRate(SystemClock.elapsedRealtime());
+        } else {
+            return 0f;
+        }
+    }
+
+    /**
+     * Called when a notification has been posted.
+     */
     public synchronized void registerPostedByApp(NotificationRecord notification) {
-        notification.stats.posttimeElapsedMs = SystemClock.elapsedRealtime();
+        final long now = SystemClock.elapsedRealtime();
+        notification.stats.posttimeElapsedMs = now;
 
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numPostedByApp++;
+            stats.updateInterarrivalEstimate(now);
             stats.countApiUse(notification);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
@@ -124,6 +140,7 @@ public class NotificationUsageStats {
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
             stats.numUpdatedByApp++;
+            stats.updateInterarrivalEstimate(SystemClock.elapsedRealtime());
             stats.countApiUse(notification);
         }
         releaseAggregatedStatsLocked(aggregatedStatsArray);
@@ -206,18 +223,37 @@ public class NotificationUsageStats {
         releaseAggregatedStatsLocked(aggregatedStatsArray);
     }
 
+    public synchronized void registerOverRateQuota(String packageName) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numRateViolations++;
+        }
+    }
+
+    public synchronized void registerOverCountQuota(String packageName) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numQuotaViolations++;
+        }
+    }
+
     // Locked by this.
     private AggregatedStats[] getAggregatedStatsLocked(NotificationRecord record) {
+        return getAggregatedStatsLocked(record.sbn.getPackageName());
+    }
+
+    // Locked by this.
+    private AggregatedStats[] getAggregatedStatsLocked(String packageName) {
         if (!ENABLE_AGGREGATED_IN_MEMORY_STATS) {
             return EMPTY_AGGREGATED_STATS;
         }
 
-        // TODO: expand to package-level counts in the future.
         AggregatedStats[] array = mStatsArrays.poll();
         if (array == null) {
-            array = new AggregatedStats[1];
+            array = new AggregatedStats[2];
         }
         array[0] = getOrCreateAggregatedStatsLocked(DEVICE_GLOBAL_STATS);
+        array[1] = getOrCreateAggregatedStatsLocked(packageName);
         return array;
     }
 
@@ -236,6 +272,7 @@ public class NotificationUsageStats {
             result = new AggregatedStats(mContext, key);
             mStats.put(key, result);
         }
+        result.mLastAccessTime = SystemClock.elapsedRealtime();
         return result;
     }
 
@@ -272,6 +309,7 @@ public class NotificationUsageStats {
                 as.dump(pw, indent);
             }
             pw.println(indent + "mStatsArrays.size(): " + mStatsArrays.size());
+            pw.println(indent + "mStats.size(): " + mStats.size());
         }
         if (ENABLE_SQLITE_LOG) {
             mSQLiteLog.dump(pw, indent, filter);
@@ -279,12 +317,20 @@ public class NotificationUsageStats {
     }
 
     public synchronized void emit() {
-        // TODO: expand to package-level counts in the future.
         AggregatedStats stats = getOrCreateAggregatedStatsLocked(DEVICE_GLOBAL_STATS);
         stats.emit();
-        mLastEmitTime = SystemClock.elapsedRealtime();
         mHandler.removeMessages(MSG_EMIT);
         mHandler.sendEmptyMessageDelayed(MSG_EMIT, EMIT_PERIOD);
+        for(String key: mStats.keySet()) {
+            if (mStats.get(key).mLastAccessTime < mLastEmitTime) {
+                mStatExpiredkeys.add(key);
+            }
+        }
+        for(String key: mStatExpiredkeys) {
+            mStats.remove(key);
+        }
+        mStatExpiredkeys.clear();
+        mLastEmitTime = SystemClock.elapsedRealtime();
     }
 
     /**
@@ -326,6 +372,10 @@ public class NotificationUsageStats {
         public ImportanceHistogram noisyImportance;
         public ImportanceHistogram quietImportance;
         public ImportanceHistogram finalImportance;
+        public RateEstimator enqueueRate;
+        public int numRateViolations;
+        public int numQuotaViolations;
+        public long mLastAccessTime;
 
         public AggregatedStats(Context context, String key) {
             this.key = key;
@@ -334,6 +384,7 @@ public class NotificationUsageStats {
             noisyImportance = new ImportanceHistogram(context, "note_imp_noisy_");
             quietImportance = new ImportanceHistogram(context, "note_imp_quiet_");
             finalImportance = new ImportanceHistogram(context, "note_importance_");
+            enqueueRate = new RateEstimator(mCreated);
         }
 
         public AggregatedStats getPrevious() {
@@ -444,6 +495,8 @@ public class NotificationUsageStats {
             maybeCount("note_text", (numWithText - previous.numWithText));
             maybeCount("note_sub_text", (numWithSubText - previous.numWithSubText));
             maybeCount("note_info_text", (numWithInfoText - previous.numWithInfoText));
+            maybeCount("note_over_rate", (numRateViolations - previous.numRateViolations));
+            maybeCount("note_over_quota", (numQuotaViolations - previous.numQuotaViolations));
             noisyImportance.maybeCount(previous.noisyImportance);
             quietImportance.maybeCount(previous.quietImportance);
             finalImportance.maybeCount(previous.finalImportance);
@@ -473,6 +526,8 @@ public class NotificationUsageStats {
             previous.numWithText = numWithText;
             previous.numWithSubText = numWithSubText;
             previous.numWithInfoText = numWithInfoText;
+            previous.numRateViolations = numRateViolations;
+            previous.numQuotaViolations = numQuotaViolations;
             noisyImportance.update(previous.noisyImportance);
             quietImportance.update(previous.quietImportance);
             finalImportance.update(previous.finalImportance);
@@ -491,6 +546,19 @@ public class NotificationUsageStats {
         @Override
         public String toString() {
             return toStringWithIndent("");
+        }
+
+        /** @return the enqueue rate if there were a new enqueue event right now. */
+        public float getEnqueueRate() {
+            return getEnqueueRate(SystemClock.elapsedRealtime());
+        }
+
+        public float getEnqueueRate(long now) {
+            return enqueueRate.getRate(now);
+        }
+
+        public void updateInterarrivalEstimate(long now) {
+            enqueueRate.update(now);
         }
 
         private String toStringWithIndent(String indent) {
@@ -549,6 +617,8 @@ public class NotificationUsageStats {
             output.append("numWithSubText=").append(numWithSubText).append("\n");
             output.append(indentPlusTwo);
             output.append("numWithInfoText=").append(numWithInfoText).append("\n");
+            output.append("numRateViolations=").append(numRateViolations).append("\n");
+            output.append("numQuotaViolations=").append(numQuotaViolations).append("\n");
             output.append(indentPlusTwo).append(noisyImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(quietImportance.toString()).append("\n");
             output.append(indentPlusTwo).append(finalImportance.toString()).append("\n");
@@ -586,6 +656,9 @@ public class NotificationUsageStats {
             maybePut(dump, "numWithText", numWithText);
             maybePut(dump, "numWithSubText", numWithSubText);
             maybePut(dump, "numWithInfoText", numWithInfoText);
+            maybePut(dump, "numRateViolations", numRateViolations);
+            maybePut(dump, "numQuotaLViolations", numQuotaViolations);
+            maybePut(dump, "notificationEnqueueRate", getEnqueueRate());
             noisyImportance.maybePut(dump, previous.noisyImportance);
             quietImportance.maybePut(dump, previous.quietImportance);
             finalImportance.maybePut(dump, previous.finalImportance);
@@ -595,6 +668,12 @@ public class NotificationUsageStats {
 
         private void maybePut(JSONObject dump, String name, int value) throws JSONException {
             if (value > 0) {
+                dump.put(name, value);
+            }
+        }
+
+        private void maybePut(JSONObject dump, String name, float value) throws JSONException {
+            if (value > 0.0) {
                 dump.put(name, value);
             }
         }
