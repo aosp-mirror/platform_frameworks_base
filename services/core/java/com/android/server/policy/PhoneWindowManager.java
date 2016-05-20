@@ -5411,7 +5411,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         errorIntent.setComponent(errorComponent);
         errorIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
                 Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(errorIntent, UserHandle.ALL);
+        mContext.sendBroadcastAsUser(errorIntent, UserHandle.CURRENT);
     }
 
     /** {@inheritDoc} */
