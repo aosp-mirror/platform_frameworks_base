@@ -139,8 +139,8 @@
     <string name="choose_profile" msgid="8229363046053568878">"Profil Seçin"</string>
     <string name="category_personal" msgid="1299663247844969448">"Şəxsi"</string>
     <string name="category_work" msgid="8699184680584175622">"İş"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Tərtibatçı seçimləri"</string>
-    <string name="development_settings_enable" msgid="542530994778109538">"Tərtibatçı seçənəklərini aktiv edin"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Developer seçimləri"</string>
+    <string name="development_settings_enable" msgid="542530994778109538">"Developer variantlarını aktiv edin"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Tətbiq inkişafı seçimlərini təyin et"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Gəlişdirici seçimləri bu istifadəçi üçün əlçatımlı deyil"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN ayarları bu istifadəçi üçün əlçatmazdır"</string>

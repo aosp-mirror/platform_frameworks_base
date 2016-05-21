@@ -77,12 +77,12 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"ပင်နံပါတ် သို့မဟုတ် ဖြတ်သန်းခွင့်ကီးမမှန်ကန်သောကြောင့်<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့် တွဲချိတ်မရပါ။"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်ဆက်သွယ်မရပါ"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>နှင့်တွဲချိတ်ရန် ပယ်ချခံရသည်"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"ဝိုင်ဖိုင် မရှိ"</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"ဝိုင်ဖိုင် ချိတ်ဆက်ထားမှု မရှိပါ"</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"ဝိုင်ဖိုင် ၁ ဘားရှိ"</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ဝိုင်ဖိုင် ၂ ဘား"</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ဝိုင်ဖိုင် ၃ ဘား"</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ဝိုင်ဖိုင် အပြည့်ရှိ"</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi  မရှိ"</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi  ချိတ်ဆက်ထားမှု မရှိပါ"</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi  ၁ ဘားရှိ"</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi  ၂ ဘား"</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi  ၃ ဘား"</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi  အပြည့်ရှိ"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android စနစ်"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အပ်ပလီကေးရှင်းများ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ဖယ်ရှားထားသော အပလီကေးရှင်းနှင့် သုံးစွဲသူများ"</string>
@@ -159,9 +159,9 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"အစပြုခြင်းကိရိယာအား သော့ဖွင့်ရန် ခွင့်ပြုမည်"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM သော့ဖွင့်ခြင်း ခွင့်ပြုမလား?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"သတိပေးချက်: ဤချိန်ညှိချက်ဖွင့်ထားလျှင်၊ ဤစက်ပစ္စည်းပေါ်တွင် စက်ပစ္စည်းကာကွယ်သည့် အထူးပြုလုပ်ချက် အလုပ်လုပ်မည်မဟုတ်ပါ။"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု app ရွေးရန်"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ app သတ်မှတ်ထားခြင်းမရှိပါ"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ app- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"တည်နေရာအတုပြု အက်ပ် ရွေးရန်"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"တည်နေရာအတုပြ အက်ပ် သတ်မှတ်ထားခြင်းမရှိပါ"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"တည်နေရာအတုပြ အက်ပ်- <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"ကွန်ရက်လုပ်ငန်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
@@ -270,7 +270,7 @@
     <item msgid="8280754435979370728">"မျက်လုံးမှတွေ့ရသည့် သဘာဝအရောင်"</item>
     <item msgid="5363960654009010371">"ဒီဂျစ်တယ်အကြောင်းအရာအတွက် ပြင်ဆင်ထားသည့် အရောင်များ"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"အလုပ်မလုပ်သော app များ"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"အလုပ်မလုပ်သော အက်ပ် များ"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ပွင့်မနေပါ။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>

@@ -139,7 +139,7 @@
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
     <item msgid="8190572633763871652">"Desactivado"</item>
-    <item msgid="7688197031296835369">"Mostrar áreas sobredebuxadas"</item>
+    <item msgid="7688197031296835369">"Mostrar áreas superpostas"</item>
     <item msgid="2290859360633824369">"Mostrar áreas de deuteranomalía"</item>
   </string-array>
   <string-array name="app_process_limit_entries">

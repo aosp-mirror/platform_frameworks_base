@@ -138,7 +138,7 @@
     <item msgid="1851438178120770973">"In adb shell dumpsys gfxinfo"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"Išjungti"</item>
+    <item msgid="8190572633763871652">"Išjungta"</item>
     <item msgid="7688197031296835369">"Rodyti perdangos sritis"</item>
     <item msgid="2290859360633824369">"Rodyti deuteranomalijos sritis"</item>
   </string-array>

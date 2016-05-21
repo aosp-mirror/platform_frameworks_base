@@ -305,7 +305,7 @@
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, o‘zgaruvchan tok orqali to‘lguncha"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, USB orqali to‘lguncha"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – quvvati to‘lguncha <xliff:g id="TIME">%2$s</xliff:g> qoldi (USB orqali)"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, simsiz quvvatlash orqali to‘lguncha"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -313,7 +313,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Quvvat olmoqda (AC)"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Quvvat olmoqda"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Quvvat olmoqda (USB)"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB orqali quvvat olmoqda"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Simsiz quvvat olmoqda"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Quvvat olmoqda"</string>
