@@ -685,4 +685,12 @@ public class NotificationChildrenContainer extends ViewGroup {
         mHybridGroupManager.setOverflowNumberColor(mOverflowNumber,
                 mNotificationParent.getNotificationColor());
     }
+
+    public void setRemoved() {
+        int childCount = mChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            ExpandableNotificationRow child = mChildren.get(i);
+            child.setRemoved();
+        }
+    }
 }
