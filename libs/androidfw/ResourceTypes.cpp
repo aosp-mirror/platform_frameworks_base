@@ -5822,10 +5822,11 @@ static bool compareResTableConfig(const ResTable_config& a, const ResTable_confi
     return a.compare(b) < 0;
 }
 
-void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap,
-        bool ignoreAndroidPackage, bool includeSystemConfigs) const {
+template <typename Func>
+void ResTable::forEachConfiguration(bool ignoreMipmap, bool ignoreAndroidPackage,
+                                    bool includeSystemConfigs, const Func& f) const {
     const size_t packageCount = mPackageGroups.size();
-    String16 android("android");
+    const String16 android("android");
     for (size_t i = 0; i < packageCount; i++) {
         const PackageGroup* packageGroup = mPackageGroups[i];
         if (ignoreAndroidPackage && android == packageGroup->name) {
@@ -5853,42 +5854,47 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMi
                     memset(&cfg, 0, sizeof(ResTable_config));
                     cfg.copyFromDtoH(config->config);
 
-                    auto iter = std::lower_bound(configs->begin(), configs->end(), cfg,
-                                                 compareResTableConfig);
-                    if (iter == configs->end() || iter->compare(cfg) != 0) {
-                        configs->insertAt(cfg, std::distance(configs->begin(), iter));
-                    }
+                    f(cfg);
                 }
             }
         }
     }
 }
 
+void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap,
+                                 bool ignoreAndroidPackage, bool includeSystemConfigs) const {
+    auto func = [&](const ResTable_config& cfg) {
+        const auto beginIter = configs->begin();
+        const auto endIter = configs->end();
+
+        auto iter = std::lower_bound(beginIter, endIter, cfg, compareResTableConfig);
+        if (iter == endIter || iter->compare(cfg) != 0) {
+            configs->insertAt(cfg, std::distance(beginIter, iter));
+        }
+    };
+    forEachConfiguration(ignoreMipmap, ignoreAndroidPackage, includeSystemConfigs, func);
+}
+
 static bool compareString8AndCString(const String8& str, const char* cStr) {
     return strcmp(str.string(), cStr) < 0;
 }
 
-void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) const
-{
-    Vector<ResTable_config> configs;
-    ALOGV("calling getConfigurations");
-    getConfigurations(&configs,
-            false /* ignoreMipmap */,
-            false /* ignoreAndroidPackage */,
-            includeSystemLocales /* includeSystemConfigs */);
-    ALOGV("called getConfigurations size=%d", (int)configs.size());
-    const size_t I = configs.size();
-
+void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) const {
     char locale[RESTABLE_MAX_LOCALE_LEN];
-    for (size_t i=0; i<I; i++) {
-        configs[i].getBcp47Locale(locale);
 
-        auto iter = std::lower_bound(locales->begin(), locales->end(), locale,
-                                     compareString8AndCString);
-        if (iter == locales->end() || strcmp(iter->string(), locale) != 0) {
-            locales->insertAt(String8(locale), std::distance(locales->begin(), iter));
+    forEachConfiguration(false, false, includeSystemLocales, [&](const ResTable_config& cfg) {
+        if (cfg.locale != 0) {
+            cfg.getBcp47Locale(locale);
+
+            const auto beginIter = locales->begin();
+            const auto endIter = locales->end();
+
+            auto iter = std::lower_bound(beginIter, endIter, locale, compareString8AndCString);
+            if (iter == endIter || strcmp(iter->string(), locale) != 0) {
+                locales->insertAt(String8(locale), std::distance(beginIter, iter));
+            }
         }
-    }
+    });
 }
 
 StringPoolRef::StringPoolRef(const ResStringPool* pool, uint32_t index)
