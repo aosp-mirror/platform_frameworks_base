@@ -54,18 +54,12 @@ public class TetherInterfaceSM extends StateMachine {
             MessageUtils.findMessageNames(messageClasses);
 
     private static final int BASE_IFACE              = Protocol.BASE_TETHERING + 100;
-    // notification from the master SM that it's not in tether mode
-    public static final int CMD_TETHER_MODE_DEAD            = BASE_IFACE + 1;
     // request from the user that it wants to tether
     public static final int CMD_TETHER_REQUESTED            = BASE_IFACE + 2;
     // request from the user that it wants to untether
     public static final int CMD_TETHER_UNREQUESTED          = BASE_IFACE + 3;
     // notification that this interface is down
     public static final int CMD_INTERFACE_DOWN              = BASE_IFACE + 4;
-    // notification that this interface is up
-    public static final int CMD_INTERFACE_UP                = BASE_IFACE + 5;
-    // notification from the master SM that it had an error turning on cellular dun
-    public static final int CMD_CELL_DUN_ERROR              = BASE_IFACE + 6;
     // notification from the master SM that it had trouble enabling IP Forwarding
     public static final int CMD_IP_FORWARDING_ENABLE_ERROR  = BASE_IFACE + 7;
     // notification from the master SM that it had trouble disabling IP Forwarding
@@ -309,7 +303,6 @@ public class TetherInterfaceSM extends StateMachine {
         public boolean processMessage(Message message) {
             maybeLogMessage(this, message.what);
             boolean retValue = true;
-            boolean error = false;
             switch (message.what) {
                 case CMD_TETHER_UNREQUESTED:
                 case CMD_INTERFACE_DOWN:
@@ -365,15 +358,11 @@ public class TetherInterfaceSM extends StateMachine {
                     }
                     mMyUpstreamIfaceName = newUpstreamIfaceName;
                     break;
-                case CMD_CELL_DUN_ERROR:
                 case CMD_IP_FORWARDING_ENABLE_ERROR:
                 case CMD_IP_FORWARDING_DISABLE_ERROR:
                 case CMD_START_TETHERING_ERROR:
                 case CMD_STOP_TETHERING_ERROR:
                 case CMD_SET_DNS_FORWARDERS_ERROR:
-                    error = true;
-                    // fall through
-                case CMD_TETHER_MODE_DEAD:
                     cleanupUpstream();
                     try {
                         mNMService.untetherInterface(mIfaceName);
@@ -382,19 +371,8 @@ public class TetherInterfaceSM extends StateMachine {
                                 ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
                         break;
                     }
-                    if (error) {
-                        setLastErrorAndTransitionToInitialState(
-                                ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
-                        break;
-                    }
-                    if (DBG) Log.d(TAG, "Tether lost upstream connection " + mIfaceName);
-                    mTetherController.sendTetherStateChangedBroadcast();
-                    if (mUsb) {
-                        if (!configureUsbIface(false, mIfaceName)) {
-                            setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
-                        }
-                    }
-                    transitionTo(mInitialState);
+                    setLastErrorAndTransitionToInitialState(
+                            ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
                     break;
                 default:
                     retValue = false;
@@ -404,6 +382,13 @@ public class TetherInterfaceSM extends StateMachine {
         }
     }
 
+    /**
+     * This state is terminal for the per interface state machine.  At this
+     * point, the master state machine should have removed this interface
+     * specific state machine from its list of possible recipients of
+     * tethering requests.  The state machine itself will hang around until
+     * the garbage collector finds it.
+     */
     class UnavailableState extends State {
         @Override
         public void enter() {
@@ -411,19 +396,6 @@ public class TetherInterfaceSM extends StateMachine {
             setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
             setTethered(false);
             mTetherController.sendTetherStateChangedBroadcast();
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            boolean retValue = true;
-            switch (message.what) {
-                case CMD_INTERFACE_UP:
-                    transitionTo(mInitialState);
-                    break;
-                default:
-                    retValue = false;
-                    break;
-            }
-            return retValue;
         }
     }
 

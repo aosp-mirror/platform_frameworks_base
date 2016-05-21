@@ -92,10 +92,7 @@ public class TetherInterfaceSMTest {
     public void shouldDoNothingUntilRequested() {
         initStateMachine(false);
         final int [] NOOP_COMMANDS = {
-            TetherInterfaceSM.CMD_TETHER_MODE_DEAD,
             TetherInterfaceSM.CMD_TETHER_UNREQUESTED,
-            TetherInterfaceSM.CMD_INTERFACE_UP,
-            TetherInterfaceSM.CMD_CELL_DUN_ERROR,
             TetherInterfaceSM.CMD_IP_FORWARDING_ENABLE_ERROR,
             TetherInterfaceSM.CMD_IP_FORWARDING_DISABLE_ERROR,
             TetherInterfaceSM.CMD_START_TETHERING_ERROR,
