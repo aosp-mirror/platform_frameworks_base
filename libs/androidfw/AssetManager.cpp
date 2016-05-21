@@ -66,7 +66,6 @@ static const char* kAssetsRoot = "assets";
 static const char* kAppZipName = NULL; //"classes.jar";
 static const char* kSystemAssets = "framework/framework-res.apk";
 static const char* kResourceCache = "resource-cache";
-static const char* kAndroidManifest = "AndroidManifest.xml";
 
 static const char* kExcludeExtension = ".EXCLUDE";
 
@@ -202,16 +201,6 @@ bool AssetManager::addAssetPath(
 
     ALOGV("In %p Asset %s path: %s", this,
          ap.type == kFileTypeDirectory ? "dir" : "zip", ap.path.string());
-
-    // Check that the path has an AndroidManifest.xml
-    Asset* manifestAsset = const_cast<AssetManager*>(this)->openNonAssetInPathLocked(
-            kAndroidManifest, Asset::ACCESS_BUFFER, ap);
-    if (manifestAsset == NULL) {
-        // This asset path does not contain any resources.
-        delete manifestAsset;
-        return false;
-    }
-    delete manifestAsset;
 
     ap.isSystemAsset = isSystemAsset;
     mAssetPaths.add(ap);
