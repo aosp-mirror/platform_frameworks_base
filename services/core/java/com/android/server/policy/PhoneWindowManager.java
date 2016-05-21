@@ -716,6 +716,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_REQUEST_TRANSIENT_BARS = 16;
     private static final int MSG_SHOW_TV_PICTURE_IN_PICTURE_MENU = 17;
     private static final int MSG_BACK_LONG_PRESS = 18;
+    private static final int MSG_DISPOSE_INPUT_CONSUMER = 19;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -782,6 +783,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
+                    break;
+                case MSG_DISPOSE_INPUT_CONSUMER:
+                    disposeInputConsumer((InputConsumer) msg.obj);
                     break;
             }
         }
@@ -1257,6 +1261,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
                 startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
                 break;
+        }
+    }
+
+    private void disposeInputConsumer(InputConsumer inputConsumer) {
+        if (inputConsumer != null) {
+            inputConsumer.dismiss();
         }
     }
 
@@ -3738,6 +3748,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // When the user taps down, we re-show the nav bar.
                         boolean changed = false;
                         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
+                            if (mInputConsumer == null) {
+                                return;
+                            }
                             // Any user activity always causes us to show the
                             // navigation controls, if they had been hidden.
                             // We also clear the low profile and only content
@@ -3991,7 +4004,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // bar and ensure the application doesn't see the event.
             if (navVisible || navAllowedHidden) {
                 if (mInputConsumer != null) {
-                    mInputConsumer.dismiss();
+                    mHandler.sendMessage(
+                            mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
                     mInputConsumer = null;
                 }
             } else if (mInputConsumer == null) {
