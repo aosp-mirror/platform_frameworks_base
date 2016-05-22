@@ -317,7 +317,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Ліміт <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Папярэджанне: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Рэжым працы"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Няма апошніх элементаў"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Няма нядаўніх элементаў"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Вы ачысцілі усё"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Звесткі аб праграме"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"замацаванне экрана"</string>
@@ -383,7 +383,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Выканаць выхад бягучага карыстальніка"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ВЫКАНАЦЬ ВЫХАД КАРЫСТАЛЬНІКА"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Дадаць новага карыстальніка?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Калі вы дадаяце новага карыстальніка, ён павінен наладзіць свой раздзел.\n\nЛюбы карыстальнік можа абнаўляць праграмы для ўсіх астатніх карыстальнікаў."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Пасля стварэння профіля яго трэба наладзіць.\n\nЛюбы карыстальнік прылады можа абнаўляць праграмы ўсіх іншых карыстальнікаў."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Выдаліць карыстальніка?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Усе праграмы і даныя гэтага карыстальніка будуць выдалены."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Выдаліць"</string>

@@ -306,7 +306,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Susiejimas"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Viešosios interneto prieigos taškas"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Pranešimai"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Žibintuvėlis"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiliojo ryšio duomenys"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Duomenų naudojimas"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Likę duomenys"</string>
@@ -575,7 +575,7 @@
     <string name="data_saver" msgid="5037565123367048522">"Duomenų taupymo priemonė"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Duomenų taupymo priemonė įjungta"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Duomenų taupymo priemonė išjungta"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"Įjungti"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Įjungta"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"Išjungta"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Naršymo juosta"</string>
     <string name="start" msgid="6873794757232879664">"Pradėti"</string>

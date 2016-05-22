@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कुनै सूचनाहरू छैन"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"चलिरहेको"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाहरू"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"ब्याट्रि कम छ"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"ब्याट्री कम छ"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाँकी। ब्याट्री बचत खुलै छ।"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB चार्ज गर्न समर्थित छैन।\n आपूर्ति गरिएको चार्जर मात्र प्रयोग गर्नुहोस्।"</string>
@@ -101,11 +101,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"स्क्रिनलाई सानोबाट ठूलो पार्नुहोस्।"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"ब्लुटुथसँग विच्छेद गरियो।"</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"कुनै ब्याट्रि छैन।"</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ब्याट्रि एउटा पट्टि।"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"कुनै ब्याट्री छैन।"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"ब्याट्री एउटा पट्टि।"</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"ब्याट्रिका दुईवटा पट्टिहरू"</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"ब्याट्रिका तिनवटा पट्टिहरू"</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"ब्याट्रि पूर्ण छ।"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"ब्याट्री पूर्ण छ।"</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"फोन छैन्।"</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"फोन एउटा पट्टि।"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"फोन दुई पट्टि।"</string>
@@ -157,7 +157,7 @@
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM कार्ड छैन।"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"वाहक नेटवर्क परिवर्तन हुँदै।"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ब्याट्री सम्बन्धी विवरणहरूलाई खोल्नुहोस्"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"ब्याट्रि <xliff:g id="NUMBER">%d</xliff:g> प्रतिशत"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"ब्याट्री <xliff:g id="NUMBER">%d</xliff:g> प्रतिशत"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ब्याट्री चार्ज हुँदैछ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत।"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"प्रणाली सेटिङहरू"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचनाहरू।"</string>
@@ -188,7 +188,7 @@
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाइफाइ बन्द गरियो।"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"वाइफाइ खुला गरियो।"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोवाइल <xliff:g id="SIGNAL">%1$s</xliff:g>। <xliff:g id="TYPE">%2$s</xliff:g>। <xliff:g id="NETWORK">%3$s</xliff:g>।"</string>
-    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ब्याट्रि <xliff:g id="STATE">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ब्याट्री <xliff:g id="STATE">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"हवाइजहाज मोड बन्द।"</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"हवाइजहाज मोड खुला।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"हवाइजहाज मोड बन्द छ।"</string>
@@ -276,7 +276,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"स्थान बन्द छ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"मिडिया उपकरण"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"आकस्मिक कल मात्र"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"आपतकालीन कल मात्र"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"सेटिङहरू"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"समय"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"मलाई"</string>
@@ -377,12 +377,12 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"वर्तमान प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"प्रयोगकर्ता लगआउट गर्नुहोस्"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्नुहुन्छ?"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"नयाँ प्रयोगकर्ता थप्ने हो?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"जब तपाईँले नयाँ प्रयोगकर्ता थप्नुहुन्छ, त्यस प्रयोगकर्ताले आफ्नो स्थान स्थापना गर्न पर्ने छ।\n\nकुनै पनि प्रयोगकर्ताले सबै अन्य प्रयोगकर्ताहरूका लागि अनुप्रयोगहरू अद्यावधिक गर्न सक्छन्।"</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"प्रयोगकर्ता हटाउन चाहनुहुन्छ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"यस प्रयोगकर्ताको सबै अनुप्रयोगहरू तथा डेटा हटाइनेछ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"हटाउनुहोस्"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ब्याट्रि सेभर चालु छ"</string>
+    <string name="battery_saver_notification_title" msgid="237918726750955859">"ब्याट्री सेभर चालु छ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"प्रदर्शन र पृष्ठभूमि डेटा घटाउँनुहोस्"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ब्याट्री बचत बन्द गर्नुहोस्"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ले आफ्नो स्क्रीनमा प्रदर्शित हुने सबै खिच्न शुरू गर्नेछ।"</string>

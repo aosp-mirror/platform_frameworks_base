@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ဖွင့်ရန်"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ဘက်ထရီ ချွေတာမှုကို ဖွင့်ရန်"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"အပြင်အဆင်များ"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ဝိုင်ဖိုင်"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"မျက်နှာပြင်အလိုအလျောက်လှည့်ရန်"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
@@ -147,7 +147,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ကွန်ယက်ပြင်ပဒေတာအသုံးပြုခြင်း"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ဝိုင်ဖိုင်"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ဆင်းကဒ်မရှိပါ။"</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"ဆဲလ်လူလာ ဒေတာ"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"ဆဲလ်လူလာ ဒေတာ ဖွင့်ထားသည်"</string>
@@ -155,7 +155,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"လေယာဥ်ပျံပေါ်အသုံးပြုသောစနစ်။"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM ကဒ် မရှိပါ"</string>
-    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ယက် ပြောင်းလဲနေစဉ်။"</string>
+    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"ဝန်ဆောင်မှုဌာန ကွန်ရက် ပြောင်းလဲနေစဉ်။"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ဘက်ထရီ အသေးစိတ် အချက်အလက်များကို ဖွင့်ပါ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ဘတ္တရီ <xliff:g id="NUMBER">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ဘက်ထရီအားသွင်းနေသည်၊ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ရာခိုင်နှုန်း။"</string>
@@ -282,7 +282,7 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ကျွန်ုပ်"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"အသုံးပြုသူ"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"အသုံးပြုသူ အသစ်"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"ဝိုင်ဖိုင်"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ချိတ်ဆက်မထားပါ"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"ကွန်ရက်မရှိပါ"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ဝိုင်ဖိုင်ပိတ်ရန်"</string>
@@ -315,7 +315,7 @@
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"အလုပ် မုဒ်"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"မကြာမီကဖွင့်ထားသည်များ မရှိပါ"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"သင်အားလုံးကို ရှင်းလင်းပြီးပါပြီ"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အပလီကေးရှင်း အင်ဖို"</string>
+    <string name="recents_app_info_button_label" msgid="2890317189376000030">"အက်ပ် အင်ဖို"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"မျက်နှာပြင် ပင်ထိုးမှု"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
@@ -365,7 +365,7 @@
     <string name="guest_new_guest" msgid="600537543078847803">"ဧည့်သည့်ကို ထည့်ပေးရန်"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"ဧည့်သည်ကို ဖယ်ထုတ်ရန်"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ဧည့်သည်ကို ဖယ်ထုတ်လိုက်ရမလား?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ဒီချိတ်ဆက်မှု ထဲက appများ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ဒီချိတ်ဆက်မှု ထဲက အက်ပ်များ အားလုံး နှင့် ဒေတာကို ဖျက်ပစ်မည်။"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"ဖယ်ထုတ်ပါ"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ပြန်လာတာ ကြိုဆိုပါသည်၊ ဧည့်သည်!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"သင်သည် သင်၏ ချိတ်ဆက်မှုကို ဆက်ပြုလုပ် လိုပါသလား?"</string>
@@ -377,8 +377,8 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"လက်ရှိ အသုံးပြုသူကို ထုတ်ပစ်ရန်"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"အသုံးပြုသူ ထွက်လိုက်ပါ"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူ အသစ်ကို ထည့်ရမလား?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် appများကို မွမ်းမံပေးနိုင်သည်။"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"အသုံးပြုသူအသစ်ကို ထည့်မလား။"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"သင်ထည့်လိုက်သော အသုံးပြုသူအသစ်သည် ၎င်း၏နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်သည်။\n\nမည်သည့်အသုံးပြုသူမဆို ကျန်သူများအားလုံးအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်ပေးနိုင်သည်။"</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"သုံးစွဲသူကိုဖယ်ရှားမည်လား?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ဤအသုံးပြုသူ၏ ဒေတာနှင့် အပ်ဖ်များအားလုံး ဖျက်လိုက်ပါမည်"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ဖယ်ရှားရန်"</string>
@@ -560,7 +560,7 @@
     <string name="keyboard_shortcut_group_applications_im" msgid="1892749399083161405">"အမြန်စာတိုစနစ်"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"Music"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
-    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"ပြက္ခဒိန်"</string>
+    <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendar"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"အသံထိန်းချုပ်သည့်ခလုတ်များဖြင့် ပြပါ"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"မနှောက်ယှက်ပါနှင့်"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"အသံထိန်းချုပ်သည့်ခလုတ် ဖြတ်လမ်း"</string>

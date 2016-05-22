@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobil internet o‘chiq"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM karta yo‘q."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM karta yo‘q."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya quvvati sarfi haqida ma’lumot"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
@@ -278,7 +278,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv xizmati o‘chiq"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Faqat favqulodda qo‘ng‘iroqlar"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Favqulodda qo‘ng‘iroqlar"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Sozlamalar"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Vaqt"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Men"</string>
@@ -389,7 +389,7 @@
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Quvvat tejash rejimidan chiqish"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi qurilma ekranidagi har qanday tasvirni ko‘rishni boshlaydi."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Boshqa ko‘rsatilmasin"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Barchasini tozalash"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Hammasini tozalash"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Boshlash"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Bildirishnomalar yo‘q"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Qurilma kuzatilishi mumkin"</string>
@@ -639,7 +639,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Tezkor sozlamalarni ochish."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Tezkor sozlamalarni yopish."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Uyg‘otkich o‘rnatildi."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Siz <xliff:g id="ID_1">%s</xliff:g> sifatida kirgansiz"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> sifatida kirgansiz"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Internet yo‘q."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Tafsilotlarini ko‘rsatish."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> sozlamalarini ochish."</string>
