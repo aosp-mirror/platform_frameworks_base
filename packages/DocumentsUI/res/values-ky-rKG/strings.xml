@@ -29,7 +29,7 @@
     <string name="menu_open" msgid="432922957274920903">"Ачуу"</string>
     <string name="menu_save" msgid="2394743337684426338">"Сактоо"</string>
     <string name="menu_share" msgid="3075149983979628146">"Бөлүшүү"</string>
-    <string name="menu_delete" msgid="8138799623850614177">"Өчүрүү"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"Жок кылуу"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Бардыгын тандоо"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Төмөнкүгө көчүрүү…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Төмөнкүгө жылдыруу..."</string>

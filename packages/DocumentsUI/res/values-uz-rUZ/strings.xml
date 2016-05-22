@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Hujjatlar"</string>
-    <string name="downloads_label" msgid="959113951084633612">"Yuklanishlar"</string>
+    <string name="downloads_label" msgid="959113951084633612">"Yuklanmalar"</string>
     <string name="title_open" msgid="4353228937663917801">"Ochish"</string>
     <string name="title_save" msgid="2433679664882857999">"Saqlash"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Yangi jild"</string>
@@ -38,8 +38,8 @@
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Joylash"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Ichki xotirani ko‘rsatish"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"Ichki xotirani berkitish"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Fayl hajmini ko‘rsatish"</string>
-    <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayl hajmini berkitish"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Fayllar hajmini ko‘rsatish"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayllar hajmi ko‘rsatilmasin"</string>
     <string name="button_select" msgid="527196987259139214">"Tanlash"</string>
     <string name="button_copy" msgid="8706475544635021302">"Nusxalash"</string>
     <string name="button_move" msgid="2202666023104202232">"Ko‘chirib o‘tkazish"</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s jildidan topilmadi"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Fayl ochilmadi"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ba’zi hujjatlar o‘chirilmadi"</string>
-    <string name="share_via" msgid="8966594246261344259">"Quyidagi orqali ulashish"</string>
+    <string name="share_via" msgid="8966594246261344259">"Baham ko‘rish"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Fayllar nusxalanmoqda"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Ko‘chirib o‘tkazilmoqda"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"Fayllar o‘chirilmoqda"</string>
@@ -124,7 +124,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta element</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta element</item>
     </plurals>
-    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"“<xliff:g id="NAME">%1$s</xliff:g>” fayli o‘chirib tashlansinmi?"</string>
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"“<xliff:g id="NAME">%1$s</xliff:g>” o‘chirib tashlansinmi?"</string>
     <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"“<xliff:g id="NAME">%1$s</xliff:g>” jildi ichidagi kontentlari bilan o‘chirib tashlansinmi?"</string>
     <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayl o‘chirilsinmi?</item>
