@@ -58,7 +58,7 @@
     <string name="root_type_service" msgid="2178854894416775409">"સંગ્રહ સેવાઓ"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"શોર્ટકટ્સ"</string>
     <string name="root_type_device" msgid="7121342474653483538">"ઉપકરણો"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશનો"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"વધુ ઍપ્લિકેશનો"</string>
     <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s માં કોઇ મેળ નથી"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"ફાઇલ ખોલી શકતાં નથી"</string>

@@ -23,7 +23,7 @@
     <string name="menu_create_dir" msgid="2547620241173881754">"Yeni qovluq"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Torlu görünüş"</string>
     <string name="menu_list" msgid="7279285939892417279">"Siyahı görünüşü"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Bunlardan biri üzrə sırala"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Sıralayın"</string>
     <string name="menu_search" msgid="3816712084502856974">"Axtarış"</string>
     <string name="menu_settings" msgid="8239065133341597825">"Yaddaş ayarları"</string>
     <string name="menu_open" msgid="432922957274920903">"Açın"</string>
@@ -32,7 +32,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"Sil"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Hamısını seçin"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Buraya kopyalayın:"</string>
-    <string name="menu_move" msgid="1828090633118079817">"Köçürün…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"Daşıyın..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Yeni pəncərə"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopyalayın"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Yerləşdirin"</string>
@@ -58,8 +58,8 @@
     <string name="root_type_service" msgid="2178854894416775409">"Saxlama xidmətləri"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Qısa yollar"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Cihazlar"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"Daha çox tətbiq"</string>
-    <string name="empty" msgid="7858882803708117596">"Element yoxdur"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"Digər tətbiqlər"</string>
+    <string name="empty" msgid="7858882803708117596">"Heç nə yoxdur"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s ilə heç bir uyğunluq yoxdur"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Fayl açılmır"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Bəzi sənədləri silə bilmir"</string>
