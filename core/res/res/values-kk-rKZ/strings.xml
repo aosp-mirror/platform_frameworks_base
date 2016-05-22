@@ -595,7 +595,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Үй факсы"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Пейджер"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Басқа"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"кері телефон шалу нөмірі"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Кері телефон шалу нөмірі"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Автокөлік"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Компания негізгі"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN (біріктірілген қызметтердің сандық желісі)"</string>
@@ -1615,7 +1615,7 @@
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Жұмыс профилінің құлпын ашу үшін түртіңіз"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> қосылу орындалды"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Файлдарды көру үшін түртіңіз"</string>
-    <string name="pin_target" msgid="3052256031352291362">"PIN код"</string>
+    <string name="pin_target" msgid="3052256031352291362">"PIN коды"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Босату"</string>
     <string name="app_info" msgid="6856026610594615344">"Қолданба ақпараты"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>

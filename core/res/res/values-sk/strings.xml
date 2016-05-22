@@ -261,7 +261,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"zaznamenávanie zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a zaznamenávanie videí"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovať a spravovať hovory"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Telesné senzory"</string>
@@ -603,13 +603,13 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Iné"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Spätné volanie"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Telefón v aute"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Hlavné číslo spoločnosti"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Hlavné firemné"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Hlavné"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Iný fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Rádiotelefón"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Textový telefón"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Pracovný mobil"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pracovný pager"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
@@ -958,7 +958,7 @@
     <string name="yes" msgid="5362982303337969312">"OK"</string>
     <string name="no" msgid="5141531044935541497">"Zrušiť"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornenie"</string>
-    <string name="loading" msgid="7933681260296021180">"Prebieha načítavanie..."</string>
+    <string name="loading" msgid="7933681260296021180">"Načítava sa…"</string>
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončiť akciu pomocou aplikácie"</string>
@@ -1561,7 +1561,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Aktualizované správcom"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Odstránený správcom"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"S cieľom predĺžiť výdrž batérie zníži šetrič batérie výkonnosť zariadenia a obmedzí vibrácie, služby určovania polohy a dátové prenosy na pozadí. Pošta, čet a ďalšie aplikácie, ktoré sa spoliehajú na synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Ak chcete znížiť spotrebu dát, dátový server zabráni niektorým aplikáciam odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú momentálne používate, môže pristupovať k dátam, ale môže to robiť menej často. Znamená to, že napríklad obrázky sa nezobrazia, kým na ne neklepnete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Šetrič dát bráni niektorým aplikáciám odosielať alebo prijímať dáta na pozadí s cieľom znížiť spotrebu dát. Aplikácia, ktorú momentálne používate, môže prenášať dáta, ale môže to robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Zapnúť Šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

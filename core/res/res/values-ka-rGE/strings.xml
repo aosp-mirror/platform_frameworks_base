@@ -604,9 +604,9 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"რადიო"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"სამსახურის მობილური"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"სამუშაო პეიჯერი"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"დამხმარე"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"სამსახ.მობილური"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"სამსახ.პეიჯერი"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"თანაშემწე"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"მორგებული"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"დაბადების დღე"</string>
@@ -1023,7 +1023,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"მედიის ხმა"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"შეტყობინების ხმა"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ნაგულისხმევი ზარი"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ნაგულისხმევი ზარი (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ნაგულის.ზარი (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"არც ერთი"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ზარები"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"უცნობი ზარი"</string>
@@ -1096,7 +1096,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"ნებართვა საჭირო არ არის"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ამისათვის შესაძლოა მოგიწიოთ თანხის გადახდა"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"მოწყობილობა USB-ის მეშვეობით იტენება"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"მოწყობილობა USB-თი იტენება"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"მიერთებულ მოწყობილობას ელკვებას USB აწვდის"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB ფაილების გადაცემისთვის"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB ფოტოების გადაცემისთვის"</string>

@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Fără titlu&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Niciun număr de telefon)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Necunoscut"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesaj vocal"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Mesagerie vocală"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problemă de conexiune sau cod MMI nevalid."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Operația este limitată la numerele cu apelări restricționate."</string>
@@ -258,7 +258,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfonul"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze imagini"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Senzori corporali"</string>
@@ -525,11 +525,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Schimbarea setărilor de blocare a ecranului"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Să schimbe blocarea ecranului"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modificați blocarea ecranului."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Blocați ecranul"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Să blocheze ecranul"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Stabiliți modul și timpul în care se blochează ecranul."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Ștergere integrală date"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Să șteargă toate datele"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ștergeți datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Ștergeți datele de pe televizor fără avertisment, prin revenirea la setările din fabrică."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ștergeți datele din telefon fără avertisment, efectuând resetarea configurării din fabrică."</string>
@@ -600,14 +600,14 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altele"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Apelare inversă"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Mașină"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Numărul de telefon principal al companiei"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Companie (principal)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Număr de telefon principal"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Alt număr de fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Telefon mobil serviciu"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobil serviciu"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager serviciu"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -682,7 +682,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Încercați din nou"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Încercați din nou"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S-a depășit numărul maxim de încercări pentru Deblocare facială"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Niciun card SIM"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Fără SIM."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nu există card SIM în computerul tablet PC."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Niciun card SIM în televizor."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonul nu are card SIM."</string>
@@ -1040,7 +1040,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Ton de apel prestabilit"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de apel prestabilit (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Niciunul"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonuri de apel"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonuri de sonerie"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Ton de apel necunoscut"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="few">Rețele Wi-Fi disponibile</item>
@@ -1542,7 +1542,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți în prezent poate să acceseze datele, dar o poate face mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

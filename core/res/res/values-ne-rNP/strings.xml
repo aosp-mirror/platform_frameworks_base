@@ -105,7 +105,7 @@
     <string name="serviceClassFAX" msgid="5566624998840486475">"फ्याक्स"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Async"</string>
-    <string name="serviceClassDataSync" msgid="7530000519646054776">"सिङ्क गर्नुहोस्"</string>
+    <string name="serviceClassDataSync" msgid="7530000519646054776">"सिंक गर्नुहोस्"</string>
     <string name="serviceClassPacket" msgid="6991006557993423453">"प्याकेट"</string>
     <string name="serviceClassPAD" msgid="3235259085648271037">"PAD"</string>
     <string name="roamingText0" msgid="7170335472198694945">"रोमिङ सूचक खुला"</string>
@@ -144,7 +144,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अगाडि बढाइएको छैन"</string>
     <string name="fcComplete" msgid="3118848230966886575">"विशेषता कोड पुरा भयो।"</string>
     <string name="fcError" msgid="3327560126588500777">"जडान समस्या वा अमान्य सुविधा कोड।"</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"ठिक छ"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"ठीक छ"</string>
     <string name="httpError" msgid="7956392511146698522">"एउटा नेटवर्क त्रुटि थियो।"</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL भेटाउन सकेन।"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"साइटको आधिकारिकता योजना समर्थित छैन।"</string>
@@ -162,7 +162,7 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"धेरै नै अनुरोधहरू प्रक्रियामा छन्। पछि फेरि प्रयास गर्नुहोस्।"</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g>को लागि साइन इन त्रुटि"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"सिङक गर्नुहोस्"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"सिङ्क गर्नुहोस्"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"सिंक गर्नुहोस्"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"अति धेरै <xliff:g id="CONTENT_TYPE">%s</xliff:g> मेट्नुहोस्।"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ट्याब्लेट भण्डारण खाली छैन! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
@@ -357,7 +357,7 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अनुप्रयोगलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो अनुप्रयोगलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"सटीक स्थान पहुँच गराउनुहोस् (GPS तथा नेटवर्कमा आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"अनुप्रयोगले विश्वव्यापी स्थान प्रणाली (GPS) वा सेल टावरहरू र वाइफाइ जस्ता नेटवर्क स्थान स्रोतहरूको प्रयोग गरेर तपाईँको सही स्थान प्राप्त गर्न अनुमति दिन्छ। यी स्थान सेवाहरू खोल्नु पर्छ र अनुप्रयोगहरूका लागि प्रयोग गर्न तपाईँको उपकरणमा उपलब्ध हुनु पर्छ। अनुप्रयोगहरूले तपाईँ कहाँ हुनु हुन्छ भन्ने निर्धारण गर्न यसलाई प्रयोग गर्न सक्छ र यसले अतिरिक्त ब्याट्रि उर्जा खतप गर्न सक्छ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"अनुप्रयोगले विश्वव्यापी स्थान प्रणाली (GPS) वा सेल टावरहरू र वाइफाइ जस्ता नेटवर्क स्थान स्रोतहरूको प्रयोग गरेर तपाईँको सही स्थान प्राप्त गर्न अनुमति दिन्छ। यी स्थान सेवाहरू खोल्नु पर्छ र अनुप्रयोगहरूका लागि प्रयोग गर्न तपाईँको उपकरणमा उपलब्ध हुनु पर्छ। अनुप्रयोगहरूले तपाईँ कहाँ हुनु हुन्छ भन्ने निर्धारण गर्न यसलाई प्रयोग गर्न सक्छ र यसले अतिरिक्त ब्याट्री उर्जा खतप गर्न सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित स्थान पहुँच गराउनुहोस् (नेटवर्कमा आधारित)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"अनुप्रयोगलाई तपाईँको अनुमानित स्थान प्राप्त गर्न अनुमति दिन्छ। यो स्थान सेल टावर र वाइ-फाइजस्ता नेटवर्क स्थान स्रोतहरूको प्रोग गरी स्थान सेवाहरूबाट उत्पन्न गरिएको हो। अनुप्रयोगले यी स्थान सेवाहरूको उपयोग गर्नको लागि यी सेवाहरू तपाईँको उपकरणमा चालु र उपलब्ध हुनु आवश्यक छ। अनुप्रयोगहरूले अनुमानित रूपमा तपाईँ कहाँ हुनुहुन्छ भन्ने निर्धारण गर्न यसको प्रयोग गर्न सक्छन्।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
@@ -454,10 +454,10 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिन्ट आइकन"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिङ्क सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिङ्क भएको नभएको निर्धारण गर्न सक्दछ।"</string>
-    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिङ्क खुला र बन्द"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिङ्क सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिङ्क सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
-    <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिङ्क तथ्याङ्कहरू पढ्नुहोस्"</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
+    <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिंक खुला र बन्द"</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"अनुप्रयोगहरूलाई खाताको लागि सिंक सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ। उदाहरणको लागि, यो खातासँग व्यक्ति अनुप्रयोगको सिंक सक्षम गर्न प्रयोग गर्न सकिन्छ।"</string>
+    <string name="permlab_readSyncStats" msgid="7396577451360202448">"सिंक तथ्याङ्कहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"अनुप्रयोगलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"आफ्नो USB भण्डारणको सामग्रीहरूहरु पढ्नुहोस्"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"आफ्नो SD कार्डको सामग्रीहरूहरु पढ्नुहोस्"</string>
@@ -597,7 +597,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"अन्य"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"कलब्याक"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"कार"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"कम्पनी मुख्य"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"मुख्य कम्पनी"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"मुख्य"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"अन्य फ्याक्स"</string>
@@ -673,7 +673,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"अनलक वा आपतकालीन कल गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"अनलक गर्नु ढाँचा खिच्नुहोस्"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"आकस्मिक"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"आपतकालीन"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"कलमा फर्किनुहोस्"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"सही!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"फेरि प्रयास गर्नुहोस्"</string>
@@ -923,9 +923,9 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चलिरहेको छ"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"थप जानकारीका लागि वा अनुप्रयोगलाई बन्द गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="ok" msgid="5970060430562524910">"ठिक छ"</string>
+    <string name="ok" msgid="5970060430562524910">"ठीक छ"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द गर्नुहोस्"</string>
-    <string name="yes" msgid="5362982303337969312">"ठिक छ"</string>
+    <string name="yes" msgid="5362982303337969312">"ठीक छ"</string>
     <string name="no" msgid="5141531044935541497">"रद्द गर्नुहोस्"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"सावधानी"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हुँदै..."</string>
@@ -980,7 +980,7 @@
     <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ले प्रतिक्रिया दिइरहेको छैन"</string>
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> ले प्रतिक्रिया दिइरहेको छैन"</string>
     <string name="anr_process" msgid="6156880875555921105">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> ले प्रतिक्रिया दिइरहेको छैन"</string>
-    <string name="force_close" msgid="8346072094521265605">"ठिक छ"</string>
+    <string name="force_close" msgid="8346072094521265605">"ठीक छ"</string>
     <string name="report" msgid="4060218260984795706">"रिपोर्ट गर्नुहोस्"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा गर्नुहोस्"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ गैर जिम्मेवारी भएको छ।\n\nके तपाईँ यसलाई बन्द गर्न चाहनुहुन्छ?"</string>
@@ -1031,7 +1031,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"पूर्वनिर्धारित रिङटोन"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"पूर्वनिर्धारित रिङटोन (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"कुनै पनि होइन"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"घन्टीका स्वरहरू"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"रिङटोनहरू"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"अज्ञात रिङटोन"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="other">Wi-Fi सञ्जालहरू उपलब्ध छन्</item>
@@ -1101,7 +1101,7 @@
     <string name="perms_description_app" msgid="5139836143293299417">"<xliff:g id="APP_NAME">%1$s</xliff:g>द्वारा प्रदान गरिएको।"</string>
     <string name="no_permissions" msgid="7283357728219338112">"कुनै अनुमति आवश्यक छैन"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"सायद तपाईँलाई पैसा पर्न सक्छ।"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"ठिक छ"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"ठीक छ"</string>
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"यस यन्त्रलाई USB मार्फत चार्ज गर्दै"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"संलग्न गरिएको यन्त्रमा USB मार्फत पावर आपूर्ति गरिँदै"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"फाइल स्थानान्तरणको लागि USB"</string>
@@ -1189,7 +1189,7 @@
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"तपाईँ तपाईँको कार्य प्रोफाइल बाहिर यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"तपाईँ आफ्नो कार्य प्रोफाइलमा यो अनुप्रयोग प्रयोग गरिरहनु भएको छ"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"इनपुट विधि"</string>
-    <string name="sync_binding_label" msgid="3687969138375092423">"सिङ्क गर्नुहोस्"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"सिंक गर्नुहोस्"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"उपलब्धता"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"वालपेपर"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"वालपेपर परिवर्तन गर्नुहोस्"</string>

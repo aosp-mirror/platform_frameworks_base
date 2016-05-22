@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"傳送和查看短訊"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存空間"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"在您的裝置上存取相片、媒體和檔案"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"存取裝置上的相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄音"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
@@ -616,7 +616,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"住宅"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"公司"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"其他"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"流動電郵"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"流動"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"自訂"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"住宅"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"公司"</string>
@@ -694,7 +694,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"停止"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"倒帶"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"向前快轉"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"僅可撥打緊急電話"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"只可撥打緊急電話"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"網絡已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡處於 PUK 鎖定狀態。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"請參閱使用者指南或與客戶服務中心聯絡。"</string>
@@ -1345,7 +1345,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形不對"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒後再試一次。"</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約電池用量模式有助於延長電池壽命，但這會降低裝置效能，並限制震動、定位服務及大部分背景數據傳輸。除非您啟用，否則電郵、短訊及其他需要使用同步功能的應用程式均不會更新。\n\n當裝置充電時，節約電池用量模式會自動關閉。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式仍可以存取資料，但存取頻率可能會降低。例如，除非您輕按圖片，否則系統可能不會顯示相關圖片。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省程式」可防止部分應用程式在背景收發資料，以節省數據用量。您正在使用的應用程式雖可存取資料，但次數可能會減少。例如，圖片可能需要輕按才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要啟用數據節省程式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1597,7 +1597,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"新增語言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"輸入語言名稱"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"推薦"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"建議"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已關閉"</string>

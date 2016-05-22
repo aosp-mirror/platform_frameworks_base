@@ -404,7 +404,7 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet que l\'aplicació creï sòcols de xarxa i que utilitzi protocols de xarxa personalitzats. El navegador i altres aplicacions proporcionen mitjans per enviar dades a Internet, de manera que aquest permís no és obligatori per enviar-n\'hi."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"canviar la connectivitat de xarxa"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet que l\'aplicació pugui canviar l\'estat de connectivitat de la xarxa."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat d\'ancoratge a xarxa"</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat de compartició de xarxa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet que l\'aplicació canviï l\'estat de la connectivitat de la xarxa d\'ancoratge."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"veure connexions Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permet que l\'aplicació visualitzi informació sobre les xarxes Wi-Fi, com ara si la Wi-Fi està activada i el nom dels dispositius Wi-Fi connectats."</string>
@@ -597,7 +597,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altres"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Torna la trucada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Cotxe"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Principal de l\'empresa"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Telèfon d\'empresa"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"XDSI"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Altres faxos"</string>
@@ -605,7 +605,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Tèlex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mòbil de la feina"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersones de la feina"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Cercapersones feina"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personalitza"</string>
@@ -1047,7 +1047,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"L\'aplicació %1$s vol connectar-se a la xarxa Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicació"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Inicia Wi-Fi Direct. Això desactivarà el client/la zona Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Inicia Wi-Fi Direct. Això desactivarà el client/el punt d\'accés Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No s\'ha pogut iniciar Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct està activat"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Toca per veure la configuració"</string>
@@ -1096,7 +1096,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"pot ser que comporti càrrecs"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"L\'USB està carregant el dispositiu"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"El dispositiu s\'està carregant per USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"L\'USB subministra energia al dispositiu connectat"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB per transferir fitxers"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB per transferir fotos"</string>
@@ -1201,11 +1201,11 @@
     <string name="vpn_lockdown_config" msgid="4655589351146766608">"Toca per configurar"</string>
     <string name="upload_file" msgid="2897957172366730416">"Trieu un fitxer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No s\'ha escollit cap fitxer"</string>
-    <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
+    <string name="reset" msgid="2448168080964209908">"Restableix"</string>
     <string name="submit" msgid="1602335572089911941">"Envia"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mode de cotxe activat"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca per sortir del mode de cotxe."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Ancoratge a la xarxa o zona Wi-Fi activat"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartició de xarxa o punt d\'accés Wi-Fi activat"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca per configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>

@@ -1331,9 +1331,9 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"அமைப்பு"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"புளூடூத் ஆடியோ"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"வயர்லெஸ் காட்சி"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"அனுப்பு"</string>
+    <string name="media_route_button_content_description" msgid="591703006349356016">"திரையிடு"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"சாதனத்துடன் இணைக்கவும்"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"திரையிலிருந்து சாதனத்திற்கு அனுப்புக"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ஸ்கிரீனை சாதனத்தில் திரையிடு"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"சாதனங்களைத் தேடுகிறது..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"அமைப்பு"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"துண்டி"</string>
