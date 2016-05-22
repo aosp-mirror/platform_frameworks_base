@@ -119,7 +119,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профайлыг солиход зурган түгжээ оруулах шаардлагатай"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профайлыг солиход PIN оруулах шаардлагатай"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профайлыг солиход нууц үг оруулах шаардлагатай"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Төхөөрөмжийн администратор төхөөрөмжийг түгжсэн"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Төхөөрөмжийн админ төхөөрөмжийг түгжсэн"</string>
     <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Төхөөрөмжийг гараар түгжсэн"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_1">%d</xliff:g> цагийн турш тайлаагүй байна. Зурган хээг баталгаажуулна уу.</item>

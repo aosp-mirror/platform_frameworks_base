@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Maglagay ng SIM card."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Wala o hindi nababasa ang SIM card. Maglagay ng SIM card."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Hindi nagagamit na SIM card."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Ang iyong SIM card ay permanenteng hindi pinagana.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Ang iyong SIM card ay permanenteng naka-disable.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Naka-lock ang SIM card."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Naka-lock ang SIM card gamit ang PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ina-unlock ang SIM card…"</string>
@@ -55,7 +55,7 @@
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Lugar ng PIN ng SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Lugar ng PUK ng SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Nakatakda ang susunod na alarm para sa <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Tanggalin"</string>
+    <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"I-delete"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Nakalimutan ang Pattern"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Maling Pattern"</string>

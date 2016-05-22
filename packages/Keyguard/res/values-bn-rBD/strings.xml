@@ -111,13 +111,13 @@
     <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"ইনপুট পদ্ধতি পাল্টান"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"বিমান মোড"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"ডিভাইস পুনরায় আরম্ভ করার পর প্যাটার্নের প্রয়োজন হবে"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ডিভাইস পুনরায় আরম্ভ করার পর PIN এর প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"ডিভাইস পুনরায় আরম্ভ করার পর পিন এর প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"ডিভাইস পুনরায় আরম্ভ করার পর পাসওয়ার্ডের প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"অতিরিক্ত সুরক্ষার জন্য প্যাটার্ন প্রয়োজন"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"অতিরিক্ত সুরক্ষার জন্য PIN প্রয়োজন"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"অতিরিক্ত সুরক্ষার জন্য পিন প্রয়োজন"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"অতিরিক্ত সুরক্ষার জন্য পাসওয়ার্ড প্রয়োজন"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন প্যাটার্নের প্রয়োজন হবে"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন PIN এর প্রয়োজন হবে"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পিন এর প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"যখন আপনি প্রোফাইলগুলি পাল্টাবেন তখন পাসওয়ার্ডের প্রয়োজন হবে"</string>
     <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"ডিভাইস প্রশাসক ডিভাইসটিকে লক করেছেন"</string>
     <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"ডিভাইসটিকে নিজের হাতে লক করা হয়েছে"</string>
