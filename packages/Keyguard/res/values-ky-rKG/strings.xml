@@ -58,7 +58,7 @@
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жок кылуу"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Кирүү"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Үлгү унутулду"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Үлгү туура эмес"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Сырсөз туура эмес"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-код туура эмес"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> секундадан кийин кайталаңыз."</string>
@@ -119,7 +119,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"Профилдерди которуштурганда графикалык ачкыч талап кылынат"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"Профилдерди которуштурганда PIN код талап кылынат"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"Профилдерди которуштурганда сырсөз талап кылынат"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Түзмөктүн администратору түзмөктү кулпулап койду"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Түзмөк башкаргычы түзмөктү кулпулап койду"</string>
     <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Түзмөк кол менен кулпуланды"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Түзмөктүн кулпусу <xliff:g id="NUMBER_1">%d</xliff:g> саат бою ачылган жок. Cүрөт үлгүсүн ырастаңыз.</item>
