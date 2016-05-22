@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Bu seçenek TÜM sesleri ve titreşimleri engeller. Buna alarmlar, müzik, videolar ve oyunlar dahildir."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Daha az acil bildirimler aşağıdadır"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Açmak için tekrar hafifçe vurun"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Açmak için tekrar dokunun"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Kilidi açmak için hızlıca yukarı kaydırın"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefon için, simgeden hızlıca kaydırın"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Sesli yardım için, simgeden hızlıca kaydırın"</string>
@@ -388,7 +388,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, ekranınızda görüntülenen her şeyi kaydetmeye başlayacak."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Bir daha gösterme"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tümü temizle"</string>
-    <string name="media_projection_action_text" msgid="8470872969457985954">"Şimdi başla"</string>
+    <string name="media_projection_action_text" msgid="8470872969457985954">"Şimdi başlat"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Bildirim yok"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"Cihaz izlenebilir"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil izlenebilir"</string>

@@ -247,10 +247,10 @@
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"അറിയിപ്പ് ക്രമീകരണങ്ങൾ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണം"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ യാന്ത്രികമായി തിരിയും."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ സ്വയമേവ തിരിയും."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"സ്‌ക്രീൻ ലാൻഡ്‌സ്‌കേപ്പ് ഓറിയന്റേഷനിൽ ലോക്കുചെയ്‌തു."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"സ്‌ക്രീൻ പോർട്രെയ്‌റ്റ് ഓറിയന്റേഷനിൽ ലോക്കുചെയ്‌തു."</string>
-    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"സ്ക്രീൻ ഇപ്പോൾ യാന്ത്രികമായി തിരിയും."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"സ്ക്രീൻ ഇപ്പോൾ സ്വയമേവ തിരിയും."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"ലാൻഡ്‌സ്‌കേപ്പ് ഓറിയന്റേഷനിൽ ഇപ്പോൾ സ്ക്രീൻ ലോക്കുചെയ്‌തു."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"പോർട്രെയ്‌റ്റ് ഓറിയന്റേഷനിൽ ഇപ്പോൾ സ്ക്രീൻ ലോക്കുചെയ്‌തു."</string>
     <string name="dessert_case" msgid="1295161776223959221">"ഡെസേർട്ട് കെയ്സ്"</string>
@@ -295,7 +295,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"ഉപകരണങ്ങളൊന്നും ലഭ്യമല്ല"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"തെളിച്ചം"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"യാന്ത്രികം"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"വിപരീത വർണ്ണങ്ങൾ"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"നിറം മാറ്റുക"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"വർണ്ണം ശരിയാക്കൽ മോഡ്"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"പൂർത്തിയാക്കി"</string>
