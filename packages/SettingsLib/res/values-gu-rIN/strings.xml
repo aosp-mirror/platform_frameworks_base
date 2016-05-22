@@ -84,8 +84,8 @@
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi ત્રણ બાર."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"પૂર્ણ Wifi સિગ્નલ."</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"દૂર કરેલી એપ્લિકેશનો"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"દૂર કરેલી એપ્લિકેશનો અને વપરાશકર્તાઓ"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"દૂર કરેલી ઍપ્લિકેશનો"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"દૂર કરેલી ઍપ્લિકેશનો અને વપરાશકર્તાઓ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ટિથરિંગ"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"પોર્ટેબલ હોટસ્પોટ"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth ટિથરિંગ"</string>
@@ -183,12 +183,12 @@
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"નવા Android DHCP ક્લાઇન્ટને બદલે Lollipop પરના DHCP ક્લાઇન્ટનો ઉપયોગ કરો."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Wi‑Fi  સક્રિય હોય ત્યારે પણ, હંમેશા મોબાઇલ ડેટાને સક્રિય રાખો (ઝડપી નેટવર્ક સ્વિચિંગ માટે)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, સૂચના વગર તમારા ઉપકરણ પર એપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB ડિબગીંગ ફક્ત વિકાસ હેતુઓ માટે જ બનાવાયેલ છે. તેનો ઉપયોગ તમારા કમ્પ્યુટર અને તમારા ઉપકરણ વચ્ચે ડેટાને કૉપિ કરવા, સૂચના વગર તમારા ઉપકરણ પર ઍપ્લિકેશનો ઇન્સ્ટોલ કરવા અને લૉગ ડેટા વાંચવા માટે કરો."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"તમે અગાઉ અધિકૃત કરેલા તમામ કમ્પ્યુટર્સમાંથી USB ડિબગિંગ પરની અ‍ૅક્સેસ રદબાતલ કરીએ?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"વિકાસ સેટિંગ્સને મંજૂરી આપીએ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"આ સેટિંગ્સ ફક્ત વિકાસનાં ઉપયોગ માટે જ હેતુબદ્ધ છે. તે તમારા ઉપકરણ અને તેના પરની એપ્લિકેશન્સનાં ભંગ થવા અથવા ખરાબ વર્તનનું કારણ બની શકે છે."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB પર એપ્લિકેશનો ચકાસો"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"હાનિકારક વર્તણૂંક માટે ADB/ADT મારફતે ઇન્સ્ટોલ કરવામાં આવેલી એપ્લિકેશનો તપાસો."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB પર ઍપ્લિકેશનો ચકાસો"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"હાનિકારક વર્તણૂંક માટે ADB/ADT મારફતે ઇન્સ્ટોલ કરવામાં આવેલી ઍપ્લિકેશનો તપાસો."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"રિમોટ ઉપકરણોમાં વધુ પડતું ઊંચું વૉલ્યૂમ અથવા નિયંત્રણની કમી જેવી વૉલ્યૂમની સમસ્યાઓની સ્થિતિમાં Bluetooth ચોક્કસ વૉલ્યૂમ સુવિધાને અક્ષમ કરે છે."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"સ્થાનિક ટર્મિનલ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"સ્થાનિક શેલ અ‍ૅક્સેસની ઑફર કરતી ટર્મિનલ એપ્લિકેશનને સક્ષમ કરો"</string>
@@ -201,14 +201,14 @@
     <string name="select_application" msgid="5156029161289091703">"ઍપ્લિકેશન પસંદ કરો"</string>
     <string name="no_application" msgid="2813387563129153880">"કંઈ નહીં"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"ડીબગર માટે રાહ જુઓ"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ડીબગ કરેલ એપ્લિકેશનો ક્રિયાન્વિત થતા પહેલાં ડીબગર જોડાઈ તેની રાહ જુએ છે"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"ડીબગ કરેલ ઍપ્લિકેશનો ક્રિયાન્વિત થતા પહેલાં ડીબગર જોડાઈ તેની રાહ જુએ છે"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ઇનપુટ"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"રેખાંકન"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"હાર્ડવેર પ્રવેગક રેન્ડરિંગ"</string>
     <string name="media_category" msgid="4388305075496848353">"મીડિયા"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"નિરિક્ષણ કરી રહ્યું છે"</string>
     <string name="strict_mode" msgid="1938795874357830695">"સ્ટ્રિક્ટ મોડ સક્ષમ કરેલ છે"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"જ્યારે મુખ્ય થ્રેડ પર એપ્લિકેશનો લાંબી કામગીરીઓ કરે ત્યારે સ્ક્રીનને ફ્લેશ કરો"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"જ્યારે મુખ્ય થ્રેડ પર ઍપ્લિકેશનો લાંબી કામગીરીઓ કરે ત્યારે સ્ક્રીનને ફ્લેશ કરો"</string>
     <string name="pointer_location" msgid="6084434787496938001">"પોઇન્ટર સ્થાન"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"વર્તમાન ટચ ડેટા દર્શાવતું સ્ક્રીન ઓવરલે"</string>
     <string name="show_touches" msgid="2642976305235070316">"ટૅપ્સ બતાવો"</string>
@@ -242,7 +242,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"સંક્રમણ એનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"એનિમેટર અવધિ સ્કેલ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ગૌણ ડિસ્પ્લેનુ અનુકરણ કરો"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"એપ્લિકેશનો"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"ઍપ્લિકેશનો"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"પ્રવૃત્તિઓ રાખશો નહીં"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"જેવો વપરાશકર્તા તેને છોડે, તરત જ દરેક પ્રવૃત્તિ નષ્ટ કરો"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"પૃષ્ઠભૂમિ પ્રક્રિયા સીમા"</string>
@@ -270,7 +270,7 @@
     <item msgid="8280754435979370728">"આંખો વડે જોઈ શકાતાં કુદરતી રંગો"</item>
     <item msgid="5363960654009010371">"ડિજિટલ સામગ્રી માટે ઓપ્ટિમાઇઝ કરાયેલા રંગો"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"નિષ્ક્રિય એપ્લિકેશનો"</string>
+    <string name="inactive_apps_title" msgid="1317817863508274533">"નિષ્ક્રિય ઍપ્લિકેશનો"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"નિષ્ક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"સક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ચાલુ સેવાઓ"</string>
