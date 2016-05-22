@@ -4,7 +4,7 @@
     <string name="app_label" msgid="8016145283189546017">"Inputenheder"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-tastatur"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Engelsk (UK)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Engelsk (USA)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"engelsk (USA)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Engelsk (USA), international stil"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Engelsk (USA), Colemak-stil"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Engelsk (USA), Dvorak-stil"</string>
