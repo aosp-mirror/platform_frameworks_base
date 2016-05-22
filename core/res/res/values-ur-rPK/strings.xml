@@ -595,7 +595,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"گھر کا فیکس"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"پیجر"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"دیگر"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"واپسی کال"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"کال بیک"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"کار"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"کمپنی مرکزی"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>

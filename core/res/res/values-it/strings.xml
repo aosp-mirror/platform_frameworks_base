@@ -595,13 +595,13 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax casa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Cercapersone"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Altro"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Callback"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Richiamata"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Automobile"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Azienda, principale"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Azienda (principale)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principale"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Altro fax"</string>
-    <string name="phoneTypeRadio" msgid="4093738079908667513">"Segnale radio"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Cellulare lavoro"</string>
@@ -1587,8 +1587,8 @@
     <string name="maximize_button_text" msgid="7543285286182446254">"Ingrandisci"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Chiudi"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementi selezionati</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento selezionato</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> file selezionati</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> file selezionato</item>
     </plurals>
     <string name="importance_from_user" msgid="7318955817386549931">"Stabilisci tu l\'importanza di queste notifiche."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Importante a causa delle persone coinvolte."</string>

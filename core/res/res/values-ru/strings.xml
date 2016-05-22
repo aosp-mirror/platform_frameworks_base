@@ -259,7 +259,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Память"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запись аудио"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снимать фото и видео"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>

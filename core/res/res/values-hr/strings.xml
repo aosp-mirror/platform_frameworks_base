@@ -525,11 +525,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava tablet ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava televizor ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava telefon ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Promijeni zaporku za zaključavanje"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Mijenjanje zaporke za zaključavanje"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mijenja se zaporka za zaključavanje zaslona."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Zaključaj zaslon"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Zaključavanje zaslona"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Upravlja se načinom i vremenom zaključavanja zaslona."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Izbriši sve podatke"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Brisanje svih podataka"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Vraćanjem u tvorničko stanje izbriši podatke tabletnog računala bez upozorenja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Briše podatke televizora bez upozorenja vraćanjem na tvorničko stanje."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Vraćanjem na tvorničke postavke brišu se podaci s telefona bez upozorenja."</string>
@@ -600,7 +600,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Ostalo"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Povratni poziv"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Automobil"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Primarni broj za tvrtku"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Centrala tvrtke"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Glavni telefon"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Drugi faks"</string>
@@ -1039,7 +1039,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Glasnoća obavijesti"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zadana melodija zvona"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Zadana melodija zvona (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Nijedna"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Ništa"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Melodije zvona"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nepoznata melodija zvona"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1120,7 +1120,7 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Spojen na USB pribor"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za uklanjanje pogrešaka USB-om"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Priključen je alat za otklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje pogrešaka putem USB-a."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izrada izvješća o programskoj pogrešci…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite li podijeliti izvješće o programskoj pogrešci?"</string>

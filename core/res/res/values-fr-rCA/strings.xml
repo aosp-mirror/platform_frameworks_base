@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"Messagerie texte"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"envoyer et afficher des messages texte"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Stockage"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder à des photos, à des contenus multimédias et à des fichiers sur votre appareil"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"accéder aux photos, aux contenus multimédias et aux fichiers sur votre appareil"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
@@ -548,8 +548,8 @@
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
     <item msgid="7897544654242874543">"Travail"</item>
-    <item msgid="1103601433382158155">"Télécopieur professionnel"</item>
-    <item msgid="1735177144948329370">"Télécopieur personnel"</item>
+    <item msgid="1103601433382158155">"Téléc. bureau"</item>
+    <item msgid="1735177144948329370">"Téléc. domicile"</item>
     <item msgid="603878674477207394">"Téléavertisseur"</item>
     <item msgid="1650824275177931637">"Autre"</item>
     <item msgid="9192514806975898961">"Personnaliser"</item>
@@ -591,8 +591,8 @@
     <string name="phoneTypeHome" msgid="2570923463033985887">"Domicile"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobile"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Travail"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Télécopieur professionnel"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Télécopieur personnel"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Téléc. travail"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Téléc. domicile"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Téléavertisseur"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Autre"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Rappel"</string>

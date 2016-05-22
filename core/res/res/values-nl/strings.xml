@@ -67,8 +67,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Inkomende beller-id"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Uitgaande beller-id"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Inkomende beller-ID"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Uitgaande beller-ID"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID van verbonden lijn"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Beperking voor ID van verbonden lijn"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Oproep doorschakelen"</string>
@@ -82,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Ongewenste, vervelende oproepen weigeren"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Weergave van nummer van beller"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Niet storen"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: beperkt."</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-id standaard ingesteld op \'beperkt\'. Volgende oproep: onbeperkt."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: beperkt."</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Beller-ID standaard ingesteld op \'beperkt\'. Volgende oproep: beperkt."</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Beller-ID standaard ingesteld op \'beperkt\'. Volgende oproep: onbeperkt."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgende oproep: beperkt."</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service niet voorzien."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-id niet wijzigen."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Gegevensservice is geblokkeerd."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Alarmservice is geblokkeerd."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Spraakservice is geblokkeerd."</string>

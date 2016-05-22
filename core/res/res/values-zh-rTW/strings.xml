@@ -55,7 +55,7 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI 完成。"</string>
     <string name="badPin" msgid="9015277645546710014">"您輸入的舊 PIN 不正確。"</string>
     <string name="badPuk" msgid="5487257647081132201">"您輸入的 PUK 不正確。"</string>
-    <string name="mismatchPin" msgid="609379054496863419">"您輸入的 PIN 不符。"</string>
+    <string name="mismatchPin" msgid="609379054496863419">"您輸入的 PIN 碼不符。"</string>
     <string name="invalidPin" msgid="3850018445187475377">"輸入 4~8 個數字的 PIN。"</string>
     <string name="invalidPuk" msgid="8761456210898036513">"輸入 8 位數以上的 PUK。"</string>
     <string name="needPuk" msgid="919668385956251611">"SIM 卡的 PUK 已鎖定。請輸入 PUK 碼解除鎖定。"</string>
@@ -596,13 +596,13 @@
     <string name="phoneTypePager" msgid="7582359955394921732">"呼叫器"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"其他"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"回撥電話"</string>
-    <string name="phoneTypeCar" msgid="8738360689616716982">"汽車電話"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"車用電話"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"公司代表號"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"代表號"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"其他傳真"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"無線電"</string>
-    <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"電報"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"公司行動電話"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"公司呼叫器"</string>
@@ -715,7 +715,7 @@
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"忘記解鎖圖案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"帳戶解鎖"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"圖形嘗試次數過多"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"圖案嘗試次數過多"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"如要解除鎖定，請使用 Google 帳戶登入。"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"使用者名稱 (電子郵件)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密碼"</string>
@@ -751,7 +751,7 @@
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"人臉解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密碼解鎖。"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖形區域。"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖案區域。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1344,12 +1344,12 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"第 <xliff:g id="ID">%1$d</xliff:g> 個重疊效果"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖形"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形錯誤"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖形"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"輸入密碼"</string>
@@ -1362,7 +1362,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK 碼必須為 8 碼。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 碼不符"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖形嘗試次數過多"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖案嘗試次數過多"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"如要解除鎖定，請使用 Google 帳戶登入。"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"使用者名稱 (電子郵件)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密碼"</string>
@@ -1492,7 +1492,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新 PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"確認新 PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"建立修改限制所需的 PIN"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN 不符，請再試一次。"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN 碼不符，請再試一次。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN 長度太短，至少必須為 4 位數。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other">請於 <xliff:g id="COUNT">%d</xliff:g> 秒後再試一次</item>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已遭管理員刪除"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"為協助減少數據用量，數據節省模式會禁止部分應用程式在背景傳送或接收資料。您目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由您輕觸後才會顯示。"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。您目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由您輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

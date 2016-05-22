@@ -552,7 +552,7 @@
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Prepreči uporabo nekaterih funkcij zaklepanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>
-    <item msgid="869923650527136615">"Mobilni"</item>
+    <item msgid="869923650527136615">"Mobilni telefon"</item>
     <item msgid="7897544654242874543">"Služba"</item>
     <item msgid="1103601433382158155">"Službeni faks"</item>
     <item msgid="1735177144948329370">"Domači faks"</item>
@@ -595,7 +595,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Po meri"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Dom"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilni"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Mobilni telefon"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Služba"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Službeni faks"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Domači faks"</string>
@@ -603,9 +603,9 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Drugo"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Povratni klic"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Avto"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Podjetje (glavno)"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Podjetje (glavna št.)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavni"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Glavna št."</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Drugi faks"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telefaks"</string>
@@ -1137,8 +1137,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Priključen na dodatek USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dotaknite se za več možnosti."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje in odpravljanje napak USB je povezano"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dotaknite se, če želite onemogočiti odpravljanje napak prek vrat USB."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje napak prek USB je povezano"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dotaknite se za izklop odpravljanja napak prek USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Zajemanje poročila o napakah …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Želite poslati poročilo o napakah?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Pošiljanje poročila o napakah …"</string>
@@ -1561,7 +1561,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisal skrbnik"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko dostopa do podatkov, vendar to morda lahko počne manj pogosto. To na primer morda pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Vklop"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

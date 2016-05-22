@@ -207,7 +207,7 @@
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"ຣີບູດເຂົ້າ safe mode"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"ທ່ານຕ້ອງການຣີບູດເຂົ້າ safe mode ຫຼືບໍ່? ນີ້ຈະເປັນການປິດການເຮັດວຽກຂອງແອັບພລິເຄຊັນ ຈາກພາກສ່ວນທີສາມທັງໝົດທີ່ທ່ານໄດ້ຕິດຕັ້ງໄວ້. ແອັບພລິເຄຊັນເຫຼົ່ານັ້ນ ຈະກັບມາເຮັດວຽກໄດ້ອີກຫຼັງຈາກທ່ານຣີບູດອີກຄັ້ງ."</string>
-    <string name="recent_tasks_title" msgid="3691764623638127888">"ຫາກໍໃຊ້"</string>
+    <string name="recent_tasks_title" msgid="3691764623638127888">"ຫຼ້າສຸດ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ບໍ່ມີແອັບຯຫຼ້າສຸດ"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"ທາງ​ເລືອກໂທລະພາບ"</string>

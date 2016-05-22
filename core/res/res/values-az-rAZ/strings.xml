@@ -67,8 +67,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Daxil olan zəng edənin ID\'si"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Gedən Zəng ID"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Gələn çağrı kimliyi"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Gedən çağrı kimliyi"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Qoşulmuş Xətt ID"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Qoşulmuş Xətt ID Məhdudluğu"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Zəng yönləndirmə"</string>
@@ -82,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Xoşagəlməz zənglərdən imtina"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Çatdırılma zəngi"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Narahat etməyin"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Adətən zəng edənin ID\'si məhdudlaşdırılır. Növbəti zəng: Məhdudlaşdırılıb"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Adətən zəng edənin ID\'si məhdudlaşdırılır. Növbəti zəng: Məhdudlaşdırılmayıb"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Adətən zəng edənin ID\'si məhdudlaşdırılmır. Növbəti zəng: Məhdudlaşdırılıb"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Adətən zəng edənin ID\'si məhdudlaşdırılmır. Növbəti zəng: Məhdudlaşdırılmayıb"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Zəng edənin kimliyi defolt olaraq qadağandır. Növbəti zəng: Qadağandır"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Zəng edənin kimliyi defolt olaraq qadağan deyil. Növbəti zəng: Qadağan deyil"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Zəng edənin kimliyi defolt olaraq qadağan deyil. Növbəti zəng: Qadağandır"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Zəng edənin kimliyi defolt olaraq qadağan deyil. Növbəti zəng: Qadağan deyil"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Xidmət təmin edilməyib."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Siz zəng edənin ID nizamlarını dəyişə bilməzsiz."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Çağrı kimliyi ayarını dəyişə bilməzsiniz."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Data xidmət bağlıdır."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Təcili xidmət bağlıdır."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Səs xidməti bağlıdır."</string>
@@ -117,9 +117,9 @@
     <string name="roamingText6" msgid="2059440825782871513">"Rominq - Mümkün sistem"</string>
     <string name="roamingText7" msgid="7112078724097233605">"Rominq - Alyans partnyoru"</string>
     <string name="roamingText8" msgid="5989569778604089291">"Rominq - Premium partnyor"</string>
-    <string name="roamingText9" msgid="7969296811355152491">"Rouminq - Tam Xidmət Funksionallığı"</string>
-    <string name="roamingText10" msgid="3992906999815316417">"Rouminq - Qismən Xidmət Funksionallığı"</string>
-    <string name="roamingText11" msgid="4154476854426920970">"Rouminq Banneri Açıqdır"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Rominq - Tam Xidmət Funksionallığı"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Rominq - Qismən Xidmət Funksionallığı"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"Rominq Banneri Açıqdır"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming Banner Off"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Xidmət axtarılır"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi zəngi"</string>
@@ -194,8 +194,8 @@
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Zəng vibrasiyadadır"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Zəngvuran açıqdır"</string>
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android sistemi güncəlləməsi"</string>
-    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Güncəlləmə üçün hazırlanır ..."</string>
-    <string name="reboot_to_update_package" msgid="3871302324500927291">"Güncəlləmə paketi icra olunur..."</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Güncəllənməyə hazırlanır ..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Güncəllənmə paketi icra olunur..."</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Yenidən başlanır..."</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"Data zavod sıfırlaması"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Yenidən başlanır..."</string>
@@ -250,7 +250,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"təqvimə daxil olun"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"göndərin və SMS mesajlarına baxın"</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Yaddaş"</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Depo"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"cihazınızda foto, media və fayllara daxil olun"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"səsi qeydə alın"</string>
@@ -289,7 +289,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"mətn mesajlarını qəbul edir (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tətbiqə MMS mesajlarını qəbul və emal üçün imkan verir. Bu o deməkdir ki, bu tətbiq sizə göstərmədən cihazınıza göndərilən mesajları silə bilər."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"mobil yayım mesajlarını oxuyur"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tətbiqə sizin telefonunuz tərəfindən alınmış yayım mesajlarını oxuma icazəsi verir. Telefon yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər fövqəladə mobil yayım qəbul edildiyi zaman telefonunun performansına və əməliyyatına müdaxilə edə bilər."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tətbiqə telefonunuz tərəfindən alınmış yayım mesajlarını oxuma icazəsi verir. Telefon yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər təcili mobil yayım qəbul edildiyi zaman telefonunun performansına və əməliyyatına müdaxilə edə bilər."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abunə olunmuş xəbərləri oxuyur"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tətbiqə hazırda sinxron lentlər haqqında ətraflı məlumat almaq üçün imkan verir."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"göndərin və SMS mesajlarına baxın"</string>
@@ -673,7 +673,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Təcili zəng kilidini açmaq və ya yerləşdirmək üçün Menyu düyməsinə basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Kilidi açmaq üçün Menyu düyməsinə basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Kilidi açmaq üçün model çəkin"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Fövqəladə"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Təcili"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zəngə qayıt"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Düzdür!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Bir də cəhd edin"</string>
@@ -808,7 +808,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Heç vaxt"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Bu səhifəni açmaq üçün icazəniz yoxdur."</string>
     <string name="text_copied" msgid="4985729524670131385">"Mətn panoya kopyalandı."</string>
-    <string name="more_item_label" msgid="4650918923083320495">"Daha çox"</string>
+    <string name="more_item_label" msgid="4650918923083320495">"Digər"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menyu+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"boşluq"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"daxil olun"</string>
@@ -1272,7 +1272,7 @@
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Nöqtə."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Evə gedin"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Yuxarı gedin"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Əlavə seçimlər"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Digər variantlar"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="3570990907910199483">"Daxili paylaşılan yaddaş"</string>

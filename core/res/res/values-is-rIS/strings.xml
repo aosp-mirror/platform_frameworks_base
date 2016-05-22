@@ -1024,7 +1024,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hljóðstyrkur tilkynninga"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sjálfgefinn hringitónn"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Sjálfgefinn hringitónn (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Enginn"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Ekkert"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Hringitónar"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Óþekktur hringitónn"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">

@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Haina jina&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Hakuna nambari ya simu)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Isiyojulikana"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Barua ya sauti"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ujumbe wa sauti"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Tatizo la muunganisho au msimbo batili MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Uendeshaji umepunguzwa kwa namba za upigaji simu za kudumu pekee."</string>
@@ -51,7 +51,7 @@
     <string name="serviceDisabled" msgid="1937553226592516411">"Hitilafu ya huduma!"</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"Usajili ulifaulu."</string>
     <string name="serviceErased" msgid="1288584695297200972">"Ufutaji ulifanikiwa"</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"Nenosiri si sahihi."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"Nenosiri hilo si sahihi."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI imekamilika."</string>
     <string name="badPin" msgid="9015277645546710014">"PIN ya awali uliyoingiza si sahihi."</string>
     <string name="badPuk" msgid="5487257647081132201">"PUK uliyoingiza si sahihi."</string>
@@ -243,7 +243,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Anwani"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ifikie anwani zako"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Mahali"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ifikie mahali kilipo kifaa hiki"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"itambue mahali kifaa hiki kilipo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"fikia kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
@@ -251,9 +251,9 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"rekodi sauti"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"piga picha na urekodi video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipiga picha na kurekodi video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
@@ -1085,7 +1085,7 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"SIYO SASA"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"SIM mpya imewekwa"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Gonga ili uiweke"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Weka muda"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Weka saa"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Weka tarehe"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Weka"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Imekamilika"</string>
@@ -1514,7 +1514,7 @@
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Programu imebanwa: Kubanuliwa hakuruhusiwi kwenye kifaa hiki."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrini imebandikwa"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skrini imebanduliwa"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>
+    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Itisha PIN kabla hujabandua"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Omba mchoro wa kufungua kabla hujabandua"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Omba nenosiri kabla hujabandua"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Kilisakinishwa na msimamizi wako"</string>

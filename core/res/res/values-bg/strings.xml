@@ -253,7 +253,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Съхранение"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"има достъп до снимките, мултимедията и файловете на устройството ви"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запис на звук"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записва звук"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"прави снимки и записва видеоклипове"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
@@ -362,7 +362,7 @@
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Разрешава на приложението да получи приблизителното ви местоположение. То се извлича от услугите за местоположение посредством съответните мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги трябва да са включени и налице на устройството ви, за да могат да се използват от приложението. Приложенията може да ползват това, за да определят къде приблизително се намирате."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промяна на настройките ви за звука"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Разрешава на приложението да променя глобалните настройки за звука, като например силата и това, кой високоговорител се използва за изход."</string>
-    <string name="permlab_recordAudio" msgid="3876049771427466323">"запис на звук"</string>
+    <string name="permlab_recordAudio" msgid="3876049771427466323">"записва звук"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"Разрешава на приложението да записва звук с микрофона. Това разрешение му позволява да го прави по всяко време без потвърждение от ваша страна."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"изпращане на команди до SIM картата"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Разрешава на приложението да изпраща команди до SIM картата. Това е много опасно."</string>
@@ -529,7 +529,7 @@
     <string name="policylab_wipeData" msgid="3910545446758639713">"Изтриване на всички данни"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Изтриване на данните в таблета без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Изтриване на данните от телевизора без предупреждение чрез възстановяване на фабричните настройки."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Изтриване на данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Изтрива данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Изтриване на потребителските данни"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Изтрива данните на този потребител от таблета без предупреждение."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Изтрива данните на този потребител от телевизора без предупреждение."</string>
@@ -604,8 +604,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Радиотелефон"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Служебен мобилен"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Служебен пейджър"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Служ. мобилен"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Служ. пейджър"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Асистент"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Персонализирано"</string>
@@ -1096,7 +1096,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Не се изискват разрешения"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"това може да ви струва пари"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"През USB се зарежда това устройство"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Това устройство се зарежда през USB"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"През USB се зарежда свързаното устройство"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за прехвърляне на файлове"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за прехвърляне на снимки"</string>

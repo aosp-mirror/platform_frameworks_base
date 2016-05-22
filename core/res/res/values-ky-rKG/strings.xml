@@ -239,23 +239,23 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Мазмундар жашырылган"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Тийиштүү саясат боюнча жашырылган мазмундар"</string>
     <string name="safeMode" msgid="2788228061547930246">"Коопсуз режим"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android Тутуму"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android тутуму"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Жеке профилге которулуу"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Жумуш профилине которулуу"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Байланыштар"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"байланыштарыңызга уруксат"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"байланыштарыңызды көрүүгө"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"бул түзмөктүн жайгашкан жери тууралуу дайындарды көрүү"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"түзмөктүн жайгашкан жери тууралуу дайындарды көрүүгө"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнбарак"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Сактагыч"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"түзмөгүңүздөгү сүрөттөр, медиа жана файлдарга кирүү"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"түзмөгүңүздөгү сүрөттөрдү жана башка мультимедиа файлдарын пайдаланууга"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жаздыруу"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"сүрөт тартуу жана видео жаздыруу"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"сүрөт жана видео тартууга"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене сенсорлору"</string>
@@ -522,14 +522,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, сыналгыны кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртүү"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртөт"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран кулпусун өзгөртүү."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды кулпулоо"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Экран качан жана кантип бөгөттөлөөрүн башкаруу."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Бардык дайындарды тазалоо"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Баштапкы абалга кайтарууну колдонуп, планшеттин бардык берилиштерин эскертүүсүз тазалоо."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Экран качан жана кантип кулпулана турганын башкарат."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Бардык дайындарды тазалайт"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен планшеттеги бардык дайындарды өчүрөт."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сыналгынын дайындарын баштапкы абалга кайтарып, алдын-ала эскертпестен өчүрүп салуу."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Баштапкы абалга кайтарууну колдонуп, телефондун бардык берилиштерин эскертүүсүз тазалоо."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Алдын-ала эскертпестен, баштапкы абалга келтирүү функциясы менен телефондогу бардык дайындарды өчүрөт."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Колдонуучунун дайындарын тазалоо"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Бул колдонуучунун ушул планшеттеги дайындарын эскертүүсүз тазалоо."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Бул колдонуучунун ушул сыналгыдагы дайындарын эскертүүсүз тазалоо."</string>
@@ -552,30 +552,30 @@
     <item msgid="1735177144948329370">"Үй факсы"</item>
     <item msgid="603878674477207394">"Пейжер"</item>
     <item msgid="1650824275177931637">"Башка"</item>
-    <item msgid="9192514806975898961">"Ыңгайлаштырылган"</item>
+    <item msgid="9192514806975898961">"Өзгөчө"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Башкы бет"</item>
     <item msgid="7084237356602625604">"Жумуш"</item>
     <item msgid="1112044410659011023">"Башка"</item>
-    <item msgid="2374913952870110618">"Ыңгайлаштырылган"</item>
+    <item msgid="2374913952870110618">"Өзгөчө"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Башкы бет"</item>
     <item msgid="5629153956045109251">"Жумуш"</item>
     <item msgid="4966604264500343469">"Башка"</item>
-    <item msgid="4932682847595299369">"Ыңгайлаштырылган"</item>
+    <item msgid="4932682847595299369">"Өзгөчө"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Башкы бет"</item>
     <item msgid="1359644565647383708">"Жумуш"</item>
     <item msgid="7868549401053615677">"Башка"</item>
-    <item msgid="3145118944639869809">"Ыңгайлаштырылган"</item>
+    <item msgid="3145118944639869809">"Өзгөчө"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Жумуш"</item>
     <item msgid="4378074129049520373">"Башка"</item>
-    <item msgid="3455047468583965104">"Ыңгайлаштырылган"</item>
+    <item msgid="3455047468583965104">"Өзгөчө"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -587,7 +587,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Ыңгайлаштырылган"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Өзгөчө"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Башкы бет"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобилдик"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Жумуш"</string>
@@ -603,29 +603,29 @@
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Башка факс"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Радио"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Телетайп түзмөгү TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Жумуш мобил. телефон"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Жумуш моб."</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Жумуш пейжери"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Жардамчы"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Ыңгайлаштырылган"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Өзгөчө"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Туулган күн"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Маараке"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Башка"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Ыңгайлаштырылган"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Өзгөчө"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Башкы бет"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Жумуш"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Башка"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобилдик"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Ыңгайлаштырылган"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Өзгөчө"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Башкы бет"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Жумуш"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Башка"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Ыңгайлаштырылган"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Өзгөчө"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Башкы бет"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Жумуш"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Башка"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Ыңгайлаштырылган"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Өзгөчө"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -637,8 +637,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Жумуш"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Башка"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Ыңгайлаштырылган"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Ыңгайлаштырылган"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Өзгөчө"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Өзгөчө"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Жардамчы"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Ага-ини"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Баласы"</string>
@@ -653,7 +653,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Тууган"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Эже-сиңди"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Жубай"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Ыңгайлаштырылган"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Өзгөчө"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Башкы бет"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Жумуш"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Башка"</string>
@@ -1087,8 +1087,8 @@
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"АЗЫР ЭМЕС"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Жаңы SIM карта салынды"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Аны жөндөө үчүн таптап коюңуз"</string>
-    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Убакыт орнотуу"</string>
-    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Күнүн орнотуу"</string>
+    <string name="time_picker_dialog_title" msgid="8349362623068819295">"Убакытты коюу"</string>
+    <string name="date_picker_dialog_title" msgid="5879450659453782278">"Күндү коюу"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Коюу"</string>
     <string name="date_time_done" msgid="2507683751759308828">"Даяр"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"ЖАҢЫ: "</font></string>
@@ -1103,8 +1103,8 @@
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI үчүн USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB мүчүлүштүктөрдү оңдоо туташтырылган"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB аркылуу мүчүлүштүктөрдү жоюу мүмкүнчүлүгүн өчүрүү үчүн таптап коюңуз."</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB аркылуу мүчүлүштүктөрдү оңдоо туташтырылган"</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"USB арклуу мүчүлштктрдү жоюну өчр үчн тийп коюңуз."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Мүчүлүштүк тууралуу кабар алынууда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Мүчүлүштүк тууралуу баяндама бөлүшүлсүнбү?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Мүчүлүштүк тууралуу баяндама бөлүшүлүүдө…"</string>
@@ -1328,7 +1328,7 @@
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Кулакчын"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Аудио док бекет"</string>
     <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
-    <string name="default_audio_route_category_name" msgid="3722811174003886946">"Систем"</string>
+    <string name="default_audio_route_category_name" msgid="3722811174003886946">"Тутум"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth аудио"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Зымсыз дисплей"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Тандалгандар"</string>
@@ -1348,7 +1348,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", корголгон"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Үлгү унутулду"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Үлгү туура эмес"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Графикалык ачкыч туура эмес"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Сырсөз туура эмес"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-код туура эмес"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> секундадан кийин кайталаңыз."</string>

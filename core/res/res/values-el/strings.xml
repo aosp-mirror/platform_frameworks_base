@@ -545,29 +545,29 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Απενεργοπ. λειτ. κλειδ. οθόνης"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Να αποτρέπεται η χρήση ορισμένων λειτουργιών του κλειδώματος οθόνης."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Οικία"</item>
+    <item msgid="8901098336658710359">"Σπίτι"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
     <item msgid="7897544654242874543">"Εργασία"</item>
     <item msgid="1103601433382158155">"Φαξ εργασίας"</item>
-    <item msgid="1735177144948329370">"Φαξ οικίας"</item>
+    <item msgid="1735177144948329370">"Φαξ σπιτιού"</item>
     <item msgid="603878674477207394">"Pager"</item>
     <item msgid="1650824275177931637">"Άλλο"</item>
     <item msgid="9192514806975898961">"Προσαρμοσμένο"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Οικία"</item>
+    <item msgid="8073994352956129127">"Σπίτι"</item>
     <item msgid="7084237356602625604">"Εργασία"</item>
     <item msgid="1112044410659011023">"Άλλο"</item>
     <item msgid="2374913952870110618">"Προσαρμοσμένο"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Οικία"</item>
+    <item msgid="6880257626740047286">"Σπίτι"</item>
     <item msgid="5629153956045109251">"Εργασία"</item>
     <item msgid="4966604264500343469">"Άλλο"</item>
     <item msgid="4932682847595299369">"Προσαρμοσμένο"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Οικία"</item>
+    <item msgid="1738585194601476694">"Σπίτι"</item>
     <item msgid="1359644565647383708">"Εργασία"</item>
     <item msgid="7868549401053615677">"Άλλο"</item>
     <item msgid="3145118944639869809">"Προσαρμοσμένο"</item>
@@ -588,16 +588,16 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Προσαρμοσμένο"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Οικία"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Σπίτι"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Κινητό"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Εργασία"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Φαξ εργασίας"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Φαξ οικίας"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Φαξ σπιτιού"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Βομβητής"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Άλλο"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Επανάκληση"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Αυτοκίνητο"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Κύρια εταιρική γραμμή"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Κύρια εταιρική"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Κύριος"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Άλλο fax"</string>
@@ -613,16 +613,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Επέτειος"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Άλλο"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Προσαρμοσμένο"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Οικία"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Σπίτι"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Εργασία"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Άλλο"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Κινητό"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Προσαρμοσμένο"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Οικία"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Σπίτι"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Εργασία"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Άλλο"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Προσαρμοσμένο"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Οικία"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Σπίτι"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Εργασία"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Άλλο"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Προσαρμοσμένο"</string>
@@ -654,7 +654,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Αδερφή"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Σύζυγος"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Προσαρμοσμένο"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Οικία"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Σπίτι"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Εργασία"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Άλλο"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Δεν βρέθηκε καμία εφαρμογή για την προβολή αυτής της επαφής."</string>
@@ -1023,7 +1023,7 @@
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Ένταση ήχου πολυμέσων"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Ένταση ήχου ειδοποιήσεων"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Προεπιλεγμένος ήχος κλήσης"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Προεπιλεγμένος ήχος κλήσης (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Προεπ. ήχος (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Κανένας"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ήχοι κλήσης"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Άγνωστος ήχος κλήσης"</string>
