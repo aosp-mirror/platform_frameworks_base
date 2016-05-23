@@ -142,13 +142,17 @@ public final class WebViewFactory {
     public static int loadWebViewNativeLibraryFromPackage(String packageName,
                                                           ClassLoader clazzLoader) {
         int ret = waitForProviderAndSetPackageInfo();
-        if (ret != LIBLOAD_SUCCESS) {
+        if (ret != LIBLOAD_SUCCESS && ret != LIBLOAD_FAILED_WAITING_FOR_RELRO) {
             return ret;
         }
         if (!sPackageInfo.packageName.equals(packageName))
             return LIBLOAD_WRONG_PACKAGE_NAME;
 
-        return loadNativeLibrary(clazzLoader);
+        int loadNativeRet = loadNativeLibrary(clazzLoader);
+        // If we failed waiting for relro we want to return that fact even if we successfully load
+        // the relro file.
+        if (loadNativeRet == LIBLOAD_SUCCESS) return ret;
+        return loadNativeRet;
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -240,7 +244,8 @@ public final class WebViewFactory {
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
-            if (response.status != LIBLOAD_SUCCESS) {
+            if (response.status != LIBLOAD_SUCCESS
+                    && response.status != LIBLOAD_FAILED_WAITING_FOR_RELRO) {
                 throw new MissingWebViewPackageException("Failed to load WebView provider: "
                         + getWebViewPreparationErrorReason(response.status));
             }
@@ -599,8 +604,10 @@ public final class WebViewFactory {
         try {
             response =
                 getUpdateService().waitForAndGetProvider();
-            if (response.status == WebViewFactory.LIBLOAD_SUCCESS)
+            if (response.status == LIBLOAD_SUCCESS
+                    || response.status == LIBLOAD_FAILED_WAITING_FOR_RELRO) {
                 sPackageInfo = response.packageInfo;
+            }
         } catch (RemoteException e) {
             Log.e(LOGTAG, "error waiting for relro creation", e);
             return LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN;
