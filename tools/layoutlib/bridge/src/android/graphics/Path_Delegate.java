@@ -86,6 +86,8 @@ public final class Path_Delegate {
 
     public void reset() {
         mPath.reset();
+        mLastX = 0;
+        mLastY = 0;
     }
 
     public void setPathIterator(PathIterator iterator) {
@@ -124,7 +126,7 @@ public final class Path_Delegate {
             return;
         }
 
-        pathDelegate.mPath.reset();
+        pathDelegate.reset();
     }
 
     @LayoutlibDelegate
