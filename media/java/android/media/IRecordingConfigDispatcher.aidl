@@ -25,6 +25,6 @@ import android.media.AudioRecordingConfiguration;
  */
 oneway interface IRecordingConfigDispatcher {
 
-    void dispatchRecordingConfigChange(in AudioRecordingConfiguration[] configs);
+    void dispatchRecordingConfigChange(in List<AudioRecordingConfiguration> configs);
 
 }

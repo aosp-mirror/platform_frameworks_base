@@ -164,5 +164,5 @@ interface IAudioService {
 
     oneway void unregisterRecordingCallback(in IRecordingConfigDispatcher rcdb);
 
-    AudioRecordingConfiguration[] getActiveRecordingConfigurations();
+    List<AudioRecordingConfiguration> getActiveRecordingConfigurations();
 }

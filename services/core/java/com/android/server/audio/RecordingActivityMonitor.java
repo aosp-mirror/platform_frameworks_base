@@ -29,6 +29,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
@@ -54,7 +55,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        final AudioRecordingConfiguration[] configs =
+        final List<AudioRecordingConfiguration> configs =
                 updateSnapshot(event, session, source, recordingInfo);
         if (configs != null){
             synchronized(mClients) {
@@ -104,9 +105,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
     }
 
-    AudioRecordingConfiguration[] getActiveRecordingConfigurations() {
+    List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
         synchronized(mRecordConfigs) {
-            return mRecordConfigs.values().toArray(new AudioRecordingConfiguration[0]);
+            return new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
         }
     }
 
@@ -118,13 +119,13 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * @param recordingFormat see
      *     {@link AudioSystem.AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])}
      *     for the definition of the contents of the array
-     * @return null if the list of active recording sessions has not been modified, an array
+     * @return null if the list of active recording sessions has not been modified, a list
      *     with the current active configurations otherwise.
      */
-    private AudioRecordingConfiguration[] updateSnapshot(int event, int session, int source,
+    private List<AudioRecordingConfiguration> updateSnapshot(int event, int session, int source,
             int[] recordingInfo) {
         final boolean configChanged;
-        final AudioRecordingConfiguration[] configs;
+        final ArrayList<AudioRecordingConfiguration> configs;
         synchronized(mRecordConfigs) {
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
@@ -171,7 +172,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 configChanged = false;
             }
             if (configChanged) {
-                configs = mRecordConfigs.values().toArray(new AudioRecordingConfiguration[0]);
+                configs = new ArrayList<AudioRecordingConfiguration>(mRecordConfigs.values());
             } else {
                 configs = null;
             }
