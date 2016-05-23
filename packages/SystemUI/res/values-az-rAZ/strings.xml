@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Enerjiyə qənaət rejimini aktivləşdirin"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Ayarlar"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ekranın avto-dönüşü"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ekran avtodönüşü"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"SUSDUR"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AVTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Bildirişlər"</string>
@@ -145,7 +145,7 @@
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouminq"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rominq"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM yoxdur"</string>
@@ -265,8 +265,8 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth bağlıdır"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Heç bir cütlənmiş cihaz əlçatan deyil"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Parlaqlıq"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avto-fırlanma"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranın avto-dönüşü"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtodönüş"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekran avtodönüşü"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"<xliff:g id="ID_1">%s</xliff:g> ölçüsünə ayarlandı"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Fırlanma kilidlidir"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Portret"</string>
@@ -276,7 +276,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Yer Deaktiv"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media cihazı"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Yalnız fövqəladə zənglər"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Yalnız təcili zənglər"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Nizamlar"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Vaxt"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Mən"</string>
@@ -297,7 +297,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AVTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Rəngləri çevirin"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Rəng korreksiyası rejimi"</string>
-    <string name="quick_settings_more_settings" msgid="326112621462813682">"Daha çox ayar"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Digər ayarlar"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Hazır"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Qoşulu"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Qoşulur..."</string>
@@ -511,7 +511,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS üçün tünd tema istifadə edin"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Çaları nizamlayın"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Parlaqlığı nizamlayın"</string>
-    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tünd tema Android OS sisteminin adətən işıqlı tema göstərilən Ayarlar kimi əsas sahələri üçün tətbiq edilir."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tünd tema Android sisteminin adətən açıq tonda göstərilən əsas elementlərinə (məsələn, \"Ayarlar\") tətbiq edilir."</string>
     <string name="color_apply" msgid="9212602012641034283">"Tətbiq edin"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Ayarları təsdiq edin"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Bəzi renk ayarları bu cihazı yararsız edə bilər. Bu rənk ayarlarını təsdiq etmək üçün OK basın, əks halda bu ayarlar 10 saniyə sonra sıfırlanacaq."</string>
