@@ -54,9 +54,9 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.tv.animations.HomeRecentsEnterExitAnimationHolder;
 import com.android.systemui.recents.tv.views.RecentsTvView;
+import com.android.systemui.recents.tv.views.TaskCardView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.tv.views.TaskStackHorizontalViewAdapter;
-import com.android.systemui.recents.views.AnimationProps;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.tv.pip.PipManager;
 import com.android.systemui.tv.pip.PipRecentsOverlayManager;
@@ -184,12 +184,14 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if (!plan.hasTasks()) {
             loader.preloadTasks(plan, -1, !launchState.launchedFromHome);
         }
+
+        int numVisibleTasks = TaskCardView.getNumberOfVisibleTasks(getApplicationContext());
         mLaunchedFromHome = launchState.launchedFromHome;
         TaskStack stack = plan.getTaskStack();
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = launchState.launchedToTaskId;
-        loadOpts.numVisibleTasks = stack.getStackTaskCount();
-        loadOpts.numVisibleTaskThumbnails = stack.getStackTaskCount();
+        loadOpts.numVisibleTasks = numVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = numVisibleTasks;
         loader.loadTasks(this, plan, loadOpts);
 
 
