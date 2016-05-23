@@ -210,7 +210,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"حالت شدید فعال شد"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"چشمک زدن صفحه هنگام انجام عملیات طولانی توسط برنامه‌ها در رشته اصلی"</string>
     <string name="pointer_location" msgid="6084434787496938001">"محل اشاره‌گر"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"هم‌پوشانی صفحهٔ نمایش با نمایش داده لمسی فعلی"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"هم‌پوشانی صفحه‌نمایش با نمایش داده لمسی فعلی"</string>
     <string name="show_touches" msgid="2642976305235070316">"نمایش ضربه‌ها"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"نمایش بازخورد تصویری برای ضربه‌ها"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"نمایش به‌روزرسانی سطح"</string>
@@ -231,7 +231,7 @@
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"‏اجباری کردن چیدمان RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"‏اجباری کردن چیدمان RTL صفحه برای همه زبان‌ها"</string>
     <string name="show_cpu_usage" msgid="2389212910758076024">"‏نمایش میزان استفاده از CPU"</string>
-    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏هم‌پوشانی صفحهٔ نمایش میزان استفاده از CPU فعلی"</string>
+    <string name="show_cpu_usage_summary" msgid="2113341923988958266">"‏هم‌پوشانی صفحه‌نمایش میزان استفاده از CPU فعلی"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"‏پردازش اجباری GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"‏استفاده اجباری از GPU برای طراحی دوم"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏اجبار 4x MSAA"</string>

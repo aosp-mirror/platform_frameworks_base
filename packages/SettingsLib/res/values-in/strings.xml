@@ -104,7 +104,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tinggi nada"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Memengaruhi nada ucapan yang disintesis"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Bahasa"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"Gunakan bahasa sistem"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"Menggunakan bahasa sistem"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Bahasa tidak dipilih"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"Menyetel suara spesifik bahasa untuk teks lisan"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"Dengarkan contoh"</string>

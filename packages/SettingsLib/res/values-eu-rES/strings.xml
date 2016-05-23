@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Desgaitu USB audio-bideratzea"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Desgaitu USB audio-gailuetara automatikoki bideratzea"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Erakutsi diseinuaren mugak"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Erakutsi diseinu-mugak"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Behartu eskuin-ezker norabidea."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin."</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Behartu 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan."</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Araztu angeluzuzenak ez diren klip-eragiketak."</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Egin GPU errendatzearen profila"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU errendatze-profila"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Leihoen animazio-eskala"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Trantsizio-animazio eskala"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatzailearen iraupena"</string>

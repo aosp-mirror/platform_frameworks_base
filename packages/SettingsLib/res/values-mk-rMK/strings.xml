@@ -74,7 +74,7 @@
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Откажи"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Кога е поврзано, спарувањето одобрува пристап до контактите и историјата на повиците."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не можеше да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не можеше да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен ПИН или лозинка."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не можеше да се спари со <xliff:g id="DEVICE_NAME">%1$s</xliff:g> поради погрешен PIN или лозинка."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не може да комуницира со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Спарувањето е одбиено од <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi е исклучено."</string>
@@ -139,7 +139,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"Изберете профил"</string>
     <string name="category_personal" msgid="1299663247844969448">"Лични"</string>
     <string name="category_work" msgid="8699184680584175622">"Работа"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Опции на развивач"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Програмерски опции"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Овозможете ги опциите за програмери"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Постави опции за развој на апликација"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Опциите на програмерот не се достапни за овој корисник"</string>
