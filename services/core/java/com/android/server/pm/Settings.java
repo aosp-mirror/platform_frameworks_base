@@ -4029,7 +4029,7 @@ final class Settings {
         file.delete();
         removeCrossProfileIntentFiltersLPw(userId);
 
-        mRuntimePermissionsPersistence.onUserRemoved(userId);
+        mRuntimePermissionsPersistence.onUserRemovedLPw(userId);
 
         writePackageListLPr();
     }
@@ -5134,7 +5134,7 @@ final class Settings {
             }
         }
 
-        private void onUserRemoved(int userId) {
+        private void onUserRemovedLPw(int userId) {
             // Make sure we do not
             mHandler.removeMessages(userId);
 
@@ -5145,6 +5145,9 @@ final class Settings {
             for (SettingBase sb : mSharedUsers.values()) {
                 revokeRuntimePermissionsAndClearFlags(sb, userId);
             }
+
+            mDefaultPermissionsGranted.delete(userId);
+            mFingerprints.remove(userId);
         }
 
         private void revokeRuntimePermissionsAndClearFlags(SettingBase sb, int userId) {
