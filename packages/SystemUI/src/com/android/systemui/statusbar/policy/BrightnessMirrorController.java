@@ -53,7 +53,7 @@ public class BrightnessMirrorController {
 
     public void showMirror() {
         mBrightnessMirror.setVisibility(View.VISIBLE);
-        mStackScroller.setFadedOut(true);
+        mStackScroller.setFadingOut(true);
         mScrimBehind.animateViewAlpha(0.0f, TRANSITION_DURATION_OUT, Interpolators.ALPHA_OUT);
         outAnimation(mNotificationPanel.animate())
                 .withLayer();
@@ -67,7 +67,7 @@ public class BrightnessMirrorController {
                     @Override
                     public void run() {
                         mBrightnessMirror.setVisibility(View.INVISIBLE);
-                        mStackScroller.setFadedOut(false);
+                        mStackScroller.setFadingOut(false);
                     }
                 });
     }
