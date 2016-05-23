@@ -40,7 +40,7 @@ import java.net.InetAddress;
  *
  * Tracks the eligibility of a given network interface for tethering.
  */
-public class TetherInterfaceSM extends StateMachine {
+public class TetherInterfaceStateMachine extends StateMachine {
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
     private static final int USB_PREFIX_LENGTH = 24;
 
@@ -48,7 +48,7 @@ public class TetherInterfaceSM extends StateMachine {
     private final static boolean DBG = false;
     private final static boolean VDBG = false;
     private static final Class[] messageClasses = {
-            TetherInterfaceSM.class
+            TetherInterfaceStateMachine.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(messageClasses);
@@ -90,7 +90,7 @@ public class TetherInterfaceSM extends StateMachine {
     private int mLastError;
     private String mMyUpstreamIfaceName;  // may change over time
 
-    public TetherInterfaceSM(String ifaceName, Looper looper, boolean usb, Object mutex,
+    public TetherInterfaceStateMachine(String ifaceName, Looper looper, boolean usb, Object mutex,
                     INetworkManagementService nMService, INetworkStatsService statsService,
                     IControlsTethering tetherController) {
         super(ifaceName, looper);
@@ -224,7 +224,7 @@ public class TetherInterfaceSM extends StateMachine {
             switch (message.what) {
                 case CMD_TETHER_REQUESTED:
                     setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
-                    mTetherController.notifyInterfaceTetheringReadiness(true, TetherInterfaceSM.this);
+                    mTetherController.notifyInterfaceTetheringReadiness(true, TetherInterfaceStateMachine.this);
                     transitionTo(mTetheredState);
                     break;
                 case CMD_INTERFACE_DOWN:
@@ -244,7 +244,7 @@ public class TetherInterfaceSM extends StateMachine {
             setAvailable(false);
             if (mUsb) {
                 if (!configureUsbIface(true, mIfaceName)) {
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceSM.this);
+                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceStateMachine.this);
                     setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
 
                     transitionTo(mInitialState);
@@ -314,7 +314,7 @@ public class TetherInterfaceSM extends StateMachine {
                                 ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
                         break;
                     }
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceSM.this);
+                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceStateMachine.this);
                     if (message.what == CMD_TETHER_UNREQUESTED) {
                         if (mUsb) {
                             if (!configureUsbIface(false, mIfaceName)) {
