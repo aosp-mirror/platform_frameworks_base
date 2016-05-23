@@ -6342,7 +6342,7 @@ public class AudioService extends IAudioService.Stub {
         mRecordMonitor.unregisterRecordingCallback(rcdb);
     }
 
-    public AudioRecordingConfiguration[] getActiveRecordingConfigurations() {
+    public List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
         return mRecordMonitor.getActiveRecordingConfigurations();
     }
 
