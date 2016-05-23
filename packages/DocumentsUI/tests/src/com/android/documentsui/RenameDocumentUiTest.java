@@ -16,6 +16,13 @@
 
 package com.android.documentsui;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.swipeLeft;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static com.android.documentsui.StubProvider.ROOT_0_ID;
+import static com.android.documentsui.StubProvider.ROOT_1_ID;
+
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 
@@ -32,6 +39,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
     public void setUp() throws Exception {
         super.setUp();
         initTestFiles();
+        bots.roots.closeDrawer();
     }
 
     public void testRenameEnabled_SingleSelection() throws Exception {
@@ -78,7 +86,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.main.menuRename().click();
         bots.main.setDialogText(newName);
 
-        bots.main.findDialogOkButton().click();
+        bots.main.clickDialogOkButton();
 
         bots.directory.assertDocumentsAbsent(fileName1);
         bots.directory.assertDocumentsPresent(newName);
@@ -104,7 +112,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.main.menuRename().click();
         bots.main.setDialogText(newName);
 
-        bots.main.findDialogCancelButton().click();
+        bots.main.clickDialogCancelButton();
 
         bots.directory.assertDocumentsPresent(fileName1);
         bots.directory.assertDocumentsAbsent(newName);

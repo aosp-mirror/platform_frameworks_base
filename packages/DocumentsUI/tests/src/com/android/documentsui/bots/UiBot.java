@@ -18,14 +18,22 @@ package com.android.documentsui.bots;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.withResourceName;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.typeText;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.allOf;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
@@ -34,12 +42,16 @@ import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toolbar;
+import junit.framework.AssertionFailedError;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
+import com.android.internal.view.menu.ActionMenuItemView;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -63,11 +75,12 @@ public class UiBot extends BaseBot {
     }
 
     public void assertWindowTitle(String expected) {
-        onView(isAssignableFrom(Toolbar.class)).check(matches(withToolbarTitle(is(expected))));
+        onView(allOf(isAssignableFrom(Toolbar.class), withId(R.id.toolbar)))
+            .check(matches(withToolbarTitle(is(expected))));
     }
 
     public void assertBreadcrumbTitle(String expected) {
-      onView(isAssignableFrom(Spinner.class)).check(matches(withBreadcrumbTitle(is(expected))));
+        onView(isAssignableFrom(Spinner.class)).check(matches(withBreadcrumbTitle(is(expected))));
   }
 
     public void assertMenuEnabled(int id, boolean enabled) {
@@ -77,11 +90,11 @@ public class UiBot extends BaseBot {
     }
 
     public void assertSearchTextField(boolean isFocused, String query)
-            throws UiObjectNotFoundException {
+        throws UiObjectNotFoundException {
         UiObject textField = findSearchViewTextField();
-        UiObject searchIcon = findSearchViewIcon();
+        boolean searchIconVisible = isSearchIconVisible();
 
-        assertFalse(searchIcon.exists());
+        assertFalse(searchIconVisible);
         assertTrue(textField.exists());
         assertEquals(isFocused, textField.isFocused());
         if(query != null) {
@@ -89,9 +102,11 @@ public class UiBot extends BaseBot {
         }
     }
 
-    public void assertSearchTextFiledAndIcon(boolean searchTextFieldExists, boolean searchIconExists) {
-        assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
-        assertEquals(searchIconExists, findSearchViewIcon().exists());
+    public void assertSearchTextFiledAndIcon(boolean searchTextFieldExists,
+        boolean searchIconExists) {
+      assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
+      boolean searchIconVisible = isSearchIconVisible();
+      assertEquals(searchIconExists, searchIconVisible);
     }
 
     public void assertInActionMode(boolean inActionMode) {
@@ -106,11 +121,7 @@ public class UiBot extends BaseBot {
     }
 
     public void setSearchQuery(String query) throws UiObjectNotFoundException {
-        UiObject searchView = findSearchView();
-        assertTrue(searchView.exists());
-        UiObject searchTextField = findSearchViewTextField();
-        searchTextField.setText(query);
-        assertSearchTextField(true, query);
+        onView(allOf(withId(R.id.menu_search), isDisplayed())).perform(typeText(query));
     }
 
     public UiObject openOverflowMenu() throws UiObjectNotFoundException {
@@ -124,6 +135,11 @@ public class UiBot extends BaseBot {
         findDialogEditText().setText(text);
     }
 
+    public boolean isTablet() {
+        return (mContext.getResources().getConfiguration().screenLayout &
+          Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
     void switchViewMode() {
         UiObject2 mode = menuGridMode();
         if (mode != null) {
@@ -131,6 +147,25 @@ public class UiBot extends BaseBot {
         } else {
             menuListMode().click();
         }
+    }
+
+    boolean isSearchIconVisible() {
+      boolean searchIconVisible = true;
+      boolean isTablet = isTablet();
+      try {
+        if (isTablet) {
+          // Tablets use ImageView for its search icon, and has search_button as its res name
+          onView(allOf(isAssignableFrom(ImageView.class), withResourceName("search_button")))
+          .check(matches(isDisplayed()));
+        } else {
+          // Phones use ActionMenuItemView for its search icon, and has menu_search as its res name
+          onView(allOf(isAssignableFrom(ActionMenuItemView.class), withResourceName("menu_search")))
+          .check(matches(isDisplayed()));
+        }
+      } catch (Exception | AssertionFailedError e) {
+        searchIconVisible = false;
+      }
+      return searchIconVisible;
     }
 
     UiObject2 menuGridMode() {
@@ -188,16 +223,16 @@ public class UiBot extends BaseBot {
         return title;
     }
 
-    public UiObject findDialogOkButton() {
-        UiObject object = findObject("android:id/content", "android:id/button1");
-        object.waitForExists(mTimeout);
-        return object;
+    public void clickDialogOkButton() {
+        // Espresso has flaky results when keyboard shows up, so hiding it for now
+        // before trying to click on any dialog button
+        onView(withId(android.R.id.button1)).perform(closeSoftKeyboard(), click());
     }
 
-    public UiObject findDialogCancelButton() {
-        UiObject object = findObject("android:id/content", "android:id/button2");
-        object.waitForExists(mTimeout);
-        return object;
+    public void clickDialogCancelButton() throws UiObjectNotFoundException {
+        // Espresso has flaky results when keyboard shows up, so hiding it for now
+        // before trying to click on any dialog button
+        onView(withId(android.R.id.button2)).perform(closeSoftKeyboard(), click());
     }
 
     UiObject findMenuLabelWithName(String label) {

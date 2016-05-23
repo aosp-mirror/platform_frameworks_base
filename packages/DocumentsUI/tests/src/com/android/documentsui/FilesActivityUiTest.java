@@ -133,7 +133,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         device.waitForIdle();
         bots.main.menuDelete().click();
 
-        bots.main.findDialogOkButton().click();
+        bots.main.clickDialogOkButton();
 
         bots.directory.assertDocumentsAbsent("file1.png");
     }
@@ -152,8 +152,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.roots.openRoot(ROOT_1_ID);
         bots.main.pressKey(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON);
 
-        device.waitForIdle();
-
+        bots.directory.waitForDocument("file1.png");
         bots.directory.assertDocumentsPresent("file1.png");
 
         bots.roots.openRoot(ROOT_0_ID);
@@ -174,8 +173,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.roots.openRoot(ROOT_1_ID);
         bots.main.pressKey(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON);
 
-        device.waitForIdle();
-
+        bots.directory.waitForDocument("file1.png");
         bots.directory.assertDocumentsPresent("file1.png");
 
         bots.roots.openRoot(ROOT_0_ID);
@@ -191,7 +189,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         device.waitForIdle();
         bots.main.menuDelete().click();
 
-        bots.main.findDialogCancelButton().click();
+        bots.main.clickDialogCancelButton();
 
         bots.directory.assertDocumentsPresent("file1.png");
     }
