@@ -4223,7 +4223,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return false;
     }
 
-    private void showBouncer() {
+    protected void showBouncer() {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             mWaitingForKeyguardExit = mStatusBarKeyguardViewManager.isShowing();
             mStatusBarKeyguardViewManager.dismiss();
