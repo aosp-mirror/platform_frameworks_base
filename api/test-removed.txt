@@ -196,6 +196,10 @@ package android.media {
     ctor public AudioFormat();
   }
 
+  public static abstract class AudioManager.AudioRecordingCallback {
+    method public deprecated void onRecordingConfigChanged(android.media.AudioRecordingConfiguration[]);
+  }
+
 }
 
 package android.media.tv {
