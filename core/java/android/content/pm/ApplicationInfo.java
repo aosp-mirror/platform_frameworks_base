@@ -764,6 +764,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
+    /**
+     * Resource file providing the application's Network Security Config.
+     * @hide
+     */
+    public int networkSecurityConfigRes;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -834,6 +840,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             } else {
                 pw.println(prefix + "fullBackupContent="
                         + (fullBackupContent < 0 ? "false" : "true"));
+            }
+            if (networkSecurityConfigRes != 0) {
+                pw.println(prefix + "networkSecurityConfigRes=0x"
+                        + Integer.toHexString(networkSecurityConfigRes));
             }
         }
         super.dumpBack(pw, prefix);
@@ -921,6 +931,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
         fullBackupContent = orig.fullBackupContent;
+        networkSecurityConfigRes = orig.networkSecurityConfigRes;
     }
 
     public String toString() {
@@ -976,6 +987,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
         dest.writeInt(fullBackupContent);
+        dest.writeInt(networkSecurityConfigRes);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1031,6 +1043,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
         fullBackupContent = source.readInt();
+        networkSecurityConfigRes = source.readInt();
     }
 
     /**
