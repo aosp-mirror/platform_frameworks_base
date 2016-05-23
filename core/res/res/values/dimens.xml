@@ -24,6 +24,8 @@
     <dimen name="thumbnail_height">192dp</dimen>
     <!-- The amount to scale a fullscreen screenshot thumbnail. -->
     <item name="thumbnail_fullscreen_scale" type="fraction">60%</item>
+    <!-- The width used to calculate scale for full screen thumbnail on TV -->
+    <integer name="thumbnail_width_tv">240</integer>
     <!-- The standard size (both width and height) of an application icon that
          will be displayed in the app launcher and elsewhere. -->
     <dimen name="app_icon_size">48dip</dimen>
