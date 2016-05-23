@@ -4075,6 +4075,10 @@ public class Notification implements Parcelable
         public BigPictureStyle() {
         }
 
+        /**
+         * @deprecated use {@code BigPictureStyle()}.
+         */
+        @Deprecated
         public BigPictureStyle(Builder builder) {
             setBuilder(builder);
         }
@@ -4231,6 +4235,10 @@ public class Notification implements Parcelable
         public BigTextStyle() {
         }
 
+        /**
+         * @deprecated use {@code BigTextStyle()}.
+         */
+        @Deprecated
         public BigTextStyle(Builder builder) {
             setBuilder(builder);
         }
@@ -4773,6 +4781,10 @@ public class Notification implements Parcelable
         public InboxStyle() {
         }
 
+        /**
+         * @deprecated use {@code InboxStyle()}.
+         */
+        @Deprecated
         public InboxStyle(Builder builder) {
             setBuilder(builder);
         }
@@ -4945,6 +4957,10 @@ public class Notification implements Parcelable
         public MediaStyle() {
         }
 
+        /**
+         * @deprecated use {@code MediaStyle()}.
+         */
+        @Deprecated
         public MediaStyle(Builder builder) {
             setBuilder(builder);
         }
@@ -5152,10 +5168,6 @@ public class Notification implements Parcelable
         public DecoratedCustomViewStyle() {
         }
 
-        public DecoratedCustomViewStyle(Builder builder) {
-            setBuilder(builder);
-        }
-
         /**
          * @hide
          */
@@ -5270,10 +5282,6 @@ public class Notification implements Parcelable
     public static class DecoratedMediaCustomViewStyle extends MediaStyle {
 
         public DecoratedMediaCustomViewStyle() {
-        }
-
-        public DecoratedMediaCustomViewStyle(Builder builder) {
-            setBuilder(builder);
         }
 
         /**
