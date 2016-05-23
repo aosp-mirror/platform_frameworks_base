@@ -206,7 +206,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ਤੁਹਾਡਾ ਫੋਨ ਬੰਦ ਕੀਤਾ ਜਾਏਗਾ।"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ਕੀ ਤੁਸੀਂ ਬੰਦ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"ਮੋਡ ਸੁਰੱਖਿਅਤ ਕਰਨ ਲਈ ਰੀਬੂਟ ਕਰੋ"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"ਕੀ ਤੁਸੀਂ ਸੁਰੱਖਿਅਤ ਮੋਡ ਵਿੱਚ ਰੀਬੂਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਇਹ ਤੁਹਾਡੇ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤੀਆਂ ਤੀਜੀ ਪਾਰਟੀ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾ ਦੇਵੇਗਾ। ਜਦੋਂ ਤੁਸੀਂ ਦੁਬਾਰਾ ਰੀਬੂਟ ਕਰੋਗੇ ਤਾਂ ਇਸਨੂੰ ਰੀਸਟੋਰ ਕੀਤਾ ਜਾਏਗਾ।"</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"ਕੀ ਤੁਸੀਂ ਸੁਰੱਖਿਅਤ ਮੋਡ ਵਿੱਚ ਰੀਬੂਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? ਇਹ ਤੁਹਾਡੇ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤੀਆਂ ਤੀਜੀ ਪਾਰਟੀ ਦੀਆਂ ਸਾਰੀਆਂ ਐਪਲੀਕੇਸ਼ਨਾਂ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾ ਦੇਵੇਗਾ। ਜਦੋਂ ਤੁਸੀਂ ਦੁਬਾਰਾ ਰੀਬੂਟ ਕਰੋਂਗੇ ਤਾਂ ਇਸਨੂੰ ਰੀਸਟੋਰ ਕੀਤਾ ਜਾਏਗਾ।"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"ਹਾਲੀਆ"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ਕੋਈ ਹਾਲੀਆ ਐਪਸ ਨਹੀਂ।"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ਟੈਬਲੇਟ ਚੋਣਾਂ"</string>
@@ -355,11 +355,11 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ਐਪ ਨੂੰ ਉਹ ਇਵੈਂਟਾਂ ਜੋੜਨ, ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜਿਹਨਾਂ ਨੂੰ ਤੁਸੀਂ ਆਪਣੇ TV ਤੇ ਸੰਸ਼ੋਧਿਤ ਕਰ ਸਕਦੇ ਹੋ, ਦੋਸਤਾਂ ਜਾਂ ਸਹਿਯੋਗੀਆਂ ਦੀਆਂ ਇਵੈਂਟਾਂ ਸਮੇਤ। ਇਹ ਐਪ ਨੂੰ ਮਾਲਕ ਦੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਉਹ ਸੁਨੇਹੇ, ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪਦੇ ਹਨ, ਭੇਜਣ ਦੀ ਜਾਂ ਇਵੈਂਟਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ਐਪ ਨੂੰ ਉਹ ਇਵੈਂਟਾਂ ਜੋੜਨ, ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਜਿਹਨਾਂ ਨੂੰ ਤੁਸੀਂ ਆਪਣੇ ਫੋਨ ਤੇ ਸੰਸ਼ੋਧਿਤ ਕਰ ਸਕਦੇ ਹੋ, ਦੋਸਤਾਂ ਜਾਂ ਸਹਿਯੋਗੀਆਂ ਦੀਆਂ ਇਵੈਂਟਾਂ ਸਮੇਤ। ਇਹ ਐਪ ਨੂੰ ਮਾਲਕ ਦੀ ਜਾਣਕਾਰੀ ਤੋਂ ਬਿਨਾਂ ਉਹ ਸੁਨੇਹੇ, ਜੋ ਕੈਲੰਡਰ ਮਾਲਕਾਂ ਤੋਂ ਆਉਂਦੇ ਜਾਪਦੇ ਹਨ, ਭੇਜਣ ਦੀ ਜਾਂ ਇਵੈਂਟਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸ੍ਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ਸਟੀਕ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (GPS ਅਤੇ ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ਐਪ ਨੂੰ ਗਲੋਬਲ ਪੋਜੀਸ਼ਨਿੰਗ ਸਿਸਟਮ (GPS) ਜਾਂ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸ੍ਰੋਤ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi, ਵਰਤਦੇ ਹੋਏ ਤੁਹਾਡਾ ਨਿਯਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਨਿਰਧਾਰਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ ਅਤੇ ਵਾਧੂ ਬੈਟਰੀ ਪਾਵਰ ਖ਼ਰਚ ਸਕਦੇ ਹਨ।"</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ਐਪ ਨੂੰ ਗਲੋਬਲ ਪੋਜੀਸ਼ਨਿੰਗ ਸਿਸਟਮ (GPS) ਜਾਂ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi, ਵਰਤਦੇ ਹੋਏ ਤੁਹਾਡਾ ਨਿਯਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਨਿਰਧਾਰਿਤ ਕਰਨ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ ਅਤੇ ਵਾਧੂ ਬੈਟਰੀ ਪਾਵਰ ਖ਼ਰਚ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ਅੰਦਾਜ਼ਨ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ਐਪ ਨੂੰ ਤੁਹਾਡਾ ਅਨੁਮਾਨਿਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸ੍ਰੋਤ ਵਰਤਦੇ ਹੋਏ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਰਾਹੀਂ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi. ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਅਨੁਮਾਨ ਲਗਾਉਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ।"</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ਐਪ ਨੂੰ ਤੁਹਾਡਾ ਅਨੁਮਾਨਿਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤ ਵਰਤਦੇ ਹੋਏ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਰਾਹੀਂ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi. ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਅਨੁਮਾਨ ਲਗਾਉਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਯੂਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
@@ -538,8 +538,8 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ਜਦੋਂ ਪਾੱਲਿਸੀ ਸਮਰਥਿਤ ਹੋਵੇ ਤਾਂ ਵਰਤੇ ਜਾਣ ਲਈ ਡੀਵਾਈਸ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈੱਟ ਕਰੋ। ਕੇਵਲ ਡੀਵਾਈਸ ਮਾਲਡ ਗਲੋਬਲ ਪ੍ਰੌਕਸੀ ਸੈਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"ਸਕ੍ਰੀਨ ਲੌਕ ਪਾਸਵਰਡ ਸਮਾਪਤੀ ਮਿਆਦ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"ਇਸ ਵਿੱਚ ਬਦਲਾਵ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲੌਕ ਪਾਸਵਰਡ, PIN ਜਾਂ ਪੈਟਰਨ ਨੂੰ ਕਿੰਨੀ ਵਾਰ ਬਦਲਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ।"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ਸਟੋਰੇਜ ਐਨਕ੍ਰਿਪਸ਼ਨ ਸੈੱਟ ਕਰੋ"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ਲੋੜ ਹੈ ਕਿ ਸਟੋਰ ਕੀਤਾ ਐਪ ਡੈਟਾ ਐਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾਏ।"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ਸਟੋਰੇਜ ਇਨਕ੍ਰਿਪਸ਼ਨ ਸੈੱਟ ਕਰੋ"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ਲੋੜ ਹੈ ਕਿ ਸਟੋਰ ਕੀਤਾ ਐਪ ਡੈਟਾ ਇਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾਏ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ਕੈਮਰੇ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ਸਾਰੇ ਡੀਵਾਈਸ ਕੈਮਰਿਆਂ ਦੀ ਵਰਤੋਂ ਰੋਕੋ।"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ਸਕ੍ਰੀਨ ਲੌਕ ਦੀਆਂ ਕੁਝ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਓ"</string>
@@ -550,32 +550,32 @@
     <item msgid="7897544654242874543">"ਕੰਮ"</item>
     <item msgid="1103601433382158155">"ਦਫ਼ਤਰ ਦੀ ਫੈਕਸ"</item>
     <item msgid="1735177144948329370">"ਘਰ ਦੀ ਫੈਕਸ"</item>
-    <item msgid="603878674477207394">"ਪੇਜ਼ਰ"</item>
+    <item msgid="603878674477207394">"ਪੇਜਰ"</item>
     <item msgid="1650824275177931637">"ਹੋਰ"</item>
-    <item msgid="9192514806975898961">"ਕਸਟਮ"</item>
+    <item msgid="9192514806975898961">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"ਘਰ"</item>
     <item msgid="7084237356602625604">"ਕੰਮ"</item>
     <item msgid="1112044410659011023">"ਹੋਰ"</item>
-    <item msgid="2374913952870110618">"ਕਸਟਮ"</item>
+    <item msgid="2374913952870110618">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"ਘਰ"</item>
     <item msgid="5629153956045109251">"ਕੰਮ"</item>
     <item msgid="4966604264500343469">"ਹੋਰ"</item>
-    <item msgid="4932682847595299369">"ਕਸਟਮ"</item>
+    <item msgid="4932682847595299369">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"ਘਰ"</item>
     <item msgid="1359644565647383708">"ਕੰਮ"</item>
     <item msgid="7868549401053615677">"ਹੋਰ"</item>
-    <item msgid="3145118944639869809">"ਕਸਟਮ"</item>
+    <item msgid="3145118944639869809">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"ਕੰਮ"</item>
     <item msgid="4378074129049520373">"ਹੋਰ"</item>
-    <item msgid="3455047468583965104">"ਕਸਟਮ"</item>
+    <item msgid="3455047468583965104">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -587,17 +587,17 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"ਕਸਟਮ"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"ਘਰ"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"ਮੋਬਾਈਲ"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"ਕੰਮ"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ਦਫ਼ਤਰ ਦੀ ਫੈਕਸ"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ਘਰ ਦੀ ਫੈਕਸ"</string>
-    <string name="phoneTypePager" msgid="7582359955394921732">"ਪੇਜ਼ਰ"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"ਪੇਜਰ"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"ਹੋਰ"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"ਕਾਲਬੈਕ ਕਰੋ"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"ਕਾਰ"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"ਕੰਪਨੀ ਮੇਨ"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"ਕੰਪਨੀ ਦਾ ਪ੍ਰਮੁੱਖ ਫ਼ੋਨ"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"ਮੁੱਖ"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"ਹੋਰ ਫੈਕਸ"</string>
@@ -608,37 +608,37 @@
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"ਦਫ਼ਤਰ ਦਾ ਪੇਜਰ"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"ਸਹਾਇਕ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"ਕਸਟਮ"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"ਜਨਮਦਿਨ"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"ਵਰ੍ਹੇਗੰਢ"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"ਹੋਰ"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"ਕਸਟਮ"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"ਘਰ"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"ਕੰਮ"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"ਹੋਰ"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"ਮੋਬਾਈਲ"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"ਕਸਟਮ"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"ਘਰ"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"ਕੰਮ"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"ਹੋਰ"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"ਕਸਟਮ"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"ਘਰ"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"ਕੰਮ"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"ਹੋਰ"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"ਕਸਟਮ"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"ਹੈਂਗਆਊਟਸ"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"ਕੰਮ"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"ਹੋਰ"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"ਕਸਟਮ"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"ਕਸਟਮ"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"ਸਹਾਇਕ"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"ਭਰਾ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"ਬੱਚਾ"</string>
@@ -653,7 +653,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"ਰਿਸ਼ਤੇਦਾਰ"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"ਭੈਣ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"ਜੀਵਨਸਾਥੀ"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"ਕਸਟਮ"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"ਘਰ"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"ਕੰਮ"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"ਹੋਰ"</string>
@@ -803,7 +803,7 @@
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ਬ੍ਰਾਊਜ਼ਰ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰੋ"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ਐਪ ਨੂੰ ਬ੍ਰਾਊਜ਼ਰ ਦੀਆਂ ਜਿਓਲੋਕੇਸ਼ਨ ਅਨੁਮਤੀਆਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਖ਼ਰਾਬ ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਆਰਬਿਟਰੇਰੀ ਵੈਬ ਸਾਈਟਾਂ ਨੂੰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਜਾਣਕਾਰੀ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦੇਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ।"</string>
     <string name="save_password_message" msgid="767344687139195790">"ਕੀ ਤੁਸੀਂ ਚਾਹੁੰਦੇ ਹੋ ਕਿ ਬ੍ਰਾਊਜ਼ਰ ਇਹ ਪਾਸਵਰਡ ਯਾਦ ਰੱਖੇ?"</string>
-    <string name="save_password_notnow" msgid="6389675316706699758">"ਹੁਣ ਨਹੀਂ"</string>
+    <string name="save_password_notnow" msgid="6389675316706699758">"ਅਜੇ ਨਹੀਂ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"ਯਾਦ ਰੱਖੋ"</string>
     <string name="save_password_never" msgid="8274330296785855105">"ਕਦੇ ਵੀ ਨਹੀਂ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ਤੁਹਾਨੂੰ ਇਸ ਸਫ਼ੇ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਅਨੁਮਤੀ ਨਹੀਂ ਹੈ।"</string>
@@ -940,8 +940,8 @@
     <string name="whichEditApplication" msgid="144727838241402655">"ਨਾਲ ਸੰਪਾਦਿਤ ਕਰੋ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ਨਾਲ ਸੰਪਾਦਿਤ ਕਰੋ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ਸੰਪਾਦਨ ਕਰੋ"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"ਇਸ ਨਾਲ ਸ਼ੇਅਰ ਕਰੋ"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ਨਾਲ ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ਇਸ ਦੀ ਵਰਤੋਂ ਨਾਲ ਭੇਜੋ"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s ਦੀ ਵਰਤੋਂ ਨਾਲ ਭੇਜੋ"</string>
@@ -1022,8 +1022,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"ਕਾਲ ਵੌਲਯੂਮ"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ਮੀਡੀਆ ਵੌਲਯੂਮ"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ਸੂਚਨਾ ਵੌਲਯੂਮ"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"ਡਿਫੌਲਟ ਰਿੰਗਟੋਨ"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ਡਿਫੌਲਟ ਰਿੰਗਟੋਨ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ਕੋਈ ਨਹੀਂ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ਰਿੰਗਟੋਨਾਂ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ਅਗਿਆਤ ਰਿੰਗਟੋਨ"</string>
@@ -1084,7 +1084,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"ਰੀਸਟਾਰਟ ਕਰੋ"</string>
     <string name="carrier_app_dialog_message" msgid="7066156088266319533">"ਤੁਹਾਡੀ ਨਵੀਂ SIM ਦੇ ਸਹੀ ਢੰਗ ਨਾਲ ਕੰਮ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਤੋਂ ਇੱਕ ਐਪ ਸਥਾਪਤ ਕਰਨ ਅਤੇ ਖੋਲ੍ਹਣ ਦੀ ਲੋੜ ਪਵੇਗੀ।"</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ਐਪ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ਹੁਣੇ ਨਹੀਂ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ਅਜੇ ਨਹੀਂ"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"ਨਵੀਂ SIM ਦਾਖਲ ਕੀਤੀ ਗਈ"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"ਇਸ ਨੂੰ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ਸਮਾਂ ਸੈੱਟ ਕਰੋ"</string>
@@ -1109,7 +1109,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ਕੀ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇਸ ਡੀਵਾਈਸ ਦੀ ਸਮੱਸਿਆ ਨੂੰ ਠੀਕ ਕਰਨ ਵਿੱੱਚ ਮਦਦ ਲਈ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਹੈ। ਐਪਾਂ ਅਤੇ ਡੈਟੇ ਨੂੰ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।"</string>
-    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ਸਾਂਝੀ ਕਰੋ"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀ-ਬੋਰਡ ਬਦਲੋ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
@@ -1133,7 +1133,7 @@
     <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਹਟਾਇਆ ਗਿਆ, ਕੋਈ ਨਵਾਂ ਸੰਮਿਲਿਤ ਕਰੋ"</string>
     <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"ਅਜੇ ਵੀ <xliff:g id="NAME">%s</xliff:g> ਨੂੰ ਕੱਢ ਰਿਹਾ ਹੈ..."</string>
     <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ਨਾ ਹਟਾਓ"</string>
-    <string name="ext_media_init_action" msgid="7952885510091978278">"ਸੈਟ ਅਪ"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ਬਾਹਰ ਕੱਢੋ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ਐਕਸਪਲੋਰ ਕਰੋ"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ਲਾਪਤਾ"</string>
@@ -1222,7 +1222,7 @@
     <string name="action_mode_done" msgid="7217581640461922289">"ਹੋ ਗਿਆ"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ਸਟੋਰੇਜ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD ਕਾਰਡ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
-    <string name="share" msgid="1778686618230011964">"ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="share" msgid="1778686618230011964">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="find" msgid="4808270900322985960">"ਲੱਭੋ"</string>
     <string name="websearch" msgid="4337157977400211589">"ਵੈਬ ਖੋਜ"</string>
     <string name="find_next" msgid="5742124618942193978">"ਅਗਲਾ ਲੱਭੋ"</string>
@@ -1267,8 +1267,8 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"ਦਾਖਲ ਕਰੋ"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"ਇੱਕ ਐਪ ਚੁਣੋ"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨੂੰ ਲੌਂਚ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ਇਸ ਨਾਲ ਸ਼ੇਅਰ ਕਰੋ"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨਾਲ ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਛੋਹਵੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"ਬੋਲੀਆਂ ਗਈਆਂ ਪਾਸਵਰਡ ਕੁੰਜੀਆਂ ਸੁਣਨ ਲਈ ਇੱਕ ਹੈਡਸੈਟ ਪਲਗ ਇਨ ਕਰੋ।"</string>
@@ -1315,7 +1315,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ਫਿੰਗਰਪ੍ਰਿੰਟ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ਸਭ ਦੇਖੋ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ਗਤੀਵਿਧੀ ਚੁਣੋ"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"ਇਸ ਨਾਲ ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="sending" msgid="3245653681008218030">"ਭੇਜ ਰਿਹਾ ਹੈ..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ਕੀ ਬ੍ਰਾਊਜ਼ਰ ਲੌਂਚ ਕਰਨਾ ਹੈ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"ਕੀ ਕਾਲ ਸਵੀਕਾਰ ਕਰਨੀ ਹੈ?"</string>
