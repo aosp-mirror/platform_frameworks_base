@@ -93,7 +93,7 @@
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Modem rejimi"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Barcha ishchi ilovalar"</string>
     <string name="user_guest" msgid="8475274842845401871">"Mehmon"</string>
-    <string name="unknown" msgid="1592123443519355854">"Noma‘lum"</string>
+    <string name="unknown" msgid="1592123443519355854">"Noma’lum"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Birlamchi sozlamalar o‘rnatilmagan"</string>
@@ -112,7 +112,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Ovoz ma’lumotlarini o‘rnatish"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Nutq sintezi uchun kerakli ovoz ma’lumotlarini o‘rnatish"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ushbu nutq sintezi mexanizmi barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. U <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> mexanizmi bilan o‘rnatiladi. Ushbu nutq sintezi mexanizmidan foydalanilsinmi?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til matnni nutqga o‘girish uchun faol Internet ulanishini talab qiladi."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til uchun nutq sintezatorini yoqish uchun Internetga ulaning."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Bu nutq sintezining misoli"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Birlamchi til"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> – to‘liq qo‘llab-quvvatlanadi"</string>
@@ -327,7 +327,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> oldin"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> qoldi"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Kichkina"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Birlamchi"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Standart"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Katta"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Kattaroq"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Eng katta"</string>
