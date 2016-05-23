@@ -52,7 +52,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfiguratu idazketa-metodoak"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teklatu fisikoa"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari USB gailua atzitzeko baimena eman nahi diozu?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"USB osagarria atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari USB osagarria atzitzeko baimena eman nahi diozu?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB gailu hau konektatuta dagoenean <xliff:g id="ACTIVITY">%1$s</xliff:g> ireki nahi duzu?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"USB osagarri hau konektatuta dagoenean <xliff:g id="ACTIVITY">%1$s</xliff:g> ireki nahi duzu?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Instalatutako aplikazioek ez dute USB osagarri honekin funtzionatzen. Lortu informazio gehiago osagarriari buruz hemen: <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -213,7 +213,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Kokapena hautemateko aukera aktibatuta dago."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Kokapena hautemateko aukera desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Kokapena hautemateko aukera aktibatu egin da."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarmaren ordua: <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarma ordu honetarako ezarri da: <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Itxi panela."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Denbora gehiago."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Denbora gutxiago."</string>

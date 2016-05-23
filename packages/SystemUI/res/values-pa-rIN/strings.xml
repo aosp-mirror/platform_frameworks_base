@@ -50,7 +50,7 @@
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ਟੀਥਰ ਕੀਤੀ"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ਇਨਪੁਟ ਵਿਧੀਆਂ ਸੈਟ ਅਪ ਕਰੋ"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ਫਿਜੀਕਲ ਕੀਬੋਰਡ"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ਫਿਜੀਕਲ ਕੀ-ਬੋਰਡ"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"ਕੀ ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ USB ਡੀਵਾਈਸ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ਕੀ ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ USB ਐਕਸੈਸਰੀ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"ਕੀ ਜਦੋਂ ਇਹ USB ਡੀਵਾਈਸ ਕਨੈਕਟ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਤਾਂ <xliff:g id="ACTIVITY">%1$s</xliff:g> ਨੂੰ ਖੋਲ੍ਹਂਣਾ ਹੈ?"</string>
@@ -183,7 +183,7 @@
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ਰੂਪ-ਰੇਖਾ।"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"ਬੰਦ ਕਰੋ"</string>
-    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ਉਪਭੋਗਤਾ <xliff:g id="USER">%s</xliff:g>।"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ਵਰਤੋਂਕਾਰ <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi ਬੰਦ ਕੀਤਾ।"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi ਚਾਲੂ ਕੀਤਾ।"</string>
@@ -280,7 +280,7 @@
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"ਸਮਾਂ"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"ਮੈਂ"</string>
-    <string name="quick_settings_user_title" msgid="4467690427642392403">"ਉਪਭੋਗਤਾ"</string>
+    <string name="quick_settings_user_title" msgid="4467690427642392403">"ਵਰਤੋਂਕਾਰ"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ"</string>
@@ -288,7 +288,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi ਬੰਦ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ਚਾਲੂ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ਕੋਈ Wi-Fi ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ਜੋੜੋ"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ਪ੍ਰਸਾਰਿਤ ਕਰੋ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"ਕਾਸਟਿੰਗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ਬਿਨਾਂ ਨਾਮ ਦਿੱਤੀ ਡੀਵਾਈਸ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ਜੋੜਨ ਲਈ ਤਿਆਰ"</string>
@@ -360,7 +360,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ਉਪਭੋਗਤਾ, ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"ਉਪਭੋਗਤਾ ਜੋੜੋ"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ਮਹਿਮਾਨ"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"ਮਹਿਮਾਨ ਜੋੜੋ"</string>
@@ -378,8 +378,8 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗਆਉਟ ਕਰੋ"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਨਾ ਹੈ?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਉਪਭੋਗਤਾ ਜੋੜਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣਾ ਸਪੇਸ ਸੈਟ ਅਪ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਉਪਭੋਗਤਾ ਹੋਰ ਸਾਰੇ ਉਪਭੋਗਤਾਵਾਂ ਦੇ ਐਪਸ ਨੂੰ ਅਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸਥਾਪਤ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਉਪਭੋਗਤਾ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ਇਸ ਉਪਭੋਗਤਾ ਦੇ ਸਾਰੇ ਐਪਸ ਅਤੇ ਡੈਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ਹਟਾਓ"</string>
@@ -413,14 +413,14 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ਅਨਲੌਕ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਉਹਨਾਂ ਨੂੰ ਦੇਖੋ"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"ਸੈਟ ਅਪ"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"ਹੁਣੇ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"ਇਹ ਇਸ ਨੂੰ ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਵਾਪਸ ਜਾਓ ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"ਸਮਝ ਗਿਆ"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"ਸਮਝ ਲਿਆ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ਕੀ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ਨੂੰ ਲੁਕਾਉਣਾ ਹੈ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ਇਹ ਅਗਲੀ ਵਾਰ ਮੁੜ ਪ੍ਰਗਟ ਹੋਵੇਗਾ ਜਦੋਂ ਤੁਸੀਂ ਇਸਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਾਲੂ ਕਰਦੇ ਹੋ।"</string>
@@ -461,7 +461,7 @@
     <string name="tuner_warning_title" msgid="7094689930793031682">"ਕੁਝ ਵਾਸਤੇ ਤਾਂ ਮਜ਼ੇਦਾਰ ਹੈ ਲੇਕਿਨ ਸਾਰਿਆਂ ਵਾਸਤੇ ਨਹੀਂ"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"ਸਿਸਟਮ UI ਟਿਊਨਰ ਤੁਹਾਨੂੰ Android ਉਪਭੋਗਤਾ ਇੰਟਰਫੇਸ ਤਬਦੀਲ ਕਰਨ ਅਤੇ ਅਨੁਕੂਲਿਤ ਕਰਨ ਲਈ ਵਾਧੂ ਤਰੀਕੇ ਦਿੰਦਾ ਹੈ। ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"ਇਹ ਪ੍ਰਯੋਗਾਤਮਿਕ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਭਵਿੱਖ ਦੀ ਰੀਲੀਜ਼ ਵਿੱਚ ਬਦਲ ਸਕਦੀਆਂ ਹਨ, ਟੁੱਟ ਸਕਦੀਆਂ ਹਨ, ਜਾਂ ਅਲੋਪ ਹੋ ਸਕਦੀਆਂ ਹਨ। ਸਾਵਧਾਨੀ ਨਾਲ ਅੱਗੇ ਵੱਧੋ।"</string>
-    <string name="got_it" msgid="2239653834387972602">"ਸਮਝ ਗਿਆ"</string>
+    <string name="got_it" msgid="2239653834387972602">"ਸਮਝ ਲਿਆ"</string>
     <string name="tuner_toast" msgid="603429811084428439">"ਵਧਾਈਆਂ! ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਸੈਟਿੰਗਜ਼ ਵਿੱਚ ਜੋੜਿਆ ਗਿਆ ਹੈ"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"ਸੈਟਿੰਗਜ਼ ਤੋਂ ਹਟਾਓ"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"ਕੀ ਸੈਟਿੰਗਜ਼ ਤੋਂ ਸਿਸਟਮ UI ਟਿਊਨਰ ਨੂੰ ਹਟਾਉਣਾ ਹੈ ਅਤੇ ਇਸਦੀਆਂ ਸਾਰੀਆਂ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਨੂੰ ਉਪਯੋਗ ਕਰਨ ਤੋਂ ਰੋਕਣਾ ਹੈ?"</string>

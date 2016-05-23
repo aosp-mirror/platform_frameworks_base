@@ -413,7 +413,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"O dispositivo permanecerá bloqueado ata que o desbloquees manualmente"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Recibir notificacións máis rápido"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Consúltaas antes de desbloquear"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non grazas"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Non, grazas"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configurar"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"Finalizar agora"</string>
@@ -475,7 +475,7 @@
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Activa o xesto de pasar o dedo cara arriba desde o botón Visión xeral para acceder ao modo de pantalla dividida"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Queres activar o Bluetooth?"</string>
-    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Para conectar o teu teclado co tablet, primeiro tes que activar o Bluetooth."</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"Para conectar o teu teclado coa tableta, primeiro tes que activar o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activar"</string>
     <string name="show_silently" msgid="6841966539811264192">"Mostrar notificacións de forma silenciosa"</string>
     <string name="block" msgid="2734508760962682611">"Bloquear todas as notificacións"</string>
@@ -597,7 +597,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"Os botóns de código de teclas permiten engadir teclas do teclado á barra de navegación. Ao premelos, emulan a tecla seleccionada. Primeiro, debes seleccionar unha tecla para o botón e escoller a imaxe que se mostrará nel."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selecciona o botón do teclado"</string>
     <string name="preview" msgid="9077832302472282938">"Vista previa"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastrar para engadir mosaicos"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastrar para engadir funcións"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrastra o elemento ata aquí para eliminalo"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Hora"</string>

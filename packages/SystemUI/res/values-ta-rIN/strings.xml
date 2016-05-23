@@ -288,10 +288,10 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"வைஃபையை முடக்கு"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"வைஃபை இயக்கத்தில்"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"அனுப்பு"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"திரையிடு"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"பெயரிடப்படாத சாதனம்"</string>
-    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"அனுப்பத் தயார்"</string>
+    <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"திரையிடத் தயார்"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"சாதனங்கள் இல்லை"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ஒளிர்வு"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"தானியங்கு"</string>
