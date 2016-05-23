@@ -78,9 +78,11 @@ public class DnsEventListenerService extends IDnsEventListener.Stub {
                 return;
             }
 
+            // Only log as many events as we actually have.
+            byte[] eventTypes = Arrays.copyOf(mEventTypes, mEventCount);
             byte[] returnCodes = Arrays.copyOf(mReturnCodes, mEventCount);
             int[] latenciesMs = Arrays.copyOf(mLatenciesMs, mEventCount);
-            DnsEvent.logEvent(mNetId, mEventTypes, mReturnCodes, mLatenciesMs);
+            DnsEvent.logEvent(mNetId, eventTypes, returnCodes, latenciesMs);
             maybeLog(String.format("Logging %d results for netId %d", mEventCount, mNetId));
             mEventCount = 0;
         }
