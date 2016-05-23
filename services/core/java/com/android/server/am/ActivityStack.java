@@ -1819,22 +1819,24 @@ final class ActivityStack {
     private boolean shouldBeVisible(ActivityRecord r, boolean behindTranslucentActivity,
             boolean stackVisibleBehind, ActivityRecord visibleBehind,
             boolean behindFullscreenActivity) {
-        // mLaunchingBehind: Activities launching behind are at the back of the task stack
-        // but must be drawn initially for the animation as though they were visible.
-        final boolean activityVisibleBehind =
-                (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
 
         if (!okToShowLocked(r)) {
             return false;
         }
 
+        // mLaunchingBehind: Activities launching behind are at the back of the task stack
+        // but must be drawn initially for the animation as though they were visible.
+        final boolean activityVisibleBehind =
+                (behindTranslucentActivity || stackVisibleBehind) && visibleBehind == r;
+
         boolean isVisible =
                 !behindFullscreenActivity || r.mLaunchTaskBehind || activityVisibleBehind;
 
         if (isVisible && r.isRecentsActivity()) {
-            // Recents activity can only be visible if the home stack isn't fullscreen or is the
-            // focused stack.
-            isVisible = !mFullscreen || mStackSupervisor.isFocusedStack(this);
+            // Recents activity can only be visible if the home stack is the focused stack or we are
+            // in split-screen mode.
+            isVisible = mStackSupervisor.getStack(DOCKED_STACK_ID) != null
+                    || mStackSupervisor.isFocusedStack(this);
         }
 
         return isVisible;
