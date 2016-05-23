@@ -97,7 +97,7 @@
     <item msgid="79513688117503758">"Qisqa tomoni"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"Bo‘yiga"</item>
+    <item msgid="4061931020926489228">"Tik holat"</item>
     <item msgid="3199660090246166812">"Eniga"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Faylga yozib bo‘lmadi"</string>
