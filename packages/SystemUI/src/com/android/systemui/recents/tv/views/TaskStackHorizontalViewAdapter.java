@@ -23,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.LaunchTvTaskEvent;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
+import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.AnimationProps;
 
@@ -122,7 +124,10 @@ public class TaskStackHorizontalViewAdapter extends
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.init(mTaskList.get(position));
+        Task task = mTaskList.get(position);
+        // Retrives from caches, loading only if necessary
+        Recents.getTaskLoader().loadTaskData(task);
+        holder.init(task);
     }
 
     @Override
