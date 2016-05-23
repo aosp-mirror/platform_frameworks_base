@@ -48,11 +48,10 @@ public class TetherInterfaceStateMachineTest {
     @Mock private InterfaceConfiguration mInterfaceConfiguration;
 
     private final TestLooper mLooper = new TestLooper();
-    private final Object mMutex = new Object();
     private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(boolean isUsb) {
-        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), isUsb, mMutex,
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), isUsb,
                 mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
@@ -77,7 +76,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void startsOutAvailable() {
-        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), false, mMutex,
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), false,
                 mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         mLooper.dispatchAll();
