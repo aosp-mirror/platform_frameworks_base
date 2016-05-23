@@ -271,7 +271,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranni avtomatik burish"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Tanlandi: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Aylanmaydigan qilingan"</string>
-    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Bo‘yiga"</string>
+    <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Tik holat"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Eniga"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Joylashuv"</string>
@@ -290,21 +290,21 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi o‘chiq"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi yoqilgan"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Hech qanday Wi-Fi tarmog‘i mavjud emas"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Wi-Fi monitor"</string>
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Translatsiya"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Translatsiya qilinmoqda"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nomsiz qurilma"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tarqatish uchun tayyor"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Qurilmalar topilmadi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Yorqinlik"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AVTOMATIC"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Ranglarni almashtirish"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Teskari ranglar"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Rangni to‘g‘rilash usuli"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Boshqa sozlamalar"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Tayyor"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ulangan"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ulanmoqda…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Modem rejimi"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Ulanish nuqtasi"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirishnomalar"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Fonar"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobil internet"</string>
@@ -364,7 +364,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"Foydalanuvchi qo‘shish"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"Yangi foydalanuvchi"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Mehmon"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"Yangi mehmon qo‘shish"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"Mehmon qo‘shish"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Mehmon rejimini o‘chirish"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Mehmon hisobi o‘chirib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -379,8 +379,8 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Foydalanuvchi nomidan chiqish"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Joriy foydalanuvchini tizimdan chiqaring"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"FOYDALANUVCHI NOMIDAN CHIQISH"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"Yangi foyd-chi qo‘shilsinmi?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi foydalanuvchi qo‘shilgach, o‘sha shaxs o‘z hududini sozlashi lozim bo‘ladi.\n\nHar qanday foydalanuvchi ilovalarni barcha foydalanuvchilar uchun yangilashi mumkin."</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Foydalanuvchi qo‘shilsinmi?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi profil qo‘shilgach, uni sozlash lozim.\n\nQurilmaning istalgan foydalanuvchisi ilovalarni barcha hisoblar uchun yangilashi mumkin."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Foydalanuvchi olib tashlansinmi?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Ushbu foydalanuvchining barcha ilovalari va ma’lumotlari o‘chirib tashlanadi."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Olib tashlash"</string>
@@ -457,7 +457,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Tezkor sozlamalar, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Ulanish nuqtasi"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Ishchi profil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diqqat!"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tuner yordamida siz Android foydalanuvchi interfeysini tuzatish va o‘zingizga moslashtirishingiz mumkin. Ushbu tajribaviy funksiyalar o‘zgarishi, buzilishi yoki keyingi versiyalarda olib tashlanishi mumkin. Ehtiyot bo‘lib davom eting."</string>
@@ -586,7 +586,7 @@
     <string name="select_button" msgid="1597989540662710653">"Qo‘shish uchun tugmani tanlang"</string>
     <string name="add_button" msgid="4134946063432258161">"Tugma qo‘shish"</string>
     <string name="save" msgid="2311877285724540644">"Saqlash"</string>
-    <string name="reset" msgid="2448168080964209908">"Tiklash"</string>
+    <string name="reset" msgid="2448168080964209908">"Asliga qaytarish"</string>
     <string name="no_home_title" msgid="1563808595146071549">"“Bosh ekran” tugmasi topilmadi"</string>
     <string name="no_home_message" msgid="5408485011659260911">"Qurilma bo‘ylab o‘tish uchun “Bosh ekran” tugmasi kerak. Saqlashdan oldin mazkur tugmani qo‘shing."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Tugma enini moslashtiring"</string>
@@ -597,7 +597,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"Tugmalar kodi yordamida klaviatura tugmalarini navigatsiya paneliga qo‘shish mumkin. Ular bosilganda tanlangan klaviatura tugmasining bosilishini taqlid qiladi. Tugmalar kodi uchun klaviatura tugmasi va rasm tanlanishi kerak."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatura tugmasini tanlang"</string>
     <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Fragmentlar qo‘shish uchun torting"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kerakli elementni tortib qo‘shing"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"O‘chirish uchun bu yerga torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Vaqt"</string>
