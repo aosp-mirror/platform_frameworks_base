@@ -1452,6 +1452,32 @@ public class LockPatternUtils {
     }
 
     /**
+     * @see StrongAuthTracker#getStrongAuthForUser
+     */
+    public int getStrongAuthForUser(int userId) {
+        try {
+            return getLockSettings().getStrongAuthForUser(userId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not get StrongAuth", e);
+            return StrongAuthTracker.getDefaultFlags(mContext);
+        }
+    }
+
+    /**
+     * @see StrongAuthTracker#isTrustAllowedForUser
+     */
+    public boolean isTrustAllowedForUser(int userId) {
+        return getStrongAuthForUser(userId) == StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+    }
+
+    /**
+     * @see StrongAuthTracker#isFingerprintAllowedForUser
+     */
+    public boolean isFingerprintAllowedForUser(int userId) {
+        return (getStrongAuthForUser(userId) & ~StrongAuthTracker.ALLOWING_FINGERPRINT) == 0;
+    }
+
+    /**
      * Tracks the global strong authentication state.
      */
     public static class StrongAuthTracker {
@@ -1556,9 +1582,8 @@ public class LockPatternUtils {
         public void onStrongAuthRequiredChanged(int userId) {
         }
 
-        void handleStrongAuthRequiredChanged(@StrongAuthFlags int strongAuthFlags,
+        protected void handleStrongAuthRequiredChanged(@StrongAuthFlags int strongAuthFlags,
                 int userId) {
-
             int oldValue = getStrongAuthForUser(userId);
             if (strongAuthFlags != oldValue) {
                 if (strongAuthFlags == mDefaultStrongAuthFlags) {
@@ -1571,7 +1596,7 @@ public class LockPatternUtils {
         }
 
 
-        final IStrongAuthTracker.Stub mStub = new IStrongAuthTracker.Stub() {
+        protected final IStrongAuthTracker.Stub mStub = new IStrongAuthTracker.Stub() {
             @Override
             public void onStrongAuthRequiredChanged(@StrongAuthFlags int strongAuthFlags,
                     int userId) {
