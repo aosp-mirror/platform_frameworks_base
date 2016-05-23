@@ -1132,4 +1132,22 @@ interface ITelephony {
      * means all carriers are allowed.
      */
     List<CarrierIdentifier> getAllowedCarriers(int slotId);
+
+   /**
+    * Action set from carrier signalling broadcast receivers to enable/disable metered apns
+    * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+    * @param subId the subscription ID that this action applies to.
+    * @param enabled control enable or disable metered apns.
+    * @hide
+    */
+    void carrierActionSetMeteredApnsEnabled(int subId, boolean visible);
+
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable radio
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable radio.
+     * @hide
+     */
+    void carrierActionSetRadioEnabled(int subId, boolean enabled);
 }

@@ -662,18 +662,37 @@ public class CarrierConfigManager {
     public static final String KEY_MMS_USER_AGENT_STRING = "userAgent";
 
     /**
-     * If carriers require differentiate un-provisioned status: cold sim or out of credit sim
-     * a package name and activity name can be provided to launch a supported carrier application
-     * that check the sim provisioning status
-     * The first element is the package name and the second element is the activity name
-     * of the provisioning app
-     * example:
-     * <item>com.google.android.carrierPackageName</item>
-     * <item>com.google.android.carrierPackageName.CarrierActivityName</item>
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_REDIRECTED.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
      * @hide
      */
-     public static final String KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY =
-            "sim_state_detection_carrier_app_string_array";
+    public static final String KEY_SIGNAL_REDIRECTION_RECEIVER_STRING_ARRAY =
+            "signal_redirection_receiver_string_array";
+
+    /**
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
+     * @hide
+     */
+    public static final String KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY =
+            "signal_dcfailure_receiver_string_array";
+
+    /**
+     * A list of component name of carrier signalling receivers which are interested in intent
+     * android.intent.action.CARRIER_SIGNAL_PCO_VALUE.
+     * Example:
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameA</item>
+     * <item>com.google.android.carrierPackageName/.CarrierSignalReceiverNameB</item>
+     * @hide
+     */
+    public static final String KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY =
+            "signal_pco_receiver_string_array";
 
     /**
      * Determines whether the carrier supports making non-emergency phone calls while the phone is
@@ -849,9 +868,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
 
-        // Used for Sim card State detection app
-        sDefaults.putStringArray(KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY,
-                null);
+        // Carrier Signalling Receivers
+        sDefaults.putStringArray(KEY_SIGNAL_REDIRECTION_RECEIVER_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY, null);
+        sDefaults.putStringArray(KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY, null);
     }
 
     /**
