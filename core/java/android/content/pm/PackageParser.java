@@ -2945,6 +2945,10 @@ public class PackageParser {
             ai.privateFlags |= PRIVATE_FLAG_RESIZEABLE_ACTIVITIES;
         }
 
+        ai.networkSecurityConfigRes = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestApplication_networkSecurityConfig,
+                0);
+
         String str;
         str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_permission, 0);

@@ -18,25 +18,24 @@ package android.security.net.config;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.util.Log;
 import android.util.Pair;
 import java.util.Set;
 
 /** @hide */
 public class ManifestConfigSource implements ConfigSource {
-    public static final String META_DATA_NETWORK_SECURITY_CONFIG =
-            "android.security.net.config";
     private static final boolean DBG = true;
     private static final String LOG_TAG = "NetworkSecurityConfig";
 
     private final Object mLock = new Object();
     private final Context mContext;
+    private final ApplicationInfo mInfo;
 
     private ConfigSource mConfigSource;
 
-    public ManifestConfigSource(Context context) {
+    public ManifestConfigSource(Context context, ApplicationInfo info) {
         mContext = context;
+        mInfo = info;
     }
 
     @Override
@@ -54,22 +53,15 @@ public class ManifestConfigSource implements ConfigSource {
             if (mConfigSource != null) {
                 return mConfigSource;
             }
-            ApplicationInfo info;
-            try {
-                info = mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(),
-                        PackageManager.GET_META_DATA);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RuntimeException("Failed to look up ApplicationInfo", e);
-            }
-            int targetSdkVersion = info.targetSdkVersion;
+            int targetSdkVersion = mInfo.targetSdkVersion;
             int configResourceId = 0;
-            if (info != null && info.metaData != null) {
-                configResourceId = info.metaData.getInt(META_DATA_NETWORK_SECURITY_CONFIG);
+            if (mInfo != null) {
+                configResourceId = mInfo.networkSecurityConfigRes;
             }
 
             ConfigSource source;
             if (configResourceId != 0) {
-                boolean debugBuild = (info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                boolean debugBuild = (mInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 if (DBG) {
                     Log.d(LOG_TAG, "Using Network Security Config from resource "
                             + mContext.getResources().getResourceEntryName(configResourceId)
@@ -82,7 +74,7 @@ public class ManifestConfigSource implements ConfigSource {
                     Log.d(LOG_TAG, "No Network Security Config specified, using platform default");
                 }
                 boolean usesCleartextTraffic =
-                        (info.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
+                        (mInfo.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
                 source = new DefaultConfigSource(usesCleartextTraffic, targetSdkVersion);
             }
             mConfigSource = source;
