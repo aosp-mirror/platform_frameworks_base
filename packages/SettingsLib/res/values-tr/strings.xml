@@ -83,7 +83,7 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Kablosuz sinyal gücü iki çubuk."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Kablosuz sinyal gücü üç çubuk."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Kablosuz sinyal gücü tam."</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"Android İS"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Kaldırılan uygulamalar"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Kaldırılmış kullanıcılar ve uygulamalar"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB tethering"</string>
