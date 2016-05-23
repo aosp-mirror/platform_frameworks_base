@@ -790,11 +790,14 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will fail for listeners that have
      * not been granted the permission by the user.
      */
-    public static void requestRebind(ComponentName componentName)
-            throws RemoteException {
+    public static void requestRebind(ComponentName componentName) {
         INotificationManager noMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        noMan.requestBindListener(componentName);
+        try {
+            noMan.requestBindListener(componentName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -807,12 +810,16 @@ public abstract class NotificationListenerService extends Service {
      * <p>The service should wait for the {@link #onListenerConnected()} event
      * before performing this operation. I know it's tempting, but you must wait.
      */
-    public final void requestUnbind() throws RemoteException {
+    public final void requestUnbind() {
         if (mWrapper != null) {
             INotificationManager noMan = getNotificationInterface();
-            noMan.requestUnbindListener(mWrapper);
-            // Disable future messages.
-            isConnected = false;
+            try {
+                noMan.requestUnbindListener(mWrapper);
+                // Disable future messages.
+                isConnected = false;
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
         }
     }
 
