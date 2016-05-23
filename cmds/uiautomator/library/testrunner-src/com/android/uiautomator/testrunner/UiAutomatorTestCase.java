@@ -36,7 +36,10 @@ import java.util.List;
  * {@link UiDevice} instance
  * {@link Bundle} for command line parameters.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiAutomatorTestCase extends TestCase {
 
     private static final String DISABLE_IME = "disable_ime";
