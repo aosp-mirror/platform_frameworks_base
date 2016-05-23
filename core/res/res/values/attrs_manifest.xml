@@ -1178,6 +1178,9 @@
          -->
     <attr name="autoVerify" format="boolean" />
 
+    <!-- An XML resource with the application's Network Security Config. -->
+    <attr name="networkSecurityConfig" format="reference" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1313,6 +1316,7 @@
         <attr name="defaultToDeviceProtectedStorage" format="boolean" />
         <attr name="directBootAware" />
         <attr name="resizeableActivity" />
+        <attr name="networkSecurityConfig" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
