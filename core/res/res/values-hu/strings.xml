@@ -679,10 +679,10 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Próbálja újra"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Újra"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Elérte az arcalapú feloldási kísérletek maximális számát"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nincs SIM kártya."</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM kártya a táblagépben."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Nincs SIM kártya a tévében."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM kártya a telefonban."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Nincs SIM-kártya."</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nincs SIM-kártya a táblagépben."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Nincs SIM-kártya a tévében."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Nincs SIM-kártya a telefonban."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"A SIM kártya hiányzik vagy nem olvasható. Helyezzen be egy SIM kártyát."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"A SIM kártya nem használható."</string>

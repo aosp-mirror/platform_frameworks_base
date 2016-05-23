@@ -522,10 +522,10 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse tabletti tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse televisio tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Valvo väärien salasanojen määrää ruudun lukitusta avattaessa ja lukitse puhelin tai poista kaikki tämän käyttäjän tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuta näytön lukitus"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuttaa näytön lukituksen"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Muuttaa näytön lukituksen"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Muuttaa näytön lukituksen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lukita ruudun"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoi, milloin ja miten ruutu lukittuu."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoida, milloin ja miten näyttö lukittuu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhkiä kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Palauta tehdasasetukset ja poista television tiedot ilman varoitusta."</string>
@@ -1294,7 +1294,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mobiilitiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi-tiedonsiirtoraja ylitetty"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> yli asetetun rajan"</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustatietojen käyttö"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Rajoitettu taustadatan käyttö"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Poista rajoitus napauttamalla."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Suojausvarmenne"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Varmenne on voimassa."</string>
