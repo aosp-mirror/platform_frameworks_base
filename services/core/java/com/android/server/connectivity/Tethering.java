@@ -71,7 +71,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.server.IoThread;
 import com.android.server.connectivity.tethering.IControlsTethering;
-import com.android.server.connectivity.tethering.TetherInterfaceSM;
+import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.io.FileDescriptor;
@@ -101,7 +101,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final static boolean VDBG = false;
 
     private static final Class[] messageClasses = {
-            Tethering.class, TetherMasterSM.class, TetherInterfaceSM.class
+            Tethering.class, TetherMasterSM.class, TetherInterfaceStateMachine.class
     };
     private static final SparseArray<String> sMagicDecoderRing =
             MessageUtils.findMessageNames(messageClasses);
@@ -127,7 +127,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final INetworkStatsService mStatsService;
     private final Looper mLooper;
 
-    private HashMap<String, TetherInterfaceSM> mIfaces; // all tethered/tetherable ifaces
+    private HashMap<String, TetherInterfaceStateMachine> mIfaces; // all tethered/tetherable ifaces
 
     private BroadcastReceiver mStateReceiver;
 
@@ -172,7 +172,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         mPublicSync = new Object();
 
-        mIfaces = new HashMap<String, TetherInterfaceSM>();
+        mIfaces = new HashMap<String, TetherInterfaceStateMachine>();
 
         // make our own thread so we don't anr the system
         mLooper = IoThread.get().getLooper();
@@ -259,10 +259,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             }
             if (found == false) return;
 
-            TetherInterfaceSM sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (up) {
                 if (sm == null) {
-                    sm = new TetherInterfaceSM(iface, mLooper, usb, mPublicSync,
+                    sm = new TetherInterfaceStateMachine(iface, mLooper, usb, mPublicSync,
                             mNMService, mStatsService, this);
                     mIfaces.put(iface, sm);
                     sm.start();
@@ -273,7 +273,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     // we will handle disconnect in interfaceRemoved instead
                     if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
                 } else if (sm != null) {
-                    sm.sendMessage(TetherInterfaceSM.CMD_INTERFACE_DOWN);
+                    sm.sendMessage(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
                     mIfaces.remove(iface);
                 }
             }
@@ -333,12 +333,12 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 return;
             }
 
-            TetherInterfaceSM sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (sm != null) {
                 if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
                 return;
             }
-            sm = new TetherInterfaceSM(iface, mLooper, usb, mPublicSync,
+            sm = new TetherInterfaceStateMachine(iface, mLooper, usb, mPublicSync,
                     mNMService, mStatsService, this);
             mIfaces.put(iface, sm);
             sm.start();
@@ -349,14 +349,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     public void interfaceRemoved(String iface) {
         if (VDBG) Log.d(TAG, "interfaceRemoved " + iface);
         synchronized (mPublicSync) {
-            TetherInterfaceSM sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (sm == null) {
                 if (VDBG) {
                     Log.e(TAG, "attempting to remove unknown iface (" + iface + "), ignoring");
                 }
                 return;
             }
-            sm.sendMessage(TetherInterfaceSM.CMD_INTERFACE_DOWN);
+            sm.sendMessage(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
             mIfaces.remove(iface);
         }
     }
@@ -576,7 +576,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     public int tether(String iface) {
         if (DBG) Log.d(TAG, "Tethering " + iface);
-        TetherInterfaceSM sm = null;
+        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
         }
@@ -588,13 +588,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             Log.e(TAG, "Tried to Tether an unavailable iface :" + iface + ", ignoring");
             return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
         }
-        sm.sendMessage(TetherInterfaceSM.CMD_TETHER_REQUESTED);
+        sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
     public int untether(String iface) {
         if (DBG) Log.d(TAG, "Untethering " + iface);
-        TetherInterfaceSM sm = null;
+        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
         }
@@ -606,7 +606,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             Log.e(TAG, "Tried to Untethered an errored iface :" + iface + ", ignoring");
             return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
         }
-        sm.sendMessage(TetherInterfaceSM.CMD_TETHER_UNREQUESTED);
+        sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
@@ -618,7 +618,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     public int getLastTetherError(String iface) {
-        TetherInterfaceSM sm = null;
+        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
             sm = mIfaces.get(iface);
             if (sm == null) {
@@ -647,7 +647,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         synchronized (mPublicSync) {
             Set<String> ifaces = mIfaces.keySet();
             for (String iface : ifaces) {
-                TetherInterfaceSM sm = mIfaces.get(iface);
+                TetherInterfaceStateMachine sm = mIfaces.get(iface);
                 if (sm != null) {
                     if (sm.isErrored()) {
                         erroredList.add(iface);
@@ -917,7 +917,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         synchronized (mPublicSync) {
             Set<String> keys = mIfaces.keySet();
             for (String key : keys) {
-                TetherInterfaceSM sm = mIfaces.get(key);
+                TetherInterfaceStateMachine sm = mIfaces.get(key);
                 if (sm.isTethered()) {
                     list.add(key);
                 }
@@ -935,7 +935,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         synchronized (mPublicSync) {
             Set<String> keys = mIfaces.keySet();
             for (String key : keys) {
-                TetherInterfaceSM sm = mIfaces.get(key);
+                TetherInterfaceStateMachine sm = mIfaces.get(key);
                 if (sm.isAvailable()) {
                     list.add(key);
                 }
@@ -957,7 +957,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         synchronized (mPublicSync) {
             Set<String> keys = mIfaces.keySet();
             for (String key : keys) {
-                TetherInterfaceSM sm = mIfaces.get(key);
+                TetherInterfaceStateMachine sm = mIfaces.get(key);
                 if (sm.isErrored()) {
                     list.add(key);
                 }
@@ -1097,7 +1097,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         private State mStopTetheringErrorState;
         private State mSetDnsForwardersErrorState;
 
-        private ArrayList<TetherInterfaceSM> mNotifyList;
+        private ArrayList<TetherInterfaceStateMachine> mNotifyList;
 
         private int mMobileApnReserved = ConnectivityManager.TYPE_NONE;
         private NetworkCallback mMobileUpstreamCallback;
@@ -1124,7 +1124,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             mSetDnsForwardersErrorState = new SetDnsForwardersErrorState();
             addState(mSetDnsForwardersErrorState);
 
-            mNotifyList = new ArrayList<TetherInterfaceSM>();
+            mNotifyList = new ArrayList<>();
             setInitialState(mInitialState);
         }
 
@@ -1339,8 +1339,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             protected void notifyTetheredOfNewUpstreamIface(String ifaceName) {
                 if (DBG) Log.d(TAG, "Notifying tethered with upstream=" + ifaceName);
                 mCurrentUpstreamIface = ifaceName;
-                for (TetherInterfaceSM sm : mNotifyList) {
-                    sm.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
+                for (TetherInterfaceStateMachine sm : mNotifyList) {
+                    sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
                             ifaceName);
                 }
             }
@@ -1409,7 +1409,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                             synchronized (mPublicSync) {
                                 Set<String> ifaces = mIfaces.keySet();
                                 for (String iface : ifaces) {
-                                    TetherInterfaceSM sm = mIfaces.get(iface);
+                                    TetherInterfaceStateMachine sm = mIfaces.get(iface);
                                     if (sm != null && sm.isTethered()) {
                                         if (isUsb(iface)) {
                                             tethered.add(new Integer(
@@ -1455,13 +1455,13 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
-                        TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         mNotifyList.add(who);
                         transitionTo(mTetherModeAliveState);
                         break;
                     case CMD_TETHER_MODE_UNREQUESTED:
-                        who = (TetherInterfaceSM)message.obj;
+                        who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         int index = mNotifyList.indexOf(who);
                         if (index != -1) {
@@ -1503,14 +1503,14 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
-                        TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         mNotifyList.add(who);
-                        who.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED,
+                        who.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
                                 mCurrentUpstreamIface);
                         break;
                     case CMD_TETHER_MODE_UNREQUESTED:
-                        who = (TetherInterfaceSM)message.obj;
+                        who = (TetherInterfaceStateMachine)message.obj;
                         if (VDBG) Log.d(TAG, "Tether Mode unrequested by " + who);
                         int index = mNotifyList.indexOf(who);
                         if (index != -1) {
@@ -1572,7 +1572,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 boolean retValue = true;
                 switch (message.what) {
                     case CMD_TETHER_MODE_REQUESTED:
-                        TetherInterfaceSM who = (TetherInterfaceSM)message.obj;
+                        TetherInterfaceStateMachine who = (TetherInterfaceStateMachine)message.obj;
                         who.sendMessage(mErrorNotification);
                         break;
                     default:
@@ -1583,7 +1583,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             void notify(int msgType) {
                 mErrorNotification = msgType;
                 for (Object o : mNotifyList) {
-                    TetherInterfaceSM sm = (TetherInterfaceSM)o;
+                    TetherInterfaceStateMachine sm = (TetherInterfaceStateMachine)o;
                     sm.sendMessage(msgType);
                 }
             }
@@ -1593,7 +1593,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void enter() {
                 Log.e(TAG, "Error in setIpForwardingEnabled");
-                notify(TetherInterfaceSM.CMD_IP_FORWARDING_ENABLE_ERROR);
+                notify(TetherInterfaceStateMachine.CMD_IP_FORWARDING_ENABLE_ERROR);
             }
         }
 
@@ -1601,7 +1601,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void enter() {
                 Log.e(TAG, "Error in setIpForwardingDisabled");
-                notify(TetherInterfaceSM.CMD_IP_FORWARDING_DISABLE_ERROR);
+                notify(TetherInterfaceStateMachine.CMD_IP_FORWARDING_DISABLE_ERROR);
             }
         }
 
@@ -1609,7 +1609,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void enter() {
                 Log.e(TAG, "Error in startTethering");
-                notify(TetherInterfaceSM.CMD_START_TETHERING_ERROR);
+                notify(TetherInterfaceStateMachine.CMD_START_TETHERING_ERROR);
                 try {
                     mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
@@ -1620,7 +1620,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void enter() {
                 Log.e(TAG, "Error in stopTethering");
-                notify(TetherInterfaceSM.CMD_STOP_TETHERING_ERROR);
+                notify(TetherInterfaceStateMachine.CMD_STOP_TETHERING_ERROR);
                 try {
                     mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
@@ -1631,7 +1631,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             @Override
             public void enter() {
                 Log.e(TAG, "Error in setDnsForwarders");
-                notify(TetherInterfaceSM.CMD_SET_DNS_FORWARDERS_ERROR);
+                notify(TetherInterfaceStateMachine.CMD_SET_DNS_FORWARDERS_ERROR);
                 try {
                     mNMService.stopTethering();
                 } catch (Exception e) {}
@@ -1675,7 +1675,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     @Override
-    public void notifyInterfaceTetheringReadiness(boolean isReady, TetherInterfaceSM who) {
+    public void notifyInterfaceTetheringReadiness(boolean isReady,
+            TetherInterfaceStateMachine who) {
         mTetherMasterSM.sendMessage((isReady) ? TetherMasterSM.CMD_TETHER_MODE_REQUESTED
                                               : TetherMasterSM.CMD_TETHER_MODE_UNREQUESTED, who);
     }

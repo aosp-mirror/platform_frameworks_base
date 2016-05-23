@@ -37,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 
-public class TetherInterfaceSMTest {
+public class TetherInterfaceStateMachineTest {
     private static final String IFACE_NAME = "testnet1";
     private static final String UPSTREAM_IFACE = "upstream0";
     private static final String UPSTREAM_IFACE2 = "upstream1";
@@ -49,10 +49,10 @@ public class TetherInterfaceSMTest {
 
     private final TestLooper mLooper = new TestLooper();
     private final Object mMutex = new Object();
-    private TetherInterfaceSM mTestedSm;
+    private TetherInterfaceStateMachine mTestedSm;
 
     private void initStateMachine(boolean isUsb) {
-        mTestedSm = new TetherInterfaceSM(IFACE_NAME, mLooper.getLooper(), isUsb, mMutex,
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), isUsb, mMutex,
                 mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
@@ -63,7 +63,7 @@ public class TetherInterfaceSMTest {
 
     private void initTetheredStateMachine(boolean isUsb, String upstreamIface) {
         initStateMachine(isUsb);
-        dispatchCommand(TetherInterfaceSM.CMD_TETHER_REQUESTED);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         if (upstreamIface != null) {
             dispatchTetherConnectionChanged(upstreamIface);
         }
@@ -77,7 +77,7 @@ public class TetherInterfaceSMTest {
 
     @Test
     public void startsOutAvailable() {
-        mTestedSm = new TetherInterfaceSM(IFACE_NAME, mLooper.getLooper(), false, mMutex,
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), false, mMutex,
                 mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         mLooper.dispatchAll();
@@ -92,13 +92,13 @@ public class TetherInterfaceSMTest {
     public void shouldDoNothingUntilRequested() {
         initStateMachine(false);
         final int [] NOOP_COMMANDS = {
-            TetherInterfaceSM.CMD_TETHER_UNREQUESTED,
-            TetherInterfaceSM.CMD_IP_FORWARDING_ENABLE_ERROR,
-            TetherInterfaceSM.CMD_IP_FORWARDING_DISABLE_ERROR,
-            TetherInterfaceSM.CMD_START_TETHERING_ERROR,
-            TetherInterfaceSM.CMD_STOP_TETHERING_ERROR,
-            TetherInterfaceSM.CMD_SET_DNS_FORWARDERS_ERROR,
-            TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED
+            TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED,
+            TetherInterfaceStateMachine.CMD_IP_FORWARDING_ENABLE_ERROR,
+            TetherInterfaceStateMachine.CMD_IP_FORWARDING_DISABLE_ERROR,
+            TetherInterfaceStateMachine.CMD_START_TETHERING_ERROR,
+            TetherInterfaceStateMachine.CMD_STOP_TETHERING_ERROR,
+            TetherInterfaceStateMachine.CMD_SET_DNS_FORWARDERS_ERROR,
+            TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED
         };
         for (int command : NOOP_COMMANDS) {
             // None of these commands should trigger us to request action from
@@ -111,7 +111,7 @@ public class TetherInterfaceSMTest {
     @Test
     public void handlesImmediateInterfaceDown() {
         initStateMachine(false);
-        dispatchCommand(TetherInterfaceSM.CMD_INTERFACE_DOWN);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
         verify(mTetherHelper).sendTetherStateChangedBroadcast();
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
         assertFalse("Should not be tetherable when the interface is down", mTestedSm.isAvailable());
@@ -123,7 +123,7 @@ public class TetherInterfaceSMTest {
     @Test
     public void canBeTethered() throws RemoteException {
         initStateMachine(false);
-        dispatchCommand(TetherInterfaceSM.CMD_TETHER_REQUESTED);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
@@ -139,7 +139,7 @@ public class TetherInterfaceSMTest {
     public void canUnrequestTethering() throws Exception {
         initTetheredStateMachine(false, null);
 
-        dispatchCommand(TetherInterfaceSM.CMD_TETHER_UNREQUESTED);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
@@ -155,7 +155,7 @@ public class TetherInterfaceSMTest {
         initStateMachine(true);
 
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
-        dispatchCommand(TetherInterfaceSM.CMD_TETHER_REQUESTED);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
 
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
@@ -206,7 +206,7 @@ public class TetherInterfaceSMTest {
     public void canUnrequestTetheringWithUpstream() throws Exception {
         initTetheredStateMachine(false, UPSTREAM_IFACE);
 
-        dispatchCommand(TetherInterfaceSM.CMD_TETHER_UNREQUESTED);
+        dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
         inOrder.verify(mStatsService).forceUpdate();
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
@@ -224,7 +224,7 @@ public class TetherInterfaceSMTest {
     /**
      * Send a command to the state machine under test, and run the event loop to idle.
      *
-     * @param command One of the TetherInterfaceSM.CMD_* constants.
+     * @param command One of the TetherInterfaceStateMachine.CMD_* constants.
      */
     private void dispatchCommand(int command) {
         mTestedSm.sendMessage(command);
@@ -238,7 +238,8 @@ public class TetherInterfaceSMTest {
      * @param upstreamIface String name of upstream interface (or null)
      */
     private void dispatchTetherConnectionChanged(String upstreamIface) {
-        mTestedSm.sendMessage(TetherInterfaceSM.CMD_TETHER_CONNECTION_CHANGED, upstreamIface);
+        mTestedSm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
+                upstreamIface);
         mLooper.dispatchAll();
     }
 }
