@@ -1065,9 +1065,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mEntranceAnimationRunning = true;
         resizeStack(position, mSnapAlgorithm.getMiddleTarget().position,
                 mSnapAlgorithm.getMiddleTarget());
-
-        // Vibrate after docking
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
@@ -1105,9 +1102,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mExitStartPosition = getCurrentPosition();
             stopDragging(mExitStartPosition, target, 336 /* duration */, 100 /* startDelay */,
                     0 /* endDelay */, Interpolators.FAST_OUT_SLOW_IN);
-
-            // Vibrate after undocking
-            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
         }
     }
 }
