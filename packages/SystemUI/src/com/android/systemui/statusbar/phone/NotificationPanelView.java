@@ -39,6 +39,7 @@ import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.AutoReinflateContainer;
@@ -2289,6 +2290,12 @@ public class NotificationPanelView extends PanelView implements
     public void onAffordanceLaunchEnded() {
         mLaunchingAffordance = false;
         setLaunchingAffordance(false);
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+        mNotificationStackScroller.setParentFadingOut(alpha != 1.0f);
     }
 
     /**
