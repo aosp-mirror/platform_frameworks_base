@@ -2718,6 +2718,7 @@
     <public type="attr" name="numberPickerStyle" />
     <public type="attr" name="enableVrMode" />
     <public type="attr" name="hash" />
+    <public type="attr" name="networkSecurityConfig" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
