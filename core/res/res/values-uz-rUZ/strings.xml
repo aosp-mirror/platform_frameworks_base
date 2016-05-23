@@ -245,9 +245,9 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarga kirish"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Joylashuv"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"qurilmaning joylashuvi haqidagi ma’lumotlarga kirish"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"shu qurilmaning joylashuvi haqidagi ma’lumotlarga kirish"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Taqvim"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvim ma’lumotlariga kirish"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"taqvimingizga kirish"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS xabarlarni yuborish va ko‘rish"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
@@ -555,7 +555,7 @@
     <item msgid="9192514806975898961">"Maxsus"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Uy"</item>
+    <item msgid="8073994352956129127">"Shaxsiy"</item>
     <item msgid="7084237356602625604">"Ish"</item>
     <item msgid="1112044410659011023">"Boshqa"</item>
     <item msgid="2374913952870110618">"Maxsus"</item>
@@ -595,16 +595,16 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks (uy)"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Peyjer"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Boshqa"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Teskari qo‘ng‘iroq"</string>
-    <string name="phoneTypeCar" msgid="8738360689616716982">"Mashina"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Asosiy kompaniya"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Qayta qo‘ng‘iroq"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Avtomobil"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ofis"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Asosiy"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Faks (boshqa)"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobayl (ish)"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Teletayp"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobil (ish)"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peyjer (ish)"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yordamchi"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -613,7 +613,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Yubiley"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Boshqa"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Maxsus"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Uy"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Shaxsiy"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Ish"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Boshqa"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobil"</string>
@@ -649,10 +649,10 @@
     <string name="relationTypeMother" msgid="4578571352962758304">"Ona"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Ota-ona"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Hamkor"</string>
-    <string name="relationTypeReferredBy" msgid="101573059844135524">"Tavsiya qilingan"</string>
+    <string name="relationTypeReferredBy" msgid="101573059844135524">"Tavsiya etilgan"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Qarindosh"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Opa/singil"</string>
-    <string name="relationTypeSpouse" msgid="394136939428698117">"Turmush o‘rtog‘i"</string>
+    <string name="relationTypeSpouse" msgid="394136939428698117">"Turmush o‘rtoq"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Maxsus"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Uy"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Ish"</string>
@@ -1102,7 +1102,7 @@
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB orqali rasm o‘tkazish"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB orqali MIDI"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB jihozga ulangan"</string>
-    <string name="usb_notification_message" msgid="3370903770828407960">"Qo‘shimcha parametrlarni ko‘rsatish uchun bosing."</string>
+    <string name="usb_notification_message" msgid="3370903770828407960">"Boshqa parametrlarini ko‘rish uchun bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"O‘chirib qo‘yish uchun bu yerga bosing."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Xatoliklar hisoboti olinmoqda…"</string>
@@ -1204,7 +1204,7 @@
     <string name="vpn_lockdown_config" msgid="4655589351146766608">"Sozlash uchun bosing"</string>
     <string name="upload_file" msgid="2897957172366730416">"Faylni tanlash"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Hech qanday fayl tanlanmadi"</string>
-    <string name="reset" msgid="2448168080964209908">"Tiklash"</string>
+    <string name="reset" msgid="2448168080964209908">"Asliga qaytarish"</string>
     <string name="submit" msgid="1602335572089911941">"Yuborish"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mashina usuli yoqilgan"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Avtomobil rejimidan chiqish uchun bosing."</string>
