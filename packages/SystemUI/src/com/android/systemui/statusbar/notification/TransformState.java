@@ -463,9 +463,7 @@ public class TransformState {
         mTransformedView.animate().cancel();
         mTransformedView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         mTransformedView.setAlpha(visible ? 1.0f : 0.0f);
-        if (visible) {
-            resetTransformedView();
-        }
+        resetTransformedView();
     }
 
     public void prepareFadeIn() {
