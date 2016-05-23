@@ -254,7 +254,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Het scherm is nu vergrendeld in liggende stand."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Het scherm is nu vergrendeld in staande stand."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessertshowcase"</string>
-    <string name="start_dreams" msgid="5640361424498338327">"Schermbeveiliging"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Niet storen"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Alleen prioriteit"</string>
@@ -378,7 +378,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Huidige gebruiker uitloggen"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"GEBRUIKER UITLOGGEN"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\n1Elke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Gebruiker verwijderen?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Verwijderen"</string>

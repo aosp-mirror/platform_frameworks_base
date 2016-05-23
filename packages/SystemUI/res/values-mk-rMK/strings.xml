@@ -178,7 +178,7 @@
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Известувањето е отфрлено."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Панел за известување"</string>
-    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Брзи подесувања."</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Брзи поставки."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Заклучи екран."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Поставки"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Краток преглед."</string>
@@ -306,7 +306,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Известувања"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Светилка"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилни податоци"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Користење податоци"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Потрошен интернет"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Преостанати податоци"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Над лимитот"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Искористено: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
