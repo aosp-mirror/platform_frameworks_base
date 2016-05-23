@@ -333,6 +333,14 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_ALWAYS_FOCUSABLE = 0x40000;
 
     /**
+     * Bit in {@link #flags} indicating if the activity is a launcher activity which should always
+     * show up on the top of others.
+     * See android.R.attr#onTopLauncher.
+     * @hide
+     */
+    public static final int FLAG_ON_TOP_LAUNCHER = 0x80000;
+
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.
