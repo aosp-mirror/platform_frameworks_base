@@ -120,6 +120,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final Context mContext;
     private final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
+    private final SynchronizedStrongAuthTracker mStrongAuthTracker;
 
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
@@ -174,6 +175,30 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onCleanupUser(int userHandle) {
             mLockSettingsService.onCleanupUser(userHandle);
+        }
+    }
+
+    private class SynchronizedStrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+        public SynchronizedStrongAuthTracker(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void handleStrongAuthRequiredChanged(int strongAuthFlags, int userId) {
+            synchronized (this) {
+                super.handleStrongAuthRequiredChanged(strongAuthFlags, userId);
+            }
+        }
+
+        @Override
+        public int getStrongAuthForUser(int userId) {
+            synchronized (this) {
+                return super.getStrongAuthForUser(userId);
+            }
+        }
+
+        void register() {
+            mStrongAuth.registerStrongAuthTracker(this.mStub);
         }
     }
 
@@ -245,6 +270,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mStrongAuthTracker = new SynchronizedStrongAuthTracker(mContext);
+        mStrongAuthTracker.register();
+
     }
 
     /**
@@ -1396,6 +1424,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void userPresent(int userId) {
         checkWritePermission(userId);
         mStrongAuth.reportUnlock(userId);
+    }
+
+    @Override
+    public int getStrongAuthForUser(int userId) {
+        checkPasswordReadPermission(userId);
+        return mStrongAuthTracker.getStrongAuthForUser(userId);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
