@@ -128,14 +128,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
 
     private void setLastError(int error) {
         mLastError = error;
-
-        if (isErrored()) {
-            if (mUsb) {
-                // note everything's been unwound by this point so nothing to do on
-                // further error..
-                configureUsbIface(false, mIfaceName);
-            }
-        }
     }
 
     public boolean isAvailable() {
@@ -215,9 +207,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         public void enter() {
             if (mUsb) {
                 if (!configureUsbIface(true, mIfaceName)) {
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceStateMachine.this);
                     setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
-
                     transitionTo(mInitialState);
                     return;
                 }
@@ -228,17 +218,33 @@ public class TetherInterfaceStateMachine extends StateMachine {
             } catch (Exception e) {
                 Log.e(TAG, "Error Tethering: " + e.toString());
                 setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
-
-                try {
-                    mNMService.untetherInterface(mIfaceName);
-                } catch (Exception ee) {
-                    Log.e(TAG, "Error untethering after failure!" + ee.toString());
-                }
                 transitionTo(mInitialState);
                 return;
             }
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
             mTetherController.sendTetherStateChangedBroadcast();
+        }
+
+        @Override
+        public void exit() {
+            mTetherController.notifyInterfaceTetheringReadiness(false,
+                    TetherInterfaceStateMachine.this);
+
+            // Note that at this point, we're leaving the tethered state.  We can fail any
+            // of these operations, but it doesn't really change that we have to try them
+            // all in sequence.
+            cleanupUpstream();
+
+            try {
+                mNMService.untetherInterface(mIfaceName);
+            } catch (Exception ee) {
+                setLastError(ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
+                Log.e(TAG, "Failed to untether interface: " + ee.toString());
+            }
+
+            if (mUsb) {
+                configureUsbIface(false, mIfaceName);
+            }
         }
 
         private void cleanupUpstream() {
@@ -275,28 +281,12 @@ public class TetherInterfaceStateMachine extends StateMachine {
             boolean retValue = true;
             switch (message.what) {
                 case CMD_TETHER_UNREQUESTED:
+                    transitionTo(mInitialState);
+                    if (DBG) Log.d(TAG, "Untethered (unrequested)" + mIfaceName);
+                    break;
                 case CMD_INTERFACE_DOWN:
-                    cleanupUpstream();
-                    try {
-                        mNMService.untetherInterface(mIfaceName);
-                    } catch (Exception e) {
-                        setLastErrorAndTransitionToInitialState(
-                                ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
-                        break;
-                    }
-                    mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceStateMachine.this);
-                    if (message.what == CMD_TETHER_UNREQUESTED) {
-                        if (mUsb) {
-                            if (!configureUsbIface(false, mIfaceName)) {
-                                setLastError(
-                                        ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
-                            }
-                        }
-                        transitionTo(mInitialState);
-                    } else if (message.what == CMD_INTERFACE_DOWN) {
-                        transitionTo(mUnavailableState);
-                    }
-                    if (DBG) Log.d(TAG, "Untethered " + mIfaceName);
+                    transitionTo(mUnavailableState);
+                    if (DBG) Log.d(TAG, "Untethered (ifdown)" + mIfaceName);
                     break;
                 case CMD_TETHER_CONNECTION_CHANGED:
                     String newUpstreamIfaceName = (String)(message.obj);
@@ -314,13 +304,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
                                     newUpstreamIfaceName);
                         } catch (Exception e) {
                             Log.e(TAG, "Exception enabling Nat: " + e.toString());
-                            try {
-                                mNMService.disableNat(mIfaceName, newUpstreamIfaceName);
-                            } catch (Exception ee) {}
-                            try {
-                                mNMService.untetherInterface(mIfaceName);
-                            } catch (Exception ee) {}
-
                             setLastError(ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR);
                             transitionTo(mInitialState);
                             return true;
@@ -333,14 +316,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 case CMD_START_TETHERING_ERROR:
                 case CMD_STOP_TETHERING_ERROR:
                 case CMD_SET_DNS_FORWARDERS_ERROR:
-                    cleanupUpstream();
-                    try {
-                        mNMService.untetherInterface(mIfaceName);
-                    } catch (Exception e) {
-                        setLastErrorAndTransitionToInitialState(
-                                ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
-                        break;
-                    }
                     setLastErrorAndTransitionToInitialState(
                             ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
                     break;
