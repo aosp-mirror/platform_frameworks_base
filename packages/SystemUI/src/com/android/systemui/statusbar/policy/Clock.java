@@ -167,9 +167,6 @@ public class Clock extends TextView implements DemoMode, Tunable {
         if (CLOCK_SECONDS.equals(key)) {
             mShowSeconds = newValue != null && Integer.parseInt(newValue) != 0;
             updateShowSeconds();
-        } else if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
-            ArraySet<String> list = StatusBarIconController.getIconBlacklist(newValue);
-            setVisibility(list.contains("clock") ? View.GONE : View.VISIBLE);
         }
     }
 
