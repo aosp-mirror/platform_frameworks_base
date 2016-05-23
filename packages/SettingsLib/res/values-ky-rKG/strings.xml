@@ -34,7 +34,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s аркылуу жеткиликтүү"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s аркылуу жеткиликтүү"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Туташып турат, Интернет жок"</string>
-    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ажыратылды"</string>
+    <string name="bluetooth_disconnected" msgid="6557104142667339895">"Ажыратылган"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Ажыратылууда…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Туташууда…"</string>
     <string name="bluetooth_connected" msgid="6038755206916626419">"Туташып турат"</string>

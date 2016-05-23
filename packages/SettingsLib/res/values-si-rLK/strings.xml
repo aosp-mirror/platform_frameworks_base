@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"ඇතැම් පෙරනිමියන් සකස් කර ඇත"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"පෙරනිමියන් සකසා නොමැත"</string>
     <string name="tts_settings" msgid="8186971894801348327">"පෙළ-සිට-කථාවට සැකසුම්"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"පෙළ-සිට-කථන ප්‍රතිදානය"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"පෙළින්-කථන ප්‍රතිදානය"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"කථන ශීඝ්‍රතාව"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"පෙළ කථා කරනා වේගය"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"තාරතාව"</string>
