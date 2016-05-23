@@ -215,17 +215,23 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
 
     public boolean isOnlyChildInSuppressedGroup(StatusBarNotification sbn) {
         return isGroupSuppressed(sbn.getGroupKey())
-                && isOnlyChildInGroup(sbn);
+                && isOnlyChild(sbn);
     }
 
-    public boolean isOnlyChildInGroup(StatusBarNotification sbn) {
+    private boolean isOnlyChild(StatusBarNotification sbn) {
         return !sbn.getNotification().isGroupSummary()
                 && getTotalNumberOfChildren(sbn) == 1;
     }
 
+    public boolean isOnlyChildInGroup(StatusBarNotification sbn) {
+        return isOnlyChild(sbn) && getLogicalGroupSummary(sbn) != null;
+    }
+
     private int getTotalNumberOfChildren(StatusBarNotification sbn) {
-        return getNumberOfIsolatedChildren(sbn.getGroupKey())
-                + mGroupMap.get(sbn.getGroupKey()).children.size();
+        int isolatedChildren = getNumberOfIsolatedChildren(sbn.getGroupKey());
+        NotificationGroup group = mGroupMap.get(sbn.getGroupKey());
+        int realChildren = group != null ? group.children.size() : 0;
+        return isolatedChildren + realChildren;
     }
 
     private boolean isGroupSuppressed(String groupKey) {
