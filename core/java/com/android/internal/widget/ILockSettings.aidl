@@ -44,4 +44,5 @@ interface ILockSettings {
     void requireStrongAuth(int strongAuthReason, int userId);
     void systemReady();
     void userPresent(int userId);
+    int getStrongAuthForUser(int userId);
 }
