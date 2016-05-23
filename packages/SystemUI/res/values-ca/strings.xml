@@ -48,7 +48,7 @@
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"Silen."</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Notificacions"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ancorat"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Xarxa compartida per Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configura els mètodes d\'entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclat físic"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"Vols permetre que l\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g> accedeixi al dispositiu USB?"</string>
@@ -152,7 +152,7 @@
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Dades mòbils"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Les dades mòbils estan activades"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Les dades mòbils estan desactivades"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ancoratge de Bluetooth"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartició de xarxa per Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
@@ -301,7 +301,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Fet"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Connectat"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"S\'està connectant..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Ancoratge a xarxa"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Compartició de xarxa"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Punt d\'accés Wi-Fi"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificacions"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Llanterna"</string>

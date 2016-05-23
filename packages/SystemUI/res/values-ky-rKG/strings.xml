@@ -133,7 +133,7 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"Эки таякча."</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Үч таякча."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Толук сигнал."</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"Жандырылган."</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Күйүк."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Өчүк."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Туташтып турат."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Туташууда."</string>
@@ -272,7 +272,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Тигинен"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Туурасынан"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Киргизүү ыкмасы"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"Жайгаштыруу"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Жайгашкан жер"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Жайгашытрууну өчүрүү"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Медиа түзмөгү"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
@@ -298,22 +298,22 @@
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Түстөрдү аңтаруу"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түстү тууралоо абалы"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Дагы жөндөөлөр"</string>
-    <string name="quick_settings_done" msgid="3402999958839153376">"Аткарылды"</string>
+    <string name="quick_settings_done" msgid="3402999958839153376">"Бүттү"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Туташкан"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Туташууда…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетеринг"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Туташуу чекити"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Дайындарды өткөрүүчү уюктук тутум"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындарды колдонуу"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Дайындарды өткөрүү"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын колдонулушу"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Калган дайындар"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Чектен ашты"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> колдонулду"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> чектөө"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> эскертүү"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Иштөө режими"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Акыркы нерселер жок"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Акыркы колдонмолор жок"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Баарын тазаладыңыз"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Колдонмо жөнүндө маалымат"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"экран кадоо"</string>
@@ -498,7 +498,7 @@
     <string name="notification_importance_high" msgid="1729480727023990427">"Калкып чыкма эскертме көрсөтүлүп, толук экранда көрсөтүлбөсүн."</string>
     <string name="notification_importance_max" msgid="2508384624461849111">"Калкып чыгуучу жана толук экранда көрсөтүлүүчү эскертмелерге уруксат берилсин."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
-    <string name="notification_done" msgid="5279426047273930175">"Аткарылды"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Бүттү"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> эскертмесин башкаруу каражаттары"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Түсү жана көрүнүшү"</string>
     <string name="night_mode" msgid="3540405868248625488">"Түнкү режим"</string>

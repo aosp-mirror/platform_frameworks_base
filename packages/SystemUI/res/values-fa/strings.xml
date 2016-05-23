@@ -179,7 +179,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"اعلان ردشد."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"تنظیمات سریع."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"صفحه در حالت قفل."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"قفل صفحه."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"تنظیمات"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"نمای کلی."</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"بستن"</string>
@@ -378,7 +378,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"خروج کاربر فعلی از سیستم"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"خروج کاربر از سیستم"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"کاربر جدیدی اضافه می‌کنید؟"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی را اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"کاربر حذف شود؟"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"همه برنامه‌ها و داده‌های این کاربر حذف می‌شود."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"حذف"</string>
@@ -482,7 +482,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"کنترل‌های قدرتمند اعلان"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"روشن"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"خاموش"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در صفحه درحالت قفل و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"با کنترل‌های قدرتمند اعلان می‌توانید سطح اهمیت اعلان‌های هر برنامه را از ۰ تا ۵ تعیین کنید. \n\n"<b>"سطح ۵"</b>" \n- در صدر فهرست اعلان‌ها نشان داده می‌شود \n- وقفه برای نمایش تمام‌صفحه مجاز است \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۴"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- همیشه اجمالی نشان داده می‌شود \n\n"<b>"سطح ۳"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n\n"<b>"سطح ۲"</b>" \n- وقفه برای نمایش تمام‌صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا و لرزش ایجاد نمی‌کند \n\n"<b>"سطح ۱"</b>" \n- نمایش تمام صفحه مجاز نیست \n- هیچ‌وقت اجمالی نشان داده نمی‌شود \n- هیچ‌وقت صدا یا لرزش ایجاد نمی‌کند \n- در قفل صفحه و نوار وضعیت پنهان است \n- در پایین فهرست اعلان‌ها نشان داده می‌شود \n\n"<b>"سطح ۰"</b>" \n- همه اعلان‌های این برنامه مسدود است"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"اهمیت: خودکار"</string>
     <string name="blocked_importance" msgid="5035073235408414397">"اهمیت: سطح ۰"</string>
     <string name="min_importance" msgid="560779348928574878">"اهمیت: سطح ۱"</string>
@@ -492,7 +492,7 @@
     <string name="max_importance" msgid="4880179829869865275">"اهمیت: سطح ۵"</string>
     <string name="notification_importance_user_unspecified" msgid="2868359605125272874">"برنامه اهمیت هر اعلان را تعیین می‌کند."</string>
     <string name="notification_importance_blocked" msgid="4237497046867398057">"اعلان‌های این برنامه هرگز نشان داده نمی‌شود."</string>
-    <string name="notification_importance_min" msgid="7844224511187027155">"بدون وقفه نمایش تمام‌صفحه، نمایش اجمالی، صدا یا لرزش. عدم نمایش در صفحه قفل و نوار وضعیت."</string>
+    <string name="notification_importance_min" msgid="7844224511187027155">"بدون وقفه نمایش تمام‌صفحه، نمایش اجمالی، صدا یا لرزش. عدم نمایش در قفل صفحه و نوار وضعیت."</string>
     <string name="notification_importance_low" msgid="7950291702044409847">"بدون وقفه نمایش تمام‌صفحه، نمایش اجمالی، صدا یا لرزش."</string>
     <string name="notification_importance_default" msgid="5924405820269074915">"بدون وقفه نمایش تمام‌صفحه یا نمایش اجمالی."</string>
     <string name="notification_importance_high" msgid="1729480727023990427">"همیشه نمایش اجمالی. بدون وقفه نمایش تمام‌صفحه."</string>
@@ -595,7 +595,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"دکمه «کد دکمه» به کلیدهای صفحه‌کلید امکان می‌دهند به «نوار پیمایش» اضافه شوند. وقتی فشار داده می‌شوند رفتار کلید صفحه‌کلید انتخاب‌شده را تقلید می‌کنند. ابتدا باید کلید را برای دکمه انتخاب کرد و به دنبال آن باید تصویری برای نشان داده شدن روی دکمه انتخاب شود."</string>
     <string name="select_keycode" msgid="7413765103381924584">"کلید صفحه‌کلید را انتخاب کنید"</string>
     <string name="preview" msgid="9077832302472282938">"پیش‌نمایش"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"کشیدن برای افزودن کاشی‌ها"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"برای افزودن کاشی، بکشید"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"برای حذف، به اینجا بکشید"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ویرایش"</string>
     <string name="tuner_time" msgid="6572217313285536011">"زمان"</string>

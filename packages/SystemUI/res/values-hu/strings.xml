@@ -154,7 +154,7 @@
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobiladat-kapcsolat kikapcsolva"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth megosztása."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Repülőgép üzemmód."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Nincs SIM kártya."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Nincs SIM-kártya."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Szolgáltatói hálózat váltása."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Az akkumulátorral kapcsolatos részletek megnyitása"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akkumulátor <xliff:g id="NUMBER">%d</xliff:g> százalék."</string>

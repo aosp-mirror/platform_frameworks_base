@@ -155,7 +155,7 @@
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Datele mobile sunt dezactivate"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conectarea ca modem prin Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mod Avion."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Niciun card SIM."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Fără SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Se schimbă rețeaua operatorului."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Deschideți detaliile privind bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> la sută."</string>
@@ -298,7 +298,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Niciun dispozitiv disponibil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminozitate"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMAT"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inversați culori"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inversați culorile"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Mod de corectare a culorilor"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Mai multe setări"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Terminat"</string>
@@ -323,13 +323,13 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"căutare"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> nu a putut porni."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplicația <xliff:g id="APP">%s</xliff:g> este dezactivată în modul sigur."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ștergeți-le pe toate"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ștergeți tot"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Aplicația nu acceptă ecranul împărțit"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Trageți aici pentru a folosi ecranul împărțit"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divizare pe orizontală"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divizare pe verticală"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divizare personalizată"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"S-a încărcat"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Încărcată"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Se încarcă"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> până la încărcare completă"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Nu se încarcă"</string>
@@ -380,7 +380,7 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Deconectați utilizatorul"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Deconectați utilizatorul actual"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"DECONECTAȚI UTILIZATORUL"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"Adăugați utilizator nou?"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Adăugați un utilizator nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Când adăugați un utilizator nou, acesta trebuie să-și configureze spațiul.\n\nOrice utilizator poate actualiza aplicațiile pentru toți ceilalți utilizatori."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Eliminați utilizatorul?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Toate aplicațiile și datele acestui utilizator vor fi șterse."</string>
