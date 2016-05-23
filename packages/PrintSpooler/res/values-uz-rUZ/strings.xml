@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Chop qilishni nazorat qilish"</string>
-    <string name="more_options_button" msgid="2243228396432556771">"Ko‘proq"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Yana"</string>
     <string name="label_destination" msgid="9132510997381599275">"Mo‘ljal"</string>
     <string name="label_copies" msgid="3634531042822968308">"Nusxalar"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"Nusxalari soni:"</string>
@@ -97,7 +97,7 @@
     <item msgid="79513688117503758">"Qisqa tomoni"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"Bo‘yiga"</item>
+    <item msgid="4061931020926489228">"Tik holat"</item>
     <item msgid="3199660090246166812">"Eniga"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Faylga yozib bo‘lmadi"</string>
