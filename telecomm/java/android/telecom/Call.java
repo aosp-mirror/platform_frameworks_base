@@ -286,11 +286,6 @@ public final class Call {
         public static final int PROPERTY_HIGH_DEF_AUDIO = 0x00000010;
 
         /**
-         * @deprecated Use {@link #PROPERTY_ENTERPRISE_CALL} instead.
-         */
-        public static final int PROPERTY_WORK_CALL = 0x00000020;
-
-        /**
          * Whether the call is associated with the work profile.
          */
         public static final int PROPERTY_ENTERPRISE_CALL = 0x00000020;
