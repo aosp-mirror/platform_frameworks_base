@@ -125,17 +125,18 @@ public class DhcpClient extends StateMachine {
     public static final int CMD_CONFIGURE_LINKADDRESS       = PUBLIC_BASE + 8;
     public static final int EVENT_LINKADDRESS_CONFIGURED    = PUBLIC_BASE + 9;
 
-    /* Message.arg1 arguments to CMD_POST_DHCP notification */
+    /* Message.arg1 arguments to CMD_POST_DHCP_ACTION notification */
     public static final int DHCP_SUCCESS = 1;
     public static final int DHCP_FAILURE = 2;
 
-    // Messages.
+    // Internal messages.
     private static final int PRIVATE_BASE         = Protocol.BASE_DHCP + 100;
     private static final int CMD_KICK             = PRIVATE_BASE + 1;
     private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
     private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
     private static final int CMD_RENEW_DHCP       = PRIVATE_BASE + 4;
-    private static final int CMD_EXPIRE_DHCP      = PRIVATE_BASE + 5;
+    private static final int CMD_REBIND_DHCP      = PRIVATE_BASE + 5;
+    private static final int CMD_EXPIRE_DHCP      = PRIVATE_BASE + 6;
 
     // For message logging.
     private static final Class[] sMessageClasses = { DhcpClient.class };
@@ -177,6 +178,7 @@ public class DhcpClient extends StateMachine {
     private final WakeupMessage mKickAlarm;
     private final WakeupMessage mTimeoutAlarm;
     private final WakeupMessage mRenewAlarm;
+    private final WakeupMessage mRebindAlarm;
     private final WakeupMessage mExpiryAlarm;
     private final String mIfaceName;
 
@@ -241,8 +243,9 @@ public class DhcpClient extends StateMachine {
         mKickAlarm = makeWakeupMessage("KICK", CMD_KICK);
         // Used to time out PacketRetransmittingStates.
         mTimeoutAlarm = makeWakeupMessage("TIMEOUT", CMD_TIMEOUT);
-        // Used to schedule DHCP renews.
+        // Used to schedule DHCP reacquisition.
         mRenewAlarm = makeWakeupMessage("RENEW", CMD_RENEW_DHCP);
+        mRebindAlarm = makeWakeupMessage("REBIND", CMD_REBIND_DHCP);
         mExpiryAlarm = makeWakeupMessage("EXPIRY", CMD_EXPIRE_DHCP);
     }
 
@@ -276,6 +279,10 @@ public class DhcpClient extends StateMachine {
     }
 
     private boolean initSockets() {
+        return initPacketSocket() && initUdpSocket();
+    }
+
+    private boolean initPacketSocket() {
         try {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             PacketSocketAddress addr = new PacketSocketAddress((short) ETH_P_IP, mIface.getIndex());
@@ -285,6 +292,10 @@ public class DhcpClient extends StateMachine {
             Log.e(TAG, "Error creating packet socket", e);
             return false;
         }
+        return true;
+    }
+
+    private boolean initUdpSocket() {
         try {
             mUdpSock = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             Os.setsockoptInt(mUdpSock, SOL_SOCKET, SO_REUSEADDR, 1);
@@ -363,16 +374,25 @@ public class DhcpClient extends StateMachine {
         return (short) ((SystemClock.elapsedRealtime() - mTransactionStartMillis) / 1000);
     }
 
-    private boolean transmitPacket(ByteBuffer buf, String description, Inet4Address to) {
+    private boolean transmitPacket(ByteBuffer buf, String description, int encap, Inet4Address to) {
         try {
-            if (to.equals(INADDR_BROADCAST)) {
+            if (encap == DhcpPacket.ENCAP_L2) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
                 Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
+            } else if (encap == DhcpPacket.ENCAP_BOOTP && to.equals(INADDR_BROADCAST)) {
+                if (DBG) Log.d(TAG, "Broadcasting " + description);
+                // We only send L3-encapped broadcasts in DhcpRebindingState,
+                // where we have an IP address and an unconnected UDP socket.
+                //
+                // N.B.: We only need this codepath because DhcpRequestPacket
+                // hardcodes the source IP address to 0.0.0.0. We could reuse
+                // the packet socket if this ever changes.
+                Os.sendto(mUdpSock, buf, 0, to, DhcpPacket.DHCP_SERVER);
             } else {
                 // It's safe to call getpeername here, because we only send unicast packets if we
-                // have an IP address, and we connect the UDP socket before
-                // ConfiguringInterfaceState#exit.
-                if (DBG) Log.d(TAG, "Unicasting " + description + " to " + Os.getpeername(mUdpSock));
+                // have an IP address, and we connect the UDP socket in DhcpBoundState#enter.
+                if (DBG) Log.d(TAG, String.format("Unicasting %s to %s",
+                        description, Os.getpeername(mUdpSock)));
                 Os.write(mUdpSock, buf);
             }
         } catch(ErrnoException|IOException e) {
@@ -386,14 +406,15 @@ public class DhcpClient extends StateMachine {
         ByteBuffer packet = DhcpPacket.buildDiscoverPacket(
                 DhcpPacket.ENCAP_L2, mTransactionId, getSecs(), mHwAddr,
                 DO_UNICAST, REQUESTED_PARAMS);
-        return transmitPacket(packet, "DHCPDISCOVER", INADDR_BROADCAST);
+        return transmitPacket(packet, "DHCPDISCOVER", DhcpPacket.ENCAP_L2, INADDR_BROADCAST);
     }
 
     private boolean sendRequestPacket(
             Inet4Address clientAddress, Inet4Address requestedAddress,
             Inet4Address serverAddress, Inet4Address to) {
         // TODO: should we use the transaction ID from the server?
-        int encap = to.equals(INADDR_BROADCAST) ? DhcpPacket.ENCAP_L2 : DhcpPacket.ENCAP_BOOTP;
+        final int encap = INADDR_ANY.equals(clientAddress)
+                ? DhcpPacket.ENCAP_L2 : DhcpPacket.ENCAP_BOOTP;
 
         ByteBuffer packet = DhcpPacket.buildRequestPacket(
                 encap, mTransactionId, getSecs(), clientAddress,
@@ -403,7 +424,7 @@ public class DhcpClient extends StateMachine {
         String description = "DHCPREQUEST ciaddr=" + clientAddress.getHostAddress() +
                              " request=" + requestedAddress.getHostAddress() +
                              " serverid=" + serverStr;
-        return transmitPacket(packet, description, to);
+        return transmitPacket(packet, description, encap, to);
     }
 
     private void scheduleLeaseTimers() {
@@ -413,14 +434,21 @@ public class DhcpClient extends StateMachine {
         }
 
         final long now = SystemClock.elapsedRealtime();
-        long renewTime = (now + mDhcpLeaseExpiry) / 2;
-        mRenewAlarm.schedule(renewTime);
-        long secondsHence = (renewTime - now) / 1000;
-        Log.d(TAG, "Scheduling renewal in " + secondsHence + "s");
 
-        mExpiryAlarm.schedule(mDhcpLeaseExpiry);
-        secondsHence = (mDhcpLeaseExpiry - now) / 1000;
-        Log.d(TAG, "Scheduling expiry in " + secondsHence + "s");
+        // TODO: consider getting the renew and rebind timers from T1 and T2.
+        // See also:
+        //     https://tools.ietf.org/html/rfc2131#section-4.4.5
+        //     https://tools.ietf.org/html/rfc1533#section-9.9
+        //     https://tools.ietf.org/html/rfc1533#section-9.10
+        final long remainingDelay = mDhcpLeaseExpiry - now;
+        final long renewDelay = remainingDelay / 2;
+        final long rebindDelay = remainingDelay * 7 / 8;
+        mRenewAlarm.schedule(now + renewDelay);
+        mRebindAlarm.schedule(now + rebindDelay);
+        mExpiryAlarm.schedule(now + remainingDelay);
+        Log.d(TAG, "Scheduling renewal in " + (renewDelay / 1000) + "s");
+        Log.d(TAG, "Scheduling rebind in " + (rebindDelay / 1000) + "s");
+        Log.d(TAG, "Scheduling expiry in " + (remainingDelay / 1000) + "s");
     }
 
     private void notifySuccess() {
@@ -719,7 +747,6 @@ public class DhcpClient extends StateMachine {
 
     class DhcpRequestingState extends PacketRetransmittingState {
         public DhcpRequestingState() {
-            super();
             mTimeout = DHCP_TIMEOUT_MS / 2;
         }
 
@@ -777,7 +804,11 @@ public class DhcpClient extends StateMachine {
 
         @Override
         public void exit() {
+            // Clear any extant alarms.
+            mRenewAlarm.cancel();
+            mRebindAlarm.cancel();
             mExpiryAlarm.cancel();
+            clearDhcpState();
             // Tell IpManager to clear the IPv4 address. There is no need to
             // wait for confirmation since any subsequent packets are sent from
             // INADDR_ANY anyway (DISCOVER, REQUEST).
@@ -797,21 +828,7 @@ public class DhcpClient extends StateMachine {
             super.processMessage(message);
             switch (message.what) {
                 case EVENT_LINKADDRESS_CONFIGURED:
-                    if (mDhcpLease.serverAddress != null &&
-                            !connectUdpSock(mDhcpLease.serverAddress)) {
-                        // There's likely no point in going into DhcpInitState here, we'll probably
-                        // just repeat the transaction, get the same IP address as before, and fail.
-                        //
-                        // NOTE: It is observed that connectUdpSock() basically never fails, due to
-                        // SO_BINDTODEVICE. Examining the local socket address shows it will happily
-                        // return an IPv4 address from another interface, or even return "0.0.0.0".
-                        //
-                        // TODO: Consider deleting this check, following testing on several kernels.
-                        notifyFailure();
-                        transitionTo(mStoppedState);
-                    } else {
-                        transitionTo(mDhcpBoundState);
-                    }
+                    transitionTo(mDhcpBoundState);
                     return HANDLED;
                 default:
                     return NOT_HANDLED;
@@ -823,8 +840,19 @@ public class DhcpClient extends StateMachine {
         @Override
         public void enter() {
             super.enter();
-            // TODO: DhcpStateMachine only supported renewing at 50% of the lease time,
-            // and did not support rebinding. Now that the legacy DHCP client is gone, fix this.
+            if (mDhcpLease.serverAddress != null && !connectUdpSock(mDhcpLease.serverAddress)) {
+                // There's likely no point in going into DhcpInitState here, we'll probably
+                // just repeat the transaction, get the same IP address as before, and fail.
+                //
+                // NOTE: It is observed that connectUdpSock() basically never fails, due to
+                // SO_BINDTODEVICE. Examining the local socket address shows it will happily
+                // return an IPv4 address from another interface, or even return "0.0.0.0".
+                //
+                // TODO: Consider deleting this check, following testing on several kernels.
+                notifyFailure();
+                transitionTo(mStoppedState);
+            }
+
             scheduleLeaseTimers();
         }
 
@@ -843,18 +871,10 @@ public class DhcpClient extends StateMachine {
                     return NOT_HANDLED;
             }
         }
-
-        @Override
-        public void exit() {
-            mRenewAlarm.cancel();
-        }
     }
 
-    class DhcpRenewingState extends PacketRetransmittingState {
-        public DhcpRenewingState() {
-            super();
-            mTimeout = DHCP_TIMEOUT_MS;
-        }
+    abstract class DhcpReacquiringState extends PacketRetransmittingState {
+        protected String mLeaseMsg;
 
         @Override
         public void enter() {
@@ -862,16 +882,14 @@ public class DhcpClient extends StateMachine {
             startNewTransaction();
         }
 
+        abstract protected Inet4Address packetDestination();
+
         protected boolean sendPacket() {
-            // Not specifying a SERVER_IDENTIFIER option is a violation of RFC 2131, but...
-            // http://b/25343517 . Try to make things work anyway by using broadcast renews.
-            Inet4Address to = (mDhcpLease.serverAddress != null) ?
-                    mDhcpLease.serverAddress : INADDR_BROADCAST;
             return sendRequestPacket(
                     (Inet4Address) mDhcpLease.ipAddress.getAddress(),  // ciaddr
                     INADDR_ANY,                                        // DHCP_REQUESTED_IP
                     null,                                              // DHCP_SERVER_IDENTIFIER
-                    to);                                               // packet destination address
+                    packetDestination());                              // packet destination address
         }
 
         protected void receivePacket(DhcpPacket packet) {
@@ -890,7 +908,7 @@ public class DhcpClient extends StateMachine {
                     // in IpManager and by any overridden relevant handlers of
                     // the registered IpManager.Callback.  IP address changes
                     // are not supported here.
-                    acceptDhcpResults(results, "Renewed");
+                    acceptDhcpResults(results, mLeaseMsg);
                     transitionTo(mDhcpBoundState);
                 }
             } else if (packet instanceof DhcpNakPacket) {
@@ -901,8 +919,57 @@ public class DhcpClient extends StateMachine {
         }
     }
 
-    // Not implemented--yet. DhcpStateMachine did not implement it either.
-    class DhcpRebindingState extends LoggingState {
+    class DhcpRenewingState extends DhcpReacquiringState {
+        public DhcpRenewingState() {
+            mLeaseMsg = "Renewed";
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (super.processMessage(message) == HANDLED) {
+                return HANDLED;
+            }
+
+            switch (message.what) {
+                case CMD_REBIND_DHCP:
+                    transitionTo(mDhcpRebindingState);
+                    return HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
+        }
+
+        @Override
+        protected Inet4Address packetDestination() {
+            // Not specifying a SERVER_IDENTIFIER option is a violation of RFC 2131, but...
+            // http://b/25343517 . Try to make things work anyway by using broadcast renews.
+            return (mDhcpLease.serverAddress != null) ?
+                    mDhcpLease.serverAddress : INADDR_BROADCAST;
+        }
+    }
+
+    class DhcpRebindingState extends DhcpReacquiringState {
+        public DhcpRebindingState() {
+            mLeaseMsg = "Rebound";
+        }
+
+        @Override
+        public void enter() {
+            super.enter();
+
+            // We need to broadcast and possibly reconnect the socket to a
+            // completely different server.
+            closeQuietly(mUdpSock);
+            if (!initUdpSocket()) {
+                Log.e(TAG, "Failed to recreate UDP socket");
+                transitionTo(mDhcpInitState);
+            }
+        }
+
+        @Override
+        protected Inet4Address packetDestination() {
+            return INADDR_BROADCAST;
+        }
     }
 
     class DhcpInitRebootState extends LoggingState {
