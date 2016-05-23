@@ -404,7 +404,7 @@
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permet que l\'aplicació creï sòcols de xarxa i que utilitzi protocols de xarxa personalitzats. El navegador i altres aplicacions proporcionen mitjans per enviar dades a Internet, de manera que aquest permís no és obligatori per enviar-n\'hi."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"canviar la connectivitat de xarxa"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Permet que l\'aplicació pugui canviar l\'estat de connectivitat de la xarxa."</string>
-    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat d\'ancoratge a xarxa"</string>
+    <string name="permlab_changeTetherState" msgid="5952584964373017960">"Canvia la connectivitat de compartició de xarxa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Permet que l\'aplicació canviï l\'estat de la connectivitat de la xarxa d\'ancoratge."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"veure connexions Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Permet que l\'aplicació visualitzi informació sobre les xarxes Wi-Fi, com ara si la Wi-Fi està activada i el nom dels dispositius Wi-Fi connectats."</string>
@@ -1205,7 +1205,7 @@
     <string name="submit" msgid="1602335572089911941">"Envia"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mode de cotxe activat"</string>
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Toca per sortir del mode de cotxe."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir la xarxa o punt d\'accés Wi-Fi activat"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Compartició de xarxa o punt d\'accés Wi-Fi activat"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca per configurar."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>

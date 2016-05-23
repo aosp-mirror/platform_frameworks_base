@@ -694,7 +694,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"停止"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"倒帶"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"向前快轉"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"僅可撥打緊急電話"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"只可撥打緊急電話"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"網絡已鎖定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡處於 PUK 鎖定狀態。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"請參閱使用者指南或與客戶服務中心聯絡。"</string>
@@ -1345,7 +1345,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形不對"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒後再試一次。"</string>
@@ -1597,7 +1597,7 @@
     <string name="language_selection_title" msgid="2680677278159281088">"新增語言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"輸入語言名稱"</string>
-    <string name="language_picker_section_suggested" msgid="8414489646861640885">"推薦"</string>
+    <string name="language_picker_section_suggested" msgid="8414489646861640885">"建議"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已關閉"</string>
