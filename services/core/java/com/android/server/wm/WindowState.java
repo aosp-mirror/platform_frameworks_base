@@ -1265,8 +1265,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * @return true if the window should be considered while evaluating allDrawn flags.
      */
     boolean mightAffectAllDrawn(boolean visibleOnly) {
-        final boolean isViewVisible = (mViewVisibility == View.VISIBLE)
-                && (mAppToken == null || !mAppToken.clientHidden);
+        final boolean isViewVisible = (mAppToken == null || !mAppToken.clientHidden)
+                && (mViewVisibility == View.VISIBLE) && !mWindowRemovalAllowed;
         return (isOnScreenIgnoringKeyguard() && (!visibleOnly || isViewVisible)
                 || mWinAnimator.mAttrType == TYPE_BASE_APPLICATION)
                 && !mAnimatingExit && !mDestroying;
@@ -1822,7 +1822,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     /** @return true if this window desires key events. */
     boolean canReceiveKeys() {
         return isVisibleOrAdding()
-                && (mViewVisibility == View.VISIBLE)
+                && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
                 && (mAppToken == null || mAppToken.windowsAreFocusable())
                 && !isAdjustedForMinimizedDock();

@@ -2365,7 +2365,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // immediately after the enter animation is done. If the app is not yet drawn then
                 // it will show up as a flicker.
                 win.mRemoveOnExit = true;
-                win.mWindowRemovalAllowed = true;
+                // Request a focus update as this window's input channel is already gone. Otherwise
+                // we could have no focused window in input manager.
+                final boolean focusChanged = updateFocusedWindowLocked(
+                        UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
+                if (focusChanged) {
+                    mInputMonitor.updateInputWindowsLw(false /*force*/);
+                }
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
