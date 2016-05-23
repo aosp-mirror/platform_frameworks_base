@@ -25,6 +25,7 @@ import com.android.printservice.recommendation.plugin.hp.HPRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.MDNSFilterPlugin;
 import com.android.printservice.recommendation.plugin.mdnsFilter.VendorConfig;
 import com.android.printservice.recommendation.plugin.mopria.MopriaRecommendationPlugin;
+import com.android.printservice.recommendation.plugin.samsung.SamsungRecommendationPlugin;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -71,6 +72,14 @@ public class RecommendationServiceImpl extends RecommendationService
                     true));
         } catch (Exception e) {
             Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_morpia) +
+                    " plugin", e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(new SamsungRecommendationPlugin(this), this,
+                    false));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_samsung) +
                     " plugin", e);
         }
 
