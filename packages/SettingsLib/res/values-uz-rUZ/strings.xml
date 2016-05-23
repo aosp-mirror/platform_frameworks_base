@@ -93,7 +93,7 @@
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Modem rejimi"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Barcha ishchi ilovalar"</string>
     <string name="user_guest" msgid="8475274842845401871">"Mehmon"</string>
-    <string name="unknown" msgid="1592123443519355854">"Noma‘lum"</string>
+    <string name="unknown" msgid="1592123443519355854">"Noma’lum"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Birlamchi sozlamalar o‘rnatilmagan"</string>
@@ -112,7 +112,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Ovoz ma’lumotlarini o‘rnatish"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Nutq sintezi uchun kerakli ovoz ma’lumotlarini o‘rnatish"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ushbu nutq sintezi mexanizmi barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. U <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> mexanizmi bilan o‘rnatiladi. Ushbu nutq sintezi mexanizmidan foydalanilsinmi?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til matnni nutqga o‘girish uchun faol Internet ulanishini talab qiladi."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til uchun nutq sintezatorini yoqish uchun Internetga ulaning."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Bu nutq sintezining misoli"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Birlamchi til"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> – to‘liq qo‘llab-quvvatlanadi"</string>
@@ -305,7 +305,7 @@
     <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_ac" msgid="3969186192576594254">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, o‘zgaruvchan tok orqali to‘lguncha"</string>
     <string name="power_charging_duration_ac_short" msgid="7895864687218765582">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, USB orqali to‘lguncha"</string>
+    <string name="power_charging_duration_usb" msgid="182405645340976546">"<xliff:g id="LEVEL">%1$s</xliff:g> – quvvati to‘lguncha <xliff:g id="TIME">%2$s</xliff:g> qoldi (USB orqali)"</string>
     <string name="power_charging_duration_usb_short" msgid="941854728040426399">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_duration_wireless" msgid="1829295708243159464">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, simsiz quvvatlash orqali to‘lguncha"</string>
     <string name="power_charging_duration_wireless_short" msgid="1642664799869599476">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -313,7 +313,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Quvvat olmoqda (AC)"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Quvvat olmoqda"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"Quvvat olmoqda (USB)"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB orqali quvvat olmoqda"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Simsiz quvvat olmoqda"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Quvvat olmoqda"</string>
@@ -327,7 +327,7 @@
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> oldin"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> qoldi"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Kichkina"</string>
-    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Birlamchi"</string>
+    <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Standart"</string>
     <string name="screen_zoom_summary_large" msgid="4835294730065424084">"Katta"</string>
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Kattaroq"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Eng katta"</string>

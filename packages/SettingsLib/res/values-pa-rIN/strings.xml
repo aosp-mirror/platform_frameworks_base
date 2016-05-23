@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ਨੈਟਵਰਕਾਂ ਲਈ ਸਕੈਨ ਨਹੀਂ ਕਰ ਸਕਦਾ"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ਕੋਈ ਨਹੀਂ"</string>
-    <string name="wifi_remembered" msgid="4955746899347821096">"ਸੁਰੱਖਿਅਤ ਕੀਤਾ"</string>
-    <string name="wifi_disabled_generic" msgid="4259794910584943386">"ਅਸਮਰੱਥ ਬਣਾਇਆ"</string>
+    <string name="wifi_remembered" msgid="4955746899347821096">"ਰੱਖਿਅਤ ਕੀਤਾ"</string>
+    <string name="wifi_disabled_generic" msgid="4259794910584943386">"ਅਯੋਗ ਬਣਾਇਆ"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP ਕੌਂਫਿਗਰੇਸ਼ਨ ਅਸਫਲਤਾ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="3081668066612876581">"WiFi ਕਨੈਕਸ਼ਨ ਅਸਫਲਤਾ"</string>
     <string name="wifi_disabled_password_failure" msgid="8659805351763133575">"ਪ੍ਰਮਾਣੀਕਰਨ ਸਮੱਸਿਆ"</string>
@@ -94,7 +94,7 @@
     <string name="managed_user_title" msgid="8109605045406748842">"ਸਾਰੀਆਂ ਕੰਮ ਐਪਾਂ"</string>
     <string name="user_guest" msgid="8475274842845401871">"ਮਹਿਮਾਨ"</string>
     <string name="unknown" msgid="1592123443519355854">"ਅਗਿਆਤ"</string>
-    <string name="running_process_item_user_label" msgid="3129887865552025943">"ਉਪਭੋਗਤਾ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
+    <string name="running_process_item_user_label" msgid="3129887865552025943">"ਵਰਤੋਂਕਾਰ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"ਕੁਝ ਡਿਫੌਲਟਸ ਸੈਟ ਕੀਤੇ"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ ਸੈਟਿੰਗਾਂ"</string>
@@ -288,7 +288,7 @@
     <string name="button_convert_fbe" msgid="5152671181309826405">"ਮਿਟਾਓ ਅਤੇ ਤਬਦੀਲ ਕਰੋ..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"ਤਸਵੀਰ ਰੰਗ ਮੋਡ"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ਅਸਮਰੱਥ ਬਣਾਇਆ"</string>
+    <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"ਅਯੋਗ ਬਣਾਇਆ"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Monochromacy"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaly (ਲਾਲ-ਹਰਾ)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanomaly (ਲਾਲ-ਹਰਾ)"</string>
@@ -313,7 +313,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"AC ਤੇ ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB ਤੇ ਚਾਰਜਿੰਗ"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB \'ਤੇ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"ਵਾਇਰਲੈਸ ਤੌਰ ਤੇ ਚਾਰਜਿੰਗ"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
