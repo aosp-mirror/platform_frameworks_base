@@ -43,6 +43,8 @@ import com.android.internal.app.procstats.DumpUtils.*;
 import dalvik.system.VMRuntime;
 import libcore.util.EmptyArray;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -51,6 +53,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public final class ProcessStats implements Parcelable {
     public static final String TAG = "ProcessStats";
@@ -151,7 +155,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 20;
+    private static final int PARCEL_VERSION = 21;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -187,6 +191,12 @@ public final class ProcessStats implements Parcelable {
 
     // For reading parcels.
     ArrayList<String> mIndexToCommonString;
+
+    private static final Pattern sPageTypeRegex = Pattern.compile(
+            "^Node\\s+(\\d+),.*. type\\s+(\\w+)\\s+([\\s\\d]+?)\\s*$");
+    private final ArrayList<Integer> mPageTypeZones = new ArrayList<Integer>();
+    private final ArrayList<String> mPageTypeLabels = new ArrayList<String>();
+    private final ArrayList<int[]> mPageTypeSizes = new ArrayList<int[]>();
 
     public ProcessStats(boolean running) {
         mRunning = running;
@@ -493,6 +503,7 @@ public final class ProcessStats implements Parcelable {
         mReadError = null;
         mFlags = 0;
         evaluateSystemProperties(true);
+        updateFragmentation();
     }
 
     public boolean evaluateSystemProperties(boolean update) {
@@ -514,6 +525,101 @@ public final class ProcessStats implements Parcelable {
     }
 
     static final int[] BAD_TABLE = new int[0];
+
+
+    /**
+     * Load the system's memory fragmentation info.
+     */
+    public void updateFragmentation() {
+        // Parse /proc/pagetypeinfo and store the values.
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader("/proc/pagetypeinfo"));
+            final Matcher matcher = sPageTypeRegex.matcher("");
+            mPageTypeZones.clear();
+            mPageTypeLabels.clear();
+            mPageTypeSizes.clear();
+            while (true) {
+                final String line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                matcher.reset(line);
+                if (matcher.matches()) {
+                    final Integer zone = Integer.valueOf(matcher.group(1), 10);
+                    if (zone == null) {
+                        continue;
+                    }
+                    mPageTypeZones.add(zone);
+                    mPageTypeLabels.add(matcher.group(2));
+                    mPageTypeSizes.add(splitAndParseNumbers(matcher.group(3)));
+                }
+            }
+        } catch (IOException ex) {
+            mPageTypeZones.clear();
+            mPageTypeLabels.clear();
+            mPageTypeSizes.clear();
+            return;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException allHopeIsLost) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Split the string of digits separaed by spaces.  There must be no
+     * leading or trailing spaces.  The format is ensured by the regex
+     * above.
+     */
+    private static int[] splitAndParseNumbers(String s) {
+        // These are always positive and the numbers can't be so big that we'll overflow
+        // so just do the parsing inline.
+        boolean digit = false;
+        int count = 0;
+        final int N = s.length();
+        // Count the numbers
+        for (int i=0; i<N; i++) {
+            final char c = s.charAt(i);
+            if (c >= '0' && c <= '9') {
+                if (!digit) {
+                    digit = true;
+                    count++;
+                }
+            } else {
+                digit = false;
+            }
+        }
+        // Parse the numbers
+        final int[] result = new int[count];
+        int p = 0;
+        int val = 0;
+        for (int i=0; i<N; i++) {
+            final char c = s.charAt(i);
+            if (c >= '0' && c <= '9') {
+                if (!digit) {
+                    digit = true;
+                    val = c - '0';
+                } else {
+                    val *= 10;
+                    val += c - '0';
+                }
+            } else {
+                if (digit) {
+                    digit = false;
+                    result[p++] = val;
+                }
+            }
+        }
+        if (count > 0) {
+            result[count-1] = val;
+        }
+        return result;
+    }
+
 
     private void writeCompactedLongArray(Parcel out, long[] array, int num) {
         for (int i=0; i<num; i++) {
@@ -715,6 +821,15 @@ public final class ProcessStats implements Parcelable {
                     }
                 }
             }
+        }
+
+        // Fragmentation info (/proc/pagetypeinfo)
+        final int NPAGETYPES = mPageTypeLabels.size();
+        out.writeInt(NPAGETYPES);
+        for (int i=0; i<NPAGETYPES; i++) {
+            out.writeInt(mPageTypeZones.get(i));
+            out.writeString(mPageTypeLabels.get(i));
+            out.writeIntArray(mPageTypeSizes.get(i));
         }
 
         mCommonStringToIndex = null;
@@ -979,6 +1094,20 @@ public final class ProcessStats implements Parcelable {
                     }
                 }
             }
+        }
+
+        // Fragmentation info
+        final int NPAGETYPES = in.readInt();
+        mPageTypeZones.clear();
+        mPageTypeZones.ensureCapacity(NPAGETYPES);
+        mPageTypeLabels.clear();
+        mPageTypeLabels.ensureCapacity(NPAGETYPES);
+        mPageTypeSizes.clear();
+        mPageTypeSizes.ensureCapacity(NPAGETYPES);
+        for (int i=0; i<NPAGETYPES; i++) {
+            mPageTypeZones.add(in.readInt());
+            mPageTypeLabels.add(in.readString());
+            mPageTypeSizes.add(in.createIntArray());
         }
 
         mIndexToCommonString = null;
@@ -1271,6 +1400,8 @@ public final class ProcessStats implements Parcelable {
             */
             pw.print("  mRunning="); pw.println(mRunning);
         }
+
+        dumpFragmentationLocked(pw);
     }
 
     public void dumpSummaryLocked(PrintWriter pw, String reqPackage, long now, boolean activeOnly) {
@@ -1280,6 +1411,21 @@ public final class ProcessStats implements Parcelable {
                 ALL_PROC_STATES, NON_CACHED_PROC_STATES, now, totalTime, reqPackage, activeOnly);
         pw.println();
         dumpTotalsLocked(pw, now);
+    }
+
+    private void dumpFragmentationLocked(PrintWriter pw) {
+        pw.println();
+        pw.println("Available pages by page size:");
+        final int NPAGETYPES = mPageTypeLabels.size();
+        for (int i=0; i<NPAGETYPES; i++) {
+            pw.format("Zone %3d  %14s ", mPageTypeZones.get(i), mPageTypeLabels.get(i));
+            final int[] sizes = mPageTypeSizes.get(i);
+            final int N = sizes == null ? 0 : sizes.length;
+            for (int j=0; j<N; j++) {
+                pw.format("%6d", sizes[j]);
+            }
+            pw.println();
+        }
     }
 
     long printMemoryCategory(PrintWriter pw, String prefix, String label, double memWeight,
@@ -1540,6 +1686,24 @@ public final class ProcessStats implements Parcelable {
             pw.print(totalMem.processStateSamples[i]);
         }
         pw.println();
+
+        final int NPAGETYPES = mPageTypeLabels.size();
+        for (int i=0; i<NPAGETYPES; i++) {
+            pw.print("availablepages,");
+            pw.print(mPageTypeLabels.get(i));
+            pw.print(",");
+            pw.print(mPageTypeZones.get(i));
+            pw.print(",");
+            final int[] sizes = mPageTypeSizes.get(i);
+            final int N = sizes == null ? 0 : sizes.length;
+            for (int j=0; j<N; j++) {
+                if (j != 0) {
+                    pw.print(",");
+                }
+                pw.print(sizes[j]);
+            }
+            pw.println();
+        }
     }
 
 
