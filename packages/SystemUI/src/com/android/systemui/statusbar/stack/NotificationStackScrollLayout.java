@@ -333,7 +333,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
     private boolean mPulsing;
     private boolean mDrawBackgroundAsSrc;
-    private boolean mFadedOut;
+    private boolean mFadingOut;
+    private boolean mParentFadingOut;
     private boolean mGroupExpandedForMeasure;
     private View mForcedScroll;
     private float mBackgroundFadeAmount = 1.0f;
@@ -470,7 +471,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateSrcDrawing() {
-        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && !mFadedOut ? mSrcMode : null);
+        mBackgroundPaint.setXfermode(mDrawBackgroundAsSrc && (!mFadingOut && !mParentFadingOut)
+                ? mSrcMode : null);
         invalidate();
     }
 
@@ -1871,7 +1873,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void applyCurrentBackgroundBounds() {
-        if (!mFadedOut) {
+        if (!mFadingOut) {
             mScrimController.setExcludedBackgroundArea(mCurrentBounds);
         }
         invalidate();
@@ -3610,22 +3612,33 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateNotificationAnimationStates();
     }
 
-    public void setFadedOut(boolean fadingOut) {
-        if (fadingOut != mFadedOut) {
-            mFadedOut = fadingOut;
-            if (fadingOut) {
-                mScrimController.setExcludedBackgroundArea(null);
-            } else {
-                applyCurrentBackgroundBounds();
-            }
-            updateSrcDrawing();
+    public void setFadingOut(boolean fadingOut) {
+        if (fadingOut != mFadingOut) {
+            mFadingOut = fadingOut;
+            updateFadingState();
         }
+    }
+
+    public void setParentFadingOut(boolean fadingOut) {
+        if (fadingOut != mParentFadingOut) {
+            mParentFadingOut = fadingOut;
+            updateFadingState();
+        }
+    }
+
+    private void updateFadingState() {
+        if (mFadingOut || mParentFadingOut || mAmbientState.isDark()) {
+            mScrimController.setExcludedBackgroundArea(null);
+        } else {
+            applyCurrentBackgroundBounds();
+        }
+        updateSrcDrawing();
     }
 
     @Override
     public void setAlpha(@FloatRange(from = 0.0, to = 1.0) float alpha) {
         super.setAlpha(alpha);
-        setFadedOut(alpha != 1.0f);
+        setFadingOut(alpha != 1.0f);
     }
 
     /**
