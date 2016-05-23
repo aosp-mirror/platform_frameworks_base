@@ -360,7 +360,7 @@
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ਉਪਭੋਗਤਾ, ਵਰਤਮਾਨ ਉਪਭੋਗਤਾ ਸਵਿਚ ਕਰੋ<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"ਪ੍ਰੋਫਾਈਲ ਦਿਖਾਓ"</string>
-    <string name="user_add_user" msgid="5110251524486079492">"ਉਪਭੋਗਤਾ ਜੋੜੋ"</string>
+    <string name="user_add_user" msgid="5110251524486079492">"ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"ਨਵਾਂ ਉਪਭੋਗਤਾ"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"ਮਹਿਮਾਨ"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"ਮਹਿਮਾਨ ਜੋੜੋ"</string>
@@ -413,7 +413,7 @@
     <string name="hidden_notifications_title" msgid="7139628534207443290">"ਤੇਜ਼ੀ ਨਾਲ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"ਅਨਲੌਕ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਉਹਨਾਂ ਨੂੰ ਦੇਖੋ"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
-    <string name="hidden_notifications_setup" msgid="41079514801976810">"ਸੈਟ ਅਪ"</string>
+    <string name="hidden_notifications_setup" msgid="41079514801976810">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="3179845345429841822">"ਹੁਣੇ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"ਵਿਸਤਾਰ ਕਰੋ"</string>
