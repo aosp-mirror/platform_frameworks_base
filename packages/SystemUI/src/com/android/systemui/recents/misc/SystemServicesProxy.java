@@ -418,8 +418,8 @@ public class SystemServicesProxy {
             options.setLaunchStackId(DOCKED_STACK_ID);
             mIam.startActivityFromRecents(taskId, options.toBundle());
             return true;
-        } catch (RemoteException | IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to dock task: " + taskId + " with createMode: " + createMode, e);
         }
         return false;
     }
