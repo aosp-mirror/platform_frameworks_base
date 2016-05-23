@@ -430,6 +430,7 @@ var RESOURCE_COLLECTIONS = {
       "distribute/monetize/ads.html",
       "distribute/monetize/ecommerce.html",
       "distribute/monetize/payments.html",
+      "distribute/monetize/conversions.html",
       "distribute/analyze/understand-user-value.html",
     ]
   },
@@ -1554,6 +1555,15 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://play.google.com/about/giftcards/",
       "https://support.google.com/googleplay/answer/2651410"
+    ]
+  },
+  "distribute/monetize/conversions": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/adwords/answer/2471188",
+      "https://developers.google.com/app-conversion-tracking/",
+      "https://support.google.com/analytics/answer/2611404",
+      "https://support.google.com/adwords/answer/1704341"
     ]
   },
   "autolanding": {

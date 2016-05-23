@@ -1943,11 +1943,63 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "url": "https://support.google.com/googleplay/answer/2651410",
     "timestamp": null,
     "image": "images/cards/google-play_2x.png",
-    "title": "Google Play Accepted Payment Methods",
+    "title": "Google Play accepted payment methods",
     "summary": "Support details on the payment methods supported in Google Play.",
     "keywords": ["gift card"],
     "type": "distribute",
     "category": "google play"
+  },
+  {
+   "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/adwords/answer/2471188",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "AdWords Conversion Optimizer",
+    "summary": "Learn how Conversion Optimizer works to find the users who are most likely to convert and to serve them your conversion ads.",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/app-conversion-tracking/",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Track conversions with the AdWords SDK or server API",
+    "summary": "Use the lightweight AdWords app SDK or server-to-server API to track remarketing conversions.",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/analytics/answer/2611404",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Create Remarketing Audiences in Google Analytics",
+    "summary": "Learn how to use preconfigured audiences created by the Analytics team or create your own to use in your conversion campaigns.",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/adwords/answer/1704341",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Link your Google Analytics and AdWords accounts",
+    "summary": "Gain greater insight into how AdWords is driving app engagement and conversions, and use this insight to improve your ads and app.",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
   },
   {
     "lang": "en",
@@ -4106,6 +4158,7 @@ METADATA['en'].collections = {
       "distribute/monetize/ads.html",
       "distribute/monetize/ecommerce.html",
       "distribute/monetize/payments.html",
+      "distribute/monetize/conversions.html",
       "distribute/analyze/understand-user-value.html",
     ]
   },
@@ -5052,6 +5105,15 @@ METADATA['en'].collections = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
+  "distribute/monetize/conversions": {
+     "title": "",
+     "resources": [
+       "https://support.google.com/adwords/answer/2471188",
+       "https://developers.google.com/app-conversion-tracking/",
+       "https://support.google.com/analytics/answer/2611404",
+       "https://support.google.com/adwords/answer/1704341"
+     ]
+   },
   "topic/libraries": {
     "title": "",
     "resources": [
