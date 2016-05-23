@@ -16,8 +16,6 @@
 
 package com.android.server.connectivity.tethering;
 
-import com.android.server.connectivity.Tethering;
-
 /**
  * @hide
  *
@@ -25,5 +23,5 @@ import com.android.server.connectivity.Tethering;
  */
 public interface IControlsTethering {
     void sendTetherStateChangedBroadcast();
-    void notifyInterfaceTetheringReadiness(boolean isReady, Tethering.TetherInterfaceSM who);
+    void notifyInterfaceTetheringReadiness(boolean isReady, TetherInterfaceSM who);
 }
