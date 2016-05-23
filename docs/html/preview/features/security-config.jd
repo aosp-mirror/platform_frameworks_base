@@ -72,9 +72,8 @@ page.image=images/cards/card-nyc_2x.jpg
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;manifest ... &gt;
-  &lt;application ... &gt;
-    &lt;meta-data android:name="android.security.net.config"
-               android:resource="@xml/network_security_config" /&gt;
+  &lt;application android:networkSecurityConfig="@xml/network_security_config"
+               ... &gt;
     ...
   &lt;/application&gt;
 &lt;/manifest&gt;
