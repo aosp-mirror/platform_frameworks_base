@@ -314,6 +314,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (scrim instanceof ScrimView) {
             float alpha2 = getDozeAlpha(scrim);
             float alpha = 1 - (1 - alpha1) * (1 - alpha2);
+            alpha = Math.max(0, Math.min(1.0f, alpha));
             int baseColor = ((ScrimView) scrim).getScrimColor();
             ((ScrimView) scrim).setScrimColor(
                     ColorUtils.setAlphaComponent(baseColor, (int) (alpha * 255)));
@@ -462,6 +463,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                     PropertyValuesHolder[] values = previousAnimator.getValues();
                     float relativeDiff = alpha - previousEndValue;
                     float newStartValue = previousStartValue + relativeDiff;
+                    newStartValue = Math.max(0, Math.min(1.0f, newStartValue));
                     values[0].setFloatValues(newStartValue, alpha);
                     scrim.setTag(TAG_START_ALPHA, newStartValue);
                     scrim.setTag(TAG_END_ALPHA, alpha);
