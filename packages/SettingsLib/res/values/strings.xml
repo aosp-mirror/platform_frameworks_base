@@ -809,7 +809,8 @@
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Settings Home</string>
 
-    <string-array name="battery_labels" translatable="false">
+    <!-- Labels on the side of batter graph in Quick Settings and Settings [CHAR LIMIT=8] -->
+    <string-array name="battery_labels">
         <item>0%</item>
         <item>50%</item>
         <item>100%</item>
