@@ -125,6 +125,8 @@ class AlarmManagerService extends SystemService {
     long mNativeData;
     private long mNextWakeup;
     private long mNextNonWakeup;
+    private long mLastWakeupSet;
+    private long mLastWakeup;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
     boolean mLastWakeLockUnimportantForLogging;
@@ -1400,6 +1402,9 @@ class AlarmManagerService extends SystemService {
                     pw.print(" = "); pw.println(sdf.format(new Date(nextNonWakeupRTC)));
             pw.print("  Next wakeup: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
+            pw.print("  Last wakeup: "); TimeUtils.formatDuration(mLastWakeup, nowELAPSED, pw);
+            pw.print(" set at "); TimeUtils.formatDuration(mLastWakeupSet, nowELAPSED, pw);
+            pw.println();
             pw.print("  Num time change events: "); pw.println(mNumTimeChanged);
             pw.println("  mDeviceIdleUserWhitelist=" + Arrays.toString(mDeviceIdleUserWhitelist));
 
@@ -1838,6 +1843,7 @@ class AlarmManagerService extends SystemService {
             final Batch firstBatch = mAlarmBatches.get(0);
             if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
                 mNextWakeup = firstWakeup.start;
+                mLastWakeupSet = SystemClock.elapsedRealtime();
                 setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
             }
             if (firstBatch != firstWakeup) {
@@ -2436,6 +2442,7 @@ class AlarmManagerService extends SystemService {
             while (true)
             {
                 int result = waitForAlarm(mNativeData);
+                mLastWakeup = SystemClock.elapsedRealtime();
 
                 triggerList.clear();
 
@@ -2536,6 +2543,11 @@ class AlarmManagerService extends SystemService {
                             deliverAlarmsLocked(triggerList, nowELAPSED);
                         }
                     }
+
+                } else {
+                    // Just in case -- even though no wakeup flag was set, make sure
+                    // we have updated the kernel to the next alarm time.
+                    rescheduleKernelAlarmsLocked();
                 }
             }
         }
