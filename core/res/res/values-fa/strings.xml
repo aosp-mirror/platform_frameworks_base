@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"پست صوتی"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"‏مشکل در اتصال یا کد MMI نامعتبر."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"عملکرد فقط به شماره‌های شماره گیری ثابت محدود است."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"عملکرد فقط به شماره‌های شماره‌گیری ثابت محدود است."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"سرویس فعال شد."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"سرویس فعال شد برای:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"سرویس غیرفعال شده است."</string>
@@ -67,8 +67,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"شناسه تماس گیرنده ورودی"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"شناسه تماس گیرنده خروجی"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"شناسه تماس‌گیرنده ورودی"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"شناسه تماس‌گیرنده خروجی"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"شناسه خط متصل"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"محدودیت شناسه خط متصل"</string>
     <string name="CfMmi" msgid="5123218989141573515">"هدایت تماس"</string>
@@ -82,12 +82,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"رد تماس‌های ناخواسته و آزار دهنده"</string>
     <string name="CndMmi" msgid="3116446237081575808">"تحویل شماره تماس"</string>
     <string name="DndMmi" msgid="1265478932418334331">"مزاحم نشوید"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"پیش‌فرض شناسه تماس گیرنده روی محدود است. تماس بعدی: محدود"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"پیش‌فرض شناسه تماس گیرنده روی محدود است. تماس بعدی: بدون محدودیت"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"پیش‌فرض شناسه تماس گیرنده روی غیر محدود است. تماس بعدی: محدود"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"پیش‌فرض شناسه تماس گیرنده روی غیر محدود است. تماس بعدی: بدون محدودیت"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: محدود"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"پیش‌فرض شناسه تماس‌گیرنده روی محدود است. تماس بعدی: بدون محدودیت"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"پیش‌فرض شناسه تماس‌گیرنده روی غیر محدود است. تماس بعدی: محدود"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"پیش‌فرض شناسه تماس‌گیرنده روی غیر محدود است. تماس بعدی: بدون محدودیت"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"سرویس دارای مجوز نیست."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"‏شما می‎توانید تنظیم شناسه تماس گیرنده را تغییر دهید."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"‏شما می‎توانید تنظیم شناسه تماس‌گیرنده را تغییر دهید."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"سرویس داده مسدود است."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"سرویس اضطراری مسدود است."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"سرویس صوتی مسدود شده است."</string>
@@ -286,15 +286,15 @@
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"به برنامه اجازه می‌دهد عددی را که در طی یک تماس خروجی شماره‌گیری شده، ببیند و این اختیار را دارد که تماس را به شماره دیگری هدایت کند یا کلاً تماس را قطع کند."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"دریافت پیام‌های نوشتاری (پیامک)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"به برنامه اجازه می‌دهد پیامک‌ها را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
-    <string name="permlab_receiveMms" msgid="1821317344668257098">"‏دریافت پیام‌های نوشتاری (MMS)"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"‏به برنامه اجازه می‌دهد پیام‌های MMS را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"دریافت پیام‌های نوشتاری (فراپیام)"</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"به برنامه اجازه می‌دهد پیام‌های فراپیام را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"خواندن پیام‌های پخش سلولی"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"خواندن فیدهای مشترک"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"‏به برنامه اجازه می‎دهد تا جزئیات مربوط به فیدهای همگام شده کنونی را دریافت کند."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"ارسال و نمایش پیام‌های پیامک"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"به برنامه اجازه می‌دهد پیامک‌ها را ارسال کند. این باعث ایجاد هزینه‌های پیش‌بینی نشده می‌شود. برنامه‌های مخرب ممکن است با ارسال پیام بدون تأیید شما هزینه‌هایی را برای شما ایجاد کنند."</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"‏خواندن پیام‌های نوشتاری شما (پیامک یا MMS)"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"خواندن پیام‌های نوشتاری شما (پیامک یا فراپیام)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در رایانهٔ لوحی یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"به برنامه اجازه می‌دهد تا پیامهای کوتاه ذخیره شده در تلویزیون یا سیم‌کارت شما را بخواند. به برنامه اجازه می‌دهد تا همه پیامهای کوتاه را صرفنظر از محتوا یا محرمانه بودن آنها بخواند."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"به برنامه اجازه می‌دهد پیامک‌های ذخیره شده در تلفن یا سیم کارت شما را بخواند. این ویژگی به برنامه امکان می‌دهد همه پیامک‌ها را صرفنظر از محتوا یا محرمانه بودن آن‌ها بخواند."</string>
@@ -503,8 +503,8 @@
     <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"به برنامه امکان می‌دهد پارامترهای کالیبراسیون صفحه لمسی را تغییر دهد. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"‏دسترسی به گواهی‌های DRM"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"‏به یک برنامه کاربردی اجازه ارائه مجوز و استفاده از گواهی‌های DRM را می‌دهد. هرگز برای برنامه‌های عادی مورد نیاز نیست."</string>
-    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏دریافت وضعیت انتقال پرتوی Android"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏به برنامه امکان می‌دهد تا اطلاعاتی درباره انتقال‌های کنونی پرتوی Android به دست آورد"</string>
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"‏دریافت وضعیت انتقال Android Beam"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏به برنامه امکان می‌دهد تا اطلاعاتی درباره انتقال‌های کنونی Android Beam به‌دست آورد"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏حذف گواهی‌های DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏به برنامه امکان می‌دهد گواهی‌های DRM را حذف کند. نباید برای برنامه‌های عادی هیچ‌وقت لازم باشد."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
@@ -605,9 +605,9 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"تلکس"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"تلفن همراه محل کار"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"پیجوی محل کار"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"پی‌جوی محل کار"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"دستیار"</string>
-    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"فراپیام"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"سفارشی"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"تاریخ تولد"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"سالگرد"</string>
@@ -730,7 +730,7 @@
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"الگو پاک شد"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"سلول اضافه شد"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"سلول <xliff:g id="CELL_INDEX">%1$s</xliff:g> اضافه شد"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"الگو تکمیل شد"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"الگو کامل شد"</string>
     <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"ناحیه الگو"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"‏%1$s. ابزارک %2$d از %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"ابزارک اضافه کنید."</string>
@@ -1523,7 +1523,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» مانع ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها می‌شود. برنامه‌ای که درحال حاضر استفاده می‌کنید می‌تواند به داده دسترسی داشته باشد اما دفعات دسترسی آن محدود است. به این معنی که، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

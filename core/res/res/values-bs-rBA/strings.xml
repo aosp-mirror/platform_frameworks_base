@@ -1041,7 +1041,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Jačina zvuka za obavještenja"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Zadana melodija zvona"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Zadano zvono (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="7937634392408977062">"Ne poduzimaj ništa"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Bez zvuka"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Melodije zvona"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Nepoznato zvono"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
@@ -1123,7 +1123,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Uspostavljena veza sa USB pohranom"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za više opcija."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Uređaj za USB otklanjanje grešaka povezan"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje grešaka preko USB veze."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da onemogućite otklanjanje grešaka preko USB veze."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Prijem izvještaja o grešci..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Podijeliti izvještaj o grešci?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvještaja o grešci..."</string>
@@ -1547,7 +1547,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurirao administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao administrator"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se trajanje baterije produžilo, opcija za štednju baterije minimizira rad uređaja i ograničava vibriranje, usluge lokacije i većinu prijenosa podataka u pozadini. E-pošta, poruke i druge aplikacije koje se oslanjaju na sinhronizaciju ne mogu biti ažurirane dok ih ne otvorite.\n\nŠtednja baterije se automatski isključi prilikom punjenja uređaja."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjilo koriptenje podataka, usluga Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali se to može desiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjilo korištenje podataka, usluga Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali se to može desiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">

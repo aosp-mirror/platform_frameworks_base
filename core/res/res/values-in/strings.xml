@@ -522,7 +522,7 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Mengubah kunci layar"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mengubah kunci layar."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kunci layar"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrol cara dan kapan layar mengunci."</string>
@@ -694,7 +694,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Berhenti"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Putar Ulang"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Maju cepat"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Panggilan darurat saja"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Telepon urgen saja"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Jaringan terkunci"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kartu SIM terkunci PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Lihatlah Panduan Pengguna atau hubungi Layanan Pelanggan."</string>
@@ -1236,7 +1236,7 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Jangan lakukan apa pun untuk saat ini"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Pilih akun"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Tambahkan akun"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Tambahkan akun"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Tambah akun"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Tambah"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Kurangi"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> sentuh &amp; tahan."</string>
