@@ -56,7 +56,7 @@ public class RemoteViewsTest {
     @Before
     public void setup() {
         mContext = InstrumentationRegistry.getContext();
-        mPackage = mPackage;
+        mPackage = mContext.getPackageName();
         mContainer = new LinearLayout(mContext);
     }
 
