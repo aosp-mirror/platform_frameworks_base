@@ -272,6 +272,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
@@ -12822,12 +12823,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                     com.android.internal.R.dimen.thumbnail_width);
             mThumbnailHeight = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.thumbnail_height);
-            mFullscreenThumbnailScale = res.getFraction(
-                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
             mDefaultPinnedStackBounds = Rect.unflattenFromString(res.getString(
                     com.android.internal.R.string.config_defaultPictureInPictureBounds));
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
+            if ((mConfiguration.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
+                mFullscreenThumbnailScale = (float) res
+                    .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
+                    (float) mConfiguration.screenWidthDp;
+            } else {
+                mFullscreenThumbnailScale = res.getFraction(
+                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
+            }
         }
     }
 
