@@ -2699,6 +2699,45 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "https://developers.google.com/nearby/",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Create features based on proximity",
+    "summary": "Build simple interactions between nearby devices and people.",
+    "keywords": ["nearby", "engage"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.youtube.com/watch?v=hultDpBS22s",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Use Nearby Messages to collaborate",
+    "summary": "Nearby Messages is perfect for setting up ad-hoc groups, collaborative sessions, or sharing resources with people in a co-located space.",
+    "keywords": ["nearby", "engage"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/beacons",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Mark up the world using beacons",
+    "summary": "Give your users better location and proximity experiences by providing a strong context signal for their devices in the form of Bluetooth low energy (BLE) beacons with Eddystone.",
+    "keywords": ["nearby", "engage"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://support.google.com/adwords/answer/6167164",
     "timestamp": null,
     "image": "distribute/images/advertising.jpg",
@@ -4095,7 +4134,8 @@ METADATA['en'].collections = {
       "distribute/engage/easy-signin.html",
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
-      "distribute/engage/beta.html"
+      "distribute/engage/beta.html",
+      "distribute/engage/nearby.html"
     ]
   },
   "distribute/monetize": {
@@ -4413,6 +4453,14 @@ METADATA['en'].collections = {
       "https://support.google.com/adwords/answer/6032073",
       "https://support.google.com/adwords/answer/6167164",
       "https://support.google.com/adwords/answer/6167162"
+    ]
+  },
+  "distribute/users/nearby": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/nearby/",
+      "https://www.youtube.com/watch?v=hultDpBS22s",
+      "https://developers.google.com/beacons"
     ]
   },
   "distribute/users/buildbuzz": {

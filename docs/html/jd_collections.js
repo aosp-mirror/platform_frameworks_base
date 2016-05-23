@@ -419,7 +419,8 @@ var RESOURCE_COLLECTIONS = {
       "distribute/engage/easy-signin.html",
       "distribute/analyze/build-better-apps.html",
       "distribute/engage/gcm.html",
-      "distribute/engage/beta.html"
+      "distribute/engage/beta.html",
+      "distribute/engage/nearby.html"
     ]
   },
   "distribute/monetize": {
@@ -759,6 +760,14 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/adwords/answer/6032073",
       "https://support.google.com/adwords/answer/6167164",
       "https://support.google.com/adwords/answer/6167162"
+    ]
+  },
+  "distribute/users/nearby": {
+    "title": "",
+    "resources": [
+      "https://developers.google.com/nearby/",
+      "https://www.youtube.com/watch?v=hultDpBS22s",
+      "https://developers.google.com/beacons"
     ]
   },
   "distribute/users/buildbuzz": {

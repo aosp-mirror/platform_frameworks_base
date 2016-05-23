@@ -2719,7 +2719,6 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "material design",
     "titleFriendly": ""
   },
-
   {
     "lang": "en",
     "group": "",
@@ -2730,6 +2729,45 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "title": "Setting up Mobile App Install Ads",
     "summary": "With Mobile app installs campaigns on the Search and Display Networks, and TrueView for mobile app promotion on YouTube, you can create custom app install ads that run exclusively on phones and tablets.",
     "keywords": ["marketing", "admob"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/nearby/",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Create features based on proximity",
+    "summary": "Build simple interactions between nearby devices and people.",
+    "keywords": ["nearby", "engage"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://www.youtube.com/watch?v=hultDpBS22s",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Use Nearby Messages to collaborate",
+    "summary": "Nearby Messages is perfect for setting up ad-hoc groups, collaborative sessions, or sharing resources with people in a co-located space.",
+    "keywords": ["nearby", "engage"],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/beacons",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "Mark up the world using beacons",
+    "summary": "Give your users better location and proximity experiences by providing a strong context signal for their devices in the form of Bluetooth low energy (BLE) beacons with Eddystone.",
+    "keywords": ["nearby", "engage"],
     "type": "distribute",
     "titleFriendly": ""
   },
