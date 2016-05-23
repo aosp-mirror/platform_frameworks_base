@@ -1027,6 +1027,8 @@ public class IpManager extends StateMachine {
     }
 
     class StartedState extends State {
+        private boolean mDhcpActionInFlight;
+
         @Override
         public void enter() {
             mStartTimeMillis = SystemClock.elapsedRealtime();
@@ -1066,7 +1068,7 @@ public class IpManager extends StateMachine {
         @Override
         public void exit() {
             mProvisioningTimeoutAlarm.cancel();
-            mDhcpActionTimeoutAlarm.cancel();
+            stopDhcpAction();
 
             if (mIpReachabilityMonitor != null) {
                 mIpReachabilityMonitor.stop();
@@ -1086,16 +1088,22 @@ public class IpManager extends StateMachine {
             resetLinkProperties();
         }
 
-        private void startDhcpAction() {
-            mCallback.onPreDhcpAction();
-            final long alarmTime = SystemClock.elapsedRealtime() +
-                    mConfiguration.mRequestedPreDhcpActionMs;
-            mDhcpActionTimeoutAlarm.schedule(alarmTime);
+        private void ensureDhcpAction() {
+            if (!mDhcpActionInFlight) {
+                mCallback.onPreDhcpAction();
+                mDhcpActionInFlight = true;
+                final long alarmTime = SystemClock.elapsedRealtime() +
+                        mConfiguration.mRequestedPreDhcpActionMs;
+                mDhcpActionTimeoutAlarm.schedule(alarmTime);
+            }
         }
 
         private void stopDhcpAction() {
             mDhcpActionTimeoutAlarm.cancel();
-            mCallback.onPostDhcpAction();
+            if (mDhcpActionInFlight) {
+                mCallback.onPostDhcpAction();
+                mDhcpActionInFlight = false;
+            }
         }
 
         @Override
@@ -1165,9 +1173,8 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
-                    if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
                     if (mConfiguration.mRequestedPreDhcpActionMs > 0) {
-                        startDhcpAction();
+                        ensureDhcpAction();
                     } else {
                         sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
                     }
@@ -1193,18 +1200,18 @@ public class IpManager extends StateMachine {
                 // This message is only received when:
                 //
                 //     a) initial address acquisition succeeds,
-                //     b) renew succeeds,
-                //     c) renew fails,
+                //     b) renew succeeds or is NAK'd,
+                //     c) rebind succeeds or is NAK'd, or
+                //     c) the lease expires,
                 //
                 // but never when initial address acquisition fails. The latter
                 // condition is now governed by the provisioning timeout.
-                case DhcpClient.CMD_POST_DHCP_ACTION: {
+                case DhcpClient.CMD_POST_DHCP_ACTION:
                     stopDhcpAction();
 
-                    final DhcpResults dhcpResults = (DhcpResults) msg.obj;
                     switch (msg.arg1) {
                         case DhcpClient.DHCP_SUCCESS:
-                            handleIPv4Success(dhcpResults);
+                            handleIPv4Success((DhcpResults) msg.obj);
                             break;
                         case DhcpClient.DHCP_FAILURE:
                             handleIPv4Failure();
@@ -1213,7 +1220,6 @@ public class IpManager extends StateMachine {
                             Log.e(mTag, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
                     }
                     break;
-                }
 
                 case DhcpClient.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
