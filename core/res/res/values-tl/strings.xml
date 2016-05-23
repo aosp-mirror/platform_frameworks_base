@@ -253,9 +253,9 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Imbakan"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"mag-access ng mga larawan, media at file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"nagre-record ng audio"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumukuha ng mga larawan at nagre-record ng video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at nmag-record ng video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumatawag sa telepono at namamahala sa mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Mga Sensor ng Katawan"</string>
@@ -595,7 +595,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax sa Tahanan"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Iba pa"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Tawagan Pabalik"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Callback"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Kotse"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Pangunahin ng Kumpanya"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -606,7 +606,7 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobile sa Trabaho"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager sa Trabaho"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Katuwang"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistant"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Custom"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Kaarawan"</string>

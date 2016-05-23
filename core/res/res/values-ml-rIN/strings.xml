@@ -71,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ഔട്ട്ഗോയിംഗ് കോളർ ഐഡി"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"കണക്‌റ്റുചെയ്‌തിരിക്കുന്ന ലൈൻ ഐഡി"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"കണക്‌റ്റുചെയ്‌തിരിക്കുന്ന ലൈൻ ഐഡി നിയന്ത്രണം"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"കോൾ കൈമാറൽ"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"കോൾ ഫോർവേഡിംഗ്"</string>
     <string name="CwMmi" msgid="9129678056795016867">"കോൾ വെയ്‌റ്റിംഗ്"</string>
     <string name="BaMmi" msgid="455193067926770581">"കോൾ നിരോധിക്കൽ"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"പാസ്‌വേഡ് മാറ്റം"</string>
@@ -679,7 +679,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ശ്രമങ്ങളുടെ പരമാവധി കഴിഞ്ഞു"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"സിം കാർഡൊന്നുമില്ല"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"സിം കാർഡില്ല"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"ടിവിയിൽ SIM കാർഡൊന്നുമില്ല."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ഫോണിൽ സിം കാർഡൊന്നുമില്ല."</string>
@@ -717,10 +717,10 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"അക്കൗണ്ട് അൺലോക്ക്"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ഉപയോക്തൃനാമം (ഇമെയിൽ)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"പാസ്‌വേഡ്"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"സൈൻ ഇൻ ചെയ്യുക"</string>
-    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ അസാധുവാണ്."</string>
+    <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ഉപയോക്താവിന്റെ പേരോ പാസ്‌വേഡോ അസാധുവാണ്."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"നിങ്ങളുടെ ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ മറന്നുപോയോ?\n"<b>"google.com/accounts/recovery"</b>" സന്ദർശിക്കുക."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"പരിശോധിക്കുന്നു…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"അൺലോക്കുചെയ്യുക"</string>
@@ -1022,8 +1022,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"കോൾ വോളിയം"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"മീഡിയ വോളിയം"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"അറിയിപ്പ് വോളിയം"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"സ്ഥിര റിംഗ്‌ടോൺ"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"സ്ഥിര റിംഗ്‌ടോൺ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"ഡിഫോൾട്ട് റിംഗ്‌ടോൺ"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ഡിഫോൾട്ട് റിംഗ്‌ടോൺ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ഒന്നും വേണ്ട"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"റിംഗ്ടോണുകൾ"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"അജ്ഞാത റിംഗ്‌ടോൺ"</string>
@@ -1367,7 +1367,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"പിൻ കോഡുകൾ പൊരുത്തപ്പെടുന്നില്ല"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"വളരെയധികം പാറ്റേൺ ശ്രമങ്ങൾ"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"അൺലോക്കുചെയ്യുന്നതിന്, നിങ്ങളുടെ Google അക്കൗണ്ട് ഉപയോഗിച്ച് സൈൻ ഇൻ ചെയ്യുക."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"ഉപയോക്തൃനാമം (ഇമെയിൽ)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"ഉപയോക്താവിന്റെ പേര് (ഇമെയിൽ)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"പാസ്‌വേഡ്"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"സൈൻ ഇൻ ചെയ്യുക"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ഉപയോക്തൃനാമമോ പാസ്‌വേഡോ അസാധുവാണ്."</string>

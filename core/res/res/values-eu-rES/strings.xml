@@ -368,7 +368,7 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Kamerarekin argazkiak ateratzeko eta bideoak grabatzeko baimena ematen die aplikazioei. Baimen horrekin, aplikazioak kamera edonoiz erabil dezake zure baimenik gabe."</string>
-    <string name="permlab_vibrate" msgid="7696427026057705834">"bibrazioa kontrolatzea"</string>
+    <string name="permlab_vibrate" msgid="7696427026057705834">"Kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Bibragailua kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"deitu zuzenean telefono-zenbakietara"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Aplikazio gaiztoek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
@@ -376,7 +376,7 @@
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzea baimentzen die aplikazioei."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"telefonoaren egoera eta identitatea irakurtzea"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Gailuaren telefono-eginbideak atzitzeko baimena ematen die aplikazioei. Baimen horrek aplikazioari telefono-zenbakia eta gailu IDak zein diren, deirik aktibo dagoen eta deia zer zenbakirekin konektatuta dagoen zehazteko baimena ematen die aplikazioei."</string>
-    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"eragotzi tableta inaktibo ezartzea"</string>
+    <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"Eragotzi tableta inaktibo ezartzea"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"Eragotzi telebista inaktibo geratzea"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"Eragotzi telefonoa inaktibo ezartzea"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Tableta inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
@@ -594,7 +594,7 @@
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Laneko faxa"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Etxeko faxa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Bilagailua"</string>
-    <string name="phoneTypeOther" msgid="1544425847868765990">"Bestelakoak"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Bestelakoa"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Dei bidezko erantzuna"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Autoa"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Laneko nagusia"</string>
@@ -636,7 +636,7 @@
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Lanekoa"</string>
-    <string name="orgTypeOther" msgid="3951781131570124082">"Bestelakoak"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Bestelakoa"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Pertsonalizatua"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Pertsonalizatua"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Laguntzailea"</string>
@@ -1066,7 +1066,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"SMS mezuak bidaltzen"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; SMS asko ari da bidaltzen. Mezuak bidaltzen jarrai dezan onartu nahi duzu?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Onartu"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Eragotzi"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Ukatu"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioak mezu bat bidali nahi du &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; helbidera."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Baliteke horrek mugikorreko kontuan "<b>"gastuak eragitea"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Mugikorreko kontuan gastuak eragingo ditu horrek."</b></string>

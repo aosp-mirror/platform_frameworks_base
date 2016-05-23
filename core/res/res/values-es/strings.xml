@@ -1047,7 +1047,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"La aplicación %1$s quiere establecer conexión con la red Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicación"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento de la zona o del cliente Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento del punto de acceso o cliente Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se ha podido iniciar Wi-Fi Direct."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct activado"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Toca para ver ajustes"</string>

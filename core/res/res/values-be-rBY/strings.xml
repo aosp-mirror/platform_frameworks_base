@@ -551,7 +551,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Адкл.некат.функцыі блак.экрана"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Забараніць выкарыстанне некаторых функцый блакіроўкі экрана."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Галоўная старонка"</item>
+    <item msgid="8901098336658710359">"Хатні"</item>
     <item msgid="869923650527136615">"Мабільны"</item>
     <item msgid="7897544654242874543">"Працоўны"</item>
     <item msgid="1103601433382158155">"Працоўны факс"</item>
@@ -602,7 +602,7 @@
     <string name="phoneTypePager" msgid="7582359955394921732">"Пэйджар"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Іншы"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Зваротны выклік"</string>
-    <string name="phoneTypeCar" msgid="8738360689616716982">"Машына"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Тэл. у машыне"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Асноўны тэлефон кампаніі"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Галоўны"</string>
@@ -619,16 +619,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Гадавіна"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Іншае"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Карыстальніцкі"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Галоўная старонка"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Хатні"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Працоўны"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Іншы"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мабільны"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Карыстальніцкі"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Галоўная старонка"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Хатні"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Працоўны"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Іншы"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Карыстальніцкі"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Галоўная старонка"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Хатні"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Працоўны"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Іншы"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Карыстальніцкі"</string>
@@ -660,7 +660,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Сястра"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Муж/жонка"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Карыстальніцкі"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Галоўная старонка"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Хатні"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Працоўны"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Іншае"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Адсутнічае праграма для прагляду гэтага кантакту."</string>
@@ -679,7 +679,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Націсніце \"Меню\", каб разблакаваць, або зрабіце экстраны выклік."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Націсніце \"Меню\", каб разблакаваць."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Намалюйце камбінацыю разблакоўкі, каб разблакаваць"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Экстранная сітуацыя"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"SOS-выклік"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вярнуцца да выкліку"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правільна!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Паспрабуйце яшчэ раз"</string>
@@ -1255,7 +1255,7 @@
     <string name="action_mode_done" msgid="7217581640461922289">"Гатова"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Выдаленне дадзеных з USB-назапашвальнiка..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Выдаленне дадзеных з SD-карты..."</string>
-    <string name="share" msgid="1778686618230011964">"Адкрыць доступ"</string>
+    <string name="share" msgid="1778686618230011964">"Абагуліць"</string>
     <string name="find" msgid="4808270900322985960">"Пошук"</string>
     <string name="websearch" msgid="4337157977400211589">"Вэб-пошук"</string>
     <string name="find_next" msgid="5742124618942193978">"Знайсці нiжэй"</string>
@@ -1381,7 +1381,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> кр. на цалю"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", бяспечны"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Забылі ключ"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільна ключ"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільны ўзор"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Няправiльны пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Няправільны PIN-код"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Паўтарыце спробу праз <xliff:g id="NUMBER">%1$d</xliff:g> с."</string>

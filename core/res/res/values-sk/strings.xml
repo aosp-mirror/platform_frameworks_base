@@ -261,7 +261,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofón"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"zaznamenávanie zvuku"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a zaznamenávanie videí"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefón"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonovať a spravovať hovory"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Telesné senzory"</string>
@@ -603,13 +603,13 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Iné"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Spätné volanie"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Telefón v aute"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Hlavné číslo spoločnosti"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Hlavné firemné"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Hlavné"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Iný fax"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Rádiotelefón"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telex"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Textový telefón"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Pracovný mobil"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pracovný pager"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asistent"</string>
