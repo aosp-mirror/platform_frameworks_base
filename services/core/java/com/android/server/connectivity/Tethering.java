@@ -262,7 +262,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (up) {
                 if (sm == null) {
-                    sm = new TetherInterfaceStateMachine(iface, mLooper, usb, mPublicSync,
+                    sm = new TetherInterfaceStateMachine(iface, mLooper, usb,
                             mNMService, mStatsService, this);
                     mIfaces.put(iface, sm);
                     sm.start();
@@ -338,7 +338,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
                 return;
             }
-            sm = new TetherInterfaceStateMachine(iface, mLooper, usb, mPublicSync,
+            sm = new TetherInterfaceStateMachine(iface, mLooper, usb,
                     mNMService, mStatsService, this);
             mIfaces.put(iface, sm);
             sm.start();
@@ -576,38 +576,39 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     public int tether(String iface) {
         if (DBG) Log.d(TAG, "Tethering " + iface);
-        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
-            sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
+            if (sm == null) {
+                Log.e(TAG, "Tried to Tether an unknown iface :" + iface + ", ignoring");
+                return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
+            }
+            // Ignore the error status of the interface.  If the interface is available,
+            // the errors are referring to past tethering attempts anyway.
+            if (!sm.isAvailable()) {
+                Log.e(TAG, "Tried to Tether an unavailable iface :" + iface + ", ignoring");
+                return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
+
+            }
+            sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
+            return ConnectivityManager.TETHER_ERROR_NO_ERROR;
         }
-        if (sm == null) {
-            Log.e(TAG, "Tried to Tether an unknown iface :" + iface + ", ignoring");
-            return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
-        }
-        if (!sm.isAvailable() && !sm.isErrored()) {
-            Log.e(TAG, "Tried to Tether an unavailable iface :" + iface + ", ignoring");
-            return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
-        }
-        sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
-        return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
     public int untether(String iface) {
         if (DBG) Log.d(TAG, "Untethering " + iface);
-        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
-            sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
+            if (sm == null) {
+                Log.e(TAG, "Tried to Untether an unknown iface :" + iface + ", ignoring");
+                return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
+            }
+            if (!sm.isTethered()) {
+                Log.e(TAG, "Tried to Untethered an errored iface :" + iface + ", ignoring");
+                return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
+            }
+            sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
+            return ConnectivityManager.TETHER_ERROR_NO_ERROR;
         }
-        if (sm == null) {
-            Log.e(TAG, "Tried to Untether an unknown iface :" + iface + ", ignoring");
-            return ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
-        }
-        if (sm.isErrored()) {
-            Log.e(TAG, "Tried to Untethered an errored iface :" + iface + ", ignoring");
-            return ConnectivityManager.TETHER_ERROR_UNAVAIL_IFACE;
-        }
-        sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
-        return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
     public void untetherAll() {
@@ -618,9 +619,8 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     }
 
     public int getLastTetherError(String iface) {
-        TetherInterfaceStateMachine sm = null;
         synchronized (mPublicSync) {
-            sm = mIfaces.get(iface);
+            TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (sm == null) {
                 Log.e(TAG, "Tried to getLastTetherError on an unknown iface :" + iface +
                         ", ignoring");
