@@ -2747,11 +2747,18 @@ public class AudioManager {
      */
     public static abstract class AudioRecordingCallback {
         /**
+         * This method is deprecated, override {@link #onRecordingConfigChanged(List)} instead.
+         * @param configs
+         * @removed
+         */
+        @Deprecated
+        public void onRecordingConfigChanged(AudioRecordingConfiguration[] configs) {}
+        /**
          * Called whenever the device recording configuration has changed.
-         * @param configs array containing the results of
+         * @param configs list containing the results of
          *      {@link AudioManager#getActiveRecordingConfigurations()}.
          */
-        public void onRecordingConfigChanged(AudioRecordingConfiguration[] configs) {}
+        public void onRecordingConfigChanged(List<AudioRecordingConfiguration> configs) {}
     }
 
     private static class AudioRecordingCallbackInfo {
@@ -2765,10 +2772,10 @@ public class AudioManager {
 
     private final static class RecordConfigChangeCallbackData {
         final AudioRecordingCallback mCb;
-        final AudioRecordingConfiguration[] mConfigs;
+        final List<AudioRecordingConfiguration> mConfigs;
 
         RecordConfigChangeCallbackData(AudioRecordingCallback cb,
-                AudioRecordingConfiguration[] configs) {
+                List<AudioRecordingConfiguration> configs) {
             mCb = cb;
             mConfigs = configs;
         }
@@ -2848,10 +2855,10 @@ public class AudioManager {
 
     /**
      * Returns the current active audio recording configurations of the device.
-     * @return a non-null array of recording configurations. An array of length 0 indicates there is
+     * @return a non-null list of recording configurations. An empty list indicates there is
      *     no recording active when queried.
      */
-    public @NonNull AudioRecordingConfiguration[] getActiveRecordingConfigurations() {
+    public @NonNull List<AudioRecordingConfiguration> getActiveRecordingConfigurations() {
         final IAudioService service = getService();
         try {
             return service.getActiveRecordingConfigurations();
@@ -2909,7 +2916,7 @@ public class AudioManager {
 
     private final IRecordingConfigDispatcher mRecCb = new IRecordingConfigDispatcher.Stub() {
 
-        public void dispatchRecordingConfigChange(AudioRecordingConfiguration[] configs) {
+        public void dispatchRecordingConfigChange(List<AudioRecordingConfiguration> configs) {
             synchronized(mRecordCallbackLock) {
                 if (mRecordCallbackList != null) {
                     for (int i=0 ; i < mRecordCallbackList.size() ; i++) {
