@@ -28,11 +28,11 @@
     <string name="menu_settings" msgid="8239065133341597825">"ਸਟੋਰੇਜ ਸੈਟਿੰਗਾਂ"</string>
     <string name="menu_open" msgid="432922957274920903">"ਖੋਲ੍ਹੋ"</string>
     <string name="menu_save" msgid="2394743337684426338">"ਸੁਰੱਖਿਅਤ ਕਰੋ"</string>
-    <string name="menu_share" msgid="3075149983979628146">"ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="menu_share" msgid="3075149983979628146">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ਮਿਟਾਓ"</string>
-    <string name="menu_select_all" msgid="8323579667348729928">"ਸਾਰੇ ਚੁਣੋ"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"ਸਭ ਚੁਣੋ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ਇਸ ਵਿੱਚ ਕਾਪੀ ਕਰੋ…"</string>
-    <string name="menu_move" msgid="1828090633118079817">"ਇਸ ਵਿੱਚ ਮੂਵ ਕਰੋ..."</string>
+    <string name="menu_move" msgid="1828090633118079817">"ਇਸ ਵਿੱਚ ਤਬਦੀਲ ਕਰੋ..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"ਨਵੀਂ ਵਿੰਡੋ"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ਕਾਪੀ ਕਰੋ"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ਪੇਸਟ ਕਰੋ"</string>
@@ -46,7 +46,7 @@
     <string name="button_dismiss" msgid="3714065566893946085">"ਬਰਖਾਸਤ ਕਰੋ"</string>
     <string name="button_retry" msgid="4392027584153752797">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="sort_name" msgid="9183560467917256779">"ਨਾਮ ਮੁਤਾਬਕ"</string>
-    <string name="sort_date" msgid="586080032956151448">"ਤਾਰੀਖ ਮੁਤਾਬਕ ਸੰਸ਼ੋਧਿਤ"</string>
+    <string name="sort_date" msgid="586080032956151448">"ਸੋਧੇ ਜਾਣ ਦੀ ਤਾਰੀਖ਼ ਮੁਤਾਬਕ"</string>
     <string name="sort_size" msgid="3350681319735474741">"ਆਕਾਰ ਮੁਤਾਬਕ"</string>
     <string name="drawer_open" msgid="4545466532430226949">"ਰੂਟਸ ਦਿਖਾਓ"</string>
     <string name="drawer_close" msgid="7602734368552123318">"ਰੂਟਸ ਲੁਕਾਓ"</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s ਵਿੱਚ ਕੋਈ ਮੇਲ ਨਹੀਂ"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ਕੁਝ ਦਸਤਾਵੇਜ਼ ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਮਰੱਥ"</string>
-    <string name="share_via" msgid="8966594246261344259">"ਇਸ ਰਾਹੀਂ ਸ਼ੇਅਰ ਕਰੋ"</string>
+    <string name="share_via" msgid="8966594246261344259">"ਇਸ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ਫਾਈਲਾਂ ਕਾਪੀ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
