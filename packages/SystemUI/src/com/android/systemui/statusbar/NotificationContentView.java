@@ -71,7 +71,6 @@ public class NotificationContentView extends FrameLayout {
     private HybridGroupManager mHybridGroupManager;
     private int mClipTopAmount;
     private int mContentHeight;
-    private int mUnrestrictedContentHeight;
     private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
     private boolean mDark;
     private boolean mAnimate;
@@ -371,8 +370,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void setContentHeight(int contentHeight) {
-        mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());;
-        mUnrestrictedContentHeight = Math.max(contentHeight, getMinHeight());
+        mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());
         selectLayout(mAnimate /* animate */, false /* force */);
 
         int minHeightHint = getMinContentHeightHint();
@@ -591,7 +589,21 @@ public class NotificationContentView extends FrameLayout {
         mContainingNotification.setContentBackground(customBackgroundColor, animate, this);
     }
 
-    private int getBackgroundColor(int visibleType) {
+    public int getVisibleType() {
+        return mVisibleType;
+    }
+
+    public int getBackgroundColorForExpansionState() {
+        // When expanding or user locked we want the new type, when collapsing we want
+        // the original type
+        final int visibleType = (mContainingNotification.isGroupExpanded()
+                || mContainingNotification.isUserLocked())
+                        ? calculateVisibleType()
+                        : getVisibleType();
+        return getBackgroundColor(visibleType);
+    }
+
+    public int getBackgroundColor(int visibleType) {
         NotificationViewWrapper currentVisibleWrapper = getVisibleWrapper(visibleType);
         int customBackgroundColor = 0;
         if (currentVisibleWrapper != null) {
@@ -699,7 +711,7 @@ public class NotificationContentView extends FrameLayout {
     /**
      * @return one of the static enum types in this view, calculated form the current state
      */
-    private int calculateVisibleType() {
+    public int calculateVisibleType() {
         if (mUserExpanding) {
             int height = !mIsChildInGroup || isGroupExpanded()
                     || mContainingNotification.isExpanded(true /* allowOnKeyguard */)
