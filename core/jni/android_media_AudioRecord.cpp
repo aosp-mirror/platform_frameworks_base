@@ -71,11 +71,11 @@ static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
 
 // ----------------------------------------------------------------------------
 
-#define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      -16
-#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK -17
-#define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       -18
-#define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       -19
-#define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    -20
+#define AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT      (-16)
+#define AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK  (-17)
+#define AUDIORECORD_ERROR_SETUP_INVALIDFORMAT       (-18)
+#define AUDIORECORD_ERROR_SETUP_INVALIDSOURCE       (-19)
+#define AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    (-20)
 
 // ----------------------------------------------------------------------------
 static void recorderCallback(int event, void* user, void *info) {

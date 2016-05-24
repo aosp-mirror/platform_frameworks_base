@@ -38,23 +38,23 @@ namespace android {
 
 #define FIND_CLASS(var, className) \
     var = env->FindClass(className); \
-    LOG_FATAL_IF(! var, "Unable to find class " className);
+    LOG_FATAL_IF(! (var), "Unable to find class " className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
 #define GET_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetMethodID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! var, "Unable to find method " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find method " fieldName);
 
 #define GET_STATIC_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetStaticFieldID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
 #define GET_STATIC_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetStaticMethodID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! var, "Unable to find static method " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find static method " fieldName);
 
 
 struct RequestFields {
