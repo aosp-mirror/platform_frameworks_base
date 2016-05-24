@@ -886,8 +886,8 @@ public class AlertController {
             listView.setAdapter(mAdapter);
             final int checkedItem = mCheckedItem;
             if (checkedItem > -1) {
-                listView.setItemChecked(checkedItem, true);
-                listView.setSelection(checkedItem);
+                listView.setItemChecked(checkedItem + listView.getHeaderViewsCount(), true);
+                listView.setSelection(checkedItem + listView.getHeaderViewsCount());
             }
         }
     }
@@ -1066,7 +1066,8 @@ public class AlertController {
                             if (mCheckedItems != null) {
                                 boolean isItemChecked = mCheckedItems[position];
                                 if (isItemChecked) {
-                                    listView.setItemChecked(position, true);
+                                    listView.setItemChecked(
+                                            position + listView.getHeaderViewsCount(), true);
                                 }
                             }
                             return view;
@@ -1087,7 +1088,8 @@ public class AlertController {
                         public void bindView(View view, Context context, Cursor cursor) {
                             CheckedTextView text = (CheckedTextView) view.findViewById(R.id.text1);
                             text.setText(cursor.getString(mLabelIndex));
-                            listView.setItemChecked(cursor.getPosition(),
+                            listView.setItemChecked(
+                                    cursor.getPosition() + listView.getHeaderViewsCount(),
                                     cursor.getInt(mIsCheckedIndex) == 1);
                         }
 
