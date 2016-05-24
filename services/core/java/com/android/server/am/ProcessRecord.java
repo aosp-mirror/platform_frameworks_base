@@ -194,6 +194,8 @@ final class ProcessRecord {
 
     // Process is currently hosting a backup agent for backup or restore
     public boolean inFullBackup;
+    // App is allowed to manage whitelists such as temporary Power Save mode whitelist.
+    boolean whitelistManager;
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -375,6 +377,9 @@ final class ProcessRecord {
                         pw.print(errorReportReceiver.flattenToShortString());
                     }
                     pw.println();
+        }
+        if (whitelistManager) {
+            pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
         }
         if (activities.size() > 0) {
             pw.print(prefix); pw.println("Activities:");
