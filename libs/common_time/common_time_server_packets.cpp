@@ -48,12 +48,12 @@ const uint16_t TimeServicePacketHeader::kCurVersion = 1;
 #define SERIALIZE_INT32(field_name) SERIALIZE_FIELD(field_name, int32_t, htonl)
 #define SERIALIZE_INT64(field_name) SERIALIZE_FIELD(field_name, int64_t, htonq)
 
-#define DESERIALIZE_FIELD(field_name, type, converter)      \
-    do {                                                    \
-        if ((offset + sizeof(field_name)) > length)         \
-            return -1;                                      \
-        field_name = converter(*((type*)(data + offset)));  \
-        offset += sizeof(field_name);                       \
+#define DESERIALIZE_FIELD(field_name, type, converter)       \
+    do {                                                     \
+        if ((offset + sizeof(field_name)) > length)          \
+            return -1;                                       \
+        (field_name) = converter(*((type*)(data + offset))); \
+        offset += sizeof(field_name);                        \
     } while (0)
 #define DESERIALIZE_INT16(field_name) DESERIALIZE_FIELD(field_name, int16_t, ntohs)
 #define DESERIALIZE_INT32(field_name) DESERIALIZE_FIELD(field_name, int32_t, ntohl)
