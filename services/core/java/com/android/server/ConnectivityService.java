@@ -4069,7 +4069,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized(mRulesLock) {
                 uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             }
-            if ((uidRules & RULE_ALLOW_ALL) == 0) {
+            if (mRestrictBackground && (uidRules & RULE_ALLOW_METERED) == 0
+                    && (uidRules & RULE_TEMPORARY_ALLOW_METERED) == 0) {
                 // we could silently fail or we can filter the available nets to only give
                 // them those they have access to.  Chose the more useful option.
                 networkCapabilities.addCapability(NET_CAPABILITY_NOT_METERED);
