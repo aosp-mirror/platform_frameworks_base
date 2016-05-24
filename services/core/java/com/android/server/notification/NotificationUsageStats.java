@@ -384,7 +384,7 @@ public class NotificationUsageStats {
             noisyImportance = new ImportanceHistogram(context, "note_imp_noisy_");
             quietImportance = new ImportanceHistogram(context, "note_imp_quiet_");
             finalImportance = new ImportanceHistogram(context, "note_importance_");
-            enqueueRate = new RateEstimator(mCreated);
+            enqueueRate = new RateEstimator();
         }
 
         public AggregatedStats getPrevious() {
