@@ -2074,7 +2074,8 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
-                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0) {
+                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0
+                        && (flags & UserInfo.FLAG_DEMO) == 0) {
                     Log.e(LOG_TAG,
                             "Ephemeral users are supported on split-system-user systems only.");
                     return null;

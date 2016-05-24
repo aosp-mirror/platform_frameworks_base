@@ -20943,6 +20943,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "No user info for user #" + targetUserId);
                 return false;
             }
+            if (!targetUserInfo.isDemo() && UserManager.isDeviceInDemoMode(mContext)) {
+                Slog.w(TAG, "Cannot switch to non-demo user #" + targetUserId
+                        + " when device is in demo mode");
+                return false;
+            }
             if (!targetUserInfo.supportsSwitchTo()) {
                 Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
                 return false;
