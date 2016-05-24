@@ -37,10 +37,10 @@
         <item name="textAppearanceListItem">@style/TextAppearance.Micro.Subtitle</item>
         <item name="textAppearanceListItemSmall">@style/TextAppearance.Micro.Body1</item>
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.Micro.Body2</item>
-        <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_micro</item>
-        <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_micro</item>
-        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_micro</item>
-        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_micro</item>
+        <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_left_micro</item>
+        <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_right_micro</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_left_micro</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_right_micro</item>
 
         <!-- Dialog styling -->
         <item name="buttonBarStyle">@style/Widget.Micro.ButtonBar</item>
