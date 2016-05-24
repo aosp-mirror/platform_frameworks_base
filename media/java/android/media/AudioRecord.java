@@ -94,6 +94,11 @@ public class AudioRecord implements AudioRouting
      * Denotes a failure due to the improper use of a method.
      */
     public  static final int ERROR_INVALID_OPERATION               = AudioSystem.INVALID_OPERATION;
+    /**
+     * An error code indicating that the object reporting it is no longer valid and needs to
+     * be recreated.
+     */
+    public  static final int ERROR_DEAD_OBJECT                     = AudioSystem.DEAD_OBJECT;
 
     // Error codes:
     // to keep in sync with frameworks/base/core/jni/android_media_AudioRecord.cpp
@@ -1046,10 +1051,16 @@ public class AudioRecord implements AudioRouting
      * @param audioData the array to which the recorded audio data is written.
      * @param offsetInBytes index in audioData from which the data is written expressed in bytes.
      * @param sizeInBytes the number of requested bytes.
-     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of bytes will not exceed sizeInBytes.
+     * @return zero or the positive number of bytes that were read, or one of the following
+     *    error codes. The number of bytes will not exceed sizeInBytes.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes) {
         return read(audioData, offsetInBytes, sizeInBytes, READ_BLOCKING);
@@ -1070,11 +1081,17 @@ public class AudioRecord implements AudioRouting
      *     is read.
      *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
      *     reading as much audio data as possible without blocking.
-     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of bytes will be a multiple of the frame size in bytes
+     * @return zero or the positive number of bytes that were read, or one of the following
+     *    error codes. The number of bytes will be a multiple of the frame size in bytes
      *    not to exceed sizeInBytes.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @ReadMode int readMode) {
@@ -1106,10 +1123,17 @@ public class AudioRecord implements AudioRouting
      *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of requested shorts.
      *        Must not be negative, or cause the data access to go out of bounds of the array.
-     * @return the number of shorts that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
+     * @return zero or the positive number of shorts that were read, or one of the following
+     *    error codes. The number of shorts will be a multiple of the channel count not to exceed
+     *    sizeInShorts.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
         return read(audioData, offsetInShorts, sizeInShorts, READ_BLOCKING);
@@ -1129,10 +1153,17 @@ public class AudioRecord implements AudioRouting
      *     is read.
      *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
      *     reading as much audio data as possible without blocking.
-     * @return the number of shorts that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
+     * @return zero or the positive number of shorts that were read, or one of the following
+     *    error codes. The number of shorts will be a multiple of the channel count not to exceed
+     *    sizeInShorts.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @ReadMode int readMode) {
@@ -1169,10 +1200,17 @@ public class AudioRecord implements AudioRouting
      *     is read.
      *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
      *     reading as much audio data as possible without blocking.
-     * @return the number of floats that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of floats will be a multiple of the channel count not to exceed sizeInFloats.
+     * @return zero or the positive number of floats that were read, or one of the following
+     *    error codes. The number of floats will be a multiple of the channel count not to exceed
+     *    sizeInFloats.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @ReadMode int readMode) {
@@ -1213,11 +1251,17 @@ public class AudioRecord implements AudioRouting
      * @param sizeInBytes the number of requested bytes. It is recommended but not enforced
      *    that the number of bytes requested be a multiple of the frame size (sample size in
      *    bytes multiplied by the channel count).
-     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of bytes will not exceed sizeInBytes.
-     *    The number of bytes read will be truncated to be a multiple of the frame size.
+     * @return zero or the positive number of bytes that were read, or one of the following
+     *    error codes. The number of bytes will not exceed sizeInBytes and will be truncated to be
+     *    a multiple of the frame size.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes) {
         return read(audioBuffer, sizeInBytes, READ_BLOCKING);
@@ -1240,11 +1284,17 @@ public class AudioRecord implements AudioRouting
      *     is read.
      *     <br>With {@link #READ_NON_BLOCKING}, the read will return immediately after
      *     reading as much audio data as possible without blocking.
-     * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
-     *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes.
-     *    The number of bytes will not exceed sizeInBytes.
-     *    The number of bytes read will be truncated to be a multiple of the frame size.
+     * @return zero or the positive number of bytes that were read, or one of the following
+     *    error codes. The number of bytes will not exceed sizeInBytes and will be truncated to be
+     *    a multiple of the frame size.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the object isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the object is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next read()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes, @ReadMode int readMode) {
         if (mState != STATE_INITIALIZED) {

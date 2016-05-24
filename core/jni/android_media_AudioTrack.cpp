@@ -606,6 +606,18 @@ void envReleaseArrayElements(JNIEnv *env, jfloatArray array, jfloat *elems, jint
     env->ReleaseFloatArrayElements(array, elems, mode);
 }
 
+static inline
+jint interpretWriteSizeError(ssize_t writeSize) {
+    if (writeSize == WOULD_BLOCK) {
+        return (jint)0;
+    } else if (writeSize == NO_INIT) {
+        return AUDIO_JAVA_DEAD_OBJECT;
+    } else {
+        ALOGE("Error %zd during AudioTrack native read", writeSize);
+        return nativeToJavaStatus(writeSize);
+    }
+}
+
 // ----------------------------------------------------------------------------
 template <typename T>
 static jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const T *data,
@@ -628,11 +640,10 @@ static jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const T 
         memcpy(track->sharedBuffer()->pointer(), data + offsetInSamples, sizeInBytes);
         written = sizeInBytes;
     }
-    if (written > 0) {
+    if (written >= 0) {
         return written / sizeof(T);
     }
-    // for compatibility, error codes pass through unchanged
-    return written;
+    return interpretWriteSizeError(written);
 }
 
 // ----------------------------------------------------------------------------
