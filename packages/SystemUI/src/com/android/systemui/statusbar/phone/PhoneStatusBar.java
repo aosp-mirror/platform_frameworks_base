@@ -4335,6 +4335,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (expandView instanceof ExpandableNotificationRow) {
             row = (ExpandableNotificationRow) expandView;
             row.setUserExpanded(true /* userExpanded */, true /* allowChildExpansion */);
+            // Indicate that the group expansion is changing at this time -- this way the group
+            // and children backgrounds / divider animations will look correct.
+            row.setGroupExpansionChanging(true);
         }
         boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
                 || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();

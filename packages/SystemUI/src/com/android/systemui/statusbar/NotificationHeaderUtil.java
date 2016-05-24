@@ -90,7 +90,7 @@ public class NotificationHeaderUtil {
     private final ArrayList<HeaderProcessor> mComparators = new ArrayList<>();
     private final HashSet<Integer> mDividers = new HashSet<>();
 
-    NotificationHeaderUtil(ExpandableNotificationRow row) {
+    public NotificationHeaderUtil(ExpandableNotificationRow row) {
         mRow = row;
         // To hide the icons if they are the same and the color is the same
         mComparators.add(new HeaderProcessor(mRow,
