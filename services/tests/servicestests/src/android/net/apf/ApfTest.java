@@ -720,36 +720,52 @@ public class ApfTest extends AndroidTestCase {
     }
 
     @LargeTest
-    public void testApfFilterIPv4Multicast() throws Exception {
+    public void testApfFilterMulticast() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
         ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, false /* multicastFilter */);
         byte[] program = ipManagerCallback.getApfProgram();
 
+        // Construct IPv4 and IPv6 multicast packets.
+        ByteBuffer v4packet = ByteBuffer.wrap(new byte[100]);
+        v4packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IP);
+        v4packet.position(IPV4_DEST_ADDR_OFFSET);
+        v4packet.put(new byte[]{(byte)224,0,0,1});
+
+        ByteBuffer v6packet = ByteBuffer.wrap(new byte[100]);
+        v6packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IPV6);
+        v6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_UDP);
+        v6packet.position(IPV6_DEST_ADDR_OFFSET);
+        v6packet.put(new byte[]{(byte)0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,(byte)0xfb});
+
         // Verify initially disabled multicast filter is off
-        ByteBuffer packet = ByteBuffer.wrap(new byte[100]);
-        packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IP);
-        packet.position(IPV4_DEST_ADDR_OFFSET);
-        packet.put(new byte[]{(byte)224,0,0,1});
-        assertPass(program, packet.array(), 0);
+        assertPass(program, v4packet.array(), 0);
+        assertPass(program, v6packet.array(), 0);
 
         // Turn on multicast filter and verify it works
         ipManagerCallback.resetApfProgramWait();
         apfFilter.setMulticastFilter(true);
         program = ipManagerCallback.getApfProgram();
-        assertDrop(program, packet.array(), 0);
+        assertDrop(program, v4packet.array(), 0);
+        assertDrop(program, v6packet.array(), 0);
 
         // Turn off multicast filter and verify it's off
         ipManagerCallback.resetApfProgramWait();
         apfFilter.setMulticastFilter(false);
         program = ipManagerCallback.getApfProgram();
-        assertPass(program, packet.array(), 0);
+        assertPass(program, v4packet.array(), 0);
+        assertPass(program, v6packet.array(), 0);
 
         // Verify it can be initialized to on
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
         apfFilter = new TestApfFilter(ipManagerCallback, true /* multicastFilter */);
         program = ipManagerCallback.getApfProgram();
-        assertDrop(program, packet.array(), 0);
+        assertDrop(program, v4packet.array(), 0);
+        assertDrop(program, v6packet.array(), 0);
+
+        // Verify that ICMPv6 multicast is not dropped.
+        v6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
+        assertPass(program, v6packet.array(), 0);
 
         apfFilter.shutdown();
     }
@@ -839,7 +855,7 @@ public class ApfTest extends AndroidTestCase {
     @LargeTest
     public void testApfFilterRa() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        TestApfFilter apfFilter = new TestApfFilter(ipManagerCallback, false /* multicastFilter */);
+        TestApfFilter apfFilter = new TestApfFilter(ipManagerCallback, true /* multicastFilter */);
         byte[] program = ipManagerCallback.getApfProgram();
 
         // Verify RA is passed the first time
@@ -848,6 +864,8 @@ public class ApfTest extends AndroidTestCase {
         basePacket.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
         basePacket.put(ICMP6_TYPE_OFFSET, (byte)ICMP6_ROUTER_ADVERTISEMENT);
         basePacket.putShort(ICMP6_RA_ROUTER_LIFETIME_OFFSET, (short)1000);
+        basePacket.position(IPV6_DEST_ADDR_OFFSET);
+        basePacket.put(IPV6_ALL_NODES_ADDRESS);
         assertPass(program, basePacket.array(), 0);
 
         testRaLifetime(apfFilter, ipManagerCallback, basePacket, 1000);
