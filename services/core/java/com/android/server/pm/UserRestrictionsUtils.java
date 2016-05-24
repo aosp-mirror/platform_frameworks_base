@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -424,6 +425,14 @@ public class UserRestrictionsUtils {
                             android.provider.Settings.Global.SAFE_BOOT_DISALLOWED,
                             newValue ? 1 : 0);
                     break;
+                case UserManager.DISALLOW_FACTORY_RESET:
+                    if (newValue) {
+                        PersistentDataBlockManager manager = (PersistentDataBlockManager) context
+                                .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+                        if (manager != null) {
+                            manager.setOemUnlockEnabled(false);
+                        }
+                    }
             }
         } finally {
             Binder.restoreCallingIdentity(id);
