@@ -2111,7 +2111,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     void clearHasSavedSurface() {
         mSurfaceSaved = false;
         mAnimatingWithSavedSurface = false;
-        mWasVisibleBeforeClientHidden = false;
+        if (mWasVisibleBeforeClientHidden) {
+            mAppToken.destroySavedSurfaces();
+        }
     }
 
     boolean clearAnimatingWithSavedSurface() {
