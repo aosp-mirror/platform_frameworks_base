@@ -38,6 +38,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.tv.animations.DismissAnimationsHolder;
 import com.android.systemui.recents.tv.animations.RecentsRowFocusAnimationHolder;
 import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
@@ -85,6 +87,24 @@ public class TaskCardView extends LinearLayout {
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isTouchExplorationEnabled()) {
+            mDismissIconView.setFocusable(true);
+            mDismissIconView.setFocusableInTouchMode(true);
+            mDismissIconView.setOnFocusChangeListener(new OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) {
+                        setDismissState(true);
+                    } else {
+                        setDismissState(false);
+                    }
+                }
+            });
+        } else {
+            mDismissIconView.setFocusable(false);
+            mDismissIconView.setFocusableInTouchMode(false);
+        }
         mViewFocusAnimator = new ViewFocusAnimator(this);
     }
 
