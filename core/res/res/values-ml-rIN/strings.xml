@@ -1621,4 +1621,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"നിയന്ത്രണങ്ങൾ ഇല്ലാതെ ഈ ഉപകരണം ഉപയോഗിക്കാൻ ഫാക്ടറി റീസെറ്റ് നടത്തുക"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"കൂടുതലറിയുന്നതിന് സ്‌പർശിക്കുക."</string>
+    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
+    <skip />
 </resources>

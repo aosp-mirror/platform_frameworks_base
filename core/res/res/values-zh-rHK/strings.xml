@@ -1618,4 +1618,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"將此裝置回復至原廠設定後，使用將不受限制"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"輕觸以瞭解詳情。"</string>
+    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
+    <skip />
 </resources>

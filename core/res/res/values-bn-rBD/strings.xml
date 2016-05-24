@@ -1621,4 +1621,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"কোনো বিধিনিষেধ ছাড়াই এই ডিভাইসটিকে ব্যবহার করতে ফ্যাক্টরি রিসেট করুন"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"আরো জানতে স্পর্শ করুন৷"</string>
+    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
+    <skip />
 </resources>
