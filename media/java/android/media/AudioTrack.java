@@ -156,7 +156,6 @@ public class AudioTrack extends PlayerBase
     /**
      * An error code indicating that the object reporting it is no longer valid and needs to
      * be recreated.
-     * @hide
      */
     public  static final int ERROR_DEAD_OBJECT                     = AudioSystem.DEAD_OBJECT;
     /**
@@ -1840,17 +1839,17 @@ public class AudioTrack extends PlayerBase
      *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInBytes the number of bytes to write in audioData after the offset.
      *    Must not be negative, or cause the data access to go out of bounds of the array.
-     * @return zero or the positive number of bytes that were written, or
-     *    {@link #ERROR_INVALID_OPERATION}
-     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes, or
-     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *    needs to be recreated.
-     *    The dead object error code is not returned if some data was successfully transferred.
-     *    In this case, the error is returned at the next write().
-     *    The number of bytes will be a multiple of the frame size in bytes
+     * @return zero or the positive number of bytes that were written, or one of the following
+     *    error codes. The number of bytes will be a multiple of the frame size in bytes
      *    not to exceed sizeInBytes.
-     *
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      * This is equivalent to {@link #write(byte[], int, int, int)} with <code>writeMode</code>
      * set to  {@link #WRITE_BLOCKING}.
      */
@@ -1888,16 +1887,17 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return zero or the positive number of bytes that were written, or
-     *    {@link #ERROR_INVALID_OPERATION}
-     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes, or
-     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *    needs to be recreated.
-     *    The dead object error code is not returned if some data was successfully transferred.
-     *    In this case, the error is returned at the next write().
-     *    The number of bytes will be a multiple of the frame size in bytes
+     * @return zero or the positive number of bytes that were written, or one of the following
+     *    error codes. The number of bytes will be a multiple of the frame size in bytes
      *    not to exceed sizeInBytes.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @WriteMode int writeMode) {
@@ -1950,16 +1950,17 @@ public class AudioTrack extends PlayerBase
      *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
      *    Must not be negative, or cause the data access to go out of bounds of the array.
-     * @return zero or the positive number of shorts that were written, or
-     *    {@link #ERROR_INVALID_OPERATION}
-     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes, or
-     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *    needs to be recreated.
-     *    The dead object error code is not returned if some data was successfully transferred.
-     *    In this case, the error is returned at the next write().
-     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
-     *
+     * @return zero or the positive number of shorts that were written, or one of the following
+     *    error codes. The number of shorts will be a multiple of the channel count not to
+     *    exceed sizeInShorts.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      * This is equivalent to {@link #write(short[], int, int, int)} with <code>writeMode</code>
      * set to  {@link #WRITE_BLOCKING}.
      */
@@ -1995,15 +1996,17 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return zero or the positive number of shorts that were written, or
-     *    {@link #ERROR_INVALID_OPERATION}
-     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes, or
-     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *    needs to be recreated.
-     *    The dead object error code is not returned if some data was successfully transferred.
-     *    In this case, the error is returned at the next write().
-     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
+     * @return zero or the positive number of shorts that were written, or one of the following
+     *    error codes. The number of shorts will be a multiple of the channel count not to
+     *    exceed sizeInShorts.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @WriteMode int writeMode) {
@@ -2074,15 +2077,17 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <br>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return zero or the positive number of floats that were written, or
-     *    {@link #ERROR_INVALID_OPERATION}
-     *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
-     *    the parameters don't resolve to valid data and indexes, or
-     *    {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *    needs to be recreated.
-     *    The dead object error code is not returned if some data was successfully transferred.
-     *    In this case, the error is returned at the next write().
-     *    The number of floats will be a multiple of the channel count not to exceed sizeInFloats.
+     * @return zero or the positive number of floats that were written, or one of the following
+     *    error codes. The number of floats will be a multiple of the channel count not to
+     *    exceed sizeInFloats.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int write(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
@@ -2154,12 +2159,16 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @return zero or the positive number of bytes that were written, or
-     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
-     *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *     needs to be recreated.
-     *     The dead object error code is not returned if some data was successfully transferred.
-     *     In this case, the error is returned at the next write().
+     * @return zero or the positive number of bytes that were written, or one of the following
+     *    error codes.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int write(@NonNull ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode) {
@@ -2223,12 +2232,16 @@ public class AudioTrack extends PlayerBase
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
      * @param timestamp The timestamp of the first decodable audio frame in the provided audioData.
-     * @return zero or a positive number of bytes that were written, or
-     *     {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}, or
-     *     {@link AudioManager#ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
-     *     needs to be recreated.
-     *     The dead object error code is not returned if some data was successfully transferred.
-     *     In this case, the error is returned at the next write().
+     * @return zero or the positive number of bytes that were written, or one of the following
+     *    error codes.
+     * <ul>
+     * <li>{@link #ERROR_INVALID_OPERATION} if the track isn't properly initialized</li>
+     * <li>{@link #ERROR_BAD_VALUE} if the parameters don't resolve to valid data and indexes</li>
+     * <li>{@link #ERROR_DEAD_OBJECT} if the AudioTrack is not valid anymore and
+     *    needs to be recreated. The dead object error code is not returned if some data was
+     *    successfully transferred. In this case, the error is returned at the next write()</li>
+     * <li>{@link #ERROR} in case of other error</li>
+     * </ul>
      */
     public int write(@NonNull ByteBuffer audioData, int sizeInBytes,
             @WriteMode int writeMode, long timestamp) {
