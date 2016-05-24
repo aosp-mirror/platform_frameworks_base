@@ -19,6 +19,7 @@ package android.appwidget;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
@@ -150,7 +151,7 @@ public class AppWidgetHostView extends FrameLayout {
             // We add padding to the AppWidgetHostView if necessary
             Rect padding = getDefaultPaddingForWidget(mContext, info.provider, null);
             setPadding(padding.left, padding.top, padding.right, padding.bottom);
-            setContentDescription(info.label);
+            updateContentDescription(info);
         }
     }
 
@@ -459,6 +460,7 @@ public class AppWidgetHostView extends FrameLayout {
         }
 
         applyContent(content, recycled, exception);
+        updateContentDescription(mInfo);
     }
 
     private void applyContent(View content, boolean recycled, Exception exception) {
@@ -489,6 +491,22 @@ public class AppWidgetHostView extends FrameLayout {
                 // and that looks okay.
                 mFadeStartTime = SystemClock.uptimeMillis();
                 invalidate();
+            }
+        }
+    }
+
+    private void updateContentDescription(AppWidgetProviderInfo info) {
+        if (info != null) {
+            LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
+            ApplicationInfo appInfo = launcherApps.getApplicationInfo(
+                    info.provider.getPackageName(), 0, info.getProfile());
+            if (appInfo != null &&
+                    (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0) {
+                setContentDescription(
+                        Resources.getSystem().getString(
+                        com.android.internal.R.string.suspended_widget_accessibility, info.label));
+            } else {
+                setContentDescription(info.label);
             }
         }
     }

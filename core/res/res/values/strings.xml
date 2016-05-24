@@ -4317,4 +4317,7 @@
     <!-- Description of notification shown when device has been forced to safe mode after a security compromise. -->
     <string name="audit_safemode_notification_details">Touch to learn more.</string>
 
+    <!-- Accessibilty string added to a widget that has been suspended [CHAR LIMIT=20] -->
+    <string name="suspended_widget_accessibility">Suspended <xliff:g id="label" example="Calendar">%1$s</xliff:g></string>
+
 </resources>
