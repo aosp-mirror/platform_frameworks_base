@@ -19,7 +19,8 @@ Copyright (C) 2015 The Android Open Source Project
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F3374248"
-    android:clickable="true" >
+    android:importantForAccessibility="noHideDescendants"
+    android:clickable="true">
 
     <ImageView android:id="@+id/work_widget_app_icon"
         android:layout_width="wrap_content"
