@@ -16867,6 +16867,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return false;
             }
 
+            // If the app is a regular app (uid >= 10000) and not the system server or phone
+            // process, etc, then mark it as being in full backup so that certain calls to the
+            // process can be blocked. This is not reset to false anywhere because we kill the
+            // process after the full backup is done and the ProcessRecord will vaporize anyway.
+            if (UserHandle.isApp(app.uid) && backupMode == IApplicationThread.BACKUP_MODE_FULL) {
+                proc.inFullBackup = true;
+            }
             r.app = proc;
             mBackupTarget = r;
             mBackupAppName = app.packageName;
