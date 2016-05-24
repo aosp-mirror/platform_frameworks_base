@@ -79,7 +79,7 @@ instalação existente, pule para a etapa 4):</p>
 
 <h2 id="get-sdk">Obter o N Preview SDK</h2>
 
-<p>Para começar a desenvolver com as APIs do Android N, instale o 
+<p>Para começar a desenvolver com as APIs do Android N, instale o
 Android N Preview SDK no Android Studio da seguinte maneira:</p>
 
 <ol>
@@ -112,7 +112,7 @@ Android N Preview SDK no Android Studio da seguinte maneira:</p>
 <p>
   Informações detalhadas sobre as APIs do Android N são disponibilizadas na documentação de referência do N Preview
 , que pode ser baixada pela tabela a seguir.
- Este pacote contém uma versão off-line resumida do site de desenvolvedores do Android 
+ Este pacote contém uma versão off-line resumida do site de desenvolvedores do Android
  e inclui uma referência atualizada para as APIs do Android N, além de um relatório
  das diferenças entre as APIs.
 </p>
@@ -168,7 +168,7 @@ agora mesmo.</p>
   Para usar as APIs do Android N, seu projeto deve ser configurado da maneira apropriada.
 </p>
 
-<p>Se planeja usar os recursos de linguagem do Java 8, consulte 
+<p>Se planeja usar os recursos de linguagem do Java 8, consulte
 <a href="{@docRoot}preview/j8-jack.html">Recursos de linguagem do Java 8</a>
 para saber mais sobre os recursos do Java 8 com suporte e
 como configurar seu projeto com o compilador Jack.</p>
@@ -216,9 +216,9 @@ android {
 
 <ul>
   <li>Siga o guia para <a href="{@docRoot}preview/download.html">Testar em um dispositivo Android N</a>.</li>
-  <li>Saiba mais sobre a plataforma Android N com 
+  <li>Saiba mais sobre a plataforma Android N com
 <a href="{@docRoot}preview/behavior-changes.html">Mudanças de comportamento</a>
 e <a href="{@docRoot}preview/api-overview.html">Recursos de APIs do
 Android N</a>.</li>
 </ul>
-
+<div class="end-content-title"></div>
