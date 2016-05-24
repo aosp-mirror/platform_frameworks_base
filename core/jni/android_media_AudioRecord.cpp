@@ -479,17 +479,13 @@ void envReleaseArrayElements(JNIEnv *env, jfloatArray array, jfloat *elems, jint
 
 static inline
 jint interpretReadSizeError(ssize_t readSize) {
-    ALOGE_IF(readSize != WOULD_BLOCK, "Error %zd during AudioRecord native read", readSize);
-    switch (readSize) {
-    case WOULD_BLOCK:
+    if (readSize == WOULD_BLOCK) {
         return (jint)0;
-    case BAD_VALUE:
-        return (jint)AUDIO_JAVA_BAD_VALUE;
-    default:
-        // may be possible for other errors such as
-        // NO_INIT to happen if restoreRecord_l fails.
-    case INVALID_OPERATION:
-        return (jint)AUDIO_JAVA_INVALID_OPERATION;
+    } else if (readSize == NO_INIT) {
+        return AUDIO_JAVA_DEAD_OBJECT;
+    } else {
+        ALOGE("Error %zd during AudioRecord native read", readSize);
+        return nativeToJavaStatus(readSize);
     }
 }
 
