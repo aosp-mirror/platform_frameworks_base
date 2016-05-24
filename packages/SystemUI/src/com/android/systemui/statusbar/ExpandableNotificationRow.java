@@ -1486,6 +1486,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         updateBackground();
     }
 
+    public int getPositionOfChild(ExpandableNotificationRow childRow) {
+        if (mIsSummaryWithChildren) {
+            return mChildrenContainer.getPositionInLinearLayout(childRow);
+        }
+        return 0;
+    }
+
     public void setExpansionLogger(ExpansionLogger logger, String key) {
         mLogger = logger;
         mLoggingKey = key;

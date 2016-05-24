@@ -610,9 +610,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             ExpandableView expandableView = (ExpandableView) mForcedScroll;
             int positionInLinearLayout = getPositionInLinearLayout(expandableView);
             int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
+            int outOfViewScroll = positionInLinearLayout + expandableView.getIntrinsicHeight();
 
             targetScroll = Math.max(0, Math.min(targetScroll, getScrollRange()));
-            if (mOwnScrollY < targetScroll || positionInLinearLayout < mOwnScrollY) {
+
+            // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
+            // that it is not visible anymore.
+            if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
                 mOwnScrollY = targetScroll;
             }
         }
@@ -1032,9 +1036,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public boolean scrollTo(View v) {
         ExpandableView expandableView = (ExpandableView) v;
-        int targetScroll = targetScrollForView(expandableView, getPositionInLinearLayout(v));
+        int positionInLinearLayout = getPositionInLinearLayout(v);
+        int targetScroll = targetScrollForView(expandableView, positionInLinearLayout);
+        int outOfViewScroll = positionInLinearLayout + expandableView.getIntrinsicHeight();
 
-        if (mOwnScrollY < targetScroll) {
+        // Only apply the scroll if we're scrolling the view upwards, or the view is so far up
+        // that it is not visible anymore.
+        if (mOwnScrollY < targetScroll || outOfViewScroll < mOwnScrollY) {
             mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScroll - mOwnScrollY);
             mDontReportNextOverScroll = true;
             postInvalidateOnAnimation();
@@ -1062,6 +1070,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             // animating away. To work around that we'll wait until things have settled.
             removeCallbacks(mReclamp);
             postDelayed(mReclamp, 50);
+        } else if (mForcedScroll != null) {
+            // The scroll was requested before we got the actual inset - in case we need
+            // to scroll up some more do so now.
+            scrollTo(mForcedScroll);
         }
         return insets;
     }
@@ -2361,7 +2373,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         return view.getHeight();
     }
 
-    private int getPositionInLinearLayout(View requestedChild) {
+    private int getPositionInLinearLayout(View requestedView) {
+        ExpandableNotificationRow childInGroup = null;
+        ExpandableNotificationRow requestedRow = null;
+        if (isChildInGroup(requestedView)) {
+            // We're asking for a child in a group. Calculate the position of the parent first,
+            // then within the parent.
+            childInGroup = (ExpandableNotificationRow) requestedView;
+            requestedView = requestedRow = childInGroup.getNotificationParent();
+        }
         int position = 0;
         float previousIncreasedAmount = 0.0f;
         for (int i = 0; i < getChildCount(); i++) {
@@ -2377,7 +2397,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 previousIncreasedAmount = increasedPaddingAmount;
             }
-            if (child == requestedChild) {
+            if (child == requestedView) {
+                if (requestedRow != null) {
+                    position += requestedRow.getPositionOfChild(childInGroup);
+                }
                 return position;
             }
             if (notGone) {
