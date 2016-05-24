@@ -1509,7 +1509,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         Entry entry = mNotificationData.get(key);
         if (entry != null && entry.row != null) {
-            entry.row.setRemoved(true);
+            entry.row.setRemoved();
         }
         // Let's remove the children if this was a summary
         handleGroupSummaryRemoved(key, ranking);
@@ -1557,7 +1557,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 toRemove.get(i).setKeepInParent(true);
                 // we need to set this state earlier as otherwise we might generate some weird
                 // animations
-                toRemove.get(i).setRemoved(true);
+                toRemove.get(i).setRemoved();
             }
             for (int i = 0; i < toRemove.size(); i++) {
                 removeNotification(toRemove.get(i).getStatusBarNotification().getKey(), ranking);
