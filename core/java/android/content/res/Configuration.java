@@ -1446,7 +1446,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      *
      * @return The locale list.
      */
-    public LocaleList getLocales() {
+    public @NonNull LocaleList getLocales() {
         fixUpLocaleList();
         return mLocaleList;
     }
