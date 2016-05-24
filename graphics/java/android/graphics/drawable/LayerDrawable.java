@@ -104,6 +104,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private Rect mHotspotBounds;
     private boolean mMutated;
 
+    private boolean mSuspendChildInvalidation;
+    private boolean mChildRequestedInvalidation;
+
     /**
      * Creates a new layer drawable with the list of specified layers.
      *
@@ -944,9 +947,37 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
       return mLayerState.mPaddingMode;
     }
 
+    /**
+     * Temporarily suspends child invalidation.
+     *
+     * @see #resumeChildInvalidation()
+     */
+    private void suspendChildInvalidation() {
+        mSuspendChildInvalidation = true;
+    }
+
+    /**
+     * Resumes child invalidation after suspension, immediately performing an
+     * invalidation if one was requested by a child during suspension.
+     *
+     * @see #suspendChildInvalidation()
+     */
+    private void resumeChildInvalidation() {
+        mSuspendChildInvalidation = false;
+
+        if (mChildRequestedInvalidation) {
+            mChildRequestedInvalidation = false;
+            invalidateSelf();
+        }
+    }
+
     @Override
     public void invalidateDrawable(@NonNull Drawable who) {
-        invalidateSelf();
+        if (mSuspendChildInvalidation) {
+            mChildRequestedInvalidation = true;
+        } else {
+            invalidateSelf();
+        }
     }
 
     @Override
@@ -1482,6 +1513,15 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     private void updateLayerBounds(Rect bounds) {
+        try {
+            suspendChildInvalidation();
+            updateLayerBoundsInternal(bounds);
+        } finally {
+            resumeChildInvalidation();
+        }
+    }
+
+    private void updateLayerBoundsInternal(Rect bounds) {
         int paddingL = 0;
         int paddingT = 0;
         int paddingR = 0;
