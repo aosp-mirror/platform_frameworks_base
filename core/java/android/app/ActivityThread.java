@@ -62,6 +62,7 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -130,6 +131,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -4684,6 +4686,8 @@ public final class ActivityThread {
                     + config);
 
             mResourcesManager.applyConfigurationToResourcesLocked(config, compat);
+            updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
+                    mResourcesManager.getConfiguration().getLocales());
 
             if (mConfiguration == null) {
                 mConfiguration = new Configuration();
@@ -4987,6 +4991,24 @@ public final class ActivityThread {
         return insInfo.nativeLibraryDir;
     }
 
+    /**
+     * The LocaleList set for the app's resources may have been shuffled so that the preferred
+     * Locale is at position 0. We must find the index of this preferred Locale in the
+     * original LocaleList.
+     */
+    private void updateLocaleListFromAppContext(Context context, LocaleList newLocaleList) {
+        final Locale bestLocale = context.getResources().getConfiguration().getLocales().get(0);
+        final int newLocaleListSize = newLocaleList.size();
+        for (int i = 0; i < newLocaleListSize; i++) {
+            if (bestLocale.equals(newLocaleList.get(i))) {
+                LocaleList.setDefault(newLocaleList, i);
+                return;
+            }
+        }
+        throw new AssertionError("chosen locale " + bestLocale + " must be present in LocaleList: "
+                + newLocaleList.toLanguageTags());
+    }
+
     private void handleBindApplication(AppBindData data) {
         // Register the UI Thread as a sensitive thread to the runtime.
         VMRuntime.registerSensitiveThread();
@@ -5044,6 +5066,24 @@ public final class ActivityThread {
          * system time zone.
          */
         TimeZone.setDefault(null);
+
+        /*
+         * Set the LocaleList. This may change once we create the App Context.
+         */
+        LocaleList.setDefault(data.config.getLocales());
+
+        synchronized (mResourcesManager) {
+            /*
+             * Update the system configuration since its preloaded and might not
+             * reflect configuration changes. The configuration object passed
+             * in AppBindData can be safely assumed to be up to date
+             */
+            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+            mCurDefaultDisplayDpi = data.config.densityDpi;
+
+            // This calls mResourcesManager so keep it within the synchronized block.
+            applyCompatConfiguration(mCurDefaultDisplayDpi);
+        }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
@@ -5172,25 +5212,8 @@ public final class ActivityThread {
         }
 
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
-        synchronized (mResourcesManager) {
-            /*
-             * Initialize the default locales in this process for the reasons we set the time zone.
-             *
-             * We do this through ResourcesManager, since we need to do locale negotiation.
-             */
-            mResourcesManager.setDefaultLocalesLocked(data.config.getLocales());
-
-            /*
-             * Update the system configuration since its preloaded and might not
-             * reflect configuration changes. The configuration object passed
-             * in AppBindData can be safely assumed to be up to date
-             */
-            mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
-            mCurDefaultDisplayDpi = data.config.densityDpi;
-
-            // This calls mResourcesManager so keep it within the synchronized block.
-            applyCompatConfiguration(mCurDefaultDisplayDpi);
-        }
+        updateLocaleListFromAppContext(appContext,
+                mResourcesManager.getConfiguration().getLocales());
 
         if (!Process.isIsolated() && !"android".equals(appContext.getPackageName())) {
             // This cache location probably points at credential-encrypted
@@ -5893,6 +5916,9 @@ public final class ActivityThread {
                     // immediately, because upon returning the view
                     // hierarchy will be informed about it.
                     if (mResourcesManager.applyConfigurationToResourcesLocked(newConfig, null)) {
+                        updateLocaleListFromAppContext(mInitialApplication.getApplicationContext(),
+                                mResourcesManager.getConfiguration().getLocales());
+
                         // This actually changed the resources!  Tell
                         // everyone about it.
                         if (mPendingConfiguration == null ||
