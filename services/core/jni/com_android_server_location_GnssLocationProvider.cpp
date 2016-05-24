@@ -72,15 +72,18 @@ static const GnssConfigurationInterface* sGnssConfigurationInterface = NULL;
 #define GPS_MAX_SATELLITE_COUNT 32
 #define GNSS_MAX_SATELLITE_COUNT 64
 
-// Let these through, with ID remapped by offset
+// Let these through, with ID remapped down to 1, 2... by offset
 #define GLONASS_SVID_OFFSET 64
 #define GLONASS_SVID_COUNT 24
 #define BEIDOU_SVID_OFFSET 200
 #define BEIDOU_SVID_COUNT 35
 
+// Let these through, with ID remapped up (33->120 ... 64->151, etc.)
+#define SBAS_SVID_MIN 33
+#define SBAS_SVID_MAX 64
+#define SBAS_SVID_ADD 87
+
 // Let these through, with no ID remapping
-#define SBAS_SVID_MIN 120
-#define SBAS_SVID_MAX 151
 #define QZSS_SVID_MIN 193
 #define QZSS_SVID_MAX 200
 
@@ -159,6 +162,7 @@ static void sv_status_callback(GpsSvStatus* sv_status)
             info.svid -= BEIDOU_SVID_OFFSET;
         } else if (info.svid >= SBAS_SVID_MIN && info.svid <= SBAS_SVID_MAX) {
             info.constellation = GNSS_CONSTELLATION_SBAS;
+            info.svid += SBAS_SVID_ADD;
         } else if (info.svid >= QZSS_SVID_MIN && info.svid <= QZSS_SVID_MAX) {
             info.constellation = GNSS_CONSTELLATION_QZSS;
         } else {
