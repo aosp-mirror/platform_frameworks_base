@@ -1918,13 +1918,15 @@ public final class MediaCodecInfo {
                         case CodecProfileLevel.MPEG2ProfileMain:
                             switch (profileLevel.level) {
                                 case CodecProfileLevel.MPEG2LevelLL:
-                                    FR = 30; W = 22; H =  18; MBPS =  11880; FS =  396; BR =  4000; break;
+                                    FR = 30; W = 22; H =  18; MBPS =  11880; FS =   396; BR =  4000; break;
                                 case CodecProfileLevel.MPEG2LevelML:
-                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR =  15000; break;
+                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR = 15000; break;
                                 case CodecProfileLevel.MPEG2LevelH14:
-                                    FR = 60; W = 90; H =  68; MBPS =  367200; FS =  6120; BR = 60000; break;
+                                    FR = 60; W = 90; H =  68; MBPS = 183600; FS =  6120; BR = 60000; break;
                                 case CodecProfileLevel.MPEG2LevelHL:
-                                    FR = 60; W = 120; H = 68; MBPS =  489600; FS =  8160; BR = 80000; break;
+                                    FR = 60; W = 120; H = 68; MBPS = 244800; FS =  8160; BR = 80000; break;
+                                case CodecProfileLevel.MPEG2LevelHP:
+                                    FR = 60; W = 120; H = 68; MBPS = 489600; FS =  8160; BR = 80000; break;
                                 default:
                                     Log.w(TAG, "Unrecognized profile/level "
                                             + profileLevel.profile + "/"
@@ -1982,15 +1984,12 @@ public final class MediaCodecInfo {
                                     FR = 30; W = 22; H = 18; MBPS =  5940; FS = 396; BR = 128; break;
                                 case CodecProfileLevel.MPEG4Level3:
                                     FR = 30; W = 22; H = 18; MBPS = 11880; FS = 396; BR = 384; break;
-                                case CodecProfileLevel.MPEG4Level4:
                                 case CodecProfileLevel.MPEG4Level4a:
+                                    FR = 30; W = 40; H = 30; MBPS = 36000; FS = 1200; BR = 4000; break;
                                 case CodecProfileLevel.MPEG4Level5:
-                                    // While MPEG4 SP does not have level 4 or 5, some vendors
-                                    // report it. Use the same limits as level 3, but mark as
-                                    // unsupported.
-                                    FR = 30; W = 22; H = 18; MBPS = 11880; FS = 396; BR = 384;
-                                    supported = false;
-                                    break;
+                                    FR = 30; W = 45; H = 36; MBPS = 40500; FS = 1620; BR = 8000; break;
+                                case CodecProfileLevel.MPEG4Level6:
+                                    FR = 30; W = 80; H = 45; MBPS = 108000; FS = 3600; BR = 12000; break;
                                 default:
                                     Log.w(TAG, "Unrecognized profile/level "
                                             + profileLevel.profile + "/"
@@ -2007,12 +2006,9 @@ public final class MediaCodecInfo {
                                     FR = 30; W = 22; H = 18; MBPS =  5940; FS =  396; BR =  384; break;
                                 case CodecProfileLevel.MPEG4Level3:
                                     FR = 30; W = 22; H = 18; MBPS = 11880; FS =  396; BR =  768; break;
-                                // case CodecProfileLevel.MPEG4Level3b:
-                                // TODO: MPEG4 level 3b is not defined in OMX
-                                //  MBPS = 11880; FS =  396; BR = 1500; break;
+                                case CodecProfileLevel.MPEG4Level3b:
+                                    FR = 30; W = 22; H = 18; MBPS = 11880; FS =  396; BR = 1500; break;
                                 case CodecProfileLevel.MPEG4Level4:
-                                case CodecProfileLevel.MPEG4Level4a:
-                                    // TODO: MPEG4 level 4a is not defined in spec
                                     FR = 30; W = 44; H = 36; MBPS = 23760; FS =  792; BR = 3000; break;
                                 case CodecProfileLevel.MPEG4Level5:
                                     FR = 30; W = 45; H = 36; MBPS = 48600; FS = 1620; BR = 8000; break;
@@ -2640,9 +2636,13 @@ public final class MediaCodecInfo {
         public static final int MPEG4Level1      = 0x04;
         public static final int MPEG4Level2      = 0x08;
         public static final int MPEG4Level3      = 0x10;
+        /** @hide */
+        public static final int MPEG4Level3b     = 0x18;
         public static final int MPEG4Level4      = 0x20;
         public static final int MPEG4Level4a     = 0x40;
         public static final int MPEG4Level5      = 0x80;
+        /** @hide */
+        public static final int MPEG4Level6      = 0x100;
 
         // from OMX_VIDEO_MPEG2PROFILETYPE
         public static final int MPEG2ProfileSimple              = 0x00;
@@ -2657,6 +2657,8 @@ public final class MediaCodecInfo {
         public static final int MPEG2LevelML     = 0x01;
         public static final int MPEG2LevelH14    = 0x02;
         public static final int MPEG2LevelHL     = 0x03;
+        /** @hide */
+        public static final int MPEG2LevelHP     = 0x04;
 
         // from OMX_AUDIO_AACPROFILETYPE
         public static final int AACObjectMain       = 1;
