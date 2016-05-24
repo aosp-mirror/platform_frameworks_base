@@ -7458,6 +7458,45 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public void dumpProfiles(String packageName) {
+        PackageParser.Package pkg;
+        synchronized (mPackages) {
+            pkg = mPackages.get(packageName);
+            if (pkg == null) {
+                throw new IllegalArgumentException("Unknown package: " + packageName);
+            }
+        }
+        /* Only the shell or the app user should be able to dump profiles. */
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SHELL_UID && callingUid != pkg.applicationInfo.uid) {
+            throw new SecurityException("dumpProfiles");
+        }
+
+        synchronized (mInstallLock) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
+            final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+            try {
+                final File codeFile = new File(pkg.applicationInfo.getCodePath());
+                List<String> allCodePaths = Collections.EMPTY_LIST;
+                if (codeFile != null && codeFile.exists()) {
+                    try {
+                        final PackageLite codePkg = PackageParser.parsePackageLite(codeFile, 0);
+                        allCodePaths = codePkg.getAllCodePaths();
+                    } catch (PackageParserException e) {
+                        // Well, we tried.
+                    }
+                }
+                String gid = Integer.toString(sharedGid);
+                String codePaths = TextUtils.join(";", allCodePaths);
+                mInstaller.dumpProfiles(gid, packageName, codePaths);
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to dump profiles", e);
+            }
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    @Override
     public void forceDexOpt(String packageName) {
         enforceSystemOrRoot("forceDexOpt");
 
