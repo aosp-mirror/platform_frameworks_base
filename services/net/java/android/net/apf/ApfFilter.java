@@ -648,14 +648,31 @@ public class ApfFilter {
         // Here's a basic summary of what the IPv6 filter program does:
         //
         // if it's not ICMPv6:
+        //   if it's multicast and we're dropping multicast:
+        //     drop
         //   pass
         // if it's ICMPv6 NA to ff02::1:
         //   drop
 
-        // If not ICMPv6, pass
         gen.addLoad8(Register.R0, IPV6_NEXT_HEADER_OFFSET);
-        // TODO: Drop multicast if the multicast filter is enabled.
-        gen.addJumpIfR0NotEquals(IPPROTO_ICMPV6, gen.PASS_LABEL);
+
+        // Drop multicast if the multicast filter is enabled.
+        if (mMulticastFilter) {
+            // Don't touch ICMPv6 multicast here, we deal with it in more detail later.
+            String skipIpv6MulticastFilterLabel = "skipIPv6MulticastFilter";
+            gen.addJumpIfR0Equals(IPPROTO_ICMPV6, skipIpv6MulticastFilterLabel);
+
+            // Drop all other packets sent to ff00::/8.
+            gen.addLoad8(Register.R0, IPV6_DEST_ADDR_OFFSET);
+            gen.addJumpIfR0Equals(0xff, gen.DROP_LABEL);
+            // Not multicast and not ICMPv6. Pass.
+            gen.addJump(gen.PASS_LABEL);
+            gen.defineLabel(skipIpv6MulticastFilterLabel);
+        } else {
+            // If not ICMPv6, pass.
+            gen.addJumpIfR0NotEquals(IPPROTO_ICMPV6, gen.PASS_LABEL);
+        }
+
         // Add unsolicited multicast neighbor announcements filter
         String skipUnsolicitedMulticastNALabel = "skipUnsolicitedMulticastNA";
         // If not neighbor announcements, skip unsolicited multicast NA filter
