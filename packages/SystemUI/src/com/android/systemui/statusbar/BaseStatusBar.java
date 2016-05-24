@@ -189,6 +189,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected boolean mVisible;
     protected ArraySet<Entry> mHeadsUpEntriesToRemoveOnSwitch = new ArraySet<>();
+    protected ArraySet<Entry> mRemoteInputEntriesToRemoveOnCollapse = new ArraySet<>();
 
     /**
      * Notifications with keys in this set are not actually around anymore. We kept them around
@@ -972,7 +973,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return vetoButton;
     }
 
-    private void performRemoveNotification(StatusBarNotification n, boolean removeView) {
+    protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
         final String pkg = n.getPackageName();
         final String tag = n.getTag();
         final int id = n.getId();
@@ -982,6 +983,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (FORCE_REMOTE_INPUT_HISTORY
                     && mKeysKeptForRemoteInput.contains(n.getKey())) {
                 mKeysKeptForRemoteInput.remove(n.getKey());
+                removeView = true;
+            }
+            if (mRemoteInputEntriesToRemoveOnCollapse.remove(mNotificationData.get(n.getKey()))) {
                 removeView = true;
             }
             if (removeView) {
@@ -2089,8 +2093,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     /**
      * The LEDs are turned off when the notification panel is shown, even just a little bit.
-     * See also NotificationStackScrollLayout.setIsExpanded() for another place where we
-     * attempt to do this.
+     * See also PhoneStatusBar.setPanelExpanded for another place where we attempt to do this.
      */
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
@@ -2330,8 +2333,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         Entry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
-        } else if (mHeadsUpEntriesToRemoveOnSwitch.contains(entry)) {
+        } else {
             mHeadsUpEntriesToRemoveOnSwitch.remove(entry);
+            mRemoteInputEntriesToRemoveOnCollapse.remove(entry);
         }
 
         Notification n = notification.getNotification();
