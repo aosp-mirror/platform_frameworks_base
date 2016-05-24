@@ -34,6 +34,7 @@ public final class GpsStatus {
     private static final int NUM_SATELLITES = 255;
     private static final int GLONASS_SVID_OFFSET = 64;
     private static final int BEIDOU_SVID_OFFSET = 200;
+    private static final int SBAS_SVID_OFFSET = -87;
 
     /* These package private values are modified by the LocationManager class */
     private int mTimeToFirstFix;
@@ -166,9 +167,10 @@ public final class GpsStatus {
                 prn += GLONASS_SVID_OFFSET;
             } else if (constellationType == GnssStatus.CONSTELLATION_BEIDOU) {
                 prn += BEIDOU_SVID_OFFSET;
+            } else if (constellationType == GnssStatus.CONSTELLATION_SBAS) {
+                prn += SBAS_SVID_OFFSET;
             } else if ((constellationType != GnssStatus.CONSTELLATION_GPS) &&
-                    (constellationType != GnssStatus.CONSTELLATION_QZSS) &&
-                    (constellationType != GnssStatus.CONSTELLATION_SBAS)) {
+                    (constellationType != GnssStatus.CONSTELLATION_QZSS)) {
                 continue;
             }
             if (prn > 0 && prn <= NUM_SATELLITES) {
