@@ -2960,16 +2960,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (changed) {
             if (!mIsExpanded) {
                 mGroupManager.collapseAllGroups();
-            } else {
-                // XXX: HACK: we should not be clearing notification effects from way down here.
-                // But at the moment we don't have a reliable way to know when the window is
-                // actually exposed to the air, so
-                if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD) {
-                    if (DEBUG) {
-                        Log.v(TAG, "clearing notification effects from scroller");
-                    }
-                    mPhoneStatusBar.clearNotificationEffects();
-                }
             }
             updateNotificationAnimationStates();
             updateChronometers();

@@ -263,6 +263,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * This affects the status bar UI. */
     private static final boolean FREEFORM_WINDOW_MANAGEMENT;
 
+    /**
+     * How long to wait before auto-dismissing a notification that was kept for remote input, and
+     * has now sent a remote input. We auto-dismiss, because the app may not see a reason to cancel
+     * these given that they technically don't exist anymore. We wait a bit in case the app issues
+     * an update.
+     */
+    private static final int REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY = 200;
+
     static {
         boolean onlyCoreApps;
         boolean freeformWindowManagement;
@@ -1182,16 +1190,24 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mIconPolicy.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
 
-        if (FORCE_REMOTE_INPUT_HISTORY) {
-            mRemoteInputController.addCallback(new RemoteInputController.Callback() {
-                @Override
-                public void onRemoteInputSent(Entry entry) {
-                    if (mKeysKeptForRemoteInput.contains(entry.key)) {
-                        removeNotification(entry.key, null);
-                    }
+        mRemoteInputController.addCallback(new RemoteInputController.Callback() {
+            @Override
+            public void onRemoteInputSent(Entry entry) {
+                if (FORCE_REMOTE_INPUT_HISTORY && mKeysKeptForRemoteInput.contains(entry.key)) {
+                    removeNotification(entry.key, null);
+                } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
+                    // We're currently holding onto this notification, but from the apps point of
+                    // view it is already canceled, so we'll need to cancel it on the apps behalf
+                    // after sending - unless the app posts an update in the mean time, so wait a
+                    // bit.
+                    mHandler.postDelayed(() -> {
+                        if (mRemoteInputEntriesToRemoveOnCollapse.remove(entry)) {
+                            removeNotification(entry.key, null);
+                        }
+                    }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
-            });
-        }
+            }
+        });
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightStatusBarController.setFingerprintUnlockController(mFingerprintUnlockController);
@@ -1508,6 +1524,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             return;
         }
         Entry entry = mNotificationData.get(key);
+
+        if (entry != null && mRemoteInputController.isRemoteInputActive(entry)) {
+            mLatestRankingMap = ranking;
+            mRemoteInputEntriesToRemoveOnCollapse.add(entry);
+            return;
+        }
+
         if (entry != null && entry.row != null) {
             entry.row.setRemoved();
         }
@@ -1566,6 +1589,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mStackScroller.removeViewStateForView(toRemove.get(i));
             }
         }
+    }
+
+    @Override
+    protected void performRemoveNotification(StatusBarNotification n, boolean removeView) {
+        Entry entry = mNotificationData.get(n.getKey());
+        if (mRemoteInputController.isRemoteInputActive(entry)) {
+            mRemoteInputController.removeRemoteInput(entry);
+        }
+        super.performRemoveNotification(n, removeView);
     }
 
     @Override
@@ -2465,6 +2497,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void setPanelExpanded(boolean isExpanded) {
         mStatusBarWindowManager.setPanelExpanded(isExpanded);
+
+        if (isExpanded && getBarState() != StatusBarState.KEYGUARD) {
+            if (DEBUG) {
+                Log.v(TAG, "clearing notification effects from setPanelExpanded");
+            }
+            clearNotificationEffects();
+        }
+
+        if (!isExpanded) {
+            removeRemoteInputEntriesKeptUntilCollapsed();
+        }
+    }
+
+    private void removeRemoteInputEntriesKeptUntilCollapsed() {
+        for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
+            Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
+            mRemoteInputController.removeRemoteInput(entry);
+            removeNotification(entry.key, mLatestRankingMap);
+        }
+        mRemoteInputEntriesToRemoveOnCollapse.clear();
     }
 
     public void onScreenTurnedOff() {
@@ -4215,6 +4267,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (state != mState && mVisible && (state == StatusBarState.SHADE_LOCKED
                 || (state == StatusBarState.SHADE && isGoingToNotificationShade()))) {
             clearNotificationEffects();
+        }
+        if (state == StatusBarState.KEYGUARD) {
+            removeRemoteInputEntriesKeptUntilCollapsed();
         }
         mState = state;
         mGroupManager.setStatusBarState(state);
