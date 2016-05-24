@@ -61,6 +61,7 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 
 public class AlertController {
+    public static final int MICRO = 1;
 
     private final Context mContext;
     private final DialogInterface mDialogInterface;
@@ -183,6 +184,8 @@ public class AlertController {
         a.recycle();
 
         switch (controllerType) {
+            case MICRO:
+                return new MicroAlertController(context, di, window);
             default:
                 return new AlertController(context, di, window);
         }
@@ -1128,6 +1131,7 @@ public class AlertController {
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                        position -= listView.getHeaderViewsCount();
                         mOnClickListener.onClick(dialog.mDialogInterface, position);
                         if (!mIsSingleChoice) {
                             dialog.mDialogInterface.dismiss();
@@ -1138,6 +1142,7 @@ public class AlertController {
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                        position -= listView.getHeaderViewsCount();
                         if (mCheckedItems != null) {
                             mCheckedItems[position] = listView.isItemChecked(position);
                         }
