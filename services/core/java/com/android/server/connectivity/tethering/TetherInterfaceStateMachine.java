@@ -84,13 +84,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final boolean mUsb;
     private final String mIfaceName;
 
-    private final Object mMutex;  // Protects the fields below.
-    private boolean mAvailable;
-    private boolean mTethered;
     private int mLastError;
     private String mMyUpstreamIfaceName;  // may change over time
 
-    public TetherInterfaceStateMachine(String ifaceName, Looper looper, boolean usb, Object mutex,
+    public TetherInterfaceStateMachine(String ifaceName, Looper looper, boolean usb,
                     INetworkManagementService nMService, INetworkStatsService statsService,
                     IControlsTethering tetherController) {
         super(ifaceName, looper);
@@ -99,7 +96,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mTetherController = tetherController;
         mIfaceName = ifaceName;
         mUsb = usb;
-        mMutex = mutex;
         setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
 
         mInitialState = new InitialState();
@@ -127,53 +123,31 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     public int getLastError() {
-        synchronized (mMutex) {
-            return mLastError;
-        }
+        return mLastError;
     }
 
     private void setLastError(int error) {
-        synchronized (mMutex) {
-            mLastError = error;
+        mLastError = error;
 
-            if (isErrored()) {
-                if (mUsb) {
-                    // note everything's been unwound by this point so nothing to do on
-                    // further error..
-                    configureUsbIface(false, mIfaceName);
-                }
+        if (isErrored()) {
+            if (mUsb) {
+                // note everything's been unwound by this point so nothing to do on
+                // further error..
+                configureUsbIface(false, mIfaceName);
             }
         }
     }
 
     public boolean isAvailable() {
-        synchronized (mMutex) {
-            return mAvailable;
-        }
-    }
-
-    private void setAvailable(boolean available) {
-        synchronized (mMutex) {
-            mAvailable = available;
-        }
+        return getCurrentState() == mInitialState;
     }
 
     public boolean isTethered() {
-        synchronized (mMutex) {
-            return mTethered;
-        }
-    }
-
-    private void setTethered(boolean tethered) {
-        synchronized (mMutex) {
-            mTethered = tethered;
-        }
+        return getCurrentState() == mTetheredState;
     }
 
     public boolean isErrored() {
-        synchronized (mMutex) {
-            return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
-        }
+        return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
     }
 
     // configured when we start tethering and unconfig'd on error or conclusion
@@ -212,8 +186,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class InitialState extends State {
         @Override
         public void enter() {
-            setAvailable(true);
-            setTethered(false);
             mTetherController.sendTetherStateChangedBroadcast();
         }
 
@@ -241,7 +213,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class TetheredState extends State {
         @Override
         public void enter() {
-            setAvailable(false);
             if (mUsb) {
                 if (!configureUsbIface(true, mIfaceName)) {
                     mTetherController.notifyInterfaceTetheringReadiness(false, TetherInterfaceStateMachine.this);
@@ -267,7 +238,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 return;
             }
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
-            setTethered(true);
             mTetherController.sendTetherStateChangedBroadcast();
         }
 
@@ -392,9 +362,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class UnavailableState extends State {
         @Override
         public void enter() {
-            setAvailable(false);
             setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
-            setTethered(false);
             mTetherController.sendTetherStateChangedBroadcast();
         }
     }
