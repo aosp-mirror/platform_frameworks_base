@@ -192,6 +192,9 @@ final class ProcessRecord {
     // app that installed the package.
     ComponentName errorReportReceiver;
 
+    // Process is currently hosting a backup agent for backup or restore
+    public boolean inFullBackup;
+
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
 
