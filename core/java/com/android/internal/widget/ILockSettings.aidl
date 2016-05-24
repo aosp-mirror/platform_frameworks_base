@@ -28,6 +28,7 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     String getString(in String key, in String defaultValue, in int userId);
     void setLockPattern(in String pattern, in String savedPattern, int userId);
+    void resetKeyStore(int userId);
     VerifyCredentialResponse checkPattern(in String pattern, int userId);
     VerifyCredentialResponse verifyPattern(in String pattern, long challenge, int userId);
     void setLockPassword(in String password, in String savedPassword, int userId);
