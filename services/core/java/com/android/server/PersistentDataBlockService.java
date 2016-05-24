@@ -146,6 +146,15 @@ public class PersistentDataBlockService extends SystemService {
                     "Only the Admin user is allowed to change OEM unlock state");
         }
     }
+
+    private void enforceFactoryResetAllowed() {
+        final boolean isOemUnlockRestricted = UserManager.get(mContext)
+                .hasUserRestriction(UserManager.DISALLOW_FACTORY_RESET);
+        if (isOemUnlockRestricted) {
+            throw new SecurityException("OEM unlock is disallowed by DISALLOW_FACTORY_RESET");
+        }
+    }
+
     private int getTotalDataSizeLocked(DataInputStream inputStream) throws IOException {
         // skip over checksum
         inputStream.skipBytes(DIGEST_SIZE_BYTES);
@@ -452,7 +461,9 @@ public class PersistentDataBlockService extends SystemService {
                     Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
                 throw new SecurityException("OEM unlock has been disallowed.");
             }
-
+            if (enabled) {
+                enforceFactoryResetAllowed();
+            }
             synchronized (mLock) {
                 doSetOemUnlockEnabledLocked(enabled);
                 computeAndWriteDigestLocked();
