@@ -831,45 +831,55 @@ public final class BridgeContext extends Context {
                     }
                 }
 
-                // if there's no direct value for this attribute in the XML, we look for default
-                // values in the widget defStyle, and then in the theme.
-                if (value == null) {
-                    ResourceValue resValue = null;
-
+                // Calculate the default value from the Theme in two cases:
+                //   - If defaultPropMap is not null, get the default value to add it to the list
+                //   of default values of properties.
+                //   - If value is null, it means that the attribute is not directly set as an
+                //   attribute in the XML so try to get the default value.
+                ResourceValue defaultValue = null;
+                if (defaultPropMap != null || value == null) {
                     // look for the value in the custom style first (and its parent if needed)
                     if (customStyleValues != null) {
-                        resValue = mRenderResources.findItemInStyle(customStyleValues,
-                                attrName, frameworkAttr);
+                        defaultValue = mRenderResources.findItemInStyle(customStyleValues, attrName,
+                                frameworkAttr);
                     }
 
                     // then look for the value in the default Style (and its parent if needed)
-                    if (resValue == null && defStyleValues != null) {
-                        resValue = mRenderResources.findItemInStyle(defStyleValues,
-                                attrName, frameworkAttr);
+                    if (defaultValue == null && defStyleValues != null) {
+                        defaultValue = mRenderResources.findItemInStyle(defStyleValues, attrName,
+                                frameworkAttr);
                     }
 
                     // if the item is not present in the defStyle, we look in the main theme (and
                     // its parent themes)
-                    if (resValue == null) {
-                        resValue = mRenderResources.findItemInTheme(attrName, frameworkAttr);
+                    if (defaultValue == null) {
+                        defaultValue = mRenderResources.findItemInTheme(attrName, frameworkAttr);
                     }
 
                     // if we found a value, we make sure this doesn't reference another value.
                     // So we resolve it.
-                    if (resValue != null) {
-                        String preResolve = resValue.getValue();
-                        resValue = mRenderResources.resolveResValue(resValue);
+                    if (defaultValue != null) {
+                        String preResolve = defaultValue.getValue();
+                        defaultValue = mRenderResources.resolveResValue(defaultValue);
 
                         if (defaultPropMap != null) {
                             defaultPropMap.put(
                                     frameworkAttr ? SdkConstants.PREFIX_ANDROID + attrName :
-                                            attrName,
-                                    new Property(preResolve, resValue.getValue()));
+                                            attrName, new Property(preResolve, defaultValue.getValue()));
                         }
+                    }
+                }
+                // Done calculating the defaultValue
 
+                // if there's no direct value for this attribute in the XML, we look for default
+                // values in the widget defStyle, and then in the theme.
+                if (value == null) {
+                    // if we found a value, we make sure this doesn't reference another value.
+                    // So we resolve it.
+                    if (defaultValue != null) {
                         // If the value is a reference to another theme attribute that doesn't
                         // exist, we should log a warning and omit it.
-                        String val = resValue.getValue();
+                        String val = defaultValue.getValue();
                         if (val != null && val.startsWith(SdkConstants.PREFIX_THEME_REF)) {
                             if (!attrName.equals(RTL_ATTRS.get(val)) ||
                                     getApplicationInfo().targetSdkVersion <
@@ -880,11 +890,11 @@ public final class BridgeContext extends Context {
                                         String.format("Failed to find '%s' in current theme.", val),
                                         val);
                             }
-                            resValue = null;
+                            defaultValue = null;
                         }
                     }
 
-                    ta.bridgeSetValue(index, attrName, frameworkAttr, resValue);
+                    ta.bridgeSetValue(index, attrName, frameworkAttr, defaultValue);
                 } else {
                     // there is a value in the XML, but we need to resolve it in case it's
                     // referencing another resource or a theme value.
