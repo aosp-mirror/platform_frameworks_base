@@ -21,6 +21,7 @@ import com.android.internal.util.Preconditions;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -470,6 +471,26 @@ public class UsbManager {
     public void grantPermission(UsbDevice device) {
         try {
             mService.grantDevicePermission(device, Process.myUid());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grants permission to specified package for USB device without showing system dialog.
+     * Only system components can call this function, as it requires the MANAGE_USB permission.
+     * @param device to request permissions for
+     * @param packageName of package to grant permissions
+     *
+     * {@hide}
+     */
+    public void grantPermission(UsbDevice device, String packageName) {
+        try {
+            int uid = mContext.getPackageManager()
+                .getPackageUidAsUser(packageName, mContext.getUserId());
+            mService.grantDevicePermission(device, uid);
+        } catch (NameNotFoundException e) {
+            Log.e(TAG, "Package " + packageName + " not found.", e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
