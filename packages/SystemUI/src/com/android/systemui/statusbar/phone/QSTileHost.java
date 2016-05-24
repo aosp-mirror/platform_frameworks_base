@@ -211,7 +211,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
 
     public void animateToggleQSExpansion() {
         // TODO: Better path to animated panel expansion.
-        mHeader.performClick();
+        mHeader.callOnClick();
     }
 
     @Override
