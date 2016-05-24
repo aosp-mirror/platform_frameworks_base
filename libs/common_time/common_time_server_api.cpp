@@ -285,7 +285,7 @@ void CommonTimeServer::reevaluateAutoDisableState(bool commonClockHasClients) {
     if (res > 0)                                  \
         write(fd, buffer, res);                   \
 } while (0)
-#define checked_percentage(a, b) ((0 == b) ? 0.0f : ((100.0f * a) / b))
+#define checked_percentage(a, b) ((0 == (b)) ? 0.0f : ((100.0f * (a)) / (b)))
 
 status_t CommonTimeServer::dumpClockInterface(int fd,
                                               const Vector<String16>& /* args */,
