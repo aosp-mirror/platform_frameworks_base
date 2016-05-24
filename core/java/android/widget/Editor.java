@@ -117,6 +117,7 @@ import com.android.internal.widget.EditableInputConnection;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.BreakIterator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -6137,16 +6138,20 @@ public class Editor {
 
         private final Editor mEditor;
         private final TextView mTextView;
+        private final Context mContext;
         private final PackageManager mPackageManager;
-        private final SparseArray<Intent> mAccessibilityIntents = new SparseArray<Intent>();
+        private final String mPackageName;
+        private final SparseArray<Intent> mAccessibilityIntents = new SparseArray<>();
         private final SparseArray<AccessibilityNodeInfo.AccessibilityAction> mAccessibilityActions
-                = new SparseArray<AccessibilityNodeInfo.AccessibilityAction>();
+                = new SparseArray<>();
+        private final List<ResolveInfo> supportedActivities = new ArrayList<>();
 
         private ProcessTextIntentActionsHandler(Editor editor) {
             mEditor = Preconditions.checkNotNull(editor);
             mTextView = Preconditions.checkNotNull(mEditor.mTextView);
-            mPackageManager = Preconditions.checkNotNull(
-                    mTextView.getContext().getPackageManager());
+            mContext = Preconditions.checkNotNull(mTextView.getContext());
+            mPackageManager = Preconditions.checkNotNull(mContext.getPackageManager());
+            mPackageName = Preconditions.checkNotNull(mContext.getPackageName());
         }
 
         /**
@@ -6154,7 +6159,8 @@ public class Editor {
          */
         public void onInitializeMenu(Menu menu) {
             int i = 0;
-            for (ResolveInfo resolveInfo : getSupportedActivities()) {
+            loadSupportedActivities();
+            for (ResolveInfo resolveInfo : supportedActivities) {
                 menu.add(Menu.NONE, Menu.NONE,
                         Editor.MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i++,
                         getLabel(resolveInfo))
@@ -6180,7 +6186,8 @@ public class Editor {
             mAccessibilityIntents.clear();
             mAccessibilityActions.clear();
             int i = 0;
-            for (ResolveInfo resolveInfo : getSupportedActivities()) {
+            loadSupportedActivities();
+            for (ResolveInfo resolveInfo : supportedActivities) {
                 int actionId = TextView.ACCESSIBILITY_ACTION_PROCESS_TEXT_START_ID + i++;
                 mAccessibilityActions.put(
                         actionId,
@@ -6222,9 +6229,23 @@ public class Editor {
             return false;
         }
 
-        private List<ResolveInfo> getSupportedActivities() {
+        private void loadSupportedActivities() {
+            supportedActivities.clear();
             PackageManager packageManager = mTextView.getContext().getPackageManager();
-            return packageManager.queryIntentActivities(createProcessTextIntent(), 0);
+            List<ResolveInfo> unfiltered = packageManager.queryIntentActivities(createProcessTextIntent(), 0);
+            for (ResolveInfo info : unfiltered) {
+                if (isSupportedActivity(info)) {
+                    supportedActivities.add(info);
+                }
+            }
+        }
+
+        private boolean isSupportedActivity(ResolveInfo info) {
+            return mPackageName.equals(info.activityInfo.packageName)
+                    || info.activityInfo.exported
+                            && (info.activityInfo.permission == null
+                                    || mContext.checkSelfPermission(info.activityInfo.permission)
+                                            == PackageManager.PERMISSION_GRANTED);
         }
 
         private Intent createProcessTextIntentForResolveInfo(ResolveInfo info) {
