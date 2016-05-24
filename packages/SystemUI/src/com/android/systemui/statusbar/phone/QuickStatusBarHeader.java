@@ -92,7 +92,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private TouchAnimator mAlarmTranslation;
     protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
-    private QSTileHost mHost;
+    protected QSTileHost mHost;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
