@@ -1742,6 +1742,11 @@ public class TelephonyManager {
      *@hide
      */
     public static final int SIM_STATE_CARD_IO_ERROR = 8;
+    /** SIM card state: SIM Card restricted, present but not usable due to
+     * carrier restrictions.
+     *@hide
+     */
+    public static final int SIM_STATE_CARD_RESTRICTED = 9;
 
     /**
      * @return true if a ICC card is present
