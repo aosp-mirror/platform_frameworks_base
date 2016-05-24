@@ -158,12 +158,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
             if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 onConfigurationChanged();
-            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
-                onUserUnlocked(userId);
-            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
-                onUserStopped(userId);
-            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                reloadWidgetsMaskedStateForGroup(userId);
             } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)
                     || Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
                 synchronized (mLock) {
@@ -280,13 +274,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
                 sdFilter, null, null);
-
-        IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_UNLOCKED);
-        userFilter.addAction(Intent.ACTION_USER_STOPPED);
-        userFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
-                userFilter, null, null);
 
         IntentFilter offModeFilter = new IntentFilter();
         offModeFilter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
@@ -454,7 +441,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * due to user not being available and package suspension.
      * userId must be the group parent.
      */
-    private void reloadWidgetsMaskedStateForGroup(int userId) {
+    void reloadWidgetsMaskedStateForGroup(int userId) {
         if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
             return;
         }
@@ -2525,7 +2512,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void onUserUnlocked(int userId) {
+    void onUserUnlocked(int userId) {
         if (isProfileWithLockedParent(userId)) {
             return;
         }
@@ -3072,7 +3059,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return new AtomicFile(settingsFile);
     }
 
-    private void onUserStopped(int userId) {
+    void onUserStopped(int userId) {
         synchronized (mLock) {
             boolean crossProfileWidgetsChanged = false;
 
