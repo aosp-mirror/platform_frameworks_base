@@ -108,11 +108,11 @@ static SortedVector <audiotrack_callback_cookie *> sAudioTrackCallBackCookies;
 // ----------------------------------------------------------------------------
 #define DEFAULT_OUTPUT_SAMPLE_RATE   44100
 
-#define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         -16
-#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK  -17
-#define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       -18
-#define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   -19
-#define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    -20
+#define AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM         (-16)
+#define AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK  (-17)
+#define AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT       (-18)
+#define AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE   (-19)
+#define AUDIOTRACK_ERROR_SETUP_NATIVEINITFAILED    (-20)
 
 // ----------------------------------------------------------------------------
 static void audioCallback(int event, void* user, void *info) {

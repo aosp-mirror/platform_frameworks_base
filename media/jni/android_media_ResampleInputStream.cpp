@@ -36,7 +36,7 @@
 using namespace android;
 
 
-#define FIR_COEF(coef) (short)(0x10000 * coef)
+#define FIR_COEF(coef) (short)(0x10000 * (coef))
 static const short fir21[] = {
     FIR_COEF(-0.006965742326),
     FIR_COEF(-0.008428945737),

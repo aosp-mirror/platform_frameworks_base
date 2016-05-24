@@ -31,13 +31,13 @@
 using namespace android;
 
 #define VISUALIZER_SUCCESS                      0
-#define VISUALIZER_ERROR                       -1
-#define VISUALIZER_ERROR_ALREADY_EXISTS        -2
-#define VISUALIZER_ERROR_NO_INIT               -3
-#define VISUALIZER_ERROR_BAD_VALUE             -4
-#define VISUALIZER_ERROR_INVALID_OPERATION     -5
-#define VISUALIZER_ERROR_NO_MEMORY             -6
-#define VISUALIZER_ERROR_DEAD_OBJECT           -7
+#define VISUALIZER_ERROR                       (-1)
+#define VISUALIZER_ERROR_ALREADY_EXISTS        (-2)
+#define VISUALIZER_ERROR_NO_INIT               (-3)
+#define VISUALIZER_ERROR_BAD_VALUE             (-4)
+#define VISUALIZER_ERROR_INVALID_OPERATION     (-5)
+#define VISUALIZER_ERROR_NO_MEMORY             (-6)
+#define VISUALIZER_ERROR_DEAD_OBJECT           (-7)
 
 #define NATIVE_EVENT_PCM_CAPTURE                0
 #define NATIVE_EVENT_FFT_CAPTURE                1
