@@ -30,13 +30,13 @@
 using namespace android;
 
 #define AUDIOEFFECT_SUCCESS                      0
-#define AUDIOEFFECT_ERROR                       -1
-#define AUDIOEFFECT_ERROR_ALREADY_EXISTS        -2
-#define AUDIOEFFECT_ERROR_NO_INIT               -3
-#define AUDIOEFFECT_ERROR_BAD_VALUE             -4
-#define AUDIOEFFECT_ERROR_INVALID_OPERATION     -5
-#define AUDIOEFFECT_ERROR_NO_MEMORY             -6
-#define AUDIOEFFECT_ERROR_DEAD_OBJECT           -7
+#define AUDIOEFFECT_ERROR                       (-1)
+#define AUDIOEFFECT_ERROR_ALREADY_EXISTS        (-2)
+#define AUDIOEFFECT_ERROR_NO_INIT               (-3)
+#define AUDIOEFFECT_ERROR_BAD_VALUE             (-4)
+#define AUDIOEFFECT_ERROR_INVALID_OPERATION     (-5)
+#define AUDIOEFFECT_ERROR_NO_MEMORY             (-6)
+#define AUDIOEFFECT_ERROR_DEAD_OBJECT           (-7)
 
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/audiofx/AudioEffect";
