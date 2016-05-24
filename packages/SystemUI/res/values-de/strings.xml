@@ -594,7 +594,7 @@
     <string name="clipboard_description" msgid="3819919243940546364">"Elemente können direkt in die Zwischenablage gezogen werden. Ebenso können sie direkt aus der Zwischenablage gezogen werden, sofern diese geöffnet ist."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Benutzerdefinierte Navigationsschaltfläche"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Mit den Keycode-Schaltflächen können der Navigationsleiste Tasten hinzugefügt werden. Wird eine Keycode-Schaltfläche ausgewählt, führt sie die Aktion der entsprechenden Taste aus. Wählen Sie zuerst die Taste für die Schaltfläche aus und anschließend ein Bild, das auf der Schaltfläche erscheinen soll."</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Mit den Keycode-Schaltflächen kann man der Navigationsleiste Tasten hinzufügen. Wird eine Keycode-Schaltfläche ausgewählt, führt sie die Aktion der entsprechenden Taste aus. Wähle zuerst die Taste für die Schaltfläche aus und dann ein Bild, das auf der Schaltfläche erscheinen soll."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Taste auswählen"</string>
     <string name="preview" msgid="9077832302472282938">"Vorschau"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Zum Hinzufügen von Kacheln ziehen"</string>
