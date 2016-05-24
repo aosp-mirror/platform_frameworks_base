@@ -40,7 +40,7 @@
         <item name="wallpaperIntraCloseExitAnimation">@anim/slide_in_exit_micro</item>
     </style>
 
-    <style name="AlertDialog.Micro" parent="AlertDialog.Material.Light">
+    <style name="AlertDialog.Micro" parent="AlertDialog.Material">
         <item name="fullDark">@null</item>
         <item name="topDark">@null</item>
         <item name="centerDark">@null</item>
@@ -52,30 +52,79 @@
         <item name="bottomMedium">@null</item>
         <item name="centerMedium">@null</item>
         <item name="layout">@layout/alert_dialog_micro</item>
+        <item name="controllerType">micro</item>
     </style>
 
     <style name="DialogWindowTitle.Micro">
-        <item name="maxLines">1</item>
         <item name="scrollHorizontally">true</item>
         <item name="textAppearance">@style/TextAppearance.Micro.DialogWindowTitle</item>
+        <item name="textAlignment">viewStart</item>
     </style>
 
     <style name="TextAppearance.Micro" parent="TextAppearance.Material">
-        <item name="textSize">20sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
-        <item name="textColor">@color/micro_text_light</item>
+        <item name="lineSpacingMultiplier">@dimen/line_spacing_multiplier_micro</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textSize">@dimen/text_size_medium_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Inverse" parent="TextAppearance.Material">
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+        <item name="textColorHint">?attr/textColorHintInverse</item>
+        <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
+        <item name="textColorLink">?attr/textColorLinkInverse</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Headline">
+        <item name="textSize">@dimen/text_size_headline_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Title">
+        <item name="textSize">@dimen/text_size_title_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Subtitle">
+        <item name="textSize">@dimen/text_size_subtitle_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Body1">
+        <item name="textSize">@dimen/text_size_body1_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Body2">
+        <item name="textSize">@dimen/text_size_body2_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Caption">
+        <item name="textSize">@dimen/text_size_caption_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Large">
+        <item name="textSize">@dimen/text_size_large_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Medium">
+        <item name="textSize">@dimen/text_size_medium_micro</item>
+    </style>
+
+    <style name="TextAppearance.Micro.Small">
+        <item name="textSize">@dimen/text_size_small_micro</item>
     </style>
 
     <style name="TextAppearance.Micro.DialogWindowTitle" parent="TextAppearance.Material.DialogWindowTitle">
-        <item name="textSize">20sp</item>
         <item name="fontFamily">sans-serif-condensed-light</item>
-        <item name="textColor">@color/micro_text_light</item>
+        <item name="lineSpacingMultiplier">@dimen/line_spacing_multiplier_micro</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textSize">@dimen/text_size_large_micro</item>
     </style>
+
+    <style name="TextAppearance.Micro.AlertDialog.Message" parent="TextAppearance.Micro.Small" />
 
     <style name="Widget.Micro" parent="Widget.Material" />
 
-    <style name="Widget.Micro.TextView">
-        <item name="fontFamily">sans-serif-condensed</item>
+    <style name="Widget.Micro.TextView" parent="Widget.Material.TextView" >
+        <item name="breakStrategy">balanced</item>
+        <item name="hyphenationFrequency">normal</item>
     </style>
 
     <style name="Widget.Micro.NumberPicker">
@@ -90,4 +139,14 @@
         <item name="descendantFocusability">blocksDescendants</item>
     </style>
 
+    <style name="Widget.Micro.ButtonBar">
+        <item name="background">@color/background_floating_micro_dark</item>
+    </style>
+
+    <style name="Widget.Micro.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.ButtonBar.AlertDialog">
+        <item name="textAppearance">@style/TextAppearance.Micro.Small</item>
+        <item name="maxLines">3</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textAlignment">viewStart</item>
+    </style>
 </resources>
