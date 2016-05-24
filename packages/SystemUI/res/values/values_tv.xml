@@ -16,5 +16,5 @@ limitations under the License.
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <item format="float" type="integer" name="unselected_scale">1.0</item>
     <item format="float" type="integer" name="selected_scale">1.259</item>
-    <item format="float" type="integer" name="dismiss_unselected_alpha">0.1</item>
+    <item format="float" type="integer" name="dismiss_unselected_alpha">0.3</item>
 </resources>
