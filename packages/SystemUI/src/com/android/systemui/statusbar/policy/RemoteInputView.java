@@ -73,6 +73,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private ScrollContainer mScrollContainer;
     private View mScrollContainerChild;
+    private boolean mRemoved;
 
     public RemoteInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -171,7 +172,12 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     public void onDefocus() {
         mController.removeRemoteInput(mEntry);
         mEntry.remoteInputText = mEditText.getText();
-        setVisibility(INVISIBLE);
+
+        // During removal, we get reattached and lose focus. Not hiding in that
+        // case to prevent flicker.
+        if (!mRemoved) {
+            setVisibility(INVISIBLE);
+        }
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_CLOSE,
                 mEntry.notification.getPackageName());
     }
@@ -347,6 +353,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         return mPendingIntent;
     }
 
+    public void setRemoved() {
+        mRemoved = true;
+    }
+
     /**
      * An EditText that changes appearance based on whether it's focusable and becomes
      * un-focusable whenever the user navigates away from it or it becomes invisible.
@@ -413,6 +423,15 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 return true;
             }
             return super.onKeyPreIme(keyCode, event);
+        }
+
+        @Override
+        public boolean onCheckIsTextEditor() {
+            // Stop being editable while we're being removed. During removal, we get reattached,
+            // and editable views get their spellchecking state re-evaluated which is too costly
+            // during the removal animation.
+            boolean flyingOut = mRemoteInputView != null && mRemoteInputView.mRemoved;
+            return !flyingOut && super.onCheckIsTextEditor();
         }
 
         @Override
