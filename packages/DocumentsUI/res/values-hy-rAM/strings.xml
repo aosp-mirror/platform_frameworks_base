@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s-ում համընկնումներ չկան"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Հնարավոր չէ բացել ֆայլը"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Անհնար է ջնջել որոշ փաստաթղթեր"</string>
-    <string name="share_via" msgid="8966594246261344259">"Տարածել"</string>
+    <string name="share_via" msgid="8966594246261344259">"Կիսվել"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Ֆայլերի պատճենում"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Ֆայլերի տեղափոխում"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"Ֆայլերը ջնջվում են"</string>
