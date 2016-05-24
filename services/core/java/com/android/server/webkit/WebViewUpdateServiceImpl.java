@@ -595,13 +595,14 @@ public class WebViewUpdateServiceImpl {
                 return mMinimumVersionCode;
             }
 
+            int minimumVersionCode = -1;
             for (WebViewProviderInfo provider : mSystemInterface.getWebViewPackages()) {
                 if (provider.availableByDefault && !provider.isFallback) {
                     try {
                         int versionCode =
                             mSystemInterface.getFactoryPackageVersion(provider.packageName);
-                        if (mMinimumVersionCode < 0 || versionCode < mMinimumVersionCode) {
-                            mMinimumVersionCode = versionCode;
+                        if (minimumVersionCode < 0 || versionCode < minimumVersionCode) {
+                            minimumVersionCode = versionCode;
                         }
                     } catch (NameNotFoundException e) {
                         // Safe to ignore.
@@ -609,6 +610,7 @@ public class WebViewUpdateServiceImpl {
                 }
             }
 
+            mMinimumVersionCode = minimumVersionCode;
             return mMinimumVersionCode;
         }
     }
