@@ -733,6 +733,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mQsContainer = qsContainer;
     }
 
+    @Override
     public void onChildDismissed(View v) {
         ExpandableNotificationRow row = (ExpandableNotificationRow) v;
         if (!row.isDismissed()) {
@@ -820,6 +821,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return true; // Don't fade out the notification
     }
 
+    @Override
     public void onBeginDrag(View v) {
         mFalsingManager.onNotificatonStartDismissing();
         setSwipingInProgress(true);
@@ -848,6 +850,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return false;
     }
 
+    @Override
     public void onDragCancelled(View v) {
         mFalsingManager.onNotificatonStopDismissing();
         setSwipingInProgress(false);
@@ -906,11 +909,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         return closestChild;
     }
 
+    @Override
     public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
         getLocationOnScreen(mTempInt2);
         return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
     }
 
+    @Override
     public ExpandableView getChildAtPosition(float touchX, float touchY) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
@@ -947,12 +952,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         return null;
     }
 
+    @Override
     public boolean canChildBeExpanded(View v) {
         return v instanceof ExpandableNotificationRow
                 && ((ExpandableNotificationRow) v).isExpandable()
                 && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
     }
 
+    @Override
     public void setUserExpandedChild(View v, boolean userExpanded) {
         if (v instanceof ExpandableNotificationRow) {
             ((ExpandableNotificationRow) v).setUserExpanded(userExpanded,
@@ -960,6 +967,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    @Override
+    public void setExpansionCancelled(View v) {
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).setGroupExpansionChanging(false);
+        }
+    }
+
+    @Override
     public void setUserLockedChild(View v, boolean userLocked) {
         if (v instanceof ExpandableNotificationRow) {
             ((ExpandableNotificationRow) v).setUserLocked(userLocked);
@@ -1070,6 +1085,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mScrollingEnabled;
     }
 
+    @Override
     public boolean canChildBeDismissed(View v) {
         return StackScrollAlgorithm.canChildBeDismissed(v);
     }
@@ -1927,7 +1943,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
-                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
+                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
+                        - lastView.getExtraBottomPadding());
                 bottom = Math.min(bottom, getHeight());
             }
         } else {
@@ -3153,8 +3170,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 expandableView.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
             } else {
                 float yLocation = previous.getTranslationY() + previous.getActualHeight() -
-                        expandableView.getTranslationY();
-                expandableView.setFakeShadowIntensity(diff / FakeShadowView.SHADOW_SIBLING_TRESHOLD,
+                        expandableView.getTranslationY() - previous.getExtraBottomPadding();
+                expandableView.setFakeShadowIntensity(
+                        diff / FakeShadowView.SHADOW_SIBLING_TRESHOLD,
                         previous.getOutlineAlpha(), (int) yLocation,
                         previous.getOutlineTranslation());
             }
@@ -3525,6 +3543,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!mGroupExpandedForMeasure) {
             onHeightChanged(changedRow, false /* needsAnimation */);
         }
+        runAfterAnimationFinished(new Runnable() {
+            @Override
+            public void run() {
+                changedRow.onFinishedExpansionChange();
+            }
+        });
     }
 
     @Override

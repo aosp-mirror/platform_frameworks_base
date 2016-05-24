@@ -57,6 +57,11 @@ public class StackViewState extends ViewState {
      */
     public int location;
 
+    /**
+     * Whether a child in a group is being clipped at the bottom.
+     */
+    public boolean isBottomClipped;
+
     @Override
     public void copyFrom(ViewState viewState) {
         super.copyFrom(viewState);
@@ -71,6 +76,7 @@ public class StackViewState extends ViewState {
             clipTopAmount = svs.clipTopAmount;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
+            isBottomClipped = svs.isBottomClipped;
         }
     }
 }

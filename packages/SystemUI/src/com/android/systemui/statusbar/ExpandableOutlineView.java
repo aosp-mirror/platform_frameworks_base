@@ -33,22 +33,25 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
 
+    ViewOutlineProvider mProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            int translation = (int) getTranslation();
+            if (!mCustomOutline) {
+                outline.setRect(translation,
+                        mClipTopAmount,
+                        getWidth() + translation,
+                        Math.max(getActualHeight(), mClipTopAmount));
+            } else {
+                outline.setRect(mOutlineRect);
+            }
+            outline.setAlpha(mOutlineAlpha);
+        }
+    };
+
     public ExpandableOutlineView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                if (!mCustomOutline) {
-                    outline.setRect(0,
-                            mClipTopAmount,
-                            getWidth(),
-                            Math.max(getActualHeight(), mClipTopAmount));
-                } else {
-                    outline.setRect(mOutlineRect);
-                }
-                outline.setAlpha(mOutlineAlpha);
-            }
-        });
+        setOutlineProvider(mProvider);
     }
 
     @Override
@@ -87,17 +90,30 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     @Override
     public int getOutlineTranslation() {
-        return mCustomOutline ? mOutlineRect.left : 0;
+        return mCustomOutline ? mOutlineRect.left : (int) getTranslation();
+    }
+
+    public void updateOutline() {
+        if (mCustomOutline) {
+            return;
+        }
+        boolean hasOutline = true;
+        if (isChildInGroup()) {
+            hasOutline = isGroupExpanded() && !isGroupExpansionChanging();
+        } else if (isSummaryWithChildren()) {
+            hasOutline = !isGroupExpanded() || isGroupExpansionChanging();
+        }
+        setOutlineProvider(hasOutline ? mProvider : null);
+    }
+
+    public boolean isOutlineShowing() {
+        ViewOutlineProvider op = getOutlineProvider();
+        return op != null;
     }
 
     protected void setOutlineRect(float left, float top, float right, float bottom) {
-        setOutlineRect(true, left, top, right, bottom);
-    }
-
-    protected void setOutlineRect(boolean clipToOutline, float left, float top, float right,
-            float bottom) {
         mCustomOutline = true;
-        setClipToOutline(clipToOutline);
+        setClipToOutline(true);
 
         mOutlineRect.set((int) left, (int) top, (int) right, (int) bottom);
 

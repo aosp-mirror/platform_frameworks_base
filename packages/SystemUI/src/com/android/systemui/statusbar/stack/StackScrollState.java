@@ -173,6 +173,9 @@ public class StackScrollState {
         }
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (state.isBottomClipped) {
+                row.setClipToActualHeight(true);
+            }
             row.applyChildrenState(this);
         }
         return true;
