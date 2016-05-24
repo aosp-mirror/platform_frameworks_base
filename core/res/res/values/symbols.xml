@@ -2596,4 +2596,5 @@
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
 
+  <java-symbol type="string" name="suspended_widget_accessibility" />
 </resources>
