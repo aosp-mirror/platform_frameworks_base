@@ -25,30 +25,43 @@ package com.android.server.notification;
 public class RateEstimator {
     private static final double RATE_ALPHA = 0.8;
     private static final double MINIMUM_DT = 0.0005;
-    private long mLastEventTime;
-    private float mInterarrivalTime;
+    private Long mLastEventTime;
+    private Float mInterarrivalTime;
 
-    public RateEstimator(long now) {
-        mLastEventTime = now;
-    }
+    public RateEstimator() {}
 
-    /** Update the estimate to account for an event that jsut happened. */
+    /** Update the estimate to account for an event that just happened. */
     public float update(long now) {
-        mInterarrivalTime = (float) getInterarrivalEstimate(now);
+        float rate;
+        if (mLastEventTime == null) {
+            // No last event time, rate is zero.
+            rate = 0f;
+        } else {
+            // Calculate the new inter-arrival time based on last event time.
+            mInterarrivalTime = (float) getInterarrivalEstimate(now);
+            rate = (float) (1.0 / mInterarrivalTime);
+        }
         mLastEventTime = now;
-        return (float) (1.0 / mInterarrivalTime);
+        return rate;
     }
 
     /** @return the estimated rate if there were a new event right now. */
     public float getRate(long now) {
+        if (mLastEventTime == null) {
+            return 0f;
+        }
         return (float) (1.0 / getInterarrivalEstimate(now));
     }
 
     /** @return the average inter-arrival time if there were a new event right now. */
     private double getInterarrivalEstimate(long now) {
-        // a*iat_old + (1-a)*(t_now-t_last)
         double dt = ((double) (now - mLastEventTime)) / 1000.0;
         dt = Math.max(dt, MINIMUM_DT);
+        if (mInterarrivalTime == null) {
+            // No last inter-arrival time, return the new value directly.
+            return dt;
+        }
+        // a*iat_old + (1-a)*(t_now-t_last)
         return (RATE_ALPHA * mInterarrivalTime + (1.0 - RATE_ALPHA) * dt);
     }
 }
