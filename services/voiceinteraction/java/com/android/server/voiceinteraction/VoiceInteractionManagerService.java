@@ -1101,7 +1101,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (hit && doit) {
                     // The user is force stopping our current interactor/recognizer.
                     // Clear the current settings and restore default state.
-                    synchronized (VoiceInteractionManagerService.this) {
+                    synchronized (VoiceInteractionManagerServiceStub.this) {
                         unloadAllKeyphraseModels();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
@@ -1126,7 +1126,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 int userHandle = getChangingUserId();
                 if (DEBUG) Slog.d(TAG, "onSomePackagesChanged user=" + userHandle);
 
-                synchronized (VoiceInteractionManagerService.this) {
+                synchronized (VoiceInteractionManagerServiceStub.this) {
                     ComponentName curInteractor = getCurInteractor(userHandle);
                     ComponentName curRecognizer = getCurRecognizer(userHandle);
                     if (curRecognizer == null) {
