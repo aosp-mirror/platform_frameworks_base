@@ -878,11 +878,49 @@ void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
 
     restoreForLayer();
 
+    // saveLayer will clip & translate the draw contents, so we need
+    // to translate the drawLayer by how much the contents was translated
+    // TODO: Unify this with beginLayerOp so we don't have to calculate this
+    // twice
+    uint32_t layerWidth = (uint32_t) beginLayerOp.unmappedBounds.getWidth();
+    uint32_t layerHeight = (uint32_t) beginLayerOp.unmappedBounds.getHeight();
+
+    auto previous = mCanvasState.currentSnapshot();
+    Vector3 lightCenter = previous->getRelativeLightCenter();
+
+    // Combine all transforms used to present saveLayer content:
+    // parent content transform * canvas transform * bounds offset
+    Matrix4 contentTransform(*(previous->transform));
+    contentTransform.multiply(beginLayerOp.localMatrix);
+    contentTransform.translate(beginLayerOp.unmappedBounds.left,
+            beginLayerOp.unmappedBounds.top);
+
+    Matrix4 inverseContentTransform;
+    inverseContentTransform.loadInverse(contentTransform);
+
+    // map the light center into layer-relative space
+    inverseContentTransform.mapPoint3d(lightCenter);
+
+    // Clip bounds of temporary layer to parent's clip rect, so:
+    Rect saveLayerBounds(layerWidth, layerHeight);
+    //     1) transform Rect(width, height) into parent's space
+    //        note: left/top offsets put in contentTransform above
+    contentTransform.mapRect(saveLayerBounds);
+    //     2) intersect with parent's clip
+    saveLayerBounds.doIntersect(previous->getRenderTargetClip());
+    //     3) and transform back
+    inverseContentTransform.mapRect(saveLayerBounds);
+    saveLayerBounds.doIntersect(Rect(layerWidth, layerHeight));
+    saveLayerBounds.roundOut();
+
+    Matrix4 localMatrix(beginLayerOp.localMatrix);
+    localMatrix.translate(saveLayerBounds.left, saveLayerBounds.top);
+
     // record the draw operation into the previous layer's list of draw commands
     // uses state from the associated beginLayerOp, since it has all the state needed for drawing
     LayerOp* drawLayerOp = mAllocator.create_trivial<LayerOp>(
             beginLayerOp.unmappedBounds,
-            beginLayerOp.localMatrix,
+            localMatrix,
             beginLayerOp.localClip,
             beginLayerOp.paint,
             &(mLayerBuilders[finishedLayerIndex]->offscreenBuffer));

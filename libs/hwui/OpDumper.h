@@ -26,6 +26,7 @@ struct RecordedOp;
 class OpDumper {
 public:
     static void dump(const RecordedOp& op, std::ostream& output, int level = 0);
+    static const char* opName(const RecordedOp& op);
 };
 
 }; // namespace uirenderer
