@@ -19,9 +19,11 @@ package com.android.shell;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
+import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class BugreportStorageProvider extends DocumentsProvider {
+    private static final String AUTHORITY = "com.android.shell.documents";
     private static final String DOC_ID_ROOT = "bugreport";
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
@@ -103,6 +106,7 @@ public class BugreportStorageProvider extends DocumentsProvider {
                 for (File file : files) {
                     addFileRow(result, file);
                 }
+                result.setNotificationUri(getContext().getContentResolver(), getNotificationUri());
             }
         }
         return result;
@@ -128,6 +132,12 @@ public class BugreportStorageProvider extends DocumentsProvider {
         if (!getFileForDocId(documentId).delete()) {
             throw new FileNotFoundException("Failed to delete: " + documentId);
         }
+    }
+
+    // This is used by BugreportProgressService so that the notification uri shared by
+    // BugreportProgressService and BugreportStorageProvider are guaranteed the same and unique
+    protected static Uri getNotificationUri() {
+      return DocumentsContract.buildChildDocumentsUri(AUTHORITY, DOC_ID_ROOT);
     }
 
     private static String[] resolveRootProjection(String[] projection) {
