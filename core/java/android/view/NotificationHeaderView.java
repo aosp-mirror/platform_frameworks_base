@@ -18,7 +18,11 @@ package android.view;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
@@ -47,6 +51,18 @@ public class NotificationHeaderView extends ViewGroup {
     private int mOriginalNotificationColor;
     private boolean mExpanded;
     private boolean mShowWorkBadgeAtEnd;
+    private Drawable mBackground;
+    private int mHeaderBackgroundHeight;
+
+    ViewOutlineProvider mProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            if (mBackground != null) {
+                outline.setRect(0, 0, getWidth(), mHeaderBackgroundHeight);
+                outline.setAlpha(1f);
+            }
+        }
+    };
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -66,6 +82,8 @@ public class NotificationHeaderView extends ViewGroup {
                 com.android.internal.R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
+        mHeaderBackgroundHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_header_background_height);
     }
 
     @Override
@@ -163,6 +181,43 @@ public class NotificationHeaderView extends ViewGroup {
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new ViewGroup.MarginLayoutParams(getContext(), attrs);
+    }
+
+    /**
+     * Set a {@link Drawable} to be displayed as a background on the header.
+     */
+    public void setHeaderBackgroundDrawable(Drawable drawable) {
+        if (drawable != null) {
+            setWillNotDraw(false);
+            mBackground = drawable;
+            mBackground.setCallback(this);
+            setOutlineProvider(mProvider);
+        } else {
+            setWillNotDraw(true);
+            mBackground = null;
+            setOutlineProvider(null);
+        }
+        invalidate();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mBackground != null) {
+            mBackground.setBounds(0, 0, getWidth(), mHeaderBackgroundHeight);
+            mBackground.draw(canvas);
+        }
+    }
+
+    @Override
+    protected boolean verifyDrawable(Drawable who) {
+        return super.verifyDrawable(who) || who == mBackground;
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        if (mBackground != null && mBackground.isStateful()) {
+            mBackground.setState(getDrawableState());
+        }
     }
 
     private void updateTouchListener() {
