@@ -2636,12 +2636,10 @@ public final class MediaCodecInfo {
         public static final int MPEG4Level1      = 0x04;
         public static final int MPEG4Level2      = 0x08;
         public static final int MPEG4Level3      = 0x10;
-        /** @hide */
         public static final int MPEG4Level3b     = 0x18;
         public static final int MPEG4Level4      = 0x20;
         public static final int MPEG4Level4a     = 0x40;
         public static final int MPEG4Level5      = 0x80;
-        /** @hide */
         public static final int MPEG4Level6      = 0x100;
 
         // from OMX_VIDEO_MPEG2PROFILETYPE
@@ -2657,7 +2655,6 @@ public final class MediaCodecInfo {
         public static final int MPEG2LevelML     = 0x01;
         public static final int MPEG2LevelH14    = 0x02;
         public static final int MPEG2LevelHL     = 0x03;
-        /** @hide */
         public static final int MPEG2LevelHP     = 0x04;
 
         // from OMX_AUDIO_AACPROFILETYPE
