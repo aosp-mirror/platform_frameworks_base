@@ -42,9 +42,9 @@ public class PipRecentsOverlayManager {
 
     private final PipManager mPipManager = PipManager.getInstance();
     private final WindowManager mWindowManager;
-    private final View mOverlayView;
-    private final PipRecentsControlsView mPipControlsView;
-    private final View mRecentsView;
+    private View mOverlayView;
+    private PipRecentsControlsView mPipControlsView;
+    private View mRecentsView;
 
     private final LayoutParams mPipRecentsControlsViewLayoutParams;
     private final LayoutParams mPipRecentsControlsViewFocusedLayoutParams;
@@ -73,6 +73,21 @@ public class PipRecentsOverlayManager {
     PipRecentsOverlayManager(Context context) {
         mWindowManager = (WindowManager) context.getSystemService(WindowManager.class);
 
+        mPipRecentsControlsViewLayoutParams = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                LayoutParams.TYPE_SYSTEM_DIALOG,
+                LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT);
+        mPipRecentsControlsViewFocusedLayoutParams = new WindowManager.LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                LayoutParams.TYPE_SYSTEM_DIALOG,
+                0,
+                PixelFormat.TRANSLUCENT);
+
+        initViews(context);
+    }
+
+    private void initViews(Context context) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mOverlayView = inflater.inflate(R.layout.tv_pip_recents_overlay, null);
@@ -86,17 +101,6 @@ public class PipRecentsOverlayManager {
                 }
             }
         });
-
-        mPipRecentsControlsViewLayoutParams = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_SYSTEM_DIALOG,
-                LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
-        mPipRecentsControlsViewFocusedLayoutParams = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_SYSTEM_DIALOG,
-                0,
-                PixelFormat.TRANSLUCENT);
     }
 
     /**
@@ -209,5 +213,15 @@ public class PipRecentsOverlayManager {
      */
     boolean isRecentsShown() {
         return mIsRecentsShown;
+    }
+
+    /**
+     * Updates the PIP per configuration changed.
+     */
+    void onConfigurationChanged(Context context) {
+        if (mIsRecentsShown) {
+            Log.w(TAG, "Configuration is changed while Recents is shown");
+        }
+        initViews(context);
     }
 }
