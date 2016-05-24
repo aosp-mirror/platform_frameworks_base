@@ -25,7 +25,10 @@ package com.android.uiautomator.core;
  * tests with the modified parameters, make sure to also restore
  * the original parameter values, otherwise this will impact other tests cases.
  * @since API Level 18
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public final class Configurator {
     private long mWaitForIdleTimeout = 10 * 1000;
     private long mWaitForSelector = 10 * 1000;
