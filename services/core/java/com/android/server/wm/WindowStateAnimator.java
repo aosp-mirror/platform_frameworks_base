@@ -1334,7 +1334,17 @@ class WindowStateAnimator {
             final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
             if (wallpaperTarget != null) {
                 final Task task = wallpaperTarget.getTask();
-                if (task != null && !task.isFullscreen()) {
+                final WindowStateAnimator winAnimator = wallpaperTarget.mWinAnimator;
+                // We can only crop the wallpaper using final crop with stack bounds if the target
+                // is not animating, or if it's animating with clip mode STACK_CLIP_AFTER_ANIM.
+                // If it's animating with mode STACK_CLIP_NONE, we shouldn't crop either the task
+                // itself or the wallpaper. If it's animating with STACK_CLIP_BEFORE_ANIM, the crop
+                // is before the transform on the task itself.
+                final boolean useFinalCropOnWallpaper = !winAnimator.isAnimationSet()
+                        || winAnimator.resolveStackClip() == STACK_CLIP_AFTER_ANIM;
+                if (task != null && !task.isFullscreen()
+                        && task.cropWindowsToStackBounds()
+                        && useFinalCropOnWallpaper){
                     final TaskStack stack = task.mStack;
                     if (stack != null && !stack.isFullscreen()) {
                         stack.getDimBounds(mTmpStackBounds);
@@ -1459,7 +1469,7 @@ class WindowStateAnimator {
             // We need to ensure for each surface, that we disable transformation matrix
             // scaling in the same transaction which we resize the surface in.
             // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
-            // then take over the scaling until the new buffer arrives, and things 
+            // then take over the scaling until the new buffer arrives, and things
             // will be seamless.
             mForceScaleUntilResize = true;
         } else {
