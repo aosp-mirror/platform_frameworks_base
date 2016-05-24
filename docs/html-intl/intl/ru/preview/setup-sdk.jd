@@ -79,7 +79,7 @@ check updates for</strong> и выберите
 
 <h2 id="get-sdk">Установка N Preview SDK</h2>
 
-<p>Чтобы начать разработку с использованием API-интерфейсов Android N, необходимо установить 
+<p>Чтобы начать разработку с использованием API-интерфейсов Android N, необходимо установить
 Android N Preview SDK в Android Studio, выполнив следующие шаги.</p>
 
 <ol>
@@ -136,7 +136,7 @@ API.
 
 <h2 id="java8">Установка Java 8 JDK и JRE</h2>
 
-<p>Чтобы скомпилировать ваше приложение для платформы Android N, необходимо использовать 
+<p>Чтобы скомпилировать ваше приложение для платформы Android N, необходимо использовать
 Java 8 Developer Kit (JDK 8), а для использования некоторых инструментов с Android
 Studio 2.1 необходимо установить Java 8 Runtime Environment (JRE 8). Поэтому если у вас еще
 нет последних версий каждого из этих пакетов, загрузите JDK 8 и JRE 8
@@ -221,4 +221,4 @@ SDK</strong> и выберите
 и в описании <a href="{@docRoot}preview/api-overview.html">API-интерфейсов и возможностей Android N</a>.
 </li>
 </ul>
-
+<div class="end-content-title"></div>

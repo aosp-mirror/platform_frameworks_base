@@ -136,7 +136,7 @@ API 참조와 API 차이점 보고서가 포함되어 있습니다.
 
 <h2 id="java8">Java 8 JDK 및 JRE 가져오기</h2>
 
-<p>Android N 플랫폼에 대해 앱을 컴파일하려면 
+<p>Android N 플랫폼에 대해 앱을 컴파일하려면
 Java 8 개발자 키트(JDK 8)를 사용해야 하며, Android
 Studio 2.1의 일부 도구를 사용하려면 Java 8 런타임 환경(JRE 8)을 설치해야
 합니다. 따라서 각각 최신 버전이 없는 경우, 지금 JDK 8 및 JRE 8를
@@ -221,4 +221,4 @@ SDK</strong> 옵션 목록에서
 및 기능</a>에서 Android N 플랫폼에
 대해 자세히 알아봅니다.</li>
 </ul>
-
+<div class="end-content-title"></div>
