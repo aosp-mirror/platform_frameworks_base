@@ -31,7 +31,10 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * its constructor. Once you create an instance of a UiObject, it can
  * be reused for different views that match the selector criteria.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiObject {
     private static final String LOG_TAG = UiObject.class.getSimpleName();
     /**

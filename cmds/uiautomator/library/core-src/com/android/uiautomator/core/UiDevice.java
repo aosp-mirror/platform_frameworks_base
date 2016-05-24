@@ -42,7 +42,10 @@ import java.util.concurrent.TimeoutException;
  * You can also use this class to simulate user actions on the device,
  * such as pressing the d-pad or pressing the Home and Menu buttons.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiDevice {
     private static final String LOG_TAG = UiDevice.class.getSimpleName();
 
