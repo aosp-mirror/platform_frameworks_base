@@ -98,7 +98,7 @@ bản cài đặt có sẵn thì hãy chuyển đến bước 4):</p>
 
   <li>Nhấp vào tab <strong>SDK Tools</strong>, rồi chọn
     <strong>Android SDK Build Tools</strong>, <strong>Android SDK
-    Platform-Tools</strong>, và các hộp kiểm <strong>Android SDK Tools</strong> 
+    Platform-Tools</strong>, và các hộp kiểm <strong>Android SDK Tools</strong>
 .
   </li>
 
@@ -221,4 +221,4 @@ android {
 và<a href="{@docRoot}preview/api-overview.html">API Android N
 và Các tính năng</a>.</li>
 </ul>
-
+<div class="end-content-title"></div>
