@@ -1053,4 +1053,13 @@ public class NotificationContentView extends FrameLayout {
     public HybridNotificationView getSingleLineView() {
         return mSingleLineView;
     }
+
+    public void setRemoved() {
+        if (mExpandedRemoteInput != null) {
+            mExpandedRemoteInput.setRemoved();
+        }
+        if (mHeadsUpRemoteInput != null) {
+            mHeadsUpRemoteInput.setRemoved();
+        }
+    }
 }
