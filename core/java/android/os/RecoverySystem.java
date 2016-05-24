@@ -25,8 +25,10 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +46,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import com.android.internal.logging.MetricsLogger;
 
 import sun.security.pkcs.PKCS7;
 import sun.security.pkcs.SignerInfo;
@@ -69,6 +73,7 @@ public class RecoverySystem {
     /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static final File RECOVERY_DIR = new File("/cache/recovery");
     private static final File LOG_FILE = new File(RECOVERY_DIR, "log");
+    private static final File LAST_INSTALL_FILE = new File(RECOVERY_DIR, "last_install");
     private static final String LAST_PREFIX = "last_";
 
     /**
@@ -682,13 +687,64 @@ public class RecoverySystem {
         }
     }
 
+    // Read last_install; then report time for update and I/O to tron.
+    // Only report on the reboots immediately after an OTA update.
+    private static void parseLastInstallLog(Context context) {
+        try (BufferedReader in = new BufferedReader(new FileReader(LAST_INSTALL_FILE))) {
+            String line = null;
+            int bytesWritten = -1, bytesStashed = -1;
+            int timeTotal = -1;
+            while ((line = in.readLine()) != null) {
+                // Here is an example of lines in last_install:
+                // ...
+                // time_total: 101
+                // bytes_written_vendor: 51074
+                // bytes_stashed_vendor: 200
+                int numIndex = line.indexOf(':');
+                if (numIndex == -1 || numIndex + 1 >= line.length()) {
+                    continue;
+                }
+                String numString = line.substring(numIndex + 1).trim();
+                int parsedNum;
+                try {
+                    parsedNum = Integer.parseInt(numString);
+                } catch (NumberFormatException ignored) {
+                    Log.e(TAG, "Failed to parse numbers in " + line);
+                    continue;
+                }
+
+                if (line.startsWith("time")) {
+                    timeTotal = parsedNum;
+                } else if (line.startsWith("bytes_written")) {
+                    bytesWritten = (bytesWritten == -1) ? parsedNum : bytesWritten + parsedNum;
+                } else if (line.startsWith("bytes_stashed")) {
+                    bytesStashed = (bytesStashed == -1) ? parsedNum : bytesStashed + parsedNum;
+                }
+            }
+
+            // Don't report data to tron if corresponding entry isn't found in last_install.
+            if (timeTotal != -1) {
+                MetricsLogger.histogram(context, "ota_time_total", timeTotal);
+            }
+            if (bytesWritten != -1) {
+                MetricsLogger.histogram(context, "ota_bytes_written", bytesWritten);
+            }
+            if (bytesStashed != -1) {
+                MetricsLogger.histogram(context, "ota_bytes_stashed", bytesStashed);
+            }
+
+        } catch (IOException ignored) {
+            Log.e(TAG, "Failed to read lines in last_install", ignored);
+        }
+    }
+
     /**
      * Called after booting to process and remove recovery-related files.
      * @return the log file from recovery, or null if none was found.
      *
      * @hide
      */
-    public static String handleAftermath() {
+    public static String handleAftermath(Context context) {
         // Record the tail of the LOG_FILE
         String log = null;
         try {
@@ -697,6 +753,10 @@ public class RecoverySystem {
             Log.i(TAG, "No recovery log file");
         } catch (IOException e) {
             Log.e(TAG, "Error reading recovery log", e);
+        }
+
+        if (log != null) {
+            parseLastInstallLog(context);
         }
 
         // Only remove the OTA package if it's partially processed (uncrypt'd).
