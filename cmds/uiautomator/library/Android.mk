@@ -67,7 +67,6 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 # Make sure to run droiddoc first to generate the stub source files.
 $(full_classes_compiled_jar) : $(uiautomator_stubs_stamp)
 $(built_dex_intermediate) : $(uiautomator_stubs_stamp)
-uiautomator_stubs_jar := $(full_classes_compiled_jar)
 
 ###############################################
 # API check
@@ -92,7 +91,7 @@ $(eval $(call check-api, \
     $(uiautomator_internal_removed_api_file), \
     $(checkapi_last_error_level_flags), \
     cat $(LOCAL_PATH)/apicheck_msg_last.txt, \
-    $(uiautomator_stubs_jar), \
+    uiautomator.core, \
     $(uiautomator_stubs_stamp)))
 
 checkapi_current_error_level_flags := \
@@ -111,7 +110,7 @@ $(eval $(call check-api, \
     $(uiautomator_internal_removed_api_file), \
     $(checkapi_current_error_level_flags), \
     cat $(LOCAL_PATH)/apicheck_msg_current.txt, \
-    $(uiautomator_stubs_jar), \
+    uiautomator.core, \
     $(uiautomator_stubs_stamp)))
 
 .PHONY: update-uiautomator-api
@@ -128,7 +127,6 @@ uiautomator.core_src_files :=
 uiautomator.core_java_libraries :=
 uiautomator_stubs_stamp :=
 uiautomator_internal_api_file :=
-uiautomator_stubs_jar :=
 uiautomator_api_dir :=
 checkapi_last_error_level_flags :=
 checkapi_current_error_level_flags :=

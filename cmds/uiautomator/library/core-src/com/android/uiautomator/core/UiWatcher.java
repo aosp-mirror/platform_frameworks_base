@@ -22,7 +22,10 @@ package com.android.uiautomator.core;
  * to locate its selector yet. Only during this time, the watchers are invoked to check if there is
  * something else unexpected on the screen.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public interface UiWatcher {
 
     /**

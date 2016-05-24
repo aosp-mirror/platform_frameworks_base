@@ -27,7 +27,10 @@ import java.util.regex.Pattern;
  * information. You can also target an element by its location in a layout
  * hierarchy.
  * @since API Level 16
+ * @deprecated New tests should be written using UI Automator 2.0 which is available as part of the
+ * Android Testing Support Library.
  */
+@Deprecated
 public class UiSelector {
     static final int SELECTOR_NIL = 0;
     static final int SELECTOR_TEXT = 1;
