@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.UserManager;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
+import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Tests for {@link com.android.server.pm.UserRestrictionsUtils}.
@@ -35,6 +36,7 @@ import android.test.MoreAsserts;
      -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
  * </pre>
  */
+@SmallTest
 public class UserRestrictionsUtilsTest extends AndroidTestCase {
     public void testNonNull() {
         Bundle out = UserRestrictionsUtils.nonNull(null);
