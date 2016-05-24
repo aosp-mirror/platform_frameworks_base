@@ -220,6 +220,7 @@ public class Notification implements Parcelable
      *
      * @deprecated this number is not shown anymore
      */
+    @Deprecated
     public int number;
 
     /**
@@ -487,6 +488,7 @@ public class Notification implements Parcelable
      *
      * @deprecated Use {@link #priority} with a positive value.
      */
+    @Deprecated
     public static final int FLAG_HIGH_PRIORITY      = 0x00000080;
 
     /**
@@ -2489,6 +2491,7 @@ public class Notification implements Parcelable
          *
          * @deprecated this number is not shown anywhere anymore
          */
+        @Deprecated
         public Builder setNumber(int number) {
             mN.number = number;
             return this;
@@ -2504,6 +2507,7 @@ public class Notification implements Parcelable
          * For legacy apps targeting a version below {@link android.os.Build.VERSION_CODES#N} this
          * field will still show up, but the subtext will take precedence.
          */
+        @Deprecated
         public Builder setContentInfo(CharSequence info) {
             mN.extras.putCharSequence(EXTRA_INFO_TEXT, safeCharSequence(info));
             return this;

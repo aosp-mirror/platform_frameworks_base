@@ -435,6 +435,7 @@ public class ConnectivityManager {
      *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_MMS} capability.
      */
+    @Deprecated
     public static final int TYPE_MOBILE_MMS  = 2;
     /**
      * A SUPL-specific Mobile data connection.  This network type may use the
@@ -446,6 +447,7 @@ public class ConnectivityManager {
      *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         provides the {@link NetworkCapabilities#NET_CAPABILITY_SUPL} capability.
      */
+    @Deprecated
     public static final int TYPE_MOBILE_SUPL = 3;
     /**
      * A DUN-specific Mobile data connection.  This network type may use the
@@ -463,6 +465,7 @@ public class ConnectivityManager {
      *         {@link #requestNetwork(NetworkRequest, NetworkCallback)} to request a network that
      *         uses the {@link NetworkCapabilities#TRANSPORT_CELLULAR} transport.
      */
+    @Deprecated
     public static final int TYPE_MOBILE_HIPRI = 5;
     /**
      * The WiMAX data connection.  When active, all data traffic
@@ -593,6 +596,7 @@ public class ConnectivityManager {
      * @deprecated All APIs accepting a network type are deprecated. There should be no need to
      *             validate a network type.
      */
+    @Deprecated
     public static boolean isNetworkTypeValid(int networkType) {
         return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
     }
@@ -700,6 +704,7 @@ public class ConnectivityManager {
      *             preference.  Instead we use dynamic network properties of
      *             the networks to describe their precedence.
      */
+    @Deprecated
     public void setNetworkPreference(int preference) {
     }
 
@@ -715,6 +720,7 @@ public class ConnectivityManager {
      *             preference.  Instead we use dynamic network properties of
      *             the networks to describe their precedence.
      */
+    @Deprecated
     public int getNetworkPreference() {
         return TYPE_NONE;
     }
@@ -871,6 +877,7 @@ public class ConnectivityManager {
      *             of the same type. Use {@link #getAllNetworks} and
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
+    @Deprecated
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
             return mService.getNetworkInfo(networkType);
@@ -917,6 +924,7 @@ public class ConnectivityManager {
      *             of the same type. Use {@link #getAllNetworks} and
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
+    @Deprecated
     public NetworkInfo[] getAllNetworkInfo() {
         try {
             return mService.getAllNetworkInfo();
@@ -937,6 +945,7 @@ public class ConnectivityManager {
      *             of the same type. Use {@link #getAllNetworks} and
      *             {@link #getNetworkInfo(android.net.Network)} instead.
      */
+    @Deprecated
     public Network getNetworkForType(int networkType) {
         try {
             return mService.getNetworkForType(networkType);
@@ -1009,6 +1018,7 @@ public class ConnectivityManager {
      *             {@link #getNetworkInfo(android.net.Network)}, and
      *             {@link #getLinkProperties(android.net.Network)} instead.
      */
+    @Deprecated
     public LinkProperties getLinkProperties(int networkType) {
         try {
             return mService.getLinkPropertiesForType(networkType);
@@ -1091,6 +1101,7 @@ public class ConnectivityManager {
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
+    @Deprecated
     public int startUsingNetworkFeature(int networkType, String feature) {
         checkLegacyRoutingApiAccess();
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -1146,6 +1157,7 @@ public class ConnectivityManager {
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
+    @Deprecated
     public int stopUsingNetworkFeature(int networkType, String feature) {
         checkLegacyRoutingApiAccess();
         NetworkCapabilities netCap = networkCapabilitiesForFeature(networkType, feature);
@@ -1559,6 +1571,7 @@ public class ConnectivityManager {
      *             In {@link VERSION_CODES#M}, and above, this method is unsupported and will
      *             throw {@code UnsupportedOperationException} if called.
      */
+    @Deprecated
     public boolean requestRouteToHost(int networkType, int hostAddress) {
         return requestRouteToHostAddress(networkType, NetworkUtils.intToInetAddress(hostAddress));
     }
@@ -1581,6 +1594,7 @@ public class ConnectivityManager {
      * @deprecated Deprecated in favor of the {@link #requestNetwork} and
      *             {@link #bindProcessToNetwork} API.
      */
+    @Deprecated
     public boolean requestRouteToHostAddress(int networkType, InetAddress hostAddress) {
         checkLegacyRoutingApiAccess();
         try {
@@ -1650,6 +1664,7 @@ public class ConnectivityManager {
      * @hide
      * @deprecated Talk to TelephonyManager directly
      */
+    @Deprecated
     public boolean getMobileDataEnabled() {
         IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
         if (b != null) {
@@ -1803,6 +1818,7 @@ public class ConnectivityManager {
      *               situations where a Context pointer is unavailable.
      * @hide
      */
+    @Deprecated
     static ConnectivityManager getInstanceOrNull() {
         return sInstance;
     }
@@ -1812,6 +1828,7 @@ public class ConnectivityManager {
      *               situations where a Context pointer is unavailable.
      * @hide
      */
+    @Deprecated
     private static ConnectivityManager getInstance() {
         if (getInstanceOrNull() == null) {
             throw new IllegalStateException("No ConnectivityManager yet constructed");
@@ -2219,6 +2236,7 @@ public class ConnectivityManager {
      * @deprecated Use {@link #reportNetworkConnectivity} which allows reporting both
      *             working and non-working connectivity.
      */
+    @Deprecated
     public void reportBadNetwork(Network network) {
         try {
             // One of these will be ignored because it matches system's current state.
@@ -2421,6 +2439,7 @@ public class ConnectivityManager {
      * {@hide}
      * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
+    @Deprecated
     public void setProvisioningNotificationVisible(boolean visible, int networkType,
             String action) {
         try {
@@ -3211,6 +3230,7 @@ public class ConnectivityManager {
      *             {@link #bindProcessToNetwork} instead.  {@code bindProcessToNetwork}
      *             is a direct replacement.
      */
+    @Deprecated
     public static boolean setProcessDefaultNetwork(Network network) {
         int netId = (network == null) ? NETID_UNSET : network.netId;
         if (netId == NetworkUtils.getBoundNetworkForProcess()) {
@@ -3257,6 +3277,7 @@ public class ConnectivityManager {
      *             {@link IllegalStateException}.  Use {@link #getBoundNetworkForProcess} instead.
      *             {@code getBoundNetworkForProcess} is a direct replacement.
      */
+    @Deprecated
     public static Network getProcessDefaultNetwork() {
         int netId = NetworkUtils.getBoundNetworkForProcess();
         if (netId == NETID_UNSET) return null;
@@ -3301,6 +3322,7 @@ public class ConnectivityManager {
      * @hide
      * @deprecated This is strictly for legacy usage to support {@link #startUsingNetworkFeature}.
      */
+    @Deprecated
     public static boolean setProcessDefaultNetworkForHostResolution(Network network) {
         return NetworkUtils.bindProcessToNetworkForHostResolution(
                 network == null ? NETID_UNSET : network.netId);

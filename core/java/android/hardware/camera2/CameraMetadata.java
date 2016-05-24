@@ -1995,6 +1995,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_SCENE_MODE
      * @deprecated Please refer to this API documentation to find the alternatives
      */
+    @Deprecated
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
     /**

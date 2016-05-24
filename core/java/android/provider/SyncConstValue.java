@@ -21,6 +21,7 @@ package android.provider;
  * @deprecated Do not use.
  * @hide
  */
+@Deprecated
 public interface SyncConstValue
 {
     /**

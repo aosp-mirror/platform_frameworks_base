@@ -343,6 +343,7 @@ public class Contacts {
          * no public constructor since this is a utility class
          * @deprecated see {@link android.provider.ContactsContract}
          */
+        @Deprecated
         private People() {}
 
         /**
@@ -718,6 +719,7 @@ public class Contacts {
              * no public constructor since this is a utility class
              * @deprecated see {@link android.provider.ContactsContract}
              */
+            @Deprecated
             private Extensions() {}
 
             /**

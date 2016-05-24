@@ -237,6 +237,7 @@ public final class InputMethodSubtype implements Parcelable {
      * {@link InputMethodSubtype#InputMethodSubtype(int, int, String, String, String, boolean,
      * boolean, int)} except "id".
      */
+    @Deprecated
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype) {
         this(nameId, iconId, locale, mode, extraValue, isAuxiliary,
@@ -274,6 +275,7 @@ public final class InputMethodSubtype implements Parcelable {
      * Arrays.hashCode(new Object[] {locale, mode, extraValue,
      * isAuxiliary, overridesImplicitlyEnabledSubtype, isAsciiCapable}) will be used instead.
      */
+    @Deprecated
     public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype, int id) {
         this(getBuilder(nameId, iconId, locale, mode, extraValue, isAuxiliary,

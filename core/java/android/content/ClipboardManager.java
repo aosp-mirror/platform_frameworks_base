@@ -192,6 +192,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * @deprecated Use {@link #getPrimaryClip()} instead.  This retrieves
      * the primary clip and tries to coerce it to a string.
      */
+    @Deprecated
     public CharSequence getText() {
         ClipData clip = getPrimaryClip();
         if (clip != null && clip.getItemCount() > 0) {
@@ -205,6 +206,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
      * creates a ClippedItem holding the given text and sets it as the
      * primary clip.  It has no label or icon.
      */
+    @Deprecated
     public void setText(CharSequence text) {
         setPrimaryClip(ClipData.newPlainText(null, text));
     }
@@ -212,6 +214,7 @@ public class ClipboardManager extends android.text.ClipboardManager {
     /**
      * @deprecated Use {@link #hasPrimaryClip()} instead.
      */
+    @Deprecated
     public boolean hasText() {
         try {
             return getService().hasClipboardText(mContext.getOpPackageName());

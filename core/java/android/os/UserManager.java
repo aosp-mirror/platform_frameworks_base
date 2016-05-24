@@ -2089,6 +2089,7 @@ public class UserManager {
      * @deprecated The restrictions PIN functionality is no longer provided by the system.
      * This method is preserved for backwards compatibility reasons and always returns false.
      */
+    @Deprecated
     public boolean setRestrictionsChallenge(String newPin) {
         return false;
     }

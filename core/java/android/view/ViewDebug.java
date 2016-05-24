@@ -810,6 +810,7 @@ public class ViewDebug {
      * @deprecated See {@link #dumpv2(View, ByteArrayOutputStream)} below.
      * @hide
      */
+    @Deprecated
     public static void dump(View root, boolean skipChildren, boolean includeProperties,
             OutputStream clientStream) throws IOException {
         BufferedWriter out = null;

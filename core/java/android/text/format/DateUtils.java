@@ -116,9 +116,11 @@ public class DateUtils
     public static final String ABBREV_WEEKDAY_FORMAT = "%a";
 
     /** @deprecated Do not use. */
+    @Deprecated
     public static final int[] sameYearTable = null;
 
     /** @deprecated Do not use. */
+    @Deprecated
     public static final int[] sameMonthTable = null;
 
     /**
