@@ -40,4 +40,16 @@
         android:focusable="true"
         android:visibility="visible" />
 
+    <!-- Placeholder to dismiss during talkback. -->
+    <ImageView
+            android:id="@+id/dismiss_placeholder"
+            android:layout_width="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_height="@dimen/recents_tv_dismiss_icon_size"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="50dp"
+            android:src="@drawable/ic_cancel_white_24dp"
+            android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
+            android:focusable="true"
+            android:visibility="gone" />
+
 </com.android.systemui.recents.tv.views.RecentsTvView>
