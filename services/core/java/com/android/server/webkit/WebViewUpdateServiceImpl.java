@@ -222,7 +222,7 @@ public class WebViewUpdateServiceImpl {
             public WebViewPackageMissingException(Exception e) { super(e); }
         }
 
-        private static final int WAIT_TIMEOUT_MS = 4500; // KEY_DISPATCHING_TIMEOUT is 5000.
+        private static final int WAIT_TIMEOUT_MS = 1000; // KEY_DISPATCHING_TIMEOUT is 5000.
 
         // Keeps track of the number of running relro creations
         private int mNumRelroCreationsStarted = 0;
@@ -491,6 +491,10 @@ public class WebViewUpdateServiceImpl {
                     // Either the current relro creation  isn't done yet, or the new relro creatioin
                     // hasn't kicked off yet (the last relro creation used an out-of-date WebView).
                     webViewStatus = WebViewFactory.LIBLOAD_FAILED_WAITING_FOR_RELRO;
+                    Slog.e(TAG, "Timed out waiting for relro creation, relros started "
+                            + mNumRelroCreationsStarted
+                            + " relros finished " + mNumRelroCreationsFinished
+                            + " package dirty? " + mWebViewPackageDirty);
                 }
             }
             if (!webViewReady) Slog.w(TAG, "creating relro file timed out");
