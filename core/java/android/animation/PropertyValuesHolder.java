@@ -1178,6 +1178,15 @@ public class PropertyValuesHolder implements Cloneable {
         }
 
         @Override
+        public void setProperty(Property property) {
+            if (property instanceof IntProperty) {
+                mIntProperty = (IntProperty) property;
+            } else {
+                super.setProperty(property);
+            }
+        }
+
+        @Override
         public void setIntValues(int... values) {
             super.setIntValues(values);
             mIntKeyframes = (Keyframes.IntKeyframes) mKeyframes;
@@ -1312,6 +1321,15 @@ public class PropertyValuesHolder implements Cloneable {
             setFloatValues(values);
             if (property instanceof  FloatProperty) {
                 mFloatProperty = (FloatProperty) mProperty;
+            }
+        }
+
+        @Override
+        public void setProperty(Property property) {
+            if (property instanceof FloatProperty) {
+                mFloatProperty = (FloatProperty) property;
+            } else {
+                super.setProperty(property);
             }
         }
 
@@ -1516,7 +1534,7 @@ public class PropertyValuesHolder implements Cloneable {
                     }
                     propertyMap.put(mPropertyName, mJniSetter);
                 }
-           }
+            }
         }
     }
 
