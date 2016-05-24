@@ -48,6 +48,6 @@ public class PipUI extends SystemUI {
         if (!mSupportPip) {
             return;
         }
-        // TODO: handle configuration change.
+        PipManager.getInstance().onConfigurationChanged();
     }
 }
