@@ -237,7 +237,7 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "title":"Test Your App",
     "summary":"This document describes key concepts related to Android app testing. It assumes you have a basic knowledge of the JUnit testing framework. Android testing is based on JUnit. In general, a JUnit test is a method whose statements test a part of the application\u2026",
     "url":"studio/test/index.html",
-    "image":"images/testing/test_framework.png",
+    "image":"studio/images/test/test-framework.png",
     "type":"studio",
     "keywords": [],
     "tags": [],
