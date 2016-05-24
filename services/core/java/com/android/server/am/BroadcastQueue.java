@@ -258,6 +258,11 @@ public final class BroadcastQueue {
         if (app.thread == null) {
             throw new RemoteException();
         }
+        if (app.inFullBackup) {
+            skipReceiverLocked(r);
+            return;
+        }
+
         r.receiver = app.thread.asBinder();
         r.curApp = app;
         app.curReceiver = r;
@@ -341,11 +346,15 @@ public final class BroadcastQueue {
         }
 
         if (r != null) {
-            logBroadcastReceiverDiscardLocked(r);
-            finishReceiverLocked(r, r.resultCode, r.resultData,
-                    r.resultExtras, r.resultAbort, false);
-            scheduleBroadcastsLocked();
+            skipReceiverLocked(r);
         }
+    }
+
+    private void skipReceiverLocked(BroadcastRecord r) {
+        logBroadcastReceiverDiscardLocked(r);
+        finishReceiverLocked(r, r.resultCode, r.resultData,
+                r.resultExtras, r.resultAbort, false);
+        scheduleBroadcastsLocked();
     }
 
     public void scheduleBroadcastsLocked() {
@@ -641,9 +650,17 @@ public final class BroadcastQueue {
         try {
             if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST,
                     "Delivering to " + filter + " : " + r);
-            performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
-                    new Intent(r.intent), r.resultCode, r.resultData,
-                    r.resultExtras, r.ordered, r.initialSticky, r.userId);
+            if (filter.receiverList.app != null && filter.receiverList.app.inFullBackup) {
+                // Skip delivery if full backup in progress
+                // If it's an ordered broadcast, we need to continue to the next receiver.
+                if (ordered) {
+                    skipReceiverLocked(r);
+                }
+            } else {
+                performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
+                        new Intent(r.intent), r.resultCode, r.resultData,
+                        r.resultExtras, r.ordered, r.initialSticky, r.userId);
+            }
             if (ordered) {
                 r.state = BroadcastRecord.CALL_DONE_RECEIVE;
             }
