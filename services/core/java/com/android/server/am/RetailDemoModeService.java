@@ -25,6 +25,8 @@ import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.ServiceManager;
@@ -33,9 +35,12 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
+
+import java.io.File;
 
 public class RetailDemoModeService extends SystemService {
     private static final boolean DEBUG = false;
@@ -111,19 +116,47 @@ public class RetailDemoModeService extends SystemService {
 
     private void registerSettingsChangeObserver() {
         final Uri deviceDemoModeUri = Settings.Global.getUriFor(Settings.Global.DEVICE_DEMO_MODE);
+        final Uri deviceProvisionedUri = Settings.Global.getUriFor(
+                Settings.Global.DEVICE_PROVISIONED);
         final ContentResolver cr = getContext().getContentResolver();
         final ContentObserver deviceDemoModeSettingObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri, int userId) {
+                boolean deviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
                 if (deviceDemoModeUri.equals(uri)) {
-                    if (UserManager.isDeviceInDemoMode(getContext())) {
+                    if (deviceInDemoMode) {
                         createAndSwitchToDemoUser();
                     }
+                }
+                // If device is provisioned and left demo mode - run the cleanup in demo folder
+                if (!deviceInDemoMode && isDeviceProvisioned()) {
+                    // Run on the bg thread to not block the fg thread
+                    BackgroundThread.getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!deleteDemoFolderContents()) {
+                                Slog.w(TAG, "Failed to delete demo folder contents");
+                            }
+                        }
+                    });
                 }
             }
         };
         cr.registerContentObserver(deviceDemoModeUri, false, deviceDemoModeSettingObserver,
                 UserHandle.USER_SYSTEM);
+        cr.registerContentObserver(deviceProvisionedUri, false, deviceDemoModeSettingObserver,
+                UserHandle.USER_SYSTEM);
+    }
+
+    boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(
+                getContext().getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
+    }
+
+    private boolean deleteDemoFolderContents() {
+        File dir = Environment.getDataPreloadsDemoDirectory();
+        Slog.i(TAG, "Deleting contents of " + dir);
+        return FileUtils.deleteContents(dir);
     }
 
     private void registerBroadcastReceiver() {
