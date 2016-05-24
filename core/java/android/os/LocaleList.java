@@ -409,6 +409,14 @@ public final class LocaleList implements Parcelable {
     }
 
     /**
+     * {@hide}
+     */
+    public int getFirstMatchIndex(String[] supportedLocales) {
+        return computeFirstMatchIndex(Arrays.asList(supportedLocales),
+                false /* assume English is not supported */);
+    }
+
+    /**
      * Same as getFirstMatch(), but with English assumed to be supported, even if it's not.
      * {@hide}
      */
@@ -437,7 +445,11 @@ public final class LocaleList implements Parcelable {
      * Assumes that there is no repetition in the input.
      * {@hide}
      */
-    public static boolean isPseudoLocalesOnly(String[] supportedLocales) {
+    public static boolean isPseudoLocalesOnly(@Nullable String[] supportedLocales) {
+        if (supportedLocales == null) {
+            return true;
+        }
+
         if (supportedLocales.length > NUM_PSEUDO_LOCALES + 1) {
             // This is for optimization. Since there's no repetition in the input, if we have more
             // than the number of pseudo-locales plus one for the empty string, it's guaranteed
