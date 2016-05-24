@@ -2741,4 +2741,9 @@
     <public type="attr" name="shortcutIntentAction" />
     <public type="attr" name="shortcutIntentData" />
     <public type="attr" name="roundIcon" />
+
+    <public type="attr" name="contextUri" />
+    <public type="attr" name="contextDescription" />
+    <public type="attr" name="showMetadataInPreview" />
+
 </resources>

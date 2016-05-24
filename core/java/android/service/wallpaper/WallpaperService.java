@@ -55,6 +55,7 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
 import java.io.FileDescriptor;
@@ -628,9 +629,9 @@ public abstract class WallpaperService extends Service {
                     mCurWindowFlags = mWindowFlags;
                     mLayout.flags = mWindowFlags
                             | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                            | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            ;
+                            | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
                     mCurWindowPrivateFlags = mWindowPrivateFlags;
                     mLayout.privateFlags = mWindowPrivateFlags;
 
