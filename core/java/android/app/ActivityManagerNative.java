@@ -7015,6 +7015,7 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         mRemote.transact(SEND_INTENT_SENDER_TRANSACTION, data, reply, 0);
+        reply.readException();
         final int res = reply.readInt();
         data.recycle();
         reply.recycle();
