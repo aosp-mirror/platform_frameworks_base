@@ -2494,9 +2494,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty() || isCurrentlyAnimating()) {
+            setAnimationRunning(true);
             mStateAnimator.startAnimationForEvents(mAnimationEvents, mCurrentStackScrollState,
                     mGoToFullShadeDelay);
-            setAnimationRunning(true);
             mAnimationEvents.clear();
             updateBackground();
             updateViewShadows();
@@ -3124,6 +3124,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mListener.onChildLocationsChanged(this);
         }
         runAnimationFinishedRunnables();
+        setAnimationRunning(false);
         updateBackground();
         updateViewShadows();
     }
@@ -3239,6 +3240,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             maxLength = Math.max(mDarkAnimationOriginIndex,
                     getNotGoneChildCount() - mDarkAnimationOriginIndex - 1);
         }
+        maxLength = Math.max(0, maxLength);
         long delay = maxLength * StackStateAnimator.ANIMATION_DELAY_PER_ELEMENT_DARK;
         fadeAnimator.setStartDelay(delay);
         fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
