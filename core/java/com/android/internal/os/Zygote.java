@@ -22,6 +22,9 @@ import dalvik.system.ZygoteHooks;
 import android.system.ErrnoException;
 import android.system.Os;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /** @hide */
 public final class Zygote {
     /*
@@ -189,6 +192,41 @@ public final class Zygote {
     public static void appendQuotedShellArgs(StringBuilder command, String[] args) {
         for (String arg : args) {
             command.append(" '").append(arg.replace("'", "'\\''")).append("'");
+        }
+    }
+
+    /**
+     * Helper exception class which holds a method and arguments and
+     * can call them. This is used as part of a trampoline to get rid of
+     * the initial process setup stack frames.
+     */
+    public static class MethodAndArgsCaller extends Exception
+            implements Runnable {
+        /** method to call */
+        private final Method mMethod;
+
+        /** argument array */
+        private final String[] mArgs;
+
+        public MethodAndArgsCaller(Method method, String[] args) {
+            mMethod = method;
+            mArgs = args;
+        }
+
+        public void run() {
+            try {
+                mMethod.invoke(null, new Object[] { mArgs });
+            } catch (IllegalAccessException ex) {
+                throw new RuntimeException(ex);
+            } catch (InvocationTargetException ex) {
+                Throwable cause = ex.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw (RuntimeException) cause;
+                } else if (cause instanceof Error) {
+                    throw (Error) cause;
+                }
+                throw new RuntimeException(ex);
+            }
         }
     }
 }
