@@ -20,14 +20,14 @@ import android.content.ClipData;
 
 import org.mockito.Mockito;
 
-/**
- * Test support for working with {@link ClipData} instances.
- */
 public final class ClipDatas {
 
+    private ClipDatas() {}
+
     public static ClipData createTestClipData() {
-        ClipData data = Mockito.mock(ClipData.class);
+        final ClipData data = Mockito.mock(ClipData.class);
 
         return data;
     }
+
 }

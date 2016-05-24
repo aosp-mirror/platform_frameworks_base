@@ -20,15 +20,12 @@ import android.view.View;
 
 import org.mockito.Mockito;
 
-/**
- * Test support for working with {@link TestViews} instances.
- */
-public final class TestViews {
+public final class Views {
 
-    private TestViews() {}
+    private Views() {}
 
     public static View createTestView() {
-        View view = Mockito.mock(View.class);
+        final View view = Mockito.mock(View.class);
         Mockito.doCallRealMethod().when(view).setTag(Mockito.anyInt(), Mockito.any());
         Mockito.doCallRealMethod().when(view).getTag(Mockito.anyInt());
 

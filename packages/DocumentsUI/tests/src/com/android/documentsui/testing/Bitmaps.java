@@ -16,27 +16,16 @@
 
 package com.android.documentsui.testing;
 
-import android.content.ClipData;
-import android.view.DragEvent;
+import android.graphics.Bitmap;
 
-import org.mockito.Mockito;
+public final class Bitmaps {
 
-public final class DragEvents {
+    private Bitmaps() {}
 
-    private DragEvents() {}
+    public static Bitmap createTestBitmap(int width, int height) {
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
-    public static DragEvent createTestDragEvent(int actionId) {
-        final DragEvent mockEvent = Mockito.mock(DragEvent.class);
-        Mockito.when(mockEvent.getAction()).thenReturn(actionId);
-
-        return mockEvent;
-    }
-
-    public static DragEvent createTestDropEvent(ClipData clipData) {
-        final DragEvent dropEvent = createTestDragEvent(DragEvent.ACTION_DROP);
-        Mockito.when(dropEvent.getClipData()).thenReturn(clipData);
-
-        return dropEvent;
+        return bitmap;
     }
 
 }
