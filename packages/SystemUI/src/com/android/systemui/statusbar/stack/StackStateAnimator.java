@@ -223,7 +223,7 @@ public class StackStateAnimator {
         startViewAnimations(child, viewState, delay, duration);
 
         // start height animation
-        if (heightChanging && child.getActualHeight() != 0) {
+        if (heightChanging) {
             startHeightAnimation(child, viewState, duration, delay);
         }
 
@@ -270,7 +270,8 @@ public class StackStateAnimator {
     public void startViewAnimations(View child, ViewState viewState, long delay, long duration) {
         boolean wasVisible = child.getVisibility() == View.VISIBLE;
         final float alpha = viewState.alpha;
-        if (!wasVisible && alpha != 0 && !viewState.gone && !viewState.hidden) {
+        if (!wasVisible && (alpha != 0 || child.getAlpha() != 0)
+                && !viewState.gone && !viewState.hidden) {
             child.setVisibility(View.VISIBLE);
         }
         boolean yTranslationChanging = child.getTranslationY() != viewState.yTranslation;
@@ -477,11 +478,27 @@ public class StackStateAnimator {
         animator.addListener(getGlobalAnimationFinishedListener());
         // remove the tag when the animation is finished
         animator.addListener(new AnimatorListenerAdapter() {
+            boolean mWasCancelled;
+
             @Override
             public void onAnimationEnd(Animator animation) {
                 child.setTag(TAG_ANIMATOR_HEIGHT, null);
                 child.setTag(TAG_START_HEIGHT, null);
                 child.setTag(TAG_END_HEIGHT, null);
+                if (!mWasCancelled && child instanceof ExpandableNotificationRow) {
+                    ((ExpandableNotificationRow) child).setGroupExpansionChanging(
+                            false /* isExpansionChanging */);
+                }
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mWasCancelled = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mWasCancelled = true;
             }
         });
         startAnimator(animator);

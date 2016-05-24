@@ -45,6 +45,7 @@ public class ExpandHelper implements Gefingerpoken {
         void setUserLockedChild(View v, boolean userLocked);
         void expansionStateChanged(boolean isExpanding);
         int getMaxExpandHeight(ExpandableView view);
+        void setExpansionCancelled(View view);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -558,6 +559,8 @@ public class ExpandHelper implements Gefingerpoken {
                 public void onAnimationEnd(Animator animation) {
                     if (!mCancelled) {
                         mCallback.setUserExpandedChild(scaledView, expand);
+                    } else {
+                        mCallback.setExpansionCancelled(scaledView);
                     }
                     mCallback.setUserLockedChild(scaledView, false);
                     mScaleAnimation.removeListener(this);
