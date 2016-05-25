@@ -76,6 +76,7 @@ import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ContextMenu;
+import android.view.ContextThemeWrapper;
 import android.view.DisplayListCanvas;
 import android.view.DragAndDropPermissions;
 import android.view.DragEvent;
@@ -3004,8 +3005,16 @@ public class Editor {
         protected abstract int getTextOffset();
         protected abstract int getVerticalLocalPosition(int line);
         protected abstract int clipVertically(int positionY);
+        protected void setUp() {
+        }
 
         public PinnedPopupWindow() {
+            // Due to calling subclass methods in base constructor, subclass constructor is not
+            // called before subclass methods, e.g. createPopupWindow or initContentView. To give
+            // a chance to initialize subclasses, call setUp() method here.
+            // TODO: It is good to extract non trivial initialization code from constructor.
+            setUp();
+
             createPopupWindow();
 
             mPopupWindow.setWindowLayoutType(
@@ -3267,8 +3276,7 @@ public class Editor {
         private boolean mCursorWasVisibleBeforeSuggestions;
         private boolean mIsShowingUp = false;
         private SuggestionAdapter mSuggestionsAdapter;
-        private final TextAppearanceSpan mHighlightSpan = new TextAppearanceSpan(
-                mTextView.getContext(), mTextView.mTextEditSuggestionHighlightStyle);
+        private TextAppearanceSpan mHighlightSpan;  // TODO: Make mHighlightSpan final.
         private TextView mAddToDictionaryButton;
         private TextView mDeleteButton;
         private ListView mSuggestionListView;
@@ -3276,8 +3284,10 @@ public class Editor {
         private int mContainerMarginWidth;
         private int mContainerMarginTop;
         private LinearLayout mContainerView;
+        private Context mContext;  // TODO: Make mContext final.
 
         private class CustomPopupWindow extends PopupWindow {
+
             @Override
             public void dismiss() {
                 if (!isShowing()) {
@@ -3301,6 +3311,23 @@ public class Editor {
         }
 
         @Override
+        protected void setUp() {
+            mContext = applyDefaultTheme(mTextView.getContext());
+            mHighlightSpan = new TextAppearanceSpan(mContext,
+                    mTextView.mTextEditSuggestionHighlightStyle);
+        }
+
+        private Context applyDefaultTheme(Context originalContext) {
+            TypedArray a = originalContext.obtainStyledAttributes(
+                    new int[]{com.android.internal.R.attr.isLightTheme});
+            boolean isLightTheme = a.getBoolean(0, true);
+            int themeId = isLightTheme ? R.style.ThemeOverlay_Material_Light
+                    : R.style.ThemeOverlay_Material_Dark;
+            a.recycle();
+            return new ContextThemeWrapper(originalContext, themeId);
+        }
+
+        @Override
         protected void createPopupWindow() {
             mPopupWindow = new CustomPopupWindow();
             mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
@@ -3311,8 +3338,8 @@ public class Editor {
 
         @Override
         protected void initContentView() {
-            final LayoutInflater inflater = (LayoutInflater) mTextView.getContext().
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
             mContentView = (ViewGroup) inflater.inflate(
                     mTextView.mTextEditSuggestionContainerLayout, null);
 
@@ -3405,8 +3432,8 @@ public class Editor {
         }
 
         private class SuggestionAdapter extends BaseAdapter {
-            private LayoutInflater mInflater = (LayoutInflater) mTextView.getContext().
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            private LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
 
             @Override
             public int getCount() {
