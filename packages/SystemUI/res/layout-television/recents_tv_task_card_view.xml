@@ -50,7 +50,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/recents_tv_dismiss_icon_top_margin"
             android:layout_marginBottom="@dimen/recents_tv_dismiss_icon_bottom_margin"
-            android:contentDescription="@string/status_bar_accessibility_dismiss_recents"
             android:alpha="@integer/dismiss_unselected_alpha"
             android:src="@drawable/recents_tv_dismiss_icon" />
     <TextView
