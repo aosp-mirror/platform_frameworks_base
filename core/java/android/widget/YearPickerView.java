@@ -16,17 +16,16 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-
-import java.util.Calendar;
-
-import com.android.internal.R;
 
 /**
  * Displays a selectable list of years.
