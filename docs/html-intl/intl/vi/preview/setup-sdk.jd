@@ -130,7 +130,7 @@ bản cài đặt có sẵn thì hãy chuyển đến bước 4):</p>
       SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
     </td>
   </tr>
-<table>
+</table>
 
 
 
@@ -221,4 +221,3 @@ android {
 và<a href="{@docRoot}preview/api-overview.html">API Android N
 và Các tính năng</a>.</li>
 </ul>
-<div class="end-content-title"></div>
