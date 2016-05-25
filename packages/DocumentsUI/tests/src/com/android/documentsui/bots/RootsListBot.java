@@ -16,19 +16,33 @@
 
 package com.android.documentsui.bots;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.action.ViewActions.swipeLeft;
+import static android.support.test.espresso.action.ViewActions.swipeRight;
+
 import android.content.Context;
+import android.support.test.espresso.UiController;
+import android.support.test.espresso.ViewAction;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
+import android.support.v4.view.GravityCompat;
 import android.util.Log;
 
+import android.view.View;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.hamcrest.Matcher;
+
+import com.android.documentsui.R;
 
 /**
  * A test helper class that provides support for controlling and asserting against
@@ -66,7 +80,25 @@ public class RootsListBot extends BaseBot {
 
     public void openRoot(String label) throws UiObjectNotFoundException {
         findRoot(label).click();
-        mDevice.waitForIdle();
+        // Close the drawer in case we select a pre-selected root already
+        closeDrawer();
+    }
+
+    public void closeDrawer() {
+      // Espresso will try to close the drawer if it's opened
+      // But if no drawer exists (Tablet devices), we will have to catch the exception
+      // and continue on the test
+      // Why can't we do something like .exist() first?
+      // http://stackoverflow.com/questions/20807131/espresso-return-boolean-if-view-exists
+      try {
+        if (mContext.getResources().getConfiguration()
+            .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            onView(withId(R.id.drawer_layout)).perform(swipeRight());
+        } else {
+          onView(withId(R.id.drawer_layout)).perform(swipeLeft());
+        }
+      } catch (Exception e) {
+      }
     }
 
     public void assertRootsPresent(String... labels) throws UiObjectNotFoundException {

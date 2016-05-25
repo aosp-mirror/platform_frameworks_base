@@ -16,9 +16,14 @@
 
 package com.android.documentsui;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.swipeLeft;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
+import android.content.res.Configuration;
+import android.support.v7.recyclerview.R;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 
@@ -27,6 +32,13 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public SearchViewUiTest() {
         super(FilesActivity.class);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+      super.setUp();
+      // Drawer interferes with a lot of search action; going to try to close any opened ones
+      bots.roots.closeDrawer();
     }
 
     public void testSearchView_ExpandsOnClick() throws Exception {
@@ -79,7 +91,8 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bots.roots.openRoot("Downloads");
         bots.directory.pasteFilesFromClipboard();
 
-        //TODO: linben Why do we need to click on Downloads again so this will work?
+        //TODO: Why do we need to click on Downloads again so this will work?
+        bots.roots.openRoot(ROOT_0_ID);
         bots.roots.openRoot("Downloads");
         device.waitForIdle();
 
@@ -119,8 +132,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
         bots.keyboard.pressEnter();
 
-        bots.directory.assertDocumentsCountOnList(true, 0);
-
         String msg = String.valueOf(context.getString(R.string.no_results));
         bots.directory.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
 
@@ -142,7 +153,14 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         assertDefaultContentOfTestDir0();
     }
 
+
     public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
+         // Skipping this test for phones since currently there's no way to open the drawer on
+         // phones after doing a search (it's a back button instead of a hamburger button)
+         if (!bots.main.isTablet()) {
+           return;
+         }
+
         initTestFiles();
         assertDefaultContentOfTestDir0();
 
@@ -177,7 +195,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
             bots.directory.clickDocument(fileName2);
             device.waitForIdle();
             bots.main.menuDelete().click();
-            bots.main.findDialogOkButton().click();
+            bots.main.clickDialogOkButton();
         } catch (Exception e) {
         } finally {
             super.tearDown();
