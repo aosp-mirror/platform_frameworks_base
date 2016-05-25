@@ -32,8 +32,15 @@
         <item>Hewlett Packard</item>
     </string-array>
 
+    <string-array name="known_print_vendor_info_for_samsung" translatable="false">
+        <item>com.sec.app.samsungprintservice</item>
+        <item>Samsung Electronics</item>
+        <item>Samsung</item>
+    </string-array>
+
     <array name="known_print_plugin_vendors" translatable="false">
         <item>@array/known_print_vendor_info_for_mopria</item>
         <item>@array/known_print_vendor_info_for_hp</item>
+        <item>@array/known_print_vendor_info_for_samsung</item>
     </array>
 </resources>
