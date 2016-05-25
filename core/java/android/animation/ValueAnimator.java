@@ -708,12 +708,18 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
 
     /**
      * The amount of time, in milliseconds, to delay starting the animation after
-     * {@link #start()} is called.
-
+     * {@link #start()} is called. Note that the start delay should always be non-negative. Any
+     * negative start delay will be clamped to 0 on N and above.
+     *
      * @param startDelay The amount of the delay, in milliseconds
      */
     @Override
     public void setStartDelay(long startDelay) {
+        // Clamp start delay to non-negative range.
+        if (startDelay < 0) {
+            Log.w(TAG, "Start delay should always be non-negative");
+            startDelay = 0;
+        }
         mStartDelay = startDelay;
     }
 
