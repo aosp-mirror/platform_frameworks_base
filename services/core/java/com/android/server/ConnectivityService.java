@@ -3231,9 +3231,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public LegacyVpnInfo getLegacyVpnInfo(int userId) {
         enforceCrossUserPermission(userId);
-        if (mLockdownEnabled) {
-            return null;
-        }
 
         synchronized(mVpns) {
             return mVpns.get(userId).getLegacyVpnInfo();
