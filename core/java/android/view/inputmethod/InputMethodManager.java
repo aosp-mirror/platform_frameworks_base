@@ -1277,6 +1277,28 @@ public final class InputMethodManager {
                             return true;
                         }
                     }
+                } else {
+                    if (startInputReason
+                            == InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN) {
+                        // We are here probably because of an obsolete window-focus-in message sent
+                        // to windowGainingFocus.  Since IMMS determines whether a Window can have
+                        // IME focus or not by using the latest window focus state maintained in the
+                        // WMS, this kind of race condition cannot be avoided.  One obvious example
+                        // would be that we have already received a window-focus-out message but the
+                        // UI thread is still handling previous window-focus-in message here.
+                        // TODO: InputBindResult should have the error code.
+                        if (DEBUG) Log.w(TAG, "startInputOrWindowGainedFocus failed. "
+                                + "Window focus may have already been lost. "
+                                + "win=" + windowGainingFocus + " view=" + dumpViewInfo(view));
+                        if (!mActive) {
+                            // mHasBeenInactive is a latch switch to forcefully refresh IME focus
+                            // state when an inactive (mActive == false) client is gaining window
+                            // focus. In case we have unnecessary disable the latch due to this
+                            // spurious wakeup, we re-enable the latch here.
+                            // TODO: Come up with more robust solution.
+                            mHasBeenInactive = true;
+                        }
+                    }
                 }
                 if (mCurMethod != null && mCompletions != null) {
                     try {
