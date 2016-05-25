@@ -2025,6 +2025,7 @@ struct SaveLayerAlphaData {
     uint32_t layerHeight = 0;
     Rect rectClippedBounds;
     Matrix4 rectMatrix;
+    Matrix4 drawLayerMatrix;
 };
 /**
  * Constructs a view to hit the temporary layer alpha property implementation:
@@ -2060,6 +2061,7 @@ void testSaveLayerAlphaClip(SaveLayerAlphaData* outObservedData,
         }
         void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
             EXPECT_EQ(3, mIndex++);
+            mOutData->drawLayerMatrix = state.computedState.transform;
         }
         void recycleTemporaryLayer(OffscreenBuffer* offscreenBuffer) override {
             EXPECT_EQ(4, mIndex++);
@@ -2108,6 +2110,9 @@ RENDERTHREAD_TEST(FrameBuilder, renderPropSaveLayerAlphaClipBig) {
     expected.loadTranslate(0, -2000, 0);
     EXPECT_MATRIX_APPROX_EQ(expected, observedData.rectMatrix)
             << "expect content to be translated as part of being clipped";
+    expected.loadTranslate(10, 0, 0);
+    EXPECT_MATRIX_APPROX_EQ(expected, observedData.drawLayerMatrix)
+                << "expect drawLayer to be translated as part of being clipped";
 }
 
 RENDERTHREAD_TEST(FrameBuilder, renderPropSaveLayerAlphaRotate) {
