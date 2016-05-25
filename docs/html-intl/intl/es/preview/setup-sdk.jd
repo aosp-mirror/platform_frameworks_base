@@ -130,7 +130,7 @@ Android N Preview SDK en Android Studio de la siguiente manera:</p>
       SHA-1: 6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
     </td>
   </tr>
-<table>
+</table>
 
 
 
@@ -221,4 +221,3 @@ android {
 y <a href="{@docRoot}preview/api-overview.html">API y funciones de Android N
 </a>.</li>
 </ul>
-<div class="end-content-title"></div>
