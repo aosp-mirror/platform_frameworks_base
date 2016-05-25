@@ -88,22 +88,10 @@ public class TaskCardView extends LinearLayout {
                 R.dimen.recents_task_view_rounded_corners_radius);
         mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isTouchExplorationEnabled()) {
-            mDismissIconView.setFocusable(true);
-            mDismissIconView.setFocusableInTouchMode(true);
-            mDismissIconView.setOnFocusChangeListener(new OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) {
-                        setDismissState(true);
-                    } else {
-                        setDismissState(false);
-                    }
-                }
-            });
+        if (!ssp.isTouchExplorationEnabled()) {
+            mDismissIconView.setVisibility(VISIBLE);
         } else {
-            mDismissIconView.setFocusable(false);
-            mDismissIconView.setFocusableInTouchMode(false);
+            mDismissIconView.setVisibility(GONE);
         }
         mViewFocusAnimator = new ViewFocusAnimator(this);
     }

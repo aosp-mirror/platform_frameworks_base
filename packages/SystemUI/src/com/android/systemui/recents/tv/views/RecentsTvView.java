@@ -54,6 +54,7 @@ public class RecentsTvView extends FrameLayout {
     private TaskStack mStack;
     private TaskStackHorizontalGridView mTaskStackHorizontalView;
     private View mEmptyView;
+    private View mDismissPlaceholder;
     private RecentsRowFocusAnimationHolder mEmptyViewFocusAnimationHolder;
     private boolean mAwaitingFirstLayout = true;
     private Rect mSystemInsets = new Rect();
@@ -84,6 +85,12 @@ public class RecentsTvView extends FrameLayout {
 
         mHandler = new Handler();
         mTransitionHelper = new RecentsTvTransitionHelper(mContext, mHandler);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mDismissPlaceholder = findViewById(R.id.dismiss_placeholder);
     }
 
     public void setTaskStack(TaskStack stack) {
@@ -200,6 +207,9 @@ public class RecentsTvView extends FrameLayout {
     public void showEmptyView() {
         mEmptyView.setVisibility(View.VISIBLE);
         mTaskStackHorizontalView.setVisibility(View.GONE);
+        if (Recents.getSystemServices().isTouchExplorationEnabled()) {
+            mDismissPlaceholder.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -208,6 +218,9 @@ public class RecentsTvView extends FrameLayout {
     public void hideEmptyView() {
         mEmptyView.setVisibility(View.GONE);
         mTaskStackHorizontalView.setVisibility(View.VISIBLE);
+        if (Recents.getSystemServices().isTouchExplorationEnabled()) {
+            mDismissPlaceholder.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
