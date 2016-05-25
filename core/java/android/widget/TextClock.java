@@ -102,6 +102,7 @@ public class TextClock extends TextView {
      *
      * @deprecated Let the system use locale-appropriate defaults instead.
      */
+    @Deprecated
     public static final CharSequence DEFAULT_FORMAT_12_HOUR = "h:mm a";
 
     /**
@@ -116,6 +117,7 @@ public class TextClock extends TextView {
      *
      * @deprecated Let the system use locale-appropriate defaults instead.
      */
+    @Deprecated
     public static final CharSequence DEFAULT_FORMAT_24_HOUR = "H:mm";
 
     private CharSequence mFormat12;

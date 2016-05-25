@@ -1045,6 +1045,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     /**
      * @deprecated Use {@link #abortReliableWrite()}
      */
+    @Deprecated
     public void abortReliableWrite(BluetoothDevice mDevice) {
         abortReliableWrite();
     }

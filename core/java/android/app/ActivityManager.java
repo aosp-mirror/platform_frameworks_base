@@ -3605,6 +3605,7 @@ public class ActivityManager {
      *
      * @deprecated Use {@link #getLockTaskModeState} instead.
      */
+    @Deprecated
     public boolean isInLockTaskMode() {
         return getLockTaskModeState() != LOCK_TASK_MODE_NONE;
     }

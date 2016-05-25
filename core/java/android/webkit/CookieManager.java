@@ -158,6 +158,7 @@ public abstract class CookieManager {
      * date.
      * @deprecated use {@link #removeSessionCookies(ValueCallback)} instead.
      */
+    @Deprecated
     public abstract void removeSessionCookie();
 
     /**

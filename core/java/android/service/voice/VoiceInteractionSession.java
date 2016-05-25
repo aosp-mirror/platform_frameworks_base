@@ -453,6 +453,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * VoiceInteractor.ConfirmationRequest}.
          * @deprecated Prefer {@link #getVoicePrompt()} which allows multiple voice prompts.
          */
+        @Deprecated
         @Nullable
         public CharSequence getPrompt() {
             return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
@@ -512,6 +513,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * {@link android.app.VoiceInteractor.PickOptionRequest VoiceInteractor.PickOptionRequest}.
          * @deprecated Prefer {@link #getVoicePrompt()} which allows multiple voice prompts.
          */
+        @Deprecated
         @Nullable
         public CharSequence getPrompt() {
             return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
@@ -622,6 +624,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * VoiceInteractor.CompleteVoiceRequest}.
          * @deprecated Prefer {@link #getVoicePrompt()} which allows a separate visual message.
          */
+        @Deprecated
         @Nullable
         public CharSequence getMessage() {
             return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);
@@ -678,6 +681,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
          * {@link android.app.VoiceInteractor.AbortVoiceRequest VoiceInteractor.AbortVoiceRequest}.
          * @deprecated Prefer {@link #getVoicePrompt()} which allows a separate visual message.
          */
+        @Deprecated
         @Nullable
         public CharSequence getMessage() {
             return (mPrompt != null ? mPrompt.getVoicePromptAt(0) : null);

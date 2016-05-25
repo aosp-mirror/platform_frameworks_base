@@ -688,6 +688,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
+    @Deprecated
     public int getVisibleTitleHeight() {
         checkThread();
         return mProvider.getVisibleTitleHeight();

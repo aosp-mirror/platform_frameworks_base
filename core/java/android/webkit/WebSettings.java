@@ -81,6 +81,7 @@ public abstract class WebSettings {
      *
      * @deprecated Use {@link WebSettings#setTextZoom(int)} and {@link WebSettings#getTextZoom()} instead.
      */
+    @Deprecated
     public enum TextSize {
         SMALLEST(50),
         SMALLER(75),
@@ -476,6 +477,7 @@ public abstract class WebSettings {
      * @param t the text size as a {@link TextSize} value
      * @deprecated Use {@link #setTextZoom} instead.
      */
+    @Deprecated
     public synchronized void setTextSize(TextSize t) {
         setTextZoom(t.value);
     }
@@ -489,6 +491,7 @@ public abstract class WebSettings {
      * @see #setTextSize
      * @deprecated Use {@link #getTextZoom} instead.
      */
+    @Deprecated
     public synchronized TextSize getTextSize() {
         TextSize closestSize = null;
         int smallestDelta = Integer.MAX_VALUE;
@@ -533,6 +536,7 @@ public abstract class WebSettings {
      * @see #setDefaultZoom
      * @deprecated Will only return the default value.
      */
+    @Deprecated
     public abstract ZoomDensity getDefaultZoom();
 
     /**

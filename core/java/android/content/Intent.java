@@ -4446,6 +4446,7 @@ public class Intent implements Parcelable, Cloneable {
      * @deprecated As of API 21 this performs identically to
      * {@link #FLAG_ACTIVITY_NEW_DOCUMENT} which should be used instead of this.
      */
+    @Deprecated
     public static final int FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET = 0x00080000;
     /**
      * This flag is used to open a document into a new task rooted at the activity launched

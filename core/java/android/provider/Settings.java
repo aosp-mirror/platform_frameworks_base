@@ -2292,6 +2292,7 @@ public final class Settings {
          * @hide
          * @deprecated - Do not use
          */
+        @Deprecated
         public static boolean getShowGTalkServiceStatusForUser(ContentResolver cr,
                 int userHandle) {
             return getIntForUser(cr, SHOW_GTALK_SERVICE_STATUS, 0, userHandle) != 0;
@@ -4847,6 +4848,7 @@ public final class Settings {
          * @hide
          * @deprecated
          */
+        @Deprecated
         public static final String LOCK_SCREEN_OWNER_INFO = "lock_screen_owner_info";
 
         /**
@@ -4878,6 +4880,7 @@ public final class Settings {
          * @hide
          * @deprecated
          */
+        @Deprecated
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             "lock_screen_owner_info_enabled";
 

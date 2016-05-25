@@ -2885,11 +2885,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
      */
+    @Deprecated
     public static final int STATUS_BAR_HIDDEN = SYSTEM_UI_FLAG_LOW_PROFILE;
 
     /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_VISIBLE} instead.
      */
+    @Deprecated
     public static final int STATUS_BAR_VISIBLE = SYSTEM_UI_FLAG_VISIBLE;
 
     /**
@@ -7666,6 +7668,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setOnApplyWindowInsetsListener(android.view.View.OnApplyWindowInsetsListener)}
      * to implement handling their own insets.
      */
+    @Deprecated
     protected boolean fitSystemWindows(Rect insets) {
         if ((mPrivateFlags3 & PFLAG3_APPLYING_INSETS) == 0) {
             if (insets == null) {
@@ -7927,6 +7930,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Ask that a new dispatch of {@link #fitSystemWindows(Rect)} be performed.
      * @deprecated Use {@link #requestApplyInsets()} for newer platform versions.
      */
+    @Deprecated
     public void requestFitSystemWindows() {
         if (mParent != null) {
             mParent.requestFitSystemWindows();
@@ -20477,6 +20481,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @deprecated Use {@link #startDragAndDrop(ClipData, DragShadowBuilder, Object, int)
      * startDragAndDrop()} for newer platform versions.
      */
+    @Deprecated
     public final boolean startDrag(ClipData data, DragShadowBuilder shadowBuilder,
                                    Object myLocalState, int flags) {
         return startDragAndDrop(data, shadowBuilder, myLocalState, flags);

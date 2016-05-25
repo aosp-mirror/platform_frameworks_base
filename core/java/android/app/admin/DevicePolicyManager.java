@@ -3011,6 +3011,7 @@ public class DevicePolicyManager {
      *             TODO: delete once there are no longer any live references.
      * @hide
      */
+    @Deprecated
     public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage)
             throws NameNotFoundException, UnsupportedOperationException {
         setAlwaysOnVpnPackage(admin, vpnPackage, /* lockdownEnabled */ true);
@@ -3760,6 +3761,7 @@ public class DevicePolicyManager {
      * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
      *         the user has already been set up.
      */
+    @Deprecated
     @SystemApi
     public boolean setActiveProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName)
             throws IllegalArgumentException {

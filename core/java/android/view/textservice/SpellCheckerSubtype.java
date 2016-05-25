@@ -100,6 +100,7 @@ public final class SpellCheckerSubtype implements Parcelable {
      * {@link SpellCheckerSubtype} objects right now.  Hence only the system is expected to be able
      * to instantiate {@link SpellCheckerSubtype} object.
      */
+    @Deprecated
     public SpellCheckerSubtype(int nameId, String locale, String extraValue) {
         this(nameId, locale, SUBTYPE_LANGUAGE_TAG_NONE, extraValue, SUBTYPE_ID_NONE);
     }

@@ -308,6 +308,7 @@ public final class ContextHubManager {
      * @deprecated Use {@link #unregisterCallback(Callback)} instead.
      * @hide
      */
+    @Deprecated
     public synchronized int unregisterCallback(ICallback callback) {
         if (callback != mLocalCallback) {
             Log.w(TAG, "Cannot recognize local callback!");

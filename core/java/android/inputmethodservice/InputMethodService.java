@@ -761,6 +761,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * @deprecated Starting in API 21, hardware acceleration is always enabled
      *             on capable devices.
      */
+    @Deprecated
     public boolean enableHardwareAcceleration() {
         if (mWindow != null) {
             throw new IllegalStateException("Must be called before onCreate()");

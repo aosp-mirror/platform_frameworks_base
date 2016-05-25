@@ -249,6 +249,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_PADDING_NOT_NULL = 0x20;
 
     /** @deprecated - functionality removed */
+    @Deprecated
     private static final int FLAG_ANIMATION_CACHE = 0x40;
 
     // When set, this ViewGroup converts calls to invalidate(Rect) to invalidate() during a
@@ -295,9 +296,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_ADD_STATES_FROM_CHILDREN = 0x2000;
 
     /** @deprecated functionality removed */
+    @Deprecated
     private static final int FLAG_ALWAYS_DRAWN_WITH_CACHE = 0x4000;
 
     /** @deprecated functionality removed */
+    @Deprecated
     private static final int FLAG_CHILDREN_DRAWN_WITH_CACHE = 0x8000;
 
     /**
@@ -5651,6 +5654,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
+    @Deprecated
     public boolean isAnimationCacheEnabled() {
         return (mGroupFlags & FLAG_ANIMATION_CACHE) == FLAG_ANIMATION_CACHE;
     }
@@ -5669,6 +5673,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Caching behavior of children may be controlled through {@link View#setLayerType(int, Paint)}.
      */
+    @Deprecated
     public void setAnimationCacheEnabled(boolean enabled) {
         setBooleanFlag(FLAG_ANIMATION_CACHE, enabled);
     }
@@ -5686,6 +5691,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer have their caching behavior disabled by parents.
      */
+    @Deprecated
     public boolean isAlwaysDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_ALWAYS_DRAWN_WITH_CACHE) == FLAG_ALWAYS_DRAWN_WITH_CACHE;
     }
@@ -5710,6 +5716,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @deprecated As of {@link android.os.Build.VERSION_CODES#M}, this property is ignored.
      * Child views may no longer have their caching behavior disabled by parents.
      */
+    @Deprecated
     public void setAlwaysDrawnWithCacheEnabled(boolean always) {
         setBooleanFlag(FLAG_ALWAYS_DRAWN_WITH_CACHE, always);
     }
@@ -5727,6 +5734,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Child views may no longer be forced to cache their rendering state by their parents.
      * Use {@link View#setLayerType(int, Paint)} on individual Views instead.
      */
+    @Deprecated
     protected boolean isChildrenDrawnWithCacheEnabled() {
         return (mGroupFlags & FLAG_CHILDREN_DRAWN_WITH_CACHE) == FLAG_CHILDREN_DRAWN_WITH_CACHE;
     }
@@ -5748,6 +5756,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Child views may no longer be forced to cache their rendering state by their parents.
      * Use {@link View#setLayerType(int, Paint)} on individual Views instead.
      */
+    @Deprecated
     protected void setChildrenDrawnWithCacheEnabled(boolean enabled) {
         setBooleanFlag(FLAG_CHILDREN_DRAWN_WITH_CACHE, enabled);
     }

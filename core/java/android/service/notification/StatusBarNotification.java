@@ -249,6 +249,7 @@ public class StatusBarNotification implements Parcelable {
      *
      * @deprecated Use {@link #getUser()} instead.
      */
+    @Deprecated
     public int getUserId() {
         return this.user.getIdentifier();
     }

@@ -225,6 +225,7 @@ public class ChangeBounds extends Transition {
      * @deprecated Use {@link android.transition.ChangeTransform} to handle
      * transitions between different parents.
      */
+    @Deprecated
     public void setReparent(boolean reparent) {
         mReparent = reparent;
     }

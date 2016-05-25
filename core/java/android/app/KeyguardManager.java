@@ -123,6 +123,7 @@ public class KeyguardManager {
      * Handle returned by {@link KeyguardManager#newKeyguardLock} that allows
      * you to disable / reenable the keyguard.
      */
+    @Deprecated
     public class KeyguardLock {
         private final IBinder mToken = new Binder();
         private final String mTag;
