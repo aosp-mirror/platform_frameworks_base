@@ -23,6 +23,7 @@ import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
 import com.android.layoutlib.bridge.bars.Config;
@@ -232,8 +233,10 @@ class Layout extends RelativeLayout {
 
     private BridgeActionBar createActionBar(@NonNull BridgeContext context,
             @NonNull SessionParams params) {
+        boolean isMenu = "menu".equals(params.getFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG));
+
         BridgeActionBar actionBar;
-        if (mBuilder.isThemeAppCompat()) {
+        if (mBuilder.isThemeAppCompat() && !isMenu) {
             actionBar = new AppCompatActionBar(context, params);
         } else {
             actionBar = new FrameworkActionBar(context, params);
