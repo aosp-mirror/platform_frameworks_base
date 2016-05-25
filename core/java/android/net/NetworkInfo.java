@@ -334,6 +334,7 @@ public class NetworkInfo implements Parcelable {
      *
      * @return {@code true} if large transfers should be avoided, otherwise
      *         {@code false}.
+     * @hide
      */
     public boolean isMetered() {
         synchronized (this) {
