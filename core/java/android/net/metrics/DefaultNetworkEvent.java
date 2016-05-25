@@ -68,8 +68,28 @@ public final class DefaultNetworkEvent extends IpConnectivityEvent implements Pa
 
     @Override
     public String toString() {
-      return String.format("DefaultNetworkEvent(%d -> %d, %s, IPv4: %b, IPv6: %b)", prevNetId,
-              netId, NetworkCapabilities.transportNamesOf(transportTypes), prevIPv4, prevIPv6);
+      String prevNetwork = String.valueOf(prevNetId);
+      String newNetwork = String.valueOf(netId);
+      if (prevNetId != 0) {
+          prevNetwork += ":" + ipSupport();
+      }
+      if (netId != 0) {
+          newNetwork += ":" + NetworkCapabilities.transportNamesOf(transportTypes);
+      }
+      return String.format("DefaultNetworkEvent(%s -> %s)", prevNetwork, newNetwork);
+    }
+
+    private String ipSupport() {
+        if (prevIPv4 && prevIPv6) {
+            return "DUAL";
+        }
+        if (prevIPv6) {
+            return "IPv6";
+        }
+        if (prevIPv4) {
+            return "IPv4";
+        }
+        return "NONE";
     }
 
     public static final Parcelable.Creator<DefaultNetworkEvent> CREATOR
