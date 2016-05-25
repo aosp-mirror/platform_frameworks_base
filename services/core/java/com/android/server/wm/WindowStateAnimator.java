@@ -1773,6 +1773,10 @@ class WindowStateAnimator {
                 mWin.mAppToken.onFirstWindowDrawn(mWin, this);
             }
 
+            if (mWin.mAttrs.type == TYPE_INPUT_METHOD) {
+                mWin.mDisplayContent.mDividerControllerLocked.resetImeHideRequested();
+            }
+
             return true;
         }
         return false;
