@@ -723,21 +723,6 @@ public class TelephonyManager {
      */
     public static final String VVM_TYPE_CVVM = "vvm_type_cvvm";
 
-    /* Visual voicemail SMS filter constants */
-
-    /**
-     * The visual voicemail SMS message does not have to be a data SMS, and can be directed to any
-     * port.
-     * @hide
-     */
-    public static final int VVM_SMS_FILTER_DESTINATION_PORT_ANY = -1;
-
-    /**
-     * The visual voicemail SMS message can be directed to any port, but must be a data SMS.
-     * @hide
-     */
-    public static final int VVM_SMS_FILTER_DESTINATION_PORT_DATA_SMS = -2;
-
     //
     //
     // Device Info
@@ -2439,65 +2424,30 @@ public class TelephonyManager {
     }
 
     /**
-     * Enables or disables the visual voicemail SMS filter for a phone account. When the filter is
+     * Enables the visual voicemail SMS filter for a phone account. When the filter is
      * enabled, Incoming SMS messages matching the OMTP VVM SMS interface will be redirected to the
      * visual voicemail client with
      * {@link android.provider.VoicemailContract.ACTION_VOICEMAIL_SMS_RECEIVED}.
-     * @see #setVisualVoicemailSmsFilterPrefix(int, String)
-     * @see #setVisualVoicemailSmsFilterOriginatingNumbers(int, String[])
-     * @see #setVisualVoicemailSmsFilterDestinationPort(int, int)
      *
-     * <p>This takes effect only when the caller is the default dialer.
+     * <p>This takes effect only when the caller is the default dialer. The enabled status and
+     * settings persist through default dialer changes, but the filter will only honor the setting
+     * set by the current default dialer.
+     *
      *
      * @param subId The subscription id of the phone account.
-     * @param value The new state of the filter
+     * @param settings The settings for the filter.
      */
     /** @hide */
-    public void setVisualVoicemailSmsFilterEnabled(int subId, boolean value){
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.setVisualVoicemailSmsFilterEnabled(subId, value);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
+    public void enableVisualVoicemailSmsFilter(int subId,
+            VisualVoicemailSmsFilterSettings settings) {
+        if(settings == null){
+            throw new IllegalArgumentException("Settings cannot be null");
         }
-    }
-
-    /**
-     * Returns whether the visual voicemail SMS filter is enabled for a phone account.
-     *
-     * @param packageName The visual voicemail client to read the settings from
-     * @param subId The subscription id of the phone account.
-     */
-    /** @hide */
-    public boolean isVisualVoicemailSmsFilterEnabled(String packageName, int subId){
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.isVisualVoicemailSmsFilterEnabled(packageName, subId);
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-
-        return false;
-    }
-
-    /**
-     * Sets the client prefix for the visual voicemail SMS filter of a phone account. The client
-     * prefix will appear at the start of a visual voicemail SMS message, followed by a colon(:).
-     *
-     * <p>This takes effect only when the caller is the default dialer.
-     *
-     * @param subId The subscription id of the phone account.
-     * @param prefix The client prefix
-     */
-    /** @hide */
-    public void setVisualVoicemailSmsFilterClientPrefix(int subId, String prefix){
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                telephony.setVisualVoicemailSmsFilterClientPrefix(subId, prefix);
+                telephony.enableVisualVoicemailSmsFilter(mContext.getOpPackageName(), subId,
+                        settings);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -2505,114 +2455,70 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the client prefix for the visual voicemail SMS filter of a phone account. The client
-     * prefix will appear at the start of a visual voicemail SMS message, followed by a colon(:).
+     * Disables the visual voicemail SMS filter for a phone account.
      *
-     * @param packageName The visual voicemail client to read the settings from
-     * @param subId The subscription id of the phone account.
+     * <p>This takes effect only when the caller is the default dialer. The enabled status and
+     * settings persist through default dialer changes, but the filter will only honor the setting
+     * set by the current default dialer.
      */
     /** @hide */
-    public String getVisualVoicemailSmsFilterClientPrefix(String packageName, int subId){
+    public void disableVisualVoicemailSmsFilter(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getVisualVoicemailSmsFilterClientPrefix(packageName, subId);
+                telephony.disableVisualVoicemailSmsFilter(mContext.getOpPackageName(), subId);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
+    }
+
+    /**
+     * @returns the settings of the visual voicemail SMS filter for a phone account, or {@code null}
+     * if the filter is disabled.
+     *
+     * <p>This takes effect only when the caller is the default dialer. The enabled status and
+     * settings persist through default dialer changes, but the filter will only honor the setting
+     * set by the current default dialer.
+     */
+    /** @hide */
+    @Nullable
+    public VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(int subId) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony
+                        .getVisualVoicemailSmsFilterSettings(mContext.getOpPackageName(), subId);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+
         return null;
     }
 
     /**
-     * Sets the originating number whitelist for the visual voicemail SMS filter of a phone
-     * account. If the list is not null only the SMS messages from a number in the list can be
-     * considered as a visual voicemail SMS. Otherwise, messages from any address will be
-     * considered.
+     * @returns the settings of the visual voicemail SMS filter for a phone account set by the
+     * package, or {@code null} if the filter is disabled.
      *
-     * <p>This takes effect only when the caller is the default dialer.
-     *
-     * @param subId The subscription id of the phone account.
-     * @param numbers A array representing the white list, or null to disable number filtering.
+     * <p>Requires the calling app to have READ_PRIVILEGED_PHONE_STATE permission.
      */
     /** @hide */
-    public void setVisualVoicemailSmsFilterOriginatingNumbers(int subId,
-            @Nullable String[] numbers) {
+    @Nullable
+    public VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(String packageName,
+            int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.setVisualVoicemailSmsFilterOriginatingNumbers(subId, numbers);
+                return telephony.getSystemVisualVoicemailSmsFilterSettings(packageName, subId);
             }
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
-    }
 
-    /**
-     * Returns the originating number whitelist for the visual voicemail SMS filter of a phone
-     * account. If the list is not null only the SMS messages from a number in the list can be
-     * considered as a visual voicemail SMS. Otherwise, messages from any address will be
-     * considered.
-     *
-     * @param packageName The visual voicemail client to read the settings from
-     * @param subId The subscription id of the phone account.
-     */
-    /** @hide */
-    public String[] getVisualVoicemailSmsFilterOriginatingNumbers(String packageName, int subId){
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getVisualVoicemailSmsFilterOriginatingNumbers(packageName, subId);
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
         return null;
     }
 
-    /**
-     * Sets the destination port for the visual voicemail SMS filter of a phone
-     * account.
-     *
-     * <p>This takes effect only when the caller is the default dialer.
-     *
-     * @param subId The subscription id of the phone account.
-     * @param port The destination port, or {@link #VVM_SMS_FILTER_DESTINATION_PORT_ANY}, or
-     * {@link #VVM_SMS_FILTER_DESTINATION_PORT_DATA_SMS}
-     */
-    /** @hide */
-    public void setVisualVoicemailSmsFilterDestinationPort(int subId, int port){
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                telephony.setVisualVoicemailSmsFilterDestinationPort(subId, port);
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-    }
-
-    /**
-     * Returns the destination port for the visual voicemail SMS filter of a phone
-     * account.
-     *
-     * @param packageName The visual voicemail client to read the settings from
-     * @param subId The subscription id of the phone account.
-     * @returns port The destination port, or {@link #VVM_SMS_FILTER_DESTINATION_PORT_ANY}, or
-     * {@link #VVM_SMS_FILTER_DESTINATION_PORT_DATA_SMS}
-     */
-    /** @hide */
-    public int getVisualVoicemailSmsFilterDestinationPort(String packageName, int subId){
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.getVisualVoicemailSmsFilterDestinationPort(packageName, subId);
-            }
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-        return VVM_SMS_FILTER_DESTINATION_PORT_ANY;
-    }
     /**
      * Returns the voice mail count. Return 0 if unavailable, -1 if there are unread voice messages
      * but the count is unknown.
