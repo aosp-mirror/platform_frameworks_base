@@ -2045,12 +2045,15 @@ public final class BluetoothAdapter {
             public void onBluetoothServiceDown() {
                 if (VDBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
 
-                mServiceLock.writeLock().lock();
-                mService = null;
-                if (mLeScanClients != null) mLeScanClients.clear();
-                if (sBluetoothLeAdvertiser != null) sBluetoothLeAdvertiser.cleanup();
-                if (sBluetoothLeScanner != null) sBluetoothLeScanner.cleanup();
-                mServiceLock.writeLock().unlock();
+                try {
+                    mServiceLock.writeLock().lock();
+                    mService = null;
+                    if (mLeScanClients != null) mLeScanClients.clear();
+                    if (sBluetoothLeAdvertiser != null) sBluetoothLeAdvertiser.cleanup();
+                    if (sBluetoothLeScanner != null) sBluetoothLeScanner.cleanup();
+                } finally {
+                    mServiceLock.writeLock().unlock();
+                }
 
                 synchronized (mProxyServiceStateCallbacks) {
                     for (IBluetoothManagerCallback cb : mProxyServiceStateCallbacks ){
