@@ -98,7 +98,7 @@ Android N Preview SDK in Android Studio as follows:</p>
       SHA-1: 591eabe168c909799f6d8dcbe7b126c25ea8b04d
     </td>
   </tr>
-<table>
+</table>
 
 
 
@@ -189,4 +189,3 @@ href="{@docRoot}preview/download.html">Test on an Android N Device</a>.</li>
 and <a href="{@docRoot}preview/api-overview.html">Android N APIs
 and Features</a>.</li>
 </ul>
-<div class="end-content-title"></div>
