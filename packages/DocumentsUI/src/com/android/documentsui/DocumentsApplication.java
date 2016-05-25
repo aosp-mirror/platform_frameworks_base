@@ -35,6 +35,8 @@ public class DocumentsApplication extends Application {
 
     private ThumbnailCache mThumbnailCache;
 
+    private DocumentClipper mClipper;
+
     public static RootsCache getRootsCache(Context context) {
         return ((DocumentsApplication) context.getApplicationContext()).mRoots;
     }
@@ -55,6 +57,10 @@ public class DocumentsApplication extends Application {
         return client;
     }
 
+    public static DocumentClipper getDocumentClipper(Context context) {
+        return ((DocumentsApplication) context.getApplicationContext()).mClipper;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -66,6 +72,8 @@ public class DocumentsApplication extends Application {
         mRoots.updateAsync(false);
 
         mThumbnailCache = new ThumbnailCache(memoryClassBytes / 4);
+
+        mClipper = new DocumentClipper(this);
 
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);

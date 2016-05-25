@@ -18,21 +18,21 @@ package com.android.documentsui;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.PersistableBundle;
 import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
-
-import libcore.io.IoUtils;
+import com.android.documentsui.services.FileOperations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public final class DocumentClipper {
     private Context mContext;
     private ClipboardManager mClipboard;
 
-    public DocumentClipper(Context context) {
+    DocumentClipper(Context context) {
         mContext = context;
         mClipboard = context.getSystemService(ClipboardManager.class);
     }
@@ -114,7 +114,13 @@ public final class DocumentClipper {
         for (int i = 0; i < count; ++i) {
             ClipData.Item item = clipData.getItemAt(i);
             Uri itemUri = item.getUri();
-            srcDocs.add(createDocument(itemUri));
+            DocumentInfo docInfo = createDocument(itemUri);
+            if (docInfo != null) {
+                srcDocs.add(docInfo);
+            } else {
+                // This uri either doesn't exist, or is invalid.
+                Log.w(TAG, "Can't create document info from uri: " + itemUri);
+            }
         }
 
         return srcDocs;
@@ -196,21 +202,127 @@ public final class DocumentClipper {
         DocumentInfo doc = null;
         if (uri != null && DocumentsContract.isDocumentUri(mContext, uri)) {
             ContentResolver resolver = mContext.getContentResolver();
-            ContentProviderClient client = null;
-            Cursor cursor = null;
             try {
-                client = DocumentsApplication.acquireUnstableProviderOrThrow(resolver, uri.getAuthority());
-                cursor = client.query(uri, null, null, null, null);
-                cursor.moveToPosition(0);
-                doc = DocumentInfo.fromCursor(cursor, uri.getAuthority());
+                doc = DocumentInfo.fromUri(resolver, uri);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
-            } finally {
-                IoUtils.closeQuietly(cursor);
-                ContentProviderClient.releaseQuietly(client);
             }
         }
         return doc;
+    }
+
+    /**
+     * Copies documents from clipboard. It's the same as {@link #copyFromClipData} with clipData
+     * returned from {@link ClipboardManager#getPrimaryClip()}.
+     *
+     * @param destination destination document.
+     * @param docStack the document stack to the destination folder,
+     * @param callback callback to notify when operation finishes.
+     */
+    public void copyFromClipboard(DocumentInfo destination, DocumentStack docStack,
+            FileOperations.Callback callback) {
+        copyFromClipData(destination, docStack, mClipboard.getPrimaryClip(), callback);
+    }
+
+    /**
+     * Copies documents from given clip data.
+     *
+     * @param destination destination document
+     * @param docStack the document stack to the destination folder
+     * @param clipData the clipData to copy from, or null to copy from clipboard
+     * @param callback callback to notify when operation finishes
+     */
+    public void copyFromClipData(final DocumentInfo destination, DocumentStack docStack,
+            @Nullable final ClipData clipData, final FileOperations.Callback callback) {
+        if (clipData == null) {
+            Log.i(TAG, "Received null clipData. Ignoring.");
+            return;
+        }
+
+        new AsyncTask<Void, Void, ClipDetails>() {
+
+            @Override
+            protected ClipDetails doInBackground(Void... params) {
+                return getClipDetails(clipData);
+            }
+
+            @Override
+            protected void onPostExecute(ClipDetails clipDetails) {
+                if (clipDetails == null) {
+                    Log.w(TAG,  "Received null clipDetails. Ignoring.");
+                    return;
+                }
+
+                List<DocumentInfo> docs = clipDetails.docs;
+                @OpType int type = clipDetails.opType;
+                DocumentInfo srcParent = clipDetails.parent;
+                moveDocuments(docs, destination, docStack, type, srcParent, callback);
+            }
+        }.execute();
+    }
+
+    /**
+     * Moves {@code docs} from {@code srcParent} to {@code destination}.
+     * operationType can be copy or cut
+     * srcParent Must be non-null for move operations.
+     */
+    private void moveDocuments(
+            List<DocumentInfo> docs,
+            DocumentInfo destination,
+            DocumentStack docStack,
+            @OpType int operationType,
+            DocumentInfo srcParent,
+            FileOperations.Callback callback) {
+
+        RootInfo destRoot = docStack.root;
+        if (!canCopy(docs, destRoot, destination)) {
+            callback.onOperationResult(FileOperations.Callback.STATUS_REJECTED, operationType, 0);
+            return;
+        }
+
+        if (docs.isEmpty()) {
+            callback.onOperationResult(FileOperations.Callback.STATUS_ACCEPTED, operationType, 0);
+            return;
+        }
+
+        DocumentStack dstStack = new DocumentStack();
+        dstStack.push(destination);
+        dstStack.addAll(docStack);
+        switch (operationType) {
+            case FileOperationService.OPERATION_MOVE:
+                FileOperations.move(mContext, docs, srcParent, dstStack, callback);
+                break;
+            case FileOperationService.OPERATION_COPY:
+                FileOperations.copy(mContext, docs, dstStack, callback);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported operation: " + operationType);
+        }
+    }
+
+    /**
+     * Returns true if the list of files can be copied to destination. Note that this
+     * is a policy check only. Currently the method does not attempt to verify
+     * available space or any other environmental aspects possibly resulting in
+     * failure to copy.
+     *
+     * @return true if the list of files can be copied to destination.
+     */
+    private boolean canCopy(List<DocumentInfo> files, RootInfo root, DocumentInfo dest) {
+        if (dest == null || !dest.isDirectory() || !dest.isCreateSupported()) {
+            return false;
+        }
+
+        // Can't copy folders to downloads, because we don't show folders there.
+        if (root.isDownloads()) {
+            for (DocumentInfo docs : files) {
+                if (docs.isDirectory()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public static class ClipDetails {

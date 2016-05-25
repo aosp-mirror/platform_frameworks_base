@@ -20,7 +20,6 @@ import static android.os.SystemClock.elapsedRealtime;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.EXTRA_STACK;
 import static com.android.documentsui.Shared.asArrayList;
-import static com.android.documentsui.Shared.getQuantityString;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
@@ -30,21 +29,20 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_CO
 import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 
+import android.annotation.IntDef;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Parcelable;
 import android.support.annotation.VisibleForTesting;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 
-import com.android.documentsui.R;
-import com.android.documentsui.Snackbars;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -65,15 +63,14 @@ public final class FileOperations {
     /**
      * Tries to start the activity. Returns the job id.
      */
-    public static String start(
-            Activity activity, List<DocumentInfo> srcDocs,
-            DocumentStack stack, int operationType) {
+    public static String start(Context context, List<DocumentInfo> srcDocs, DocumentStack stack,
+            @OpType int operationType, Callback callback) {
 
         if (DEBUG) Log.d(TAG, "Handling generic 'start' call.");
 
         switch (operationType) {
             case OPERATION_COPY:
-                return FileOperations.copy(activity, srcDocs, stack);
+                return FileOperations.copy(context, srcDocs, stack, callback);
             case OPERATION_MOVE:
                 throw new IllegalArgumentException("Moving requires providing the source parent.");
             case OPERATION_DELETE:
@@ -86,17 +83,16 @@ public final class FileOperations {
     /**
      * Tries to start the activity. Returns the job id.
      */
-    public static String start(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
-            DocumentStack stack, int operationType) {
+    public static String start(Context context, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
+            DocumentStack stack, @OpType int operationType, Callback callback) {
 
         if (DEBUG) Log.d(TAG, "Handling generic 'start' call.");
 
         switch (operationType) {
             case OPERATION_COPY:
-                return FileOperations.copy(activity, srcDocs, stack);
+                return FileOperations.copy(context, srcDocs, stack, callback);
             case OPERATION_MOVE:
-                return FileOperations.move(activity, srcDocs, srcParent, stack);
+                return FileOperations.move(context, srcDocs, srcParent, stack, callback);
             case OPERATION_DELETE:
                 throw new UnsupportedOperationException("Delete isn't currently supported.");
             default:
@@ -116,17 +112,16 @@ public final class FileOperations {
     }
 
     @VisibleForTesting
-    public static String copy(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentStack destination) {
+    public static String copy(Context context, List<DocumentInfo> srcDocs,
+            DocumentStack destination, Callback callback) {
         String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'copy' operation id: " + jobId);
 
-        Intent intent = createBaseIntent(OPERATION_COPY, activity, jobId, srcDocs, destination);
+        Intent intent = createBaseIntent(OPERATION_COPY, context, jobId, srcDocs, destination);
 
-        createSharedSnackBar(activity, R.plurals.copy_begin, srcDocs.size())
-                .show();
+        callback.onOperationResult(Callback.STATUS_ACCEPTED, OPERATION_COPY, srcDocs.size());
 
-        activity.startService(intent);
+        context.startService(intent);
 
         return jobId;
     }
@@ -140,19 +135,17 @@ public final class FileOperations {
      * @param srcParent Parent of all the source documents.
      * @param destination The move destination stack.
      */
-    public static String move(
-            Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
-            DocumentStack destination) {
+    public static String move(Context context, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
+            DocumentStack destination, Callback callback) {
         String jobId = createJobId();
         if (DEBUG) Log.d(TAG, "Initiating 'move' operation id: " + jobId);
 
-        Intent intent = createBaseIntent(OPERATION_MOVE, activity, jobId, srcDocs, srcParent,
+        Intent intent = createBaseIntent(OPERATION_MOVE, context, jobId, srcDocs, srcParent,
                 destination);
 
-        createSharedSnackBar(activity, R.plurals.move_begin, srcDocs.size())
-                .show();
+        callback.onOperationResult(Callback.STATUS_ACCEPTED, OPERATION_MOVE, srcDocs.size());
 
-        activity.startService(intent);
+        context.startService(intent);
 
         return jobId;
     }
@@ -223,14 +216,6 @@ public final class FileOperations {
         return intent;
     }
 
-    private static Snackbar createSharedSnackBar(Activity activity, int contentId, int fileCount) {
-        Resources res = activity.getResources();
-        return Snackbars.makeSnackbar(
-                activity,
-                getQuantityString(activity, contentId, fileCount),
-                Snackbar.LENGTH_SHORT);
-    }
-
     private static final class IdBuilder {
 
         // Remember last job time so we can guard against collisions.
@@ -249,5 +234,26 @@ public final class FileOperations {
             mLastJobTime = time;
             return String.valueOf(mLastJobTime) + "-" + String.valueOf(mSubId);
         }
+    }
+
+    /**
+     * A functional callback called when the file operation starts or fails to start.
+     */
+    @FunctionalInterface
+    public interface Callback {
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({STATUS_ACCEPTED, STATUS_REJECTED})
+        @interface Status {}
+        static final int STATUS_ACCEPTED = 0;
+        static final int STATUS_REJECTED = 1;
+
+        /**
+         * Performs operation when the file operation starts or fails to start.
+         *
+         * @param status {@link Status} of this operation
+         * @param opType file operation type {@link OpType}.
+         * @param docCount number of documents operated.
+         */
+        void onOperationResult(@Status int status, @OpType int opType, int docCount);
     }
 }

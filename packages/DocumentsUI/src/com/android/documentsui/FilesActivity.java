@@ -76,7 +76,7 @@ public class FilesActivity extends BaseActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mClipper = new DocumentClipper(this);
+        mClipper = DocumentsApplication.getDocumentClipper(this);
 
         RootsFragment.show(getFragmentManager(), null);
 

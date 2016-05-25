@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -23,7 +24,22 @@ import android.view.View;
 public final class Snackbars {
     private Snackbars() {}
 
-    public static final Snackbar makeSnackbar(Activity activity, int messageId, int duration) {
+    public static final void showMove(Activity activity, int docCount) {
+        CharSequence message = Shared.getQuantityString(activity, R.plurals.move_begin, docCount);
+        makeSnackbar(activity, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public static final void showCopy(Activity activity, int docCount) {
+        CharSequence message = Shared.getQuantityString(activity, R.plurals.copy_begin, docCount);
+        makeSnackbar(activity, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public static final void showPasteFailed(Activity activity) {
+        makeSnackbar(activity, R.string.clipboard_files_cannot_paste, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public static final Snackbar makeSnackbar(Activity activity, @StringRes int messageId,
+            int duration) {
         return Snackbars.makeSnackbar(
                 activity, activity.getResources().getText(messageId), duration);
     }
