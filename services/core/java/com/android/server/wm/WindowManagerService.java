@@ -6392,6 +6392,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_SCREENSHOT && inRotation) Slog.v(TAG_WM,
                     "Taking screenshot while rotating");
 
+            // We force pending transactions to flush before taking
+            // the screenshot by pushing an empty synchronous transaction.
+            SurfaceControl.openTransaction();
+            SurfaceControl.closeTransactionSync();
+
             bm = SurfaceControl.screenshot(crop, width, height, minLayer, maxLayer,
                     inRotation, rot);
             if (bm == null) {

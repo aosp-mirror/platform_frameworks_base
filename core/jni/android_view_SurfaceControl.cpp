@@ -223,8 +223,9 @@ static void nativeOpenTransaction(JNIEnv* env, jclass clazz) {
     SurfaceComposerClient::openGlobalTransaction();
 }
 
-static void nativeCloseTransaction(JNIEnv* env, jclass clazz) {
-    SurfaceComposerClient::closeGlobalTransaction();
+
+static void nativeCloseTransaction(JNIEnv* env, jclass clazz, jboolean sync) {
+    SurfaceComposerClient::closeGlobalTransaction(sync);
 }
 
 static void nativeSetAnimationTransaction(JNIEnv* env, jclass clazz) {
@@ -649,7 +650,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeScreenshot },
     {"nativeOpenTransaction", "()V",
             (void*)nativeOpenTransaction },
-    {"nativeCloseTransaction", "()V",
+    {"nativeCloseTransaction", "(Z)V",
             (void*)nativeCloseTransaction },
     {"nativeSetAnimationTransaction", "()V",
             (void*)nativeSetAnimationTransaction },
