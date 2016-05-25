@@ -240,18 +240,13 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
      * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for no tags.
-     * @return Statistics object or null if permissions are insufficient or error happened during
-     *         statistics collection.
+     * @return Statistics object or null if an error happened during statistics collection.
+     * @throws SecurityException if permissions are insufficient to read network statistics.
      */
     public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
-            long startTime, long endTime, int uid, int tag) {
+            long startTime, long endTime, int uid, int tag) throws SecurityException {
         NetworkTemplate template;
-        try {
-            template = createTemplate(networkType, subscriberId);
-        } catch (IllegalArgumentException e) {
-            if (DBG) Log.e(TAG, "Cannot create template", e);
-            return null;
-        }
+        template = createTemplate(networkType, subscriberId);
 
         NetworkStats result;
         try {
@@ -302,17 +297,6 @@ public class NetworkStatsManager {
         result.startUserUidEnumeration();
         return result;
     }
-
-    /** @removed */
-    public void registerDataUsageCallback(DataUsagePolicy policy, DataUsageCallback callback,
-                @Nullable Handler handler) {}
-
-    /** @removed */
-    public void registerDataUsageCallback(DataUsagePolicy policy, UsageCallback callback,
-                @Nullable Handler handler) {}
-
-    /** @removed */
-    public void unregisterDataUsageCallback(DataUsageCallback callback) {}
 
     /**
      * Registers to receive notifications about data usage on specified networks.
@@ -394,13 +378,6 @@ public class NetworkStatsManager {
             if (DBG) Log.d(TAG, "Remote exception when unregistering callback");
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /** @removed */
-    public static abstract class DataUsageCallback {
-        /** @removed */
-        @Deprecated
-        public void onLimitReached() {}
     }
 
     /**
