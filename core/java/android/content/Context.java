@@ -1415,6 +1415,8 @@ public abstract class Context {
      * this context. This is typically used to migrate data between storage
      * locations after an upgrade, such as migrating to device protected
      * storage.
+     * <p>
+     * The database must be closed before being moved.
      *
      * @param sourceContext The source context which contains the existing
      *            database to move.
