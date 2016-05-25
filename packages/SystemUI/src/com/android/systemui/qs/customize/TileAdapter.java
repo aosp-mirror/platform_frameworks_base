@@ -286,10 +286,11 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private void selectPosition(int position, View v) {
         // Remove the placeholder.
         mAccessibilityMoving = false;
-        move(mAccessibilityFromIndex, position, v);
-        mTiles.remove(mEditIndex);
+        mTiles.remove(mEditIndex--);
         notifyItemRemoved(mEditIndex - 1);
+        move(mAccessibilityFromIndex, position, v);
         updateDividerLocations();
+        notifyDataSetChanged();
         saveSpecs(mHost);
     }
 
