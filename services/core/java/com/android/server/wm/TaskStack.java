@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
@@ -403,6 +404,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
             snapDockedStackAfterRotation(mTmpRect2);
             final int newDockSide = getDockSide(mTmpRect2);
             if (oldDockSide != newDockSide) {
+                // Update the dock create mode and clear the dock create bounds, these
+                // might change after a rotation and the original values will be invalid.
+                mService.setDockedStackCreateStateLocked(
+                        (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
+                        ? DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT
+                        : DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT,
+                        null);
                 mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
             }
         }
