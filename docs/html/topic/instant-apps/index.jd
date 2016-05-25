@@ -12,17 +12,8 @@ excludeFromSuggestions=true
 <!-- Hero section -->
 <section class="dac-expand dac-hero dac-section-light">
 <div class="wrap">
-  <div class="cols dac-hero-content">
-
-    <div class="col-1of2 col-push-1of2 dac-hero-figure">
-      <div class="dev-bytes-video">
-        <iframe width="560" height="350" src=
-        "https://www.youtube.com/embed/cosqlfqrpFA" frameborder="0"
-        allowfullscreen=""></iframe>
-      </div>
-    </div>
-
-    <div class="col-1of2 col-pull-1of2" style="margin-bottom:40px">
+  <div class="dac-hero-content">
+    <div style="margin-bottom:40px">
       <h1>
         Android Instant Apps
       </h1>
@@ -47,6 +38,11 @@ excludeFromSuggestions=true
         <a class="landing-button green download-bundle-button" href=
         "https://docs.google.com/a/google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
         target="_blank">I'M INTERESTED IN ANDROID INSTANT APPS<br></a>
+        <a class="dac-hero-cta dev-bytes"
+          href="https://www.youtube.com/watch?v=cosqlfqrpFA">
+          <span class="dac-sprite dac-auto-chevron"></span>
+          Watch a video about Instant Apps
+        </a>
       </p>
     </div>
 
@@ -56,7 +52,7 @@ excludeFromSuggestions=true
 
 <!-- Second section -->
 
-<div class="wrap" style="margin-top:60px">
+<div class="wrap sub-section">
 <div class="cols dac-hero-content">
   <div class="col-1of2 dac-hero-figure">
     <img src="/images/topic/instant-apps/instant-apps-section-2.png">
@@ -64,7 +60,7 @@ excludeFromSuggestions=true
 <div class="col-1of2">
 <div class="dac-hero-tag"></div>
 
-  <h2 id="section-2">Run Android Apps Without Installation</h2>
+  <h2 id="section-2" class="norule">Run Android Apps Without Installation</h2>
   <p class="dac-hero-description">
     Android Instant Apps lets you experience beautiful and immersive
     apps, with material design and smooth animations, without installing them
@@ -77,9 +73,9 @@ excludeFromSuggestions=true
 
 <!-- Third section -->
 
-<div class="wrap" style="margin-top:60px">
+<div class="wrap sub-section">
 
-  <h2 id="section-3">Access Apps From Anywhere</h2>
+  <h2 id="section-3" class="norule">Access Apps From Anywhere</h2>
 
   <p>
     Get people to your flagship Android experience from links that would
@@ -126,7 +122,7 @@ excludeFromSuggestions=true
 
 <!-- Fourth section -->
 
-<div class="wrap" style="margin-top:60px">
+<div class="wrap sub-section">
 <div class="cols dac-hero-content">
   <div class="col-1of2 dac-hero-figure">
     <img src="/images/topic/instant-apps/instant-apps-section-4.png">
@@ -134,9 +130,10 @@ excludeFromSuggestions=true
 <div class="col-1of2">
 <div class="dac-hero-tag"></div>
 
-  <h2 id="section-4">Built On Google Play Services</h2>
+  <h2 id="section-4" class="norule">Built On Google Play Services</h2>
   <p class="dac-hero-description">
-    Take advantage of Google Play services features &mdash; like location, identity,
+    Take advantage of Google Play services features &mdash; like location,
+    identity,
     payments, and Firebase &mdash; which are built right in for a seamless user
     experience.
   </p>
@@ -147,17 +144,16 @@ excludeFromSuggestions=true
 
 <!-- Fifth section -->
 
-<div class="wrap" style="margin-top:60px">
+<div class="wrap sub-section">
 <div class="cols dac-hero-content">
   <div class="col-1of2 col-push-1of2 dac-hero-figure">
     <img src="/images/topic/instant-apps/instant-apps-section-5.png">
   </div>
 <div class="col-1of2 col-pull-1of2">
 <div class="dac-hero-tag"></div>
-  <h2 id="section-5">Works On Most Android Devices</h2>
+  <h2 id="section-5" class="norule">Works On Most Android Devices</h2>
 
   <p class="dac-hero-description">
-
     Android Instant Apps can work on Android devices running Android 4.1+
     (API Level 16) or higher with Google Play services.
   </p>
@@ -168,7 +164,7 @@ excludeFromSuggestions=true
 
 <!-- Sixth section -->
 
-<div class="wrap" style="margin-top:60px">
+<div class="wrap sub-section">
 <div class="cols dac-hero-content">
   <div class="col-1of2 dac-hero-figure">
     <img src="/images/topic/instant-apps/upgrade-your-app-2x.png">
@@ -176,7 +172,7 @@ excludeFromSuggestions=true
 <div class="col-1of2">
 <div class="dac-hero-tag"></div>
 
-  <h2 id="section-6">Upgrade Your Existing App</h2>
+  <h2 id="section-6" class="norule">Upgrade Your Existing App</h2>
   <p class="dac-hero-description">
     Android Instant Apps functionality is an upgrade to your existing Android
     app, not a new, separate app. It's the same Android APIs, the same
@@ -192,18 +188,18 @@ excludeFromSuggestions=true
 
 <!-- Seventh section -->
 
-<div class="wrap" style="margin-top:60px" id="section-7">
-  <h2 id="sign-up-docs" style="margin-bottom: 0px;">
+<div class="wrap sub-section" id="section-7">
+  <h2 id="sign-up-docs" class="dac-section-title norule" style="margin-bottom: 0px;">
     Sign up for access to Android Instant Apps documentation
   </h2>
 
-  <p>
+  <p class="dac-section-subtitle" style="margin-top:0px">
     We’ll let you know if you’re selected for early access
     to Android Instant
     Apps.
   </p>
 
-  <p>
+  <p class="dac-section-subtitle">
     <a class="landing-button green download-bundle-button"
       href="https://docs.google.com/forms/d/1S3MzsMVIlchLCqyNLaFbv64llxWaf90QSeYLeswco90/viewform"
       target="_blank">
@@ -211,7 +207,7 @@ excludeFromSuggestions=true
     </a>
   </p>
 
-  <p style="margin-top:24px">
+  <p  class="dac-section-subtitle" style="margin-top:24px">
     Check out our <a href="faqs.html">frequently asked questions</a> to find out
     more about Android Instant Apps.
   </p>
@@ -230,38 +226,19 @@ excludeFromSuggestions=true
     background: #B0BEC5;
   }
 
-  /* Styling and layout for video. */
-  .dev-bytes-video {
-    margin-top: 30px;
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 */
-    padding-top: 30px;
-    height: 0;
-  }
-
-  .dev-bytes-video iframe,
-  .dev-bytes-video object,
-  .dev-bytes-video embed {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
   /* Increase top margin for sections */
-  .wrap {
-    margin-top: 1.5em;
+  .sub-section {
+    margin-top: 2em;
+  }
+
+  a.dev-bytes {
+   padding-top: 1em;
+   padding-left: 1em;
   }
 
   #section-3, #sign-up-docs {
     margin-top: 0px;
     border-top: 0px;
-  }
-
-  /* Align the seventh section in the center. */
-  #section-7 {
-    text-align: center;
   }
 
   /* GIF section styling */
