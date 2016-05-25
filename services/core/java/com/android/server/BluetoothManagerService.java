@@ -425,6 +425,24 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return false;
     }
 
+    public int getState() {
+        if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
+                (!checkIfCallerIsForegroundUser())) {
+            Slog.w(TAG, "getState(): not allowed for non-active and non system user");
+            return BluetoothAdapter.STATE_OFF;
+        }
+
+        try {
+            mBluetoothLock.readLock().lock();
+            if (mBluetooth != null) return mBluetooth.getState();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "getState()", e);
+        } finally {
+            mBluetoothLock.readLock().unlock();
+        }
+        return BluetoothAdapter.STATE_OFF;
+    }
+
     class ClientDeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
             if (DBG) Slog.d(TAG, "Binder is dead -  unregister Ble App");
