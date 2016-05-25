@@ -24,6 +24,7 @@
         android:gravity="start|center_vertical">
 
     <TextView android:id="@+id/text"
-            style="?android:attr/listSeparatorTextViewStyle" />
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:textAlignment="viewStart" />
 
 </LinearLayout>
