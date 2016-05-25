@@ -51,14 +51,6 @@
     </vendor>
 
     <vendor>
-        <name>@string/plugin_vendor_samsung</name>
-        <package>com.sec.app.samsungprintservice</package>
-        <mdns-names>
-            <mdns-name>Samsung</mdns-name>
-        </mdns-names>
-    </vendor>
-
-    <vendor>
         <name>@string/plugin_vendor_epson</name>
         <package>com.epson.mobilephone.android.epsonprintserviceplugin</package>
         <mdns-names>
