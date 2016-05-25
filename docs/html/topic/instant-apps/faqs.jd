@@ -63,7 +63,9 @@ forcelocalnav=true
   <strong>How can developers get involved?</strong>
   <br/>
   Developers interested in upgrading their Android apps can visit
-  <a class="external-link" href="g.co/InstantApps">g.co/InstantApps</a> to
+  <a class="external-link"
+  href="http://g.co/InstantApps">
+  g.co/InstantApps</a> to
   sign up. We will be reaching out to interested
   developers in the coming months.
 </p>
