@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.icu.text.DisplayContext;
 import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.text.TextPaint;
 import android.text.format.DateFormat;
@@ -48,7 +49,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import java.text.NumberFormat;
-import java.util.Calendar;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;

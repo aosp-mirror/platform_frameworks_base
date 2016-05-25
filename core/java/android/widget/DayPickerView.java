@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
@@ -31,7 +32,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
-import java.util.Calendar;
 import java.util.Locale;
 
 import libcore.icu.LocaleData;

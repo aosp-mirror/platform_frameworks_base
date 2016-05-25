@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
@@ -27,17 +29,16 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.icu.util.Calendar;
+import android.icu.util.TimeZone;
 import android.util.AttributeSet;
 import android.util.Log;
-import com.android.internal.R;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * This class is a calendar widget for displaying and selecting dates. The
