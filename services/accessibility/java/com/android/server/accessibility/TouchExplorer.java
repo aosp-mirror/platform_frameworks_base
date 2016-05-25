@@ -648,7 +648,16 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
      * @param policyFlags The policy flags associated with the event.
      */
     private void handleMotionEventStateDragging(MotionEvent event, int policyFlags) {
-        final int pointerIdBits = (1 << mDraggingPointerId);
+        int pointerIdBits = 0;
+        // Clear the dragging pointer id if it's no longer valid.
+        if (event.findPointerIndex(mDraggingPointerId) == -1) {
+            Slog.e(LOG_TAG, "mDraggingPointerId doesn't match any pointers on current event. " +
+                    "mDraggingPointerId: " + Integer.toString(mDraggingPointerId) +
+                    ", Event: " + event);
+            mDraggingPointerId = INVALID_POINTER_ID;
+        } else {
+            pointerIdBits = (1 << mDraggingPointerId);
+        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 throw new IllegalStateException("Dragging state can be reached only if two "
@@ -664,6 +673,9 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
                 sendDownForAllNotInjectedPointers(event, policyFlags);
             } break;
             case MotionEvent.ACTION_MOVE: {
+                if (mDraggingPointerId == INVALID_POINTER_ID) {
+                    break;
+                }
                 switch (event.getPointerCount()) {
                     case 1: {
                         // do nothing
