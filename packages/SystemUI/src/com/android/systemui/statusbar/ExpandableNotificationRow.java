@@ -1131,6 +1131,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mChildrenContainer.recreateNotificationHeader(mExpandClickListener,
                     mEntry.notification);
         }
+        getShowingLayout().updateBackgroundColor(false /* animate */);
         mPrivateLayout.updateExpandButtons(isExpandable());
         updateChildrenHeaderAppearance();
         updateChildrenVisibility();
