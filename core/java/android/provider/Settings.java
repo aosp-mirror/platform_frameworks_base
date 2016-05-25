@@ -6220,6 +6220,14 @@ public final class Settings {
                 "managed_profile_contact_remote_search";
 
         /**
+         * Whether or not the automatic storage manager is enabled and should run on the device.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_ENABLED =
+                "automatic_storage_manager_enabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
