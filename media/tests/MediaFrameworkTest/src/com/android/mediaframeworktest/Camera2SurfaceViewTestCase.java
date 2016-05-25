@@ -38,6 +38,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.media.ImageReader;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -67,6 +68,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.getPreviewS
 import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedPreviewSizes;
 import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedStillSizes;
 import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSupportedVideoSizes;
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getSortedSizesForFormat;
 import static com.android.mediaframeworktest.helpers.CameraTestUtils.makeImageReader;
 
 /**
@@ -122,6 +124,8 @@ public class Camera2SurfaceViewTestCase extends
     protected List<Size> mOrderedPreviewSizes; // In descending order.
     protected List<Size> mOrderedVideoSizes; // In descending order.
     protected List<Size> mOrderedStillSizes; // In descending order.
+    protected List<Size> mOrderedRAW10Sizes; // In descending order.
+    protected List<Size> mOrderedYUV420888Sizes; // In descending order.
     protected HashMap<Size, Long> mMinPreviewFrameDurationMap;
 
     protected WindowManager mWindowManager;
@@ -589,6 +593,7 @@ public class Camera2SurfaceViewTestCase extends
         mReaderSurface = null;
     }
 
+
     /**
      * Open a camera device and get the StaticMetadata for a given camera id.
      *
@@ -603,8 +608,13 @@ public class Camera2SurfaceViewTestCase extends
         if (mStaticInfo.isColorOutputSupported()) {
             mOrderedPreviewSizes = getSupportedPreviewSizes(cameraId, mCameraManager,
                     getPreviewSizeBound(mWindowManager, PREVIEW_SIZE_BOUND));
-            mOrderedVideoSizes = getSupportedVideoSizes(cameraId, mCameraManager, PREVIEW_SIZE_BOUND);
+            mOrderedVideoSizes = getSupportedVideoSizes(
+                    cameraId, mCameraManager, PREVIEW_SIZE_BOUND);
             mOrderedStillSizes = getSupportedStillSizes(cameraId, mCameraManager, null);
+            mOrderedRAW10Sizes = getSortedSizesForFormat(
+                    cameraId, mCameraManager, ImageFormat.RAW10, null);
+            mOrderedYUV420888Sizes = getSortedSizesForFormat(
+                    cameraId, mCameraManager, ImageFormat.YUV_420_888, null);
             // Use ImageFormat.YUV_420_888 for now. TODO: need figure out what's format for preview
             // in public API side.
             mMinPreviewFrameDurationMap =
