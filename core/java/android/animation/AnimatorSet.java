@@ -465,20 +465,26 @@ public final class AnimatorSet extends Animator {
 
     /**
      * The amount of time, in milliseconds, to delay starting the animation after
-     * {@link #start()} is called.
-
+     * {@link #start()} is called. Note that the start delay should always be non-negative. Any
+     * negative start delay will be clamped to 0 on N and above.
+     *
      * @param startDelay The amount of the delay, in milliseconds
      */
     @Override
     public void setStartDelay(long startDelay) {
-        if (mStartDelay > 0) {
-            mReversible = false;
+        // Clamp start delay to non-negative range.
+        if (startDelay < 0) {
+            Log.w(TAG, "Start delay should always be non-negative");
+            startDelay = 0;
         }
         long delta = startDelay - mStartDelay;
         if (delta == 0) {
             return;
         }
         mStartDelay = startDelay;
+        if (mStartDelay > 0) {
+            mReversible = false;
+        }
         if (!mDependencyDirty) {
             // Dependency graph already constructed, update all the nodes' start/end time
             int size = mNodes.size();
