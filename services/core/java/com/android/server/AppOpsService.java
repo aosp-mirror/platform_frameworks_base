@@ -2180,8 +2180,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         Preconditions.checkNotNull(token);
         for (int i = 0; i < AppOpsManager._NUM_OP; i++) {
             String restriction = AppOpsManager.opToRestriction(i);
-            if (restriction != null && restrictions.getBoolean(restriction, false)) {
-                setUserRestrictionNoCheck(i, true, token, userHandle, null);
+            if (restriction != null) {
+                setUserRestrictionNoCheck(i, restrictions.getBoolean(restriction, false), token,
+                        userHandle, null);
             }
         }
     }
