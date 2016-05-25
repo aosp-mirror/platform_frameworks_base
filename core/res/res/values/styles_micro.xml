@@ -127,6 +127,10 @@
         <item name="hyphenationFrequency">normal</item>
     </style>
 
+    <style name="Widget.Micro.EditText" parent="Widget.Material.EditText">
+        <item name="android:breakStrategy">simple</item>
+    </style>
+
     <style name="Widget.Micro.NumberPicker">
         <item name="internalLayout">@layout/number_picker_with_selector_wheel_micro</item>
         <item name="solidColor">@color/transparent</item>
