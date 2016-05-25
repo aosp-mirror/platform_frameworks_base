@@ -324,6 +324,11 @@
     <string name="enabled_by_admin" msgid="2386503803463071894">"စီမံခန့်ခွဲသူမှ ဖွင့်ထားသည်"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"စီမံခန့်ခွဲသူမှ ပိတ်ထားသည်"</string>
     <string name="home" msgid="3256884684164448244">"ဆက်တင် ပင်မစာမျက်နှာ"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"၀%"</item>
+    <item msgid="8934126114226089439">"၅၀%"</item>
+    <item msgid="1286113608943010849">"၁၀၀%"</item>
+  </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"ပြီးခဲ့သည့် <xliff:g id="ID_1">%1$s</xliff:g> က"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်ပါသည်"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"သေး"</string>

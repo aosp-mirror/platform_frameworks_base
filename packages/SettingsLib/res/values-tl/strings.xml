@@ -324,6 +324,9 @@
     <string name="enabled_by_admin" msgid="2386503803463071894">"Na-enable ng administrator"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Na-disable ng administrator"</string>
     <string name="home" msgid="3256884684164448244">"Home ng Mga Setting"</string>
+    <!-- no translation found for battery_labels:0 (8494684293649631252) -->
+    <!-- no translation found for battery_labels:1 (8934126114226089439) -->
+    <!-- no translation found for battery_labels:2 (1286113608943010849) -->
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> na ang nakalipas"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> na lang"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Maliit"</string>
