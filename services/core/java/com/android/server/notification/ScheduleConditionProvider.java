@@ -36,6 +36,7 @@ import android.util.Slog;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.TimeZone;
 
 /**
@@ -237,6 +238,14 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Slog.d(TAG, "onReceive " + intent.getAction());
+            if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
+                for (Uri conditionId : mSubscriptions.keySet()) {
+                    final ScheduleCalendar cal = mSubscriptions.get(conditionId);
+                    if (cal != null) {
+                        cal.setTimeZone(Calendar.getInstance().getTimeZone());
+                    }
+                }
+            }
             evaluateSubscriptions();
         }
     };

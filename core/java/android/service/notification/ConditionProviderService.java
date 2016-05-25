@@ -95,7 +95,7 @@ public abstract class ConditionProviderService extends Service {
     /**
      * A String rule id extra passed to {@link #META_DATA_CONFIGURATION_ACTIVITY}.
      */
-    public static final String EXTRA_RULE_ID = "android.content.automatic.ruleId";
+    public static final String EXTRA_RULE_ID = "android.service.notification.extra.RULE_ID";
 
     /**
      * Called when this service is connected.
