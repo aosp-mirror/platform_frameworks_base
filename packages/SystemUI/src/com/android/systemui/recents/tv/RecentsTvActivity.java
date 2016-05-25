@@ -388,6 +388,26 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
             mTaskStackHorizontalGridView.setSelectedPosition(0);
         }
 
+        View dismissPlaceholder = findViewById(R.id.dismiss_placeholder);
+        if (ssp.isTouchExplorationEnabled()) {
+            dismissPlaceholder.setAccessibilityTraversalBefore(R.id.task_list);
+            dismissPlaceholder.setAccessibilityTraversalAfter(R.id.dismiss_placeholder);
+            mTaskStackHorizontalGridView.setAccessibilityTraversalAfter(R.id.dismiss_placeholder);
+            mTaskStackHorizontalGridView.setAccessibilityTraversalBefore(R.id.pip);
+            dismissPlaceholder.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mTaskStackHorizontalGridView.requestFocus();
+                    mTaskStackHorizontalGridView.
+                            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                    Task focusedTask = mTaskStackHorizontalGridView.getFocusedTask();
+                    if (focusedTask != null) {
+                        mTaskStackViewAdapter.removeTask(focusedTask);
+                        EventBus.getDefault().send(new DeleteTaskDataEvent(focusedTask));
+                    }
+                }
+            });
+        }
         updatePipUI();
     }
 
