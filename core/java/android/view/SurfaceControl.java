@@ -46,7 +46,7 @@ public class SurfaceControl {
             boolean allLayers, boolean useIdentityTransform);
 
     private static native void nativeOpenTransaction();
-    private static native void nativeCloseTransaction();
+    private static native void nativeCloseTransaction(boolean sync);
     private static native void nativeSetAnimationTransaction();
 
     private static native void nativeSetLayer(long nativeObject, int zorder);
@@ -372,7 +372,11 @@ public class SurfaceControl {
 
     /** end a transaction */
     public static void closeTransaction() {
-        nativeCloseTransaction();
+        nativeCloseTransaction(false);
+    }
+
+    public static void closeTransactionSync() {
+        nativeCloseTransaction(true);
     }
 
     public void deferTransactionUntil(IBinder handle, long frame) {
