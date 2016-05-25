@@ -2191,7 +2191,8 @@ public class DevicePolicyManager {
      * <em>Note: This API has been limited as of {@link android.os.Build.VERSION_CODES#N} for
      * device admins that are not device owner and not profile owner.
      * The password can now only be changed if there is currently no password set.  Device owner
-     * and profile owner can still do this.</em>
+     * and profile owner can still do this when user is unlocked and does not have a managed
+     * profile.</em>
      * <p>
      * The given password must be sufficient for the current password quality and length constraints
      * as returned by {@link #getPasswordQuality(ComponentName)} and
@@ -2217,6 +2218,7 @@ public class DevicePolicyManager {
      *         current constraints or if the user has not been decrypted yet.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD}
+     * @throws IllegalStateException if the calling user is locked or has a managed profile.
      */
     public boolean resetPassword(String password, int flags) {
         throwIfParentInstance("resetPassword");
