@@ -6983,14 +6983,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return false;
     }
 
-    private static int desired(Layout layout) {
+    private static int desired(Layout layout, int maxLines) {
         int n = layout.getLineCount();
         CharSequence text = layout.getText();
         float max = 0;
 
+        // if maxLines is set, and the text length is greater that the length of the text in the
+        // layout, it means that there is a cut-off and we cannot use it.
+        if (maxLines != -1 && text.length() > layout.getLineEnd(n - 1)) {
+            return -1;
+        }
+
         // if any line was wrapped, we can't use it.
         // but it's ok for the last line not to have a newline
-
         for (int i = 0; i < n - 1; i++) {
             if (text.charAt(layout.getLineEnd(i) - 1) != '\n')
                 return -1;
@@ -7063,7 +7068,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             width = widthSize;
         } else {
             if (mLayout != null && mEllipsize == null) {
-                des = desired(mLayout);
+                des = desired(mLayout, getMaxLines());
             }
 
             if (des < 0) {
@@ -7095,7 +7100,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 int hintWidth;
 
                 if (mHintLayout != null && mEllipsize == null) {
-                    hintDes = desired(mHintLayout);
+                    hintDes = desired(mHintLayout, getMaxLines());
                 }
 
                 if (hintDes < 0) {
