@@ -141,6 +141,9 @@ public class LockPatternUtils {
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
 
+    public static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
+    public static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
+
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
