@@ -148,17 +148,6 @@ public final class LocaleList implements Parcelable {
     }
 
     /**
-     * It is almost always better to call {@link #getEmptyLocaleList()} instead which returns
-     * a pre-constructed empty locale list.
-     *
-     * @hide
-     */
-    public LocaleList() {
-        mList = sEmptyList;
-        mStringRepresentation = "";
-    }
-
-    /**
      * Creates a new {@link LocaleList}.
      *
      * <p>For empty lists of {@link Locale} items it is better to use {@link #getEmptyLocaleList()},
