@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
       </ol>
   </li>
   <li><a href="#TrustingDebugCa">Debugging-only CAs</a></li>
-  <li><a href="#UsesCleartextTraffic">Opting Out of Cleartext Traffic</a></li>
+  <li><a href="#CleartextTrafficPermitted">Opting Out of Cleartext Traffic</a></li>
   <li><a href="#CertificatePinning">Pinning Certificates</a></li>
   <li><a href="#ConfigInheritance">Configuration Inheritance Behavior</a></li>
   <li><a href="#FileFormat">Configuration File Format</a></li>
@@ -240,7 +240,7 @@ android:debuggable</a>
 </p>
 
 
-<h2 id="UsesCleartextTraffic">Opting Out of Cleartext Traffic</h2>
+<h2 id="CleartextTrafficPermitted">Opting Out of Cleartext Traffic</h2>
 
 <p>
   Applications intending to connect to destinations using only secure
@@ -263,7 +263,7 @@ android:debuggable</a>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;network-security-config&gt;
-    &lt;domain-config usesCleartextTraffic="false"&gt;
+    &lt;domain-config cleartextTrafficPermitted="false"&gt;
         &lt;domain includeSubdomains="true"&gt;secure.example.com&lt;/domain&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
@@ -436,7 +436,7 @@ android:debuggable</a>
 
 <pre class="stx">
 &lt;base-config <a href=
-"#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+"#CleartextTrafficPermitted">cleartextTrafficPermitted</a>=["true" | "false"]&gt;
     ...
 &lt;/base-config&gt;
 </pre>
@@ -463,7 +463,7 @@ android:debuggable</a>
 </p>
 
 <pre>
-&lt;base-config usesCleartextTraffic="true"&gt;
+&lt;base-config cleartextTrafficPermitted="true"&gt;
     &lt;trust-anchors&gt;
         &lt;certificates src="system" /&gt;
     &lt;/trust-anchors&gt;
@@ -471,7 +471,7 @@ android:debuggable</a>
 </pre>
 The default configuration for apps targeting API level 23 and below is:
 <pre>
-&lt;base-config usesCleartextTraffic="true"&gt;
+&lt;base-config cleartextTrafficPermitted="true"&gt;
     &lt;trust-anchors&gt;
         &lt;certificates src="system" /&gt;
         &lt;certificates src="user" /&gt;
@@ -486,7 +486,7 @@ The default configuration for apps targeting API level 23 and below is:
 <dl class="xml">
 <dt>syntax:</dt>
 <dd>
-<pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
+<pre class="stx">&lt;domain-config <a href="#CleartextTrafficPermitted">cleartextTrafficPermitted</a>=["true" | "false"]&gt;
     ...
 &lt;/domain-config&gt;</pre>
 </dd>
