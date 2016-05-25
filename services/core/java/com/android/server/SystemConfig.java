@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.os.*;
 import android.os.Process;
@@ -99,6 +100,9 @@ public class SystemConfig {
     // URL-handling state upon factory reset.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
 
+    // These are the permitted backup transport service components
+    final ArraySet<ComponentName> mBackupTransportWhitelist = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -142,6 +146,10 @@ public class SystemConfig {
 
     public ArraySet<String> getLinkedApps() {
         return mLinkedApps;
+    }
+
+    public ArraySet<ComponentName> getBackupTransportWhitelist() {
+        return mBackupTransportWhitelist;
     }
 
     SystemConfig() {
@@ -378,6 +386,23 @@ public class SystemConfig {
                                 + parser.getPositionDescription());
                     } else {
                         mLinkedApps.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("backup-transport-whitelisted-service".equals(name)) {
+                    String serviceName = parser.getAttributeValue(null, "service");
+                    if (serviceName == null) {
+                        Slog.w(TAG, "<backup-transport-whitelisted-service> without service in "
+                                + permFile + " at " + parser.getPositionDescription());
+                    } else {
+                        ComponentName cn = ComponentName.unflattenFromString(serviceName);
+                        if (cn == null) {
+                            Slog.w(TAG,
+                                    "<backup-transport-whitelisted-service> with invalid service name "
+                                    + serviceName + " in "+ permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mBackupTransportWhitelist.add(cn);
+                        }
                     }
                     XmlUtils.skipCurrentTag(parser);
 
