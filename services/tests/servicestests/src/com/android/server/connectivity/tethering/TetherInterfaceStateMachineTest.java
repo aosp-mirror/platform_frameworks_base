@@ -29,14 +29,18 @@ import android.net.InterfaceConfiguration;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-
+@RunWith(AndroidJUnit4.class)
+@SmallTest
 public class TetherInterfaceStateMachineTest {
     private static final String IFACE_NAME = "testnet1";
     private static final String UPSTREAM_IFACE = "upstream0";
