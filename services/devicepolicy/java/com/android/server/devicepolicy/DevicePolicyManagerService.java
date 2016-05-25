@@ -3810,13 +3810,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // If caller has PO (or DO) it can change the password, so see if that's the case first.
             ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
+            final boolean preN = getTargetSdk(admin.info.getPackageName(),
+                    userHandle) <= android.os.Build.VERSION_CODES.M;
             if (admin == null) {
                 // Otherwise, make sure the caller has any active admin with the right policy.
                 admin = getActiveAdminForCallerLocked(null,
                         DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
-
-                final boolean preN = getTargetSdk(admin.info.getPackageName(), userHandle)
-                        <= android.os.Build.VERSION_CODES.M;
 
                 // As of N, password resetting to empty/null is not allowed anymore.
                 // TODO Should we allow DO/PO to set an empty password?
@@ -3838,6 +3837,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
             }
+            // Do not allow to reset password when current user has a managed profile
+            if (!isManagedProfile(userHandle)) {
+                for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+                    if (userInfo.isManagedProfile()) {
+                        if (!preN) {
+                            throw new IllegalStateException(
+                                    "Cannot reset password on user has managed profile");
+                        } else {
+                            Slog.e(LOG_TAG, "Cannot reset password on user has managed profile");
+                            return false;
+                        }
+                    }
+                }
+            }
+            // Do not allow to reset password when user is locked
+            if (!mUserManager.isUserUnlocked(userHandle)) {
+                if (!preN) {
+                    throw new IllegalStateException("Cannot reset password when user is locked");
+                } else {
+                    Slog.e(LOG_TAG, "Cannot reset password when user is locked");
+                    return false;
+                }
+            }
+
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
             if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
                 quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
