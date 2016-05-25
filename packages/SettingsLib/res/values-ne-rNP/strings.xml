@@ -324,6 +324,11 @@
     <string name="enabled_by_admin" msgid="2386503803463071894">"प्रशासकद्वारा सक्षम गरिएको छ"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"प्रशासकद्वारा असक्षम गरिएको छ"</string>
     <string name="home" msgid="3256884684164448244">"सेटिङहरूको गृहपृष्ठ"</string>
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"०%"</item>
+    <item msgid="8934126114226089439">"५०%"</item>
+    <item msgid="1286113608943010849">"१००%"</item>
+  </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> पहिले"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> बाँकी"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"सानो"</string>
