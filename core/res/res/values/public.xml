@@ -2726,6 +2726,8 @@
     <public type="style" name="Widget.Material.Light.CompoundButton.Switch" />
     <public type="style" name="Widget.Material.NumberPicker" />
     <public type="style" name="Widget.Material.Light.NumberPicker" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Colored" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Borderless.Colored" />
 
     <public type="id" name="accessibilityActionSetProgress" />
     <public type="id" name="icon_frame" />
