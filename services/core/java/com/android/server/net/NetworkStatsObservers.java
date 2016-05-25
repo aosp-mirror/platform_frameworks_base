@@ -190,11 +190,9 @@ class NetworkStatsObservers {
 
     private void handleUpdateStats(StatsContext statsContext) {
         if (mDataUsageRequests.size() == 0) {
-            if (LOGV) Slog.v(TAG, "No registered listeners of data usage");
             return;
         }
 
-        if (LOGV) Slog.v(TAG, "Checking if any registered observer needs to be notified");
         for (int i = 0; i < mDataUsageRequests.size(); i++) {
             RequestInfo requestInfo = mDataUsageRequests.valueAt(i);
             requestInfo.updateStats(statsContext);
@@ -371,9 +369,6 @@ class NetworkStatsObservers {
             NetworkStats stats = mCollection.getSummary(template,
                     Long.MIN_VALUE /* start */, Long.MAX_VALUE /* end */,
                     mAccessLevel, mCallingUid);
-            if (LOGV) {
-                Slog.v(TAG, "Netstats for " + template + ": " + stats);
-            }
             return stats.getTotalBytes();
         }
     }
@@ -391,11 +386,6 @@ class NetworkStatsObservers {
 
             for (int i = 0; i < uidsToMonitor.length; i++) {
                 long bytesSoFar = getTotalBytesForNetworkUid(mRequest.template, uidsToMonitor[i]);
-
-                if (LOGV) {
-                    Slog.v(TAG, bytesSoFar + " bytes so far since notification for "
-                            + mRequest.template + " for uid=" + uidsToMonitor[i]);
-                }
                 if (bytesSoFar > mRequest.thresholdInBytes) {
                     return true;
                 }
