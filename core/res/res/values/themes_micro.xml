@@ -19,6 +19,7 @@
         <item name="alertDialogStyle">@style/AlertDialog.Micro</item>
         <item name="dialogTheme">@style/Theme.Micro.Dialog</item>
         <item name="textViewStyle">@style/Widget.Micro.TextView</item>
+        <item name="editTextStyle">@style/Widget.Micro.EditText</item>
         <item name="numberPickerStyle">@style/Widget.Micro.NumberPicker</item>
         <item name="windowAnimationStyle">@style/Animation.Micro.Activity</item>
         <item name="windowBackground">@color/background_micro_dark</item>
