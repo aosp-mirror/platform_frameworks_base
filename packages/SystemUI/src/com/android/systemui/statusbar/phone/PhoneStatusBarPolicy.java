@@ -221,6 +221,8 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
             mSimState = IccCardConstants.State.ABSENT;
         } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
             mSimState = IccCardConstants.State.CARD_IO_ERROR;
+        } else if (IccCardConstants.INTENT_VALUE_ICC_CARD_RESTRICTED.equals(stateExtra)) {
+            mSimState = IccCardConstants.State.CARD_RESTRICTED;
         } else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
             mSimState = IccCardConstants.State.READY;
         } else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
