@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.icu.text.DisplayContext;
 import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -40,7 +41,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.DayPickerView.OnDaySelectedListener;
 import android.widget.YearPickerView.OnYearSelectedListener;
 
-import java.util.Calendar;
 import java.util.Locale;
 
 /**

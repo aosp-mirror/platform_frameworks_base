@@ -25,13 +25,12 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleMonthView.OnDayClickListener;
-
-import java.util.Calendar;
 
 /**
  * An adapter for a list of {@link android.widget.SimpleMonthView} items.

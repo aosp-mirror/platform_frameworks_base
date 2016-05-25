@@ -19,6 +19,7 @@ package android.widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
 import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -37,7 +38,6 @@ import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Locale;
 
 import libcore.icu.ICU;
