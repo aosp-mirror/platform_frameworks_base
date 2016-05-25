@@ -1301,6 +1301,14 @@ class WindowSurfacePlacer {
         appsCount = mService.mClosingApps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = mService.mClosingApps.valueAt(i);
+
+            // If we still have some windows animating with saved surfaces that's
+            // either invisible or already removed, mark them exiting so that they
+            // are disposed of after the exit animation. These are not supposed to
+            // be shown, or are delayed removal until app is actually drawn (in which
+            // case the window will be removed after the animation).
+            wtoken.markSavedSurfaceExiting();
+
             final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             appAnimator.clearThumbnail();
