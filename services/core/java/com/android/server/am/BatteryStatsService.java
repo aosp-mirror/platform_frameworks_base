@@ -88,6 +88,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      */
     private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
 
+    // There is some accuracy error in wifi reports so allow some slop in the results.
+    private static final long MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS = 750;
+
     private static IBatteryStats sService;
 
     final BatteryStatsImpl mStats;
@@ -1338,32 +1341,33 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } else {
             final long totalActiveTimeMs = txTimeMs + rxTimeMs;
             long maxExpectedIdleTimeMs;
-            // Active time can never be greater than the total time, the stats received seem
-            // to be corrupt.
             if (totalActiveTimeMs > timePeriodMs) {
-                maxExpectedIdleTimeMs = timePeriodMs;
-                StringBuilder sb = new StringBuilder();
-                sb.append("Total Active time ");
-                TimeUtils.formatDuration(totalActiveTimeMs, sb);
-                sb.append(" is longer than sample period ");
-                TimeUtils.formatDuration(timePeriodMs, sb);
-                sb.append(".\n");
-                sb.append("Previous WiFi snapshot: ").append("idle=");
-                TimeUtils.formatDuration(lastIdleMs, sb);
-                sb.append(" rx=");
-                TimeUtils.formatDuration(lastRxMs, sb);
-                sb.append(" tx=");
-                TimeUtils.formatDuration(lastTxMs, sb);
-                sb.append(" e=").append(lastEnergy);
-                sb.append("\n");
-                sb.append("Current WiFi snapshot: ").append("idle=");
-                TimeUtils.formatDuration(latest.mControllerIdleTimeMs, sb);
-                sb.append(" rx=");
-                TimeUtils.formatDuration(latest.mControllerRxTimeMs, sb);
-                sb.append(" tx=");
-                TimeUtils.formatDuration(latest.mControllerTxTimeMs, sb);
-                sb.append(" e=").append(latest.mControllerEnergyUsed);
-                Slog.wtf(TAG, sb.toString());
+                // Cap the max idle time at zero since the active time consumed the whole time
+                maxExpectedIdleTimeMs = 0;
+                if (totalActiveTimeMs > timePeriodMs + MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Total Active time ");
+                    TimeUtils.formatDuration(totalActiveTimeMs, sb);
+                    sb.append(" is longer than sample period ");
+                    TimeUtils.formatDuration(timePeriodMs, sb);
+                    sb.append(".\n");
+                    sb.append("Previous WiFi snapshot: ").append("idle=");
+                    TimeUtils.formatDuration(lastIdleMs, sb);
+                    sb.append(" rx=");
+                    TimeUtils.formatDuration(lastRxMs, sb);
+                    sb.append(" tx=");
+                    TimeUtils.formatDuration(lastTxMs, sb);
+                    sb.append(" e=").append(lastEnergy);
+                    sb.append("\n");
+                    sb.append("Current WiFi snapshot: ").append("idle=");
+                    TimeUtils.formatDuration(latest.mControllerIdleTimeMs, sb);
+                    sb.append(" rx=");
+                    TimeUtils.formatDuration(latest.mControllerRxTimeMs, sb);
+                    sb.append(" tx=");
+                    TimeUtils.formatDuration(latest.mControllerTxTimeMs, sb);
+                    sb.append(" e=").append(latest.mControllerEnergyUsed);
+                    Slog.wtf(TAG, sb.toString());
+                }
             } else {
                 maxExpectedIdleTimeMs = timePeriodMs - totalActiveTimeMs;
             }
