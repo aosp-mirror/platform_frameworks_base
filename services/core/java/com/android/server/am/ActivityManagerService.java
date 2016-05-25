@@ -201,6 +201,7 @@ import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -17401,15 +17402,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                     || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
                     || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)
-                    || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)) {
+                    || TelephonyIntents.ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE.equals(action)
+                    || SuggestionSpan.ACTION_SUGGESTION_PICKED.equals(action)) {
                 // Broadcast is either protected, or it's a public action that
                 // we've relaxed, so it's fine for system internals to send.
             } else {
                 // The vast majority of broadcasts sent from system internals
                 // should be protected to avoid security holes, so yell loudly
                 // to ensure we examine these cases.
-                Log.wtf(TAG, "Sending non-protected broadcast " + action
-                        + " from system", new Throwable());
+                if (callerApp != null) {
+                    Log.wtf(TAG, "Sending non-protected broadcast " + action
+                            + " from system " + callerApp.toShortString() + " pkg " + callerPackage,
+                            new Throwable());
+                } else {
+                    Log.wtf(TAG, "Sending non-protected broadcast " + action
+                            + " from system uid " + UserHandle.formatUid(callingUid)
+                            + " pkg " + callerPackage,
+                            new Throwable());
+                }
             }
 
         } else {

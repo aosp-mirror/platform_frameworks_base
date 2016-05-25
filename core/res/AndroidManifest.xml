@@ -273,6 +273,9 @@
     <protected-broadcast android:name="com.android.server.WifiManager.action.DEVICE_IDLE" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_ACCEPTED" />
     <protected-broadcast android:name="com.android.server.action.REMOTE_BUGREPORT_SHARING_DECLINED" />
+    <protected-broadcast android:name="com.android.server.usb.ACTION_OPEN_IN_APPS" />
+    <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
+    <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
     <protected-broadcast android:name="android.net.wifi.WIFI_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_AP_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.wifi.WIFI_CREDENTIAL_CHANGED" />
@@ -323,6 +326,9 @@
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
+    <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.CONTENT_CHANGED" />
+    <protected-broadcast android:name="android.provider.Telephony.MMS_DOWNLOADED" />
 
     <protected-broadcast
         android:name="com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION" />
@@ -385,6 +391,7 @@
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_REMOVED" />
 
     <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_STATE_CHANGED" />
+    <protected-broadcast android:name="com.android.bluetooth.map.USER_CONFIRM_TIMEOUT" />
     <protected-broadcast android:name="android.content.jobscheduler.JOB_DELAY_EXPIRED" />
     <protected-broadcast android:name="android.content.syncmanager.SYNC_ALARM" />
     <protected-broadcast android:name="android.media.INTERNAL_RINGER_MODE_CHANGED_ACTION" />
