@@ -2277,6 +2277,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void setupWindowForRemoveOnExit(WindowState win) {
+        win.mRemoveOnExit = true;
+        win.setDisplayLayoutNeeded();
+        // Request a focus update as this window's input channel is already gone. Otherwise
+        // we could have no focused window in input manager.
+        final boolean focusChanged = updateFocusedWindowLocked(
+                UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
+        mWindowPlacerLocked.performSurfacePlacement();
+        if (focusChanged) {
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
+        }
+    }
+
     public void removeWindow(Session session, IWindow client) {
         synchronized(mWindowMap) {
             WindowState win = windowForClientLocked(session, client, false);
@@ -2358,14 +2371,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Do not set mAnimatingExit to true here, it will cause the surface to be hidden
                 // immediately after the enter animation is done. If the app is not yet drawn then
                 // it will show up as a flicker.
-                win.mRemoveOnExit = true;
-                // Request a focus update as this window's input channel is already gone. Otherwise
-                // we could have no focused window in input manager.
-                final boolean focusChanged = updateFocusedWindowLocked(
-                        UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
-                if (focusChanged) {
-                    mInputMonitor.updateInputWindowsLw(false /*force*/);
-                }
+                setupWindowForRemoveOnExit(win);
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
@@ -2417,16 +2423,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 // The exit animation is running or should run... wait for it!
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                         "Not removing " + win + " due to exit animation ");
-                win.mRemoveOnExit = true;
-                win.setDisplayLayoutNeeded();
-                final boolean focusChanged = updateFocusedWindowLocked(
-                        UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
-                mWindowPlacerLocked.performSurfacePlacement();
+                setupWindowForRemoveOnExit(win);
                 if (appToken != null) {
                     appToken.updateReportedVisibilityLocked();
-                }
-                if (focusChanged) {
-                    mInputMonitor.updateInputWindowsLw(false /*force*/);
                 }
                 Binder.restoreCallingIdentity(origId);
                 return;

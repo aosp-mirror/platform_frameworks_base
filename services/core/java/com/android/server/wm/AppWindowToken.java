@@ -451,6 +451,16 @@ class AppWindowToken extends WindowToken {
         destroySurfaces();
     }
 
+    void markSavedSurfaceExiting() {
+        for (int i = allAppWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = allAppWindows.get(i);
+            if (w.isAnimatingInvisibleWithSavedSurface()) {
+                w.mAnimatingExit = true;
+                w.mWinAnimator.mAnimating = true;
+            }
+        }
+    }
+
     void restoreSavedSurfaces() {
         if (!canRestoreSurfaces()) {
             clearVisibleBeforeClientHidden();
