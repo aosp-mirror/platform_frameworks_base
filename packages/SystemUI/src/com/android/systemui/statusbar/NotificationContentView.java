@@ -263,6 +263,7 @@ public class NotificationContentView extends FrameLayout {
         invalidateOutline();
         selectLayout(false /* animate */, mForceSelectNextLayout /* force */);
         mForceSelectNextLayout = false;
+        updateExpandButtons(mExpandable);
     }
 
     @Override
