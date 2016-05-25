@@ -45,5 +45,9 @@ void OpDumper::dump(const RecordedOp& op, std::ostream& output, int level) {
     }
 }
 
+const char* OpDumper::opName(const RecordedOp& op) {
+    return sOpNameLut[op.opId];
+}
+
 } // namespace uirenderer
 } // namespace android
