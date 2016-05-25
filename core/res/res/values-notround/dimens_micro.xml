@@ -15,5 +15,6 @@
 -->
 <resources>
     <dimen name="dialog_padding_micro">8dp</dimen>
-    <dimen name="list_item_padding_horizontal_micro">16dp</dimen>
+    <dimen name="list_item_padding_left_micro">16dp</dimen>
+    <dimen name="list_item_padding_right_micro">16dp</dimen>
 </resources>
