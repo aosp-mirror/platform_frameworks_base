@@ -112,8 +112,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final int FBE_ENCRYPTED_NOTIFICATION = 0;
     private static final boolean DEBUG = false;
 
-    private static final String PROFILE_KEY_NAME_ENCRYPT = "profile_key_name_encrypt_";
-    private static final String PROFILE_KEY_NAME_DECRYPT = "profile_key_name_decrypt_";
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
     private final Object mSeparateChallengeLock = new Object();
@@ -700,7 +698,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
         SecretKey decryptionKey = (SecretKey) keyStore.getKey(
-                PROFILE_KEY_NAME_DECRYPT + userId, null);
+                LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId, null);
 
         Cipher cipher = Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
                 + KeyProperties.BLOCK_MODE_GCM + "/" + KeyProperties.ENCRYPTION_PADDING_NONE);
@@ -982,14 +980,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
             keyStore.setEntry(
-                    PROFILE_KEY_NAME_ENCRYPT + userId,
+                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId,
                     new java.security.KeyStore.SecretKeyEntry(secretKey),
                     new KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT)
                             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                             .build());
             keyStore.setEntry(
-                    PROFILE_KEY_NAME_DECRYPT + userId,
+                    LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + userId,
                     new java.security.KeyStore.SecretKeyEntry(secretKey),
                     new KeyProtection.Builder(KeyProperties.PURPOSE_DECRYPT)
                             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -1000,7 +998,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
             // Key imported, obtain a reference to it.
             SecretKey keyStoreEncryptionKey = (SecretKey) keyStore.getKey(
-                    PROFILE_KEY_NAME_ENCRYPT + userId, null);
+                    LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userId, null);
             // The original key can now be discarded.
 
             Cipher cipher = Cipher.getInstance(
@@ -1399,8 +1397,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
-            keyStore.deleteEntry(PROFILE_KEY_NAME_ENCRYPT + targetUserId);
-            keyStore.deleteEntry(PROFILE_KEY_NAME_DECRYPT + targetUserId);
+            keyStore.deleteEntry(LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + targetUserId);
+            keyStore.deleteEntry(LockPatternUtils.PROFILE_KEY_NAME_DECRYPT + targetUserId);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | IOException e) {
             // We have tried our best to remove all keys
