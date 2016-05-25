@@ -81,6 +81,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private IQSService mService;
     private boolean mUnbindImmediate;
     private TileChangeListener mChangeListener;
+    // Return value from bindServiceAsUser, determines whether safe to call unbind.
+    private boolean mIsBound;
 
     public TileLifecycleManager(Handler handler, Context context, Intent intent, UserHandle user) {
         mContext = context;
@@ -132,7 +134,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             }
             if (DEBUG) Log.d(TAG, "Binding service " + mIntent + " " + mUser);
             mBindTryCount++;
-            mContext.bindServiceAsUser(mIntent, this,
+            mIsBound = mContext.bindServiceAsUser(mIntent, this,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     mUser);
         } else {
@@ -140,7 +142,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             // Give it another chance next time it needs to be bound, out of kindness.
             mBindTryCount = 0;
             mWrapper = null;
-            mContext.unbindService(this);
+            if (mIsBound) {
+                mContext.unbindService(this);
+                mIsBound = false;
+            }
         }
     }
 
