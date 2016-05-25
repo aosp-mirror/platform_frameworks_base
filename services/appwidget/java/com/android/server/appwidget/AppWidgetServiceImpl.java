@@ -29,6 +29,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -70,10 +71,12 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
+import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.Display;
@@ -732,8 +735,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
-    public ParceledListSlice<RemoteViews> startListening(IAppWidgetHost callbacks,
-            String callingPackage, int hostId, int[] appWidgetIds, int[] updatedIds) {
+    public ParceledListSlice<PendingHostUpdate> startListening(IAppWidgetHost callbacks,
+            String callingPackage, int hostId, int[] appWidgetIds) {
         final int userId = UserHandle.getCallingUserId();
 
         if (DEBUG) {
@@ -753,18 +756,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             host.callbacks = callbacks;
 
             int N = appWidgetIds.length;
-            ArrayList<RemoteViews> outViews = new ArrayList<>(N);
-            RemoteViews rv;
-            int added = 0;
+            ArrayList<PendingHostUpdate> outUpdates = new ArrayList<>(N);
+
+            LongSparseArray<PendingHostUpdate> updatesMap = new LongSparseArray<>();
             for (int i = 0; i < N; i++) {
-                rv = host.getPendingViewsForId(appWidgetIds[i]);
-                if (rv != null) {
-                    updatedIds[added] = appWidgetIds[i];
-                    outViews.add(rv);
-                    added++;
+                if (host.getPendingUpdatesForId(appWidgetIds[i], updatesMap)) {
+                    // We key the updates based on time, so that the values are sorted by time.
+                    int M = updatesMap.size();
+                    for (int j = 0; j < M; j++) {
+                        outUpdates.add(updatesMap.valueAt(j));
+                    }
                 }
             }
-            return new ParceledListSlice<>(outViews);
+            return new ParceledListSlice<>(outUpdates);
         }
     }
 
@@ -1804,6 +1808,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void scheduleNotifyAppWidgetViewDataChanged(Widget widget, int viewId) {
+        if (viewId == ID_VIEWS_UPDATE || viewId == ID_PROVIDER_CHANGED) {
+            // A view id should never collide with these constants but a developer can call this
+            // method with a wrong id. In that case, ignore the call.
+            return;
+        }
+        long requestTime = SystemClock.uptimeMillis();
+        if (widget != null) {
+            widget.updateTimes.put(viewId, requestTime);
+        }
         if (widget == null || widget.host == null || widget.host.zombie
                 || widget.host.callbacks == null || widget.provider == null
                 || widget.provider.zombie) {
@@ -1813,6 +1826,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
+        args.arg3 = requestTime;
         args.argi1 = widget.appWidgetId;
         args.argi2 = viewId;
 
@@ -1823,9 +1837,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
 
     private void handleNotifyAppWidgetViewDataChanged(Host host, IAppWidgetHost callbacks,
-            int appWidgetId, int viewId) {
+            int appWidgetId, int viewId, long requestTime) {
         try {
             callbacks.viewDataChanged(appWidgetId, viewId);
+            host.lastWidgetUpdateTime = requestTime;
         } catch (RemoteException re) {
             // It failed; remove the callback. No need to prune because
             // we know that this host is still referenced by this instance.
@@ -1874,7 +1889,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
         long requestTime = SystemClock.uptimeMillis();
         if (widget != null) {
-            widget.lastUpdateTime = requestTime;
+            widget.updateTimes.put(ID_VIEWS_UPDATE, requestTime);
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
@@ -1907,6 +1922,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void scheduleNotifyProviderChangedLocked(Widget widget) {
+        long requestTime = SystemClock.uptimeMillis();
+        if (widget != null) {
+            // When the provider changes, reset everything else.
+            widget.updateTimes.clear();
+            widget.updateTimes.append(ID_PROVIDER_CHANGED, requestTime);
+        }
         if (widget == null || widget.provider == null || widget.provider.zombie
                 || widget.host.callbacks == null || widget.host.zombie) {
             return;
@@ -1916,6 +1937,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         args.arg1 = widget.host;
         args.arg2 = widget.host.callbacks;
         args.arg3 = widget.provider.info;
+        args.arg4 = requestTime;
         args.argi1 = widget.appWidgetId;
 
         mCallbackHandler.obtainMessage(
@@ -1924,9 +1946,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void handleNotifyProviderChanged(Host host, IAppWidgetHost callbacks,
-            int appWidgetId, AppWidgetProviderInfo info) {
+            int appWidgetId, AppWidgetProviderInfo info, long requestTime) {
         try {
             callbacks.providerChanged(appWidgetId, info);
+            host.lastWidgetUpdateTime = requestTime;
         } catch (RemoteException re) {
             synchronized (mLock){
                 Slog.e(TAG, "Widget host dead: " + host.id, re);
@@ -3410,10 +3433,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Host host = (Host) args.arg1;
                     IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
                     AppWidgetProviderInfo info = (AppWidgetProviderInfo)args.arg3;
+                    long requestTime = (Long) args.arg4;
                     final int appWidgetId = args.argi1;
                     args.recycle();
 
-                    handleNotifyProviderChanged(host, callbacks, appWidgetId, info);
+                    handleNotifyProviderChanged(host, callbacks, appWidgetId, info, requestTime);
                 } break;
 
                 case MSG_NOTIFY_PROVIDERS_CHANGED: {
@@ -3429,11 +3453,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     SomeArgs args = (SomeArgs) message.obj;
                     Host host = (Host) args.arg1;
                     IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;
+                    long requestTime = (Long) args.arg3;
                     final int appWidgetId = args.argi1;
                     final int viewId = args.argi2;
                     args.recycle();
 
-                    handleNotifyAppWidgetViewDataChanged(host, callbacks, appWidgetId, viewId);
+                    handleNotifyAppWidgetViewDataChanged(host, callbacks, appWidgetId, viewId,
+                            requestTime);
                 } break;
             }
         }
@@ -3772,20 +3798,41 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         /**
-         * Returns the RemoveViews for the provided widget id if an update is pending
-         * for that widget.
+         * Adds all pending updates in {@param outUpdates} keys by the update time.
          */
-        public RemoteViews getPendingViewsForId(int appWidgetId) {
+        public boolean getPendingUpdatesForId(int appWidgetId,
+                LongSparseArray<PendingHostUpdate> outUpdates) {
             long updateTime = lastWidgetUpdateTime;
             int N = widgets.size();
             for (int i = 0; i < N; i++) {
                 Widget widget = widgets.get(i);
-                if (widget.appWidgetId == appWidgetId
-                        && widget.lastUpdateTime > updateTime) {
-                    return cloneIfLocalBinder(widget.getEffectiveViewsLocked());
+                if (widget.appWidgetId == appWidgetId) {
+                    outUpdates.clear();
+                    for (int j = widget.updateTimes.size() - 1; j >= 0; j--) {
+                        long time = widget.updateTimes.valueAt(j);
+                        if (time <= updateTime) {
+                            continue;
+                        }
+                        int id = widget.updateTimes.keyAt(j);
+                        final PendingHostUpdate update;
+                        switch (id) {
+                            case ID_PROVIDER_CHANGED:
+                                update = PendingHostUpdate.providerChanged(
+                                        appWidgetId, widget.provider.info);
+                                break;
+                            case ID_VIEWS_UPDATE:
+                                update = PendingHostUpdate.updateAppWidget(appWidgetId,
+                                        cloneIfLocalBinder(widget.getEffectiveViewsLocked()));
+                                break;
+                            default:
+                                update = PendingHostUpdate.viewDataChanged(appWidgetId, id);
+                        }
+                        outUpdates.put(time, update);
+                    }
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         @Override
@@ -3850,6 +3897,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    // These can be any constants that would not collide with a resource id.
+    private static final int ID_VIEWS_UPDATE = 0;
+    private static final int ID_PROVIDER_CHANGED = 1;
+
     private static final class Widget {
         int appWidgetId;
         int restoredId;  // tracking & remapping any restored state
@@ -3858,7 +3909,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         RemoteViews maskedViews;
         Bundle options;
         Host host;
-        long lastUpdateTime;
+        // timestamps for various operations
+        SparseLongArray updateTimes = new SparseLongArray(2);
 
         @Override
         public String toString() {
