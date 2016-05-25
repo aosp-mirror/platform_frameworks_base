@@ -5007,8 +5007,11 @@ public final class ActivityThread {
                 return;
             }
         }
-        throw new AssertionError("chosen locale " + bestLocale + " must be present in LocaleList: "
-                + newLocaleList.toLanguageTags());
+
+        // The app may have overridden the LocaleList with its own Locale
+        // (not present in the available list). Push the chosen Locale
+        // to the front of the list.
+        LocaleList.setDefault(new LocaleList(bestLocale, newLocaleList));
     }
 
     private void handleBindApplication(AppBindData data) {
