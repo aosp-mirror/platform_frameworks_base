@@ -2245,6 +2245,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final boolean wasDefault = isDefaultNetwork(nai);
             if (wasDefault) {
                 mDefaultInetConditionPublished = 0;
+                // Log default network disconnection before required book-keeping.
+                // Let rematchAllNetworksAndRequests() below record a new default network event
+                // if there is a fallback. Taken together, the two form a X -> 0, 0 -> Y sequence
+                // whose timestamps tell how long it takes to recover a default network.
+                logDefaultNetworkEvent(null, nai);
             }
             notifyIfacesChangedForNetworkStats();
             // TODO - we shouldn't send CALLBACK_LOST to requests that can be satisfied
@@ -2278,10 +2283,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             mLegacyTypeTracker.remove(nai, wasDefault);
             rematchAllNetworksAndRequests(null, 0);
-            if (wasDefault && getDefaultNetwork() == null) {
-                // Log that we lost the default network and there is no replacement.
-                logDefaultNetworkEvent(null, nai);
-            }
             if (nai.created) {
                 // Tell netd to clean up the configuration for this network
                 // (routing rules, DNS, etc).
@@ -4584,7 +4585,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         teardownUnneededNetwork(oldNetwork);
     }
 
-    private void makeDefault(NetworkAgentInfo newNetwork, NetworkAgentInfo prevNetwork) {
+    private void makeDefault(NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
         setupDataActivityTracking(newNetwork);
         try {
@@ -4596,7 +4597,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
-        logDefaultNetworkEvent(newNetwork, prevNetwork);
     }
 
     // Handles a network appearing or improving its score.
@@ -4747,7 +4747,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (isNewDefault) {
             // Notify system services that this network is up.
-            makeDefault(newNetwork, oldDefaultNetwork);
+            makeDefault(newNetwork);
+            // Log 0 -> X and Y -> X default network transitions, where X is the new default.
+            logDefaultNetworkEvent(newNetwork, oldDefaultNetwork);
             synchronized (ConnectivityService.this) {
                 // have a new default network, release the transition wakelock in
                 // a second if it's held.  The second pause is to allow apps
