@@ -19,6 +19,7 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -101,6 +102,17 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        View navBackdrop = findViewById(R.id.nav_bar_background);
+        if (navBackdrop != null) {
+            boolean shouldShow = newConfig.smallestScreenWidthDp >= 600
+                    || newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE;
+            navBackdrop.setVisibility(shouldShow ? View.VISIBLE : View.GONE);
+        }
     }
 
     public void setHost(QSTileHost host) {
