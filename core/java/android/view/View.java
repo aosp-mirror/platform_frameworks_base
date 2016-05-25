@@ -5700,6 +5700,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Call this view's OnContextClickListener, if it is defined.
      *
+     * @param x the x coordinate of the context click
+     * @param y the y coordinate of the context click
+     * @return True if there was an assigned OnContextClickListener that consumed the event, false
+     *         otherwise.
+     */
+    public boolean performContextClick(float x, float y) {
+        return performContextClick();
+    }
+
+    /**
+     * Call this view's OnContextClickListener, if it is defined.
+     *
      * @return True if there was an assigned OnContextClickListener that consumed the event, false
      *         otherwise.
      */
@@ -10048,7 +10060,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (isContextClickable() && !mInContextButtonPress && !mHasPerformedLongPress
                         && (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
                         || actionButton == MotionEvent.BUTTON_SECONDARY)) {
-                    if (performContextClick()) {
+                    if (performContextClick(event.getX(), event.getY())) {
                         mInContextButtonPress = true;
                         setPressed(true, event.getX(), event.getY());
                         removeTapCallback();
