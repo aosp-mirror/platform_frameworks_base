@@ -30,6 +30,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.RadioAccessFamily;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyHistogram;
+import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -454,24 +455,18 @@ interface ITelephony {
     int getVoiceMessageCountForSubscriber(int subId);
 
     // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
-    void setVisualVoicemailSmsFilterEnabled(int subId, boolean value);
+    void enableVisualVoicemailSmsFilter(String callingPackage, int subId,
+            in VisualVoicemailSmsFilterSettings settings);
 
-    boolean isVisualVoicemailSmsFilterEnabled(String packageName, int subId);
+    oneway void disableVisualVoicemailSmsFilter(String callingPackage, int subId);
 
-    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
-    void setVisualVoicemailSmsFilterClientPrefix(int subId, String prefix);
+    // Get settings set by the calling package
+    VisualVoicemailSmsFilterSettings getVisualVoicemailSmsFilterSettings(String callingPackage,
+            int subId);
 
-    String getVisualVoicemailSmsFilterClientPrefix(String packageName, int subId);
-
-    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
-    void setVisualVoicemailSmsFilterOriginatingNumbers(int subId, in String[] numbers);
-
-    String[] getVisualVoicemailSmsFilterOriginatingNumbers(String packageName, int subId);
-
-    // Not oneway, caller needs to make sure the vaule is set before receiving a SMS
-    void setVisualVoicemailSmsFilterDestinationPort(int subId, int port);
-
-    int getVisualVoicemailSmsFilterDestinationPort(String packageName, int subId);
+    // Get settings set by the package, requires READ_PRIVILEGED_PHONE_STATE permission
+    VisualVoicemailSmsFilterSettings getSystemVisualVoicemailSmsFilterSettings(String packageName,
+            int subId);
 
     /**
      * Returns the network type for data transmission
