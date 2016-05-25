@@ -220,6 +220,20 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
+        mClockView = (TextView) findViewById(R.id.clock_view);
+
+        mNotificationContainerParent = (NotificationsQuickSettingsContainer)
+                findViewById(R.id.notification_container_parent);
+        mNotificationStackScroller = (NotificationStackScrollLayout)
+                findViewById(R.id.notification_stack_scroller);
+        mNotificationStackScroller.setOnHeightChangedListener(this);
+        mNotificationStackScroller.setOverscrollTopChangedListener(this);
+        mNotificationStackScroller.setOnEmptySpaceClickListener(this);
+        mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+        mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
+        mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
+        mLastOrientation = getResources().getConfiguration().orientation;
+
         mQsAutoReinflateContainer =
                 (AutoReinflateContainer) findViewById(R.id.qs_auto_reinflate_container);
         mQsAutoReinflateContainer.addInflateListener(new InflateListener() {
@@ -229,32 +243,20 @@ public class NotificationPanelView extends PanelView implements
                 mQsContainer.setPanelView(NotificationPanelView.this);
                 mQsContainer.getHeader().findViewById(R.id.expand_indicator)
                         .setOnClickListener(NotificationPanelView.this);
-            }
-        });
-        mClockView = (TextView) findViewById(R.id.clock_view);
-        mNotificationContainerParent = (NotificationsQuickSettingsContainer)
-                findViewById(R.id.notification_container_parent);
-        mNotificationStackScroller = (NotificationStackScrollLayout)
-                findViewById(R.id.notification_stack_scroller);
-        mNotificationStackScroller.setOnHeightChangedListener(this);
-        mNotificationStackScroller.setOverscrollTopChangedListener(this);
-        mNotificationStackScroller.setOnEmptySpaceClickListener(this);
-        mNotificationStackScroller.setQsContainer(mQsContainer);
-        mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
-        mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
-        mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
-        mLastOrientation = getResources().getConfiguration().orientation;
 
-        // recompute internal state when qspanel height changes
-        mQsContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                    int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                final int height = bottom - top;
-                final int oldHeight = oldBottom - oldTop;
-                if (height != oldHeight) {
-                    onQsHeightChanged();
-                }
+                // recompute internal state when qspanel height changes
+                mQsContainer.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                        final int height = bottom - top;
+                        final int oldHeight = oldBottom - oldTop;
+                        if (height != oldHeight) {
+                            onQsHeightChanged();
+                        }
+                    }
+                });
+                mNotificationStackScroller.setQsContainer(mQsContainer);
             }
         });
     }
