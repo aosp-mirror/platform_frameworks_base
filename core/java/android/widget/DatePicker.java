@@ -16,11 +16,15 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.icu.util.Calendar;
+import android.icu.util.TimeZone;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -28,11 +32,7 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.R;
-
-import java.util.Calendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Provides a widget for selecting a date.

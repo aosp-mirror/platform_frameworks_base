@@ -18,10 +18,9 @@ package android.widget;
 
 import android.annotation.StyleRes;
 import android.content.Context;
+import android.icu.util.Calendar;
 import android.util.AttributeSet;
 import android.widget.DayPickerView.OnDaySelectedListener;
-
-import java.util.Calendar;
 
 class CalendarViewMaterialDelegate extends CalendarView.AbstractCalendarViewDelegate {
     private final DayPickerView mDayPickerView;
