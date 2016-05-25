@@ -31,37 +31,6 @@ package android.app.admin {
 
 }
 
-package android.app.usage {
-
-  public class DataUsagePolicy {
-    field public final int networkType;
-    field public final java.lang.String[] subscriberIds;
-    field public final long thresholdInBytes;
-    field public final int[] uids;
-  }
-
-  public static class DataUsagePolicy.Builder {
-    ctor public DataUsagePolicy.Builder();
-    method public android.app.usage.DataUsagePolicy.Builder addSubscriberId(java.lang.String);
-    method public android.app.usage.DataUsagePolicy.Builder addUid(int);
-    method public android.app.usage.DataUsagePolicy build();
-    method public android.app.usage.DataUsagePolicy.Builder setNetworkType(int);
-    method public android.app.usage.DataUsagePolicy.Builder setThreshold(long);
-  }
-
-  public class NetworkStatsManager {
-    method public void registerDataUsageCallback(android.app.usage.DataUsagePolicy, android.app.usage.NetworkStatsManager.DataUsageCallback, android.os.Handler);
-    method public void registerDataUsageCallback(android.app.usage.DataUsagePolicy, android.app.usage.NetworkStatsManager.UsageCallback, android.os.Handler);
-    method public void unregisterDataUsageCallback(android.app.usage.NetworkStatsManager.DataUsageCallback);
-  }
-
-  public static abstract class NetworkStatsManager.DataUsageCallback {
-    ctor public NetworkStatsManager.DataUsageCallback();
-    method public deprecated void onLimitReached();
-  }
-
-}
-
 package android.content {
 
   public abstract class Context {
