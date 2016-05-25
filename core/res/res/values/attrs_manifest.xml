@@ -1898,6 +1898,9 @@
              in a task/stack that isn't focusable. This flag allows them to be focusable.-->
         <attr name="alwaysFocusable" format="boolean" />
         <attr name="enableVrMode" />
+        <!-- @hide This activity is a launcher which should always show up on the top of others.
+             This attribute is ignored if the activity isn't a launcher. -->
+        <attr name="onTopLauncher" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new

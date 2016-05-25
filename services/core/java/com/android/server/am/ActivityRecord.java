@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.FLAG_ON_TOP_LAUNCHER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
@@ -856,6 +857,10 @@ final class ActivityRecord {
 
     boolean isAlwaysFocusable() {
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
+    }
+
+    boolean isOnTopLauncher() {
+        return isHomeActivity() && (info.flags & FLAG_ON_TOP_LAUNCHER) != 0;
     }
 
     void makeFinishingLocked() {
