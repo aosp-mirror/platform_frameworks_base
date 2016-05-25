@@ -4081,8 +4081,6 @@
 
     <!-- Notify use that they are in Lock-to-app -->
     <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back.</string>
-    <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-    <string name="lock_to_app_toast_accessible">To unpin this screen, touch &amp; hold Overview.</string>
     <!-- Notify user that they are locked in lock-to-app mode -->
     <string name="lock_to_app_toast_locked">App is pinned: Unpinning isn\'t allowed on this device.</string>
     <!-- Starting lock-to-app indication. -->
