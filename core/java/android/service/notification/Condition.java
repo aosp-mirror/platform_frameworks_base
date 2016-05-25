@@ -33,7 +33,7 @@ import java.util.Objects;
  * {@link ConditionProviderService} that owns the rule. Used to tell the system to enter Do Not
  * Disturb mode and request that the system exit Do Not Disturb mode.
  */
-public class Condition implements Parcelable {
+public final class Condition implements Parcelable {
 
     @SystemApi
     public static final String SCHEME = "condition";
