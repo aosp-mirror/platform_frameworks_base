@@ -34,7 +34,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -187,19 +186,28 @@ public class AppWidgetHost {
                 idsToUpdate[i] = mViews.keyAt(i);
             }
         }
-        List<RemoteViews> updatedViews;
-        int[] updatedIds = new int[idsToUpdate.length];
+        List<PendingHostUpdate> updates;
         try {
-            updatedViews = sService.startListening(
-                    mCallbacks, mContextOpPackageName, mHostId, idsToUpdate, updatedIds).getList();
+            updates = sService.startListening(
+                    mCallbacks, mContextOpPackageName, mHostId, idsToUpdate).getList();
         }
         catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
 
-        int N = updatedViews.size();
+        int N = updates.size();
         for (int i = 0; i < N; i++) {
-            updateAppWidgetView(updatedIds[i], updatedViews.get(i));
+            PendingHostUpdate update = updates.get(i);
+            switch (update.type) {
+                case PendingHostUpdate.TYPE_VIEWS_UPDATE:
+                    updateAppWidgetView(update.appWidgetId, update.views);
+                    break;
+                case PendingHostUpdate.TYPE_PROVIDER_CHANGED:
+                    onProviderChanged(update.appWidgetId, update.widgetInfo);
+                    break;
+                case PendingHostUpdate.TYPE_VIEW_DATA_CHANGED:
+                    viewDataChanged(update.appWidgetId, update.viewId);
+            }
         }
     }
 
