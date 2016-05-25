@@ -4960,9 +4960,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void setDockedStackCreateState(int mode, Rect bounds) {
         synchronized (mWindowMap) {
-            mDockedStackCreateMode = mode;
-            mDockedStackCreateBounds = bounds;
+            setDockedStackCreateStateLocked(mode, bounds);
         }
+    }
+
+    void setDockedStackCreateStateLocked(int mode, Rect bounds) {
+        mDockedStackCreateMode = mode;
+        mDockedStackCreateBounds = bounds;
     }
 
     /**
