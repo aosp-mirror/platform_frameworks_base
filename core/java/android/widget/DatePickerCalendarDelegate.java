@@ -432,7 +432,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     public void setMinDate(long minDate) {
         mTempDate.setTimeInMillis(minDate);
         if (mTempDate.get(Calendar.YEAR) == mMinDate.get(Calendar.YEAR)
-                && mTempDate.get(Calendar.DAY_OF_YEAR) != mMinDate.get(Calendar.DAY_OF_YEAR)) {
+                && mTempDate.get(Calendar.DAY_OF_YEAR) == mMinDate.get(Calendar.DAY_OF_YEAR)) {
+            // Same day, no-op.
             return;
         }
         if (mCurrentDate.before(mTempDate)) {
@@ -453,7 +454,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     public void setMaxDate(long maxDate) {
         mTempDate.setTimeInMillis(maxDate);
         if (mTempDate.get(Calendar.YEAR) == mMaxDate.get(Calendar.YEAR)
-                && mTempDate.get(Calendar.DAY_OF_YEAR) != mMaxDate.get(Calendar.DAY_OF_YEAR)) {
+                && mTempDate.get(Calendar.DAY_OF_YEAR) == mMaxDate.get(Calendar.DAY_OF_YEAR)) {
+            // Same day, no-op.
             return;
         }
         if (mCurrentDate.after(mTempDate)) {
