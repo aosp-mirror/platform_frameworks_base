@@ -2474,6 +2474,54 @@
         <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>y</item>
     </plurals>
 
+    <!-- Phrase describing a relative time using minutes in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_minutes_relative">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> minute ago</item>
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> minutes ago</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using hours in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_hours_relative">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> hour ago</item>
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> hours ago</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using days in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_days_relative">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> day ago</item>
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> days ago</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using years in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_years_relative">
+        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> year ago</item>
+        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> years ago</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using minutes that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_minutes_relative_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> minute</item>
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> minutes</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using hours that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_hours_relative_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> hour</item>
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> hours</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using days that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_days_relative_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> day</item>
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> days</item>
+    </plurals>
+
+    <!-- Phrase describing a relative time using years that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
+    <plurals name="duration_years_relative_future">
+        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> year</item>
+        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> years</item>
+    </plurals>
+
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Video problem</string>
     <!-- Text for error alert when a video container is not valid for progressive download/playback. -->
