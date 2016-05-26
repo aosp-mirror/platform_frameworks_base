@@ -308,7 +308,9 @@ abstract public class Job implements Runnable {
                 String id, DocumentStack stack, List<DocumentInfo> srcs,
                 DocumentInfo srcParent) {
             assert(!srcs.isEmpty());
-            assert(stack.peek().isDirectory());  // we can't currently delete from archives.
+            // stack is empty if we delete docs from recent.
+            // we can't currently delete from archives.
+            assert(stack.isEmpty() || stack.peek().isDirectory());
             return new DeleteJob(service, appContext, listener, id, stack, srcs, srcParent);
         }
     }
