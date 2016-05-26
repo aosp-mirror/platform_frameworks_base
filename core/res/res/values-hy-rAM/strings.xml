@@ -940,7 +940,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Խմբագրել հետևյալ ծրագրով՝"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Խմբագրել հետևյալով՝ %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Փոփոխել"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Տարածել"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Կիսվել"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Տարածել ըստ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Տրամադրել"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ուղարկել այս հավելվածով"</string>
@@ -1219,7 +1219,7 @@
     <string name="action_mode_done" msgid="7217581640461922289">"Կատարված է"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"Ջնջում է USB կրիչը..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Ջնջում է SD քարտը..."</string>
-    <string name="share" msgid="1778686618230011964">"Տարածել"</string>
+    <string name="share" msgid="1778686618230011964">"Կիսվել"</string>
     <string name="find" msgid="4808270900322985960">"Գտնել"</string>
     <string name="websearch" msgid="4337157977400211589">"Վեբի որոնում"</string>
     <string name="find_next" msgid="5742124618942193978">"Գտնել հաջորդը"</string>
@@ -1264,7 +1264,7 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Մուտք"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Ընտրել ծրագիր"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Չհաջողվեց գործարկել <xliff:g id="APPLICATION_NAME">%s</xliff:g> ծրագիրը"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Տարածել"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Կիսվել"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Կիսվել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Սահող բռնակ: Հպել &amp; պահել:"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Սահեցրեք` ապակողպելու համար:"</string>
@@ -1312,7 +1312,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1մատնահետք`"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Տեսնել բոլորը"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Ընտրել գործունեությունը"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Տարածել"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Կիսվել"</string>
     <string name="sending" msgid="3245653681008218030">"Ուղարկվում է..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Գործարկե՞լ զննարկիչը:"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Ընդունե՞լ զանգը:"</string>
@@ -1618,4 +1618,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Սարքն առանց սահմանափակումների օգտագործելու համար կատարեք գործարանային վերակայում"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Հպեք՝ ավելին իմանալու համար:"</string>
+    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
+    <skip />
 </resources>

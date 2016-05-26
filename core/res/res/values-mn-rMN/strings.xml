@@ -714,7 +714,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Хээг мартсан уу?"</string>
-    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Акаунт тайлах"</string>
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Бүртгэл тайлах"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Хээ оруулах оролдлого хэт олон"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Түгжээг тайлах бол Google акаунтаараа нэвтэрнэ үү."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Хэрэглэгч (имэйл)"</string>
@@ -1068,8 +1068,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Зөвшөөрөх"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Татгалзах"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; нь &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; уруу мессеж илгээх гэж байна."</string>
-    <string name="sms_short_code_details" msgid="5873295990846059400">"Энэ таны мобайл акаунтад "<b>"төлбөр нэмэгдүүлж магадгүй"</b>"."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Энэ таны мобайл акаунтад төлбөр нэмэгдүүлж магадгүй."</b></string>
+    <string name="sms_short_code_details" msgid="5873295990846059400">"Энэ таны мобайл бүртгэлд "<b>"төлбөр нэмэгдүүлж магадгүй"</b>"."</string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Энэ таны мобайл бүртгэлд төлбөр нэмэгдүүлж магадгүй."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Илгээх"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Цуцлах"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Миний сонголтыг санах"</string>
@@ -1173,13 +1173,13 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Ажиллуулах"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g> ашиглан \n залгах"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g> дугаар ашиглан \n харилцагч үүсгэх"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Дараах нэг буюу түүнээс дээш апп таны акаунтад одоо болон дараа хандах зөвшөөрлийг хүсэж байна."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Дараах нэг буюу түүнээс дээш апп таны бүртгэлд одоо болон дараа хандах зөвшөөрлийг хүсэж байна."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Та энэ хүсэлтийг зөвшөөрөх үү?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Хандах хүсэлт"</string>
     <string name="allow" msgid="7225948811296386551">"Зөвшөөрөх"</string>
     <string name="deny" msgid="2081879885755434506">"Татгалзах"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Зөвшөөрөл хүсэв"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> акаунт зөвшөөрөл \n хүссэн"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> бүртгэл зөвшөөрөл \n хүссэн"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Та энэ апп-г өөрийн ажлын профайлаас гадуур ашиглаж байна"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Та энэ апп-г өөрийн ажлын профайл дотор ашиглаж байна"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Оруулах арга"</string>
@@ -1234,8 +1234,8 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Устгах"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Устгасныг буцаах"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Одоо юу ч хийхгүй"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Акаунт сонгох"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Акаунт нэмэх"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Бүртгэл сонгох"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Бүртгэл нэмэх"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Аккаунт нэмэх"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Өсөх"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Бууруулах"</string>
@@ -1369,7 +1369,7 @@
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Нэвтрэх"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Хэрэглэгчийн нэр эсвэл нууц үг буруу."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Хэрэглэгчийн нэр нууц үгээ мартсан уу?\n"<b>"google.com/accounts/recovery"</b>"-д зочилно уу."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"Акаунт шалгаж байна…"</string>
+    <string name="kg_login_checking_password" msgid="1052685197710252395">"Бүртгэл шалгаж байна…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Та PIN кодоо <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
@@ -1379,7 +1379,7 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Та таблетыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Таблет одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Та телевизийнхээ түгжээг <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оруулсан байна. Телевиз үйлдвэрээс гарсан анхны тохиргоонд шилжих болно."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл акаунт шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл бүртгэл шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Та зурган түгжээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар та телевизийнхээ түгжээг и-мэйл дансаа ашиглан тайлах хэрэгтэй болно.\n\n Та <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл акаунтаа ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
@@ -1616,4 +1616,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Энэ төхөөрөмжийг хязгаарлалтгүй ашиглахын тулд үйлдвэрийн тохиргоонд дахин тохируулна уу"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Дэлгэрэнгүй үзэх бол дарна уу."</string>
+    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
+    <skip />
 </resources>
