@@ -34,8 +34,6 @@ import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkStatsService;
-import android.net.InterfaceConfiguration;
-import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -58,12 +56,12 @@ import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.util.IState;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
@@ -83,6 +81,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -127,7 +126,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private final INetworkStatsService mStatsService;
     private final Looper mLooper;
 
-    private HashMap<String, TetherInterfaceStateMachine> mIfaces; // all tethered/tetherable ifaces
+    private Map<String, TetherInterfaceStateMachine> mIfaces; // all tethered/tetherable ifaces
 
     private BroadcastReceiver mStateReceiver;
 
@@ -172,7 +171,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
         mPublicSync = new Object();
 
-        mIfaces = new HashMap<String, TetherInterfaceStateMachine>();
+        mIfaces = new ArrayMap<String, TetherInterfaceStateMachine>();
 
         // make our own thread so we don't anr the system
         mLooper = IoThread.get().getLooper();
