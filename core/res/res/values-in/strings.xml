@@ -546,7 +546,7 @@
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Mencegah penggunaan beberapa fitur kunci layar."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
-    <item msgid="869923650527136615">"Seluler"</item>
+    <item msgid="869923650527136615">"Ponsel"</item>
     <item msgid="7897544654242874543">"Kantor"</item>
     <item msgid="1103601433382158155">"Faks Kantor"</item>
     <item msgid="1735177144948329370">"Faks Rumah"</item>
@@ -589,7 +589,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Khusus"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Rumah"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"Seluler"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Ponsel"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Kantor"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Faks Kantor"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks Rumah"</string>
@@ -616,7 +616,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Rumah"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Kantor"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Lainnya"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"Seluler"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Ponsel"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Khusus"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Rumah"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Kantor"</string>
@@ -1618,4 +1618,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Dikembalikan ke setelan pabrik agar perangkat ini dapat digunakan tanpa batasan"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sentuh untuk mempelajari lebih lanjut."</string>
+    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
+    <skip />
 </resources>
