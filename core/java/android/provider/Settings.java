@@ -2230,19 +2230,37 @@ public final class Settings {
          * @param outConfig Where to place the configuration settings.
          */
         public static void getConfiguration(ContentResolver cr, Configuration outConfig) {
-            getConfigurationForUser(cr, outConfig, UserHandle.myUserId());
+            adjustConfigurationForUser(cr, outConfig, UserHandle.myUserId(),
+                    false /* updateSettingsIfEmpty */);
         }
 
         /** @hide */
-        public static void getConfigurationForUser(ContentResolver cr, Configuration outConfig,
-                int userHandle) {
+        public static void adjustConfigurationForUser(ContentResolver cr, Configuration outConfig,
+                int userHandle, boolean updateSettingsIfEmpty) {
             outConfig.fontScale = Settings.System.getFloatForUser(
                     cr, FONT_SCALE, DEFAULT_FONT_SCALE, userHandle);
             if (outConfig.fontScale < 0) {
                 outConfig.fontScale = DEFAULT_FONT_SCALE;
             }
-            outConfig.setLocales(LocaleList.forLanguageTags(
-                    Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle)));
+
+            final String localeValue =
+                    Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle);
+            if (localeValue != null) {
+                outConfig.setLocales(LocaleList.forLanguageTags(localeValue));
+            } else {
+                // Do not update configuration with emtpy settings since we need to take over the
+                // locale list of previous user if the settings value is empty. This happens when a
+                // new user is created.
+
+                if (updateSettingsIfEmpty) {
+                    // Make current configuration persistent. This is necessary the first time a
+                    // user log in. At the first login, the configuration settings are empty, so we
+                    // need to store the adjusted configuration as the initial settings.
+                    Settings.System.putStringForUser(
+                            cr, SYSTEM_LOCALES, outConfig.getLocales().toLanguageTags(),
+                            userHandle);
+                }
+            }
         }
 
         /**
