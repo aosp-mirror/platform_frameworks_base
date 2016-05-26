@@ -235,6 +235,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             randomLockSeed = SecureRandom.getInstance("SHA1PRNG").generateSeed(40);
             String newPassword = String.valueOf(HexEncoding.encode(randomLockSeed));
             setLockPasswordInternal(newPassword, managedUserPassword, managedUserId);
+            // We store a private credential for the managed user that's unlocked by the primary
+            // account holder's credential. As such, the user will never be prompted to enter this
+            // password directly, so we always store a password.
+            setLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                    DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, managedUserId);
             tieProfileLockToParent(managedUserId, newPassword);
         } catch (NoSuchAlgorithmException | RemoteException e) {
             Slog.e(TAG, "Fail to tie managed profile", e);
@@ -534,6 +539,30 @@ public class LockSettingsService extends ILockSettings.Stub {
 
                 setString("migrated_lockscreen_disabled", "true", 0);
                 Slog.i(TAG, "Migrated lockscreen disabled flag");
+            }
+
+            final List<UserInfo> users = mUserManager.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                final UserInfo userInfo = users.get(i);
+                if (userInfo.isManagedProfile() && mStorage.hasChildProfileLock(userInfo.id)) {
+                    // When managed profile has a unified lock, the password quality stored has 2
+                    // possibilities only.
+                    // 1). PASSWORD_QUALITY_UNSPECIFIED, which is upgraded from dp2, and we are
+                    // going to set it back to PASSWORD_QUALITY_ALPHANUMERIC.
+                    // 2). PASSWORD_QUALITY_ALPHANUMERIC, which is the actual password quality for
+                    // unified lock.
+                    final long quality = getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
+                    if (quality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+                        // Only possible when it's upgraded from nyc dp3
+                        Slog.i(TAG, "Migrated tied profile lock type");
+                        setLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                                DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC, userInfo.id);
+                    } else if (quality != DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC) {
+                        // It should not happen
+                        Slog.e(TAG, "Invalid tied profile lock type: " + quality);
+                    }
+                }
             }
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to migrate old data", re);
