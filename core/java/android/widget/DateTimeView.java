@@ -34,6 +34,7 @@ import android.icu.util.Calendar;
 import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -118,7 +119,6 @@ public class DateTimeView extends TextView {
     public void setTime(long time) {
         Time t = new Time();
         t.set(time);
-        t.second = 0;
         mTimeMillis = t.toMillis(false);
         mTime = new Date(t.year-1900, t.month, t.monthDay, t.hour, t.minute, 0);
         update();
@@ -331,6 +331,63 @@ public class DateTimeView extends TextView {
     void clearFormatAndUpdate() {
         mLastFormat = null;
         update();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (mShowRelativeTime) {
+            // The short version of the time might not be completely understandable and for
+            // accessibility we rather have a longer version.
+            long now = System.currentTimeMillis();
+            long duration = Math.abs(now - mTimeMillis);
+            int count;
+            boolean past = (now >= mTimeMillis);
+            String result;
+            if (duration < MINUTE_IN_MILLIS) {
+                result = mNowText;
+            } else if (duration < HOUR_IN_MILLIS) {
+                count = (int)(duration / MINUTE_IN_MILLIS);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_minutes_relative
+                                : com.android.internal.
+                                        R.plurals.duration_minutes_relative_future,
+                        count),
+                        count);
+            } else if (duration < DAY_IN_MILLIS) {
+                count = (int)(duration / HOUR_IN_MILLIS);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_hours_relative
+                                : com.android.internal.
+                                        R.plurals.duration_hours_relative_future,
+                        count),
+                        count);
+            } else if (duration < YEAR_IN_MILLIS) {
+                // In weird cases it can become 0 because of daylight savings
+                TimeZone timeZone = TimeZone.getDefault();
+                count = Math.max(Math.abs(dayDistance(timeZone, mTimeMillis, now)), 1);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_days_relative
+                                : com.android.internal.
+                                        R.plurals.duration_days_relative_future,
+                        count),
+                        count);
+
+            } else {
+                count = (int)(duration / YEAR_IN_MILLIS);
+                result = String.format(getContext().getResources().getQuantityString(past
+                                ? com.android.internal.
+                                        R.plurals.duration_years_relative
+                                : com.android.internal.
+                                        R.plurals.duration_years_relative_future,
+                        count),
+                        count);
+            }
+            info.setText(result);
+        }
     }
 
     private static class ReceiverInfo {

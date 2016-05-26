@@ -2521,6 +2521,15 @@
   <java-symbol type="plurals" name="duration_days_shortest_future" />
   <java-symbol type="plurals" name="duration_years_shortest_future" />
 
+  <java-symbol type="plurals" name="duration_minutes_relative" />
+  <java-symbol type="plurals" name="duration_hours_relative" />
+  <java-symbol type="plurals" name="duration_days_relative" />
+  <java-symbol type="plurals" name="duration_years_relative" />
+  <java-symbol type="plurals" name="duration_minutes_relative_future" />
+  <java-symbol type="plurals" name="duration_hours_relative_future" />
+  <java-symbol type="plurals" name="duration_days_relative_future" />
+  <java-symbol type="plurals" name="duration_years_relative_future" />
+
   <java-symbol type="string" name="now_string_shortest" />
 
   <!-- Encryption notification while accounts are locked by credential encryption -->
