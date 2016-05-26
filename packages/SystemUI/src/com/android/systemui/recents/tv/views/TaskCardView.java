@@ -101,6 +101,7 @@ public class TaskCardView extends LinearLayout {
         mTitleTextView.setText(task.title);
         mBadgeView.setImageDrawable(task.icon);
         setThumbnailView();
+        setContentDescription(task.titleDescription);
     }
 
     public Task getTask() {

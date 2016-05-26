@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:contentDescription="@string/status_bar_recent_inspect_item_title"
         android:layout_gravity="center"
         android:layout_centerInParent="true"
         android:clipToPadding="false"
