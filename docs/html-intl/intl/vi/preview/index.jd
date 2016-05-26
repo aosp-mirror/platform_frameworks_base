@@ -31,7 +31,7 @@ footer.hide=1
           <strong>thông báo trả lời trực tiếp</strong> và nhiều tính năng khác.
         </p>
 
-        <a href="http://factoryberlin.com" target="_new">
+        <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
           <span class="dac-sprite dac-auto-chevron"></span>
           Bắt đầu
         </a><!--<br>
@@ -61,19 +61,19 @@ footer.hide=1
     </a>
     <ul class="dac-actions">
       <li class="dac-action">
-        <a href="http://factoryberlin.com" target="_new">
+        <a class="dac-action-link" href="https://developer.android.com/preview/bug">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Báo cáo vấn đề
         </a>
       </li>
       <li class="dac-action">
-        <a href="http://factoryberlin.com" target="_new">
+        <a class="dac-action-link" href="{@docRoot}preview/support.html">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Xem ghi chú phát hành
         </a>
       </li>
       <li class="dac-action">
-        <a href="http://factoryberlin.com" target="_new">
+        <a class="dac-action-link" href="{@docRoot}preview/dev-community">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
           Tham gia cộng đồng nhà phát triển
         </a>
@@ -86,15 +86,15 @@ footer.hide=1
   <div class="wrap dac-offset-parent">
 
     <div class="actions">
-      <div><a href="http://factoryberlin.com" target="_new">
+      <div><a href="https://developer.android.com/preview/bug">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Báo cáo vấn đề
       </a></div>
-      <div><a href="http://factoryberlin.com" target="_new">
+      <div><a href="{@docRoot}preview/support.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Xem ghi chú phát hành
       </a></div>
-      <div><a href="http://factoryberlin.com" target="_new">
+      <div><a href="{@docRoot}preview/dev-community">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         Tham gia cộng đồng nhà phát triển
       </a></div>
