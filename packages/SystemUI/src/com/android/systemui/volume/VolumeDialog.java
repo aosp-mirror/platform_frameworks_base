@@ -396,6 +396,7 @@ public class VolumeDialog implements TunerService.Tunable {
         mSpTexts.add(row.header);
         row.slider = (SeekBar) row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
+        row.anim = null;
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
