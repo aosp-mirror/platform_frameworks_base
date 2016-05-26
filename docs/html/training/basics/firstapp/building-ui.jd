@@ -396,20 +396,13 @@ android.widget.LinearLayout}.</p>
 <h2>Run Your App</h2>
 
 <p>This layout is applied by the default {@link android.app.Activity} class
-that the SDK tools generated when you created the project. Run the app to see the
-results:</p>
+that the SDK tools generated when you created the project.</p>
 
-<ul>
-  <li>In Android Studio, from the toolbar, click <strong>Run</strong>
+<p>To run the app and see the results,
+  click <strong>Run 'app'</strong>
     <img src="{@docRoot}images/tools/as-run.png"
-    style="vertical-align:baseline;margin:0; max-height:1em" />.</li>
-  <li>Or from a command line, change directories to the root of your Android project and
-execute:
-<pre class="no-pretty-print">
-$ ant debug
-adb install -r app/build/outputs/apk/app-debug.apk
-</pre></li>
-</ul>
+    style="vertical-align:baseline;margin:0; max-height:1em" /> in the
+    toolbar.</p>
 
 <p>Continue to the <a href="starting-activity.html">next
 lesson</a> to learn how to respond to button presses, read content
