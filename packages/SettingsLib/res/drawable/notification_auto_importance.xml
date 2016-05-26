@@ -20,8 +20,8 @@
         android:viewportHeight="24.0">
     <path
             android:fillColor="#FFFFFFFF"
-            android:pathData="M11.2,13.6l1.6,0l-0.8,-2.6z"/>
+            android:pathData="M10.8,12.7l2.4,0l-1.2,-3.7z"/>
     <path
             android:fillColor="#FF000000"
-            android:pathData="M22.5,9.6L15,9l-3,-7L9,9L1.5,9.6l5.7,5L5.5,22l6.5,-3.9l6.5,3.9l-1.7,-7.4L22.5,9.6zM13.6,16l-0.5,-1.4h-2.3L10.4,16H9l2.3,-6.4h1.4L15,16H13.6z"/>
+            android:pathData="M12,2C6.5,2 2,6.5 2,12s4.5,10 10,10s10,-4.5 10,-10S17.5,2 12,2zM14.3,16l-0.7,-2h-3.2l-0.7,2H7.8L11,7h2l3.2,9H14.3z"/>
 </vector>
