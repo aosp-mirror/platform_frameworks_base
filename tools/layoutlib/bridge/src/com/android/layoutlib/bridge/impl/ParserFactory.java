@@ -39,8 +39,6 @@ public class ParserFactory {
 
     public final static boolean LOG_PARSER = false;
 
-    private final static String ENCODING = "UTF-8"; //$NON-NLS-1$
-
     // Used to get a new XmlPullParser from the client.
     @Nullable
     private static com.android.ide.common.rendering.api.ParserFactory sParserFactory;
@@ -74,7 +72,7 @@ public class ParserFactory {
 
         stream = readAndClose(stream, name, size);
 
-        parser.setInput(stream, ENCODING);
+        parser.setInput(stream, null);
         if (isLayout) {
             try {
                 return new LayoutParserWrapper(parser).peekTillLayoutStart();
