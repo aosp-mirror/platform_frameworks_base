@@ -55,12 +55,7 @@ import java.io.InputStream;
  * A mock {@link android.content.Context} class.  All methods are non-functional and throw
  * {@link java.lang.UnsupportedOperationException}.  You can use this to inject other dependencies,
  * mocks, or monitors into the classes you are testing.
- *
- * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
- * New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
-@Deprecated
 public class MockContext extends Context {
 
     @Override
