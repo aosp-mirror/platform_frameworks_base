@@ -5419,9 +5419,32 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
+            final int pkgUidF = pkgUid;
+            final int userIdF = userId;
+            final IPackageDataObserver localObserver = new IPackageDataObserver.Stub() {
+                @Override
+                public void onRemoveCompleted(String packageName, boolean succeeded)
+                        throws RemoteException {
+                    synchronized (ActivityManagerService.this) {
+                        finishForceStopPackageLocked(packageName, pkgUidF);
+                    }
+
+                    final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
+                            Uri.fromParts("package", packageName, null));
+                    intent.putExtra(Intent.EXTRA_UID, pkgUidF);
+                    intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(pkgUidF));
+                    broadcastIntentInPackage("android", Process.SYSTEM_UID, intent,
+                            null, null, 0, null, null, null, null, false, false, userIdF);
+
+                    if (observer != null) {
+                        observer.onRemoveCompleted(packageName, succeeded);
+                    }
+                }
+            };
+
             try {
                 // Clear application user data
-                pm.clearApplicationUserData(packageName, observer, userId);
+                pm.clearApplicationUserData(packageName, localObserver, userId);
 
                 synchronized(this) {
                     // Remove all permissions granted from/to this package
@@ -5433,12 +5456,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 inm.removeAutomaticZenRules(packageName);
                 inm.setNotificationPolicyAccessGranted(packageName, false);
 
-                Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
-                        Uri.fromParts("package", packageName, null));
-                intent.putExtra(Intent.EXTRA_UID, pkgUid);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, UserHandle.getUserId(pkgUid));
-                broadcastIntentInPackage("android", Process.SYSTEM_UID, intent,
-                        null, null, 0, null, null, null, null, false, false, userId);
             } catch (RemoteException e) {
             }
         } finally {
@@ -5623,6 +5640,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     if (mUserController.isUserRunningLocked(user, 0)) {
                         forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
+                        finishForceStopPackageLocked(packageName, pkgUid);
                     }
                 }
             }
@@ -5814,6 +5832,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
                 false, true, false, false, UserHandle.getUserId(uid), reason);
+    }
+
+    private void finishForceStopPackageLocked(final String packageName, int uid) {
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
