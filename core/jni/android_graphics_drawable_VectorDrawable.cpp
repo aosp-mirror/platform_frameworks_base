@@ -36,6 +36,13 @@ static jlong createTree(JNIEnv*, jobject, jlong groupPtr) {
     return reinterpret_cast<jlong>(tree);
 }
 
+static jlong createTreeFromCopy(JNIEnv*, jobject, jlong treePtr, jlong groupPtr) {
+    VectorDrawable::Group* rootGroup = reinterpret_cast<VectorDrawable::Group*>(groupPtr);
+    VectorDrawable::Tree* treeToCopy = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
+    VectorDrawable::Tree* tree = new VectorDrawable::Tree(treeToCopy, rootGroup);
+    return reinterpret_cast<jlong>(tree);
+}
+
 static jlong createEmptyFullPath(JNIEnv*, jobject) {
     VectorDrawable::FullPath* newPath = new VectorDrawable::FullPath();
     return reinterpret_cast<jlong>(newPath);
@@ -344,6 +351,7 @@ static void setTrimPathOffset(JNIEnv*, jobject, jlong fullPathPtr, jfloat trimPa
 
 static const JNINativeMethod gMethods[] = {
         {"nCreateTree", "!(J)J", (void*)createTree},
+        {"nCreateTreeFromCopy", "!(JJ)J", (void*)createTreeFromCopy},
         {"nSetRendererViewportSize", "!(JFF)V", (void*)setTreeViewportSize},
         {"nSetRootAlpha", "!(JF)Z", (void*)setRootAlpha},
         {"nGetRootAlpha", "!(J)F", (void*)getRootAlpha},
