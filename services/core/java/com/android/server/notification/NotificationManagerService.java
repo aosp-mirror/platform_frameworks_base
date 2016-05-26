@@ -3813,8 +3813,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onUserSwitched(int user) {
-            for (ManagedServiceInfo info : mServices) {
-                unregisterService(info.service, info.userid);
+            synchronized (mNotificationList) {
+                for (ManagedServiceInfo info : mServices) {
+                    unregisterService(info.service, info.userid);
+                }
             }
             registerRanker();
         }
