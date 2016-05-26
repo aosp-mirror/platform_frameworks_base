@@ -16,7 +16,7 @@
 
 package com.android.documentsui.dirlist;
 
-import static com.android.documentsui.dirlist.MultiSelectManager.GridModel.NOT_SET;
+import static com.android.documentsui.dirlist.BandController.GridModel.NOT_SET;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -24,14 +24,14 @@ import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
+import com.android.documentsui.dirlist.BandController.GridModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @SmallTest
-public class MultiSelectManager_GridModelTest extends AndroidTestCase {
+public class BandController_GridModelTest extends AndroidTestCase {
 
     private static final int VIEW_PADDING_PX = 5;
     private static final int CHILD_VIEW_EDGE_PX = 100;
@@ -279,7 +279,7 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
         model.onScrolled(null, 0, dy);
     }
 
-    private static final class TestEnvironment implements MultiSelectManager.SelectionEnvironment {
+    private static final class TestEnvironment implements BandController.SelectionEnvironment {
 
         private final int mNumColumns;
         private final int mNumRows;

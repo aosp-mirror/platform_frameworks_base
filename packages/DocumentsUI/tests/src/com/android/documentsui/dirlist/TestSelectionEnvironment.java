@@ -20,7 +20,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 
-import com.android.documentsui.dirlist.MultiSelectManager.SelectionEnvironment;
+import com.android.documentsui.dirlist.BandController.SelectionEnvironment;
 
 import java.util.List;
 
