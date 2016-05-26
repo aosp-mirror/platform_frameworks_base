@@ -1133,7 +1133,8 @@ public class VectorDrawable_Delegate {
                     }
 
                     final Paint fillPaint = mFillPaint;
-                    fillPaint.setColor(applyAlpha(fullPath.mFillColor, fullPath.mFillAlpha));
+                    fillPaint.setColor(applyAlpha(applyAlpha(fullPath.mFillColor, fullPath
+                      .mFillAlpha), getRootAlpha()));
                     Paint_Delegate fillPaintDelegate = Paint_Delegate.getDelegate(fillPaint
                             .getNativeInstance());
                     // mFillPaint can not be null at this point so we will have a delegate
@@ -1162,7 +1163,8 @@ public class VectorDrawable_Delegate {
                     }
 
                     strokePaint.setStrokeMiter(fullPath.mStrokeMiterlimit);
-                    strokePaint.setColor(applyAlpha(fullPath.mStrokeColor, fullPath.mStrokeAlpha));
+                    strokePaint.setColor(applyAlpha(applyAlpha(fullPath.mStrokeColor, fullPath
+                      .mStrokeAlpha), getRootAlpha()));
                     Paint_Delegate strokePaintDelegate = Paint_Delegate.getDelegate(strokePaint
                             .getNativeInstance());
                     // mStrokePaint can not be null at this point so we will have a delegate
