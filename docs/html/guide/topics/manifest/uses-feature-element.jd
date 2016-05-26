@@ -77,7 +77,7 @@ application describe the device-variable features that it uses.</p>
 <p>The set of available features that your application declares corresponds to
 the set of feature constants made available by the Android {@link
 android.content.pm.PackageManager}, which are listed for
-convenience in the <a href="#features-reference">Features Reference</a> tables
+convenience in the <a href="#features-reference">Features Reference</a> sections
 at the bottom of this document.
 
 <p>You must specify each feature in a separate <code>&lt;uses-feature&gt;</code>
@@ -131,17 +131,27 @@ device compatibility.</p>
 
 <dd>
 <dl class="attr">
+  <dt>
+    <a name="name"></a><code>android:name</code>
+  </dt>
 
-  <dt><a name="name"></a><code>android:name</code></dt>
-  <dd>Specifies a single hardware or software feature used by the application,
-as a descriptor string. Valid descriptor values are listed in the <a
-href="#hw-features">Hardware features</a> and <a href="#sw-features">Software
-features</a> tables, below. Descriptor string values are case-sensitive.</dd>
+  <dd>
+    Specifies a single hardware or software feature used by the application, as
+    a descriptor string. Valid attribute values are listed in the <a href=
+    "#hw-features">Hardware features</a> and <a href="#sw-features">Software
+    features</a> sections. These attribute values are case-sensitive.
+  </dd>
 
-  <dt><a name="required"></a><code>android:required</code></dt>  <!-- added in api level 5 -->
-  <dd>Boolean value that indicates whether the application requires
-  the feature specified in <code>android:name</code>.
+  <dt>
+    <a name="required"></a><code>android:required</code>
+  </dt>
+  <!-- added in api level 5 -->
 
+  <dd>
+    Boolean value that indicates whether the application requires the feature
+    specified in <code>android:name</code>.
+  </dd>
+</dl>
 <ul>
 <li>When you declare <code>android:required="true"</code> for a feature,
 you are specifying that the application <em>cannot function, or is not
@@ -163,7 +173,7 @@ feature</em>, if necessary. </li>
   <dd>The OpenGL ES version required by the application. The higher 16 bits
 represent the major number and the lower 16 bits represent the minor number. For
 example, to specify OpenGL ES version 2.0, you would set the value as
-"0x00020000", or to specify OpenGL ES 3.0, you would set the value as "0x00030000".
+"0x00020000", or to specify OpenGL ES 3.2, you would set the value as "0x00030002".
 
   <p>An application should specify at most one <code>android:glEsVersion</code>
 attribute in its manifest. If it specifies more than one, the
@@ -184,8 +194,8 @@ only specify the numerically lowest version of OpenGL ES that it requires. (It
 can check at run-time whether a higher level of OpenGL ES is available.)</p>
 
   <p>For more information about using OpenGL ES, including how to check the supported OpenGL ES
-version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES</a>
-API guide.</p>
+version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES
+API guide</a>.</p>
   </dd>
 
 </dl>
@@ -229,7 +239,7 @@ a device reports the features it supports as read-only system properties.</li>
 <p>To ensure an accurate comparison of features, the Android Package Manager
 provides a shared set of feature constants that both applications and devices
 use to declare feature requirements and support. The available feature constants
-are listed in the <a href="#features-reference">Features Reference</a> tables at
+are listed in the <a href="#features-reference">Features Reference</a> sections at
 the bottom of this document, and in the class documentation for {@link
 android.content.pm.PackageManager}.</p>
 
@@ -362,8 +372,8 @@ the feature as shown below.</p>
 <p class="caution">It's important to understand that the permissions that you
 request in <code>&lt;uses-permission&gt;</code> elements can directly affect how
 Google Play filters your application. The reference section <a
-href="#permissions">Permissions that Imply Feature Requirements</a>,
-below, lists the full set of permissions that imply feature requirements and
+href="#permissions">Permissions that Imply Feature Requirements</a> lists the
+full set of permissions that imply feature requirements and
 therefore trigger filtering.</p>
 
 <h3 id="bt-permission-handling">Special handling for Bluetooth feature</h3>
@@ -532,493 +542,1159 @@ locales: '--_--'
 densities: '160'
 </pre>
 
+<h2 id="features-reference">
+  Features Reference
+</h2>
 
-<h2 id=features-reference>Features Reference</h2>
+<p>
+  The following sections provide reference information about hardware features,
+  software features, and sets of permissions that imply specific feature
+  requirements.
+</p>
 
-<p>The tables below provide reference information about hardware and software
-features and the permissions that can imply them on Google Play. </p>
+<h3 id="hw-features">
+  Hardware features
+</h3>
 
-<h3 id="hw-features">Hardware features</h3>
+<p>
+  This section presents the hardware features supported by the most current
+  platform release. To indicate that your app uses or requires a hardware
+  feature, declare the corresponding value (beginning with
+  <code>"android.hardware"</code>) in an <code>android:name</code> attribute.
+  Each time you declare a hardware feature, use a separate
+  <code>&lt;uses-feature&gt;</code> element.
+</p>
 
-<p>The table below describes the hardware feature descriptors supported by the
-most current platform release. To signal that your application uses or requires
-a hardware feature, declare each value in a <code>android:name</code> attribute
-in a separate <code>&lt;uses-feature&gt;</code> element. </p>
+<h4 id="audio-hw-features">
+  Audio hardware features
+</h4>
 
-  <table>
-    <tr>
-       <th>Feature Type</th>
-       <th>Feature Descriptor</th>
-       <th style="min-width:170px">Description</th>
-       <th>Comments</th>
-    </tr>
-    <tr>
-       <td rowspan="4">Audio</td>
-       <td><code>android.hardware.audio.low_latency</code></td>
-       <td>The application uses a low-latency audio pipeline on the device and
-           is sensitive to delays or lag in sound input or output.</td>
-       <td></td>
-    </tr>
-    <tr>
-       <td><code>android.hardware.audio.pro</code></td>
-       <td>The application uses high-end audio functionality and performance.</td>
-       <td></td>
-    </tr>
-    <tr>
-       <td><code>android.hardware.microphone</code></td>
-       <td>The application records audio via a microphone.</td>
-       <td></td>
-    </tr>
-    </tr>
-       <td><code>android.hardware.output</code></td>
-       <td>The application produces at least one form of audio output, such as speakers, audio jack
-           or streaming over bluetooth.</td>
-       <td></td>
-    </tr>
-    <tr>
-       <td rowspan="2">Bluetooth</td>
-       <td><code>android.hardware.bluetooth</code></td>
-       <td>The application uses Bluetooth radio features in the device.</td>
-       <td></td>
-    </tr>
-    <tr>
-       <td><code>android.hardware.bluetooth_le</code></td>
-       <td>The application uses Bluetooth Low Energy radio features in the device.</td>
-       <td></td>
-    </tr>
-    <tr>
-       <td rowspan="6">Camera</td>
-       <td><code>android.hardware.camera</code></td>
-       <td>The application uses the device's back-facing (main) camera.</td>
-       <td>Devices with only a front-facing camera do not list this feature, so
-           the <code>android.hardware.camera.any</code> feature should be used
-           instead if a camera facing any direction is acceptable for the
-           application.</td>
-    </tr>
-<tr>
-  <td><code>android.hardware.camera.autofocus</code></td>
-  <td>Subfeature. The application uses the device camera's autofocus capability.</td>
-  <td rowspan="3">These subfeatures implicitly declare the
-<code>android.hardware.camera</code> parent feature, unless declared with
-<code>android:required="false"</code>.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.flash</code></td>
-  <td>Subfeature. The application uses the device camera's flash.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.front</code></td>
-  <td>Subfeature. The application uses a front-facing camera on the device.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.any</code></td>
-  <td>The application uses at least one camera facing in any direction, or an
-external camera device if one is connected. Use this in preference to
-<code>android.hardware.camera</code> if a back-facing camera is not required.
-  </td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.external</code></td>
-  <td>The application uses an external camera device if one is connected.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.level.full</code></td>
-  <td>The application uses a camera device with <code>FULL</code>-level support.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.capability.manual_sensor</code></td>
-  <td>The application uses a a camera device with the <code>MANUAL_SENSOR</code> capability.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.capability.manual_post_processing</code></td>
-  <td>The application uses a a camera device with the <code>MANUAL_POST_PROCESSING</code> capability.</td>
-</tr>
-<tr>
-  <td><code>android.hardware.camera.capability.raw</code></td>
-  <td>The application uses a a camera device with the <code>RAW</code> capability.</td>
-</tr>
+<dl>
+  <dt>
+    <code>android.hardware.audio.low_latency</code>
+  </dt>
 
-<tr>
-  <td>Infrared</td>
-  <td><code>android.hardware.consumerir</code></td>
-  <td>The application uses the consumer IR capabilities on the device.</td>
-  <td></td>
-</tr>
+  <dd>
+    The app uses the device's low-latency audio pipeline, which reduces lag and
+    delays when processing sound input or output.
+  </dd>
 
-<tr>
-  <td rowspan="3">Location</td>
-  <td><code>android.hardware.location</code></td>
-  <td>The application uses one or more features on the device for determining
-location, such as GPS location, network location, or cell location.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.location.network</code></td>
-  <td>Subfeature. The application uses coarse location coordinates obtained from
-a network-based geolocation system supported on the device.</td>
-  <td rowspan="2">These subfeatures implicitly declare the
-<code>android.hardware.location</code> parent feature, unless declared with
-<code>android:required="false"</code>. </td>
-</tr>
-<tr>
-  <td><code>android.hardware.location.gps</code></td>
-  <td>Subfeature. The application uses precise location coordinates obtained
-from a Global Positioning System receiver on the device. </td>
-</tr>
-<tr>
-  <td>Microphone</td>
-  <td><code>android.hardware.microphone</code></td>
-  <td>The application uses a microphone on the device.
-  </td>
-  <td></td>
-</tr>
-<tr>
-  <td rowspan="2">NFC</td>
-  <td><code>android.hardware.nfc</td>
-  <td>The application uses Near Field Communications radio features in the device.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.nfc.hce</code></td>
-  <td>The application uses the NFC card emulation feature in the device.</td>
-  <td></td>
-</tr>
-<tr>
-  <td rowspan="8">Sensors</td>
-  <td><code>android.hardware.sensor.accelerometer</code></td>
-  <td>The application uses motion readings from an accelerometer on the
-device.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.barometer</code></td>
-  <td>The application uses the device's barometer.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.compass</code></td>
-  <td>The application uses directional readings from a magnetometer (compass) on
-the device.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.gyroscope</code></td>
-  <td>The application uses the device's gyroscope sensor.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.light</code></td>
-  <td>The application uses the device's light sensor.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.proximity</code></td>
-  <td>The application uses the device's proximity sensor.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.stepcounter</code></td>
-  <td>The application uses the device's step counter.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.sensor.stepdetector</code></td>
-  <td>The application uses the device's step detector.</td>
-  <td></td>
-</tr>
+  <dt>
+    <code>android.hardware.audio.output</code>
+  </dt>
 
-<tr>
-  <td rowspan="2">Screen</td>
-  <td><code>android.hardware.screen.landscape</code></td>
-  <td>The application requires landscape orientation.</td>
-  <td rowspan="2">
-     <p>For example, if your app requires portrait orientation, you should declare
-<code>&lt;uses-feature android:name="android.hardware.screen.portrait"/&gt;</code> so that only devices
-that support portrait orientation (whether always or by user choice) can install your app. If your
-application <em>supports</em> both orientations, then you don't need to declare either.</p>
-    <p>Both orientations are assumed <em>not required</em>, by default, so your app may be installed
-on devices that support one or both orientations. However, if any of your activities request that
-they run in a specific orientation, using the <a
-href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
-android:screenOrientation}</a> attribute, then this also declares that the application requires that
-orientation. For example, if you declare <a
-href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
-android:screenOrientation}</a> with either {@code "landscape"}, {@code "reverseLandscape"}, or
-{@code "sensorLandscape"}, then your application will be available only to devices that support
-landscape orientation. As a best practice, you should still declare your requirement for this
-orientation using a {@code &lt;uses-feature&gt;} element. If you declare an orientation for your
-activity using <a href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
-android:screenOrientation}</a>, but don't actually <em>require</em> it, you can disable the
-requirement by declaring the orientation with a {@code &lt;uses-feature&gt;} element and include
-{@code android:required="false"}.</p>
-    <p>For backwards compatibility, any device running a platform version that supports only API
-level 12 or lower is assumed to support both landscape and portrait.</p>
-  </td>
-</tr>
-<tr>
-  <td><code>android.hardware.screen.portrait</code></td>
-  <td>The application requires portrait orientation.</td>
-</tr>
+  <dd>
+    The app transmits sound using the device's speakers, audio jack, Bluetooth
+    streaming capabilities, or a similar mechanism.
+  </dd>
 
-<tr>
-  <td rowspan="3">Telephony</td>
-  <td><code>android.hardware.telephony</code></td>
-  <td>The application uses telephony features on the device, such as telephony
-radio with data communication services.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.telephony.cdma</code></td>
-  <td>Subfeature. The application uses CDMA telephony radio features on the
-device. </td>
-  <td rowspan="2">These subfeatures implicitly declare the
-<code>android.hardware.telephony</code> parent feature, unless declared with
-<code>android:required="false"</code>. </td>
-</tr>
-<tr>
-  <td><code>android.hardware.telephony.gsm</code></td>
-  <td>Subfeature. The application uses GSM telephony radio features on the
-device.</td>
-</tr>
+  <dt>
+    <code>android.hardware.audio.pro</code>
+  </dt>
 
-<tr>
-  <td>Television</td>
-  <td><code>android.hardware.type.television</code></td>
-  <td>The application is designed for a television user experience.</td>
-  <td>This feature defines "television" to be a typical living room television experience:
-  displayed on a big screen, where the user is sitting far away and the dominant form of
-  input is something like a d-pad, and generally not through touch or a
-  mouse/pointer-device.</td>
-</tr>
+  <dd>
+    The app uses the device's high-end audio functionality and performance
+    capabilities.
+  </dd>
 
-<tr>
-  <td rowspan="7">Touchscreen</td>
-  <td><code>android.hardware.faketouch</code></td>
-  <td>The application uses basic touch interaction events, such as "click down", "click
-up", and drag.</td>
-  <td><p>When declared as required, this indicates that the application is compatible with a device
-only if it offers an emulated touchscreen ("fake touch" interface), or better. A device that offers
-a fake touch interface provides a user input system that emulates a subset of touchscreen
-capabilities. For example, a mouse or remote control that drives an on-screen cursor provides a fake
-touch interface. If your application requires basic point and click interaction (in other
-words, it won't work with <em>only</em> a d-pad controller), you should declare this feature.
-Because this is the minimum level of touch interaction, your app will also be compatible with
-devices that offer more complex touch interfaces.</p>
-  <p class="note"><strong>Note:</strong> Because applications require the {@code
-android.hardware.touchscreen} feature by default, if you want your application to be available to
-devices that provide a fake touch interface, you must also explicitly declare that a touch screen is
-<em>not</em> required by declaring {@code &lt;uses-feature
-android:name="android.hardware.touchscreen" <strong>android:required="false"</strong>
-/&gt;}</p></td>
-</tr>
+  <dt>
+    <code>android.hardware.microphone</code>
+  </dt>
 
-<tr>
-  <td><code>android.hardware.faketouch.multitouch.distinct</code></td>
-  <td>The application performs distinct tracking of two or more "fingers" on a fake touch
-interface. This is a superset of the faketouch feature.</td>
-  <td><p>When declared as required, this indicates that the application is compatible with a device
-only if it supports touch emulation for events that supports distinct tracking of two or more
-fingers, or better.</p>
-  <p>Unlike the distinct multitouch defined by {@code
-android.hardware.touchscreen.multitouch.distinct}, input devices that support distinct multi-touch
-with a fake touch interface will not support all two-finger gestures, because the input is
-being transformed to cursor movement on the screen. That is, single finger gestures on such a device
-move a cursor; two-finger swipes will result in single-finger touch events; other two-finger
-gestures will result in the corresponding two-finger touch event. An example device that supports
-distinct multi-touch with a fake touch interface is one that provides a trackpad for cursor movement
-which also supports two or more fingers.</p></td>
-</tr>
+  <dd>
+    The app records audio using the device's microphone.
+  </dd>
+</dl>
 
-<tr>
-  <td><code>android.hardware.faketouch.multitouch.jazzhand</code></td>
-  <td>The application performs distinct tracking of five or more "fingers" on a fake touch
-interface. This is a superset of the faketouch feature.</td>
-  <td><p>When declared as required, this indicates that the application is compatible with a device
-only if it supports touch emulation for events that supports distinct tracking of five or more
-fingers.</p>
-  <p>Unlike the distinct multitouch defined by {@code
-android.hardware.touchscreen.multitouch.jazzhand}, input devices that support jazzhand multi-touch
-with a fake touch interface will not support all five-finger gestures, because the input is being
-transformed to cursor movement on the screen. That is, single finger gestures on such a device move
-a cursor; multi-finger gestures will result in single-finger touch events; other multi-finger
-gestures will result in the corresponding multi-finger touch event. An example device that supports
-distinct multi-touch with a fake touch interface is one that provides a trackpad for cursor movement
-which also supports five or more fingers.</p></td>
-</tr>
+<h4 id="bluetooth-hw-features">
+  Bluetooth hardware features
+</h4>
 
-<tr>
-  <td><code>android.hardware.touchscreen</code></td>
-  <td>The application uses touchscreen capabilities for gestures that are more interactive
-than basic touch events, such as a fling. This is a superset of the basic faketouch feature.</td>
-  <td><p>By default, your application requires this. As such, your application is <em>not</em>
-available to devices that provide only an emulated touch interface ("fake touch"), by default. If
-you want your application available to devices that provide a fake touch interface (or even devices
-that provide only a d-pad controller), you must explicitly declare that a touch screen is not
-required, by declaring {@code android.hardware.touchscreen} with {@code android:required="false"}.
-You should do so even if your application uses&mdash;but does not <em>require</em>&mdash;a real
-touch screen interface.</p>
-<p>If your application <em>does require</em> a touch interface (in order to perform touch
-gestures such as a fling), then you don't need to do anything, because this is required by default.
-However, it's best if you explicitly declare all features used by your application, so you should
-still declare this if your app uses it.</p>
-  <p>If you require more complex touch interaction, such as multi-finger gestures, you
-should declare the advanced touch screen features below.</p></td>
-</tr>
-<tr>
-  <td><code>android.hardware.touchscreen.multitouch</code></td>
-  <td>The application uses basic two-point multitouch capabilities on the device
-screen, such as for pinch gestures, but does not need to track touches independently. This
-is a superset of touchscreen feature.</td>
-  <td>This implicitly declares the <code>android.hardware.touchscreen</code> parent feature, unless
-declared with <code>android:required="false"</code>. </td>
-</tr>
-<tr>
-  <td><code>android.hardware.touchscreen.multitouch.distinct</code></td>
-  <td>Subfeature. The application uses advanced multipoint multitouch
-capabilities on the device screen, such as for tracking two or more points fully
-independently. This is a superset of multitouch feature.</td>
-  <td rowspan="2">This implicitly declares the <code>android.hardware.touchscreen.multitouch</code>
-parent feature, unless declared with <code>android:required="false"</code>. </td>
-</tr>
-<tr>
-  <td><code>android.hardware.touchscreen.multitouch.jazzhand</code></td>
-  <td>The application uses advanced multipoint multitouch
-capabilities on the device screen, for tracking up to five points fully
-independently. This is a superset of distinct multitouch feature.</td>
-</tr>
+<dl>
+  <dt>
+    <code>android.hardware.bluetooth</code>
+  </dt>
 
-<tr>
-  <td rowspan="2">USB</td>
-  <td><code>android.hardware.usb.host</code></td>
-  <td>The application uses USB host mode features (behaves as the host and connects to USB
-devices).</td>
-  <td></td>
-</tr>
+  <dd>
+    The app uses the device's Bluetooth features, usually to communicate with
+    other Bluetooth-enabled devices.
+  </dd>
 
-<tr>
-  <td><code>android.hardware.usb.accessory</code></td>
-  <td>The application uses USB accessory features (behaves as the USB device and connects to USB
-hosts).</td>
-  <td></td>
-</tr>
+  <dt>
+    <code>android.hardware.bluetooth_le</code>
+  </dt>
 
-<tr>
-  <td rowspan="2">Wi-Fi</td>
-  <td><code>android.hardware.wifi</code></td>
-  <td>The application uses 802.11 networking (Wi-Fi) features on the device.</td>
-  <td></td>
-</tr>
-<tr>
-  <td><code>android.hardware.wifi.direct</code></td>
-  <td>The application uses the Wi-Fi Direct networking features on the device.</td>
-</tr>
+  <dd>
+    The app uses the device's Bluetooth Low Energy radio features.
+  </dd>
+</dl>
 
-  </table>
+<h4 id="camera-hw-features">
+  Camera hardware features
+</h4>
 
-<h3 id="sw-features">Software features</h3>
+<dl>
+  <dt>
+    <code>android.hardware.camera</code>
+  </dt>
 
-<p>The table below describes the software feature descriptors supported by the
-most current platform release. To signal that your application uses or requires
-a software feature, declare each value in a <code>android:name</code> attribute
-in a separate <code>&lt;uses-feature&gt;</code> element. </p>
+  <dd>
+    The app uses the device's back-facing camera. Devices with only a
+    front-facing camera do not list this feature, so use the
+    <code>android.hardware.camera.any</code> feature instead if your app can
+    communicate with any camera, regardless of which direction the camera
+    faces.
+  </dd>
 
+  <dt>
+    <code>android.hardware.camera.any</code>
+  </dt>
 
-  <table>
-<tr>
-  <th>Feature</th>
-  <th>Attribute Value</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>App Widgets</td>
-  <td><code>android.software.app_widgets</code></td>
-  <td>The application uses or provides App Widgets and should be installed only on devices
-  that include a Home screen or similar location where users can embed App Widgets.</td>
-</tr>
-<tr>
-  <td>Device Management</td>
-  <td><code>android.software.device_admin</code></td>
-  <td>The application uses device policy enforcement via device administrators.</td>
-</tr>
-<tr>
-  <td>Home Screen</td>
-  <td><code>android.software.home_screen</code></td>
-  <td>The application behaves as a Home screen replacement and should be installed only on
-  devices that support third-party Home screen apps.</td>
-</tr>
-<tr>
-  <td>Input Method</td>
-  <td><code>android.software.input_methods</code></td>
-  <td>The application provides a custom input method and should be installed only on devices that
-  support third-party input methods.</td>
-</tr>
-<tr>
-  <td>Live Wallpaper</td>
-  <td><code>android.software.live_wallpaper</code></td>
-  <td>The application uses or provides Live Wallpapers and should be installed only on devices that
-  support Live Wallpapers.</td>
-</tr>
-<tr>
-  <td>MIDI</td>
-  <td><code>android.software.midi</code></td>
-  <td>The application connects to musical instruments or outputs sound
-  using the Musical Instrument Digital Interface (MIDI) protocol.</td>
-</tr>
-<tr>
-  <td rowspan="2">SIP/VOIP</td>
-  <td><code>android.software.sip</code></td>
-  <td>The application uses SIP service on the device and should be installed only on devices that
-  support SIP.
-  </td>
-</tr>
-<tr>
-  <td><code>android.software.sip.voip</code></td>
-  <td><p>Subfeature. The application uses SIP-based VOIP service on the device.
-  <p>This subfeature implicitly declares the <code>android.software.sip</code> parent feature,
-unless declared with <code>android:required="false"</code>.</td>
-</tr>
-  </table>
+  <dd>
+    The app uses one of the device's cameras, or an external camera that the
+    user connects to the device. Use this value instead of
+    <code>android.hardware.camera</code> if your app does not require the
+    camera to be a back-facing one.
+  </dd>
 
+  <dt>
+    <code>android.hardware.camera.autofocus</code>
+  </dt>
 
-<h3 id="permissions">Permissions that Imply Feature Requirements</h3>
+  <dd>
+    <p>
+      The app uses the autofocus feature that the device's camera supports.
+    </p>
 
-<p>Some feature constants listed in the tables above were made available to
-applications <em>after</em> the corresponding API; for example, the
-<code>android.hardware.bluetooth</code> feature was added in Android 2.2 (API
-level 8), but the bluetooth API that it refers to was added in Android 2.0 (API
-level 5). Because of this, some apps were able to use the API before they had
-the ability to declare that they require the API via the
-<code>&lt;uses-feature&gt;</code> system. </p>
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.camera</code> feature, unless this parent feature
+      is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
 
-<p>To prevent those apps from being made available unintentionally,  Google
-Play assumes that certain hardware-related permissions indicate that the
-underlying hardware features are required by default. For instance, applications
-that use Bluetooth must request the <code>BLUETOOTH</code> permission in a
-<code>&lt;uses-permission&gt;</code> element &mdash; for legacy apps, Google
-Play assumes that the permission declaration means that the underlying
-<code>android.hardware.bluetooth</code> feature is required by the application
-and sets up filtering based on that feature. </p>
+  <dt>
+    <code>android.hardware.camera.capability.manual_post_processing</code>
+  </dt>
 
-<p>The table below lists permissions that imply feature requirements
-equivalent to those declared in <code>&lt;uses-feature&gt;</code> elements. Note
-that <code>&lt;uses-feature&gt;</code> declarations, including any declared
-<code>android:required</code> attribute, always take precedence over features
-implied by the permissions below. </p>
+  <dd>
+    <p>
+      The app uses the <code>MANUAL_POST_PROCESSING</code> feature that the
+      device's camera supports.
+    </p>
 
-<p>For any of the permissions below, you can disable filtering based on the
-implied feature by explicitly declaring the implied feature explicitly, in a
-<code>&lt;uses-feature&gt;</code> element, with an
-<code>android:required="false"</code> attribute. For example, to disable any
-filtering based on the <code>CAMERA</code> permission, you would add this
-<code>&lt;uses-feature&gt;</code> declaration to the manifest file:</p>
+    <p>
+      This feature allows your app to override the camera's auto white balance
+      functionality. Use <code>android.colorCorrection.transform</code>,
+      <code>android.colorCorrection.gains</code>, and an
+      <code>android.colorCorrection.mode</code> of
+      <code>TRANSFORM_MATRIX</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.capability.manual_sensor</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the <code>MANUAL_SENSOR</code> feature that the device's
+      camera supports.
+    </p>
+
+    <p>
+      This feature implies support for auto-exposure locking
+      (<code>android.control.aeLock</code>), which allows the camera's exposure
+      time and sensitivity to remain fixed at specific values.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.capability.raw</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the <code>RAW</code> feature that the device's camera
+      supports.
+    </p>
+
+    <p>
+      This feature implies that the device can save DNG (raw) files and that
+      the device's camera provides the DNG-related metadata necessary for your
+      app to process these raw images directly.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.external</code>
+  </dt>
+
+  <dd>
+    The app communicates with an external camera that the user connects to the
+    device. This feature does not guarantee, however, that the external camera
+    is available for your app to use.
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.flash</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the flash feature that the device's camera supports.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.camera</code> feature, unless this parent feature
+      is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.front</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the device's front-facing camera.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.camera</code> feature, unless this parent feature
+      is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.camera.level.full</code>
+  </dt>
+
+  <dd>
+    The app uses the <code>FULL</code>-level image-capturing support that at
+    least one of the device's cameras provides. Cameras with <code>FULL</code>
+    support provide burst-capture capabilities, per-frame control, and manual
+    post-processing control.
+  </dd>
+</dl>
+
+<h4 id="device-ui-hw-features">
+  Device UI hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.type.automotive</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app is designed to show its UI on a set of screens inside a vehicle.
+      The user interacts with the app using hard buttons, touch, rotary
+      controllers, and mouse-like interfaces. The vehicle's screens usually
+      appear in the center console or the instrument cluster of a vehicle. These
+      screens usually have limited size and resolution.
+    </p>
+
+    <p class="note">
+      <strong>Note: </strong>It's important to keep in mind that, since the user
+      is driving while using this type of app UI, the app must minimize driver
+      distraction.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.type.television</code>
+  </dt>
+
+  <dd>
+    <p>
+      (Deprecated; use <a href="#media-sw-features">
+      <code>android.software.leanback</code></a> instead.)
+    </p>
+
+    <p>
+      The app is designed to show its UI on a television. This feature defines
+      "television" to be a typical living room television experience: displayed
+      on a big screen, where the user is sitting far away and the dominant form
+      of input is something like a d-pad, and generally not using a mouse,
+      pointer, or touch device.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.type.watch</code>
+  </dt>
+
+  <dd>
+    The app is designed to show its UI on a watch. A watch is worn on the body,
+    such as on the wrist. The user is very close to the device while
+    interacting with it.
+  </dd>
+</dl>
+
+<h4 id="fingerprint-hw-features">
+  Fingerprint hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.fingerprint</code>
+  </dt>
+
+  <dd>
+    The app reads fingerprints using the device's biometric hardware.
+  </dd>
+</dl>
+
+<h4 id="gamepad-hw-features">
+  Gamepad hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.gamepad</code>
+  </dt>
+
+  <dd>
+    The app captures game controller input, either from the device itself or
+    from a connected gamepad.
+  </dd>
+</dl>
+
+<h4 id="infrared-hw-features">
+  Infrared hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.consumerir</code>
+  </dt>
+
+  <dd>
+    The app uses the device's infrared (IR) capabilities, usually to
+    communicate with other consumer IR devices.
+  </dd>
+</dl>
+
+<h4 id="location-hw-features">
+  Location hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.location</code>
+  </dt>
+
+  <dd>
+    The app uses one or more features on the device for determining location,
+    such as GPS location, network location, or cell location.
+  </dd>
+
+  <dt>
+    <code>android.hardware.location.gps</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses precise location coordinates obtained from a Global
+      Positioning System (GPS) receiver on the device.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.location</code> feature, unless this parent
+      feature is declared with the attribute
+      <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.location.network</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses coarse location coordinates obtained from a network-based
+      geolocation system supported on the device.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.location</code> feature, unless this parent
+      feature is declared with the attribute
+      <code>android:required="false"</code>.
+    </p>
+  </dd>
+</dl>
+
+<h4 id="nfc-hw-features">
+  NFC hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.nfc</code>
+  </dt>
+
+  <dd>
+    The app uses the device's Near-Field Communication (NFC) radio features.
+  </dd>
+
+  <dt>
+    <code>android.hardware.nfc.hce</code>
+  </dt>
+
+  <dd>
+    <p>
+      (Deprecated.)
+    </p>
+
+    <p>
+      The app uses NFC card emulation that is hosted on the device.
+    </p>
+  </dd>
+</dl>
+
+<h4 id="opengl-es-hw-features">
+  OpenGL ES hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.opengles.aep</code>
+  </dt>
+
+  <dd>
+    The app uses the <a href=
+    "http://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt"
+    class="external-link">OpenGL ES Android Extension Pack</a>that is installed
+    on the device.
+  </dd>
+</dl>
+
+<h4 id="sensor-hw-features">
+  Sensor hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.sensor.accelerometer</code>
+  </dt>
+
+  <dd>
+    The app uses motion readings from the device's accelerometer to detect
+    the device's current orientation. For example, an app could use
+    accelerometer readings to determine when to switch between portrait and
+    landscape orientations.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.ambient_temperature</code>
+  </dt>
+
+  <dd>
+    The app uses the device's ambient (environmental) temperature sensor. For
+    example, a weather app could report indoor or outdoor temperature.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.barometer</code>
+  </dt>
+
+  <dd>
+    The app uses the device's barometer. For example, a weather app could
+    report air pressure.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.compass</code>
+  </dt>
+
+  <dd>
+    The app uses the device's magnetometer (compass). For example, a navigation
+    app could show the current direction a user faces.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.gyroscope</code>
+  </dt>
+
+  <dd>
+    The app uses the device's gyroscope to detect rotation and twist, creating
+    a six-axis orientation system. By using this sensor, an app can detect more
+    smoothly whether it needs to switch between portrait and landscape
+    orientations.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.hifi_sensors</code>
+  </dt>
+
+  <dd>
+    The app uses the device's high fidelity (Hi-Fi) sensors. For example, a
+    gaming app could detect the user's high-precision movements.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.heartrate</code>
+  </dt>
+
+  <dd>
+    The app uses the device's heart rate monitor. For example, a fitness app
+    could report trends in a user's heart rate over time.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.heartrate.ecg</code>
+  </dt>
+
+  <dd>
+    The app uses the device's elcardiogram (ECG) heart rate sensor. For
+    example, a fitness app could report more detailed information about a
+    user's heart rate.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.light</code>
+  </dt>
+
+  <dd>
+    The app uses the device's light sensor. For example, an app could display
+    one of two different color schemes based on the ambient lighting
+    conditions.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.proximity</code>
+  </dt>
+
+  <dd>
+    The app uses the device's proximity sensor. For example, a telephony app
+    could turn off the device's screen when the app detects that the user is
+    holding the device close to their body.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.relative_humidity</code>
+  </dt>
+
+  <dd>
+    The app uses the device's relative humidity sensor. For example, a weather
+    app could use the humidity to calculate and report the current dewpoint.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.stepcounter</code>
+  </dt>
+
+  <dd>
+    The app uses the device's step counter. For example, a fitness app could
+    report the number of steps a user needs to take to achieve their daily step
+    count goal.
+  </dd>
+
+  <dt>
+    <code>android.hardware.sensor.stepdetector</code>
+  </dt>
+
+  <dd>
+    The app uses the device's step detector. For example, a fitness app could
+    use the time interval between steps to infer the type of exercise that the
+    user is doing.
+  </dd>
+</dl>
+
+<h4 id="screen-hw-features">
+  Screen hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.screen.landscape</code>
+  </dt>
+
+  <dt>
+    <code>android.hardware.screen.portrait</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app requires the device to use the portrait or landscape orientation.
+      If your app supports both orientations, then you don't need to declare
+      either feature.
+    </p>
+
+    <p>
+      For example, if your app requires portrait orientation, you should
+      declare the following feature so that only the devices that support
+      portrait orientation (always or by user choice) can run your app:
+    </p>
+    <pre>&lt;uses-feature android:name="android.hardware.screen.portrait" /&gt;</pre>
+
+    <p>
+      Both orientations are assumed not required by default, so your app may be
+      installed on devices that support one or both orientations. However, if
+      any of your activities request that they run in a specific orientation,
+      using the <a href=
+      "{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+      android:screenOrientation}</a> attribute, then this declaration implies
+      that your app requires that orientation. For example, if you declare
+      <a href=
+      "{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+      android:screenOrientation}</a> with either {@code "landscape"}, {@code
+      "reverseLandscape"}, or {@code "sensorLandscape"}, then your app will be
+      available only on devices that support landscape orientation.
+    </p>
+
+    <p>
+      As a best practice, you should still declare your requirement for this
+      orientation using a {@code &lt;uses-feature&gt;} element. If you declare
+      an orientation for your activity using <a href=
+      "{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+      android:screenOrientation}</a>, but don't actually require it, you can
+      disable the requirement by declaring the orientation with a {@code
+      &lt;uses-feature&gt;} element and include {@code
+      android:required="false"}.
+    </p>
+
+    <p>
+      For backward compatibility, any device running Android 3.1 (API level 12)
+      or lower supports both landscape and portrait orientations.
+    </p>
+  </dd>
+</dl>
+
+<h4 id="telephony-hw-features">
+  Telephony hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.telephony</code>
+  </dt>
+
+  <dd>
+    The app uses the device's telephony features, such as telephony radio with
+    data communication services.
+  </dd>
+
+  <dt>
+    <code>android.hardware.telephony.cdma</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the Code Division Multiple Access (CDMA) telephony radio
+      system.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.telephony</code> feature, unless this parent
+      feature is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.telephony.gsm</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the Global System for Mobile Communications (GSM) telephony
+      radio system.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.telephony</code> feature, unless this parent
+      feature is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+</dl>
+
+<h4 id="touchscreen-hw-features">
+  Touchscreen hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.faketouch</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses basic touch interaction events, such as tapping and
+      dragging.
+    </p>
+
+    <p>
+      When declared as required, this feature indicates that the app is
+      compatible with a device only if that device emulates a touchscreen
+      ("fake touch" interface) or has an actual touchscreen.
+    </p>
+
+    <p>
+      A device that offers a fake touch interface provides a user input system
+      that emulates a subset of a touchscreen's capabilities. For example, a
+      mouse or remote control could drive an on-screen cursor. If your app
+      requires basic point and click interaction (in other words, it won't work
+      with only a d-pad controller), you should declare this feature. Because
+      this is the minimum level of touch interaction, you can also use an app
+      that declares this feature on devices that offer more complex touch
+      interfaces.
+    </p>
+
+    <p class="note">
+      <strong>Note:</strong> Apps require the {@code android.hardware.touchscreen}
+      feature by default. If you want your app to be available to devices that
+      provide a fake touch interface, you must also explicitly declare that a
+      touchscreen is not required as follows:
+    </p>
+    <pre>&lt;uses-feature android:name="android.hardware.touchscreen" <strong>android:required="false"</strong> /&gt;</pre>
+  </dd>
+
+  <dt>
+    <code>android.hardware.faketouch.multitouch.distinct</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app tracks two or more distinct "fingers" on a fake touch interface.
+      This is a superset of the <code>android.hardware.faketouch</code>
+      feature. When declared as required, this feature indicates that the app
+      is compatible with a device only if that device emulates distinct
+      tracking of two or more fingers or has an actual touchscreen.
+    </p>
+
+    <p>
+      Unlike the distinct multitouch defined by {@code
+      android.hardware.touchscreen.multitouch.distinct}, input devices that
+      support distinct multitouch with a fake touch interface don't support all
+      two-finger gestures because the input in transformed to cursor movement
+      on the screen. That is, single-finger gestures on such a device move a
+      cursor, two-finger swipes cause single-finger touch events to occur, and
+      other two-finger gestures trigger the corresponding two-finger touch
+      events.
+    </p>
+
+    <p>
+      A device that provides a two-finger touch trackpad for cursor movement
+      can support this feature.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.faketouch.multitouch.jazzhand</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app tracks five or more distinct "fingers" on a fake touch interface.
+      This is a superset of the <code>android.hardware.faketouch</code>
+      feature. When declared as required, this feature indicates that the app
+      is compatible with a device only if that device emulates distinct
+      tracking of five or more fingers or has an actual touchscreen.
+    </p>
+
+    <p>
+      Unlike the distinct multitouch defined by {@code
+      android.hardware.touchscreen.multitouch.jazzhand}, input devices that
+      support jazzhand multitouch with a fake touch interface don't support all
+      five-finger gestures because the input in transformed to cursor movement
+      on the screen. That is, single-finger gestures on such a device move a
+      cursor, multi-finger gestures cause single-finger touch events to occur,
+      and other multi-finger gestures trigger the corresponding multi-finger
+      touch events.
+    </p>
+
+    <p>
+      A device that provides a five-finger touch trackpad for cursor movement
+      can support this feature.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.touchscreen</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the device's touchscreen capabilities for gestures that are
+      more interactive than basic touch events, such as a fling. This is a
+      superset of the <code>android.hardware.faketouch</code> feature.
+    </p>
+
+    <p>
+      By default, your app requires this feature. As such, your app is not
+      available to devices that provide only an emulated touch interface ("fake
+      touch") by default. If you want to make your app available on devices
+      that provide a fake touch interface (or even on devices that provide only
+      a d-pad controller), you must explicitly declare that a touchscreen is
+      not required by declaring {@code android.hardware.touchscreen} with
+      {@code android:required="false"}. You should add this declaration if your
+      app uses—but does not require—a real touchscreen interface.
+    </p>
+
+    <p>
+      If your app in fact requires a touch interface (to perform more advanced
+      touch gestures such as fling), then you don't need to declare any touch
+      interface features because they're required by default. However, it's
+      best if you explicitly declare all features that your app uses.
+    </p>
+
+    <p>
+      If you require more complex touch interaction, such as multi-finger
+      gestures, you should declare that your app uses advanced touchscreen
+      features.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.touchscreen.multitouch</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the device's basic two-point multitouch capabilities, such
+      as for pinch gestures, but the app does not need to track touches
+      independently. This is a superset of the
+      <code>android.hardware.touchscreen</code> feature.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.touchscreen</code> feature, unless this parent
+      feature is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.touchscreen.multitouch.distinct</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the device's advanced multitouch capabilities for tracking
+      two or more points independently. This feature is a superset of the
+      <code>android.hardware.touchscreen.multitouch</code> feature.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.touchscreen.multitouch</code> feature, unless this
+      parent feature is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.hardware.touchscreen.multitouch.jazzhand</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses the device's advanced multitouch capabilities for tracking
+      five or more points independently. This feature is a superset of the
+      <code>android.hardware.touchscreen.multitouch</code> feature.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.hardware.touchscreen.multitouch</code> feature, unless this
+      parent feature is declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+</dl>
+
+<h4 id="usb-hw-features">
+  USB hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.usb.accessory</code>
+  </dt>
+
+  <dd>
+    The app behaves as the USB device and connects to USB hosts.
+  </dd>
+
+  <dt>
+    <code>android.hardware.usb.host</code>
+  </dt>
+
+  <dd>
+    The app uses the USB accessories that are connected to the device. The
+    device serves as the USB host.
+  </dd>
+</dl>
+
+<h4 id="wi-fi-hw-features">
+  Wi-Fi hardware features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.hardware.wifi</code>
+  </dt>
+
+  <dd>
+    The app uses 802.11 networking (Wi-Fi) features on the device.
+  </dd>
+
+  <dt>
+    <code>android.hardware.wifi.direct</code>
+  </dt>
+
+  <dd>
+    The app uses the Wi-Fi Direct networking features on the device.
+  </dd>
+</dl>
+
+<h3 id="sw-features">
+  Software features
+</h3>
+
+<p>
+  This section presents the software features supported by the most current
+  platform release. To indicate that your app uses or requires a software
+  feature, declare the corresponding value (beginning with
+  <code>"android.software"</code>) in an <code>android:name</code> attribute.
+  Each time you declare a software feature, use a separate
+  <code>&lt;uses-feature&gt;</code> element.
+</p>
+
+<h4 id="communication-sw-features">
+  Communication software features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.software.sip</code>
+  </dt>
+
+  <dd>
+    The app uses Session Initiation Protocol (SIP) services. By using SIP, the
+    app can support internet telephony operations, such as video conferencing
+    and instant messaging.
+  </dd>
+
+  <dt>
+    <code>android.software.sip.voip</code>
+  </dt>
+
+  <dd>
+    <p>
+      The app uses SIP-based Voice Over Internet Protocol (VoIP) services. By
+      using VoIP, the app can support real-time internet telephony operations,
+      such as two-way video conferencing.
+    </p>
+
+    <p>
+      By using this feature, an app implies that it also uses the
+      <code>android.software.sip</code> feature, unless this parent feature is
+      declared with <code>android:required="false"</code>.
+    </p>
+  </dd>
+
+  <dt>
+    <code>android.software.webview</code>
+  </dt>
+
+  <dd>
+    The app displays content from the internet.
+  </dd>
+</dl>
+
+<h4 id="custom-input-sw-features">
+  Custom input software features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.software.input_methods</code>
+  </dt>
+
+  <dd>
+    The app uses a new input method, which the developer defines in an <a href=
+    "{@docRoot}reference/android/inputmethodservice/InputMethodService.html">{@code
+    InputMethodService}</a>.
+  </dd>
+</dl>
+
+<h4 id="device-management-sw-features">
+  Device management software features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.software.backup</code>
+  </dt>
+
+  <dd>
+    The app includes logic to handle a backup and restore operation.
+  </dd>
+
+  <dt>
+    <code>android.software.device_admin</code>
+  </dt>
+
+  <dd>
+    The app uses device administrators to enforce a device policy.
+  </dd>
+
+  <dt>
+    <code>android.software.managed_users</code>
+  </dt>
+
+  <dd>
+    The app supports secondary users and managed profiles.
+  </dd>
+
+  <dt>
+    <code>android.software.securely_removes_users</code>
+  </dt>
+
+  <dd>
+    The app can <strong>permanently</strong> remove users and their associated
+    data.
+  </dd>
+
+  <dt>
+    <code>android.software.verified_boot</code>
+  </dt>
+
+  <dd>
+    The app includes logic to handle results from the device's verified boot
+    feature, which detects whether the device's configuration changes during a
+    restart operation.
+  </dd>
+</dl>
+
+<h4 id="media-sw-features">
+  Media software features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.software.midi</code>
+  </dt>
+
+  <dd>
+    The app connects to musical instruments or outputs sound using the Musical
+    Instrument Digital Interface (MIDI) protocol.
+  </dd>
+
+  <dt>
+    <code>android.software.print</code>
+  </dt>
+
+  <dd>
+    The app includes commands for printing documents displayed on the device.
+  </dd>
+
+  <dt>
+    <code>android.software.leanback</code>
+  </dt>
+
+  <dd>
+    The app presents a UI that is designed for viewing on a large screen, such
+    as a television.
+  </dd>
+
+  <dt>
+    <code>android.software.live_tv</code>
+  </dt>
+
+  <dd>
+    The app streams live television programs.
+  </dd>
+</dl>
+
+<h4 id="screen-interface-sw-features">
+  Screen interface software features
+</h4>
+
+<dl>
+  <dt>
+    <code>android.software.app_widgets</code>
+  </dt>
+
+  <dd>
+    The app uses or provides App Widgets and should be installed only on
+    devices that include a Home screen or similar location where users can
+    embed App Widgets.
+  </dd>
+
+  <dt>
+    <code>android.software.home_screen</code>
+  </dt>
+
+  <dd>
+    The app behaves as a replacement to the device's Home screen.
+  </dd>
+
+  <dt>
+    <code>android.software.live_wallpaper</code>
+  </dt>
+
+  <dd>
+    The app uses or provides wallpapers that include animation.
+  </dd>
+</dl>
+
+<h3 id="permissions">
+  Permissions that Imply Feature Requirements
+</h3>
+
+<p>
+  Some of the hardware and software feature constants were made available to
+  applications after the corresponding API; for example, the
+  <code>android.hardware.bluetooth</code> feature was added in Android 2.2 (API
+  level 8), but the Bluetooth API that it refers to was added in Android 2.0
+  (API level 5). Because of this, some apps were able to use the API before
+  they had the ability to declare that they require the API using the
+  <code>&lt;uses-feature&gt;</code> system.
+</p>
+
+<p>
+  To prevent those apps from being made available unintentionally, Google Play
+  assumes that certain hardware-related permissions indicate that the
+  underlying hardware features are required by default. For instance,
+  applications that use Bluetooth must request the <code>BLUETOOTH</code>
+  permission in a <code>&lt;uses-permission&gt;</code> element — for legacy
+  apps, Google Play assumes that the permission declaration means that the
+  underlying <code>android.hardware.bluetooth</code> feature is required by the
+  application and sets up filtering based on that feature. Table 2 lists
+  permissions that imply feature requirements equivalent to those declared in
+  <code>&lt;uses-feature&gt;</code> elements.
+</p>
+
+<p>
+  Note that <code>&lt;uses-feature&gt;</code> declarations, including any
+  declared <code>android:required</code> attribute, always take precedence over
+  features implied by the permissions in table 2. For any of these permissions,
+  you can disable filtering based on the implied feature by explicitly
+  declaring the implied feature explicitly, in a
+  <code>&lt;uses-feature&gt;</code> element, with an
+  <code>android:required="false"</code> attribute. For example, to disable any
+  filtering based on the <code>CAMERA</code> permission, you would add this
+  <code>&lt;uses-feature&gt;</code> declaration to the manifest file:
+</p>
 
 <pre>&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;</pre>
 
-<table id="permissions-features" >
+<p class="table-caption" id="permissions-features">
+  <strong>Table 2. </strong>Device permissions that imply device hardware use.
+</p>
+<table>
   <tr>
     <th>Category</th>
     <th>This Permission...</th>
-    <th>Implies This Feature Requirement</th>
+    <th>...Implies This Feature Requirement</th>
     <!-- <th>Comments</th> -->
   </tr>
 
