@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.util.Log;
@@ -52,6 +53,10 @@ public class ConfirmDialog extends AlertActivity
 
         if (prepareVpn()) {
             setResult(RESULT_OK);
+            finish();
+            return;
+        }
+        if (UserManager.get(this).hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN)) {
             finish();
             return;
         }
