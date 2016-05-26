@@ -3168,32 +3168,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void requestPointerCapture(View view) {
-        if (!mAttachInfo.mHasWindowFocus) {
-            Log.w(mTag, "Can't set capture if it's not focused.");
-            return;
-        }
-        if (mCapturingView == view) {
-            return;
-        }
-        mCapturingView = view;
-        InputManager.getInstance().setPointerIconDetached(true);
-        return;
-    }
-
-    void releasePointerCapture(View view) {
-        if (mCapturingView != view || mCapturingView == null) {
-            return;
-        }
-
-        mCapturingView = null;
-        InputManager.getInstance().setPointerIconDetached(false);
-    }
-
-    boolean hasPointerCapture(View view) {
-        return view != null && mCapturingView == view;
-    }
-
     @Override
     public void requestChildFocus(View child, View focused) {
         if (DEBUG_INPUT_RESIZE) {
@@ -3270,10 +3244,6 @@ public final class ViewRootImpl implements ViewParent,
         mView.assignParent(null);
         mView = null;
         mAttachInfo.mRootView = null;
-
-        if (mCapturingView != null) {
-            releasePointerCapture(mCapturingView);
-        }
 
         mSurface.release();
 
@@ -3615,8 +3585,6 @@ public final class ViewRootImpl implements ViewParent,
                                 .softInputMode &=
                                     ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
                         mHasHadWindowFocus = true;
-                    } else if (mCapturingView != null) {
-                        releasePointerCapture(mCapturingView);
                     }
                 }
             } break;
