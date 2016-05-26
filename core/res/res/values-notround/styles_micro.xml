@@ -17,4 +17,6 @@
     <style name="TextAppearance.Micro.AlertDialog.Message" parent="TextAppearance.Micro.Small">
         <item name="textAlignment">viewStart</item>
     </style>
+    <style name="PreferenceFragment.Micro" parent="PreferenceFragment.Material"/>
+    <style name="PreferenceFragmentList.Micro" parent="PreferenceFragmentList.Material"/>
 </resources>
