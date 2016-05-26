@@ -500,34 +500,44 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      * @param d The drawable to initialize.
      */
     private void initializeDrawableForDisplay(Drawable d) {
-        if (mDrawableContainerState.mEnterFadeDuration <= 0 && mHasAlpha) {
-            d.setAlpha(mAlpha);
-        }
+        // Temporary fix for suspending callbacks during initialization. We
+        // don't want any of these setters causing an invalidate() since that
+        // may call back into DrawableContainer.
+        final Callback cb = d.getCallback();
+        d.setCallback(null);
 
-        if (mDrawableContainerState.mHasColorFilter) {
-            // Color filter always overrides tint.
-            d.setColorFilter(mDrawableContainerState.mColorFilter);
-        } else {
-            if (mDrawableContainerState.mHasTintList) {
-                d.setTintList(mDrawableContainerState.mTintList);
+        try {
+            if (mDrawableContainerState.mEnterFadeDuration <= 0 && mHasAlpha) {
+                d.setAlpha(mAlpha);
             }
-            if (mDrawableContainerState.mHasTintMode) {
-                d.setTintMode(mDrawableContainerState.mTintMode);
+
+            if (mDrawableContainerState.mHasColorFilter) {
+                // Color filter always overrides tint.
+                d.setColorFilter(mDrawableContainerState.mColorFilter);
+            } else {
+                if (mDrawableContainerState.mHasTintList) {
+                    d.setTintList(mDrawableContainerState.mTintList);
+                }
+                if (mDrawableContainerState.mHasTintMode) {
+                    d.setTintMode(mDrawableContainerState.mTintMode);
+                }
             }
-        }
 
-        d.setVisible(isVisible(), true);
-        d.setDither(mDrawableContainerState.mDither);
-        d.setState(getState());
-        d.setLevel(getLevel());
-        d.setBounds(getBounds());
-        d.setLayoutDirection(getLayoutDirection());
-        d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+            d.setVisible(isVisible(), true);
+            d.setDither(mDrawableContainerState.mDither);
+            d.setState(getState());
+            d.setLevel(getLevel());
+            d.setBounds(getBounds());
+            d.setLayoutDirection(getLayoutDirection());
+            d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
 
-        final Rect hotspotBounds = mHotspotBounds;
-        if (hotspotBounds != null) {
-            d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
-                    hotspotBounds.right, hotspotBounds.bottom);
+            final Rect hotspotBounds = mHotspotBounds;
+            if (hotspotBounds != null) {
+                d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
+                        hotspotBounds.right, hotspotBounds.bottom);
+            }
+        } finally {
+            d.setCallback(cb);
         }
     }
 
