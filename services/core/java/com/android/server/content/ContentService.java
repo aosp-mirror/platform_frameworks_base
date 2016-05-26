@@ -20,9 +20,11 @@ import android.Manifest;
 import android.accounts.Account;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
@@ -296,11 +298,12 @@ public final class ContentService extends IContentService.Stub {
         final int callingUserHandle = UserHandle.getCallingUserId();
         // Registering an observer for any user other than the calling user requires uri grant or
         // cross user permission
-        if (callingUserHandle != userHandle &&
-                mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        != PackageManager.PERMISSION_GRANTED) {
-            enforceCrossUserPermission(userHandle,
-                    "no permission to observe other users' provider view");
+        if (callingUserHandle != userHandle) {
+            if (checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION, userHandle)
+                    != PackageManager.PERMISSION_GRANTED) {
+                enforceCrossUserPermission(userHandle,
+                        "no permission to observe other users' provider view");
+            }
         }
 
         if (userHandle < 0) {
@@ -360,10 +363,11 @@ public final class ContentService extends IContentService.Stub {
         final int pid = Binder.getCallingPid();
         final int callingUserHandle = UserHandle.getCallingUserId();
         // Notify for any user other than the caller requires uri grant or cross user permission
-        if (callingUserHandle != userHandle &&
-                mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                        != PackageManager.PERMISSION_GRANTED) {
-            enforceCrossUserPermission(userHandle, "no permission to notify other users");
+        if (callingUserHandle != userHandle) {
+            if (checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    userHandle) != PackageManager.PERMISSION_GRANTED) {
+                enforceCrossUserPermission(userHandle, "no permission to notify other users");
+            }
         }
 
         // We passed the permission check; resolve pseudouser targets as appropriate
@@ -389,9 +393,18 @@ public final class ContentService extends IContentService.Stub {
             for (int i=0; i<numCalls; i++) {
                 ObserverCall oc = calls.get(i);
                 try {
-                    oc.mObserver.onChange(oc.mSelfChange, uri, userHandle);
+                    // If the uri does not belong to the same user as the observer: we must add
+                    // the userId to the uri. Otherewise the observer would think the uri belongs
+                    // to his user.
+                    final Uri tempUri;
+                    if (oc.mObserverUserId != userHandle) {
+                        tempUri = ContentProvider.maybeAddUserId(uri, userHandle);
+                    } else {
+                        tempUri = uri;
+                    }
+                    oc.mObserver.onChange(oc.mSelfChange, tempUri, userHandle);
                     if (DEBUG) Slog.d(TAG, "Notified " + oc.mObserver + " of " + "update at "
-                            + uri);
+                            + tempUri);
                 } catch (RemoteException ex) {
                     synchronized (mRootNode) {
                         Log.w(TAG, "Found dead observer, removing");
@@ -427,6 +440,15 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    private int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, int userHandle) {
+        try {
+            return ActivityManagerNative.getDefault().checkUriPermission(
+                    uri, pid, uid, modeFlags, userHandle, null);
+        } catch (RemoteException e) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+    }
+
     public void notifyChange(Uri uri, IContentObserver observer,
                              boolean observerWantsSelfNotifications, boolean syncToNetwork) {
         notifyChange(uri, observer, observerWantsSelfNotifications,
@@ -444,11 +466,13 @@ public final class ContentService extends IContentService.Stub {
         final ObserverNode mNode;
         final IContentObserver mObserver;
         final boolean mSelfChange;
+        final int mObserverUserId;
 
-        ObserverCall(ObserverNode node, IContentObserver observer, boolean selfChange) {
+        ObserverCall(ObserverNode node, IContentObserver observer, boolean selfChange, int observerUserId) {
             mNode = node;
             mObserver = observer;
             mSelfChange = selfChange;
+            mObserverUserId = observerUserId;
         }
     }
 
@@ -1361,7 +1385,8 @@ public final class ContentService extends IContentService.Stub {
                     if (DEBUG) Slog.d(TAG, "Reporting to " + entry.observer + ": leaf=" + leaf
                             + " flags=" + Integer.toHexString(flags)
                             + " desc=" + entry.notifyForDescendants);
-                    calls.add(new ObserverCall(this, entry.observer, selfChange));
+                    calls.add(new ObserverCall(this, entry.observer, selfChange,
+                            UserHandle.getUserId(entry.uid)));
                 }
             }
         }
