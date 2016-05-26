@@ -418,13 +418,15 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       devices, <code>fastboot oem unlock</code>
       </li>
 
-      <li>Navigate to the directory where you unzipped the system image in Step
-      1.
+      <li>On the watch, select the <strong>Unlock</strong> option.
       </li>
 
-      <li>Execute the <code>flash-all</code> script by typing
+      <li>Navigate to the directory where you unzipped the system image in Step
+      1. At the top level of that directory,
+      execute the <code>flash-all</code> script by typing
       <code>flash-all.sh</code> or, in the case of Windows,
-      <code>flash-all.bat</code>.
+      <code>flash-all.bat</code>. The following may need to
+      precede the command: <code>./</code>
       </li>
     </ol>
 
@@ -434,40 +436,10 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </h4>
 
       <p>
-        After the <code>flash-all</code> script finishes, your watch reboots
-        and soon will be ready for testing with the preview image.
-      </p>
-
-    <ol>
-      <li>Attach the watch charger to the watch and plug the USB cord
-      into your computer, if it is not already plugged in.
-      </li>
-
-      <li>Use the following <a href="{@docRoot}tools/help/adb.html">adb
-      command</a> to confirm that the watch is available:
-      <code>adb devices</code>
-      </li>
-
-      <li>Use the following adb command to start the device in fastboot mode:
-      <code>adb reboot bootloader</code>
-      </li>
-
-      <li>Use the following command to
-      lock the device's bootloader: <code>fastboot flashing lock</code> or, for some
-      devices, <code>fastboot oem lock</code>
-      </li>
-
-      <li>On the watch, continue the boot by touching <strong>'0'</strong>.
-      </li>
-
-    </ol>
-
-
-    <p>
-      Pair the watch with a
-      phone or tablet. The preview now is available for testing on the watch.
-      Before installing an app, enable the Developer Options menu, and ADB
-      debugging, on the watch as follows:
+        After the <code>flash-all</code> script finishes, your watch reboots.
+        Pair the watch with a phone or tablet. The preview now is available
+        for testing on the watch. Before installing an app, perform the
+        following steps on the watch to re-secure the watch's bootloader:
     </p>
 
     <ol>
@@ -490,6 +462,19 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Connect the watch to your computer and tap <strong>Always allow from
       this computer</strong>.
       </li>
+
+      <li>Use the following adb command to start the device in fastboot mode:
+      <code>adb reboot bootloader</code>
+      </li>
+
+      <li>Use the following command to
+      lock the device's bootloader: <code>fastboot flashing lock</code> or, for some
+      devices, <code>fastboot oem lock</code>
+      </li>
+
+      <li>On the watch, continue the boot by choosing
+      <strong>Start</strong> and touching <strong>'0'</strong>.
+      </li>
     </ol>
 
     <p>
@@ -502,8 +487,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Open your app in Android Studio.
       </li>
 
-      <li>Select <strong>wear</strong> from the Run/Debug configuration
-      drop-down menu.
+      <li>Select your Wear app module name from the Run/Debug configuration
+      drop-down menu (typically <strong>wear</strong>).
       </li>
 
       <li>Click the Play button.
@@ -514,8 +499,7 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </ol>
 
     <p>
-      After your app is installed on the watch, you are prompted to start the
-      app on the watch.
+      After your app is installed on the watch, the app should run.
     </p>
 
     <p>
@@ -567,10 +551,12 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
       <li>Click <strong>Create Virtual Device</strong>.
       </li>
 
-      <li>In the <strong>Category</strong> pane, select Wear, choose a hardware profile,
-       and click <strong>Next</strong>. The Android Wear 2.0 Developer Preview
+      <li>In the <strong>Category</strong> pane, select Wear and
+       choose a hardware profile.
+       The Android Wear 2.0 Developer Preview
        is only optimized for round devices currently, so we recommend not
        using the square or chin profiles for now.
+       Click <strong>Next</strong>.
       </li>
 
       <li>Select an <strong>N</strong> image to download. The images may be on
@@ -588,7 +574,8 @@ This is the Android Wear SDK Preview License Agreement (the “License Agreement
     </ol>
 
     <p>
-      You can now test an application in the <a href=
+      You can now test an application with a virtual preview device
+      in the <a href=
       "{@docRoot}tools/devices/emulator.html">Android Emulator</a>. For more
       information about using virtual devices, see <a href=
       "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with the AVD
