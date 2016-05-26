@@ -381,6 +381,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     private boolean updateBoundsAfterConfigChange() {
+        if (mDisplayContent == null) {
+            // If the stack is already detached we're not updating anything,
+            // as it's going away soon anyway.
+            return false;
+        }
         final int newRotation = getDisplayInfo().rotation;
         final int newDensity = getDisplayInfo().logicalDensityDpi;
 
