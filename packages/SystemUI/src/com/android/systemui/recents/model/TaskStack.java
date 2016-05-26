@@ -228,8 +228,8 @@ public class TaskStack {
         /**
          * Notifies when a task has been removed from the stack.
          */
-        void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture);
+        void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask,
+                AnimationProps animation, boolean fromDockGesture);
 
         /**
          * Notifies when all tasks have been removed from the stack.
@@ -609,12 +609,11 @@ public class TaskStack {
      */
     public void removeTask(Task t, AnimationProps animation, boolean fromDockGesture) {
         if (mStackTaskList.contains(t)) {
-            boolean wasFrontMostTask = (getStackFrontMostTask(false /* includeFreeform */) == t);
             removeTaskImpl(mStackTaskList, t);
             Task newFrontMostTask = getStackFrontMostTask(false  /* includeFreeform */);
             if (mCb != null) {
                 // Notify that a task has been removed
-                mCb.onStackTaskRemoved(this, t, wasFrontMostTask, newFrontMostTask, animation,
+                mCb.onStackTaskRemoved(this, t, newFrontMostTask, animation,
                         fromDockGesture);
             }
         }
@@ -648,6 +647,7 @@ public class TaskStack {
         ArrayMap<Task.TaskKey, Task> currentTasksMap = createTaskKeyMapFromList(mRawTaskList);
         ArrayMap<Task.TaskKey, Task> newTasksMap = createTaskKeyMapFromList(tasks);
         ArrayList<Task> addedTasks = new ArrayList<>();
+        ArrayList<Task> removedTasks = new ArrayList<>();
         ArrayList<Task> allTasks = new ArrayList<>();
 
         // Disable notifications if there are no callbacks
@@ -661,11 +661,7 @@ public class TaskStack {
             Task task = mRawTaskList.get(i);
             if (!newTasksMap.containsKey(task.key)) {
                 if (notifyStackChanges) {
-                    // If we are notifying, then remove the task now, otherwise the raw task list
-                    // will be reset at the end of this method
-                    removeTask(task, AnimationProps.IMMEDIATE, false /* fromDockGesture */);
-                    mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null,
-                            AnimationProps.IMMEDIATE, false /* fromDockGesture */);
+                    removedTasks.add(task);
                 }
             }
             task.setGroup(null);
@@ -698,6 +694,14 @@ public class TaskStack {
 
         // Update the affiliated groupings
         createAffiliatedGroupings(context);
+
+        // Only callback for the removed tasks after the stack has updated
+        int removedTaskCount = removedTasks.size();
+        Task newFrontMostTask = getStackFrontMostTask(false);
+        for (int i = 0; i < removedTaskCount; i++) {
+            mCb.onStackTaskRemoved(this, removedTasks.get(i), newFrontMostTask,
+                    AnimationProps.IMMEDIATE, false /* fromDockGesture */);
+        }
 
         // Only callback for the newly added tasks after this stack has been updated
         int addedTaskCount = addedTasks.size();
