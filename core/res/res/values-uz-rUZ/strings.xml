@@ -1526,7 +1526,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishini cheklaydi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Trafik sarfini kamaytirish maqsadida Trafik tejash funksiyasi ba’zi ilovalarning orqa fonda internetdan foydalanishining oldini oladi. Siz hozirda foydalanayotgan ilova internetdan faqat talab etilgandagina foydalanishi mumkin. Bu degani, masalan, rasmlar ustiga bosilmaguncha, ular yuklanmaydi."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fondan internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1621,4 +1621,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Bu qurilmadan cheklovlarsiz foydalanish uchun zavod sozlamalarini tiklang"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ko‘proq o‘rganish uchun bosing."</string>
+    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
+    <skip />
 </resources>

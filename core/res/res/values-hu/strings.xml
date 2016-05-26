@@ -1618,4 +1618,6 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Állítsa vissza a gyári beállításokat az eszköz korlátozások nélküli használata érdekében"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Érintse meg a további információkért."</string>
+    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
+    <skip />
 </resources>
