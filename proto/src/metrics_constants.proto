@@ -2239,6 +2239,10 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     STORAGE_MANAGER_SETTINGS = 458;
 
+    // OPEN: Settings -> Gestures
+    // CATEGORY: SETTINGS
+    SETTINGS_GESTURES = 459;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
