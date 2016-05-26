@@ -671,7 +671,7 @@ public class Build {
         /**
          * N is for ¯\_(ツ)_/¯.
          */
-        public static final int N = CUR_DEVELOPMENT;
+        public static final int N = 24;
     }
 
     /** The type of build, like "user" or "eng". */
