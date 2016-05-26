@@ -49,12 +49,7 @@ import java.util.Map;
  * <p>For more information about application testing, read the
  * <a href="{@docRoot}guide/topics/testing/index.html">Testing</a> developer guide.</p>
  * </div>
- *
- * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
- * New tests should be written using the
- * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
  */
-@Deprecated
 public class MockContentResolver extends ContentResolver {
     Map<String, ContentProvider> mProviders;
 
