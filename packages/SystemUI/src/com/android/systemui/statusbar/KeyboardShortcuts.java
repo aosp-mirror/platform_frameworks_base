@@ -151,10 +151,10 @@ public final class KeyboardShortcuts {
     }
 
     public static void dismiss() {
-        MetricsLogger.hidden(sInstance.mContext,
-                MetricsProto.MetricsEvent.KEYBOARD_SHORTCUTS_HELPER);
         synchronized (sLock) {
             if (sInstance != null) {
+                MetricsLogger.hidden(sInstance.mContext,
+                        MetricsProto.MetricsEvent.KEYBOARD_SHORTCUTS_HELPER);
                 sInstance.dismissKeyboardShortcuts();
                 sInstance = null;
             }
