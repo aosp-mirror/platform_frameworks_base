@@ -56,7 +56,7 @@ public abstract class CarrierMessagingService extends Service {
      * new message notification should be shown.
      *
      * @see #RECEIVE_OPTIONS_DROP
-     * @see #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_ENCRYPTED_STORAGE_UNAVAILABLE
+     * @see #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE
      */
     public static final int RECEIVE_OPTIONS_DEFAULT = 0;
 
@@ -72,7 +72,7 @@ public abstract class CarrierMessagingService extends Service {
      * credential-encrypted storage of the device is not available before the user unlocks the
      * phone. It is only applicable to devices that support file-based encryption.
      */
-    public static final int RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_ENCRYPTED_STORAGE_UNAVAILABLE = 0x2;
+    public static final int RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE = 0x2;
 
     /**
      * Indicates that an SMS or MMS message was successfully sent.
@@ -148,7 +148,7 @@ public abstract class CarrierMessagingService extends Service {
      * @param subId SMS subscription ID of the SIM
      * @param callback result callback. Call with a bitmask integer to indicate how the incoming
      *        text SMS should be handled by the platform. Use {@link #RECEIVE_OPTIONS_DROP} and
-     *        {@link #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_ENCRYPTED_STORAGE_UNAVAILABLE}
+     *        {@link #RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE}
      *        to set the flags in the bitmask.
      */
     public void onReceiveTextSms(@NonNull MessagePdu pdu, @NonNull String format,
@@ -157,7 +157,7 @@ public abstract class CarrierMessagingService extends Service {
             @Override
             public void onReceiveResult(Boolean result) throws RemoteException {
                 callback.onReceiveResult(result ? RECEIVE_OPTIONS_DEFAULT : RECEIVE_OPTIONS_DROP
-                    | RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_ENCRYPTED_STORAGE_UNAVAILABLE);
+                    | RECEIVE_OPTIONS_SKIP_NOTIFY_WHEN_CREDENTIAL_PROTECTED_STORAGE_UNAVAILABLE);
             }
         });
     }
