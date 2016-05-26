@@ -2737,4 +2737,28 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Retrieve the data to be backed to save the current state.
+     * @hide
+     */
+    public byte[] retrieveBackupData() {
+        try {
+            return mService.retrieveBackupData();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Restore state from the backed up data.
+     * @hide
+     */
+    public void restoreBackupData(byte[] data) {
+        try {
+            mService.restoreBackupData(data);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
