@@ -674,21 +674,16 @@ public:
     void onPropertyChanged(TreeProperties* prop);
     TreeProperties* mutateStagingProperties() { return &mStagingProperties; }
     const TreeProperties* stagingProperties() { return &mStagingProperties; }
-    PushStagingFunctor* getFunctor() { return &mFunctor;}
 
     // This should only be called from animations on RT
     TreeProperties* mutateProperties() { return &mProperties; }
 
+    // This should always be called from RT.
+    bool isDirty() const { return mCache.dirty; }
+    bool getPropertyChangeWillBeConsumed() const { return mWillBeConsumed; }
+    void setPropertyChangeWillBeConsumed(bool willBeConsumed) { mWillBeConsumed = willBeConsumed; }
+
 private:
-    class VectorDrawableFunctor : public PushStagingFunctor {
-    public:
-        VectorDrawableFunctor(Tree* tree) : mTree(tree) {}
-        virtual void operator ()() {
-            mTree->syncProperties();
-        }
-    private:
-        Tree* mTree;
-    };
 
     SkPaint* updatePaint(SkPaint* outPaint, TreeProperties* prop);
     bool allocateBitmapIfNeeded(SkBitmap* outCache, int width, int height);
@@ -705,8 +700,6 @@ private:
     TreeProperties mProperties = TreeProperties(this);
     TreeProperties mStagingProperties = TreeProperties(this);
 
-    VectorDrawableFunctor mFunctor = VectorDrawableFunctor(this);
-
     SkPaint mPaint;
     struct Cache {
         SkBitmap bitmap;
@@ -718,6 +711,8 @@ private:
 
     PropertyChangedListener mPropertyChangedListener
             = PropertyChangedListener(&mCache.dirty, &mStagingCache.dirty);
+
+    mutable bool mWillBeConsumed = false;
 };
 
 } // namespace VectorDrawable

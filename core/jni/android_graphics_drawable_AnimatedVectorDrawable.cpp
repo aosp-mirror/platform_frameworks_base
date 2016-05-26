@@ -95,6 +95,12 @@ static jlong createAnimatorSet(JNIEnv*, jobject) {
     return reinterpret_cast<jlong>(animatorSet);
 }
 
+static void setVectorDrawableTarget(JNIEnv*, jobject,jlong animatorPtr, jlong vectorDrawablePtr) {
+    VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(vectorDrawablePtr);
+    PropertyValuesAnimatorSet* set = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorPtr);
+    set->setVectorDrawable(tree);
+}
+
 static jlong createGroupPropertyHolder(JNIEnv*, jobject, jlong nativePtr, jint propertyId,
         jfloat startValue, jfloat endValue) {
     VectorDrawable::Group* group = reinterpret_cast<VectorDrawable::Group*>(nativePtr);
@@ -168,6 +174,7 @@ static void reset(JNIEnv*, jobject, jlong animatorSetPtr) {
 
 static const JNINativeMethod gMethods[] = {
     {"nCreateAnimatorSet", "()J", (void*)createAnimatorSet},
+    {"nSetVectorDrawableTarget", "(JJ)V", (void*)setVectorDrawableTarget},
     {"nAddAnimator", "(JJJJJI)V", (void*)addAnimator},
     {"nCreateGroupPropertyHolder", "!(JIFF)J", (void*)createGroupPropertyHolder},
     {"nCreatePathDataPropertyHolder", "!(JJJ)J", (void*)createPathDataPropertyHolder},
