@@ -535,6 +535,18 @@ public class LockPatternUtils {
     }
 
     /**
+     * Use it to reset keystore without wiping work profile
+     */
+    public void resetKeyStore(int userId) {
+        try {
+            getLockSettings().resetKeyStore(userId);
+        } catch (RemoteException e) {
+            // It should not happen
+            Log.e(TAG, "Couldn't reset keystore " + e);
+        }
+    }
+
+    /**
      * Clear any lock pattern or password.
      */
     public void clearLock(int userHandle) {
