@@ -9135,9 +9135,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // sense, so turn off auto-remove.
                         intent.addFlags(Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
                     }
-                } else if ((intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
-                    // Must be a new task.
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
                 if (!comp.equals(mLastAddedTaskComponent) || callingUid != mLastAddedTaskUid) {
                     mLastAddedTaskActivity = null;
