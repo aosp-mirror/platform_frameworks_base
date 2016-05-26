@@ -745,6 +745,9 @@ public final class MediaCodecInfo {
          * Retrieve the codec capabilities for a certain {@code mime type}, {@code
          * profile} and {@code level}.  If the type, or profile-level combination
          * is not understood by the framework, it returns null.
+         * <p class=note> In {@link android.os.Build.VERSION_CODES#M}, calling this
+         * method without calling any method of the {@link MediaCodecList} class beforehand
+         * results in a {@link NullPointerException}.</p>
          */
         public static CodecCapabilities createFromProfileLevel(
                 String mime, int profile, int level) {

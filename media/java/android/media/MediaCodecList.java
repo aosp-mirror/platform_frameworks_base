@@ -63,6 +63,11 @@ final public class MediaCodecList {
     }
 
     /* package private */ static final Map<String, Object> getGlobalSettings() {
+        synchronized (sInitLock) {
+            if (sGlobalSettings == null) {
+                sGlobalSettings = native_getGlobalSettings();
+            }
+        }
         return sGlobalSettings;
     }
 
@@ -74,7 +79,6 @@ final public class MediaCodecList {
     private static final void initCodecList() {
         synchronized (sInitLock) {
             if (sRegularCodecInfos == null) {
-                sGlobalSettings = native_getGlobalSettings();
                 int count = native_getCodecCount();
                 ArrayList<MediaCodecInfo> regulars = new ArrayList<MediaCodecInfo>();
                 ArrayList<MediaCodecInfo> all = new ArrayList<MediaCodecInfo>();
