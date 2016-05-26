@@ -402,12 +402,17 @@ public class NotificationContentView extends FrameLayout {
             return mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.notification_action_list_height);
         }
+        int hint;
         if (mHeadsUpChild != null) {
-            return mHeadsUpChild.getHeight();
+            hint = mHeadsUpChild.getHeight();
         } else {
-            return mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_action_list_height);
+            hint = mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_action_list_height);
         }
+        if (mExpandedChild != null) {
+            hint = Math.min(hint, mExpandedChild.getHeight());
+        }
+        return hint;
     }
 
     private void updateContentTransformation() {
