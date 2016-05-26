@@ -63,9 +63,6 @@ toc:
 - title: Google Play Developer API
   path: /google/play/developer-api.html
 
-- title: Advertising ID
-  path: /google/play-services/id.html
-
 - title: Multiple APK Support
   path: /google/play/publishing/multiple-apks.html
 
