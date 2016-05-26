@@ -454,6 +454,15 @@ class WindowSurfaceController {
         return mSurfaceY;
     }
 
+    float getWidth() {
+        return mSurfaceW;
+    }
+
+    float getHeight() {
+        return mSurfaceH;
+    }
+
+
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (dumpAll) {
             pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
