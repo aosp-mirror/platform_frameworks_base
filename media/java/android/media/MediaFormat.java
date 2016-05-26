@@ -185,10 +185,18 @@ public final class MediaFormat {
     public static final String KEY_MAX_INPUT_SIZE = "max-input-size";
 
     /**
-     * A key describing the bitrate in bits/sec.
+     * A key describing the average bitrate in bits/sec.
      * The associated value is an integer
      */
     public static final String KEY_BIT_RATE = "bitrate";
+
+    /**
+     * A key describing the max bitrate in bits/sec.
+     * This is usually over a one-second sliding window (e.g. over any window of one second).
+     * The associated value is an integer
+     * @hide
+     */
+    public static final String KEY_MAX_BIT_RATE = "max-bitrate";
 
     /**
      * A key describing the color format of the content in a video format.
