@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
 import android.os.ServiceManager;
@@ -127,6 +128,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     private IGateKeeperService mGateKeeperService;
     private NotificationManager mNotificationManager;
     private UserManager mUserManager;
+
+    private final KeyStore mKeyStore = KeyStore.getInstance();
+
+    /**
+     * The UIDs that are used for system credential storage in keystore.
+     */
+    private static final int[] SYSTEM_CREDENTIAL_UIDS = {Process.WIFI_UID, Process.VPN_UID,
+        Process.ROOT_UID, Process.SYSTEM_UID};
 
     static {
         // Just launch the home screen, which happens anyway
@@ -715,7 +724,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
             CertificateException, IOException {
-        if (DEBUG) Slog.v(TAG, "Unlock keystore for child profile");
+        if (DEBUG) Slog.v(TAG, "Get child profile decrytped key");
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
             throw new FileNotFoundException("Child profile lock file not found");
@@ -1132,6 +1141,49 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void fixateNewestUserKeyAuth(int userId)
             throws RemoteException {
         getMountService().fixateNewestUserKeyAuth(userId);
+    }
+
+    @Override
+    public void resetKeyStore(int userId) throws RemoteException {
+        if (DEBUG) Slog.v(TAG, "Reset keystore for user: " + userId);
+        int managedUserId = -1;
+        String managedUserDecryptedPassword = null;
+        final List<UserInfo> profiles = mUserManager.getProfiles(userId);
+        for (UserInfo pi : profiles) {
+            // Unlock managed profile with unified lock
+            if (pi.isManagedProfile()
+                    && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
+                    && mStorage.hasChildProfileLock(pi.id)) {
+                try {
+                    if (managedUserId == -1) {
+                        managedUserDecryptedPassword = getDecryptedPasswordForTiedProfile(pi.id);
+                        managedUserId = pi.id;
+                    } else {
+                        // Should not happen
+                        Slog.e(TAG, "More than one managed profile, uid1:" + managedUserId
+                                + ", uid2:" + pi.id);
+                    }
+                } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
+                        | NoSuchAlgorithmException | NoSuchPaddingException
+                        | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                        | BadPaddingException | CertificateException | IOException e) {
+                    Slog.e(TAG, "Failed to decrypt child profile key", e);
+                }
+            }
+        }
+        try {
+            // Clear all the users credentials could have been installed in for this user.
+            for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
+                for (int uid : SYSTEM_CREDENTIAL_UIDS) {
+                    mKeyStore.clearUid(UserHandle.getUid(profileId, uid));
+                }
+            }
+        } finally {
+            if (managedUserId != -1 && managedUserDecryptedPassword != null) {
+                if (DEBUG) Slog.v(TAG, "Restore tied profile lock");
+                tieProfileLockToParent(managedUserId, managedUserDecryptedPassword);
+            }
+        }
     }
 
     @Override
