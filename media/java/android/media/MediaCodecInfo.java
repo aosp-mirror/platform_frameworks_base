@@ -567,6 +567,34 @@ public final class MediaCodecInfo {
                     return false;
                 }
             }
+
+            Integer profile = (Integer)map.get(MediaFormat.KEY_PROFILE);
+            Integer level = (Integer)map.get(MediaFormat.KEY_LEVEL);
+
+            if (profile != null) {
+                if (!supportsProfileLevel(profile, level)) {
+                    return false;
+                }
+
+                // If we recognize this profile, check that this format is supported by the
+                // highest level supported by the codec for that profile. (Ignore specified
+                // level beyond the above profile/level check as level is only used as a
+                // guidance. E.g. AVC Level 1 CIF format is supported if codec supports level 1.1
+                // even though max size for Level 1 is QCIF. However, MPEG2 Simple Profile
+                // 1080p format is not supported even if codec supports Main Profile Level High,
+                // as Simple Profile does not support 1080p.
+                CodecCapabilities levelCaps = null;
+                int maxLevel = 0;
+                for (CodecProfileLevel pl : profileLevels) {
+                    if (pl.profile == profile && pl.level > maxLevel) {
+                        maxLevel = pl.level;
+                    }
+                }
+                levelCaps = createFromProfileLevel(mMime, profile, maxLevel);
+                if (levelCaps != null && !levelCaps.isFormatSupported(format)) {
+                    return false;
+                }
+            }
             if (mAudioCaps != null && !mAudioCaps.supportsFormat(format)) {
                 return false;
             }
@@ -577,6 +605,57 @@ public final class MediaCodecInfo {
                 return false;
             }
             return true;
+        }
+
+        private static boolean supportsBitrate(
+                Range<Integer> bitrateRange, MediaFormat format) {
+            Map<String, Object> map = format.getMap();
+
+            // consider max bitrate over average bitrate for support
+            Integer maxBitrate = (Integer)map.get(MediaFormat.KEY_MAX_BIT_RATE);
+            Integer bitrate = (Integer)map.get(MediaFormat.KEY_BIT_RATE);
+            if (bitrate == null) {
+                bitrate = maxBitrate;
+            } else if (maxBitrate != null) {
+                bitrate = Math.max(bitrate, maxBitrate);
+            }
+
+            if (bitrate != null && bitrate > 0) {
+                return bitrateRange.contains(bitrate);
+            }
+
+            return true;
+        }
+
+        private boolean supportsProfileLevel(int profile, Integer level) {
+            for (CodecProfileLevel pl: profileLevels) {
+                if (pl.profile != profile) {
+                    continue;
+                }
+
+                // AAC does not use levels
+                if (level == null || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AAC)) {
+                    return true;
+                }
+
+                // H.263 levels are not completely ordered:
+                // Level45 support only implies Level10 support
+                if (mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_H263)) {
+                    if (pl.level != level && pl.level == CodecProfileLevel.H263Level45
+                            && level > CodecProfileLevel.H263Level10) {
+                        continue;
+                    }
+                }
+                if (pl.level >= level) {
+                    // if we recognize the listed profile/level, we must also recognize the
+                    // profile/level arguments.
+                    if (createFromProfileLevel(mMime, profile, pl.level) != null) {
+                        return createFromProfileLevel(mMime, profile, level) != null;
+                    }
+                    return true;
+                }
+            }
+            return false;
         }
 
         // errors while reading profile levels - accessed from sister capabilities
@@ -1004,7 +1083,12 @@ public final class MediaCodecInfo {
             Map<String, Object> map = format.getMap();
             Integer sampleRate = (Integer)map.get(MediaFormat.KEY_SAMPLE_RATE);
             Integer channels = (Integer)map.get(MediaFormat.KEY_CHANNEL_COUNT);
+
             if (!supports(sampleRate, channels)) {
+                return false;
+            }
+
+            if (!CodecCapabilities.supportsBitrate(mBitrateRange, format)) {
                 return false;
             }
 
@@ -1310,8 +1394,7 @@ public final class MediaCodecInfo {
             return supports(width, height, null);
         }
 
-        private boolean supports(
-                Integer width, Integer height, Number rate) {
+        private boolean supports(Integer width, Integer height, Number rate) {
             boolean ok = true;
 
             if (ok && width != null) {
@@ -1353,9 +1436,16 @@ public final class MediaCodecInfo {
             Integer height = (Integer)map.get(MediaFormat.KEY_HEIGHT);
             Number rate = (Number)map.get(MediaFormat.KEY_FRAME_RATE);
 
-            // we ignore color-format for now as it is not reliably reported by codec
+            if (!supports(width, height, rate)) {
+                return false;
+            }
 
-            return supports(width, height, rate);
+            if (!CodecCapabilities.supportsBitrate(mBitrateRange, format)) {
+                return false;
+            }
+
+            // we ignore color-format for now as it is not reliably reported by codec
+            return true;
         }
 
         /* no public constructor */
