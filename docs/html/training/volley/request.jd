@@ -38,7 +38,7 @@ This lesson describes how to use the common request types that Volley supports:<
 
 <p>If your expected response is one of these types, you probably won't have to implement a
 custom request. This lesson describes how to use these standard request types. For
-information on how to implement your own custom request, see <a href="requests-custom.html">
+information on how to implement your own custom request, see <a href="request-custom.html">
 Implementing a Custom Request</a>.</p>
 
 
