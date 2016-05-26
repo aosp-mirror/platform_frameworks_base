@@ -146,6 +146,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -4664,7 +4665,7 @@ public class BackupManagerService {
         // a standalone thread.  The  runner owns this half of the pipe, and closes
         // it to indicate EOD to the other end.
         class SinglePackageBackupPreflight implements BackupRestoreTask, FullBackupPreflight {
-            final AtomicLong mResult = new AtomicLong();
+            final AtomicLong mResult = new AtomicLong(BackupTransport.AGENT_ERROR);
             final CountDownLatch mLatch = new CountDownLatch(1);
             final IBackupTransport mTransport;
 
@@ -4684,8 +4685,13 @@ public class BackupManagerService {
                     }
                     agent.doMeasureFullBackup(token, mBackupManagerBinder);
 
-                    // now wait to get our result back
-                    mLatch.await();
+                    // Now wait to get our result back.  If this backstop timeout is reached without
+                    // the latch being thrown, flow will continue as though a result or "normal"
+                    // timeout had been produced.  In case of a real backstop timeout, mResult
+                    // will still contain the value it was constructed with, AGENT_ERROR, which
+                    // intentionaly falls into the "just report failure" code.
+                    mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
+
                     long totalSize = mResult.get();
                     // If preflight timed out, mResult will contain error code as int.
                     if (totalSize < 0) {
@@ -4738,7 +4744,7 @@ public class BackupManagerService {
             @Override
             public long getExpectedSizeOrErrorCode() {
                 try {
-                    mLatch.await();
+                    mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                     return mResult.get();
                 } catch (InterruptedException e) {
                     return BackupTransport.NO_MORE_DATA;
@@ -4763,8 +4769,8 @@ public class BackupManagerService {
                 mPreflight = new SinglePackageBackupPreflight(transport);
                 mPreflightLatch = new CountDownLatch(1);
                 mBackupLatch = new CountDownLatch(1);
-                mPreflightResult = BackupTransport.TRANSPORT_OK;
-                mBackupResult = BackupTransport.TRANSPORT_OK;
+                mPreflightResult = BackupTransport.AGENT_ERROR;
+                mBackupResult = BackupTransport.AGENT_ERROR;
             }
 
             @Override
@@ -4801,7 +4807,7 @@ public class BackupManagerService {
             // otherwise return negative error code.
             long getPreflightResultBlocking() {
                 try {
-                    mPreflightLatch.await();
+                    mPreflightLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                     if (mPreflightResult == BackupTransport.TRANSPORT_OK) {
                         return mPreflight.getExpectedSizeOrErrorCode();
                     } else {
@@ -4814,7 +4820,7 @@ public class BackupManagerService {
 
             int getBackupResultBlocking() {
                 try {
-                    mBackupLatch.await();
+                    mBackupLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                     return mBackupResult;
                 } catch (InterruptedException e) {
                     return BackupTransport.AGENT_ERROR;
