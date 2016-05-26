@@ -845,6 +845,8 @@ redirects:
   to: /studio/run/emulator.html
 - from: /r/studio-ui/instant-run.html
   to: /studio/run/index.html#instant-run
+- from: /r/studio-ui/test-recorder.html
+  to: http://tools.android.com/tech-docs/test-recorder
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
 - from: /shareables/...
