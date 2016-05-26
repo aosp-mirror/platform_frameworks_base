@@ -2589,8 +2589,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final PhoneWindow win = new PhoneWindow(context);
             win.setIsStartingWindow(true);
 
+            final WindowManager.LayoutParams params = win.getAttributes();
             final Resources r = context.getResources();
-            win.setTitle(r.getText(labelRes, nonLocalizedLabel));
+            CharSequence label = r.getText(labelRes);
+            // Only change the accessibility title if the label is localized
+            if (label != null) {
+                win.setTitle(label, true);
+            } else {
+                win.setTitle(nonLocalizedLabel, false);
+            }
 
             win.setType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
@@ -2624,7 +2631,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
 
-            final WindowManager.LayoutParams params = win.getAttributes();
             params.token = appToken;
             params.packageName = packageName;
             params.windowAnimations = win.getWindowStyle().getResourceId(
