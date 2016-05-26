@@ -127,6 +127,8 @@ redirects:
   to: https://developers.google.com/mobile-ads-sdk/
 - from: /google/play-services/wallet.html
   to: https://developers.google.com/wallet/instant-buy/
+- from: /google/play-services/id.html
+  to: https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient
 - from: /google/play/safetynet/...
   to: /training/safetynet/index.html
 - from: /google/gcm/...
