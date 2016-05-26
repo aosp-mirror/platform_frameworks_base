@@ -521,16 +521,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setTitle(CharSequence title) {
+        setTitle(title, true);
+    }
+
+    public void setTitle(CharSequence title, boolean updateAccessibilityTitle) {
         if (mTitleView != null) {
             mTitleView.setText(title);
         } else if (mDecorContentParent != null) {
             mDecorContentParent.setWindowTitle(title);
         }
         mTitle = title;
-        WindowManager.LayoutParams params = getAttributes();
-        if (!TextUtils.equals(title, params.accessibilityTitle)) {
-            params.accessibilityTitle = TextUtils.stringOrSpannedString(title);
-            dispatchWindowAttributesChanged(getAttributes());
+        if (updateAccessibilityTitle) {
+            WindowManager.LayoutParams params = getAttributes();
+            if (!TextUtils.equals(title, params.accessibilityTitle)) {
+                params.accessibilityTitle = TextUtils.stringOrSpannedString(title);
+                dispatchWindowAttributesChanged(getAttributes());
+            }
         }
     }
 
