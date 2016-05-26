@@ -359,7 +359,9 @@ public class NotificationContentView extends FrameLayout {
 
     private void setVisible(final boolean isVisible) {
         if (isVisible) {
-
+            // This call can happen multiple times, but removing only removes a single one.
+            // We therefore need to remove the old one.
+            getViewTreeObserver().removeOnPreDrawListener(mEnableAnimationPredrawListener);
             // We only animate if we are drawn at least once, otherwise the view might animate when
             // it's shown the first time
             getViewTreeObserver().addOnPreDrawListener(mEnableAnimationPredrawListener);
