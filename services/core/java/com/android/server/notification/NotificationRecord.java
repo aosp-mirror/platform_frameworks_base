@@ -318,8 +318,12 @@ public final class NotificationRecord {
 
     public void setContactAffinity(float contactAffinity) {
         mContactAffinity = contactAffinity;
+        if (mImportance < IMPORTANCE_HIGH &&
+                mContactAffinity >= ValidateNotificationPeople.STARRED_CONTACT) {
+            setImportance(IMPORTANCE_HIGH, getPeopleExplanation());
+        }
         if (mImportance < IMPORTANCE_DEFAULT &&
-                mContactAffinity > ValidateNotificationPeople.VALID_CONTACT) {
+                mContactAffinity >= ValidateNotificationPeople.VALID_CONTACT) {
             setImportance(IMPORTANCE_DEFAULT, getPeopleExplanation());
         }
     }
