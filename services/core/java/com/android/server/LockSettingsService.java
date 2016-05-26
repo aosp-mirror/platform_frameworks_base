@@ -49,6 +49,7 @@ import android.os.IProgressListener;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.storage.IMountService;
+import android.os.storage.StorageManager;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -341,6 +342,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void showEncryptionNotification(UserHandle user, CharSequence title, CharSequence message,
             CharSequence detail, PendingIntent intent) {
         if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
+
+        // Suppress all notifications on non-FBE devices for now
+        if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
+
         Notification notification = new Notification.Builder(mContext)
                 .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
                 .setWhen(0)
