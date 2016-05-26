@@ -4319,18 +4319,23 @@ public class Notification implements Parcelable
                 // experience
                 bigTextText = mBuilder.processLegacyText(text);
             }
-            contentView.setTextViewText(R.id.big_text, bigTextText);
-            contentView.setViewVisibility(R.id.big_text,
-                    TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
-            contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines());
-            contentView.setBoolean(R.id.big_text, "setHasImage", mBuilder.mN.mLargeIcon != null);
+            applyBigTextContentView(mBuilder, contentView, bigTextText);
 
             return contentView;
         }
 
-        private int calculateMaxLines() {
+        static void applyBigTextContentView(Builder builder,
+                RemoteViews contentView, CharSequence bigTextText) {
+            contentView.setTextViewText(R.id.big_text, bigTextText);
+            contentView.setViewVisibility(R.id.big_text,
+                    TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
+            contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines(builder));
+            contentView.setBoolean(R.id.big_text, "setHasImage", builder.mN.mLargeIcon != null);
+        }
+
+        private static int calculateMaxLines(Builder builder) {
             int lineCount = MAX_LINES;
-            boolean hasActions = mBuilder.mActions.size() > 0;
+            boolean hasActions = builder.mActions.size() > 0;
             if (hasActions) {
                 lineCount -= LINES_CONSUMED_BY_ACTIONS;
             }
@@ -4527,6 +4532,16 @@ public class Notification implements Parcelable
                     ? super.mBigContentTitle
                     : mConversationTitle;
             boolean hasTitle = !TextUtils.isEmpty(title);
+
+            if (!hasTitle && mMessages.size() == 1) {
+                CharSequence sender = mMessages.get(0).mSender;
+                CharSequence text = mMessages.get(0).mText;
+                RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
+                        mBuilder.getBigTextLayoutResource(),
+                        false /* progress */, sender, null /* text */);
+                BigTextStyle.applyBigTextContentView(mBuilder, contentView, text);
+                return contentView;
+            }
 
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
