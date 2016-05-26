@@ -789,7 +789,7 @@ public class UserManager {
      */
     public boolean isPrimaryUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isPrimary() : false;
+        return user != null && user.isPrimary();
     }
 
     /**
@@ -855,7 +855,19 @@ public class UserManager {
      */
     public boolean isGuestUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null ? user.isGuest() : false;
+        return user != null && user.isGuest();
+    }
+
+    /**
+     * Checks if the calling app is running in a demo user.
+     * <p>
+     * Caller must hold the MANAGE_USERS permission.
+     * @return whether the caller is a demo user.
+     * @hide
+     */
+    public boolean isDemoUser() {
+        UserInfo user = getUserInfo(UserHandle.myUserId());
+        return user != null && user.isDemo();
     }
 
     /**
