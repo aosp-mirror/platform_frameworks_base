@@ -29,7 +29,6 @@ import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
-import android.os.LocaleList;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -38,13 +37,12 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
@@ -117,6 +115,30 @@ public class ResourcesManager {
                 sResourcesManager = new ResourcesManager();
             }
             return sResourcesManager;
+        }
+    }
+
+    /**
+     * Invalidate and destroy any resources that reference content under the
+     * given filesystem path. Typically used when unmounting a storage device to
+     * try as hard as possible to release any open FDs.
+     */
+    public void invalidatePath(String path) {
+        synchronized (this) {
+            int count = 0;
+            for (int i = 0; i < mResourceImpls.size();) {
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                if (key.isPathReferenced(path)) {
+                    final ResourcesImpl res = mResourceImpls.removeAt(i).get();
+                    if (res != null) {
+                        res.flushLayoutCache();
+                    }
+                    count++;
+                } else {
+                    i++;
+                }
+            }
+            Log.i(TAG, "Invalidated " + count + " asset managers that referenced " + path);
         }
     }
 
