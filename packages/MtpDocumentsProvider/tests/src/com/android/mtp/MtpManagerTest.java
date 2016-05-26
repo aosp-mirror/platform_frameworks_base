@@ -106,7 +106,7 @@ public class MtpManagerTest extends InstrumentationTestCase {
             getInstrumentation().show("Please take a photo by using connected MTP device.");
             final CancellationSignal signal = new CancellationSignal();
             MtpEvent event = mManager.readEvent(mUsbDevice.getDeviceId(), signal);
-            if (event.getEventCode() != MtpConstants.EVENT_OBJECT_ADDED) {
+            if (event.getEventCode() != MtpEvent.EVENT_OBJECT_ADDED) {
                 continue;
             }
             assertTrue(event.getObjectHandle() != 0);
