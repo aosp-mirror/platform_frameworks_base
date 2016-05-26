@@ -43,7 +43,6 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
     private int[] mTestWidths = {1024, 512};
     private int[] mTestHeights = {512, 1024};
 
-    private Instrumentation mInstrument = new Instrumentation();
     private String KEY_VECTORDRAWABLE_DRAW_TIME = "VectorDrawable_Draw_Time_MicroSec";
 
     public VectorDrawablePerfTest() {
@@ -110,6 +109,6 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
 
         final Bundle status = new Bundle();
         status.putLong(KEY_VECTORDRAWABLE_DRAW_TIME, avgDurationMicroSecond);
-        mInstrument.sendStatus(Activity.RESULT_OK, status);
+        getInstrumentation().sendStatus(Activity.RESULT_OK, status);
     }
 }
