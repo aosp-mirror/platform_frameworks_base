@@ -17524,13 +17524,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 final boolean killProcess =
                                         !intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false);
                                 final boolean fullUninstall = removed && !replacing;
-                                if (killProcess) {
-                                    forceStopPackageLocked(ssp, UserHandle.getAppId(
-                                            intent.getIntExtra(Intent.EXTRA_UID, -1)),
-                                            false, true, true, false, fullUninstall, userId,
-                                            removed ? "pkg removed" : "pkg changed");
-                                }
                                 if (removed) {
+                                    if (killProcess) {
+                                        forceStopPackageLocked(ssp, UserHandle.getAppId(
+                                                intent.getIntExtra(Intent.EXTRA_UID, -1)),
+                                                false, true, true, false, fullUninstall, userId,
+                                                removed ? "pkg removed" : "pkg changed");
+                                    }
                                     final int cmd = killProcess
                                             ? IApplicationThread.PACKAGE_REMOVED
                                             : IApplicationThread.PACKAGE_REMOVED_DONT_KILL;
@@ -17547,6 +17547,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
                                 } else {
+                                    if (killProcess) {
+                                        killPackageProcessesLocked(ssp, UserHandle.getAppId(
+                                                intent.getIntExtra(Intent.EXTRA_UID, -1)),
+                                                userId, ProcessList.INVALID_ADJ,
+                                                false, true, true, false, "change " + ssp);
+                                    }
                                     cleanupDisabledPackageComponentsLocked(ssp, userId, killProcess,
                                             intent.getStringArrayExtra(
                                                     Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST));
