@@ -16,6 +16,8 @@
 
 package android.text;
 
+import android.annotation.TestApi;
+
 import java.text.BreakIterator;
 
 
@@ -35,10 +37,10 @@ public class Selection {
      * there is no selection or cursor.
      */
     public static final int getSelectionStart(CharSequence text) {
-        if (text instanceof Spanned)
+        if (text instanceof Spanned) {
             return ((Spanned) text).getSpanStart(SELECTION_START);
-        else
-            return -1;
+        }
+        return -1;
     }
 
     /**
@@ -46,10 +48,17 @@ public class Selection {
      * there is no selection or cursor.
      */
     public static final int getSelectionEnd(CharSequence text) {
-        if (text instanceof Spanned)
+        if (text instanceof Spanned) {
             return ((Spanned) text).getSpanStart(SELECTION_END);
-        else
-            return -1;
+        }
+        return -1;
+    }
+
+    private static int getSelectionMemory(CharSequence text) {
+        if (text instanceof Spanned) {
+            return ((Spanned) text).getSpanStart(SELECTION_MEMORY);
+        }
+        return -1;
     }
 
     /*
@@ -65,6 +74,14 @@ public class Selection {
      * to <code>stop</code>.
      */
     public static void setSelection(Spannable text, int start, int stop) {
+        setSelection(text, start, stop, -1);
+    }
+
+    /**
+     * Set the selection anchor to <code>start</code>, the selection edge
+     * to <code>stop</code> and the memory horizontal to <code>memory</code>.
+     */
+    private static void setSelection(Spannable text, int start, int stop, int memory) {
         // int len = text.length();
         // start = pin(start, 0, len);  XXX remove unless we really need it
         // stop = pin(stop, 0, len);
@@ -74,9 +91,57 @@ public class Selection {
 
         if (ostart != start || oend != stop) {
             text.setSpan(SELECTION_START, start, start,
-                         Spanned.SPAN_POINT_POINT|Spanned.SPAN_INTERMEDIATE);
-            text.setSpan(SELECTION_END, stop, stop,
-                         Spanned.SPAN_POINT_POINT);
+                    Spanned.SPAN_POINT_POINT | Spanned.SPAN_INTERMEDIATE);
+            text.setSpan(SELECTION_END, stop, stop, Spanned.SPAN_POINT_POINT);
+            updateMemory(text, memory);
+        }
+    }
+
+    /**
+     * Update the memory position for text. This is used to ensure vertical navigation of lines
+     * with different lengths behaves as expected and remembers the longest horizontal position
+     * seen during a vertical traversal.
+     */
+    private static void updateMemory(Spannable text, int memory) {
+        if (memory > -1) {
+            int currentMemory = getSelectionMemory(text);
+            if (memory != currentMemory) {
+                text.setSpan(SELECTION_MEMORY, memory, memory, Spanned.SPAN_POINT_POINT);
+                if (currentMemory == -1) {
+                    // This is the first value, create a watcher.
+                    final TextWatcher watcher = new MemoryTextWatcher();
+                    text.setSpan(watcher, 0, text.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                }
+            }
+        } else {
+            removeMemory(text);
+        }
+    }
+
+    private static void removeMemory(Spannable text) {
+        text.removeSpan(SELECTION_MEMORY);
+        MemoryTextWatcher[] watchers = text.getSpans(0, text.length(), MemoryTextWatcher.class);
+        for (MemoryTextWatcher watcher : watchers) {
+            text.removeSpan(watcher);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static final class MemoryTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            s.removeSpan(SELECTION_MEMORY);
+            s.removeSpan(this);
         }
     }
 
@@ -98,8 +163,17 @@ public class Selection {
      * Move the selection edge to offset <code>index</code>.
      */
     public static final void extendSelection(Spannable text, int index) {
-        if (text.getSpanStart(SELECTION_END) != index)
+        extendSelection(text, index, -1);
+    }
+
+    /**
+     * Move the selection edge to offset <code>index</code> and update the memory horizontal.
+     */
+    private static void extendSelection(Spannable text, int index, int memory) {
+        if (text.getSpanStart(SELECTION_END) != index) {
             text.setSpan(SELECTION_END, index, index, Spanned.SPAN_POINT_POINT);
+        }
+        updateMemory(text, memory);
     }
 
     /**
@@ -108,6 +182,7 @@ public class Selection {
     public static final void removeSelection(Spannable text) {
         text.removeSpan(SELECTION_START);
         text.removeSpan(SELECTION_END);
+        removeMemory(text);
     }
 
     /*
@@ -138,17 +213,8 @@ public class Selection {
             int line = layout.getLineForOffset(end);
 
             if (line > 0) {
-                int move;
-
-                if (layout.getParagraphDirection(line) ==
-                    layout.getParagraphDirection(line - 1)) {
-                    float h = layout.getPrimaryHorizontal(end);
-                    move = layout.getOffsetForHorizontal(line - 1, h);
-                } else {
-                    move = layout.getLineStart(line - 1);
-                }
-
-                setSelection(text, move);
+                setSelectionAndMemory(
+                        text, layout, line, end, -1 /* direction */, false /* extend */);
                 return true;
             } else if (end != 0) {
                 setSelection(text, 0);
@@ -157,6 +223,40 @@ public class Selection {
         }
 
         return false;
+    }
+
+    /**
+     * Calculate the movement and memory positions needed, and set or extend the selection.
+     */
+    private static void setSelectionAndMemory(Spannable text, Layout layout, int line, int end,
+            int direction, boolean extend) {
+        int move;
+        int newMemory;
+
+        if (layout.getParagraphDirection(line)
+                == layout.getParagraphDirection(line + direction)) {
+            int memory = getSelectionMemory(text);
+            if (memory > -1) {
+                // We have a memory position
+                float h = layout.getPrimaryHorizontal(memory);
+                move = layout.getOffsetForHorizontal(line + direction, h);
+                newMemory = memory;
+            } else {
+                // Create a new memory position
+                float h = layout.getPrimaryHorizontal(end);
+                move = layout.getOffsetForHorizontal(line + direction, h);
+                newMemory = end;
+            }
+        } else {
+            move = layout.getLineStart(line + direction);
+            newMemory = -1;
+        }
+
+        if (extend) {
+            extendSelection(text, move, newMemory);
+        } else {
+            setSelection(text, move, move, newMemory);
+        }
     }
 
     /**
@@ -184,17 +284,8 @@ public class Selection {
             int line = layout.getLineForOffset(end);
 
             if (line < layout.getLineCount() - 1) {
-                int move;
-
-                if (layout.getParagraphDirection(line) ==
-                    layout.getParagraphDirection(line + 1)) {
-                    float h = layout.getPrimaryHorizontal(end);
-                    move = layout.getOffsetForHorizontal(line + 1, h);
-                } else {
-                    move = layout.getLineStart(line + 1);
-                }
-
-                setSelection(text, move);
+                setSelectionAndMemory(
+                        text, layout, line, end, 1 /* direction */, false /* extend */);
                 return true;
             } else if (end != text.length()) {
                 setSelection(text, text.length());
@@ -263,17 +354,7 @@ public class Selection {
         int line = layout.getLineForOffset(end);
 
         if (line > 0) {
-            int move;
-
-            if (layout.getParagraphDirection(line) ==
-                layout.getParagraphDirection(line - 1)) {
-                float h = layout.getPrimaryHorizontal(end);
-                move = layout.getOffsetForHorizontal(line - 1, h);
-            } else {
-                move = layout.getLineStart(line - 1);
-            }
-
-            extendSelection(text, move);
+            setSelectionAndMemory(text, layout, line, end, -1 /* direction */, true /* extend */);
             return true;
         } else if (end != 0) {
             extendSelection(text, 0);
@@ -292,20 +373,10 @@ public class Selection {
         int line = layout.getLineForOffset(end);
 
         if (line < layout.getLineCount() - 1) {
-            int move;
-
-            if (layout.getParagraphDirection(line) ==
-                layout.getParagraphDirection(line + 1)) {
-                float h = layout.getPrimaryHorizontal(end);
-                move = layout.getOffsetForHorizontal(line + 1, h);
-            } else {
-                move = layout.getLineStart(line + 1);
-            }
-
-            extendSelection(text, move);
+            setSelectionAndMemory(text, layout, line, end, 1 /* direction */, true /* extend */);
             return true;
         } else if (end != text.length()) {
-            extendSelection(text, text.length());
+            extendSelection(text, text.length(), -1);
             return true;
         }
 
@@ -466,6 +537,8 @@ public class Selection {
 
     private static final class START implements NoCopySpan { }
     private static final class END implements NoCopySpan { }
+    private static final class MEMORY implements NoCopySpan { }
+    private static final Object SELECTION_MEMORY = new MEMORY();
 
     /*
      * Public constants
