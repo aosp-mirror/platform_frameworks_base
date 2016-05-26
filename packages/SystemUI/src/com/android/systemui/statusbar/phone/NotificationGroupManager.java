@@ -323,12 +323,14 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
                         : group.summary.row;
     }
 
-    public void toggleGroupExpansion(StatusBarNotification sbn) {
+    /** @return group expansion state after toggling. */
+    public boolean toggleGroupExpansion(StatusBarNotification sbn) {
         NotificationGroup group = mGroupMap.get(getGroupKey(sbn));
         if (group == null) {
-            return;
+            return false;
         }
         setGroupExpanded(group, !group.expanded);
+        return group.expanded;
     }
 
     private boolean isIsolated(StatusBarNotification sbn) {

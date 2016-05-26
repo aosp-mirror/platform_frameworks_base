@@ -41,6 +41,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
@@ -138,11 +141,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         @Override
         public void onClick(View v) {
             if (!mShowingPublic && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
-                mGroupManager.toggleGroupExpansion(mStatusBarNotification);
-                mOnExpandClickListener.onExpandClicked(mEntry,
-                        mGroupManager.isGroupExpanded(mStatusBarNotification));
+                final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
+                boolean nowExpanded = mGroupManager.toggleGroupExpansion(mStatusBarNotification);
+                mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
                 mGroupExpansionChanging = true;
                 updateBackgroundForGroupState();
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
+                        nowExpanded);
+                logExpansionEvent(true /* userAction */, wasExpanded);
             } else {
                 boolean nowExpanded;
                 if (isPinned()) {
@@ -154,6 +160,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 }
                 notifyHeightChanged(true);
                 mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_EXPANDER,
+                        nowExpanded);
             }
         }
     };
@@ -1019,7 +1027,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
         mFalsingManager.setNotificationExpanded();
         if (mIsSummaryWithChildren && !mShowingPublic && allowChildExpansion) {
+            final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
             mGroupManager.setGroupExpanded(mStatusBarNotification, userExpanded);
+            logExpansionEvent(true /* userAction */, wasExpanded);
             return;
         }
         if (userExpanded && !mExpandable) return;
@@ -1505,7 +1515,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void logExpansionEvent(boolean userAction, boolean wasExpanded) {
-        final boolean nowExpanded = isExpanded();
+        boolean nowExpanded = isExpanded();
+        if (mIsSummaryWithChildren) {
+            nowExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
+        }
         if (wasExpanded != nowExpanded && mLogger != null) {
             mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded) ;
         }
