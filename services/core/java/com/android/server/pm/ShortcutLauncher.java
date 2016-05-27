@@ -36,6 +36,8 @@ import java.util.List;
 
 /**
  * Launcher information used by {@link ShortcutService}.
+ *
+ * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
  */
 class ShortcutLauncher extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -125,7 +127,8 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 if (si == null) {
                     continue;
                 }
-                if (si.isDynamic() || (prevSet != null && prevSet.contains(id))) {
+                if (si.isDynamic() || si.isManifestShortcut()
+                        || (prevSet != null && prevSet.contains(id))) {
                     newSet.add(id);
                 }
             }
