@@ -123,7 +123,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     private float mAdjustImeAmount;
     private float mAdjustDividerAmount;
     private final int mDockedStackMinimizeThickness;
-    private boolean mAdjustedForForComplementDock;
 
     // If this is true, we are in the bounds animating mode.
     // The task will be down or upscaled to perfectly fit the
@@ -243,9 +242,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 insetBounds = mFullyAdjustedImeBounds;
             }
         }
-        if (!mAdjustedForForComplementDock) {
-            alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : mBounds, insetBounds);
-        }
+        alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : mBounds, insetBounds);
         mDisplayContent.layoutNeeded = true;
     }
 
@@ -864,7 +861,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
         mImeWin = imeWin;
         mImeGoingAway = false;
         if (!mAdjustedForIme || forceUpdate) {
-            mAdjustedForForComplementDock = false;
             mAdjustedForIme = true;
             mAdjustImeAmount = 0f;
             mAdjustDividerAmount = 0f;
@@ -927,12 +923,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
      * @return Whether the amount has changed and a layout is needed.
      */
     boolean setAdjustedForMinimizedDock(float minimizeAmount) {
-        mAdjustedForForComplementDock = false;
-
         if (minimizeAmount != mMinimizeAmount) {
             mMinimizeAmount = minimizeAmount;
             updateAdjustedBounds();
-            return true;
+            return isVisibleForUserLocked();
         } else {
             return false;
         }
@@ -940,33 +934,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     boolean isAdjustedForMinimizedDock() {
         return mMinimizeAmount != 0f;
-    }
-
-    void setAdjustedForComplementDock(Rect dockBounds, int dockSide) {
-        if (mMinimizeAmount != 0f || mAdjustedForIme) {
-            return;
-        }
-        mTmpAdjustedBounds.set(mBounds);
-        if (dockSide == DOCKED_TOP) {
-            mTmpAdjustedBounds.top = dockBounds.bottom;
-        } else if (dockSide == DOCKED_LEFT) {
-            mTmpAdjustedBounds.left = dockBounds.right;
-        } else if (dockSide == DOCKED_RIGHT) {
-            mTmpAdjustedBounds.right = dockBounds.left;
-        } else {
-            Slog.w(TAG_WM, "setAdjustedForComplementDock: invalid dock side " + dockSide);
-            return;
-        }
-        mAdjustedForForComplementDock = true;
-        setAdjustedBounds(mTmpAdjustedBounds);
-    }
-
-    void resetAdjustedForComplementDock() {
-        if (mAdjustedForForComplementDock) {
-            mAdjustedForForComplementDock = false;
-            mTmpAdjustedBounds.setEmpty();
-            setAdjustedBounds(mTmpAdjustedBounds);
-        }
     }
 
     /**
