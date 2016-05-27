@@ -96,6 +96,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="1dp"
         android:visibility="gone"
+        android:contentDescription="@string/expand_button_content_description"
         />
     <ImageView android:id="@+id/profile_badge"
         android:layout_width="@dimen/notification_badge_size"
