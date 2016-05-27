@@ -99,10 +99,6 @@ redirects:
   to: /training/testing/ui-testing/index.html
 - from: /guide/market/
   to: /google/play/
-- from: /guide/google/gcm/client-javadoc/...
-  to: /reference/com/google/android/gms/gcm/package-summary.html
-- from: /guide/google/gcm/server-javadoc/...
-  to: /reference/com/google/android/gms/gcm/package-summary.html
 - from: /guide/google/play/services.html
   to: https://developers.google.com/android/guides/overview
 - from: /guide/google/
@@ -771,10 +767,6 @@ redirects:
   to: https://developers.google.com/android/guides/api-client
 - from: /google/auth/http-auth.html
   to: https://developers.google.com/android/guides/http-auth
-- from: /reference/gms-packages.html
-  to: https://developers.google.com/android/reference/packages
-- from: /reference/com/google/android/gms/
-  to: https://developers.google.com/android/reference/com/google/android/gms/
 - from: /preview/features/runtime-permissions.html
   to: /training/permissions/index.html
 - from: /preview/features/app-linking.html
@@ -865,10 +857,17 @@ redirects:
 - from: /tools/testing-support-library/...
   to: /topic/libraries/testing-support-library/...
 
-# GCM redirects
+# GMS and GCM reference redirects
+- from: /reference/gms-packages.html
+  to: https://developers.google.com/android/reference/packages
+- from: /guide/google/gcm/client-javadoc/...
+  to: https://developers.google.com/android/reference/com/google/android/gms/gcm/package-summary
+- from: /guide/google/gcm/server-javadoc/...
+  to: https://developers.google.com/android/reference/com/google/android/gms/gcm/package-summary
+- from: /reference/com/google/android/gcm/...
+  to: https://developers.google.com/android/reference/com/google/android/gms/gcm/package-summary
 - from: /reference/com/google/...
   to: https://developers.google.com/android/reference/com/google/...
-
 
 # Files moved during the /studio restructure
 - from: /sdk/index.html
