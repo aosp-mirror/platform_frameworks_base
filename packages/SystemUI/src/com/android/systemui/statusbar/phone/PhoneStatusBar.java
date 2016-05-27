@@ -3018,7 +3018,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
                 && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
-                ) {
+                && !mRemoteInputController.isRemoteInputActive()) { // not due to typing in IME
             userAutohide();
         }
     }
