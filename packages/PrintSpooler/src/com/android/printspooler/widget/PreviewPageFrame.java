@@ -22,29 +22,14 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import com.android.printspooler.R;
 
 /**
  * This class represents the frame of page in the print preview list
  * that contains the page and a footer.
  */
 public final class PreviewPageFrame extends LinearLayout {
-    private final float mSelectedElevation;
-    private final float mNotSelectedElevation;
-
-    private final float mSelectedPageAlpha;
-    private final float mNotSelectedAlpha;
-
     public PreviewPageFrame(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mSelectedElevation = mContext.getResources().getDimension(
-                R.dimen.selected_page_elevation);
-        mNotSelectedElevation = mContext.getResources().getDimension(
-                R.dimen.unselected_page_elevation);
-        mSelectedPageAlpha = mContext.getResources().getFraction(
-                R.fraction.page_selected_alpha, 1, 1);
-        mNotSelectedAlpha = mContext.getResources().getFraction(
-                R.fraction.page_unselected_alpha, 1, 1);
     }
 
     @Override
@@ -64,29 +49,5 @@ public final class PreviewPageFrame extends LinearLayout {
         info.setSelected(false);
         info.setCheckable(true);
         info.setChecked(isSelected());
-    }
-
-    public void setSelected(boolean selected, boolean animate) {
-        if (isSelected() == selected) {
-            return;
-        }
-        setSelected(selected);
-        if (selected) {
-            if (animate) {
-                animate().translationZ(mSelectedElevation)
-                        .alpha(mSelectedPageAlpha);
-            } else {
-                setTranslationZ(mSelectedElevation);
-                setAlpha(mSelectedPageAlpha);
-            }
-        } else {
-            if (animate) {
-                animate().translationZ(mNotSelectedElevation)
-                        .alpha(mNotSelectedAlpha);
-            } else {
-                setTranslationZ(mNotSelectedElevation);
-                setAlpha(mNotSelectedAlpha);
-            }
-        }
     }
 }
