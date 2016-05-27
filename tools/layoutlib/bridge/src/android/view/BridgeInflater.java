@@ -144,9 +144,26 @@ public final class BridgeInflater extends LayoutInflater {
     @Override
     public View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
             boolean ignoreThemeAttr) {
-        View view;
+        View view = null;
+        if (name.equals("view")) {
+            // This is usually done by the superclass but this allows us catching the error and
+            // reporting something useful.
+            name = attrs.getAttributeValue(null, "class");
+
+            if (name == null) {
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Unable to inflate view tag without " +
+                  "class attribute", null);
+                // We weren't able to resolve the view so we just pass a mock View to be able to
+                // continue rendering.
+                view = new MockView(context, attrs);
+                ((MockView) view).setText("view");
+            }
+        }
+
         try {
-            view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttr);
+            if (view == null) {
+                view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttr);
+            }
         } catch (InflateException e) {
             // Creation of ContextThemeWrapper code is same as in the super method.
             // Apply a theme wrapper, if allowed and one is specified.
@@ -240,6 +257,9 @@ public final class BridgeInflater extends LayoutInflater {
             // first get the classname in case it's not the node name
             if (name.equals("view")) {
                 name = attrs.getAttributeValue(null, "class");
+                if (name == null) {
+                    return null;
+                }
             }
 
             mConstructorArgs[1] = attrs;
