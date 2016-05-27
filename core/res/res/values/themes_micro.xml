@@ -52,6 +52,10 @@
         <item name="colorPrimary">@color/primary_micro_dark</item>
         <item name="colorAccent">@color/accent_micro_dark</item>
         <item name="colorEdgeEffect">?attr/colorPrimary</item>
+
+        <!-- Preference styles -->
+        <item name="preferenceFragmentStyle">@style/PreferenceFragment.Micro</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList.Micro</item>
     </style>
 
     <style name="Theme.Micro" parent="Theme.MicroBase">

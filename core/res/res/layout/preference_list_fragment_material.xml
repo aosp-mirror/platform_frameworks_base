@@ -32,8 +32,6 @@
         <ListView android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="0dip"
-            android:paddingBottom="@dimen/preference_fragment_padding_bottom"
             style="?attr/preferenceFragmentListStyle"
             android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
             android:clipToPadding="false"
