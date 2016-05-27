@@ -10170,6 +10170,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int N = providers.size();
             app.pubProviders.ensureCapacity(N + app.pubProviders.size());
             for (int i=0; i<N; i++) {
+                // TODO: keep logic in sync with installEncryptionUnawareProviders
                 ProviderInfo cpi =
                     (ProviderInfo)providers.get(i);
                 boolean singleton = isSingleton(cpi.processName, cpi.applicationInfo,
@@ -11150,12 +11151,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                             final PackageInfo pkgInfo = AppGlobals.getPackageManager()
                                     .getPackageInfo(pkgName, matchFlags, userId);
                             if (pkgInfo != null && !ArrayUtils.isEmpty(pkgInfo.providers)) {
-                                for (ProviderInfo provInfo : pkgInfo.providers) {
-                                    if (Objects.equals(provInfo.processName, app.processName)) {
-                                        Log.v(TAG, "Installing " + provInfo);
-                                        app.thread.scheduleInstallProvider(provInfo);
+                                for (ProviderInfo pi : pkgInfo.providers) {
+                                    // TODO: keep in sync with generateApplicationProvidersLocked
+                                    final boolean processMatch = Objects.equals(pi.processName,
+                                            app.processName) || pi.multiprocess;
+                                    final boolean userMatch = isSingleton(pi.processName,
+                                            pi.applicationInfo, pi.name, pi.flags)
+                                                    ? (app.userId == UserHandle.USER_SYSTEM) : true;
+                                    if (processMatch && userMatch) {
+                                        Log.v(TAG, "Installing " + pi);
+                                        app.thread.scheduleInstallProvider(pi);
                                     } else {
-                                        Log.v(TAG, "Skipping " + provInfo);
+                                        Log.v(TAG, "Skipping " + pi);
                                     }
                                 }
                             }
