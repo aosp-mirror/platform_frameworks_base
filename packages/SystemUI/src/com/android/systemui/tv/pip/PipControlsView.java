@@ -61,8 +61,7 @@ public class PipControlsView extends LinearLayout {
     private PipControlButtonView mCloseButtonView;
     private PipControlButtonView mPlayPauseButtonView;
 
-    private boolean mHasFocus;
-    private OnFocusChangeListener mOnChildFocusChangeListener;
+    private PipControlButtonView mFocusedChild;
 
     private MediaController.Callback mMediaControllerCallback = new MediaController.Callback() {
         @Override
@@ -80,8 +79,12 @@ public class PipControlsView extends LinearLayout {
 
     private final OnFocusChangeListener mFocusChangeListener = new OnFocusChangeListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            onChildViewFocusChanged();
+        public void onFocusChange(View view, boolean hasFocus) {
+            if (hasFocus) {
+                mFocusedChild = (PipControlButtonView) view;
+            } else if (mFocusedChild == view) {
+                mFocusedChild = null;
+            }
         }
     };
 
@@ -200,23 +203,13 @@ public class PipControlsView extends LinearLayout {
     }
 
     /**
-     * Sets a listener to be invoked when {@link android.view.View.hasFocus()} is changed.
+     * Resets to initial state.
      */
-    public void setOnChildFocusChangeListener(OnFocusChangeListener listener) {
-        mOnChildFocusChangeListener = listener;
-    }
-
-    private void onChildViewFocusChanged() {
-        // At this moment, hasFocus() returns true although there's no focused child.
-        boolean hasFocus = (mFullButtonView != null && mFullButtonView.isFocused())
-                || (mPlayPauseButtonView != null && mPlayPauseButtonView.isFocused())
-                || (mCloseButtonView != null && mCloseButtonView.isFocused());
-        if (mHasFocus != hasFocus) {
-            mHasFocus = hasFocus;
-            if (mOnChildFocusChangeListener != null) {
-                mOnChildFocusChangeListener.onFocusChange(getFocusedChild(), mHasFocus);
-            }
-        }
+    public void reset() {
+        mFullButtonView.reset();
+        mCloseButtonView.reset();
+        mPlayPauseButtonView.reset();
+        mFullButtonView.requestFocus();
     }
 
     /**
@@ -224,5 +217,12 @@ public class PipControlsView extends LinearLayout {
      */
     public void setListener(Listener listener) {
         mListener = listener;
+    }
+
+    /**
+     * Returns the focused control button view to animate focused button.
+     */
+    PipControlButtonView getFocusedButton() {
+        return mFocusedChild;
     }
 }
