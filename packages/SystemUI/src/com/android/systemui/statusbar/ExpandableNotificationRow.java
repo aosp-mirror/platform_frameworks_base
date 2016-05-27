@@ -1491,6 +1491,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mLoggingKey = key;
     }
 
+    public void onExpandedByGesture(boolean userExpanded) {
+        int event = MetricsEvent.ACTION_NOTIFICATION_GESTURE_EXPANDER;
+        if (mGroupManager.isSummaryOfGroup(getStatusBarNotification())) {
+            event = MetricsEvent.ACTION_NOTIFICATION_GROUP_GESTURE_EXPANDER;
+        }
+        MetricsLogger.action(mContext, event, userExpanded);
+    }
+
     @Override
     public float getIncreasedPaddingAmount() {
         if (mIsSummaryWithChildren) {
