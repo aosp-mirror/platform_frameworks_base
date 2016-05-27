@@ -2477,7 +2477,9 @@
          remote provider -->
     <string name="config_tvRemoteServicePackage" translatable="false"></string>
 
-    <!-- True if the device supports persisting security logs across reboots. -->
+    <!-- True if the device supports persisting security logs across reboots.
+         This requires the device's kernel to have pstore and pmsg enabled,
+         and DRAM to be powered and refreshed through all stages of reboot. -->
     <bool name="config_supportPreRebootSecurityLogs">false</bool>
 
     <!-- Default files to pin via Pinner Service -->
