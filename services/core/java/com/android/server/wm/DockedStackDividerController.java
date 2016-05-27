@@ -45,9 +45,11 @@ import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
+import com.android.server.LocalServices;
 import com.android.server.wm.DimLayer.DimLayerUser;
 import com.android.server.wm.WindowManagerService.H;
 
@@ -131,6 +133,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private float mLastAnimationProgress;
     private float mLastDividerProgress;
     private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
+    private boolean mImeHideRequested;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -375,9 +378,37 @@ public class DockedStackDividerController implements DimLayerUser {
             }
         }
         mDockedStackListeners.finishBroadcast();
-        if (!exists) {
+        if (exists) {
+            InputMethodManagerInternal inputMethodManagerInternal =
+                    LocalServices.getService(InputMethodManagerInternal.class);
+            if (inputMethodManagerInternal != null) {
+
+                // Hide the current IME to avoid problems with animations from IME adjustment when
+                // attaching the docked stack.
+                inputMethodManagerInternal.hideCurrentInputMethod();
+                mImeHideRequested = true;
+            }
+        } else {
             setMinimizedDockedStack(false);
         }
+    }
+
+    /**
+     * Resets the state that IME hide has been requested. See {@link #isImeHideRequested}.
+     */
+    void resetImeHideRequested() {
+        mImeHideRequested = false;
+    }
+
+    /**
+     * The docked stack divider controller makes sure the IME gets hidden when attaching the docked
+     * stack, to avoid animation problems. This flag indicates whether the request to hide the IME
+     * has been sent in an asynchronous manner, and the IME should be treated as hidden already.
+     *
+     * @return whether IME hide request has been sent
+     */
+    boolean isImeHideRequested() {
+        return mImeHideRequested;
     }
 
     void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
