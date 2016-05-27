@@ -117,6 +117,8 @@ public class StorageManager {
     /** {@hide} */
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
+    private static volatile IMountService sMountService = null;
+
     private static final String INTERNAL_STORAGE_SIZE_PATH =
             "/sys/block/mmcblk0/size";
     private static final String INTERNAL_STORAGE_SECTOR_SIZE =
@@ -1089,15 +1091,17 @@ public class StorageManager {
 
     /** {@hide} */
     public static boolean isUserKeyUnlocked(int userId) {
-        final IMountService mount = IMountService.Stub
-                .asInterface(ServiceManager.getService("mount"));
-        if (mount == null) {
+        if (sMountService == null) {
+            sMountService = IMountService.Stub
+                    .asInterface(ServiceManager.getService("mount"));
+        }
+        if (sMountService == null) {
             Slog.w(TAG, "Early during boot, assuming locked");
             return false;
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            return mount.isUserKeyUnlocked(userId);
+            return sMountService.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
