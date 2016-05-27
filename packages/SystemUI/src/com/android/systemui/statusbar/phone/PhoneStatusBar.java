@@ -4339,6 +4339,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
 
+
+    /* Only ever called as a consequence of a lockscreen expansion gesture. */
     @Override
     public boolean onDraggedDown(View startingChild, int dragLengthY) {
         if (hasActiveNotifications()) {
@@ -4349,6 +4351,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             // We have notifications, go to locked shade.
             goToLockedShade(startingChild);
+            if (startingChild instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
+                row.onExpandedByGesture(true /* drag down is always an open */);
+            }
             return true;
         } else {
 
