@@ -2446,7 +2446,6 @@
   <java-symbol type="id" name="work_widget_badge_icon" />
 
   <java-symbol type="id" name="aerr_report" />
-  <java-symbol type="id" name="aerr_reset" />
   <java-symbol type="id" name="aerr_restart" />
   <java-symbol type="id" name="aerr_close" />
   <java-symbol type="id" name="aerr_mute" />
