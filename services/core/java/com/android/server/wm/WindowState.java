@@ -362,6 +362,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean mRelayoutCalled;
 
+    boolean mInRelayout;
+
     /**
      * If the application has called relayout() with changes that can
      * impact its window's size, we need to perform a layout pass on it
@@ -1628,6 +1630,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean inDockedWorkspace() {
         final Task task = getTask();
         return task != null && task.inDockedWorkspace();
+    }
+
+    // TODO: Strange usage of word workspace here and above.
+    boolean inPinnedWorkspace() {
+        final Task task = getTask();
+        return task != null && task.inPinnedWorkspace();
     }
 
     boolean isDockedInEffect() {
