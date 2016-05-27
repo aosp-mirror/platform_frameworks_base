@@ -18,10 +18,9 @@ package com.android.systemui.statusbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -173,6 +172,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                     return object.getTranslation();
                 }
     };
+    private OnClickListener mOnClickListener;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -374,6 +374,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mNotificationParent = childInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(childInGroup);
         updateBackgroundForGroupState();
+        updateClickAndFocus();
         if (mNotificationParent != null) {
             mNotificationParent.updateBackgroundForGroupState();
         }
@@ -583,6 +584,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setOnExpandClickListener(OnExpandClickListener onExpandClickListener) {
         mOnExpandClickListener = onExpandClickListener;
+    }
+
+    @Override
+    public void setOnClickListener(@Nullable OnClickListener l) {
+        super.setOnClickListener(l);
+        mOnClickListener = l;
+        updateClickAndFocus();
+    }
+
+    private void updateClickAndFocus() {
+        boolean normalChild = !isChildInGroup() || isGroupExpanded();
+        boolean clickable = mOnClickListener != null && normalChild;
+        if (isFocusable() != normalChild) {
+            setFocusable(normalChild);
+        }
+        if (isClickable() != clickable) {
+            setClickable(clickable);
+        }
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -1305,6 +1324,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.setChildrenExpanded(expanded);
         }
+        updateClickAndFocus();
     }
 
     public static void applyTint(View v, int color) {

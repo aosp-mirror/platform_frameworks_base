@@ -4267,7 +4267,7 @@
     <string name="expand_button_content_description">Expand button</string>
 
     <!-- Accessibility action description on the expand button. -->
-    <string name="expand_action_accessibility">Click to expand</string>
+    <string name="expand_action_accessibility">toggle expansion</string>
 
     <!-- User visible name for USB MIDI Peripheral port -->
     <string name="usb_midi_peripheral_name">Android USB Peripheral Port</string>

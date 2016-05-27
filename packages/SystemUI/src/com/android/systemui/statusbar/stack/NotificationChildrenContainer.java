@@ -670,6 +670,11 @@ public class NotificationChildrenContainer extends ViewGroup {
         if (mNotificationHeader != null) {
             mNotificationHeader.setExpanded(childrenExpanded);
         }
+        final int count = mChildren.size();
+        for (int childIdx = 0; childIdx < count; childIdx++) {
+            ExpandableNotificationRow child = mChildren.get(childIdx);
+            child.setChildrenExpanded(childrenExpanded, false);
+        }
     }
 
     public void setNotificationParent(ExpandableNotificationRow parent) {

@@ -112,6 +112,10 @@ public class HybridGroupManager {
         if (!text.equals(reusableView.getText())) {
             reusableView.setText(text);
         }
+        String contentDescription = String.format(mContext.getResources().getQuantityString(
+                R.plurals.notification_group_overflow_description, number), number);
+
+        reusableView.setContentDescription(contentDescription);
         return reusableView;
     }
 }
