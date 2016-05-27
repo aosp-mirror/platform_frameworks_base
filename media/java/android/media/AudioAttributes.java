@@ -225,9 +225,20 @@ public final class AudioAttributes implements Parcelable {
     public final static int FLAG_BYPASS_MUTE = 0x1 << 7;
 
     /**
-     * Flag requesting a low latency path.
+     * Flag requesting a low latency path when creating an AudioTrack.
      * When using this flag, the sample rate must match the native sample rate
      * of the device. Effects processing is also unavailable.
+     *
+     * Note that if this flag is used without specifying a bufferSizeInBytes then the
+     * AudioTrack's actual buffer size may be too small. It is recommended that a fairly
+     * large buffer should be specified when the AudioTrack is created.
+     * Then the actual size can be reduced by calling
+     * {@link AudioTrack#setBufferSizeInFrames(int)}. The buffer size can be optimized
+     * by lowering it after each write() call until the audio glitches, which is detected by calling
+     * {@link AudioTrack#getUnderrunCount()}. Then the buffer size can be increased
+     * until there are no glitches.
+     * This tuning step should be done while playing silence.
+     * This technique provides a compromise between latency and glitch rate.
      */
     public final static int FLAG_LOW_LATENCY = 0x1 << 8;
 
