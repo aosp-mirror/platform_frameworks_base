@@ -1021,9 +1021,19 @@ public final class PowerManager {
     }
 
     /**
-     * Returns True if the device supports Sustained Performance Mode.
-     * Applications Should check if the device supports this mode, before
-     * using {@link android.view.Window#setSustainedPerformanceMode}.
+     * This function checks if the device has implemented Sustained Performance
+     * Mode. This needs to be checked only once and is constant for a particular
+     * device/release.
+     *
+     * Sustained Performance Mode is intended to provide a consistent level of
+     * performance for prolonged amount of time.
+     *
+     * Applications should check if the device supports this mode, before using
+     * {@link android.view.Window#setSustainedPerformanceMode}.
+     *
+     * @return Returns True if the device supports it, false otherwise.
+     *
+     * @see android.view.Window#setSustainedPerformanceMode
      */
     public boolean isSustainedPerformanceModeSupported() {
         return mContext.getResources().getBoolean(
