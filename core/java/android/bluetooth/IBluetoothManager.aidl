@@ -37,6 +37,7 @@ interface IBluetoothManager
     boolean enable();
     boolean enableNoAutoConnect();
     boolean disable(boolean persist);
+    int getState();
     IBluetoothGatt getBluetoothGatt();
 
     boolean bindBluetoothProfileService(int profile, IBluetoothProfileServiceConnection proxy);
