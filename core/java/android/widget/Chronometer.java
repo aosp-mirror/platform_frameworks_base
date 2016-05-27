@@ -23,6 +23,8 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -253,6 +255,12 @@ public class Chronometer extends TextView {
         updateRunning();
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        updateRunning();
+    }
+
     private synchronized void updateText(long now) {
         mNow = now;
         long seconds = mCountDown ? mBase - now : now - mBase;
@@ -289,7 +297,7 @@ public class Chronometer extends TextView {
     }
 
     private void updateRunning() {
-        boolean running = mVisible && mStarted;
+        boolean running = mVisible && mStarted && isShown();
         if (running != mRunning) {
             if (running) {
                 updateText(SystemClock.elapsedRealtime());
