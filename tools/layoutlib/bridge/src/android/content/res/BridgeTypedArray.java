@@ -584,6 +584,7 @@ public final class BridgeTypedArray extends TypedArray {
         if (value == null) {
             return defValue;
         }
+        value = value.trim();
 
         // if the value is just an integer, return it.
         try {
@@ -593,6 +594,11 @@ public final class BridgeTypedArray extends TypedArray {
             }
         } catch (NumberFormatException e) {
             // pass
+        }
+
+        if (value.startsWith("#")) {
+            // this looks like a color, do not try to parse it
+            return defValue;
         }
 
         // Handle the @id/<name>, @+id/<name> and @android:id/<name>
