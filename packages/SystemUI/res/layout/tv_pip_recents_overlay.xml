@@ -15,7 +15,7 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:gravity="top|center_horizontal"
     android:orientation="vertical">
@@ -33,7 +33,8 @@
             android:layout_height="32dp"
             android:translationY="-46dp"
             android:layout_gravity="top|center_horizontal"
-            android:background="@drawable/tv_pip_recents_overlay_scrim" />
+            android:background="@drawable/tv_pip_recents_overlay_scrim"
+            android:alpha="0" />
         <com.android.systemui.tv.pip.PipControlsView
             android:id="@+id/pip_control_contents"
             android:layout_width="wrap_content"
@@ -42,6 +43,8 @@
             android:layout_gravity="top|center_horizontal" />
     </com.android.systemui.tv.pip.PipRecentsControlsView>
 
+    <!-- Placeholder view to handle focus change between Recents row and PIP controls
+        in talkback mode -->
     <View
         android:id="@+id/recents"
         android:layout_width="1dp"

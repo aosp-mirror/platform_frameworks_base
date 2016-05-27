@@ -40,16 +40,18 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.tv.RecentsTvActivity;
 import com.android.systemui.recents.tv.animations.DismissAnimationsHolder;
 import com.android.systemui.recents.tv.animations.RecentsRowFocusAnimationHolder;
 import com.android.systemui.recents.tv.animations.ViewFocusAnimator;
-import com.android.systemui.recents.model.Task;
 
 public class TaskCardView extends LinearLayout {
 
     private static final String TAG = "TaskCardView";
     private View mThumbnailView;
     private View mDismissIconView;
+    private View mInfoFieldView;
     private TextView mTitleTextView;
     private ImageView mBadgeView;
     private Task mTask;
@@ -79,14 +81,14 @@ public class TaskCardView extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mThumbnailView = findViewById(R.id.card_view_thumbnail);
+        mInfoFieldView = findViewById(R.id.card_info_field);
         mTitleTextView = (TextView) findViewById(R.id.card_title_text);
         mBadgeView = (ImageView) findViewById(R.id.card_extra_badge);
         mDismissIconView = findViewById(R.id.dismiss_icon);
         mDismissAnimationsHolder = new DismissAnimationsHolder(this);
-        View title = findViewById(R.id.card_info_field);
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
-        mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, title);
+        mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, mInfoFieldView);
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (!ssp.isTouchExplorationEnabled()) {
             mDismissIconView.setVisibility(VISIBLE);
@@ -102,6 +104,9 @@ public class TaskCardView extends LinearLayout {
         mBadgeView.setImageDrawable(task.icon);
         setThumbnailView();
         setContentDescription(task.titleDescription);
+        mDismissState = false;
+        mDismissAnimationsHolder.reset();
+        mRecentsRowFocusAnimationHolder.reset();
     }
 
     public Task getTask() {
@@ -196,40 +201,37 @@ public class TaskCardView extends LinearLayout {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        // Override dispatchKeyEvent() instead of onKeyDown() to prevent warning from ViewRootImpl.
+        switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_DPAD_DOWN : {
-                if (!isInDismissState()) {
+                if (!isInDismissState() && event.getAction() == KeyEvent.ACTION_DOWN) {
                     setDismissState(true);
                     return true;
                 }
                 break;
             }
             case KeyEvent.KEYCODE_DPAD_UP : {
-                if (isInDismissState()) {
-                    setDismissState(false);
-                    return true;
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (isInDismissState()) {
+                        setDismissState(false);
+                    } else {
+                        ((RecentsTvActivity) getContext()).requestPipControlsFocus();
+                    }
                 }
-                break;
+                return true;
             }
 
-            //Eat right and left key presses when we are in dismiss state
-            case KeyEvent.KEYCODE_DPAD_LEFT : {
-                if (isInDismissState()) {
-                    return true;
-                }
-                break;
-            }
+            // Eat right and left key presses when we are in dismiss state
+            case KeyEvent.KEYCODE_DPAD_LEFT :
             case KeyEvent.KEYCODE_DPAD_RIGHT : {
                 if (isInDismissState()) {
                     return true;
                 }
                 break;
             }
-            default:
-                break;
         }
-        return super.onKeyDown(keyCode, event);
+        return super.dispatchKeyEvent(event);
     }
 
     private void setDismissState(boolean dismissState) {
@@ -252,20 +254,12 @@ public class TaskCardView extends LinearLayout {
         mDismissAnimationsHolder.startDismissAnimation(listener);
     }
 
+    public ViewFocusAnimator getViewFocusAnimator() {
+        return mViewFocusAnimator;
+    }
+
     public RecentsRowFocusAnimationHolder getRecentsRowFocusAnimationHolder() {
         return mRecentsRowFocusAnimationHolder;
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        setDismissState(false);
-    }
-
-    public void reset() {
-        mDismissState = false;
-        mRecentsRowFocusAnimationHolder.reset();
-        mDismissAnimationsHolder.reset();
     }
 
     private void setThumbnailView() {
@@ -330,6 +324,10 @@ public class TaskCardView extends LinearLayout {
 
     public View getThumbnailView() {
         return mThumbnailView;
+    }
+
+    public View getInfoFieldView() {
+        return mInfoFieldView;
     }
 
     public View getDismissIconView() {

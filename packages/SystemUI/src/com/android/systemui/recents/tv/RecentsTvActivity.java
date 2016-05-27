@@ -81,6 +81,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     private long mLastTabKeyEventTime;
     private boolean mIgnoreAltTabRelease;
     private boolean mLaunchedFromHome;
+    private boolean mTalkBackEnabled;
 
     private RecentsTvView mRecentsView;
     private View mPipView;
@@ -133,15 +134,22 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
                 @Override
                 public void onRecentsFocused() {
-                    mRecentsView.requestFocus();
-                    mRecentsView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                    if (mTalkBackEnabled) {
+                        mTaskStackHorizontalGridView.requestFocus();
+                        mTaskStackHorizontalGridView.sendAccessibilityEvent(
+                                AccessibilityEvent.TYPE_VIEW_FOCUSED);
+                    }
+                    mTaskStackHorizontalGridView.startFocusGainAnimation();
                 }
             };
+
     private final View.OnFocusChangeListener mPipViewFocusChangeListener =
             new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    handlePipViewFocusChange(hasFocus);
+                    if (hasFocus) {
+                        requestPipControlsFocus();
+                    }
                 }
             };
 
@@ -194,17 +202,18 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         loadOpts.numVisibleTaskThumbnails = numVisibleTasks;
         loader.loadTasks(this, plan, loadOpts);
 
-
-        mRecentsView.setTaskStack(stack);
         List stackTasks = stack.getStackTasks();
         Collections.reverse(stackTasks);
         if (mTaskStackViewAdapter == null) {
             mTaskStackViewAdapter = new TaskStackHorizontalViewAdapter(stackTasks);
             mTaskStackHorizontalGridView = mRecentsView
                     .setTaskStackViewAdapter(mTaskStackViewAdapter);
+            mHomeRecentsEnterExitAnimationHolder = new HomeRecentsEnterExitAnimationHolder(
+                    getApplicationContext(), mTaskStackHorizontalGridView);
         } else {
             mTaskStackViewAdapter.setNewStackTasks(stackTasks);
         }
+        mRecentsView.init(stack);
 
         if (launchState.launchedToTaskId != -1) {
             ArrayList<Task> tasks = stack.getStackTasks();
@@ -305,6 +314,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 
         mPipView = findViewById(R.id.pip);
+        mPipView.setOnFocusChangeListener(mPipViewFocusChangeListener);
         // Place mPipView at the PIP bounds for fine tuned focus handling.
         Rect pipBounds = mPipManager.getRecentsFocusedPipBounds();
         LayoutParams lp = (LayoutParams) mPipView.getLayoutParams();
@@ -342,7 +352,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         if(mLaunchedFromHome) {
             mHomeRecentsEnterExitAnimationHolder.startEnterAnimation(mPipManager.isPipShown());
         }
-        mTaskStackViewAdapter.setResetAddedCards(true);
         EventBus.getDefault().send(new EnterRecentsWindowAnimationCompletedEvent());
     }
 
@@ -352,19 +361,6 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         mPipRecentsOverlayManager.onRecentsResumed();
         // Update the recent tasks
         updateRecentsTasks();
-
-        mHomeRecentsEnterExitAnimationHolder = new HomeRecentsEnterExitAnimationHolder(
-                getApplicationContext(), mTaskStackHorizontalGridView);
-        if(mTaskStackHorizontalGridView != null &&
-                mTaskStackHorizontalGridView.getChildCount() > 0) {
-            if(mLaunchedFromHome) {
-                mHomeRecentsEnterExitAnimationHolder.setEnterFromHomeStartingAnimationValues();
-            } else {
-                mHomeRecentsEnterExitAnimationHolder.setEnterFromAppStartingAnimationValues();
-            }
-        } else {
-            mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
-        }
 
         // If this is a new instance from a configuration change, then we have to manually trigger
         // the enter animation state, or if recents was relaunched by AM, without going through
@@ -387,9 +383,11 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         } else {
             mTaskStackHorizontalGridView.setSelectedPosition(0);
         }
+        mRecentsView.getViewTreeObserver().addOnPreDrawListener(this);
 
         View dismissPlaceholder = findViewById(R.id.dismiss_placeholder);
-        if (ssp.isTouchExplorationEnabled()) {
+        mTalkBackEnabled = ssp.isTouchExplorationEnabled();
+        if (mTalkBackEnabled) {
             dismissPlaceholder.setAccessibilityTraversalBefore(R.id.task_list);
             dismissPlaceholder.setAccessibilityTraversalAfter(R.id.dismiss_placeholder);
             mTaskStackHorizontalGridView.setAccessibilityTraversalAfter(R.id.dismiss_placeholder);
@@ -408,14 +406,29 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
                 }
             });
         }
-        updatePipUI();
+
+        // Initialize PIP UI
+        if (mPipManager.isPipShown()) {
+            if (mTalkBackEnabled) {
+                // If talkback is on, use the mPipView to handle focus changes
+                // between recents row and PIP controls.
+                mPipView.setVisibility(View.VISIBLE);
+            } else {
+                mPipView.setVisibility(View.GONE);
+            }
+            // When PIP view has focus, recents overlay view will takes the focus
+            // as if it's the part of the Recents UI.
+            mPipRecentsOverlayManager.requestFocus(mTaskStackViewAdapter.getItemCount() > 0);
+        } else {
+            mPipView.setVisibility(View.GONE);
+            mPipRecentsOverlayManager.removePipRecentsOverlayView();
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mPipRecentsOverlayManager.onRecentsPaused();
-        mTaskStackViewAdapter.setResetAddedCards(false);
     }
 
     @Override
@@ -534,6 +547,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     public final void onBusEvent(AllTaskViewsDismissedEvent event) {
         if (mPipManager.isPipShown()) {
             mRecentsView.showEmptyView();
+            mPipRecentsOverlayManager.requestFocus(false);
         } else {
             dismissRecentsToHome(false);
         }
@@ -547,10 +561,14 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     @Override
     public boolean onPreDraw() {
         mRecentsView.getViewTreeObserver().removeOnPreDrawListener(this);
-        if(mLaunchedFromHome) {
-            mHomeRecentsEnterExitAnimationHolder.setEnterFromHomeStartingAnimationValues();
+        // Sets the initial values for enter animation.
+        // Animation will be started in {@link #onEnterAnimationComplete()}
+        if (mLaunchedFromHome) {
+            mHomeRecentsEnterExitAnimationHolder
+                    .setEnterFromHomeStartingAnimationValues(mPipManager.isPipShown());
         } else {
-            mHomeRecentsEnterExitAnimationHolder.setEnterFromAppStartingAnimationValues();
+            mHomeRecentsEnterExitAnimationHolder
+                    .setEnterFromAppStartingAnimationValues(mPipManager.isPipShown());
         }
         // We post to make sure that this information is delivered after this traversals is
         // finished.
@@ -564,35 +582,25 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
     }
 
     private void updatePipUI() {
-        if (mPipManager.isPipShown()) {
-            mPipView.setVisibility(View.VISIBLE);
-            mPipView.setOnFocusChangeListener(mPipViewFocusChangeListener);
-            if (mPipView.hasFocus()) {
-                // This can happen only if the activity is resumed. Ask for reset.
-                handlePipViewFocusChange(true);
-            } else {
-                mPipView.requestFocus();
-            }
-        } else {
-            mPipView.setVisibility(View.GONE);
+        if (!mPipManager.isPipShown()) {
             mPipRecentsOverlayManager.removePipRecentsOverlayView();
+            mTaskStackHorizontalGridView.startFocusLossAnimation();
+        } else {
+            Log.w(TAG, "An activity entered PIP mode while Recents is shown");
         }
     }
 
     /**
-     * Handles the PIP view's focus change.
+     * Requests the focus to the PIP controls.
      * This starts the relevant recents row animation
      * and give focus to the recents overlay if needed.
      */
-    private void handlePipViewFocusChange(boolean hasFocus) {
-        mRecentsView.startRecentsRowFocusAnimation(!hasFocus);
-        if (hasFocus) {
-            // When PIP view has focus, recents overlay view will takes the focus
-            // as if it's the part of the Recents UI.
-            mPipRecentsOverlayManager.requestFocus(
-                    mTaskStackViewAdapter.getItemCount() > 0);
-        } else {
-            mPipRecentsOverlayManager.clearFocus();
+    public void requestPipControlsFocus() {
+        if (!mPipManager.isPipShown()) {
+            return;
         }
+
+        mTaskStackHorizontalGridView.startFocusLossAnimation();
+        mPipRecentsOverlayManager.requestFocus(mTaskStackViewAdapter.getItemCount() > 0);
     }
 }

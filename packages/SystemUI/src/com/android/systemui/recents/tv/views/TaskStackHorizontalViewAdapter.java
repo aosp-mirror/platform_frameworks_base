@@ -43,17 +43,13 @@ public class TaskStackHorizontalViewAdapter extends
     private static final String TAG = "TaskStackViewAdapter";
     private List<Task> mTaskList;
     private TaskStackHorizontalGridView mGridView;
-    private boolean mResetAddedCards;
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TaskCardView mTaskCardView;
         private Task mTask;
-        private boolean mShouldReset;
         public ViewHolder(View v) {
             super(v);
-            if(v instanceof TaskCardView) {
-                mTaskCardView = (TaskCardView) v;
-            }
+            mTaskCardView = (TaskCardView) v;
         }
 
         public void init(Task task) {
@@ -90,7 +86,6 @@ public class TaskStackHorizontalViewAdapter extends
                 public void onAnimationEnd(Animator animation) {
                     removeTask(task);
                     EventBus.getDefault().send(new DeleteTaskDataEvent(task));
-                    mShouldReset = true;
                 }
 
                 @Override
@@ -131,23 +126,6 @@ public class TaskStackHorizontalViewAdapter extends
     }
 
     @Override
-    public void onViewAttachedToWindow(ViewHolder holder) {
-        if (mResetAddedCards) {
-            holder.mTaskCardView.reset();
-        }
-    }
-
-    @Override
-    public void onViewDetachedFromWindow(ViewHolder holder) {
-        // We only want to reset on view detach if this is the last task being dismissed.
-        // This is so that we do not reset when shifting to apps etc, as it is not needed.
-        if (holder.mShouldReset) {
-            holder.mTaskCardView.reset();
-            holder.mShouldReset = false;
-        }
-    }
-
-    @Override
     public int getItemCount() {
         return mTaskList.size();
     }
@@ -177,9 +155,5 @@ public class TaskStackHorizontalViewAdapter extends
     public void addTaskAt(Task task, int position) {
         mTaskList.add(position, task);
         notifyItemInserted(position);
-    }
-
-    public void setResetAddedCards(boolean reset) {
-        mResetAddedCards = reset;
     }
 }

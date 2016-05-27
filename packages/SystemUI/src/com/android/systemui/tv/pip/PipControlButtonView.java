@@ -21,12 +21,11 @@ import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View.OnFocusChangeListener;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -34,31 +33,28 @@ import com.android.systemui.R;
 /**
  * A view containing PIP controls including fullscreen, close, and media controls.
  */
-public class PipControlButtonView extends LinearLayout {
+public class PipControlButtonView extends RelativeLayout {
     private OnFocusChangeListener mFocusChangeListener;
-    private ImageView mButtonImageView;
+    private ImageView mIconImageView;
+    ImageView mButtonImageView;
     private TextView mDescriptionTextView;
-    private Animator mFocusGainAnimator;
-    private Animator mFocusLoseAnimator;
+    private Animator mTextFocusGainAnimator;
+    private Animator mButtonFocusGainAnimator;
+    private Animator mTextFocusLossAnimator;
+    private Animator mButtonFocusLossAnimator;
 
     private final OnFocusChangeListener mInternalFocusChangeListener =
             new OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (hasFocus) {
-                        if (mFocusLoseAnimator.isStarted()) {
-                            mFocusLoseAnimator.cancel();
-                        }
-                        mFocusGainAnimator.start();
+                        startFocusGainAnimation();
                     } else {
-                        if (mFocusGainAnimator.isStarted()) {
-                            mFocusGainAnimator.cancel();
-                        }
-                        mFocusLoseAnimator.start();
+                        startFocusLossAnimation();
                     }
 
                     if (mFocusChangeListener != null) {
-                        mFocusChangeListener.onFocusChange(v, hasFocus);
+                        mFocusChangeListener.onFocusChange(PipControlButtonView.this, hasFocus);
                     }
                 }
             };
@@ -82,9 +78,7 @@ public class PipControlButtonView extends LinearLayout {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.tv_pip_control_button, this);
 
-        setOrientation(LinearLayout.VERTICAL);
-        setGravity(Gravity.CENTER);
-
+        mIconImageView = (ImageView) findViewById(R.id.icon);
         mButtonImageView = (ImageView) findViewById(R.id.button);
         mDescriptionTextView = (TextView) findViewById(R.id.desc);
 
@@ -103,12 +97,19 @@ public class PipControlButtonView extends LinearLayout {
         super.onFinishInflate();
         mButtonImageView.setOnFocusChangeListener(mInternalFocusChangeListener);
 
-        mFocusGainAnimator = AnimatorInflater.loadAnimator(getContext(),
-                R.anim.tv_pip_controls_text_focus_gain_animation);
-        mFocusGainAnimator.setTarget(mDescriptionTextView);
-        mFocusLoseAnimator = AnimatorInflater.loadAnimator(getContext(),
-                R.anim.tv_pip_controls_text_focus_lose_animation);
-        mFocusLoseAnimator.setTarget(mDescriptionTextView);
+        mTextFocusGainAnimator = AnimatorInflater.loadAnimator(getContext(),
+                R.anim.tv_pip_controls_focus_gain_animation);
+        mTextFocusGainAnimator.setTarget(mDescriptionTextView);
+        mButtonFocusGainAnimator = AnimatorInflater.loadAnimator(getContext(),
+                R.anim.tv_pip_controls_focus_gain_animation);
+        mButtonFocusGainAnimator.setTarget(mButtonImageView);
+
+        mTextFocusLossAnimator = AnimatorInflater.loadAnimator(getContext(),
+                R.anim.tv_pip_controls_focus_loss_animation);
+        mTextFocusLossAnimator.setTarget(mDescriptionTextView);
+        mButtonFocusLossAnimator = AnimatorInflater.loadAnimator(getContext(),
+                R.anim.tv_pip_controls_focus_loss_animation);
+        mButtonFocusLossAnimator.setTarget(mButtonImageView);
     }
 
     @Override
@@ -125,7 +126,7 @@ public class PipControlButtonView extends LinearLayout {
      * Sets the drawable for the button with the given resource id.
      */
     public void setImageResource(int resId) {
-        mButtonImageView.setImageResource(resId);
+        mIconImageView.setImageResource(resId);
     }
 
     /**
@@ -136,8 +137,51 @@ public class PipControlButtonView extends LinearLayout {
         mDescriptionTextView.setText(resId);
     }
 
-    @Override
-    public boolean isFocused() {
-        return mButtonImageView.isFocused();
+    private static void cancelAnimator(Animator animator) {
+        if (animator.isStarted()) {
+            animator.cancel();
+        }
+    }
+
+    /**
+     * Starts the focus gain animation.
+     */
+    public void startFocusGainAnimation() {
+        cancelAnimator(mButtonFocusLossAnimator);
+        cancelAnimator(mTextFocusLossAnimator);
+        mTextFocusGainAnimator.start();
+        if (mButtonImageView.getAlpha() < 1f) {
+            // If we had faded out the ripple drawable, run our manual focus change animation.
+            // See the comment at {@link #startFocusLossAnimation()} for the reason of manual
+            // animator.
+            mButtonFocusGainAnimator.start();
+        }
+    }
+
+    /**
+     * Starts the focus loss animation.
+     */
+    public void startFocusLossAnimation() {
+        cancelAnimator(mButtonFocusGainAnimator);
+        cancelAnimator(mTextFocusGainAnimator);
+        mTextFocusLossAnimator.start();
+        if (mButtonImageView.hasFocus()) {
+            // Button uses ripple that has the default animation for the focus changes.
+            // Howevever, it doesn't expose the API to fade out while it is focused,
+            // so we should manually run the fade out animation when PIP controls row loses focus.
+            mButtonFocusLossAnimator.start();
+        }
+    }
+
+    /**
+     * Resets to initial state.
+     */
+    public void reset() {
+        cancelAnimator(mButtonFocusGainAnimator);
+        cancelAnimator(mTextFocusGainAnimator);
+        cancelAnimator(mButtonFocusLossAnimator);
+        cancelAnimator(mTextFocusLossAnimator);
+        mButtonImageView.setAlpha(1f);
+        mDescriptionTextView.setAlpha(mButtonImageView.hasFocus() ? 1f : 0f);
     }
 }

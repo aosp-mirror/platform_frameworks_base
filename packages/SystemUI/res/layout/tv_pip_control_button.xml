@@ -23,15 +23,25 @@
     <ImageView android:id="@+id/button"
         android:layout_width="34dp"
         android:layout_height="34dp"
-        android:padding="5dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:focusable="true"
-        android:src="@drawable/ic_fullscreen_white_24dp"
-        android:background="@drawable/tv_pip_button_focused"
-        android:layerType="software" />
+        android:src="@drawable/tv_pip_button_focused"
+        android:importantForAccessibility="yes" />
+
+    <ImageView android:id="@+id/icon"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:importantForAccessibility="no" />
 
     <TextView android:id="@+id/desc"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_below="@id/icon"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="3dp"
         android:gravity="center"
         android:text="@string/pip_fullscreen"
