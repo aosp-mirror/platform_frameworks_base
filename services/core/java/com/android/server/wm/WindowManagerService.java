@@ -7596,7 +7596,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void adjustForImeIfNeeded(final DisplayContent displayContent) {
         final WindowState imeWin = mInputMethodWindow;
-        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw();
+        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
+                && !displayContent.mDividerControllerLocked.isImeHideRequested();
         final boolean dockVisible = isStackVisibleLocked(DOCKED_STACK_ID);
         final TaskStack imeTargetStack = getImeFocusStackLocked();
         final int imeDockSide = (dockVisible && imeTargetStack != null) ?

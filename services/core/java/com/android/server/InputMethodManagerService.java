@@ -159,6 +159,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_BIND_INPUT = 1010;
     static final int MSG_SHOW_SOFT_INPUT = 1020;
     static final int MSG_HIDE_SOFT_INPUT = 1030;
+    static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     static final int MSG_ATTACH_TOKEN = 1040;
     static final int MSG_CREATE_SESSION = 1050;
 
@@ -2846,6 +2847,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 args.recycle();
                 return true;
+            case MSG_HIDE_CURRENT_INPUT_METHOD:
+                synchronized (mMethodMap) {
+                    hideCurrentInputLocked(0, null);
+                }
+                return true;
             case MSG_ATTACH_TOKEN:
                 args = (SomeArgs)msg.obj;
                 try {
@@ -3879,6 +3885,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // Do everything in handler so as not to block the caller.
             mHandler.sendMessage(mHandler.obtainMessage(MSG_SWITCH_IME,
                     forwardDirection ? 1 : 0, 0));
+        }
+
+        @Override
+        public void hideCurrentInputMethod() {
+            mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
+            mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
         }
     }
 
