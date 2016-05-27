@@ -2212,6 +2212,13 @@ message MetricsEvent {
     // Notification group expansion state toggled by the expand affordance.
     ACTION_NOTIFICATION_GROUP_EXPANDER = 408;
 
+
+    // Notification expansion state toggled by the expand gesture.
+    ACTION_NOTIFICATION_GESTURE_EXPANDER = 409;
+
+    // Notification group expansion state toggled by the expand gesture.
+    ACTION_NOTIFICATION_GROUP_GESTURE_EXPANDER = 410;
+
     // ---- End N Constants, all N constants go above this line ----
 
     // ------- Begin N App Disambig Shade -----

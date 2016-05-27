@@ -959,11 +959,13 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
     }
 
+    /* Only ever called as a consequence of an expansion gesture in the shade. */
     @Override
     public void setUserExpandedChild(View v, boolean userExpanded) {
         if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).setUserExpanded(userExpanded,
-                    true /* allowChildrenExpansion */);
+            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            row.setUserExpanded(userExpanded, true /* allowChildrenExpansion */);
+            row.onExpandedByGesture(userExpanded);
         }
     }
 
