@@ -924,6 +924,7 @@ public class UserManager {
 
     /** {@hide} */
     public boolean isUserRunning(int userId) {
+        // TODO Switch to using UMS internal isUserRunning
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
         } catch (RemoteException re) {
