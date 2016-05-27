@@ -6966,8 +6966,8 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void notifyLockedProfile(@UserIdInt int userId) throws RemoteException
-    {
+    @Override
+    public void notifyLockedProfile(@UserIdInt int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -6978,6 +6978,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
+    @Override
     public void startConfirmDeviceCredentialIntent(Intent intent) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -6989,6 +6990,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
+    @Override
     public int sendIntentSender(IIntentSender target, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options)
             throws RemoteException {
