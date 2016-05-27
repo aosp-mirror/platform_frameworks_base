@@ -530,7 +530,7 @@ SkPaint* Tree::updatePaint(SkPaint* outPaint, TreeProperties* prop) {
     if (prop->getRootAlpha() == 1.0f && prop->getColorFilter() == nullptr) {
         return nullptr;
     } else {
-        outPaint->setColorFilter(mStagingProperties.getColorFilter());
+        outPaint->setColorFilter(prop->getColorFilter());
         outPaint->setFilterQuality(kLow_SkFilterQuality);
         outPaint->setAlpha(prop->getRootAlpha() * 255);
         return outPaint;
