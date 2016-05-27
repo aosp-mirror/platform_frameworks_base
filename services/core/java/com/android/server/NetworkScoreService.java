@@ -17,12 +17,10 @@
 package com.android.server;
 
 import android.Manifest.permission;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
@@ -33,7 +31,6 @@ import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -42,6 +39,7 @@ import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -62,39 +60,75 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private final Context mContext;
     private final Map<Integer, INetworkScoreCache> mScoreCaches;
-    /** Lock used to update mReceiver when scorer package changes occur. */
-    private final Object mReceiverLock = new Object[0];
+    /** Lock used to update mPackageMonitor when scorer package changes occur. */
+    private final Object mPackageMonitorLock = new Object[0];
 
-    /** Clears scores when the active scorer package is no longer valid. */
-    @GuardedBy("mReceiverLock")
-    private ScorerChangedReceiver mReceiver;
+    @GuardedBy("mPackageMonitorLock")
+    private NetworkScorerPackageMonitor mPackageMonitor;
     private ScoringServiceConnection mServiceConnection;
 
-    private class ScorerChangedReceiver extends BroadcastReceiver {
+    /**
+     * Clears scores when the active scorer package is no longer valid and
+     * manages the service connection.
+     */
+    private class NetworkScorerPackageMonitor extends PackageMonitor {
         final String mRegisteredPackage;
 
-        ScorerChangedReceiver(String packageName) {
-            mRegisteredPackage = packageName;
+        private NetworkScorerPackageMonitor(String mRegisteredPackage) {
+            this.mRegisteredPackage = mRegisteredPackage;
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
-                    || Intent.ACTION_PACKAGE_REPLACED.equals(action)
-                    || Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
-                NetworkScorerAppData activeScorer =
+        public void onPackageAdded(String packageName, int uid) {
+            evaluateBinding(packageName, true /* forceUnbind */);
+        }
+
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            evaluateBinding(packageName, true /* forceUnbind */);
+        }
+
+        @Override
+        public void onPackageModified(String packageName) {
+            evaluateBinding(packageName, false /* forceUnbind */);
+        }
+
+        @Override
+        public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
+            if (doit) { // "doit" means the force stop happened instead of just being queried for.
+                for (String packageName : packages) {
+                    evaluateBinding(packageName, true /* forceUnbind */);
+                }
+            }
+            return super.onHandleForceStop(intent, packages, uid, doit);
+        }
+
+        @Override
+        public void onPackageUpdateFinished(String packageName, int uid) {
+            evaluateBinding(packageName, true /* forceUnbind */);
+        }
+
+        private void evaluateBinding(String scorerPackageName, boolean forceUnbind) {
+            if (mRegisteredPackage.equals(scorerPackageName)) {
+                if (DBG) {
+                    Log.d(TAG, "Evaluating binding for: " + scorerPackageName
+                            + ", forceUnbind=" + forceUnbind);
+                }
+                final NetworkScorerAppData activeScorer =
                         NetworkScorerAppManager.getActiveScorer(mContext);
                 if (activeScorer == null) {
-                    // Package change has invalidated a scorer.
+                    // Package change has invalidated a scorer, this will also unbind any service
+                    // connection.
                     Log.i(TAG, "Package " + mRegisteredPackage +
                             " is no longer valid, disabling scoring.");
                     setScorerInternal(null);
                 } else if (activeScorer.mScoringServiceClassName == null) {
                     // The scoring service is not available, make sure it's unbound.
                     unbindFromScoringServiceIfNeeded();
-                } else {
-                    // The scoring service may have changed or been added.
+                } else { // The scoring service changed in some way.
+                    if (forceUnbind) {
+                        unbindFromScoringServiceIfNeeded();
+                    }
                     bindToScoringServiceIfNeeded(activeScorer);
                 }
             }
@@ -121,7 +155,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             Settings.Global.putInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 1);
         }
 
-        registerPackageReceiverIfNeeded();
+        registerPackageMonitorIfNeeded();
     }
 
     /** Called when the system is ready for us to start third-party code. */
@@ -130,33 +164,29 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         bindToScoringServiceIfNeeded();
     }
 
-    private void registerPackageReceiverIfNeeded() {
-        if (DBG) Log.d(TAG, "registerPackageReceiverIfNeeded");
+    private void registerPackageMonitorIfNeeded() {
+        if (DBG) Log.d(TAG, "registerPackageMonitorIfNeeded");
         NetworkScorerAppData scorer = NetworkScorerAppManager.getActiveScorer(mContext);
-        synchronized (mReceiverLock) {
-            // Unregister the receiver if the current scorer has changed since last registration.
-            if (mReceiver != null) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Unregistering receiver for " + mReceiver.mRegisteredPackage);
+        synchronized (mPackageMonitorLock) {
+            // Unregister the current monitor if needed.
+            if (mPackageMonitor != null) {
+                if (DBG) {
+                    Log.d(TAG, "Unregistering package monitor for "
+                            + mPackageMonitor.mRegisteredPackage);
                 }
-                mContext.unregisterReceiver(mReceiver);
-                mReceiver = null;
+                mPackageMonitor.unregister();
+                mPackageMonitor = null;
             }
 
-            // Register receiver if a scorer is active.
+            // Create and register the monitor if a scorer is active.
             if (scorer != null) {
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-                filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-                filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-                filter.addDataScheme("package");
-                filter.addDataSchemeSpecificPart(scorer.mPackageName,
-                        PatternMatcher.PATTERN_LITERAL);
-                mReceiver = new ScorerChangedReceiver(scorer.mPackageName);
+                mPackageMonitor = new NetworkScorerPackageMonitor(scorer.mPackageName);
                 // TODO: Need to update when we support per-user scorers. http://b/23422763
-                mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter, null, null);
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "Registered receiver for " + scorer.mPackageName);
+                mPackageMonitor.register(mContext, null /* thread */, UserHandle.SYSTEM,
+                        false /* externalStorage */);
+                if (DBG) {
+                    Log.d(TAG, "Registered package monitor for "
+                            + mPackageMonitor.mRegisteredPackage);
                 }
             }
         }
@@ -299,7 +329,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             // will be made to bind to the new scorer.
             bindToScoringServiceIfNeeded();
             if (result) { // new scorer successfully set
-                registerPackageReceiverIfNeeded();
+                registerPackageMonitorIfNeeded();
 
                 Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
                 if (prevScorer != null) { // Directly notify the old scorer.
@@ -391,20 +421,24 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     private static class ScoringServiceConnection implements ServiceConnection {
         private final ComponentName mComponentName;
         private boolean mBound = false;
+        private boolean mConnected = false;
 
         ScoringServiceConnection(ComponentName componentName) {
             mComponentName = componentName;
         }
 
         void connect(Context context) {
-            disconnect(context);
-            Intent service = new Intent();
-            service.setComponent(mComponentName);
-            mBound = context.bindServiceAsUser(service, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                    UserHandle.SYSTEM);
             if (!mBound) {
-                Log.w(TAG, "Bind call failed for " + service);
+                Intent service = new Intent();
+                service.setComponent(mComponentName);
+                mBound = context.bindServiceAsUser(service, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        UserHandle.SYSTEM);
+                if (!mBound) {
+                    Log.w(TAG, "Bind call failed for " + service);
+                } else {
+                    if (DBG) Log.d(TAG, "ScoringServiceConnection bound.");
+                }
             }
         }
 
@@ -413,6 +447,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 if (mBound) {
                     mBound = false;
                     context.unbindService(this);
+                    if (DBG) Log.d(TAG, "ScoringServiceConnection unbound.");
                 }
             } catch (RuntimeException e) {
                 Log.e(TAG, "Unbind failed.", e);
@@ -422,15 +457,20 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DBG) Log.d(TAG, "ScoringServiceConnection: " + name.flattenToString());
+            mConnected = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (DBG) Log.d(TAG, "ScoringServiceConnection, disconnected: " + name.flattenToString());
+            if (DBG) {
+                Log.d(TAG, "ScoringServiceConnection, disconnected: " + name.flattenToString());
+            }
+            mConnected = false;
         }
 
         public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-            writer.println("ScoringServiceConnection: " + mComponentName + ", bound: " + mBound);
+            writer.println("ScoringServiceConnection: " + mComponentName + ", bound: " + mBound
+                    + ", connected: " + mConnected);
         }
     }
 }
