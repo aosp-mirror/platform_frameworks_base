@@ -1532,18 +1532,23 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     /**
      * Disable all options UI elements, beside the {@link #mDestinationSpinner}
+     *
+     * @param disableRange If the range selection options should be disabled
      */
-    private void disableOptionsUi() {
+    private void disableOptionsUi(boolean disableRange) {
         mCopiesEditText.setEnabled(false);
         mCopiesEditText.setFocusable(false);
         mMediaSizeSpinner.setEnabled(false);
         mColorModeSpinner.setEnabled(false);
         mDuplexModeSpinner.setEnabled(false);
         mOrientationSpinner.setEnabled(false);
-        mRangeOptionsSpinner.setEnabled(false);
-        mPageRangeEditText.setEnabled(false);
         mPrintButton.setVisibility(View.GONE);
         mMoreOptionsButton.setEnabled(false);
+
+        if (disableRange) {
+            mRangeOptionsSpinner.setEnabled(false);
+            mPageRangeEditText.setEnabled(false);
+        }
     }
 
     void updateOptionsUi() {
@@ -1564,14 +1569,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             if (mState != STATE_PRINTER_UNAVAILABLE) {
                 mDestinationSpinner.setEnabled(false);
             }
-            disableOptionsUi();
+            disableOptionsUi(isFinalState(mState));
             return;
         }
 
         // If no current printer, or it has no capabilities, or it is not
         // available, we disable all print options except the destination.
         if (mCurrentPrinter == null || !canPrint(mCurrentPrinter)) {
-            disableOptionsUi();
+            disableOptionsUi(false);
             return;
         }
 
@@ -1881,7 +1886,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
 
         if (mShowDestinationPrompt) {
-            disableOptionsUi();
+            disableOptionsUi(false);
         }
     }
 
