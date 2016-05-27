@@ -3575,6 +3575,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final ArrayList<Task> tasks = displayContent.getTasks();
         final boolean inMultiWindow = isStackVisibleLocked(DOCKED_STACK_ID)
                 || isStackVisibleLocked(FREEFORM_WORKSPACE_STACK_ID);
+        final boolean dockMinimized =
+                getDefaultDisplayContentLocked().mDividerControllerLocked.isMinimizedDock();
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
             final int firstToken = tokens.size() - 1;
@@ -3609,8 +3611,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     continue;
                 }
 
-                // No app except the home app may specify the screen orientation in multi-window.
-                if (inMultiWindow && !atoken.mTask.isHomeTask()) {
+                // No app except the home app may specify the screen orientation in multi-window,
+                // and only if the docked stack is minimized to avoid weirdness when home task
+                // temporarily gets moved to the front.
+                if (inMultiWindow && (!atoken.mTask.isHomeTask() || !dockMinimized)) {
                     continue;
                 }
 

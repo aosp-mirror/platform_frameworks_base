@@ -30,12 +30,12 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VelocityTracker;
@@ -141,8 +141,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private DividerSnapAlgorithm mSnapAlgorithm;
     private final Rect mStableInsets = new Rect();
 
-    private boolean mAnimateAfterRecentsDrawn;
-    private boolean mGrowAfterRecentsDrawn;
     private boolean mGrowRecents;
     private ValueAnimator mCurrentAnimator;
     private boolean mEntranceAnimationRunning;
@@ -151,6 +149,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private GestureDetector mGestureDetector;
     private boolean mDockedStackMinimized;
     private boolean mAdjustedForIme;
+    private DividerState mState;
+    private final Handler mHandler = new Handler();
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -335,8 +335,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    public void setWindowManager(DividerWindowManager windowManager) {
+    public void injectDependencies(DividerWindowManager windowManager, DividerState dividerState) {
         mWindowManager = windowManager;
+        mState = dividerState;
     }
 
     public WindowManagerProxy getWindowManagerProxy() {
@@ -558,7 +559,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 if (endDelay == 0 || mCancelled) {
                     endAction.run();
                 } else {
-                    postDelayed(endAction, endDelay);
+                    mHandler.postDelayed(endAction, endDelay);
                 }
             }
         });
@@ -1048,15 +1049,15 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public final void onBusEvent(RecentsActivityStartingEvent recentsActivityStartingEvent) {
         if (mGrowRecents && getWindowManagerProxy().getDockSide() == WindowManager.DOCKED_TOP
                 && getCurrentPosition() == getSnapAlgorithm().getLastSplitTarget().position) {
-            mGrowAfterRecentsDrawn = true;
+            mState.growAfterRecentsDrawn = true;
             startDragging(false /* animate */, false /* touching */);
         }
     }
 
     public final void onBusEvent(DockedTopTaskEvent event) {
         if (event.dragMode == NavigationBarGestureHelper.DRAG_MODE_NONE) {
-            mGrowAfterRecentsDrawn = false;
-            mAnimateAfterRecentsDrawn = true;
+            mState.growAfterRecentsDrawn = false;
+            mState.animateAfterRecentsDrawn = true;
             startDragging(false /* animate */, false /* touching */);
         }
         updateDockSide();
@@ -1068,11 +1069,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
-        if (mAnimateAfterRecentsDrawn) {
-            mAnimateAfterRecentsDrawn = false;
+        if (mState.animateAfterRecentsDrawn) {
+            mState.animateAfterRecentsDrawn = false;
             updateDockSide();
 
-            post(() -> {
+            mHandler.post(() -> {
                 // Delay switching resizing mode because this might cause jank in recents animation
                 // that's longer than this animation.
                 stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(),
@@ -1080,8 +1081,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                         200 /* endDelay */);
             });
         }
-        if (mGrowAfterRecentsDrawn) {
-            mGrowAfterRecentsDrawn = false;
+        if (mState.growAfterRecentsDrawn) {
+            mState.growAfterRecentsDrawn = false;
             updateDockSide();
             EventBus.getDefault().send(new RecentsGrowingEvent());
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 336,
