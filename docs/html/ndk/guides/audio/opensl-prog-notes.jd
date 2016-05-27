@@ -61,8 +61,8 @@ there is no harm in listing it there. OpenSL ES has one more kind of interface c
  create array and can be added
 later after the object is created. The Android implementation provides
  a convenience feature to
-avoid this complexity; see the
- <a href="#dynamic-interfaces">Dynamic interfaces at object creation</a> section above.
+avoid this complexity, which is described in
+ <a href="{@docRoot}ndk/guides/audio/opensl-for-android.html#dynamic-interfaces">Dynamic interfaces at object creation</a>.
 </p>
 
 <p>
