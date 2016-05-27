@@ -262,18 +262,37 @@ public class Vpn {
      * It uses {@link VpnConfig#LEGACY_VPN} as its package name, and
      * it can be revoked by itself.
      *
-     * @param oldPackage The package name of the old VPN application.
-     * @param newPackage The package name of the new VPN application.
+     * Note: when we added VPN pre-consent in http://ag/522961 the names oldPackage
+     * and newPackage become misleading, because when an app is pre-consented, we
+     * actually prepare oldPackage, not newPackage.
+     *
+     * Their meanings actually are:
+     *
+     * - oldPackage non-null, newPackage null: App calling VpnService#prepare().
+     * - oldPackage null, newPackage non-null: ConfirmDialog calling prepareVpn().
+     * - oldPackage non-null, newPackage=LEGACY_VPN: Used internally to disconnect
+     *   and revoke any current app VPN and re-prepare legacy vpn.
+     *
+     * TODO: Rename the variables - or split this method into two - and end this
+     * confusion.
+     *
+     * @param oldPackage The package name of the old VPN application
+     * @param newPackage The package name of the new VPN application
+     *
      * @return true if the operation is succeeded.
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
-        // Stop an existing always-on VPN from being dethroned by other apps.
-        if (mAlwaysOn && !TextUtils.equals(mPackage, newPackage)) {
-            return false;
-        }
-
         if (oldPackage != null) {
-            if (getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
+            // Stop an existing always-on VPN from being dethroned by other apps.
+            // TODO: Replace TextUtils.equals by isCurrentPreparedPackage when ConnectivityService
+            // can unset always-on after always-on package is uninstalled. Make sure when package
+            // is reinstalled, the consent dialog is not shown.
+            if (mAlwaysOn && !TextUtils.equals(mPackage, oldPackage)) {
+                return false;
+            }
+
+            // Package is not same or old package was reinstalled.
+            if (!isCurrentPreparedPackage(oldPackage)) {
                 // The package doesn't match. We return false (to obtain user consent) unless the
                 // user has already consented to that VPN package.
                 if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
@@ -291,15 +310,28 @@ public class Vpn {
 
         // Return true if we do not need to revoke.
         if (newPackage == null || (!newPackage.equals(VpnConfig.LEGACY_VPN) &&
-                getAppUid(newPackage, mUserHandle) == mOwnerUID)) {
+                isCurrentPreparedPackage(newPackage))) {
             return true;
         }
 
         // Check that the caller is authorized.
         enforceControlPermission();
 
+        // Stop an existing always-on VPN from being dethroned by other apps.
+        // TODO: Replace TextUtils.equals by isCurrentPreparedPackage when ConnectivityService
+        // can unset always-on after always-on package is uninstalled
+        if (mAlwaysOn && !TextUtils.equals(mPackage, newPackage)) {
+            return false;
+        }
+
         prepareInternal(newPackage);
         return true;
+    }
+
+    private boolean isCurrentPreparedPackage(String packageName) {
+        // We can't just check that packageName matches mPackage, because if the app was uninstalled
+        // and reinstalled it will no longer be prepared. Instead check the UID.
+        return getAppUid(packageName, mUserHandle) == mOwnerUID;
     }
 
     /** Prepare the VPN for the given package. Does not perform permission checks. */
