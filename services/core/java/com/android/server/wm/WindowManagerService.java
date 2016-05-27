@@ -2840,6 +2840,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win.mRelayoutCalled = true;
+            win.mInRelayout = true;
+
             final int oldVisibility = win.mViewVisibility;
             win.mViewVisibility = viewVisibility;
             if (DEBUG_SCREEN_ON) {
@@ -2980,6 +2982,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_LAYOUT) {
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
             }
+            win.mInRelayout = false;
         }
 
         if (configChanged) {
