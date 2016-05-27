@@ -78,7 +78,7 @@ static inline void ThrowOnError(
   env->ThrowNew(exceptionClass, methodName);
 }
 
-static bool IsValidCallbackThread() {
+static bool IsValidCallbackThreadEnvOnly() {
   JNIEnv* env = AndroidRuntime::getJNIEnv();
 
   if(sCallbackEnv == NULL || sCallbackEnv != env) {
@@ -87,6 +87,20 @@ static bool IsValidCallbackThread() {
   }
 
   return true;
+}
+
+static bool IsValidCallbackThread() {
+  // sCallbacksObject is created when FlpHardwareProvider on Java side is
+  // initialized. Sometimes the hardware may call a function before the Java
+  // side is ready. In order to prevent a system crash, check whether
+  // sCallbacksObj has been created. If not, simply ignore this event from
+  // hardware.
+  if (sCallbacksObj == NULL) {
+    ALOGE("Attempt to use FlpHardwareProvider blocked, because it hasn't been initialized.");
+    return false;
+  }
+
+  return IsValidCallbackThreadEnvOnly();
 }
 
 static void BatchingCapabilitiesCallback(int32_t capabilities) {
@@ -154,7 +168,7 @@ static int SetThreadEvent(ThreadEvent event) {
     }
     case DISASSOCIATE_JVM:
     {
-      if (!IsValidCallbackThread()) {
+      if (!IsValidCallbackThreadEnvOnly()) {
         ALOGE(
             "Attempted to dissasociate an unnownk callback thread : '%s'.",
             __FUNCTION__
@@ -659,16 +673,6 @@ static void GeofenceMonitorStatusCallback(
   jobject locationObject = NULL;
   if(lastLocation != NULL) {
     TranslateToObject(lastLocation, locationObject);
-  }
-
-  // sCallbacksObject is created when FlpHardwareProvider on Java side is
-  // initialized. Sometimes the hardware may call this function before the Java
-  // side is ready. In order to prevent the system crash, check whether
-  // sCallbacksObj has been created. If not, simply ignore this event from
-  // hardware.
-  if (sCallbacksObj == NULL) {
-    ALOGE("FlpHardwareProvider hasn't been initialized.");
-    return;
   }
 
   sCallbackEnv->CallVoidMethod(
