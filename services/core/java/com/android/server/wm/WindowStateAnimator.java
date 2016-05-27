@@ -1428,8 +1428,24 @@ class WindowStateAnimator {
         float extraHScale = (float) 1.0;
         float extraVScale = (float) 1.0;
 
-        mSurfaceResized = mSurfaceController.setSizeInTransaction(
-                mTmpSize.width(), mTmpSize.height(), recoveringMemory);
+        // Once relayout has been called at least once, we need to make sure
+        // we only resize the client surface during calls to relayout. For
+        // clients which use indeterminate measure specs (MATCH_PARENT),
+        // we may try and change their window size without a call to relayout.
+        // However, this would be unsafe, as the client may be in the middle
+        // of producing a frame at the old size, having just completed layout
+        // to find the surface size changed underneath it.
+        //
+        // TODO: For N we only apply this fix to the pinned workspace. As we
+        // aren't observing known issues here outside of PiP resizing. (Typically
+        // the other windows that use -1 are PopupWindows which aren't likely
+        // to be rendering while we resize).
+        if (!w.inPinnedWorkspace() || (!w.mRelayoutCalled || w.mInRelayout)) {
+            mSurfaceResized = mSurfaceController.setSizeInTransaction(
+                    mTmpSize.width(), mTmpSize.height(), recoveringMemory);
+        } else {
+            mSurfaceResized = false;
+        }
         mForceScaleUntilResize = mForceScaleUntilResize && !mSurfaceResized;
 
 
@@ -1437,10 +1453,12 @@ class WindowStateAnimator {
         if ((task != null && task.mStack.getForceScaleToCrop()) || mForceScaleUntilResize) {
             int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
             int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
+            float surfaceWidth = mSurfaceController.getWidth();
+            float surfaceHeight = mSurfaceController.getHeight();
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
-            extraHScale = (mTmpClipRect.width() - hInsets) / (float)(mTmpSize.width() - hInsets);
-            extraVScale = (mTmpClipRect.height() - vInsets) / (float)(mTmpSize.height() - vInsets);
+            extraHScale = (mTmpClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
+            extraVScale = (mTmpClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
 
             // In the case of ForceScaleToCrop we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
@@ -1462,7 +1480,7 @@ class WindowStateAnimator {
             // Since we are scaled to fit in our previously desired crop, we can now
             // expose the whole window in buffer space, and not risk extending
             // past where the system would have cropped us
-            mTmpClipRect.set(0, 0, mTmpSize.width(), mTmpSize.height());
+            mTmpClipRect.set(0, 0, (int)surfaceWidth, (int)surfaceHeight);
             mTmpFinalClipRect.setEmpty();
 
             // Various surfaces in the scaled stack may resize at different times.
