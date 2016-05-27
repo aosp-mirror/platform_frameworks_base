@@ -53,6 +53,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 public class PlatLogoActivity extends Activity {
+    public static final boolean REVEAL_THE_NAME = true;
+
     FrameLayout mLayout;
     int mTapCount;
     int mKeyCount;
@@ -99,6 +101,19 @@ public class PlatLogoActivity extends Activity {
                     @Override
                     public boolean onLongClick(View v) {
                         if (mTapCount < 5) return false;
+
+                        if (REVEAL_THE_NAME) {
+                            final Drawable overlay = getDrawable(
+                                com.android.internal.R.drawable.platlogo_m);
+                            overlay.setBounds(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
+                            im.getOverlay().clear();
+                            im.getOverlay().add(overlay);
+                            overlay.setAlpha(0);
+                            ObjectAnimator.ofInt(overlay, "alpha", 0, 255)
+                                .setDuration(500)
+                                .start();
+                            return true;
+                        }
 
                         final ContentResolver cr = getContentResolver();
                         if (Settings.System.getLong(cr, Settings.System.EGG_MODE, 0)
