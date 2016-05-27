@@ -266,6 +266,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
+import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
@@ -1344,6 +1345,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mSupportsMultiWindow;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
+    boolean mSupportsLeanbackOnly;
     Rect mDefaultPinnedStackBounds;
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -12813,6 +12815,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+        final boolean supportsLeanbackOnly =
+                mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
+
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
 
@@ -12828,6 +12833,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
             mLenientBackgroundCheck = lenientBackgroundCheck;
+            mSupportsLeanbackOnly = supportsLeanbackOnly;
             mForceResizableActivities = forceResizable;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             if (supportsMultiWindow || forceResizable) {
