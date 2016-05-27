@@ -15,13 +15,14 @@
 -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
     <shortcut
-        android:shortcutId="ms1"
+        android:shortcutId="ms1-alt"
+        android:enabled="true"
+        android:shortcutIcon="@drawable/icon1"
         android:shortcutShortLabel="@string/shortcut_title1"
+        android:shortcutLongLabel="@string/shortcut_text1"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message1"
+        android:shortcutCategories="android.shortcut.conversation:android.shortcut.media"
         android:shortcutIntentAction="action1"
-    />
-    <shortcut
-        android:shortcutId="ms1"
-        android:shortcutShortLabel="@string/shortcut_title2"
-        android:shortcutIntentAction="action2"
+        android:shortcutIntentData="data1"
     />
 </shortcuts>

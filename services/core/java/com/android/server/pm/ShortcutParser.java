@@ -86,6 +86,8 @@ public class ShortcutParser {
             int type;
 
             int rank = 0;
+            final int maxShortcuts = service.getMaxActivityShortcuts();
+            int numShortcuts = 0;
 
             outer:
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -115,10 +117,17 @@ public class ShortcutParser {
                     }
 
                     if (si != null) {
+                        if (numShortcuts >= maxShortcuts) {
+                            Slog.w(TAG, "More than " + maxShortcuts + " shortcuts found for "
+                                    + activityInfo.getComponentName() + ", ignoring the rest.");
+                            return result;
+                        }
+
                         if (result == null) {
                             result = new ArrayList<>();
                         }
                         result.add(si);
+                        numShortcuts++;
                     }
                     continue;
                 }
