@@ -14,8 +14,22 @@
      limitations under the License.
 -->
 
-<resources>
-    <item name="drag_hovering_tag" type="id" />
-    <item name="item_position_tag" type="id" />
-    <item name="layout_id_tag" type="id" />
-</resources>
+<ripple
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/com.android.documentsui"
+    android:color="?attr/colorControlHighlight">
+    <item
+        android:id="@android:id/mask"
+        android:drawable="@android:color/white"/>
+
+    <item>
+        <selector>
+            <item
+                app:state_highlighted="true"
+                android:drawable="@color/item_doc_background_selected"/>
+            <item
+                app:state_highlighted="false"
+                android:drawable="@android:color/transparent"/>
+        </selector>
+    </item>
+</ripple>

@@ -32,6 +32,14 @@ public final class DragEvents {
         return mockEvent;
     }
 
+    public static DragEvent createTestLocationEvent(float x, float y) {
+        final DragEvent locationEvent = createTestDragEvent(DragEvent.ACTION_DRAG_LOCATION);
+        Mockito.when(locationEvent.getX()).thenReturn(x);
+        Mockito.when(locationEvent.getY()).thenReturn(y);
+
+        return locationEvent;
+    }
+
     public static DragEvent createTestDropEvent(ClipData clipData) {
         final DragEvent dropEvent = createTestDragEvent(DragEvent.ACTION_DROP);
         Mockito.when(dropEvent.getClipData()).thenReturn(clipData);

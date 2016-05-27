@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import android.content.ClipData;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
@@ -62,6 +63,7 @@ public class ItemDragListener<H extends DragHost> implements OnDragListener {
                 handleEnteredEvent(v);
                 return true;
             case DragEvent.ACTION_DRAG_LOCATION:
+                handleLocationEvent(v, event.getX(), event.getY());
                 return true;
             case DragEvent.ACTION_DRAG_EXITED:
             case DragEvent.ACTION_DRAG_ENDED:
@@ -81,6 +83,13 @@ public class ItemDragListener<H extends DragHost> implements OnDragListener {
         assert (task != null);
         v.setTag(R.id.drag_hovering_tag, task);
         mHoverTimer.schedule(task, ViewConfiguration.getLongPressTimeout());
+    }
+
+    private void handleLocationEvent(View v, float x, float y) {
+        Drawable background = v.getBackground();
+        if (background != null) {
+            background.setHotspot(x, y);
+        }
     }
 
     private void handleExitedEndedEvent(View v) {

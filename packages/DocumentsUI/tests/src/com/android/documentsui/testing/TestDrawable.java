@@ -16,24 +16,38 @@
 
 package com.android.documentsui.testing;
 
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
-import android.view.View;
 
-import org.mockito.Mockito;
+public class TestDrawable extends Drawable {
 
-public final class Views {
+    public float hotspotX;
+    public float hotspotY;
 
-    private Views() {}
-
-    public static View createTestView() {
-        final View view = Mockito.mock(View.class);
-        Mockito.doCallRealMethod().when(view).setTag(Mockito.anyInt(), Mockito.any());
-        Mockito.doCallRealMethod().when(view).getTag(Mockito.anyInt());
-
-        return view;
+    @Override
+    public void setHotspot(float x, float y) {
+        hotspotX = x;
+        hotspotY = y;
     }
 
-    public static void setBackground(View testView, Drawable background) {
-        Mockito.when(testView.getBackground()).thenReturn(background);
+    @Override
+    public void draw(Canvas canvas) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setAlpha(int alpha) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setColorFilter(ColorFilter colorFilter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getOpacity() {
+        throw new UnsupportedOperationException();
     }
 }

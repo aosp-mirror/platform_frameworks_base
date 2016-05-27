@@ -14,7 +14,8 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.documentsui.RootItemView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="48dp"
@@ -22,7 +23,8 @@
     android:paddingEnd="@dimen/list_item_padding"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:background="@drawable/root_item_background">
 
     <FrameLayout
         android:layout_width="@dimen/icon_size"
@@ -68,4 +70,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</com.android.documentsui.RootItemView>
