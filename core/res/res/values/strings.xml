@@ -4263,6 +4263,12 @@
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
 
+    <!-- Content description of the expand button icon in the notification.-->
+    <string name="expand_button_content_description">Expand button</string>
+
+    <!-- Accessibility action description on the expand button. -->
+    <string name="expand_action_accessibility">Click to expand</string>
+
     <!-- User visible name for USB MIDI Peripheral port -->
     <string name="usb_midi_peripheral_name">Android USB Peripheral Port</string>
     <!-- Manufacturer name for USB MIDI Peripheral port -->
