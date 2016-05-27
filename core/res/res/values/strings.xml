@@ -4364,6 +4364,11 @@
     <!-- The representation of a time duration when negative. An example is -1:14. This can be used with a countdown timer for example.-->
     <string name="negative_duration">\u2212<xliff:g id="time" example="1:14">%1$s</xliff:g></string>
 
+    <!-- Title of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
+    <string name="reset_retail_demo_mode_title">Restart Session</string>
+    <!-- Text of notification to start a new demo session when device is in retail mode [CHAR LIMIT=NONE] -->
+    <string name="reset_retail_demo_mode_text">Tap to start a new demo session</string>
+
     <!-- Title of notification shown when device has been forced to safe mode after a security compromise. -->
     <string name="audit_safemode_notification">Factory reset to use this device without restrictions</string>
     <!-- Description of notification shown when device has been forced to safe mode after a security compromise. -->
