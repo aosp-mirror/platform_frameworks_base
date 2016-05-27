@@ -912,7 +912,7 @@ public final class PrintSpoolerService extends Service {
                             printJob.isCancelling()));
 
                     float progress = printJob.getProgress();
-                    if (progress != Float.NaN) {
+                    if (!Float.isNaN(progress)) {
                         serializer.attribute(null, ATTR_PROGRESS, String.valueOf(progress));
                     }
 
