@@ -59,7 +59,7 @@ public class RecentsTvView extends FrameLayout {
     private boolean mAwaitingFirstLayout = true;
     private Rect mSystemInsets = new Rect();
     private RecentsTvTransitionHelper mTransitionHelper;
-    private Handler mHandler;
+    private final Handler mHandler = new Handler();
     private OnScrollListener mScrollListener;
     public RecentsTvView(Context context) {
         this(context, null);
@@ -81,9 +81,7 @@ public class RecentsTvView extends FrameLayout {
         LayoutInflater inflater = LayoutInflater.from(context);
         mEmptyView = inflater.inflate(R.layout.recents_tv_empty, this, false);
         addView(mEmptyView);
-        mEmptyViewFocusAnimationHolder = new RecentsRowFocusAnimationHolder(mEmptyView, null);
 
-        mHandler = new Handler();
         mTransitionHelper = new RecentsTvTransitionHelper(mContext, mHandler);
     }
 
@@ -91,20 +89,18 @@ public class RecentsTvView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mDismissPlaceholder = findViewById(R.id.dismiss_placeholder);
+        mTaskStackHorizontalView = (TaskStackHorizontalGridView) findViewById(R.id.task_list);
     }
 
-    public void setTaskStack(TaskStack stack) {
+    /**
+     * Initialize the view.
+     */
+    public void init(TaskStack stack) {
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         mStack = stack;
 
-        if (mTaskStackHorizontalView != null) {
-            mTaskStackHorizontalView.reset();
-            mTaskStackHorizontalView.setStack(stack);
-        } else {
-            mTaskStackHorizontalView = (TaskStackHorizontalGridView) findViewById(R.id.task_list);
-            mTaskStackHorizontalView.setStack(stack);
-        }
+        mTaskStackHorizontalView.init(stack);
 
         if (stack.getStackTaskCount() > 0) {
             hideEmptyView();
@@ -112,6 +108,7 @@ public class RecentsTvView extends FrameLayout {
             showEmptyView();
         }
 
+        // Layout with the new stack
         requestLayout();
     }
 
@@ -185,17 +182,6 @@ public class RecentsTvView extends FrameLayout {
             mTransitionHelper.launchTaskFromRecents(mStack, task, mTaskStackHorizontalView,
                     mTaskStackHorizontalView.getChildViewForTask(task), null,
                     INVALID_STACK_ID);
-        }
-    }
-
-    /**
-     * Starts the focus change animation.
-     */
-    public void startRecentsRowFocusAnimation(boolean hasFocus) {
-        if (mEmptyView.getVisibility() == View.VISIBLE) {
-            mEmptyViewFocusAnimationHolder.getFocusChangeAnimator(hasFocus).start();
-        } else {
-            mTaskStackHorizontalView.startRecentsRowFocusAnimation(hasFocus);
         }
     }
 

@@ -18,15 +18,20 @@ package com.android.systemui.tv.pip;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.SystemServicesProxy;
 
+import static android.view.Gravity.CENTER_HORIZONTAL;
+import static android.view.Gravity.TOP;
+import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static com.android.systemui.tv.pip.PipManager.STATE_PIP_OVERLAY;
 import static com.android.systemui.tv.pip.PipManager.STATE_PIP_RECENTS;
 import static com.android.systemui.tv.pip.PipManager.STATE_PIP_RECENTS_FOCUSED;
@@ -42,13 +47,16 @@ public class PipRecentsOverlayManager {
 
     private final PipManager mPipManager = PipManager.getInstance();
     private final WindowManager mWindowManager;
+    private final SystemServicesProxy mSystemServicesProxy;
     private View mOverlayView;
     private PipRecentsControlsView mPipControlsView;
     private View mRecentsView;
+    private boolean mTalkBackEnabled;
 
-    private final LayoutParams mPipRecentsControlsViewLayoutParams;
-    private final LayoutParams mPipRecentsControlsViewFocusedLayoutParams;
+    private LayoutParams mPipRecentsControlsViewLayoutParams;
+    private LayoutParams mPipRecentsControlsViewFocusedLayoutParams;
 
+    private boolean mHasFocusableInRecents;
     private boolean mIsPipRecentsOverlayShown;
     private boolean mIsRecentsShown;
     private boolean mIsPipFocusedInRecent;
@@ -72,18 +80,7 @@ public class PipRecentsOverlayManager {
 
     PipRecentsOverlayManager(Context context) {
         mWindowManager = (WindowManager) context.getSystemService(WindowManager.class);
-
-        mPipRecentsControlsViewLayoutParams = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_SYSTEM_DIALOG,
-                LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCHABLE,
-                PixelFormat.TRANSLUCENT);
-        mPipRecentsControlsViewFocusedLayoutParams = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                LayoutParams.TYPE_SYSTEM_DIALOG,
-                0,
-                PixelFormat.TRANSLUCENT);
-
+        mSystemServicesProxy = SystemServicesProxy.getInstance(context);
         initViews(context);
     }
 
@@ -101,6 +98,20 @@ public class PipRecentsOverlayManager {
                 }
             }
         });
+
+        mOverlayView.measure(UNSPECIFIED, UNSPECIFIED);
+        mPipRecentsControlsViewLayoutParams = new WindowManager.LayoutParams(
+                mOverlayView.getMeasuredWidth(), mOverlayView.getMeasuredHeight(),
+                LayoutParams.TYPE_SYSTEM_DIALOG,
+                LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCHABLE,
+                PixelFormat.TRANSLUCENT);
+        mPipRecentsControlsViewLayoutParams.gravity = TOP | CENTER_HORIZONTAL;
+        mPipRecentsControlsViewFocusedLayoutParams = new WindowManager.LayoutParams(
+                mOverlayView.getMeasuredWidth(), mOverlayView.getMeasuredHeight(),
+                LayoutParams.TYPE_SYSTEM_DIALOG,
+                0,
+                PixelFormat.TRANSLUCENT);
+        mPipRecentsControlsViewFocusedLayoutParams.gravity = TOP | CENTER_HORIZONTAL;
     }
 
     /**
@@ -111,9 +122,10 @@ public class PipRecentsOverlayManager {
         if (mIsPipRecentsOverlayShown) {
             return;
         }
+        mTalkBackEnabled = mSystemServicesProxy.isTouchExplorationEnabled();
+        mRecentsView.setVisibility(mTalkBackEnabled ? View.VISIBLE : View.GONE);
         mIsPipRecentsOverlayShown = true;
         mIsPipFocusedInRecent = true;
-        mPipControlsView.reset();
         mWindowManager.addView(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
     }
 
@@ -126,50 +138,46 @@ public class PipRecentsOverlayManager {
             return;
         }
         mWindowManager.removeView(mOverlayView);
+        // Resets the controls view when its removed.
+        // If not, changing focus in reset will be show animation when Recents is resumed.
+        mPipControlsView.reset();
         mIsPipRecentsOverlayShown = false;
     }
 
     /**
      * Request focus to the PIP Recents overlay.
-     * Called when the PIP view in {@link com.android.systemui.recents.tv.RecentsTvActivity}
-     * is focused.
      * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
-     * @param allowRecentsFocusable {@code true} if Recents can have focus. (i.e. Has a recent task)
+     * @param hasFocusableInRecents {@code true} if Recents can have focus. (i.e. Has a recent task)
      */
-    public void requestFocus(boolean allowRecentsFocusable) {
-        mRecentsView.setVisibility(allowRecentsFocusable ? View.VISIBLE : View.GONE);
+    public void requestFocus(boolean hasFocusableInRecents) {
+        mHasFocusableInRecents = hasFocusableInRecents;
         if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || mIsPipFocusedInRecent
                 || !mPipManager.isPipShown()) {
             return;
         }
         mIsPipFocusedInRecent = true;
-        mPipManager.resizePinnedStack(STATE_PIP_RECENTS_FOCUSED);
-
-        mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
-        mPipControlsView.requestFocus();
-        mPipControlsView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         mPipControlsView.startFocusGainAnimation();
+        mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewFocusedLayoutParams);
+        mPipManager.resizePinnedStack(STATE_PIP_RECENTS_FOCUSED);
+        if (mTalkBackEnabled) {
+            mPipControlsView.requestFocus();
+            mPipControlsView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_VIEW_FOCUSED);
+        }
     }
 
     /**
      * Request focus to the PIP Recents overlay.
-     * Called when the PIP view in {@link com.android.systemui.recents.tv.RecentsTvActivity}
-     * is focused.
-     * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
      */
     public void clearFocus() {
         if (!mIsPipRecentsOverlayShown || !mIsRecentsShown || !mIsPipFocusedInRecent
-                || !mPipManager.isPipShown()) {
+                || !mPipManager.isPipShown() || !mHasFocusableInRecents) {
             return;
         }
-        if (!mRecentsView.hasFocus()) {
-            // Let mRecentsView's focus listener handle clearFocus().
-            mRecentsView.requestFocus();
-        }
         mIsPipFocusedInRecent = false;
-        mPipManager.resizePinnedStack(STATE_PIP_RECENTS);
+        mPipControlsView.startFocusLossAnimation();
         mWindowManager.updateViewLayout(mOverlayView, mPipRecentsControlsViewLayoutParams);
-        mPipControlsView.startFocusLoseAnimation();
+        mPipManager.resizePinnedStack(STATE_PIP_RECENTS);
         if (mCallback != null) {
             mCallback.onRecentsFocused();
         }

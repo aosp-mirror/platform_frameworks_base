@@ -21,6 +21,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:background="@drawable/recents_tv_background_gradient">
+
     <com.android.systemui.recents.tv.views.TaskStackHorizontalGridView
         android:id="@+id/task_list"
         android:layout_width="wrap_content"
@@ -32,13 +33,13 @@
         android:focusable="true"
         android:layoutDirection="rtl" />
 
-    <!-- Placeholder view to give focus to the PIP menus. -->
+    <!-- Placeholder view to give focus to the PIP menus in talkback mode -->
     <View
         android:id="@+id/pip"
         android:layout_width="1dp"
         android:layout_height="1dp"
         android:focusable="true"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <!-- Placeholder to dismiss during talkback. -->
     <ImageView
