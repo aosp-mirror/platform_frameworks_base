@@ -370,37 +370,8 @@ class AppErrors {
 
         Intent appErrorIntent = null;
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_CRASH, res);
-        if (res == AppErrorDialog.TIMEOUT) {
+        if (res == AppErrorDialog.TIMEOUT || res == AppErrorDialog.CANCEL) {
             res = AppErrorDialog.FORCE_QUIT;
-        }
-        if (res == AppErrorDialog.RESET) {
-            String[] packageList = r.getPackageList();
-            if (packageList != null) {
-                PackageManager pm = mContext.getPackageManager();
-                final Semaphore s = new Semaphore(0);
-                for (int i = 0; i < packageList.length; i++) {
-                    if (i < packageList.length - 1) {
-                        pm.deleteApplicationCacheFiles(packageList[i], null);
-                    } else {
-                        pm.deleteApplicationCacheFiles(packageList[i],
-                                new IPackageDataObserver.Stub() {
-                                    @Override
-                                    public void onRemoveCompleted(String packageName,
-                                                                  boolean succeeded) {
-                                        s.release();
-                                    }
-                                });
-
-                        // Wait until cache has been cleared before we restart.
-                        try {
-                            s.acquire();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-            }
-            // If there was nothing to reset, just restart;
-            res = AppErrorDialog.RESTART;
         }
         synchronized (mService) {
             if (res == AppErrorDialog.MUTE) {
