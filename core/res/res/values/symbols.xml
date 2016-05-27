@@ -698,7 +698,6 @@
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
   <java-symbol type="string" name="lock_to_app_toast" />
-  <java-symbol type="string" name="lock_to_app_toast_accessible" />
   <java-symbol type="string" name="lock_to_app_toast_locked" />
   <java-symbol type="string" name="lock_to_app_start" />
   <java-symbol type="string" name="lock_to_app_exit" />
