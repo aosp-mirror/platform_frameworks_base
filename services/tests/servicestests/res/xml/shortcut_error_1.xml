@@ -1,0 +1,11 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
+    <shortcut
+        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutIntentAction="android.intent.action.VIEW"
+    />
+    <shortcut
+        android:shortcutId="x1"
+        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutIntentAction="android.intent.action.VIEW"
+    />
+</shortcuts>

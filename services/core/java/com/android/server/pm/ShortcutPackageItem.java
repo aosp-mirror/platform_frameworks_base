@@ -26,6 +26,9 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 
+/**
+ * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
+ */
 abstract class ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
 
