@@ -109,9 +109,6 @@ public class HeaderTransformState extends TransformState {
     @Override
     public void recycle() {
         super.recycle();
-        if (mWorkProfileState != null) {
-            mWorkProfileState.recycle();
-        }
         sInstancePool.release(this);
     }
 
@@ -120,6 +117,10 @@ public class HeaderTransformState extends TransformState {
         super.reset();
         mExpandButton = null;
         mWorkProfileState = null;
+        if (mWorkProfileState != null) {
+            mWorkProfileState.recycle();
+            mWorkProfileState = null;
+        }
     }
 
     public void setVisible(boolean visible) {

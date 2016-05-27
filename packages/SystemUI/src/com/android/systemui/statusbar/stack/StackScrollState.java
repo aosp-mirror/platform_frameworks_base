@@ -26,9 +26,8 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A state of a {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout} which
@@ -39,12 +38,12 @@ public class StackScrollState {
     private static final String CHILD_NOT_FOUND_TAG = "StackScrollStateNoSuchChild";
 
     private final ViewGroup mHostView;
-    private Map<ExpandableView, StackViewState> mStateMap;
+    private WeakHashMap<ExpandableView, StackViewState> mStateMap;
     private final int mClearAllTopPadding;
 
     public StackScrollState(ViewGroup hostView) {
         mHostView = hostView;
-        mStateMap = new HashMap<ExpandableView, StackViewState>();
+        mStateMap = new WeakHashMap<>();
         mClearAllTopPadding = hostView.getContext().getResources().getDimensionPixelSize(
                 R.dimen.clear_all_padding_top);
     }
