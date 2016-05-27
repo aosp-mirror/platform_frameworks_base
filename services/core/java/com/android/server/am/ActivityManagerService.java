@@ -321,6 +321,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_URI_PERMISS
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
@@ -7132,6 +7133,41 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             return 0;
+        }
+    }
+
+    /**
+     * Whitelists {@code targetUid} to temporarily bypass Power Save mode.
+     *
+     * <p>{@code callerUid} must be allowed to request such whitelist by calling
+     * {@link #addTempPowerSaveWhitelistGrantorUid(int)}.
+     */
+    void tempWhitelistAppForPowerSave(int callerPid, int callerUid, int targetUid, long duration) {
+        if (DEBUG_WHITELISTS) {
+            Slog.d(TAG, "tempWhitelistAppForPowerSave(" + callerPid + ", " + callerUid + ", "
+                    + targetUid + ", " + duration + ")");
+        }
+        synchronized (mPidsSelfLocked) {
+            final ProcessRecord pr = mPidsSelfLocked.get(callerPid);
+            if (pr == null) {
+                Slog.w(TAG, "tempWhitelistAppForPowerSave() no ProcessRecord for pid " + callerPid);
+                return;
+            }
+            if (!pr.whitelistManager) {
+                if (DEBUG_WHITELISTS) {
+                    Slog.d(TAG, "tempWhitelistAppForPowerSave() for target " + targetUid + ": pid "
+                            + callerPid + " is not allowed");
+                }
+                return;
+            }
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(targetUid, duration,
+                    true, "pe from uid:" + callerUid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -19029,6 +19065,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
+
+            app.whitelistManager = false;
+
             for (int conni = s.connections.size()-1;
                     conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                             || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND
@@ -19047,6 +19086,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                         // Binding to ourself is not interesting.
                         continue;
                     }
+                    if ((cr.flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                        app.whitelistManager = true;
+                    }
+
                     if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
                         ProcessRecord client = cr.binding.client;
                         int clientAdj = computeOomAdjLocked(client, cachedAdj,
@@ -21322,6 +21365,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     removeProcessLocked(procs.get(i), false, true, "kill all fg");
                 }
             }
+        }
+
+        @Override
+        public void setPendingIntentWhitelistDuration(IIntentSender target, long duration) {
+            if (!(target instanceof PendingIntentRecord)) {
+                Slog.w(TAG, "markAsSentFromNotification(): not a PendingIntentRecord: " + target);
+                return;
+            }
+            ((PendingIntentRecord) target).setWhitelistDuration(duration);
         }
     }
 

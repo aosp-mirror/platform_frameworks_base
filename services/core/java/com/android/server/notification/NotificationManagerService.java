@@ -40,11 +40,13 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -56,6 +58,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.app.StatusBarManager;
 import android.app.backup.BackupManager;
 import android.app.usage.UsageEvents;
@@ -64,6 +67,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -90,6 +94,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -127,6 +132,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
+import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -2542,6 +2548,8 @@ public class NotificationManagerService extends SystemService {
                     + " id=" + id + " notification=" + notification);
         }
 
+        markAsSentFromNotification(notification);
+
         // Sanitize inputs
         notification.priority = clamp(notification.priority, Notification.PRIORITY_MIN,
                 Notification.PRIORITY_MAX);
@@ -2554,6 +2562,63 @@ public class NotificationManagerService extends SystemService {
         mHandler.post(new EnqueueNotificationRunnable(userId, r));
 
         idOut[0] = id;
+    }
+
+    private static void markAsSentFromNotification(Notification notification) {
+        final ActivityManagerInternal am = LocalServices.getService(ActivityManagerInternal.class);
+        final long duration = LocalServices.getService(DeviceIdleController.LocalService.class)
+                .getNotificationWhitelistDuration();
+
+        int size = 0;
+        if (notification.contentIntent != null) {
+            am.setPendingIntentWhitelistDuration(notification.contentIntent.getTarget(), duration);
+        }
+        if (notification.deleteIntent != null) {
+            am.setPendingIntentWhitelistDuration(notification.deleteIntent.getTarget(), duration);
+        }
+        if (notification.fullScreenIntent != null) {
+            am.setPendingIntentWhitelistDuration(notification.fullScreenIntent.getTarget(),
+                    duration);
+        }
+        if (notification.actions != null) {
+            for (Notification.Action action: notification.actions) {
+                am.setPendingIntentWhitelistDuration(action.actionIntent.getTarget(), duration);
+                setPendingIntentWhitelistDuration(am, duration, action.getExtras());
+                final RemoteInput[] remoteInputs = action.getRemoteInputs();
+                if (remoteInputs != null) {
+                    for (RemoteInput remoteInput : remoteInputs) {
+                        setPendingIntentWhitelistDuration(am, duration, remoteInput.getExtras());
+                    }
+                }
+            }
+        }
+    }
+
+    private static void setPendingIntentWhitelistDuration(ActivityManagerInternal am, long duration,
+            Bundle extras) {
+        for (String key : extras.keySet()) {
+            setPendingIntentWhitelistDuration(am, duration, extras.getParcelable(key));
+            final Parcelable[] parcelableArray = extras.getParcelableArray(key);
+            if (parcelableArray != null) {
+                for (Parcelable parcelable: parcelableArray) {
+                    setPendingIntentWhitelistDuration(am, duration, parcelable);
+                }
+            }
+            final ArrayList<Parcelable> parcelableList = extras.getParcelableArrayList(key);
+            if (parcelableList != null) {
+                for (Parcelable parcelable: parcelableList) {
+                    setPendingIntentWhitelistDuration(am, duration, parcelable);
+                }
+            }
+        }
+    }
+
+    private static void setPendingIntentWhitelistDuration(ActivityManagerInternal am, long duration,
+            Parcelable parcelable) {
+        if (parcelable instanceof PendingIntent) {
+            am.setPendingIntentWhitelistDuration(((PendingIntent) parcelable).getTarget(),
+                    duration);
+        }
     }
 
     private class EnqueueNotificationRunnable implements Runnable {

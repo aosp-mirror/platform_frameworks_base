@@ -47,6 +47,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     final WeakReference<PendingIntentRecord> ref;
     boolean sent = false;
     boolean canceled = false;
+    private long whitelistDuration = 0;
 
     String stringName;
     String lastTagPrefix;
@@ -66,9 +67,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         final int flags;
         final int hashCode;
         final int userId;
-        
+
         private static final int ODD_PRIME_NUMBER = 37;
-        
+
         Key(int _t, String _p, ActivityRecord _a, String _w,
                 int _r, Intent[] _i, String[] _it, int _f, Bundle _o, int _userId) {
             type = _t;
@@ -106,7 +107,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             //Slog.i(ActivityManagerService.TAG, this + " hashCode=0x"
             //        + Integer.toHexString(hashCode));
         }
-        
+
         public boolean equals(Object otherObj) {
             if (otherObj == null) {
                 return false;
@@ -198,6 +199,11 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         ref = new WeakReference<PendingIntentRecord>(this);
     }
 
+    void setWhitelistDuration(long duration) {
+        this.whitelistDuration = duration;
+        this.stringName = null;
+    }
+
     public void send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
             String requiredPermission, Bundle options) {
         sendInner(code, intent, resolvedType, finishedReceiver,
@@ -215,6 +221,14 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
+
+        if (whitelistDuration > 0 && !canceled) {
+            // Must call before acquiring the lock. It's possible the method return before sending
+            // the intent due to some validations inside the lock, in which case the UID shouldn't
+            // be whitelisted, but since the whitelist is temporary, that would be ok.
+            owner.tempWhitelistAppForPowerSave(Binder.getCallingPid(), Binder.getCallingUid(), uid,
+                    whitelistDuration);
+        }
 
         synchronized (owner) {
             final ActivityContainer activityContainer = (ActivityContainer)container;
@@ -361,7 +375,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             }
         }
     }
-    
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
@@ -383,6 +397,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
                     pw.print(" canceled="); pw.println(canceled);
         }
+        pw.print(prefix); pw.println("whitelistDuration="); pw.println(whitelistDuration);
     }
 
     public String toString() {
@@ -396,6 +411,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         sb.append(key.packageName);
         sb.append(' ');
         sb.append(key.typeName());
+        if (whitelistDuration > 0) {
+            sb.append( " (whitelistDuration: ").append(whitelistDuration).append("ms)");
+        }
         sb.append('}');
         return stringName = sb.toString();
     }
