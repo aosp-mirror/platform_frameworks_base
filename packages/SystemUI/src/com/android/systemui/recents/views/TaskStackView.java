@@ -1400,8 +1400,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * We expect that the {@link TaskView} associated with the removed task is already hidden.
      */
     @Override
-    public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, AnimationProps animation, boolean fromDockGesture) {
+    public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask,
+            AnimationProps animation, boolean fromDockGesture) {
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
         }
