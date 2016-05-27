@@ -148,10 +148,12 @@ public class TaskStackAnimationHelper {
         for (int i = taskViews.size() - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = (launchTargetTask != null &&
-                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask));
-            boolean hideTask = (launchTargetTask != null &&
-                    launchTargetTask.isFreeformTask() && task.isFreeformTask());
+            boolean currentTaskOccludesLaunchTarget = launchTargetTask != null &&
+                    launchTargetTask.group != null &&
+                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
+            boolean hideTask = launchTargetTask != null &&
+                    launchTargetTask.isFreeformTask() &&
+                    task.isFreeformTask();
 
             // Get the current transform for the task, which will be used to position it offscreen
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
@@ -221,11 +223,9 @@ public class TaskStackAnimationHelper {
             int taskIndexFromBack = i;
             final TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = false;
-            if (launchTargetTask != null) {
-                currentTaskOccludesLaunchTarget = launchTargetTask.group.isTaskAboveTask(task,
-                        launchTargetTask);
-            }
+            boolean currentTaskOccludesLaunchTarget = launchTargetTask != null &&
+                    launchTargetTask.group != null &&
+                    launchTargetTask.group.isTaskAboveTask(task, launchTargetTask);
 
             // Get the current transform for the task, which will be updated to the final transform
             // to animate to depending on how recents was invoked
@@ -358,8 +358,9 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            boolean currentTaskOccludesLaunchTarget = (launchingTask != null &&
-                    launchingTask.group.isTaskAboveTask(task, launchingTask));
+            boolean currentTaskOccludesLaunchTarget = launchingTask != null &&
+                    launchingTask.group != null &&
+                    launchingTask.group.isTaskAboveTask(task, launchingTask);
 
             if (tv == launchingTaskView) {
                 tv.setClipViewInStack(false);
