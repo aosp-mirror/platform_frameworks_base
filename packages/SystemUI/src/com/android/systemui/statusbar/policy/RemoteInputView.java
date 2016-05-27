@@ -47,6 +47,7 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.stack.ScrollContainer;
@@ -284,11 +285,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     private void findScrollContainer() {
         if (mScrollContainer == null) {
+            mScrollContainerChild = null;
             ViewParent p = this;
             while (p != null) {
+                if (mScrollContainerChild == null && p instanceof ExpandableView) {
+                    mScrollContainerChild = (View) p;
+                }
                 if (p.getParent() instanceof ScrollContainer) {
                     mScrollContainer = (ScrollContainer) p.getParent();
-                    mScrollContainerChild = (View) p;
+                    if (mScrollContainerChild == null) {
+                        mScrollContainerChild = (View) p;
+                    }
                     break;
                 }
                 p = p.getParent();
