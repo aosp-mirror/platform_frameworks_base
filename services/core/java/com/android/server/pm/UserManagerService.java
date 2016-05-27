@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -31,7 +32,9 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -75,7 +78,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -88,7 +90,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
-import com.android.server.am.UserState;
 
 import libcore.io.IoUtils;
 import libcore.util.Objects;
@@ -330,8 +331,8 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private boolean mForceEphemeralUsers;
 
-    @GuardedBy("mUserStates")
-    private final SparseIntArray mUserStates = new SparseIntArray();
+    @GuardedBy("mUsersLock")
+    private final SparseBooleanArray mUnlockingOrUnlockedUsers = new SparseBooleanArray();
 
     private static UserManagerService sInstance;
 
@@ -378,7 +379,6 @@ public class UserManagerService extends IUserManager.Stub {
         mLocalService = new LocalService();
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mUserStates.put(UserHandle.USER_SYSTEM, UserState.STATE_BOOTING);
     }
 
     void systemReady() {
@@ -2380,9 +2380,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
             mIsUserManaged.delete(userHandle);
-        }
-        synchronized (mUserStates) {
-            mUserStates.delete(userHandle);
+            mUnlockingOrUnlockedUsers.delete(userHandle);
         }
         synchronized (mRestrictionsLock) {
             mBaseUserRestrictions.remove(userHandle);
@@ -3083,9 +3081,6 @@ public class UserManagerService extends IUserManager.Stub {
                 pw.println();
                 pw.println("  Device managed: " + mIsDeviceManaged);
             }
-            synchronized (mUserStates) {
-                pw.println("  Started users state: " + mUserStates);
-            }
             // Dump some capabilities
             pw.println();
             pw.println("  Max users: " + UserManager.getMaxSupportedUsers());
@@ -3272,32 +3267,16 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public boolean isUserRunning(int userId) {
-            synchronized (mUserStates) {
-                return mUserStates.get(userId, -1) >= 0;
-            }
-        }
-
-        @Override
-        public void setUserState(int userId, int userState) {
-            synchronized (mUserStates) {
-                mUserStates.put(userId, userState);
-            }
-        }
-
-        @Override
-        public void removeUserState(int userId) {
-            synchronized (mUserStates) {
-                mUserStates.delete(userId);
+        public void setUserUnlockingOrUnlocked(int userId, boolean unlockingOrUnlocked) {
+            synchronized (mUsersLock) {
+                mUnlockingOrUnlockedUsers.put(userId, unlockingOrUnlocked);
             }
         }
 
         @Override
         public boolean isUserUnlockingOrUnlocked(int userId) {
-            synchronized (mUserStates) {
-                int state = mUserStates.get(userId, -1);
-                return (state == UserState.STATE_RUNNING_UNLOCKING)
-                        || (state == UserState.STATE_RUNNING_UNLOCKED);
+            synchronized (mUsersLock) {
+                return mUnlockingOrUnlockedUsers.get(userId);
             }
         }
     }
