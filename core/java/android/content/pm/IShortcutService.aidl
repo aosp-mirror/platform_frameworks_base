@@ -28,6 +28,8 @@ interface IShortcutService {
 
     ParceledListSlice getDynamicShortcuts(String packageName, int userId);
 
+    ParceledListSlice getManifestShortcuts(String packageName, int userId);
+
     boolean addDynamicShortcuts(String packageName, in ParceledListSlice shortcutInfoList,
             int userId);
 
@@ -41,6 +43,8 @@ interface IShortcutService {
 
     void disableShortcuts(String packageName, in List shortcutIds, String disabledMessage,
             int disabledMessageResId, int userId);
+
+    void enableShortcuts(String packageName, in List shortcutIds, int userId);
 
     int getMaxDynamicShortcutCount(String packageName, int userId);
 

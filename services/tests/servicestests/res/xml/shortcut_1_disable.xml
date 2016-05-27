@@ -1,0 +1,11 @@
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
+    <shortcut
+        android:shortcutId="ms1"
+        android:enabled="false"
+        android:shortcutRank="1"
+        android:shortcutIcon="@drawable/icon2"
+        android:shortcutTitle="@string/shortcut_title2"
+        android:shortcutText="@string/shortcut_text2"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_message2"
+    />
+</shortcuts>

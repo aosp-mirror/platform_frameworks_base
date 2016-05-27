@@ -2734,4 +2734,17 @@
     <public type="id" name="list_container" />
     <public type="id" name="switch_widget" />
 
+  <!-- ===============================================================
+       Resources added in version N MR1 of the platform
+       =============================================================== -->
+    <eat-comment />
+    <public type="attr" name="shortcutId" />
+    <public type="attr" name="shortcutRank" />
+    <public type="attr" name="shortcutIcon" />
+    <public type="attr" name="shortcutTitle" />
+    <public type="attr" name="shortcutText" />
+    <public type="attr" name="shortcutDisabledMessage" />
+    <public type="attr" name="shortcutCategories" />
+    <public type="attr" name="shortcutIntentAction" />
+    <public type="attr" name="shortcutIntentData" />
 </resources>

@@ -188,6 +188,11 @@ public class LauncherApps {
         public static final int FLAG_GET_PINNED = 1 << 1;
 
         /**
+         * Include manifest shortcuts in the result.
+         */
+        public static final int FLAG_GET_MANIFEST = 1 << 3;
+
+        /**
          * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
          * fields are available.
          */
@@ -198,6 +203,7 @@ public class LauncherApps {
                 value = {
                         FLAG_GET_DYNAMIC,
                         FLAG_GET_PINNED,
+                        FLAG_GET_MANIFEST,
                         FLAG_GET_KEY_FIELDS_ONLY,
                 })
         @Retention(RetentionPolicy.SOURCE)
@@ -224,39 +230,44 @@ public class LauncherApps {
          * If non-zero, returns only shortcuts that have been added or updated since the timestamp,
          * which is a milliseconds since the Epoch.
          */
-        public void setChangedSince(long changedSince) {
+        public ShortcutQuery setChangedSince(long changedSince) {
             mChangedSince = changedSince;
+            return this;
         }
 
         /**
          * If non-null, returns only shortcuts from the package.
          */
-        public void setPackage(@Nullable String packageName) {
+        public ShortcutQuery setPackage(@Nullable String packageName) {
             mPackage = packageName;
+            return this;
         }
 
         /**
          * If non-null, return only the specified shortcuts by ID.  When setting this field,
          * a packange name must also be set with {@link #setPackage}.
          */
-        public void setShortcutIds(@Nullable List<String> shortcutIds) {
+        public ShortcutQuery setShortcutIds(@Nullable List<String> shortcutIds) {
             mShortcutIds = shortcutIds;
+            return this;
         }
 
         /**
-         * If non-null, returns only shortcuts associated with the activity, which are
-         * {@link ShortcutInfo}s that have null {@link ShortcutInfo#getActivityComponent()}, or
-         * {@link ShortcutInfo#getActivityComponent()} equals to {@code activity}.
+         * If non-null, returns only shortcuts associated with the activity; i.e.
+         * {@link ShortcutInfo}s whose {@link ShortcutInfo#getActivity()} are equal
+         * to {@code activity}.
          */
-        public void setActivity(@Nullable ComponentName activity) {
+        public ShortcutQuery setActivity(@Nullable ComponentName activity) {
             mActivity = activity;
+            return this;
         }
 
         /**
          * Set query options.
          */
-        public void setQueryFlags(@QueryFlags int queryFlags) {
+        public ShortcutQuery setQueryFlags(@QueryFlags int queryFlags) {
             mQueryFlags = queryFlags;
+            return this;
         }
     }
 
@@ -525,7 +536,7 @@ public class LauncherApps {
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut) {
-        return getShortcutIconFd(shortcut.getPackageName(), shortcut.getId(),
+        return getShortcutIconFd(shortcut.getPackage(), shortcut.getId(),
                 shortcut.getUserId());
     }
 
@@ -555,14 +566,14 @@ public class LauncherApps {
         }
     }
 
-    /** TODO Javadoc */
+    /** TODO Javadoc  (not implemented yet) */
     public Drawable getShortcutIconDrawable(int density) {
-        throw new RuntimeException("TODO implement it");
+        throw new RuntimeException("TODO not implemented yet");
     }
 
-    /** TODO Javadoc */
+    /** TODO Javadoc  (not implemented yet) */
     public Drawable getShortcutBadgedIconDrawable(int density) {
-        throw new RuntimeException("TODO implement it");
+        throw new RuntimeException("TODO not implemented yet");
     }
 
     /**
@@ -600,7 +611,7 @@ public class LauncherApps {
      */
     public boolean startShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
-        return startShortcut(shortcut.getPackageName(), shortcut.getId(),
+        return startShortcut(shortcut.getPackage(), shortcut.getId(),
                 sourceBounds, startActivityOptions,
                 shortcut.getUserId());
     }
