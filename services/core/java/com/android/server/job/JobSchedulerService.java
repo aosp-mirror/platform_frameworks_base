@@ -16,6 +16,9 @@
 
 package com.android.server.job;
 
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -41,6 +44,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
@@ -217,7 +221,41 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (DEBUG) {
                 Slog.d(TAG, "Receieved: " + intent.getAction());
             }
-            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+            if (Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())) {
+                // Purge the app's jobs if the whole package was just disabled.  When this is
+                // the case the component name will be a bare package name.
+                final String pkgName = getPackageName(intent);
+                final int pkgUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                if (pkgName != null && pkgUid != -1) {
+                    final String[] changedComponents = intent.getStringArrayExtra(
+                            Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                    if (changedComponents != null) {
+                        for (String component : changedComponents) {
+                            if (component.equals(pkgName)) {
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Package state change: " + pkgName);
+                                }
+                                try {
+                                    final int userId = UserHandle.getUserId(pkgUid);
+                                    IPackageManager pm = AppGlobals.getPackageManager();
+                                    final int state = pm.getApplicationEnabledSetting(pkgName, userId);
+                                    if (state == COMPONENT_ENABLED_STATE_DISABLED
+                                            || state ==  COMPONENT_ENABLED_STATE_DISABLED_USER) {
+                                        if (DEBUG) {
+                                            Slog.d(TAG, "Removing jobs for package " + pkgName
+                                                    + " in user " + userId);
+                                        }
+                                        cancelJobsForUid(pkgUid, true);
+                                    }
+                                } catch (RemoteException e) { /* cannot happen */ }
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    Slog.w(TAG, "PACKAGE_CHANGED for " + pkgName + " / uid " + pkgUid);
+                }
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                 // If this is an outright uninstall rather than the first half of an
                 // app update sequence, cancel the jobs associated with the app.
                 if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -236,6 +274,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         }
     };
+
+    private String getPackageName(Intent intent) {
+        Uri uri = intent.getData();
+        String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
+        return pkg;
+    }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
@@ -520,7 +564,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             // Register br for package removals and user removals.
-            final IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             filter.addDataScheme("package");
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
