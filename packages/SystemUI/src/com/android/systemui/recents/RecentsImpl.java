@@ -372,7 +372,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             if (stack.getTaskCount() > 0) {
                 // Only preload the icon (but not the thumbnail since it may not have been taken for
                 // the pausing activity)
-                preloadIcon(runningTask);
+                preloadIcon(runningTask.id);
 
                 // At this point, we don't know anything about the stack state.  So only calculate
                 // the dimensions of the thumbnail that we need for the transition into Recents, but
@@ -664,10 +664,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Preloads the icon of a task.
      */
-    private void preloadIcon(ActivityManager.RunningTaskInfo task) {
+    private void preloadIcon(int runningTaskId) {
         // Ensure that we load the running task's icon
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-        launchOpts.runningTaskId = task.id;
+        launchOpts.runningTaskId = runningTaskId;
         launchOpts.loadThumbnails = false;
         launchOpts.onlyLoadForCache = true;
         Recents.getTaskLoader().loadTasks(mContext, sInstanceLoadPlan, launchOpts);
@@ -699,7 +699,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private ActivityOptions getThumbnailTransitionActivityOptions(
             ActivityManager.RunningTaskInfo runningTask, TaskStackView stackView,
                     Rect windowOverrideRect) {
-        if (runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
+        if (runningTask != null && runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
             ArrayList<Task> tasks = stackView.getStack().getStackTasks();
             TaskStackLayoutAlgorithm stackLayout = stackView.getStackAlgorithm();
@@ -810,6 +810,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
+        int runningTaskId = !mLaunchedWhileDocking && (runningTask != null)
+                ? runningTask.id
+                : -1;
+
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
@@ -818,7 +822,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
         if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
-            loader.preloadTasks(sInstanceLoadPlan, runningTask.id, !isHomeStackVisible);
+            loader.preloadTasks(sInstanceLoadPlan, runningTaskId, !isHomeStackVisible);
         }
 
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
@@ -830,12 +834,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedFromApp = useThumbnailTransition || mLaunchedWhileDocking;
         launchState.launchedViaDockGesture = mLaunchedWhileDocking;
         launchState.launchedViaDragGesture = mDraggingInRecents;
-        launchState.launchedToTaskId = (runningTask != null) ? runningTask.id : -1;
+        launchState.launchedToTaskId = runningTaskId;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
 
         // Preload the icon (this will be a null-op if we have preloaded the icon already in
         // preloadRecents())
-        preloadIcon(runningTask);
+        preloadIcon(runningTaskId);
 
         // Update the header bar if necessary
         Rect windowOverrideRect = getWindowRectOverride(growTarget);
