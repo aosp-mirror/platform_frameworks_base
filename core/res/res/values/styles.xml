@@ -1122,6 +1122,8 @@ please see styles_device_defaults.xml.
     <style name="PreferenceFragmentList">
         <item name="paddingStart">@dimen/preference_fragment_padding_side</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side</item>
+        <item name="paddingTop">0dp</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_bottom</item>
     </style>
 
     <!-- Other Misc Styles -->

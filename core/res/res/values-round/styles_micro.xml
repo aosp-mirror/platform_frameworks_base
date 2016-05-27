@@ -17,4 +17,13 @@
     <style name="TextAppearance.Micro.AlertDialog.Message" parent="TextAppearance.Micro.Small">
         <item name="textAlignment">center</item>
     </style>
+    <style name="PreferenceFragment.Micro" parent="PreferenceFragment.Material">
+        <item name="paddingTop">22dp</item>
+        <item name="paddingBottom">22dp</item>
+        <item name="clipToPadding">false</item>
+    </style>
+    <style name="PreferenceFragmentList.Micro" parent="PreferenceFragmentList.Material">
+        <item name="paddingTop">22dp</item>
+        <item name="paddingBottom">22dp</item>
+    </style>
 </resources>
