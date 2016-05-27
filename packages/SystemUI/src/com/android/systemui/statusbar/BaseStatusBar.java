@@ -1887,10 +1887,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 public boolean onDismiss() {
                     if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
                         // Release the HUN notification to the shade.
+
+                        if (isPanelFullyCollapsed()) {
+                            HeadsUpManager.setIsClickedNotification(row, true);
+                        }
                         //
                         // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
                         // become canceled shortly by NoMan, but we can't assume that.
-                        HeadsUpManager.setIsClickedNotification(row, true);
                         mHeadsUpManager.releaseImmediately(notificationKey);
                     }
                     StatusBarNotification parentToCancel = null;
