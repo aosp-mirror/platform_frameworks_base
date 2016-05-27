@@ -18,8 +18,6 @@ package com.android.systemui.recents.tv.views;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v17.leanback.widget.HorizontalGridView;
 import android.util.AttributeSet;
 import android.view.View;
@@ -39,14 +37,6 @@ import com.android.systemui.recents.views.AnimationProps;
 public class TaskStackHorizontalGridView extends HorizontalGridView implements TaskStackCallbacks {
     private static final int ANIMATION_DELAY_MS = 50;
     private static final int MSG_START_RECENT_ROW_FOCUS_ANIMATION = 100;
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_START_RECENT_ROW_FOCUS_ANIMATION) {
-                startRecentsRowFocusAnimation(msg.arg1 == 1);
-            }
-        }
-    };
     private TaskStack mStack;
     private Task mFocusedTask;
     private AnimatorSet mRecentsRowFocusAnimation;
@@ -74,38 +64,15 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     }
 
     /**
-     * Resets this view for reuse.
-     */
-    public void reset() {
-        for (int i = 0; i < getChildCount(); i++) {
-            ((TaskCardView) getChildAt(i)).getRecentsRowFocusAnimationHolder().reset();
-        }
-        if (mRecentsRowFocusAnimation != null && mRecentsRowFocusAnimation.isStarted()) {
-            mRecentsRowFocusAnimation.cancel();
-        }
-        mHandler.removeCallbacksAndMessages(null);
-        requestLayout();
-    }
-
-    /**
-     * @param task - Task to reset
-     */
-    private void resetFocusedTask(Task task) {
-        mFocusedTask = null;
-    }
-
-    /**
-     * Sets the task stack.
+     * Initializes the grid view.
      * @param stack
      */
-    public void setStack(TaskStack stack) {
-        //Set new stack
+    public void init(TaskStack stack) {
+        // Set new stack
         mStack = stack;
         if (mStack != null) {
             mStack.setCallbacks(this);
         }
-        //Layout with new stack
-        requestLayout();
     }
 
     /**
@@ -126,13 +93,6 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     }
 
     /**
-     * @return - The focused task card view.
-     */
-    public TaskCardView getFocusedTaskCardView() {
-        return ((TaskCardView)findFocus());
-    }
-
-    /**
      * @param task
      * @return Child view for given task
      */
@@ -146,32 +106,31 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
         return null;
     }
 
+
     /**
-     * Starts the focus change animation.
+     * Starts the Recents row's focus gain animation.
      */
-    public void startRecentsRowFocusAnimation(final boolean hasFocus) {
-        if (getChildCount() == 0) {
-            // Animation request may happen before view is attached.
-            // Post again with small dealy so animation can be run again later.
-            if (getAdapter().getItemCount() > 0) {
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                        MSG_START_RECENT_ROW_FOCUS_ANIMATION, hasFocus ? 1 : 0),
-                        ANIMATION_DELAY_MS);
+    public void startFocusGainAnimation() {
+        for (int i = 0; i < getChildCount(); i++) {
+            TaskCardView v = (TaskCardView) getChildAt(i);
+            if (v.hasFocus()) {
+                v.getViewFocusAnimator().changeSize(true);
             }
-            return;
+            v.getRecentsRowFocusAnimationHolder().startFocusGainAnimation();
         }
-        if (mRecentsRowFocusAnimation != null && mRecentsRowFocusAnimation.isStarted()) {
-            mRecentsRowFocusAnimation.cancel();
+    }
+
+    /**
+     * Starts the Recents row's focus loss animation.
+     */
+    public void startFocusLossAnimation() {
+        for (int i = 0; i < getChildCount(); i++) {
+            TaskCardView v = (TaskCardView) getChildAt(i);
+            if (v.hasFocus()) {
+                v.getViewFocusAnimator().changeSize(false);
+            }
+            v.getRecentsRowFocusAnimationHolder().startFocusLossAnimation();
         }
-        Animator animator = ((TaskCardView) getChildAt(0)).getRecentsRowFocusAnimationHolder()
-                .getFocusChangeAnimator(hasFocus);
-        mRecentsRowFocusAnimation = new AnimatorSet();
-        AnimatorSet.Builder builder = mRecentsRowFocusAnimation.play(animator);
-        for (int i = 1; i < getChildCount(); i++) {
-            builder.with(((TaskCardView) getChildAt(i)).getRecentsRowFocusAnimationHolder()
-                    .getFocusChangeAnimator(hasFocus));
-        }
-        mRecentsRowFocusAnimation.start();
     }
 
     @Override
@@ -185,7 +144,7 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
             AnimationProps animation, boolean fromDockGesture) {
         ((TaskStackHorizontalViewAdapter) getAdapter()).removeTask(removedTask);
         if (mFocusedTask == removedTask) {
-            resetFocusedTask(removedTask);
+            mFocusedTask = null;
         }
         // If there are no remaining tasks, then just close recents
         if (mStack.getStackTaskCount() == 0) {

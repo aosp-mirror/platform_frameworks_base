@@ -74,19 +74,35 @@ public class HomeRecentsEnterExitAnimationHolder {
         }
     }
 
-    public void setEnterFromHomeStartingAnimationValues() {
+    /**
+     * Sets the initial values Recents enter animation
+     * when Recents is started from the Launcher.
+     */
+    public void setEnterFromHomeStartingAnimationValues(boolean isPipShown) {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
             view.setTranslationX(0);
             view.setAlpha(0.0f);
+            view.getInfoFieldView().setAlpha(isPipShown ? 0 : 1f);
+            if (isPipShown && view.hasFocus()) {
+                view.getViewFocusAnimator().changeSize(false);
+            }
         }
     }
 
-    public void setEnterFromAppStartingAnimationValues() {
+    /**
+     * Sets the initial values Recents enter animation
+     * when Recents is started from an app.
+     */
+    public void setEnterFromAppStartingAnimationValues(boolean isPipShown) {
         for(int i = 0; i < mGridView.getChildCount(); i++) {
             TaskCardView view = (TaskCardView) mGridView.getChildAt(i);
             view.setTranslationX(0);
-            view.setAlpha(1.0f);
+            view.setAlpha(isPipShown ? mDimAlpha : 1f);
+            view.getInfoFieldView().setAlpha(isPipShown ? 0 : 1f);
+            if (isPipShown && view.hasFocus()) {
+                view.getViewFocusAnimator().changeSize(false);
+            }
         }
     }
 }
