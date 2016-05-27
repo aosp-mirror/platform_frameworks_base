@@ -285,6 +285,12 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: allows application hosting service to manage whitelists
+     * such as temporary allowing a {@code PendingIntent} to bypass Power Save mode.
+     */
+    public static final int BIND_ALLOW_WHITELIST_MANAGEMENT = 0x01000000;
+
+    /**
      * @hide Flag for {@link #bindService}: Like {@link #BIND_FOREGROUND_SERVICE},
      * but only applies while the device is awake.
      */

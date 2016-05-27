@@ -831,8 +831,9 @@ public final class ActiveServices {
 
         int clientLabel = 0;
         PendingIntent clientIntent = null;
+        final boolean isCallerSystem = callerApp.info.uid == Process.SYSTEM_UID;
 
-        if (callerApp.info.uid == Process.SYSTEM_UID) {
+        if (isCallerSystem) {
             // Hacky kind of thing -- allow system stuff to tell us
             // what they are, so we can report this elsewhere for
             // others to know why certain services are running.
@@ -852,6 +853,12 @@ public final class ActiveServices {
         if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
             mAm.enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                     "BIND_TREAT_LIKE_ACTIVITY");
+        }
+
+        if ((flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0 && !isCallerSystem) {
+            throw new SecurityException(
+                    "Non-system caller " + caller + " (pid=" + Binder.getCallingPid()
+                    + ") set BIND_ALLOW_WHITELIST_MANAGEMENT when binding service " + service);
         }
 
         final boolean callerFg = callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND;
@@ -1124,6 +1131,11 @@ public final class ActiveServices {
                 }
 
                 if (r.binding.service.app != null) {
+                    if (r.binding.service.app.whitelistManager) {
+                        // Must reset flag here because on computeOomAdjLocked() the service
+                        // connection will be gone...
+                        r.binding.service.app.whitelistManager = false;
+                    }
                     // This could have made the service less important.
                     if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
                         r.binding.service.app.treatLikeActivity = true;
