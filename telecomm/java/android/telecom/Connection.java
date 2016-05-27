@@ -392,6 +392,12 @@ public abstract class Connection extends Conferenceable {
      */
     public static final String EVENT_CALL_PULL_FAILED = "android.telecom.event.CALL_PULL_FAILED";
 
+    /**
+     * Connection event used to inform {@link InCallService}s when the merging of two calls has
+     * failed. The User Interface should use this message to inform the user of the error.
+     */
+    public static final String EVENT_CALL_MERGE_FAILED = "android.telecom.event.CALL_MERGE_FAILED";
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
