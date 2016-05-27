@@ -50,25 +50,25 @@ redirects:
 - from: /tools/sdk/installing.html
   to: /studio/index.html
 - from: /tools/eclipse/installing-adt.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /sdk/requirements.html
   to: /studio/index.html
 - from: /sdk/installing/next.html
   to: /training/basics/firstapp/index.html
 - from: /sdk/installing/installing-adt.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/projects/projects-eclipse.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/building/building-eclipse.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/building/building-cmdline-ant.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/testing/testing_eclipse.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/debugging/debugging-projects.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/publishing/app-signing-eclipse.html
-  to: /studio/tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 - from: /tools/testing/testing_ui.html
   to: /training/testing/ui-testing/index.html
 - from: /tools/testing/activity_test.html
@@ -1146,6 +1146,8 @@ redirects:
   to: /studio/profile/ddms.html
 - from: /tools/revisions/index.html
   to: /studio/releases/index.html
+- from: /tools/help/adt.html
+  to: /studio/tools/sdk/eclipse-adt.html
 
 # Just incase something was missed, go to intro page
 - from: /tools/...
