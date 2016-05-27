@@ -2206,6 +2206,12 @@ message MetricsEvent {
     // Settings launched from expanded quick settings.
     ACTION_QS_EXPANDED_SETTINGS_LAUNCH = 406;
 
+    // Notification expansion state toggled by the expand affordance.
+    ACTION_NOTIFICATION_EXPANDER = 407;
+
+    // Notification group expansion state toggled by the expand affordance.
+    ACTION_NOTIFICATION_GROUP_EXPANDER = 408;
+
     // ---- End N Constants, all N constants go above this line ----
 
     // ------- Begin N App Disambig Shade -----
