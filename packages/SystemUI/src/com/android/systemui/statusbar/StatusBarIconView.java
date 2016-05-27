@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -25,6 +26,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -325,8 +327,20 @@ public class StatusBarIconView extends AnimatedImageView {
 
 
     public static String contentDescForNotification(Context c, Notification n) {
-        Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
-        String appName = builder.loadHeaderAppName();
+        String appName = "";
+        try {
+            Notification.Builder builder = Notification.Builder.recoverBuilder(c, n);
+            appName = builder.loadHeaderAppName();
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Unable to recover builder", e);
+            // Trying to get the app name from the app info instead.
+            Parcelable appInfo = n.extras.getParcelable(
+                    Notification.EXTRA_BUILDER_APPLICATION_INFO);
+            if (appInfo instanceof ApplicationInfo) {
+                appName = String.valueOf(((ApplicationInfo) appInfo).loadLabel(
+                        c.getPackageManager()));
+            }
+        }
 
         CharSequence title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence ticker = n.tickerText;
