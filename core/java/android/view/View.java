@@ -22812,6 +22812,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         boolean mKeepScreenOn;
 
         /**
+         * Set during a traveral if the light center needs to be updated.
+         */
+        boolean mNeedsUpdateLightCenter;
+
+        /**
          * Bitwise-or of all of the values that views have passed to setSystemUiVisibility().
          */
         int mSystemUiVisibility;
