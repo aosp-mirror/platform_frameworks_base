@@ -663,7 +663,7 @@ public class ApfTest extends AndroidTestCase {
     @LargeTest
     public void testApfFilterIPv4() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
-        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, false /* multicastFilter */);
+        ApfFilter apfFilter = new TestApfFilter(ipManagerCallback, true /* multicastFilter */);
         byte[] program = ipManagerCallback.getApfProgram();
 
         // Verify empty packet of 100 zero bytes is passed
@@ -726,46 +726,57 @@ public class ApfTest extends AndroidTestCase {
         byte[] program = ipManagerCallback.getApfProgram();
 
         // Construct IPv4 and IPv6 multicast packets.
-        ByteBuffer v4packet = ByteBuffer.wrap(new byte[100]);
-        v4packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IP);
-        v4packet.position(IPV4_DEST_ADDR_OFFSET);
-        v4packet.put(new byte[]{(byte)224,0,0,1});
+        ByteBuffer mcastv4packet = ByteBuffer.wrap(new byte[100]);
+        mcastv4packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IP);
+        mcastv4packet.position(IPV4_DEST_ADDR_OFFSET);
+        mcastv4packet.put(new byte[]{(byte)224,0,0,1});
 
-        ByteBuffer v6packet = ByteBuffer.wrap(new byte[100]);
-        v6packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IPV6);
-        v6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_UDP);
-        v6packet.position(IPV6_DEST_ADDR_OFFSET);
-        v6packet.put(new byte[]{(byte)0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,(byte)0xfb});
+        ByteBuffer mcastv6packet = ByteBuffer.wrap(new byte[100]);
+        mcastv6packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IPV6);
+        mcastv6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_UDP);
+        mcastv6packet.position(IPV6_DEST_ADDR_OFFSET);
+        mcastv6packet.put(new byte[]{(byte)0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,(byte)0xfb});
+
+        // Construct IPv4 broadcast packet.
+        ByteBuffer bcastv4packet = ByteBuffer.wrap(new byte[100]);
+        bcastv4packet.put(ETH_BROADCAST_MAC_ADDRESS);
+        bcastv4packet.putShort(ETH_ETHERTYPE_OFFSET, (short)ETH_P_IP);
+        bcastv4packet.position(IPV4_DEST_ADDR_OFFSET);
+        bcastv4packet.put(new byte[]{(byte)192,(byte)0,(byte)2,(byte)63});
 
         // Verify initially disabled multicast filter is off
-        assertPass(program, v4packet.array(), 0);
-        assertPass(program, v6packet.array(), 0);
+        assertPass(program, bcastv4packet.array(), 0);
+        assertPass(program, mcastv4packet.array(), 0);
+        assertPass(program, mcastv6packet.array(), 0);
 
         // Turn on multicast filter and verify it works
         ipManagerCallback.resetApfProgramWait();
         apfFilter.setMulticastFilter(true);
         program = ipManagerCallback.getApfProgram();
-        assertDrop(program, v4packet.array(), 0);
-        assertDrop(program, v6packet.array(), 0);
+        assertDrop(program, bcastv4packet.array(), 0);
+        assertDrop(program, mcastv4packet.array(), 0);
+        assertDrop(program, mcastv6packet.array(), 0);
 
         // Turn off multicast filter and verify it's off
         ipManagerCallback.resetApfProgramWait();
         apfFilter.setMulticastFilter(false);
         program = ipManagerCallback.getApfProgram();
-        assertPass(program, v4packet.array(), 0);
-        assertPass(program, v6packet.array(), 0);
+        assertPass(program, bcastv4packet.array(), 0);
+        assertPass(program, mcastv4packet.array(), 0);
+        assertPass(program, mcastv6packet.array(), 0);
 
         // Verify it can be initialized to on
         ipManagerCallback.resetApfProgramWait();
         apfFilter.shutdown();
         apfFilter = new TestApfFilter(ipManagerCallback, true /* multicastFilter */);
         program = ipManagerCallback.getApfProgram();
-        assertDrop(program, v4packet.array(), 0);
-        assertDrop(program, v6packet.array(), 0);
+        assertDrop(program, bcastv4packet.array(), 0);
+        assertDrop(program, mcastv4packet.array(), 0);
+        assertDrop(program, mcastv6packet.array(), 0);
 
         // Verify that ICMPv6 multicast is not dropped.
-        v6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
-        assertPass(program, v6packet.array(), 0);
+        mcastv6packet.put(IPV6_NEXT_HEADER_OFFSET, (byte)IPPROTO_ICMPV6);
+        assertPass(program, mcastv6packet.array(), 0);
 
         apfFilter.shutdown();
     }
