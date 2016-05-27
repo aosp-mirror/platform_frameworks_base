@@ -459,23 +459,19 @@ interface IPackageManager {
 
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given
-     * package and for the given instruction set if it already hasn't done
-     * so.
-     *
-     * If the supplied instructionSet is null, the package manager will use
-     * the packages default instruction set.
+     * package if it already hasn't done so.
      *
      * In most cases, apps are dexopted in advance and this function will
      * be a no-op.
      */
-    boolean performDexOptIfNeeded(String packageName, String instructionSet);
+    boolean performDexOptIfNeeded(String packageName);
 
     /**
      * Ask the package manager to perform a dex-opt for the given reason. The package
      * manager will map the reason to a compiler filter according to the current system
      * configuration.
      */
-    boolean performDexOpt(String packageName, String instructionSet, boolean checkProfiles,
+    boolean performDexOpt(String packageName, boolean checkProfiles,
             int compileReason, boolean force);
     /**
      * Ask the package manager to perform a dex-opt with the given compiler filter.
@@ -483,7 +479,7 @@ interface IPackageManager {
      * Note: exposed only for the shell command to allow moving packages explicitly to a
      *       definite state.
      */
-    boolean performDexOptMode(String packageName, String instructionSet, boolean checkProfiles,
+    boolean performDexOptMode(String packageName, boolean checkProfiles,
             String targetCompilerFilter, boolean force);
 
     void forceDexOpt(String packageName);

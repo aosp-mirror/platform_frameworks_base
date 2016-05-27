@@ -7267,7 +7267,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
             // trade-off worth doing to save boot time work.
             int dexOptStatus = performDexOptTraced(pkg.packageName,
-                    null /* instructionSet */,
                     false /* checkProfiles */,
                     getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
                     false /* force */);
@@ -7309,33 +7308,33 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // TODO: this is not used nor needed. Delete it.
     @Override
-    public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
-        int dexOptStatus = performDexOptTraced(packageName, instructionSet,
+    public boolean performDexOptIfNeeded(String packageName) {
+        int dexOptStatus = performDexOptTraced(packageName,
                 false /* checkProfiles */, getFullCompilerFilter(), false /* force */);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
-    public boolean performDexOpt(String packageName, String instructionSet,
+    public boolean performDexOpt(String packageName,
             boolean checkProfiles, int compileReason, boolean force) {
-        int dexOptStatus = performDexOptTraced(packageName, instructionSet, checkProfiles,
+        int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
                 getCompilerFilterForReason(compileReason), force);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
     @Override
-    public boolean performDexOptMode(String packageName, String instructionSet,
+    public boolean performDexOptMode(String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force) {
-        int dexOptStatus = performDexOptTraced(packageName, instructionSet, checkProfiles,
+        int dexOptStatus = performDexOptTraced(packageName, checkProfiles,
                 targetCompilerFilter, force);
         return dexOptStatus != PackageDexOptimizer.DEX_OPT_FAILED;
     }
 
-    private int performDexOptTraced(String packageName, String instructionSet,
+    private int performDexOptTraced(String packageName,
                 boolean checkProfiles, String targetCompilerFilter, boolean force) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet, checkProfiles,
+            return performDexOptInternal(packageName, checkProfiles,
                     targetCompilerFilter, force);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -7344,10 +7343,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Run dexopt on a given package. Returns true if dexopt did not fail, i.e.
     // if the package can now be considered up to date for the given filter.
-    private int performDexOptInternal(String packageName, String instructionSet,
+    private int performDexOptInternal(String packageName,
                 boolean checkProfiles, String targetCompilerFilter, boolean force) {
         PackageParser.Package p;
-        final String targetInstructionSet;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
             if (p == null) {
@@ -7355,15 +7353,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return PackageDexOptimizer.DEX_OPT_FAILED;
             }
             mPackageUsage.write(false);
-
-            targetInstructionSet = instructionSet != null ? instructionSet :
-                    getPrimaryInstructionSet(p.applicationInfo);
         }
         long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mInstallLock) {
-                final String[] instructionSets = new String[] { targetInstructionSet };
-                return performDexOptInternalWithDependenciesLI(p, instructionSets, checkProfiles,
+                return performDexOptInternalWithDependenciesLI(p, checkProfiles,
                         targetCompilerFilter, force);
             }
         } finally {
@@ -7384,7 +7378,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private int performDexOptInternalWithDependenciesLI(PackageParser.Package p,
-            String instructionSets[], boolean checkProfiles, String targetCompilerFilter,
+            boolean checkProfiles, String targetCompilerFilter,
             boolean force) {
         // Select the dex optimizer based on the force parameter.
         // Note: The force option is rarely used (cmdline input for testing, mostly), so it's OK to
@@ -7396,6 +7390,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Optimize all dependencies first. Note: we ignore the return value and march on
         // on errors.
         Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
+        final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
@@ -7405,7 +7400,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         getCompilerFilterForReason(REASON_NON_SYSTEM_LIBRARY));
             }
         }
-
         return pdo.performDexOpt(p, p.usesLibraryFiles, instructionSets, checkProfiles,
                 targetCompilerFilter);
     }
@@ -7477,14 +7471,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         synchronized (mInstallLock) {
-            final String[] instructionSets = new String[] {
-                    getPrimaryInstructionSet(pkg.applicationInfo) };
-
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
             // Whoever is calling forceDexOpt wants a fully compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, instructionSets,
+            final int res = performDexOptInternalWithDependenciesLI(pkg,
                     false /* checkProfiles */, getCompilerFilterForReason(REASON_FORCED_DEXOPT),
                     true /* force */);
 
