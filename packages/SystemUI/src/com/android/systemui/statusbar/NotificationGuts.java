@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -70,6 +71,8 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private ImageView mAutoButton;
     private ColorStateList mActiveSliderTint;
     private ColorStateList mInactiveSliderTint;
+    private float mActiveSliderAlpha = 1.0f;
+    private float mInactiveSliderAlpha;
     private TextView mImportanceSummary;
     private TextView mImportanceTitle;
     private boolean mAuto;
@@ -100,6 +103,11 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                 }
             }
         };
+        final TypedArray ta =
+                context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Theme, 0, 0);
+        mInactiveSliderAlpha =
+                ta.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
+        ta.recycle();
     }
 
     public void resetFalsingCheck() {
@@ -299,13 +307,12 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     private void applyAuto() {
         mSeekBar.setEnabled(!mAuto);
 
-        final ColorStateList sliderTint = mAuto ? mInactiveSliderTint : mActiveSliderTint;
         final ColorStateList starTint = mAuto ?  mActiveSliderTint : mInactiveSliderTint;
+        final float alpha = mAuto ? mInactiveSliderAlpha : mActiveSliderAlpha;
         Drawable icon = mAutoButton.getDrawable().mutate();
         icon.setTintList(starTint);
         mAutoButton.setImageDrawable(icon);
-        mSeekBar.setProgressTintList(sliderTint);
-        mSeekBar.setThumbTintList(sliderTint);
+        mSeekBar.setAlpha(alpha);
 
         if (mAuto) {
             mSeekBar.setProgress(mNotificationImportance);
