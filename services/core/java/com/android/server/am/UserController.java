@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.FLAG_AND_UNLOCKING_OR_UNLOCKED;
 import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
@@ -233,7 +234,6 @@ final class UserController {
             // but we might immediately step into RUNNING below if the user
             // storage is already unlocked.
             if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
-                getUserManagerInternal().setUserState(userId, uss.state);
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -277,7 +277,7 @@ final class UserController {
             if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_LOCKED, STATE_RUNNING_UNLOCKING)) {
-                getUserManagerInternal().setUserState(userId, uss.state);
+                getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
                 uss.mUnlockProgress.start();
 
                 // Prepare app storage before we go any further
@@ -308,7 +308,7 @@ final class UserController {
             if (!StorageManager.isUserKeyUnlocked(userId)) return;
 
             if (uss.setState(STATE_RUNNING_UNLOCKING, STATE_RUNNING_UNLOCKED)) {
-                getUserManagerInternal().setUserState(userId, uss.state);
+                getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
                 uss.mUnlockProgress.finish();
 
                 // Dispatch unlocked to external apps
@@ -482,7 +482,7 @@ final class UserController {
         if (uss.state != UserState.STATE_STOPPING
                 && uss.state != UserState.STATE_SHUTDOWN) {
             uss.setState(UserState.STATE_STOPPING);
-            getUserManagerInternal().setUserState(userId, uss.state);
+            getUserManagerInternal().setUserUnlockingOrUnlocked(userId, false);
             updateStartedUserArrayLocked();
 
             long ident = Binder.clearCallingIdentity();
@@ -544,7 +544,7 @@ final class UserController {
             }
             uss.setState(UserState.STATE_SHUTDOWN);
         }
-        getUserManagerInternal().setUserState(userId, uss.state);
+        getUserManagerInternal().setUserUnlockingOrUnlocked(userId, false);
 
         mService.mBatteryStatsService.noteEvent(
                 BatteryStats.HistoryItem.EVENT_USER_RUNNING_FINISH,
@@ -573,7 +573,6 @@ final class UserController {
                 stopped = true;
                 // User can no longer run.
                 mStartedUsers.remove(userId);
-                getUserManagerInternal().removeUserState(userId);
                 mUserLru.remove(Integer.valueOf(userId));
                 updateStartedUserArrayLocked();
 
@@ -781,9 +780,7 @@ final class UserController {
                 // If the user we are switching to is not currently started, then
                 // we need to start it now.
                 if (mStartedUsers.get(userId) == null) {
-                    UserState userState = new UserState(UserHandle.of(userId));
-                    mStartedUsers.put(userId, userState);
-                    getUserManagerInternal().setUserState(userId, userState.state);
+                    mStartedUsers.put(userId, new UserState(UserHandle.of(userId)));
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }
@@ -817,14 +814,15 @@ final class UserController {
                     // so we can just fairly silently bring the user back from
                     // the almost-dead.
                     uss.setState(uss.lastState);
-                    getUserManagerInternal().setUserState(userId, uss.state);
+                    if (isUserRunningLocked(userId, FLAG_AND_UNLOCKING_OR_UNLOCKED)) {
+                        getUserManagerInternal().setUserUnlockingOrUnlocked(userId, true);
+                    }
                     updateStartedUserArrayLocked();
                     needStart = true;
                 } else if (uss.state == UserState.STATE_SHUTDOWN) {
                     // This means ACTION_SHUTDOWN has been sent, so we will
                     // need to treat this as a new boot of the user.
                     uss.setState(UserState.STATE_BOOTING);
-                    getUserManagerInternal().setUserState(userId, uss.state);
                     updateStartedUserArrayLocked();
                     needStart = true;
                 }

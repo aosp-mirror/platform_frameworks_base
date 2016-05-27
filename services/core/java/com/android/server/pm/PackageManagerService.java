@@ -16309,11 +16309,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         removeKeystoreDataIfNeeded(userId, appId);
 
-        UserManagerInternal umInternal = getUserManagerInternal();
+        final UserManager um = mContext.getSystemService(UserManager.class);
         final int flags;
-        if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+        if (um.isUserUnlockingOrUnlocked(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-        } else if (umInternal.isUserRunning(userId)) {
+        } else if (um.isUserRunning(userId)) {
             flags = StorageManager.FLAG_STORAGE_DE;
         } else {
             flags = 0;
@@ -19072,12 +19072,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         // Reconcile app data for all started/unlocked users
         final StorageManager sm = mContext.getSystemService(StorageManager.class);
         final UserManager um = mContext.getSystemService(UserManager.class);
-        UserManagerInternal umInternal = getUserManagerInternal();
         for (UserInfo user : um.getUsers()) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (um.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            } else if (umInternal.isUserRunning(user.id)) {
+            } else if (um.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
@@ -19501,12 +19500,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         final UserManager um = mContext.getSystemService(UserManager.class);
-        UserManagerInternal umInternal = getUserManagerInternal();
         for (UserInfo user : um.getUsers()) {
             final int flags;
-            if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
+            if (um.isUserUnlockingOrUnlocked(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            } else if (umInternal.isUserRunning(user.id)) {
+            } else if (um.isUserRunning(user.id)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
