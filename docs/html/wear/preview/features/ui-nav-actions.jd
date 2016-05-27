@@ -19,10 +19,10 @@ page.image=/wear/preview/images/card_drawer.png
 
    <h2>You should also read</h2>
    <ul>
-   <li><a href="http://www.google.com/design/wear-spec/components/navigation-drawer.html">
+   <li><a href="http://www.google.com/design/spec-wear/components/navigation-drawer.html">
    Navigation Drawer Design</a> </li>
    <li>
-   <a href="http://www.google.com/design/wear-spec/components/action-drawer.html">
+   <a href="http://www.google.com/design/spec-wear/components/action-drawer.html">
    Action Drawer Design</a>
    </ul>
 
