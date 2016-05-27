@@ -16,6 +16,10 @@
 
 package com.android.server.notification;
 
+import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_FOREGROUND_SERVICE;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
@@ -43,7 +47,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -56,7 +59,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -681,7 +683,7 @@ abstract public class ManagedServices {
             };
             if (!mContext.bindServiceAsUser(intent,
                 serviceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_ALLOW_WHITELIST_MANAGEMENT,
                 new UserHandle(userid))) {
                 mServicesBinding.remove(servicesBindingTag);
                 Slog.w(TAG, "Unable to bind " + getCaption() + " service: " + intent);

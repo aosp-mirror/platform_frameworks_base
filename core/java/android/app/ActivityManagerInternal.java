@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
+import android.content.IIntentSender;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -144,4 +145,10 @@ public abstract class ActivityManagerInternal {
      * Kill foreground apps from the specified user.
      */
     public abstract void killForegroundAppsForUser(int userHandle);
+
+    /**
+     *  Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
+     *  such as Power Save mode.
+     */
+    public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
 }

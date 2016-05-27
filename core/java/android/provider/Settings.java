@@ -60,8 +60,8 @@ import android.util.AndroidException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-
 import android.util.MemoryIntArray;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
@@ -7950,6 +7950,7 @@ public final class Settings {
          * idle_factor                      (float)
          * min_time_to_alarm                (long)
          * max_temp_app_whitelist_duration  (long)
+         * notification_whitelist_duration  (long)
          * </pre>
          *
          * <p>
