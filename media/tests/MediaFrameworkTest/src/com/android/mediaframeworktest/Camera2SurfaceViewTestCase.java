@@ -37,6 +37,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -127,6 +128,7 @@ public class Camera2SurfaceViewTestCase extends
     protected List<Size> mOrderedRAW10Sizes; // In descending order.
     protected List<Size> mOrderedYUV420888Sizes; // In descending order.
     protected HashMap<Size, Long> mMinPreviewFrameDurationMap;
+    protected boolean mSupportRAW10;
 
     protected WindowManager mWindowManager;
 
@@ -603,16 +605,21 @@ public class Camera2SurfaceViewTestCase extends
         mCamera = CameraTestUtils.openCamera(
                 mCameraManager, cameraId, mCameraListener, mHandler);
         mCollector.setCameraId(cameraId);
-        mStaticInfo = new StaticMetadata(mCameraManager.getCameraCharacteristics(cameraId),
-                CheckLevel.ASSERT, /*collector*/null);
+        CameraCharacteristics properties = mCameraManager.getCameraCharacteristics(cameraId);
+        mStaticInfo = new StaticMetadata(properties, CheckLevel.ASSERT, /*collector*/null);
+        StreamConfigurationMap configMap =
+                properties.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        mSupportRAW10 = configMap.isOutputSupportedFor(ImageFormat.RAW10);
         if (mStaticInfo.isColorOutputSupported()) {
             mOrderedPreviewSizes = getSupportedPreviewSizes(cameraId, mCameraManager,
                     getPreviewSizeBound(mWindowManager, PREVIEW_SIZE_BOUND));
             mOrderedVideoSizes = getSupportedVideoSizes(
                     cameraId, mCameraManager, PREVIEW_SIZE_BOUND);
             mOrderedStillSizes = getSupportedStillSizes(cameraId, mCameraManager, null);
-            mOrderedRAW10Sizes = getSortedSizesForFormat(
-                    cameraId, mCameraManager, ImageFormat.RAW10, null);
+            if (mSupportRAW10) {
+                mOrderedRAW10Sizes = getSortedSizesForFormat(
+                        cameraId, mCameraManager, ImageFormat.RAW10, null);
+            }
             mOrderedYUV420888Sizes = getSortedSizesForFormat(
                     cameraId, mCameraManager, ImageFormat.YUV_420_888, null);
             // Use ImageFormat.YUV_420_888 for now. TODO: need figure out what's format for preview
@@ -636,6 +643,7 @@ public class Camera2SurfaceViewTestCase extends
             mOrderedPreviewSizes = null;
             mOrderedVideoSizes = null;
             mOrderedStillSizes = null;
+            mSupportRAW10 = false;
         }
     }
 
