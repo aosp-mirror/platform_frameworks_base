@@ -70,6 +70,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
@@ -83,6 +84,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -233,6 +235,11 @@ final class UserController {
             // storage is already unlocked.
             if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
                 getUserManagerInternal().setUserState(userId, uss.state);
+
+                int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
+                MetricsLogger.histogram(mService.mContext, "framework_locked_boot_completed",
+                    uptimeSeconds);
+
                 Intent intent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED, null);
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 intent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
@@ -389,6 +396,8 @@ final class UserController {
             }
 
             Slog.d(TAG, "Sending BOOT_COMPLETE user #" + userId);
+            int uptimeSeconds = (int)(SystemClock.elapsedRealtime() / 1000);
+            MetricsLogger.histogram(mService.mContext, "framework_boot_completed", uptimeSeconds);
             final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
             bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
