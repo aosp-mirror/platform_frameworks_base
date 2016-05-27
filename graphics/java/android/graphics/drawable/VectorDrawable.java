@@ -804,7 +804,7 @@ public class VectorDrawable extends Drawable {
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
                 mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
-                createNativeTree(mRootGroup);
+                createNativeTreeFromCopy(copy, mRootGroup);
 
                 mBaseWidth = copy.mBaseWidth;
                 mBaseHeight = copy.mBaseHeight;
@@ -825,6 +825,16 @@ public class VectorDrawable extends Drawable {
             // Register tree size
             VMRuntime.getRuntime().registerNativeAllocation(NATIVE_ALLOCATION_SIZE);
         }
+
+        // Create a new native tree with the given root group, and copy the properties from the
+        // given VectorDrawableState's native tree.
+        private void createNativeTreeFromCopy(VectorDrawableState copy, VGroup rootGroup) {
+            mNativeTree = new VirtualRefBasePtr(nCreateTreeFromCopy(
+                    copy.mNativeTree.get(), rootGroup.mNativePtr));
+            // Register tree size
+            VMRuntime.getRuntime().registerNativeAllocation(NATIVE_ALLOCATION_SIZE);
+        }
+
 
         void onTreeConstructionFinished() {
             mRootGroup.setTree(mNativeTree);
@@ -1777,6 +1787,7 @@ public class VectorDrawable extends Drawable {
     }
 
     private static native long nCreateTree(long rootGroupPtr);
+    private static native long nCreateTreeFromCopy(long treeToCopy, long rootGroupPtr);
     private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
             float viewportHeight);
     private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
