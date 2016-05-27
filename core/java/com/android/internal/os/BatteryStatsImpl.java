@@ -8153,14 +8153,17 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private void resetAllStatsLocked() {
+        final long uptimeMillis = mClocks.uptimeMillis();
+        final long elapsedRealtimeMillis = mClocks.elapsedRealtime();
         mStartCount = 0;
-        initTimes(mClocks.uptimeMillis() * 1000, mClocks.elapsedRealtime() * 1000);
+        initTimes(uptimeMillis * 1000, elapsedRealtimeMillis * 1000);
         mScreenOnTimer.reset(false);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false);
         }
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
+        mLastIdleTimeStart = elapsedRealtimeMillis;
         mLongestLightIdleTime = 0;
         mLongestFullIdleTime = 0;
         mDeviceIdleModeLightTimer.reset(false);
