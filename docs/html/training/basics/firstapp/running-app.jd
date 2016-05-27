@@ -76,46 +76,6 @@ from the toolbar.</li>
 <p>Android Studio installs the app on your connected device and starts it.</p>
 
 
-<h3>Run the app from a command line</h3>
-
-<p>Open a command-line and navigate to the root of your project directory.
-  Use Gradle to build your project in debug mode, invoke the <code>assembleDebug</code> build task
-  using the Gradle wrapper script (<code>gradlew assembleRelease</code>).
-
-  <p>This creates your debug <code>.apk</code> file inside the module <code>build/</code>
-  directory, named <code>app-debug.apk</code>.  </p>
-
-  <p>On Windows platforms, type this command:</p>
-
-<pre>
-> gradlew.bat assembleDebug
-</pre>
-
-<p>On Mac OS and Linux platforms, type these commands:</p>
-
-<pre>
-$ chmod +x gradlew
-$ ./gradlew assembleDebug
-</pre>
-
-  <p>After you build the project, the output APK for the app module is located in
-  <code>app/build/outputs/apk/</code>
-
-  <p class="note"><strong>Note:</strong> The first command (<code>chmod</code>) adds the execution
-  permission to the Gradle wrapper script and is only necessary the first time you build this
-  project from the command line.</p>
-
-  <p>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
-  <code>PATH</code> environment variable, then execute:
-  <pre class="no-pretty-print">$ adb install app/build/outputs/apk/app-debug.apk</pre><p>
-  <p>On your device, locate <em>MyFirstApp</em> and open it.</p>
-
-<p>That's how you build and run your Android app on a device!
-  To start developing, continue to the <a href="building-ui.html">next
-lesson</a>.</p>
-
-
-
 <h2 id="Emulator">Run on the Emulator</h2>
 
 <p>Whether you're using Android Studio or the command line, to run your app on the emulator you need
@@ -168,23 +128,8 @@ device.</p>
 When you do, <em>My First App</em> appears on the emulator screen.</p>
 
 
-<h3>Run your app from the command line</h3>
- <ol>
-  <li>Build the project from the command line. The output APK for the app module is located in
-  <code>app/build/outputs/apk/</code>.</li>
-  <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
-  <code>PATH</code> environment variable.</li>
-  <li>Execute this command:
-   <p>
-   <pre class="no-pretty-print">$ adb install app/build/outputs/apk/apk-debug.apk</pre>
-   </p>
-  </li>
-  <li>On the emulator, locate <em>MyFirstApp</em> and open it.</li>
- </ol>
-
-
-  <p>That's how you build and run your Android app on the emulator!
-  To start developing, continue to the <a href="building-ui.html">next
-  lesson</a>.</p>
+<p>That's how you build and run your Android app on the emulator!
+To start developing, continue to the <a href="building-ui.html">next
+lesson</a>.</p>
 
 
