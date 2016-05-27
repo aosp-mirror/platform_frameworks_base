@@ -1832,9 +1832,9 @@ final class ActivityStack {
         boolean isVisible =
                 !behindFullscreenActivity || r.mLaunchTaskBehind || activityVisibleBehind;
 
-        if (isVisible && r.isRecentsActivity()) {
-            // Recents activity can only be visible if the home stack is the focused stack or we are
-            // in split-screen mode.
+        if (mService.mSupportsLeanbackOnly && isVisible && r.isRecentsActivity()) {
+            // On devices that support leanback only (Android TV), Recents activity can only be
+            // visible if the home stack is the focused stack or we are in split-screen mode.
             isVisible = mStackSupervisor.getStack(DOCKED_STACK_ID) != null
                     || mStackSupervisor.isFocusedStack(this);
         }
