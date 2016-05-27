@@ -1338,7 +1338,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Update any services we are bound to that might care about whether
         // their client may have activities.
-        mService.mServices.updateServiceConnectionActivitiesLocked(r.app);
+        if (r.app != null) {
+            mService.mServices.updateServiceConnectionActivitiesLocked(r.app);
+        }
 
         return true;
     }

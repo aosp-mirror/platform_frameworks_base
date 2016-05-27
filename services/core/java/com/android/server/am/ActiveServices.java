@@ -753,7 +753,7 @@ public final class ActiveServices {
 
     public void updateServiceConnectionActivitiesLocked(ProcessRecord clientProc) {
         ArraySet<ProcessRecord> updatedProcesses = null;
-        for (int i=0; i<clientProc.connections.size(); i++) {
+        for (int i = 0; i < clientProc.connections.size(); i++) {
             final ConnectionRecord conn = clientProc.connections.valueAt(i);
             final ProcessRecord proc = conn.binding.service.app;
             if (proc == null || proc == clientProc) {
