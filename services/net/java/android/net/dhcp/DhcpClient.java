@@ -84,7 +84,7 @@ import static android.net.dhcp.DhcpPacket.*;
 public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final boolean STATE_DBG = false;
     private static final boolean MSG_DBG = false;
     private static final boolean PACKET_DBG = false;
