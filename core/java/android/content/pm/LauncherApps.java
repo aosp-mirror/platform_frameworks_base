@@ -24,7 +24,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,8 +40,10 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -566,14 +573,61 @@ public class LauncherApps {
         }
     }
 
-    /** TODO Javadoc  (not implemented yet) */
-    public Drawable getShortcutIconDrawable(int density) {
-        throw new RuntimeException("TODO not implemented yet");
+    /**
+     * Returns the icon for this shortcut, without any badging for the profile.
+     *
+     * @param density The preferred density of the icon, zero for default density. Use
+     * density DPI values from {@link DisplayMetrics}.
+     * @see #getShortcutBadgedIconDrawable(ShortcutInfo, int)
+     * @see DisplayMetrics
+     * @return The drawable associated with the shortcut.
+     */
+    public Drawable getShortcutIconDrawable(@NonNull ShortcutInfo shortcut, int density) {
+        if (shortcut.hasIconFile()) {
+            final ParcelFileDescriptor pfd = getShortcutIconFd(shortcut);
+            if (pfd == null) {
+                return null;
+            }
+            try {
+                final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                return (bmp == null) ? null : new BitmapDrawable(mContext.getResources(), bmp);
+            } finally {
+                try {
+                    pfd.close();
+                } catch (IOException ignore) {
+                }
+            }
+        } else if (shortcut.hasIconResource()) {
+            try {
+                final int resId = shortcut.getIconResourceId();
+                if (resId == 0) {
+                    return null; // Shouldn't happen but just in case.
+                }
+                final ApplicationInfo ai = getApplicationInfo(shortcut.getPackage(),
+                        /* flags =*/ 0, shortcut.getUserHandle());
+                final Resources res = mContext.getPackageManager().getResourcesForApplication(ai);
+                return res.getDrawableForDensity(resId, density);
+            } catch (NameNotFoundException | Resources.NotFoundException e) {
+                return null;
+            }
+        } else {
+            return null; // Has no icon.
+        }
     }
 
-    /** TODO Javadoc  (not implemented yet) */
-    public Drawable getShortcutBadgedIconDrawable(int density) {
-        throw new RuntimeException("TODO not implemented yet");
+    /**
+     * Returns the shortcut icon with badging appropriate for the profile.
+     *
+     * @param density Optional density for the icon, or 0 to use the default density. Use
+     * {@link DisplayMetrics} for DPI values.
+     * @see DisplayMetrics
+     * @return A badged icon for the shortcut.
+     */
+    public Drawable getShortcutBadgedIconDrawable(ShortcutInfo shortcut, int density) {
+        final Drawable originalIcon = getShortcutIconDrawable(shortcut, density);
+
+        return (originalIcon == null) ? null : mContext.getPackageManager().getUserBadgedIcon(
+                originalIcon, shortcut.getUserHandle());
     }
 
     /**
