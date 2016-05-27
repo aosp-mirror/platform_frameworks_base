@@ -126,7 +126,6 @@ public class PipManager {
     private int mSuspendPipResizingReason;
 
     private Context mContext;
-    private SystemServicesProxy mSystemServiceProxy;
     private PipRecentsOverlayManager mPipRecentsOverlayManager;
     private IActivityManager mActivityManager;
     private MediaSessionManager mMediaSessionManager;
@@ -213,8 +212,7 @@ public class PipManager {
         mPipBounds = mDefaultPipBounds;
 
         mActivityManager = ActivityManagerNative.getDefault();
-        mSystemServiceProxy = SystemServicesProxy.getInstance(context);
-        mSystemServiceProxy.registerTaskStackListener(mTaskStackListener);
+        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
