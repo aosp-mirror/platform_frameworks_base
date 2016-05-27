@@ -4360,6 +4360,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = of.bottom = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
             // ...with content insets above the nav bar
             cf.bottom = vf.bottom = mStableBottom;
+            if (mStatusBar != null && mFocusedWindow == mStatusBar && canReceiveInput(mStatusBar)) {
+                // The status bar forces the navigation bar while it's visible. Make sure the IME
+                // avoids the navigation bar in that case.
+                pf.right = df.right = of.right = cf.right = vf.right = mStableRight;
+            }
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
