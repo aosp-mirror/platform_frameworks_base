@@ -19,8 +19,11 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PixelFormat;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -31,37 +34,48 @@ import android.view.View;
  * This should all be optimized out by the renderer.
  */
 public class FullscreenOverdrawActivity extends AppCompatActivity {
-    private class OverdrawView extends View {
+    private class OverdrawDrawable extends Drawable {
         Paint paint = new Paint();
         int mColorValue = 0;
-
-        public OverdrawView(Context context) {
-            super(context);
-        }
 
         @SuppressWarnings("unused")
         public void setColorValue(int colorValue) {
             mColorValue = colorValue;
-            invalidate();
+            invalidateSelf();
         }
 
         @Override
-        protected void onDraw(Canvas canvas) {
+        public void draw(Canvas canvas) {
             paint.setColor(Color.rgb(mColorValue, 255 - mColorValue, 255));
 
             for (int i = 0; i < 400; i++) {
-                canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
+                canvas.drawRect(getBounds(), paint);
             }
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.OPAQUE;
         }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        OverdrawView overdrawView = new OverdrawView(this);
-        setContentView(overdrawView);
+        OverdrawDrawable overdraw = new OverdrawDrawable();
+        getWindow().setBackgroundDrawable(overdraw);
 
-        ObjectAnimator objectAnimator = ObjectAnimator.ofInt(overdrawView, "colorValue", 0, 255);
+        setContentView(new View(this));
+
+        ObjectAnimator objectAnimator = ObjectAnimator.ofInt(overdraw, "colorValue", 0, 255);
         objectAnimator.setRepeatMode(ValueAnimator.REVERSE);
         objectAnimator.setRepeatCount(ValueAnimator.INFINITE);
         objectAnimator.start();
