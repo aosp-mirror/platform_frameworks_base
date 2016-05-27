@@ -240,6 +240,7 @@ public class MainActivity extends FragmentActivity {
              * Ask the framework to run your sync adapter.
              * To maintain backward compatibility, assume that
              * changeUri is null.
+             */
             ContentResolver.requestSync(ACCOUNT, AUTHORITY, null);
         }
         ...
