@@ -8247,7 +8247,7 @@ i
 
     <declare-styleable name="Shortcut">
         <attr name="shortcutId" format="string" />
-        <attr name="enabled" format="boolean" />
+        <attr name="enabled" />
         <attr name="shortcutRank" format="integer" />
         <attr name="shortcutIcon" format="reference" />
         <attr name="shortcutTitle" format="reference" />
