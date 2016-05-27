@@ -1055,18 +1055,27 @@ public class Vpn {
     }
 
     /**
-     * @return {@code true} if the set of users blocked whilst waiting for VPN to connect includes
-     *         the UID {@param uid}, {@code false} otherwise.
+     * @return {@code true} if {@param uid} is blocked by an always-on VPN.
+     *         A UID is blocked if it's included in one of the mBlockedUsers ranges and the VPN is
+     *         not connected, or if the VPN is connected but does not apply to the UID.
      *
      * @see #mBlockedUsers
      */
     public synchronized boolean isBlockingUid(int uid) {
-        for (UidRange uidRange : mBlockedUsers) {
-            if (uidRange.contains(uid)) {
-                return true;
-            }
+        if (!mLockdown) {
+            return false;
         }
-        return false;
+
+        if (mNetworkInfo.isConnected()) {
+            return !appliesToUid(uid);
+        } else {
+            for (UidRange uidRange : mBlockedUsers) {
+                if (uidRange.contains(uid)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     private native int jniCreate(int mtu);
