@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 package android.os;
 
@@ -129,15 +129,23 @@ public abstract class UserManagerInternal {
 
     /**
      * Return whether the given user is running in an
-     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKING "unlocking"} or
-     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKED "unlocked"} state.
+     * {@code UserState.STATE_RUNNING_UNLOCKING} or
+     * {@code UserState.STATE_RUNNING_UNLOCKED} state.
      */
     public abstract boolean isUserUnlockingOrUnlocked(int userId);
 
     /**
-     * Sets whether the given user is running in an
-     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKING "unlocking"} or
-     * {@link com.android.server.am.UserState#STATE_RUNNING_UNLOCKED "unlocked"} state.
+     * Return whether the given user is running
      */
-    public abstract void setUserUnlockingOrUnlocked(int userId, boolean unlockingOrUnlocked);
+    public abstract boolean isUserRunning(int userId);
+
+    /**
+     * Set user's running state
+     */
+    public abstract void setUserState(int userId, int userState);
+
+    /**
+     * Remove user's running state
+     */
+    public abstract void removeUserState(int userId);
 }
