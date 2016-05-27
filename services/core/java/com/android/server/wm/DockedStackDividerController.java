@@ -606,7 +606,12 @@ public class DockedStackDividerController implements DimLayerUser {
     private void setMinimizedDockedStack(boolean minimized) {
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         notifyDockedStackMinimizedChanged(minimized, 0);
-        setMinimizeAmount(stack, minimized ? 1f : 0f);
+        if (stack == null) {
+            return;
+        }
+        if (stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f)) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+        }
     }
 
     private boolean isAnimationMaximizing() {
@@ -690,49 +695,16 @@ public class DockedStackDividerController implements DimLayerUser {
         float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
         t = (isAnimationMaximizing() ? TOUCH_RESPONSE_INTERPOLATOR : mMinimizedDockInterpolator)
                 .getInterpolation(t);
-        setMinimizeAmount(stack, getMinimizeAmount(stack, t));
-
+        if (stack != null) {
+            if (stack.setAdjustedForMinimizedDock(getMinimizeAmount(stack, t))) {
+                mService.mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
         if (t >= 1.0f) {
             mAnimatingForMinimizedDockedStack = false;
             return false;
         } else {
             return true;
-        }
-    }
-
-    void setMinimizeAmount(TaskStack dockedStack, float minimizeAmount) {
-        final ArrayList<TaskStack> stacks = mDisplayContent.getStacks();
-
-        // If the docked stack is not visible, clear the complementary stack on all stacks.
-        if (dockedStack == null) {
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                final TaskStack stack = stacks.get(i);
-                stack.resetAdjustedForComplementDock();
-            }
-            return;
-        }
-
-        // Otherwise if the docked stack minimize amount has changed, update the adjusted bounds
-        // on the other stack that's currently visible, so that the stack's getDimBounds()
-        // occupies what's left by the docked stack. This is needed so that stuff like wallpaper
-        // gets cropped properly to the area left by the dock.
-        if (dockedStack.setAdjustedForMinimizedDock(minimizeAmount)) {
-            final boolean adjusted =
-                    dockedStack.isVisibleForUserLocked() && minimizeAmount != 0.0f;
-            dockedStack.getDimBounds(mTmpRect2);
-            int dockSide = dockedStack.getDockSide();
-            for (int i = stacks.size() - 1; i >= 0; --i) {
-                final TaskStack stack = stacks.get(i);
-                if (stack == dockedStack) {
-                    continue;
-                }
-                if (stack.isVisibleLocked() && adjusted) {
-                    stack.setAdjustedForComplementDock(mTmpRect2, dockSide);
-                } else {
-                    stack.resetAdjustedForComplementDock();
-                }
-            }
-            mService.mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
