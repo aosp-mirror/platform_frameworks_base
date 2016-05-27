@@ -16,15 +16,22 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.UserManager;
 
 import android.provider.Settings;
+import android.provider.Settings.Global;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
+import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.HotspotController;
 
@@ -36,12 +43,22 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mDisable =
             new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
                     R.drawable.ic_hotspot_enable);
+    private final Icon mUnavailable =
+            ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
+    private final GlobalSetting mAirplaneMode;
+    private boolean mListening;
 
     public HotspotTile(Host host) {
         super(host);
         mController = host.getHotspotController();
+        mAirplaneMode = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
+            @Override
+            protected void handleValueChanged(int value) {
+                refreshState();
+            }
+        };
     }
 
     @Override
@@ -61,11 +78,18 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
         if (listening) {
             mController.addCallback(mCallback);
+            final IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            mContext.registerReceiver(mReceiver, filter);
         } else {
             mController.removeCallback(mCallback);
+            mContext.unregisterReceiver(mReceiver);
         }
+        mAirplaneMode.setListening(listening);
     }
 
     @Override
@@ -76,6 +100,9 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         final boolean isEnabled = (Boolean) mState.value;
+        if (!isEnabled && mAirplaneMode.getValue() != 0) {
+            return;
+        }
         MetricsLogger.action(mContext, getMetricsCategory(), !isEnabled);
         mController.setHotspotEnabled(!isEnabled);
     }
@@ -96,6 +123,13 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
             state.value = mController.isHotspotEnabled();
         }
         state.icon = state.value ? mEnable : mDisable;
+        if (mAirplaneMode.getValue() != 0) {
+            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
+            state.label = new SpannableStringBuilder().append(state.label,
+                    new ForegroundColorSpan(disabledColor),
+                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+            state.icon = mUnavailable;
+        }
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
         state.contentDescription = state.label;
@@ -119,6 +153,15 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onHotspotChanged(boolean enabled) {
             refreshState(enabled);
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
+                refreshState();
+            }
         }
     };
 }
