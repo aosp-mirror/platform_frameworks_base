@@ -63,18 +63,9 @@ Platform Versions</a>.</p>
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
-<p class="note"><strong>Note:</strong> This data is gathered from the new Google Play
-Store app, which supports Android 2.2 and above, so devices running older versions are not included.
-However, in August, 2013, versions older than Android 2.2 accounted for about 1% of devices that
-<em>checked in</em> to Google servers (not those that actually visited Google Play Store).
-</p>
-
-
-
 
 
 <h2 id="Screens">Screen Sizes and Densities</h2>
-
 
 <p>This section provides data about the relative number of devices that have a particular
 screen configuration, defined by a combination of screen size and density. To simplify the way that
