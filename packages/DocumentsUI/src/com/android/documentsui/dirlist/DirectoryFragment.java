@@ -177,6 +177,8 @@ public class DirectoryFragment extends Fragment
     // Save selection found during creation so it can be restored during directory loading.
     private Selection mSelection = null;
     private boolean mSearchMode = false;
+
+    private @Nullable BandController mBandController;
     private @Nullable ActionMode mActionMode;
 
     private DirectoryDragListener mOnDragListener;
@@ -298,6 +300,10 @@ public class DirectoryFragment extends Fragment
                     ? MultiSelectManager.MODE_MULTIPLE
                     : MultiSelectManager.MODE_SINGLE,
                 null);
+
+        if (state.allowMultiple) {
+            mBandController = new BandController(mRecView, mAdapter, mSelectionManager);
+        }
 
         mSelectionManager.addCallback(new SelectionModeListener());
 
@@ -451,7 +457,9 @@ public class DirectoryFragment extends Fragment
         int pad = getDirectoryPadding(mode);
         mRecView.setPadding(pad, pad, pad, pad);
         mRecView.requestLayout();
-        mSelectionManager.handleLayoutChanged();  // RecyclerView doesn't do this for us
+        if (mBandController != null) {
+            mBandController.handleLayoutChanged();
+        }
         mIconHelper.setViewMode(mode);
     }
 
