@@ -154,9 +154,9 @@ public class QSTileBaseView extends LinearLayout {
             event.setClassName(mAccessibilityClass);
             if (Switch.class.getName().equals(mAccessibilityClass)) {
                 String label = getResources()
-                        .getString(mTileState ? R.string.switch_bar_on : R.string.switch_bar_off);
+                        .getString(!mTileState ? R.string.switch_bar_on : R.string.switch_bar_off);
                 event.setContentDescription(label);
-                event.setChecked(mTileState);
+                event.setChecked(!mTileState);
             }
         }
     }
