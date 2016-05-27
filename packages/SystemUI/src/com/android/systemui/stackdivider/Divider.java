@@ -39,6 +39,7 @@ import java.io.PrintWriter;
 public class Divider extends SystemUI {
     private DividerWindowManager mWindowManager;
     private DividerView mView;
+    private final DividerState mDividerState = new DividerState();
     private DockDividerVisibilityListener mDockDividerVisibilityListener;
     private boolean mVisible = false;
     private boolean mMinimized = false;
@@ -76,7 +77,7 @@ public class Divider extends SystemUI {
         final int width = landscape ? size : MATCH_PARENT;
         final int height = landscape ? MATCH_PARENT : size;
         mWindowManager.add(mView, width, height);
-        mView.setWindowManager(mWindowManager);
+        mView.injectDependencies(mWindowManager, mDividerState);
     }
 
     private void removeDivider() {
