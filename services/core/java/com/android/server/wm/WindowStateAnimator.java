@@ -1282,7 +1282,7 @@ class WindowStateAnimator {
         if (DEBUG_WINDOW_CROP) Slog.d(TAG,
                 "win=" + w + " Clip rect after stack adjustment=" + clipRect);
 
-        w.transformFromScreenToSurfaceSpace(clipRect);
+        w.transformClipRectFromScreenToSurfaceSpace(clipRect);
 
         // See {@link WindowState#notifyMovedInStack} for why this is necessary.
         if (w.hasJustMovedInStack() && mLastClipRect.isEmpty() && !clipRect.isEmpty()) {
