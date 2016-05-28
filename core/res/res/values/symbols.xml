@@ -1888,6 +1888,8 @@
   <java-symbol type="string" name="config_persistentDataPackageName" />
   <java-symbol type="string" name="audit_safemode_notification" />
   <java-symbol type="string" name="audit_safemode_notification_details" />
+  <java-symbol type="string" name="reset_retail_demo_mode_title" />
+  <java-symbol type="string" name="reset_retail_demo_mode_text" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />

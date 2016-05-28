@@ -481,6 +481,8 @@
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
 
+    <protected-broadcast android:name="com.android.server.am.ACTION_RESET_DEMO" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
