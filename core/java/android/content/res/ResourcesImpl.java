@@ -292,8 +292,10 @@ public class ResourcesImpl {
             return mAssets.openNonAsset(value.assetCookie, value.string.toString(),
                     AssetManager.ACCESS_STREAMING);
         } catch (Exception e) {
-            NotFoundException rnf = new NotFoundException("File " + value.string.toString() +
-                    " from drawable resource ID #0x" + Integer.toHexString(id));
+            // Note: value.string might be null
+            NotFoundException rnf = new NotFoundException("File "
+                    + (value.string == null ? "(null)" : value.string.toString())
+                    + " from drawable resource ID #0x" + Integer.toHexString(id));
             rnf.initCause(e);
             throw rnf;
         }
