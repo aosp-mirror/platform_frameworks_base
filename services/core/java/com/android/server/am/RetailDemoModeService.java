@@ -17,6 +17,9 @@
 package com.android.server.am;
 
 import android.app.ActivityManagerNative;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,6 +39,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.R;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
@@ -47,15 +51,18 @@ public class RetailDemoModeService extends SystemService {
 
     private static final String TAG = RetailDemoModeService.class.getSimpleName();
     private static final String DEMO_USER_NAME = "Demo";
+    private static final String ACTION_RESET_DEMO = "com.android.server.am.ACTION_RESET_DEMO";
 
     private static final long SCREEN_WAKEUP_DELAY = 5000;
 
     private ActivityManagerService mAms;
     private UserManagerService mUms;
+    private NotificationManager mNm;
     private PowerManager mPm;
     private PowerManager.WakeLock mWakeLock;
     private Handler mHandler;
     private ServiceThread mHandlerThread;
+    private PendingIntent mResetDemoPendingIntent;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -75,12 +82,35 @@ public class RetailDemoModeService extends SystemService {
                         }
                     }, SCREEN_WAKEUP_DELAY);
                     break;
+                case ACTION_RESET_DEMO:
+                    createAndSwitchToDemoUser();
+                    break;
             }
         }
     };
 
     public RetailDemoModeService(Context context) {
         super(context);
+    }
+
+    private Notification createResetNotification() {
+        return new Notification.Builder(getContext())
+                .setContentTitle(getContext().getString(R.string.reset_retail_demo_mode_title))
+                .setContentText(getContext().getString(R.string.reset_retail_demo_mode_text))
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.platlogo)
+                .setShowWhen(false)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setContentIntent(getResetDemoPendingIntent())
+                .build();
+    }
+
+    private PendingIntent getResetDemoPendingIntent() {
+        if (mResetDemoPendingIntent == null) {
+            Intent intent = new Intent(ACTION_RESET_DEMO);
+            mResetDemoPendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+        }
+        return mResetDemoPendingIntent;
     }
 
     private void createAndSwitchToDemoUser() {
@@ -162,7 +192,8 @@ public class RetailDemoModeService extends SystemService {
     private void registerBroadcastReceiver() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+        filter.addAction(ACTION_RESET_DEMO);
+        getContext().registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override
@@ -184,6 +215,8 @@ public class RetailDemoModeService extends SystemService {
         mPm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPm
                 .newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
+        mNm = NotificationManager.from(getContext());
+
         if (UserManager.isDeviceInDemoMode(getContext())) {
             createAndSwitchToDemoUser();
         }
@@ -208,5 +241,6 @@ public class RetailDemoModeService extends SystemService {
         if (!mWakeLock.isHeld()) {
             mWakeLock.acquire();
         }
+        mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
     }
 }
