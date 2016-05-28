@@ -549,6 +549,12 @@ public:
     Tree(Group* rootNode) : mRootNode(rootNode) {
         mRootNode->setPropertyChangedListener(&mPropertyChangedListener);
     }
+
+    // Copy properties from the tree and use the give node as the root node
+    Tree(const Tree* copy, Group* rootNode) : Tree(rootNode) {
+        mStagingProperties.syncAnimatableProperties(*copy->stagingProperties());
+        mStagingProperties.syncNonAnimatableProperties(*copy->stagingProperties());
+    }
     // Draws the VD onto a bitmap cache, then the bitmap cache will be rendered onto the input
     // canvas. Returns the number of pixels needed for the bitmap cache.
     int draw(Canvas* outCanvas, SkColorFilter* colorFilter,
@@ -673,7 +679,7 @@ public:
     };
     void onPropertyChanged(TreeProperties* prop);
     TreeProperties* mutateStagingProperties() { return &mStagingProperties; }
-    const TreeProperties* stagingProperties() { return &mStagingProperties; }
+    const TreeProperties* stagingProperties() const { return &mStagingProperties; }
 
     // This should only be called from animations on RT
     TreeProperties* mutateProperties() { return &mProperties; }
