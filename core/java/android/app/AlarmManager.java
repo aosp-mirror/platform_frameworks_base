@@ -606,6 +606,22 @@ public class AlarmManager {
      *
      * @hide
      */
+    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+            String tag, OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, tag,
+                targetHandler, workSource, null);
+    }
+
+    /**
+     * Direct callback version of {@link #set(int, long, long, long, PendingIntent, WorkSource)}.
+     * Note that repeating alarms must use the PendingIntent variant, not an OnAlarmListener.
+     * <p>
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * invoked via the specified target Handler, or on the application's main looper
+     * if {@code null} is passed as the {@code targetHandler} parameter.
+     *
+     * @hide
+     */
     @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             OnAlarmListener listener, Handler targetHandler, WorkSource workSource) {
