@@ -1996,6 +1996,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (event.fromDeviceOrientationChange) {
             mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
             mDisplayRect = Recents.getSystemServices().getDisplayRect();
+
+            // Always stop the scroller, otherwise, we may continue setting the stack scroll to the
+            // wrong bounds in the new layout
+            mStackScroller.stopScroller();
         }
         reloadOnConfigurationChange();
 
