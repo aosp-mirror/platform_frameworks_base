@@ -677,6 +677,10 @@ public class NotificationChildrenContainer extends ViewGroup {
         mHeaderUtil = new NotificationHeaderUtil(mNotificationParent);
     }
 
+    public ExpandableNotificationRow getNotificationParent() {
+        return mNotificationParent;
+    }
+
     public NotificationHeaderView getHeaderView() {
         return mNotificationHeader;
     }
@@ -853,5 +857,24 @@ public class NotificationChildrenContainer extends ViewGroup {
             ExpandableNotificationRow child = mChildren.get(i);
             child.setRemoved();
         }
+    }
+
+    public int getPositionInLinearLayout(View childInGroup) {
+        int position = mNotificationHeaderMargin + mNotificatonTopPadding;
+
+        for (int i = 0; i < mChildren.size(); i++) {
+            ExpandableNotificationRow child = mChildren.get(i);
+            boolean notGone = child.getVisibility() != View.GONE;
+            if (notGone) {
+                position += mDividerHeight;
+            }
+            if (child == childInGroup) {
+                return position;
+            }
+            if (notGone) {
+                position += child.getIntrinsicHeight();
+            }
+        }
+        return 0;
     }
 }
