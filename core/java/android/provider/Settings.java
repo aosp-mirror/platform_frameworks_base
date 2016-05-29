@@ -5316,12 +5316,22 @@ public final class Settings {
                 NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
+         * Change quick settings tiles interpolator
+         *
+         * @hide
+         */
+        public static final String ANIM_TILE_INTERPOLATOR = "anim_tile_interpolator";
+
+        /** @hide */
+        private static final Validator ANIM_TILE_INTERPOLATOR_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
          * the setting value. See an example above.
          */
-
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -5584,6 +5594,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(QS_COLUMNS_LANDSCAPE);
             PRIVATE_SETTINGS.add(ANIM_TILE_STYLE);
             PRIVATE_SETTINGS.add(ANIM_TILE_DURATION);
+            PRIVATE_SETTINGS.add(ANIM_TILE_INTERPOLATOR);
         }
 
         /**
@@ -5754,6 +5765,7 @@ public final class Settings {
             VALIDATORS.put(QS_COLUMNS_LANDSCAPE, QS_COLUMNS_LANDSCAPE_VALIDATOR);
             VALIDATORS.put(ANIM_TILE_STYLE, ANIM_TILE_STYLE_VALIDATOR);
             VALIDATORS.put(ANIM_TILE_DURATION, ANIM_TILE_DURATION_VALIDATOR);
+            VALIDATORS.put(ANIM_TILE_INTERPOLATOR, ANIM_TILE_INTERPOLATOR_VALIDATOR);
         }
 
         /**

@@ -36,6 +36,14 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AnticipateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -746,6 +754,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 Settings.System.ANIM_TILE_STYLE, 0, UserHandle.USER_CURRENT);
         int animDuration = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.ANIM_TILE_DURATION, 2000, UserHandle.USER_CURRENT);
+        int interpolatorType = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.ANIM_TILE_INTERPOLATOR, 0, UserHandle.USER_CURRENT);
         if (animStyle == 0) {
             //No animation
         }
@@ -756,6 +766,34 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             animTile = ObjectAnimator.ofFloat(v, "rotation", 0f, 360f);
         }
         if (animTile != null) {
+            switch (interpolatorType) {
+                    case 0:
+                        animTile.setInterpolator(new LinearInterpolator());
+                        break;
+                    case 1:
+                        animTile.setInterpolator(new AccelerateInterpolator());
+                        break;
+                    case 2:
+                        animTile.setInterpolator(new DecelerateInterpolator());
+                        break;
+                    case 3:
+                        animTile.setInterpolator(new AccelerateDecelerateInterpolator());
+                        break;
+                    case 4:
+                        animTile.setInterpolator(new BounceInterpolator());
+                        break;
+                    case 5:
+                        animTile.setInterpolator(new OvershootInterpolator());
+                        break;
+                    case 6:
+                        animTile.setInterpolator(new AnticipateInterpolator());
+                        break;
+                    case 7:
+                        animTile.setInterpolator(new AnticipateOvershootInterpolator());
+                        break;
+                    default:
+                        break;
+            }
             animTile.setDuration(animDuration);
             animTile.start();
         }
