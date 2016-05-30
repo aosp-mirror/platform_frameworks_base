@@ -139,7 +139,7 @@
     <string name="choose_profile" msgid="8229363046053568878">"Ընտրել պրոֆիլ"</string>
     <string name="category_personal" msgid="1299663247844969448">"Անձնական"</string>
     <string name="category_work" msgid="8699184680584175622">"Աշխատանքային"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"Ծրագրավորման ընտրանքներ"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"Ծրագրավորողի ընտրանքներ"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"Միացնել մշակողի ընտրանքները"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"Կարգավորել ընտրանքները ծրագրի ծրագրավորման համար"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Ծրագրավորման ընտրանքներն այլևս հասանելի չեն այս օգտվողի համար"</string>
