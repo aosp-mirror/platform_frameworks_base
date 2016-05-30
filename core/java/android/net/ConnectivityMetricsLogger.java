@@ -33,28 +33,39 @@ public class ConnectivityMetricsLogger {
 
     // Component Tags
     public static final int COMPONENT_TAG_CONNECTIVITY = 0;
-    public static final int COMPONENT_TAG_BLUETOOTH = 1;
-    public static final int COMPONENT_TAG_WIFI = 2;
-    public static final int COMPONENT_TAG_TELECOM = 3;
-    public static final int COMPONENT_TAG_TELEPHONY = 4;
-
-    public static final int NUMBER_OF_COMPONENTS = 5;
+    public static final int COMPONENT_TAG_BLUETOOTH    = 1;
+    public static final int COMPONENT_TAG_WIFI         = 2;
+    public static final int COMPONENT_TAG_TELECOM      = 3;
+    public static final int COMPONENT_TAG_TELEPHONY    = 4;
+    public static final int NUMBER_OF_COMPONENTS       = 5;
 
     // Event Tag
     public static final int TAG_SKIPPED_EVENTS = -1;
 
     public static final String DATA_KEY_EVENTS_COUNT = "count";
 
-    private IConnectivityMetricsLogger mService;
-
-    private long mServiceUnblockedTimestampMillis = 0;
-    private int mNumSkippedEvents = 0;
+    /** {@hide} */ protected final IConnectivityMetricsLogger mService;
+    /** {@hide} */ protected volatile long mServiceUnblockedTimestampMillis;
+    private int mNumSkippedEvents;
 
     public ConnectivityMetricsLogger() {
         mService = IConnectivityMetricsLogger.Stub.asInterface(ServiceManager.getService(
                 CONNECTIVITY_METRICS_LOGGER_SERVICE));
     }
 
+    /**
+     * Log a ConnectivityMetricsEvent.
+     *
+     * This method keeps track of skipped events when MetricsLoggerService throttles input events.
+     * It skips logging when MetricsLoggerService is active. When throttling ends, it logs a
+     * meta-event containing the number of events dropped. It is not safe to call this method
+     * concurrently from different threads.
+     *
+     * @param timestamp is the epoch timestamp of the event in ms.
+     * @param componentTag is the COMPONENT_* constant the event belongs to.
+     * @param eventTag is an event type constant whose meaning is specific to the component tag.
+     * @param data is a Parcelable instance representing the event.
+     */
     public void logEvent(long timestamp, int componentTag, int eventTag, Parcelable data) {
         if (mService == null) {
             if (DBG) {
@@ -104,7 +115,7 @@ public class ConnectivityMetricsLogger {
                 }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error logging event " + e.getMessage());
+            Log.e(TAG, "Error logging event", e);
         }
     }
 
@@ -121,8 +132,8 @@ public class ConnectivityMetricsLogger {
     public ConnectivityMetricsEvent[] getEvents(ConnectivityMetricsEvent.Reference reference) {
         try {
             return mService.getEvents(reference);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "IConnectivityMetricsLogger.getEvents: " + ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "IConnectivityMetricsLogger.getEvents", e);
             return null;
         }
     }
@@ -133,8 +144,8 @@ public class ConnectivityMetricsLogger {
     public boolean register(PendingIntent newEventsIntent) {
         try {
             return mService.register(newEventsIntent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "IConnectivityMetricsLogger.register: " + ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "IConnectivityMetricsLogger.register", e);
             return false;
         }
     }
@@ -142,8 +153,8 @@ public class ConnectivityMetricsLogger {
     public boolean unregister(PendingIntent newEventsIntent) {
         try {
             mService.unregister(newEventsIntent);
-        } catch (RemoteException ex) {
-            Log.e(TAG, "IConnectivityMetricsLogger.unregister: " + ex);
+        } catch (RemoteException e) {
+            Log.e(TAG, "IConnectivityMetricsLogger.unregister", e);
             return false;
         }
 
