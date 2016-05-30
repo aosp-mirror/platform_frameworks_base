@@ -114,7 +114,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ushbu nutq sintezi mexanizmi barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. U <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> mexanizmi bilan o‘rnatiladi. Ushbu nutq sintezi mexanizmidan foydalanilsinmi?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til uchun nutq sintezatorini yoqish uchun Internetga ulaning."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Bu nutq sintezining misoli"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"Birlamchi til"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Asosiy til"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> – to‘liq qo‘llab-quvvatlanadi"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> tili tarmoqqa ulanishi lozim"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> – qo‘llab-quvvatlanmaydi"</string>
@@ -324,9 +324,11 @@
     <string name="enabled_by_admin" msgid="2386503803463071894">"Administrator tomonidan yoqilgan"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Administrator tomonidan o‘chirilgan"</string>
     <string name="home" msgid="3256884684164448244">"Sozlamalar"</string>
-    <!-- no translation found for battery_labels:0 (8494684293649631252) -->
-    <!-- no translation found for battery_labels:1 (8934126114226089439) -->
-    <!-- no translation found for battery_labels:2 (1286113608943010849) -->
+  <string-array name="battery_labels">
+    <item msgid="8494684293649631252">"0%"</item>
+    <item msgid="8934126114226089439">"50%"</item>
+    <item msgid="1286113608943010849">"100%"</item>
+  </string-array>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> oldin"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> qoldi"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Kichkina"</string>
