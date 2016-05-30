@@ -97,7 +97,7 @@
     <string name="voice_assist_label" msgid="3956854378310019854">"otvori glasovnu pomoć"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvori kameru"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Izaberite novi raspored zadataka"</string>
-    <string name="cancel" msgid="6442560571259935130">"Prekini"</string>
+    <string name="cancel" msgid="6442560571259935130">"Otkaži"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Dugme za uvećavanje u slučaju nekompatibilnosti."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Uvećani prikaz manjeg ekrana na većem ekranu."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth je povezan."</string>
