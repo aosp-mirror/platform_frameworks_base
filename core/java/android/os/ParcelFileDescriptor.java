@@ -864,6 +864,34 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 super.close();
             }
         }
+
+        @Override
+        public int read() throws IOException {
+            final int result = super.read();
+            if (result == -1 && mPfd.canDetectErrors()) {
+                // Check for errors only on EOF, to minimize overhead.
+                mPfd.checkError();
+            }
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b) throws IOException {
+            final int result = super.read(b);
+            if (result == -1 && mPfd.canDetectErrors()) {
+                mPfd.checkError();
+            }
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            final int result = super.read(b, off, len);
+            if (result == -1 && mPfd.canDetectErrors()) {
+                mPfd.checkError();
+            }
+            return result;
+        }
     }
 
     /**
