@@ -28,12 +28,12 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import libcore.util.ZoneInfoDB;
 
 import java.io.IOException;
-import java.util.WeakHashMap;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -244,7 +244,7 @@ public class AlarmManager {
 
     // Tracking of the OnAlarmListener -> wrapper mapping, for cancel() support.
     // Access is synchronized on the AlarmManager class object.
-    private static WeakHashMap<OnAlarmListener, ListenerWrapper> sWrappers;
+    private static ArrayMap<OnAlarmListener, ListenerWrapper> sWrappers;
 
     /**
      * package private on purpose
@@ -631,7 +631,7 @@ public class AlarmManager {
         if (listener != null) {
             synchronized (AlarmManager.class) {
                 if (sWrappers == null) {
-                    sWrappers = new WeakHashMap<OnAlarmListener, ListenerWrapper>();
+                    sWrappers = new ArrayMap<OnAlarmListener, ListenerWrapper>();
                 }
 
                 recipientWrapper = sWrappers.get(listener);
