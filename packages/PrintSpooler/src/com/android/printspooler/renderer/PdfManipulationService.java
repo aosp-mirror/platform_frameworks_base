@@ -277,18 +277,12 @@ public final class PdfManipulationService extends Service {
                 Rect cropBox = new Rect();
                 Matrix transform = new Matrix();
 
-                final boolean contentPortrait = attributes.getMediaSize().isPortrait();
-
                 final boolean layoutDirectionRtl = getResources().getConfiguration()
                         .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
 
                 // We do not want to rotate the media box, so take into account orientation.
-                final int dstWidthPts = contentPortrait
-                        ? pointsFromMils(attributes.getMediaSize().getWidthMils())
-                        : pointsFromMils(attributes.getMediaSize().getHeightMils());
-                final int dstHeightPts = contentPortrait
-                        ? pointsFromMils(attributes.getMediaSize().getHeightMils())
-                        : pointsFromMils(attributes.getMediaSize().getWidthMils());
+                final int dstWidthPts = pointsFromMils(attributes.getMediaSize().getWidthMils());
+                final int dstHeightPts = pointsFromMils(attributes.getMediaSize().getHeightMils());
 
                 final boolean scaleForPrinting = mEditor.shouldScaleForPrinting();
 
@@ -310,24 +304,12 @@ public final class PdfManipulationService extends Service {
                     // Make sure content is top-left after media box resize.
                     transform.setTranslate(0, srcHeightPts - dstHeightPts);
 
-                    // Rotate the content if in landscape.
-                    if (!contentPortrait) {
-                        transform.postRotate(270);
-                        transform.postTranslate(0, dstHeightPts);
-                    }
-
                     // Scale the content if document allows it.
                     final float scale;
                     if (scaleForPrinting) {
-                        if (contentPortrait) {
-                            scale = Math.min((float) dstWidthPts / srcWidthPts,
-                                    (float) dstHeightPts / srcHeightPts);
-                            transform.postScale(scale, scale);
-                        } else {
-                            scale = Math.min((float) dstWidthPts / srcHeightPts,
-                                    (float) dstHeightPts / srcWidthPts);
-                            transform.postScale(scale, scale, mediaBox.left, mediaBox.bottom);
-                        }
+                        scale = Math.min((float) dstWidthPts / srcWidthPts,
+                                (float) dstHeightPts / srcHeightPts);
+                        transform.postScale(scale, scale);
                     } else {
                         scale = 1.0f;
                     }
@@ -344,10 +326,8 @@ public final class PdfManipulationService extends Service {
 
                     // If in RTL mode put the content in the logical top-right corner.
                     if (layoutDirectionRtl) {
-                        final float dx = contentPortrait
-                                ? dstWidthPts - (int) (srcWidthPts * scale + 0.5f) : 0;
-                        final float dy = contentPortrait
-                                ? 0 : - (dstHeightPts - (int) (srcWidthPts * scale + 0.5f));
+                        final float dx = dstWidthPts - (int) (srcWidthPts * scale + 0.5f);
+                        final float dy = 0;
                         transform.postTranslate(dx, dy);
                     }
 
