@@ -21,9 +21,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
@@ -230,6 +230,7 @@ public class NotificationHeaderView extends ViewGroup {
     public void setOnClickListener(@Nullable OnClickListener l) {
         mExpandClickListener = l;
         setOnTouchListener(mExpandClickListener != null ? mTouchListener : null);
+        setFocusable(l != null);
         updateTouchListener();
     }
 
@@ -377,6 +378,19 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
         return this;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (mExpandClickListener != null) {
+            AccessibilityNodeInfo.AccessibilityAction expand
+                    = new AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK,
+                    getContext().getString(
+                            com.android.internal.R.string.expand_action_accessibility));
+            info.addAction(expand);
+        }
     }
 
     public ImageView getExpandButton() {
