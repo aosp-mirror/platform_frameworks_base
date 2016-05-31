@@ -223,10 +223,11 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
      * stop executing.
      */
     JobStatus getRunningJob() {
+        final JobStatus job;
         synchronized (mLock) {
-            return mRunningJob == null ?
-                    null : new JobStatus(mRunningJob);
+            job = mRunningJob;
         }
+        return job == null ? null : new JobStatus(job);
     }
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
