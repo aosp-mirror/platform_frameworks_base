@@ -594,6 +594,12 @@
     <!-- The overflow indicator shown when a group has more notification inside the group than the visible ones. An example is "+ 3" [CHAR LIMIT=5] -->
     <string name="notification_group_overflow_indicator">+ <xliff:g id="number" example="3">%s</xliff:g></string>
 
+    <!-- Content description describing how many more notifications are in a group [CHAR LIMIT=NONE] -->
+    <plurals name="notification_group_overflow_description">
+        <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> more notification inside.</item>
+        <item quantity="other"><xliff:g id="number" example="3">%s</xliff:g> more notifications inside.</item>
+    </plurals>
+
     <!-- Content description of button in notification inspector for system settings relating to
          notifications from this application [CHAR LIMIT=NONE] -->
     <string name="status_bar_notification_inspect_item_title">Notification settings</string>
