@@ -425,33 +425,14 @@ public class BluetoothTestUtils extends Assert {
     public void enable(BluetoothAdapter adapter) {
         int mask = (BluetoothReceiver.STATE_TURNING_ON_FLAG | BluetoothReceiver.STATE_ON_FLAG
                 | BluetoothReceiver.SCAN_MODE_CONNECTABLE_FLAG);
-        long start = -1;
+        long start = System.currentTimeMillis();
         BluetoothReceiver receiver = getBluetoothReceiver(mask);
 
-        int state = adapter.getState();
-        switch (state) {
-            case BluetoothAdapter.STATE_ON:
-                assertTrue(adapter.isEnabled());
-                removeReceiver(receiver);
-                return;
-            case BluetoothAdapter.STATE_TURNING_ON:
-                assertFalse(adapter.isEnabled());
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            case BluetoothAdapter.STATE_OFF:
-                assertFalse(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                assertTrue(adapter.enable());
-                break;
-            case BluetoothAdapter.STATE_TURNING_OFF:
-                start = System.currentTimeMillis();
-                assertTrue(adapter.enable());
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("enable() invalid state: state=%d", state));
-        }
+        writeOutput("Enabling Bluetooth adapter.");
+        assertFalse(adapter.isEnabled());
+        assertTrue(adapter.enable());
 
+        int state = BluetoothAdapter.STATE_OFF;
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < ENABLE_DISABLE_TIMEOUT) {
             state = adapter.getState();
@@ -485,33 +466,14 @@ public class BluetoothTestUtils extends Assert {
     public void disable(BluetoothAdapter adapter) {
         int mask = (BluetoothReceiver.STATE_TURNING_OFF_FLAG | BluetoothReceiver.STATE_OFF_FLAG
                 | BluetoothReceiver.SCAN_MODE_NONE_FLAG);
-        long start = -1;
+        long start = System.currentTimeMillis();
         BluetoothReceiver receiver = getBluetoothReceiver(mask);
 
-        int state = adapter.getState();
-        switch (state) {
-            case BluetoothAdapter.STATE_OFF:
-                assertFalse(adapter.isEnabled());
-                removeReceiver(receiver);
-                return;
-            case BluetoothAdapter.STATE_TURNING_ON:
-                assertFalse(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                break;
-            case BluetoothAdapter.STATE_ON:
-                assertTrue(adapter.isEnabled());
-                start = System.currentTimeMillis();
-                assertTrue(adapter.disable());
-                break;
-            case BluetoothAdapter.STATE_TURNING_OFF:
-                assertFalse(adapter.isEnabled());
-                mask = 0; // Don't check for received intents since we might have missed them.
-                break;
-            default:
-                removeReceiver(receiver);
-                fail(String.format("disable() invalid state: state=%d", state));
-        }
+        writeOutput("Disabling Bluetooth adapter.");
+        assertTrue(adapter.isEnabled());
+        assertTrue(adapter.disable());
 
+        int state = BluetoothAdapter.STATE_OFF;
         long s = System.currentTimeMillis();
         while (System.currentTimeMillis() - s < ENABLE_DISABLE_TIMEOUT) {
             state = adapter.getState();
