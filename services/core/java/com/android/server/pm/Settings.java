@@ -191,7 +191,6 @@ final class Settings {
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
-    private static final String TAG_N_WORK = "n-work";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -397,17 +396,6 @@ final class Settings {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
-
-    /**
-     * Used to track whether N+ work has been done. This is similar to the file-system level
-     * and denotes that first-boot or upgrade-to-N work has been done.
-     *
-     * Note: the flag has been added to a) allow tracking while an API level check is impossible
-     *       and b) to merge upgrade as well as first boot (because the flag is false, by default).
-     *
-     * STOPSHIP: b/27872764
-     */
-    private boolean mIsNWorkDone = false;
 
     Settings(Object lock) {
         this(Environment.getDataDirectory(), lock);
@@ -2396,10 +2384,6 @@ final class Settings {
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
-            serializer.startTag(null, TAG_N_WORK);
-            serializer.attribute(null, ATTR_DONE, Boolean.toString(mIsNWorkDone));
-            serializer.endTag(null, TAG_N_WORK);
-
             serializer.endTag(null, "packages");
 
             serializer.endDocument();
@@ -2937,8 +2921,6 @@ final class Settings {
                     ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
                     ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
-                } else if (TAG_N_WORK.equals(tagName)) {
-                    mIsNWorkDone = XmlUtils.readBooleanAttribute(parser, ATTR_DONE, false);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -4231,14 +4213,6 @@ final class Settings {
             }
         }
         return res;
-    }
-
-    public boolean isNWorkDone() {
-        return mIsNWorkDone;
-    }
-
-    void setNWorkDone() {
-        mIsNWorkDone = true;
     }
 
     static void printFlags(PrintWriter pw, int val, Object[] spec) {
