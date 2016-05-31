@@ -60,6 +60,12 @@ public class ConfirmDialog extends AlertActivity
             finish();
             return;
         }
+        final String alwaysOnVpnPackage = getAlwaysOnVpnPackage();
+        // Can't prepare new vpn app when another vpn is always-on
+        if (alwaysOnVpnPackage != null && !alwaysOnVpnPackage.equals(mPackage)) {
+            finish();
+            return;
+        }
         View view = View.inflate(this, R.layout.confirm, null);
         ((TextView) view.findViewById(R.id.warning)).setText(
                 Html.fromHtml(getString(R.string.warning, getVpnLabel()),
@@ -74,6 +80,16 @@ public class ConfirmDialog extends AlertActivity
         getWindow().setCloseOnTouchOutside(false);
         Button button = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         button.setFilterTouchesWhenObscured(true);
+    }
+
+    private String getAlwaysOnVpnPackage() {
+        try {
+           return mService.getAlwaysOnVpnPackage(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "fail to call getAlwaysOnVpnPackage", e);
+            // Fallback to null to show the dialog
+            return null;
+        }
     }
 
     private boolean prepareVpn() {
