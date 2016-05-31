@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -66,15 +68,15 @@ public class PackageManagerServiceUtils {
     }
 
     private static void filterRecentlyUsedApps(Collection<PackageParser.Package> pkgs,
+            long estimatedPreviousSystemUseTime,
             long dexOptLRUThresholdInMills) {
         // Filter out packages that aren't recently used.
         int total = pkgs.size();
         int skipped = 0;
-        long now = System.currentTimeMillis();
         for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
             PackageParser.Package pkg = i.next();
             long then = pkg.getLatestForegroundPackageUseTimeInMills();
-            if (then + dexOptLRUThresholdInMills < now) {
+            if (then < estimatedPreviousSystemUseTime - dexOptLRUThresholdInMills) {
                 if (DEBUG_DEXOPT) {
                     Log.i(TAG, "Skipping dexopt of " + pkg.packageName +
                             " last used in foreground: " +
@@ -82,6 +84,12 @@ public class PackageManagerServiceUtils {
                 }
                 i.remove();
                 skipped++;
+            } else {
+                if (DEBUG_DEXOPT) {
+                    Log.i(TAG, "Will dexopt " + pkg.packageName +
+                            " last used in foreground: " +
+                            ((then == 0) ? "never" : new Date(then)));
+                }
             }
         }
         if (DEBUG_DEXOPT) {
@@ -136,8 +144,24 @@ public class PackageManagerServiceUtils {
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
-        if (packageManagerService.isHistoricalPackageUsageAvailable()) {
-            filterRecentlyUsedApps(remainingPkgs, SEVEN_DAYS_IN_MILLISECONDS);
+        if (!remainingPkgs.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
+            if (DEBUG_DEXOPT) {
+                Log.i(TAG, "Looking at historical package use");
+            }
+            // Get the package that was used last.
+            PackageParser.Package lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
+                    Long.compare(pkg1.getLatestForegroundPackageUseTimeInMills(),
+                            pkg2.getLatestForegroundPackageUseTimeInMills()));
+            if (DEBUG_DEXOPT) {
+                Log.i(TAG, "Taking package " + lastUsed.packageName + " as reference in time use");
+            }
+            long estimatedPreviousSystemUseTime =
+                    lastUsed.getLatestForegroundPackageUseTimeInMills();
+            // Be defensive if for some reason package usage has bogus data.
+            if (estimatedPreviousSystemUseTime != 0) {
+                filterRecentlyUsedApps(remainingPkgs, estimatedPreviousSystemUseTime,
+                        SEVEN_DAYS_IN_MILLISECONDS);
+            }
         }
         result.addAll(remainingPkgs);
 
