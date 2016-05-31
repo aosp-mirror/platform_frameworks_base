@@ -51,7 +51,7 @@
     <string name="serviceDisabled" msgid="1937553226592516411">"ಸೇವೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"ನೋಂದಣಿ ಯಶಸ್ವಿಯಾಗಿದೆ."</string>
     <string name="serviceErased" msgid="1288584695297200972">"ಅಳಿಸುವಿಕೆ ಯಶಸ್ವಿಯಾಗಿದೆ."</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI ಪೂರ್ಣಗೊಂಡಿದೆ."</string>
     <string name="badPin" msgid="9015277645546710014">"ನೀವು ಟೈಪ್‌‌ ಮಾಡಿದ ಹಳೆಯ ಪಿನ್‌ ಸರಿಯಾಗಿಲ್ಲ."</string>
     <string name="badPuk" msgid="5487257647081132201">"ನೀವು ಟೈಪ್‌ ಮಾಡಿದ PUK ಸರಿಯಾಗಿಲ್ಲ."</string>
@@ -188,7 +188,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"ಶಾಂತ ಮೋಡ್"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ವೈರ್‌ಲೆಸ್ ಆನ್ ಮಾಡು"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"ವೈರ್‌ಲೆಸ್ ಆಫ್ ಮಾಡು"</string>
-    <string name="screen_lock" msgid="799094655496098153">"ಪರದೆ ಲಾಕ್"</string>
+    <string name="screen_lock" msgid="799094655496098153">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
     <string name="power_off" msgid="4266614107412865048">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ರಿಂಗರ್ ಆಫ್"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"ರಿಂಗರ್ ವೈಬ್ರೇಷನ್‌"</string>
@@ -212,7 +212,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ಟ್ಯಾಬ್ಲೆಟ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"ಟಿವಿ ಆಯ್ಕೆಗಳು"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"ಫೋನ್ ಆಯ್ಕೆಗಳು"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"ಪರದೆ ಲಾಕ್"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"ಸ್ಕ್ರೀನ್ ಲಾಕ್"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ಪವರ್ ಆಫ್ ಮಾಡು"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ದೋಷದ ವರದಿ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷ ವರದಿ ರಚಿಸಿ"</string>
@@ -430,7 +430,7 @@
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ಫೋನ್‍ನಲ್ಲಿ ಬ್ಲೂಟೂತ್‌‌ ಕಾನ್ಫಿಗರೇಶನ್ ಅನ್ನು ವೀಕ್ಷಿಸಲು ಮತ್ತು ಜೋಡಿ ಮಾಡಿರುವ ಸಾಧನಗಳೊಂದಿಗೆ ಸಂಪರ್ಕಗಳನ್ನು ಕಲ್ಪಿಸಲು ಹಾಗೂ ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ಸಮೀಪ ಕ್ಷೇತ್ರ ಸಂವಹನವನ್ನು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ಸಮೀಪದ ಕ್ಷೇತ್ರ ಸಂವಹನ (NFC) ಟ್ಯಾಗ್‌ಗಳು, ಕಾರ್ಡ್‌ಗಳು, ಮತ್ತು ಓದುಗರನ್ನು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ನಿಮ್ಮ ಪರದೆ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -522,9 +522,9 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ಟೈಪ್ ಮಾಡಲಾದ ತಪ್ಪಾಗಿರುವ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಟ್ಯಾಬ್ಲೆಟ್ ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ಟೈಪ್ ಮಾಡಲಾದ ತಪ್ಪಾಗಿರುವ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಟಿವಿಯನ್ನು ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ಪರದೆಯನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡುವಾಗ ಟೈಪ್ ಮಾಡಲಾದ ತಪ್ಪಾಗಿರುವ ಪಾಸ್‌ವರ್ಡ್‌ಗಳ ಸಂಖ್ಯೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಫೋನ್ ಲಾಕ್ ಮಾಡಿ ಅಥವಾ ಹಲವಾರು ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ಟೈಪ್ ಮಾಡಲಾಗಿದ್ದರೆ ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"ಪರದೆ ಲಾಕ್ ಬದಲಾಯಿಸಿ"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ಪರದೆ ಲಾಕ್ ಬದಲಾಯಿಸಿ."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"ಪರದೆ ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬದಲಾಯಿಸಿ"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬದಲಾಯಿಸಿ."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ಪರದೆಯು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ಲಾಕ್ ಆಗಬೇಕೆಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ಅಳಿಸಿ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾ ಮರುಹೊಂದಿಕೆಯನ್ನು ನಿರ್ವಹಿಸುವ ಮೂಲಕ ಎಚ್ಚರಿಕೆಯನ್ನು ನೀಡದೆಯೇ ಟ್ಯಾಬ್ಲೆಟ್ ಡೇಟಾವನ್ನು ಅಳಿಸಿಹಾಕಿ."</string>
@@ -536,13 +536,13 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ಯಾವುದೇ ಸೂಚನೆ ಇಲ್ಲದೆ ಈ ಫೋನ್‌ನಲ್ಲಿ ಈ ಬಳಕೆದಾರರ ಡೇಟಾವನ್ನು ಅಳಿಸಿ."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ಸಾಧನವನ್ನು ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಗೆ ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ನೀತಿಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಬಳಸಬೇಕಾದ ಸಾಧನದ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಿ. ಸಾಧನದ ಮಾಲೀಕರು ಮಾತ್ರ ಜಾಗತಿಕ ಪ್ರಾಕ್ಸಿಯನ್ನು ಹೊಂದಿಸಬಹುದಾಗಿರುತ್ತದೆ."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"ಪರದೆ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಮುಕ್ತಾಯವನ್ನು ಹೊಂದಿಸಿ"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"ಪರದೆ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್, ಪಿನ್, ಅಥವಾ ನಮೂನೆಯನ್ನು ಹೆಚ್ಚು ಪದೆ ಪದೇ ಬದಲಾಯಿಸಬೇಕಾಗಿರುತ್ತದೆ ಎಂಬುದನ್ನು ಬದಲಾಯಿಸಿ."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್ ಮುಕ್ತಾಯವನ್ನು ಹೊಂದಿಸಿ"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಪಾಸ್‌ವರ್ಡ್, ಪಿನ್, ಅಥವಾ ನಮೂನೆಯನ್ನು ಹೆಚ್ಚು ಪದೆ ಪದೇ ಬದಲಾಯಿಸಬೇಕಾಗಿರುತ್ತದೆ ಎಂಬುದನ್ನು ಬದಲಾಯಿಸಿ."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ಸಂಗ್ರಹಣೆ ಎನ್‌ಕ್ರಿಪ್ಶನ್ ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ಸಂಗ್ರಹಿಸಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಬೇಕಾದ ಅಗತ್ಯವಿದೆ."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ಕ್ಯಾಮರಾಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ಎಲ್ಲಾ ಸಾಧನ ಕ್ಯಾಮರಾಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ಕೆಲವು ಪರದೆ ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ಕೆಲವು ಸ್ಕ್ರೀನ್ ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ಕೆಲವು ಪರದೆ ಲಾಕ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ನಿವಾಸ"</item>
@@ -669,7 +669,7 @@
     <string name="keyguard_label_text" msgid="861796461028298424">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು, ಮೆನು ನಂತರ 0 ಒತ್ತಿರಿ."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"ತುರ್ತು ಸಂಖ್ಯೆ"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"ಯಾವುದೇ ಸೇವೆಯಿಲ್ಲ"</string>
-    <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ಪರದೆ ಲಾಕ್ ಆಗಿದೆ."</string>
+    <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಆಗಿದೆ."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ ಇಲ್ಲವೇ ತುರ್ತು ಕರೆಯನ್ನು ಮಾಡಿ."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ಯಾಟರ್ನ್ ಚಿತ್ರಿಸಿ"</string>
@@ -891,6 +891,38 @@
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ವ ನಲ್ಲಿ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ವ ನಲ್ಲಿ</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ನಿಮಿಷಗಳ ಹಿಂದೆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ನಿಮಿಷಗಳ ಹಿಂದೆ</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ಗಂಟೆಗಳ ಹಿಂದೆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ಗಂಟೆಗಳ ಹಿಂದೆ</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ದಿನಗಳ ಹಿಂದೆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ದಿನಗಳ ಹಿಂದೆ</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ವರ್ಷಗಳ ಹಿಂದೆ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ವರ್ಷಗಳ ಹಿಂದೆ</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ನಿಮಿಷಗಳಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ನಿಮಿಷಗಳಲ್ಲಿ </item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ಗಂಟೆಗಳಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ಗಂಟೆಗಳಲ್ಲಿ</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ದಿನಗಳಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ದಿನಗಳಲ್ಲಿ</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ವರ್ಷಗಳಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ವರ್ಷಗಳಲ್ಲಿ</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ವೀಡಿಯೊ ಸಮಸ್ಯೆ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ಈ ಸಾಧನಲ್ಲಿ ಸ್ಟ್ರೀಮ್ ಮಾಡಲು ಈ ವೀಡಿಯೊ ಮಾನ್ಯವಾಗಿಲ್ಲ."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ಈ ವೀಡಿಯೊ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲಿಸಿದೆ"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"ಅಪ್ಲಿಕೇಶನ್ ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"ಅಪ್ಲಿಕೇಶನ್ ಮರುಹೊಂದಿಸಿ ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಿ"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸು"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ಮುಚ್ಚು"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ಸಾಧನವು ಮರುಪ್ರಾರಂಭವಾಗುವವರೆಗೂ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
@@ -1349,7 +1381,7 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ಸುರಕ್ಷಿತ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಮರೆತಿರುವಿರಿ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ತಪ್ಪು ಪ್ಯಾಟರ್ನ್"</string>
-    <string name="kg_wrong_password" msgid="2333281762128113157">"ತಪ್ಪಾದ ಪಾಸ್‌ವರ್ಡ್"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"ತಪ್ಪಾದ ಪಿನ್‌"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ನಿಮ್ಮ ನಮೂನೆಯನ್ನು ಚಿತ್ರಿಸಿ"</string>
@@ -1515,7 +1547,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> ಅಳಿಸಲಾಗಿದೆ"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ಕೆಲಸ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಂಂದೆ ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"ಈ ಪರದೆಯನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿ ಹಿಡಿಯಿರಿ."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ಅಪ್ಲಿಕೇಶನ್ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ: ಈ ಸಾಧನದಲ್ಲಿ ಅನ್‌ಪಿನ್‌ ಮಾಡುವುದನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ಸ್ಕ್ರೀನ್‌ ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ಸ್ಕ್ರೀನ್‌ ಅನ್‌ಪಿನ್‌ ಮಾಡಲಾಗಿದೆ"</string>
@@ -1582,6 +1613,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ವಿನಂತಿಯನ್ನು ಹೊಸ SS ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
@@ -1619,8 +1654,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"ಅನ್‌ಪಿನ್"</string>
     <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ನಿರ್ಬಂಧಗಳು ಇಲ್ಲದೆಯೇ ಈ ಸಾಧನವನ್ನು ಬಳಸಲು ಫ್ಯಾಕ್ಟರಿ ಮರುಹೊಂದಿಸಿ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
 </resources>

@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> v:n päästä</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v:n päästä</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuuttia sitten</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuutti sitten</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tuntia sitten</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tunti sitten</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päivää sitten</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päivä sitten</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> vuotta sitten</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> vuosi sitten</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuutin kuluttua</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuutin kuluttua</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tunnin kuluttua</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tunnin kuluttua</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päivän kuluttua</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päivän kuluttua</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> vuoden kuluttua</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> vuoden kuluttua</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video-ongelma"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Tätä videota ei voi suoratoistaa tällä laitteella."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Videota ei voida toistaa."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyi."</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> pysähtyy toistuvasti."</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyy toistuvasti."</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Käynnistä sovellus uudelleen"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Nollaa sovellus ja käynnistä uudelleen"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Lähetä palautetta"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Sulje"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Mykistä laitteen uudelleenkäynnistykseen asti"</string>
@@ -1512,7 +1544,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> poistettiin"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (työ)"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Irrota näyttö koskettamalla Takaisin-painiketta pitkään."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Poista näytön kiinnitys koskettamalla Yleistä-kohtaa pitkään."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Sovellus on kiinnitetty. Irrottaminen ei ole sallittua tällä laitteella."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Näyttö kiinnitetty"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Näyttö irrotettu"</string>
@@ -1579,6 +1610,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-pyyntö muutettiin USSD-pyynnöksi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-pyyntö muutettiin uudeksi SS-pyynnöksi."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Työprofiili"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Androidin USB-oheislaiteportti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-oheislaiteportti"</string>
@@ -1616,8 +1651,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"Irrota"</string>
     <string name="app_info" msgid="6856026610594615344">"Sovelluksen tiedot"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Palauta tehdasasetukset, jotta voit käyttää tätä laitetta rajoituksitta"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Lue lisätietoja koskettamalla."</string>
-    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ei ole käytössä."</string>
 </resources>

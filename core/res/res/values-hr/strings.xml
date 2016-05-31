@@ -906,6 +906,46 @@
       <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> g</item>
       <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> g</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one">prije <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="few">prije <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="other">prije <xliff:g id="COUNT_1">%d</xliff:g> minuta</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one">prije <xliff:g id="COUNT_1">%d</xliff:g> sata</item>
+      <item quantity="few">prije <xliff:g id="COUNT_1">%d</xliff:g> sata</item>
+      <item quantity="other">prije <xliff:g id="COUNT_1">%d</xliff:g> sati</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one">prije <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="few">prije <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="other">prije <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one">prije <xliff:g id="COUNT_1">%d</xliff:g> godine</item>
+      <item quantity="few">prije <xliff:g id="COUNT_1">%d</xliff:g> godine</item>
+      <item quantity="other">prije <xliff:g id="COUNT_1">%d</xliff:g> godina</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> minutu</item>
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> minuta</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> sat</item>
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> sata</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> sati</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> godinu</item>
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> godine</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> godina</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem s videozapisom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ovaj videozapis nije valjan za streaming na ovaj uređaj."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ovaj videozapis nije moguće reproducirati."</string>
@@ -977,8 +1017,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"Postupak <xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljen"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> neprekidno se ruši"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Postupak <xliff:g id="PROCESS">%1$s</xliff:g> neprekidno se ruši"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Ponovo pokreni aplikaciju"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Vrati aplikaciju na zadano i pokreni ponovo"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Pošalji povratne informacije"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zatvori"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Zanemari do ponovnog pokretanja uređaja"</string>
@@ -1531,7 +1571,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"Izbrisan je broj <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite Natrag."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Da biste otkvačili ovaj zaslon, dodirnite i zadržite Pregled."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je prikvačena: otkvačivanje nije dopušteno na tom uređaju."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pričvršćen"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je otkvačen"</string>
@@ -1606,6 +1645,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS zahtjev izmijenjen je u USSD zahtjev."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS zahtjev izmijenjen je u novi SS zahtjev."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Radni profil"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Androidov USB priključak za periferne uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB priključak za periferne uređaje"</string>
@@ -1644,8 +1687,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"Otkvači"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Uređaj je vraćen na tvorničke postavke da biste ga mogli upotrebljavati bez ograničenja"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Dodirnite da biste saznali više."</string>
-    <!-- no translation found for suspended_widget_accessibility (6554642642085851965) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> – onemogućeno"</string>
 </resources>
