@@ -37,19 +37,6 @@
             android:importantForAccessibility="yes"
             android:focusable="true" />
 
-        <TextView
-            android:id="@android:id/edit"
-            style="@style/QSBorderlessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:minWidth="88dp"
-            android:textAppearance="@style/TextAppearance.QS.DetailButton"
-            android:textColor="#64FFFFFF"
-            android:focusable="true"
-            android:text="@string/qs_edit"
-            android:contentDescription="@string/accessibility_quick_settings_edit"/>
-
     </FrameLayout>
 
 </com.android.systemui.qs.PagedTileLayout>
