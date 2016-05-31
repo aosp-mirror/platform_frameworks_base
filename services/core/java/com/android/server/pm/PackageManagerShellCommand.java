@@ -358,7 +358,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 mInterface.clearApplicationProfileData(packageName);
             }
 
-            boolean result = mInterface.performDexOptMode(packageName, null /* instructionSet */,
+            boolean result = mInterface.performDexOptMode(packageName,
                     checkProfiles, targetCompilerFilter, forceCompilation);
             if (!result) {
                 failedPackages.add(packageName);
