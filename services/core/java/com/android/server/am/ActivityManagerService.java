@@ -199,6 +199,7 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.service.voice.VoiceInteractionSession;
+import android.telecom.TelecomManager;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.text.style.SuggestionSpan;
@@ -10166,6 +10167,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
                         "stopLockTask", true);
+            }
+            TelecomManager tm = (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+            if (tm != null) {
+                tm.showInCallScreen(false);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
