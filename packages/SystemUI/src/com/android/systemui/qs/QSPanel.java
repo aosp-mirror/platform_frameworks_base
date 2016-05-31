@@ -57,7 +57,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     private int mPanelPaddingBottom;
     private int mBrightnessPaddingTop;
     protected boolean mExpanded;
-    private boolean mListening;
+    protected boolean mListening;
 
     private Callback mCallback;
     private BrightnessController mBrightnessController;
@@ -102,6 +102,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected void setupTileLayout() {
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.qs_paged_tile_layout, this, false);
+        mTileLayout.setListening(mListening);
         addView((View) mTileLayout);
     }
 
@@ -233,8 +234,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     public void setListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
-        for (TileRecord r : mRecords) {
-            r.tile.setListening(mListening);
+        if (mTileLayout != null) {
+            mTileLayout.setListening(listening);
         }
         mFooter.setListening(mListening);
         if (mListening) {
@@ -348,7 +349,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             }
         };
         r.tileView.init(click, longClick);
-        r.tile.setListening(mListening);
         callback.onStateChanged(r.tile.getState());
         r.tile.refreshState();
         mRecords.add(r);
@@ -541,5 +541,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         void removeTile(TileRecord tile);
         int getOffsetTop(TileRecord tile);
         boolean updateResources();
+
+        void setListening(boolean listening);
     }
 }
