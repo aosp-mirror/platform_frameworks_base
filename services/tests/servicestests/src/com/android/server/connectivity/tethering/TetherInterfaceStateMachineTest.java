@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.InterfaceConfiguration;
 import android.os.INetworkManagementService;
@@ -56,8 +57,8 @@ public class TetherInterfaceStateMachineTest {
     private final TestLooper mLooper = new TestLooper();
     private TetherInterfaceStateMachine mTestedSm;
 
-    private void initStateMachine(boolean isUsb) throws Exception {
-        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), isUsb,
+    private void initStateMachine(int interfaceType) throws Exception {
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), interfaceType,
                 mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         // Starting the state machine always puts us in a consistent state and notifies
@@ -67,8 +68,8 @@ public class TetherInterfaceStateMachineTest {
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
     }
 
-    private void initTetheredStateMachine(boolean isUsb, String upstreamIface) throws Exception {
-        initStateMachine(isUsb);
+    private void initTetheredStateMachine(int interfaceType, String upstreamIface) throws Exception {
+        initStateMachine(interfaceType);
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         if (upstreamIface != null) {
             dispatchTetherConnectionChanged(upstreamIface);
@@ -84,8 +85,8 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void startsOutAvailable() {
-        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(), false,
-                mNMService, mStatsService, mTetherHelper);
+        mTestedSm = new TetherInterfaceStateMachine(IFACE_NAME, mLooper.getLooper(),
+                ConnectivityManager.TETHERING_BLUETOOTH, mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         mLooper.dispatchAll();
         assertTrue("Should start out available for tethering", mTestedSm.isAvailable());
@@ -97,7 +98,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void shouldDoNothingUntilRequested() throws Exception {
-        initStateMachine(false);
+        initStateMachine(ConnectivityManager.TETHERING_BLUETOOTH);
         final int [] NOOP_COMMANDS = {
             TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED,
             TetherInterfaceStateMachine.CMD_IP_FORWARDING_ENABLE_ERROR,
@@ -117,7 +118,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void handlesImmediateInterfaceDown() throws Exception {
-        initStateMachine(false);
+        initStateMachine(ConnectivityManager.TETHERING_BLUETOOTH);
         dispatchCommand(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
         verify(mTetherHelper).sendTetherStateChangedBroadcast();
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
@@ -129,7 +130,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void canBeTethered() throws Exception {
-        initStateMachine(false);
+        initStateMachine(ConnectivityManager.TETHERING_BLUETOOTH);
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
         inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
@@ -144,7 +145,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void canUnrequestTethering() throws Exception {
-        initTetheredStateMachine(false, null);
+        initTetheredStateMachine(ConnectivityManager.TETHERING_BLUETOOTH, null);
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
@@ -159,7 +160,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void canBeTetheredAsUsb() throws Exception {
-        initStateMachine(true);
+        initStateMachine(ConnectivityManager.TETHERING_USB);
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
@@ -177,7 +178,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void handlesFirstUpstreamChange() throws Exception {
-        initTetheredStateMachine(false, null);
+        initTetheredStateMachine(ConnectivityManager.TETHERING_BLUETOOTH, null);
 
         // Telling the state machine about its upstream interface triggers a little more configuration.
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
@@ -192,7 +193,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void handlesChangingUpstream() throws Exception {
-        initTetheredStateMachine(false, UPSTREAM_IFACE);
+        initTetheredStateMachine(ConnectivityManager.TETHERING_BLUETOOTH, UPSTREAM_IFACE);
 
         dispatchTetherConnectionChanged(UPSTREAM_IFACE2);
         InOrder inOrder = inOrder(mNMService, mStatsService);
@@ -209,7 +210,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void canUnrequestTetheringWithUpstream() throws Exception {
-        initTetheredStateMachine(false, UPSTREAM_IFACE);
+        initTetheredStateMachine(ConnectivityManager.TETHERING_BLUETOOTH, UPSTREAM_IFACE);
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
@@ -228,7 +229,7 @@ public class TetherInterfaceStateMachineTest {
     @Test
     public void interfaceDownLeadsToUnavailable() throws Exception {
         for (boolean shouldThrow : new boolean[]{true, false}) {
-            initTetheredStateMachine(true, null);
+            initTetheredStateMachine(ConnectivityManager.TETHERING_USB, null);
 
             if (shouldThrow) {
                 doThrow(RemoteException.class).when(mNMService).untetherInterface(IFACE_NAME);
@@ -246,7 +247,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void usbShouldBeTornDownOnTetherError() throws Exception {
-        initStateMachine(true);
+        initStateMachine(ConnectivityManager.TETHERING_USB);
 
         doThrow(RemoteException.class).when(mNMService).tetherInterface(IFACE_NAME);
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
@@ -263,7 +264,7 @@ public class TetherInterfaceStateMachineTest {
 
     @Test
     public void shouldTearDownUsbOnUpstreamError() throws Exception {
-        initTetheredStateMachine(true, null);
+        initTetheredStateMachine(ConnectivityManager.TETHERING_USB, null);
 
         doThrow(RemoteException.class).when(mNMService).enableNat(anyString(), anyString());
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
