@@ -509,6 +509,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     /**
+     * @return Whether the window is currently showing the wallpaper.
+     */
+    boolean isShowingWallpaper() {
+        return (getAttributes().flags & FLAG_SHOW_WALLPAPER) != 0;
+    }
+
+    /**
      * Return a LayoutInflater instance that can be used to inflate XML view layout
      * resources for use in this Window.
      *

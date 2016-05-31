@@ -45,6 +45,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Shader;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
@@ -907,10 +908,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (getBackground() != drawable) {
             setBackgroundDrawable(drawable);
             if (drawable != null) {
-                mResizingBackgroundDrawable = drawable;
+                mResizingBackgroundDrawable = enforceNonTranslucentBackground(drawable,
+                        mWindow.isTranslucent() || mWindow.isShowingWallpaper());
             } else {
                 mResizingBackgroundDrawable = getResizingBackgroundDrawable(
-                        getContext(), 0, mWindow.mBackgroundFallbackResource);
+                        getContext(), 0, mWindow.mBackgroundFallbackResource,
+                        mWindow.isTranslucent() || mWindow.isShowingWallpaper());
             }
             if (mResizingBackgroundDrawable != null) {
                 mResizingBackgroundDrawable.getPadding(mBackgroundPadding);
@@ -1785,7 +1788,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private void loadBackgroundDrawablesIfNeeded() {
         if (mResizingBackgroundDrawable == null) {
             mResizingBackgroundDrawable = getResizingBackgroundDrawable(getContext(),
-                    mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
+                    mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource,
+                    mWindow.isTranslucent() || mWindow.isShowingWallpaper());
             if (mResizingBackgroundDrawable == null) {
                 // We shouldn't really get here as the background fallback should be always
                 // available since it is defaulted by the system.
@@ -1893,21 +1897,41 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * user is resizing the window of an activity in multi-window mode.
      */
     public static Drawable getResizingBackgroundDrawable(Context context, int backgroundRes,
-            int backgroundFallbackRes) {
+            int backgroundFallbackRes, boolean windowTranslucent) {
         if (backgroundRes != 0) {
             final Drawable drawable = context.getDrawable(backgroundRes);
             if (drawable != null) {
-                return drawable;
+                return enforceNonTranslucentBackground(drawable, windowTranslucent);
             }
         }
 
         if (backgroundFallbackRes != 0) {
             final Drawable fallbackDrawable = context.getDrawable(backgroundFallbackRes);
             if (fallbackDrawable != null) {
-                return fallbackDrawable;
+                return enforceNonTranslucentBackground(fallbackDrawable, windowTranslucent);
             }
         }
-        return null;
+        return new ColorDrawable(Color.BLACK);
+    }
+
+    /**
+     * Enforces a drawable to be non-translucent to act as a background if needed, i.e. if the
+     * window is not translucent.
+     */
+    private static Drawable enforceNonTranslucentBackground(Drawable drawable,
+            boolean windowTranslucent) {
+        if (!windowTranslucent && drawable instanceof ColorDrawable) {
+            ColorDrawable colorDrawable = (ColorDrawable) drawable;
+            int color = colorDrawable.getColor();
+            if (Color.alpha(color) != 255) {
+                ColorDrawable copy = (ColorDrawable) colorDrawable.getConstantState().newDrawable()
+                        .mutate();
+                copy.setColor(
+                        Color.argb(255, Color.red(color), Color.green(color), Color.blue(color)));
+                return copy;
+            }
+        }
+        return drawable;
     }
 
     /**
@@ -2037,7 +2061,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private void drawResizingShadowIfNeeded(DisplayListCanvas canvas) {
         if (mResizeMode != RESIZE_MODE_DOCKED_DIVIDER || mWindow.mIsFloating
                 || mWindow.isTranslucent()
-                || (mWindow.getAttributes().flags & FLAG_SHOW_WALLPAPER) != 0) {
+                || mWindow.isShowingWallpaper()) {
             return;
         }
         canvas.save();
