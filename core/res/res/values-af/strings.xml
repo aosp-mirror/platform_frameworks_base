@@ -891,6 +891,38 @@
       <item quantity="other">oor <xliff:g id="COUNT_1">%d</xliff:g> j.</item>
       <item quantity="one">oor <xliff:g id="COUNT_0">%d</xliff:g> j.</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minute gelede</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuut gelede</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> uur gelede</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> uur gelede</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dae gelede</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> dag gelede</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> jaar gelede</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> jaar gelede</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">oor <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="one">oor <xliff:g id="COUNT_0">%d</xliff:g> minuut</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other">oor <xliff:g id="COUNT_1">%d</xliff:g> uur</item>
+      <item quantity="one">oor <xliff:g id="COUNT_0">%d</xliff:g> uur</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other">oor <xliff:g id="COUNT_1">%d</xliff:g> dae</item>
+      <item quantity="one">oor <xliff:g id="COUNT_0">%d</xliff:g> dag</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other">oor <xliff:g id="COUNT_1">%d</xliff:g> jaar</item>
+      <item quantity="one">oor <xliff:g id="COUNT_0">%d</xliff:g> jaar</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoprobleem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Hierdie video is nie geldig vir stroming na hierdie toestel nie."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Kan nie hierdie video speel nie."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> het gestop"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> stop aanhoudend"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> stop aanhoudend"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Herbegin program"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Stel terug en herbegin program"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Stuur terugvoer"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Maak toe"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Demp totdat toestel herbegin"</string>
@@ -1512,7 +1544,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> uitgevee"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Werk-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Raak en hou Terug om hierdie skerm te ontspeld."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Raak en hou Oorsig om hierdie skerm te ontspeld."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Program is vasgespeld: Dit mag nie op hierdie toestel ontspeld word nie."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skerm vasgespeld"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skerm ontspeld"</string>
@@ -1579,6 +1610,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-versoek is gewysig tot USSD-versoek."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-versoek is gewysig tot nuwe SS-versoek."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Werkprofiel"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android-USB-randpoort"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-randpoort"</string>
@@ -1618,6 +1653,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Doen \'n fabriekterugstelling om hierdie toestel sonder beperkinge te gebruik"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Raak om meer te wete te kom."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Het <xliff:g id="LABEL">%1$s</xliff:g> gedeaktiveer"</string>
 </resources>

@@ -891,6 +891,38 @@
       <item quantity="one">за <xliff:g id="COUNT_1">%d</xliff:g>г.</item>
       <item quantity="other">за <xliff:g id="COUNT_1">%d</xliff:g>г.</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one">пред <xliff:g id="COUNT_1">%d</xliff:g> минута</item>
+      <item quantity="other">пред <xliff:g id="COUNT_1">%d</xliff:g> минути</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one">пред <xliff:g id="COUNT_1">%d</xliff:g> час</item>
+      <item quantity="other">пред <xliff:g id="COUNT_1">%d</xliff:g> часа</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one">пред <xliff:g id="COUNT_1">%d</xliff:g> ден</item>
+      <item quantity="other">пред <xliff:g id="COUNT_1">%d</xliff:g> дена</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one">пред <xliff:g id="COUNT_1">%d</xliff:g> година</item>
+      <item quantity="other">пред <xliff:g id="COUNT_1">%d</xliff:g> години</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">за <xliff:g id="COUNT_1">%d</xliff:g> минута</item>
+      <item quantity="other">за <xliff:g id="COUNT_1">%d</xliff:g> минути</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">за <xliff:g id="COUNT_1">%d</xliff:g> час</item>
+      <item quantity="other">за <xliff:g id="COUNT_1">%d</xliff:g> часа</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">за <xliff:g id="COUNT_1">%d</xliff:g> ден</item>
+      <item quantity="other">за <xliff:g id="COUNT_1">%d</xliff:g> дена</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">за <xliff:g id="COUNT_1">%d</xliff:g> година</item>
+      <item quantity="other">за <xliff:g id="COUNT_1">%d</xliff:g> години</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Проблем со видео"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Видеово не е важечко за постојан тек до уредов."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ова видео не може да се пушти."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> запре"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> постојано запира"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> постојано запира"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Рестартирај ја апликацијата"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Ресетирај ја и рестартирај ја апликацијата"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Испрати повратни информации"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Затвори"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Исклучи го звукот додека уредот не се рестартира"</string>
@@ -1517,7 +1549,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"Избришано <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"За откачување на екранов, допрете и задржете Назад."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"За откачување на екранов, допрете и задржете Краток преглед."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Апликацијата е закачена: откачување не е дозволено на уредов."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
@@ -1584,6 +1615,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Барањето SS е изменето во барање USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Барањето SS е изменето во ново барање SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на УСБ за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Надворешна порта на УСБ"</string>
@@ -1623,6 +1658,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Ресетирајте до фабричките поставки за уредов да го користите без ограничувања"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Допрете за да дознаете повеќе."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Оневозможен <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

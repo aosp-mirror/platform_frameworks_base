@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ж.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ж.</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> минут бұрын</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> минут бұрын</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> сағат бұрын</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> сағат бұрын</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> күн бұрын</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> күн бұрын</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> жыл бұрын</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> жыл бұрын</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> минутта</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> минутта</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> сағатта</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> сағатта</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> күнде</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> күнде</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> жылда</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> жылда</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Бейне ақаулығы"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Бұл бейне осы құрылғыға ағынын жіберуге жарамсыз."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Бұл бейне таспаны ойната алмайды."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> тоқтады"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> тоқтай береді"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> тоқтай береді"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Қолданбаны қайта іске қосу"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Ысырып, қолданбаны қайта іске қосу"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Пікір жіберу"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Жабу"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Құрылғы қайта іске қосылғанша дыбысын өшіру"</string>
@@ -1515,7 +1547,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Осы экранды босату үшін \"Артқа\" түймесін басып тұрыңыз."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Осы экранды босату үшін \"Шолу\" түймесін басып тұрыңыз."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Бағдарлама белгіленді: Бұл құрылғыда белгіні алуға рұқсат берілмейді."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран босатылды"</string>
@@ -1582,6 +1613,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сұрауы USSD сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сұрауы жаңа SS сұрауына өзгертілді."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жұмыс профилі"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB перифериялық порты"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB перифериялық порты"</string>
@@ -1621,6 +1656,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Осы құрылғыны шектеусіз пайдалану үшін зауыттық параметрлерді қалпына келтіріңіз"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Қосымша мәліметтер алу үшін түртіңіз."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> өшірулі"</string>
 </resources>

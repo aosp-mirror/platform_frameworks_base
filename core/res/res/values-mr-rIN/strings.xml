@@ -891,6 +891,38 @@
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>वर्षामध्ये</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्षांमध्ये</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मिनिटापूर्वी</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनिटांंपूर्वी</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> तासापूर्वी</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> तासांंपूर्वी</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिवसापूर्वी</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिवसांंपूर्वी</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्षापूर्वी</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षांपूर्वी</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मिनिटात</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनिटांमध्ये</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> तासामध्ये</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> तासांंमध्ये</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिवसात</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिवसांंमध्ये</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्षात</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षांंमध्ये</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"व्हिडिओ समस्या"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"या डिव्हाइसवर प्रवाहित करण्यासाठी हा व्हिडिओ वैध नाही."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"हा व्हिडिओ प्ले करू शकत नाही."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबली आहे"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबतो"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबते"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"अॅप रीस्टार्ट करा"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"अॅप रीसेट आणि रीस्टार्ट करा"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"अभिप्राय पाठवा"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करा"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"डिव्हाइस रीस्टार्ट होईपर्यंत नि:शब्द करा"</string>
@@ -1515,7 +1547,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटविली"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ही स्क्रीन अनपिन करण्यासाठी, परत ला स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अॅप पिन केलेला आहे: या डिव्हाइसवर अनपिन करण्यास अनुमती नाही."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>
@@ -1582,6 +1613,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS विनंती USSD विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS विनंती नवीन SS विनंतीवर सुधारित केली आहे."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफाईल"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB परिधीय पोर्ट"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB परिधीय पोर्ट"</string>
@@ -1621,6 +1656,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"हे डिव्हाइस निर्बंधांशिवाय वापरण्यासाठी फॅक्टरी रीसेट करा"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"अधिक जाणून घेण्यासाठी स्पर्श करा."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
 </resources>
