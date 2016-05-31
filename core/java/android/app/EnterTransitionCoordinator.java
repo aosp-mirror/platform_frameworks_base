@@ -150,6 +150,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             };
             decor.getViewTreeObserver().addOnPreDrawListener(mViewsReadyListener);
+            decor.invalidate();
         }
     }
 
