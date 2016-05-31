@@ -154,7 +154,6 @@ public class BackgroundDexOptService extends JobService {
                     // behave differently than "pm.dexopt.bg-dexopt=speed-profile" but that's a
                     // trade-off worth doing to save boot time work.
                     pm.performDexOpt(pkg,
-                            /* instruction set */ null,
                             /* checkProfiles */ false,
                             PackageManagerService.REASON_BOOT,
                             /* force */ false);
@@ -192,7 +191,6 @@ public class BackgroundDexOptService extends JobService {
                     // Optimize package if needed. Note that there can be no race between
                     // concurrent jobs because PackageDexOptimizer.performDexOpt is synchronized.
                     if (pm.performDexOpt(pkg,
-                            /* instruction set */ null,
                             /* checkProfiles */ true,
                             PackageManagerService.REASON_BACKGROUND_DEXOPT,
                             /* force */ false)) {
