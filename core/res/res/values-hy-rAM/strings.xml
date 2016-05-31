@@ -24,7 +24,7 @@
     <string name="kilobyteShort" msgid="5973789783504771878">"ԿԲ"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"ՏԲ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Պբ"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> օր"</string>
@@ -891,6 +891,38 @@
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> րոպե առաջ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> րոպե առաջ</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ժամ առաջ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ժամ առաջ</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> օր առաջ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> օր առաջ</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> տարի առաջ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> տարի առաջ</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> րոպեից</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> րոպեից</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ժամից</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ժամից</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> օրից</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> օրից</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Տեսանյութի խնդիր"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Այս տեսանյութը հեռարձակման ենթակա չէ այս սարքով:"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Այս տեսանյութը հնարավոր չէ նվագարկել:"</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացն ընդհատվել է"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքը շարունակաբար ընդհատվում է"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը շարունակաբար ընդհատվում է"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Վերագործարկել հավելվածը"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Վերակայել և վերագործարկել հավելվածը"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Ուղարկել կարծիք"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Անջատել ձայնը մինչև սարքի վերագործարկումը"</string>
@@ -1512,7 +1544,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> թիվը ջնջված է"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Այս էկրանն ապամրացնելու համար հպեք և պահեք Հետ կոճակը:"</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Այս էկրանն ապամրացնելու համար հպեք և պահեք Համատեսքի կոճակը:"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Հավելվածն ամրացված է: Ապամրացումն այս սարքում չի թույլատրվում:"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Էկրանն ամրացված է"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Էկրանն ապամրացված է"</string>
@@ -1579,6 +1610,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS հարցումը փոխվել է USSD հարցման:"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS հարցումը փոխվել է նոր SS հարցման:"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Աշխատանքային պրոֆիլ"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB արտաքին միացք"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB արտաքին միացք"</string>
@@ -1618,6 +1653,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Սարքն առանց սահմանափակումների օգտագործելու համար կատարեք գործարանային վերակայում"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Հպեք՝ ավելին իմանալու համար:"</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Անջատած <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

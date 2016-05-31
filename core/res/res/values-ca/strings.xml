@@ -645,7 +645,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Parella"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Pare"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Amic"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Gerent"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Gestor"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Mare"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Pare/mare"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
@@ -891,6 +891,38 @@
       <item quantity="other">d\'aquí a <xliff:g id="COUNT_1">%d</xliff:g> a</item>
       <item quantity="one">d\'aquí a <xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other">fa <xliff:g id="COUNT_1">%d</xliff:g> minuts</item>
+      <item quantity="one">fa <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other">fa <xliff:g id="COUNT_1">%d</xliff:g> hores</item>
+      <item quantity="one">fa <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other">fa <xliff:g id="COUNT_1">%d</xliff:g> dies</item>
+      <item quantity="one">fa <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other">fa <xliff:g id="COUNT_1">%d</xliff:g> anys</item>
+      <item quantity="one">fa <xliff:g id="COUNT_0">%d</xliff:g> any</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">d\'aquí a <xliff:g id="COUNT_1">%d</xliff:g> minuts</item>
+      <item quantity="one">d\'aquí a <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other">d\'aquí a <xliff:g id="COUNT_1">%d</xliff:g> hores</item>
+      <item quantity="one">d\'aquí a <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other">d\'aquí a <xliff:g id="COUNT_1">%d</xliff:g> dies</item>
+      <item quantity="one">d\'aquí a <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other">d\'aquí a <xliff:g id="COUNT_1">%d</xliff:g> anys</item>
+      <item quantity="one">d\'aquí a <xliff:g id="COUNT_0">%d</xliff:g> any</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema amb el vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Aquest vídeo no és vàlid per a la reproducció en aquest dispositiu."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"No es pot reproduir aquest vídeo."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> s\'ha aturat"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"L\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g> s\'atura contínuament"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"El procés <xliff:g id="PROCESS">%1$s</xliff:g> s\'atura contínuament"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Reinicia l\'aplicació"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Restableix i reinicia l\'aplicació"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Envia suggeriments"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Tanca"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silencia fins que es reiniciï el dispositiu"</string>
@@ -1512,7 +1544,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> suprimit"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Toca i mantén premuda l\'opció Enrere per deixar de fixar aquesta pantalla."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Toca i mantén premuda l\'opció Visió general per deixar de fixar aquesta pantalla."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"S\'ha fixat l\'aplicació. En aquest dispositiu no es permet anul·lar-ne la fixació."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
@@ -1579,6 +1610,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La sol·licitud SS s\'ha transformat en una sol·licitud USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La sol·licitud SS s\'ha transformat en una sol·licitud SS nova."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil professional"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port perifèric USB d\'Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port perifèric USB"</string>
@@ -1618,6 +1653,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Restableix les dades de fàbrica del dispositiu per utilitzar-lo sense restriccions"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca per obtenir més informació."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> s\'ha desactivat"</string>
 </resources>

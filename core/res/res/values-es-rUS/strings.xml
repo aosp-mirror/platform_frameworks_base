@@ -891,6 +891,14 @@
       <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> años</item>
       <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> año</item>
     </plurals>
+    <!-- no translation found for duration_minutes_relative (3178131706192980192) -->
+    <!-- no translation found for duration_hours_relative (676894109982008411) -->
+    <!-- no translation found for duration_days_relative (2203515825765397130) -->
+    <!-- no translation found for duration_years_relative (4820062134188885734) -->
+    <!-- no translation found for duration_minutes_relative_future (4655043589817680966) -->
+    <!-- no translation found for duration_hours_relative_future (8084579714205223891) -->
+    <!-- no translation found for duration_days_relative_future (333215369363433992) -->
+    <!-- no translation found for duration_years_relative_future (8644862986413104011) -->
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemas de video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"No es posible transmitir este video al dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"No se puede reproducir el video."</string>
@@ -962,8 +970,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> se detuvo"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> continúa fallando"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> continúa fallando"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Reiniciar app"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Restablecer y reiniciar la app"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
@@ -1512,7 +1520,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> borrado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Para dejar de fijar esta pantalla, mantén presionado Atrás."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Para dejar de fijar esta pantalla, mantén presionado Recientes."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"La aplicación está fijada, no se puede anular la fijación en este dispositivo."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla no fija"</string>
@@ -1579,6 +1586,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La solicitud SS cambió por una solicitud USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS cambió por una nueva solicitud SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Puerto USB de periféricos Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Puerto USB de periféricos"</string>
@@ -1618,6 +1629,5 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Restablece la configuración de fábrica para usar este dispositivo sin restricciones"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Se inhabilitó <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>
