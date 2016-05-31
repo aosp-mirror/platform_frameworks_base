@@ -882,7 +882,7 @@ public class DirectoryFragment extends Fragment
                 new AlertDialog.Builder(getActivity())
                     .setView(message)
                     .setPositiveButton(
-                         android.R.string.yes,
+                         android.R.string.ok,
                          new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // Finish selection mode first which clears selection so we
@@ -903,7 +903,7 @@ public class DirectoryFragment extends Fragment
                                         getActivity(), docs, srcParent, getDisplayState().stack);
                             }
                         })
-                    .setNegativeButton(android.R.string.no, null)
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show();
             }
         }.execute(selected);
