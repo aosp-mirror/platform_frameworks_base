@@ -67,7 +67,8 @@ public class TextUtils {
     private static final String TAG = "TextUtils";
 
     /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
-    private static final String ELLIPSIS_STRING = new String(ELLIPSIS_NORMAL);
+    /** {@hide} */
+    public static final String ELLIPSIS_STRING = new String(ELLIPSIS_NORMAL);
 
     /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
     private static final String ELLIPSIS_TWO_DOTS_STRING = new String(ELLIPSIS_TWO_DOTS);

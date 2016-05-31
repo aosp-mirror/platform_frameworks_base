@@ -16,9 +16,11 @@
 
 package com.android.internal.app;
 
+import android.annotation.IntRange;
 import android.icu.text.ListFormatter;
 import android.icu.util.ULocale;
 import android.os.LocaleList;
+import android.text.TextUtils;
 
 import java.text.Collator;
 import java.util.Comparator;
@@ -153,15 +155,33 @@ public class LocaleHelper {
      * @param locales the list of locales whose names is to be displayed.
      * @param displayLocale the locale in which to display the names.
      *                      If this is null, it will use the default locale.
+     * @param maxLocales maximum number of locales to display. Generates ellipsis after that.
      * @return the locale aware list of locale names
      */
-    public static String getDisplayLocaleList(LocaleList locales, Locale displayLocale) {
+    public static String getDisplayLocaleList(
+            LocaleList locales, Locale displayLocale, @IntRange(from=1) int maxLocales) {
+
         final Locale dispLocale = displayLocale == null ? Locale.getDefault() : displayLocale;
 
-        int localeCount = locales.size();
-        final String[] localeNames = new String[localeCount];
+        final boolean ellipsisNeeded = locales.size() > maxLocales;
+        final int localeCount, listCount;
+        if (ellipsisNeeded) {
+            localeCount = maxLocales;
+            listCount = maxLocales + 1;  // One extra slot for the ellipsis
+        } else {
+            listCount = localeCount = locales.size();
+        }
+        final String[] localeNames = new String[listCount];
         for (int i = 0; i < localeCount; i++) {
             localeNames[i] = LocaleHelper.getDisplayName(locales.get(i), dispLocale, false);
+        }
+        if (ellipsisNeeded) {
+            // Theoretically, we want to extract this from ICU's Resource Bundle for
+            // "Ellipsis/final", which seems to have different strings than the normal ellipsis for
+            // Hong Kong Traditional Chinese (zh_Hant_HK) and Dzongkha (dz). But that has two
+            // problems: it's expensive to extract it, and in case the output string becomes
+            // automatically ellipsized, it can result in weird output.
+            localeNames[maxLocales] = TextUtils.ELLIPSIS_STRING;
         }
 
         ListFormatter lfn = ListFormatter.getInstance(dispLocale);
