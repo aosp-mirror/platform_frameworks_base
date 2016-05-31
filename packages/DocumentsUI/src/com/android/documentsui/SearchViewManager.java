@@ -37,7 +37,7 @@ import com.android.documentsui.model.RootInfo;
 /**
  * Manages searching UI behavior.
  */
-final class SearchViewManager implements
+public class SearchViewManager implements
         SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener,
         OnActionExpandListener {
 
@@ -46,7 +46,7 @@ final class SearchViewManager implements
         void onSearchFinished();
     }
 
-    public static final String TAG = "SearchManger";
+    private static final String TAG = "SearchManager";
 
     private SearchManagerListener mListener;
     private boolean mSearchExpanded;
@@ -129,7 +129,7 @@ final class SearchViewManager implements
                 && ((root.flags & Root.FLAG_SUPPORTS_SEARCH) != 0));
     }
 
-    void showMenu(boolean visible) {
+    protected void showMenu(boolean visible) {
         if (mMenuItem == null) {
             if (DEBUG) Log.d(TAG, "showMenu called before Search MenuItem installed.");
             return;

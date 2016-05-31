@@ -36,10 +36,13 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.documentsui.MenuManager.DirectoryDetails;
 import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.FragmentTuner;
+import com.android.documentsui.dirlist.FragmentTuner.FilesTuner;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -67,6 +70,8 @@ public class FilesActivity extends BaseActivity {
     // We use the time gap to figure out whether to close app or reopen the drawer.
     private long mDrawerLastFiddled;
     private DocumentClipper mClipper;
+    private FilesMenuManager mMenuManager;
+    private DirectoryDetails mDetails;
 
     public FilesActivity() {
         super(R.layout.files_activity, TAG);
@@ -77,6 +82,13 @@ public class FilesActivity extends BaseActivity {
         super.onCreate(icicle);
 
         mClipper = DocumentsApplication.getDocumentClipper(this);
+        mMenuManager = new FilesMenuManager(mSearchManager);
+        mDetails = new DirectoryDetails(this) {
+            @Override
+            public boolean hasItemsToPaste() {
+                return mClipper.hasItemsToPaste();
+            }
+        };
 
         RootsFragment.show(getFragmentManager(), null);
 
@@ -198,23 +210,7 @@ public class FilesActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-
-        final RootInfo root = getCurrentRoot();
-
-        final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
-        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
-
-        createDir.setVisible(true);
-        createDir.setEnabled(canCreateDirectory());
-        pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
-        settings.setVisible(root.hasSettings());
-        newWindow.setVisible(Shared.shouldShowFancyFeatures(this));
-
-        Menus.disableHiddenItems(menu, pasteFromCb);
-        // It hides icon if searching in progress
-        mSearchManager.updateMenu();
+        mMenuManager.updateOptionMenu(menu, mDetails);
         return true;
     }
 
@@ -460,6 +456,16 @@ public class FilesActivity extends BaseActivity {
 
         setResult(Activity.RESULT_OK, intent);
         finish();
+    }
+
+    @Override
+    public FragmentTuner createFragmentTuner() {
+      return new FilesTuner(this, getDisplayState());
+    }
+
+    @Override
+    public MenuManager getMenuManager() {
+      return mMenuManager;
     }
 
     /**
