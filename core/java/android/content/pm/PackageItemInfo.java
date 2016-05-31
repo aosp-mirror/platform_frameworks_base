@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.UserHandle;
 import android.text.BidiFormatter;
+import android.text.Html;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
@@ -164,12 +165,13 @@ public class PackageItemInfo {
     @SystemApi
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm) {
         // loadLabel() always returns non-null
-        CharSequence label = loadLabel(pm);
+        String label = loadLabel(pm).toString();
+        // strip HTML tags to avoid <br> and other tags overwriting original message
+        String labelStr = Html.fromHtml(label).toString();
 
         // If the label contains new line characters it may push the UI
         // down to hide a part of it. Labels shouldn't have new line
         // characters, so just truncate at the first time one is seen.
-        String labelStr = label.toString();
         final int labelLength = labelStr.length();
         int offset = 0;
         while (offset < labelLength) {
@@ -181,13 +183,18 @@ public class PackageItemInfo {
                 labelStr = labelStr.substring(0, offset);
                 break;
             }
+            // replace all non-break space to " " in order to be trimmed
+            if (type == Character.SPACE_SEPARATOR) {
+                labelStr = labelStr.substring(0, offset) + " " + labelStr.substring(offset +
+                        Character.charCount(codePoint));
+            }
             offset += Character.charCount(codePoint);
         }
 
+        labelStr = labelStr.trim();
         if (labelStr.isEmpty()) {
-            return labelStr;
+            return packageName;
         }
-
         TextPaint paint = new TextPaint();
         paint.setTextSize(42);
 
