@@ -212,19 +212,23 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     } else {
         // PDF's coordinate system origin is left-bottom while
         // in graphics it is the top-left, so remap the origin.
-        matrix.Set(1, 0, 0, -1, 0, pPage->GetPageHeight());
+        SkMatrix reflectOnX = SkMatrix::MakeScale(1, -1);
+        SkMatrix moveUp = SkMatrix::MakeTrans(0, FPDF_GetPageHeight(page));
+        SkMatrix m = SkMatrix::Concat(moveUp, reflectOnX);
+
+        // Concatenate transformation and origin transformation
+        m.setConcat(*transform, m);
 
         SkScalar transformValues[6];
-        if (transform->asAffine(transformValues)) {
-            matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
-                    transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
-                    transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
-        } else {
+        if (!m.asAffine(transformValues)) {
             // Already checked for a return value of false in the caller, so this should never
             // happen.
             ALOGE("Error rendering page!");
         }
 
+        matrix = {transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                  transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                  transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]};
     }
     pageContext->AppendObjectList(pPage, &matrix);
 

@@ -22,7 +22,6 @@
 #include "fpdfview.h"
 #include "fpdf_edit.h"
 #include "fpdf_save.h"
-#include "fsdk_rendercontext.h"
 #include "fpdf_transformpage.h"
 #pragma GCC diagnostic pop
 
@@ -176,7 +175,7 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
         jlong transformPtr, jint clipLeft, jint clipTop, jint clipRight, jint clipBottom) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
 
-    CPDF_Page* page = (CPDF_Page*) FPDF_LoadPage(document, pageIndex);
+    FPDF_PAGE* page = (FPDF_PAGE*) FPDF_LoadPage(document, pageIndex);
     if (!page) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "cannot open page");
@@ -193,30 +192,32 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
         return;
     }
 
-    CFX_Matrix matrix;
 
-    SkMatrix* skTransform = reinterpret_cast<SkMatrix*>(transformPtr);
+    // PDF's coordinate system origin is left-bottom while in graphics it
+    // is the top-left. So, translate the PDF coordinates to ours.
+    SkMatrix reflectOnX = SkMatrix::MakeScale(1, -1);
+    SkMatrix moveUp = SkMatrix::MakeTrans(0, FPDF_GetPageHeight(page));
+    SkMatrix coordinateChange = SkMatrix::Concat(moveUp, reflectOnX);
+
+    // Apply the transformation what was created in our coordinates.
+    SkMatrix matrix = SkMatrix::Concat(*reinterpret_cast<SkMatrix*>(transformPtr),
+            coordinateChange);
+
+    // Translate the result back to PDF coordinates.
+    matrix.setConcat(coordinateChange, matrix);
 
     SkScalar transformValues[6];
-    if (!skTransform->asAffine(transformValues)) {
+    if (!matrix.asAffine(transformValues)) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "transform matrix has perspective. Only affine matrices are allowed.");
         return;
     }
 
-    // PDF's coordinate system origin is left-bottom while in graphics it
-    // is the top-left. So, translate the PDF coordinates to ours.
-    matrix.Set(1, 0, 0, -1, 0, page->GetPageHeight());
+    FS_MATRIX transform = {transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                           transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                           transformValues[SkMatrix::kATransX],
+                           transformValues[SkMatrix::kATransY]};
 
-    // Apply the transformation what was created in our coordinates.
-    matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
-            transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
-            transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
-
-    // Translate the result back to PDF coordinates.
-    matrix.Concat(1, 0, 0, -1, 0, page->GetPageHeight());
-
-    FS_MATRIX transform = {matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f};
     FS_RECTF clip = {(float) clipLeft, (float) clipTop, (float) clipRight, (float) clipBottom};
 
     FPDFPage_TransFormWithClip(page, &transform, &clip);
