@@ -2395,6 +2395,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             mPromoteSystemApps =
                     mIsUpgrade && ver.sdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1;
 
+            // When upgrading from pre-N, we need to handle package extraction like first boot,
+            // as there is no profiling data available.
+            mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
+
             // save off the names of pre-existing system packages prior to scanning; we don't
             // want to automatically grant runtime permissions for new system apps
             if (mPromoteSystemApps) {
@@ -2406,11 +2410,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-
-            // When upgrading from pre-N, we need to handle package extraction like first boot,
-            // as there is no profiling data available.
-            mIsPreNUpgrade = !mSettings.isNWorkDone();
-            mSettings.setNWorkDone();
 
             // Collect vendor overlay packages.
             // (Do this before scanning any apps.)
