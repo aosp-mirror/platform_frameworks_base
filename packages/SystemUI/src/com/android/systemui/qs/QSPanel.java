@@ -103,8 +103,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.qs_paged_tile_layout, this, false);
         addView((View) mTileLayout);
-        findViewById(android.R.id.edit).setOnClickListener(view ->
-                mHost.startRunnableDismissingKeyguard(() -> showEdit(view)));
     }
 
     public boolean isShowingCustomize() {
@@ -363,7 +361,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
 
-    private void showEdit(final View v) {
+    public void showEdit(final View v) {
         v.post(new Runnable() {
             @Override
             public void run() {
@@ -371,8 +369,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
                     if (!mCustomizePanel.isCustomizing()) {
                         int[] loc = new int[2];
                         v.getLocationInWindow(loc);
-                        int x = loc[0];
-                        int y = loc[1];
+                        int x = loc[0] + v.getWidth() / 2;
+                        int y = loc[1] + v.getHeight() / 2;
                         mCustomizePanel.show(x, y);
                     }
                 }

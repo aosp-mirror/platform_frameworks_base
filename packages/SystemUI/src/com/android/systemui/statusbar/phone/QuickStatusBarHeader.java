@@ -81,18 +81,16 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
 
-    private float mDateTimeTranslation;
-    private float mDateTimeAlarmTranslation;
     private float mDateScaleFactor;
     protected float mGearTranslation;
 
     private TouchAnimator mSecondHalfAnimator;
     private TouchAnimator mFirstHalfAnimator;
     private TouchAnimator mDateSizeAnimator;
-    private TouchAnimator mAlarmTranslation;
     protected TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
     protected QSTileHost mHost;
+    private View mEdit;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -103,6 +101,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         super.onFinishInflate();
 
         mEmergencyOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
+
+        mEdit = findViewById(android.R.id.edit);
+        findViewById(android.R.id.edit).setOnClickListener(view ->
+                mHost.startRunnableDismissingKeyguard(() -> mQsPanel.showEdit(view)));
 
         mDateTimeAlarmGroup = (ViewGroup) findViewById(R.id.date_time_alarm_group);
         mDateTimeAlarmGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
@@ -153,16 +155,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mGearTranslation = mContext.getResources().getDimension(R.dimen.qs_header_gear_translation);
 
-        mDateTimeTranslation = mContext.getResources().getDimension(
-                R.dimen.qs_date_anim_translation);
-        mDateTimeAlarmTranslation = mContext.getResources().getDimension(
-                R.dimen.qs_date_alarm_anim_translation);
         float dateCollapsedSize = mContext.getResources().getDimension(
                 R.dimen.qs_date_collapsed_text_size);
         float dateExpandedSize = mContext.getResources().getDimension(
                 R.dimen.qs_date_text_size);
         mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
-        updateDateTimePosition();
 
         mSecondHalfAnimator = new TouchAnimator.Builder()
                 .addFloat(mAlarmStatus, "alpha", 0, 1)
@@ -184,10 +181,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     protected void updateSettingsAnimator() {
         mSettingsAlpha = new TouchAnimator.Builder()
-                .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
+                .addFloat(mEdit, "translationY", -mGearTranslation, 0)
                 .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
-                .addFloat(mSettingsButton, "rotation", -90, 0)
-                .addFloat(mSettingsContainer, "alpha", 0, 1)
+                .addFloat(mEdit, "alpha", 0, 1)
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
                 .setStartDelay(QSAnimator.EXPANDED_TILE_DELAY)
                 .build();
@@ -246,7 +242,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mSecondHalfAnimator.setPosition(headerExpansionFraction);
         mFirstHalfAnimator.setPosition(headerExpansionFraction);
         mDateSizeAnimator.setPosition(headerExpansionFraction);
-        mAlarmTranslation.setPosition(headerExpansionFraction);
         mSettingsAlpha.setPosition(headerExpansionFraction);
 
         updateAlarmVisibilities();
@@ -267,15 +262,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAlarmStatusCollapsed.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void updateDateTimePosition() {
-        // This one has its own because we have to rebuild it every time the alarm state changes.
-        mAlarmTranslation = new TouchAnimator.Builder()
-                .addFloat(mDateTimeAlarmGroup, "translationY", 0, mAlarmShowing
-                        ? mDateTimeAlarmTranslation : mDateTimeTranslation)
-                .build();
-        mAlarmTranslation.setPosition(mExpansionAmount);
-    }
-
     public void setListening(boolean listening) {
         if (listening == mListening) {
             return;
@@ -287,7 +273,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void updateEverything() {
-        updateDateTimePosition();
         updateVisibilities();
         setClickable(false);
     }
@@ -296,7 +281,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateAlarmVisibilities();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
-        mSettingsContainer.setVisibility(mExpanded ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
         mMultiUserSwitch.setVisibility(mExpanded && mMultiUserSwitch.hasMultipleUsers()
