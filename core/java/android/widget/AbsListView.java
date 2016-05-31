@@ -2675,15 +2675,45 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK ? 0 : mPaddingBottom;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    protected void internalSetPadding(int left, int top, int right, int bottom) {
+        super.internalSetPadding(left, top, right, bottom);
+        if (isLayoutRequested()) {
+            handleBoundsChange();
+        }
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        if (getChildCount() > 0) {
-            mDataChanged = true;
-            rememberSyncState();
-        }
-
+        handleBoundsChange();
         if (mFastScroll != null) {
             mFastScroll.onSizeChanged(w, h, oldw, oldh);
+        }
+    }
+
+    /**
+     * Called when bounds of the AbsListView are changed. AbsListView marks data set as changed
+     * and force layouts all children that don't have exact measure specs.
+     * <p>
+     * This invalidation is necessary, otherwise, AbsListView may think the children are valid and
+     * fail to relayout them properly to accommodate for new bounds.
+     */
+    void handleBoundsChange() {
+        final int childCount = getChildCount();
+        if (childCount > 0) {
+            mDataChanged = true;
+            rememberSyncState();
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                final ViewGroup.LayoutParams lp = child.getLayoutParams();
+                // force layout child unless it has exact specs
+                if (lp == null || lp.width < 1 || lp.height < 1) {
+                    child.forceLayout();
+                }
+            }
         }
     }
 
