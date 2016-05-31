@@ -16,8 +16,8 @@
 
 package android.net.metrics;
 
+import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IConnectivityMetricsLogger;
 
@@ -39,11 +39,8 @@ import java.util.List;
 
 public class IpConnectivityLogTest extends TestCase {
 
-    static class FakeEvent extends IpConnectivityEvent implements Parcelable {
-        public int describeContents() { return 0; }
-        public void writeToParcel(Parcel p, int flag) { }
-    }
-    static final FakeEvent FAKE_EV = new FakeEvent();
+    // use same Parcel object everywhere for pointer equality
+    static final Bundle FAKE_EV = new Bundle();
 
     @Mock IConnectivityMetricsLogger mService;
     ArgumentCaptor<ConnectivityMetricsEvent> evCaptor;
@@ -98,7 +95,7 @@ public class IpConnectivityLogTest extends TestCase {
         assertFalse(mLog.log(1, FAKE_EV));
         new Thread() {
             public void run() {
-                busySpinLog(FAKE_EV);
+                busySpinLog();
             }
         }.start();
 
@@ -116,7 +113,7 @@ public class IpConnectivityLogTest extends TestCase {
         for (int i = 0; i < nCallers; i++) {
             new Thread() {
                 public void run() {
-                    busySpinLog(FAKE_EV);
+                    busySpinLog();
                 }
             }.start();
         }
@@ -128,7 +125,7 @@ public class IpConnectivityLogTest extends TestCase {
         }
     }
 
-    void busySpinLog(Parcelable ev) {
+    void busySpinLog() {
         final long timeout = 200;
         final long stop = System.currentTimeMillis() + timeout;
         try {

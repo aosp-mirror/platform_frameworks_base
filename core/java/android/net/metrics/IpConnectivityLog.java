@@ -34,6 +34,7 @@ public class IpConnectivityLog extends ConnectivityMetricsLogger {
     private static final boolean DBG = false;
 
     public IpConnectivityLog() {
+        // mService initialized in super constructor.
     }
 
     @VisibleForTesting
@@ -46,11 +47,11 @@ public class IpConnectivityLog extends ConnectivityMetricsLogger {
      * keep track of skipped events and is thread-safe for callers.
      *
      * @param timestamp is the epoch timestamp of the event in ms.
-     * @param data is a Parcelable IpConnectivityEvent instance representing the event.
+     * @param data is a Parcelable instance representing the event.
      *
      * @return true if the event was successfully logged.
      */
-    public <T extends IpConnectivityEvent & Parcelable> boolean log(long timestamp, T data) {
+    public boolean log(long timestamp, Parcelable data) {
         if (mService == null) {
             if (DBG) {
                 Log.d(TAG, CONNECTIVITY_METRICS_LOGGER_SERVICE + " service not ready");
@@ -77,5 +78,9 @@ public class IpConnectivityLog extends ConnectivityMetricsLogger {
             Log.e(TAG, "Error logging event", e);
             return false;
         }
+    }
+
+    public void log(Parcelable event) {
+        log(System.currentTimeMillis(), event);
     }
 }

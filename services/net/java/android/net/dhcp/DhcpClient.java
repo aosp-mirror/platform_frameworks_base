@@ -30,6 +30,7 @@ import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
 import android.os.Message;
@@ -163,6 +164,7 @@ public class DhcpClient extends StateMachine {
     // System services / libraries we use.
     private final Context mContext;
     private final Random mRandom;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
     // Sockets.
     // - We use a packet socket to receive, because servers send us packets bound for IP addresses
@@ -356,14 +358,14 @@ public class DhcpClient extends StateMachine {
                 } catch (IOException|ErrnoException e) {
                     if (!mStopped) {
                         Log.e(TAG, "Read error", e);
-                        DhcpErrorEvent.logReceiveError(mIfaceName);
+                        logError(DhcpErrorEvent.RECEIVE_ERROR);
                     }
                 } catch (DhcpPacket.ParseException e) {
                     Log.e(TAG, "Can't parse packet: " + e.getMessage());
                     if (PACKET_DBG) {
                         Log.d(TAG, HexDump.dumpHexString(mPacket, 0, length));
                     }
-                    DhcpErrorEvent.logParseError(mIfaceName, e.errorCode);
+                    logError(e.errorCode);
                 }
             }
             if (DBG) Log.d(TAG, "Receive thread stopped");
@@ -493,7 +495,7 @@ public class DhcpClient extends StateMachine {
         @Override
         public void enter() {
             if (STATE_DBG) Log.d(TAG, "Entering state " + getName());
-            DhcpClientEvent.logStateEvent(mIfaceName, getName());
+            mMetricsLog.log(new DhcpClientEvent(mIfaceName, getName()));
         }
 
         private String messageName(int what) {
@@ -976,5 +978,9 @@ public class DhcpClient extends StateMachine {
     }
 
     class DhcpRebootingState extends LoggingState {
+    }
+
+    private void logError(int errorCode) {
+        mMetricsLog.log(new DhcpErrorEvent(mIfaceName, errorCode));
     }
 }

@@ -76,6 +76,7 @@ import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.Uri;
 import android.net.metrics.DefaultNetworkEvent;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.os.Binder;
 import android.os.Build;
@@ -453,6 +454,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mValidationLogs.addFirst(new ValidationLog(network, networkExtraInfo, log));
         }
     }
+
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -2205,7 +2208,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void linger(NetworkAgentInfo nai) {
         nai.lingering = true;
-        NetworkEvent.logEvent(nai.network.netId, NetworkEvent.NETWORK_LINGER);
+        logNetworkEvent(nai, NetworkEvent.NETWORK_LINGER);
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_LINGER);
         notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING);
     }
@@ -2219,7 +2222,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkLingered.clear();
         if (!nai.lingering) return;
         nai.lingering = false;
-        NetworkEvent.logEvent(nai.network.netId, NetworkEvent.NETWORK_UNLINGER);
+        logNetworkEvent(nai, NetworkEvent.NETWORK_UNLINGER);
         if (VDBG) log("Canceling linger of " + nai.name());
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
     }
@@ -5242,7 +5245,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new NetworkMonitor(context, handler, nai, defaultRequest);
     }
 
-    private static void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
+    private void logDefaultNetworkEvent(NetworkAgentInfo newNai, NetworkAgentInfo prevNai) {
         int newNetid = NETID_UNSET;
         int prevNetid = NETID_UNSET;
         int[] transports = new int[0];
@@ -5260,6 +5263,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             hadIPv6 = lp.hasGlobalIPv6Address() && lp.hasIPv6DefaultRoute();
         }
 
-        DefaultNetworkEvent.logEvent(newNetid, transports, prevNetid, hadIPv4, hadIPv6);
+        mMetricsLog.log(new DefaultNetworkEvent(newNetid, transports, prevNetid, hadIPv4, hadIPv6));
+    }
+
+    private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
+        mMetricsLog.log(new NetworkEvent(nai.network.netId, evtype));
     }
 }

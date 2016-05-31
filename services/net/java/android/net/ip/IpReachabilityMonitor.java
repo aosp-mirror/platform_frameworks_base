@@ -24,6 +24,7 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
@@ -151,6 +152,7 @@ public class IpReachabilityMonitor {
     private final Callback mCallback;
     private final NetlinkSocketObserver mNetlinkSocketObserver;
     private final Thread mObserverThread;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     @GuardedBy("mLock")
     private LinkProperties mLinkProperties = new LinkProperties();
     // TODO: consider a map to a private NeighborState class holding more
@@ -359,7 +361,6 @@ public class IpReachabilityMonitor {
         }
 
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
-            IpReachabilityEvent.logProvisioningLost(mInterfaceName);
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + msg;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
@@ -367,8 +368,9 @@ public class IpReachabilityMonitor {
                 // an InetAddress argument.
                 mCallback.notifyLost(ip, logMsg);
             }
+            logEvent(IpReachabilityEvent.PROVISIONING_LOST, 0);
         } else {
-            IpReachabilityEvent.logNudFailed(mInterfaceName);
+            logEvent(IpReachabilityEvent.NUD_FAILED, 0);
         }
     }
 
@@ -393,7 +395,7 @@ public class IpReachabilityMonitor {
                 break;
             }
             final int returnValue = probeNeighbor(mInterfaceIndex, target);
-            IpReachabilityEvent.logProbeEvent(mInterfaceName, returnValue);
+            logEvent(IpReachabilityEvent.PROBE, returnValue);
         }
     }
 
@@ -411,6 +413,11 @@ public class IpReachabilityMonitor {
         final long retransTimeMs = 1000;
         final long gracePeriodMs = 500;
         return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
+    }
+
+    private void logEvent(int probeType, int errorCode) {
+        int eventType = probeType | (errorCode & 0xff );
+        mMetricsLog.log(new IpReachabilityEvent(mInterfaceName, eventType));
     }
 
     // TODO: simplify the number of objects by making this extend Thread.
