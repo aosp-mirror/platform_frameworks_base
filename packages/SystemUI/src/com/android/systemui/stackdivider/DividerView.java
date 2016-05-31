@@ -1064,6 +1064,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         int position = DockedDividerUtils.calculatePositionForBounds(event.initialRect,
                 mDockSide, mDividerSize);
         mEntranceAnimationRunning = true;
+
+        // Insets might not have been fetched yet, so fetch manually if needed.
+        if (mStableInsets.isEmpty()) {
+            SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+            mSnapAlgorithm = null;
+            initializeSnapAlgorithm();
+        }
+
         resizeStack(position, mSnapAlgorithm.getMiddleTarget().position,
                 mSnapAlgorithm.getMiddleTarget());
     }
