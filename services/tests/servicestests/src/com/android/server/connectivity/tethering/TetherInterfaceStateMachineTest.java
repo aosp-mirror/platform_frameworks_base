@@ -16,8 +16,6 @@
 
 package com.android.server.connectivity.tethering;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -25,6 +23,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
+import static android.net.ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR;
+import static com.android.server.connectivity.tethering.IControlsTethering.STATE_AVAILABLE;
+import static com.android.server.connectivity.tethering.IControlsTethering.STATE_TETHERED;
+import static com.android.server.connectivity.tethering.IControlsTethering.STATE_UNAVAILABLE;
 
 import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
@@ -78,8 +84,7 @@ public class TetherInterfaceStateMachineTest {
         when(mNMService.getInterfaceConfig(IFACE_NAME)).thenReturn(mInterfaceConfiguration);
     }
 
-    @Before
-    public void setUp() throws Exception {
+    @Before public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -89,10 +94,8 @@ public class TetherInterfaceStateMachineTest {
                 ConnectivityManager.TETHERING_BLUETOOTH, mNMService, mStatsService, mTetherHelper);
         mTestedSm.start();
         mLooper.dispatchAll();
-        assertTrue("Should start out available for tethering", mTestedSm.isAvailable());
-        assertFalse("Should not be tethered initially", mTestedSm.isTethered());
-        assertFalse("Should have no errors initially", mTestedSm.isErrored());
-        verify(mTetherHelper).sendTetherStateChangedBroadcast();
+        verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mTetherHelper, mNMService, mStatsService);
     }
 
@@ -119,28 +122,23 @@ public class TetherInterfaceStateMachineTest {
     @Test
     public void handlesImmediateInterfaceDown() throws Exception {
         initStateMachine(ConnectivityManager.TETHERING_BLUETOOTH);
+
         dispatchCommand(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
-        verify(mTetherHelper).sendTetherStateChangedBroadcast();
+        verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertFalse("Should not be tetherable when the interface is down", mTestedSm.isAvailable());
-        assertFalse("Should not be tethered when the interface is down", mTestedSm.isTethered());
-        assertFalse("Should have no errors when the interface goes immediately down",
-                mTestedSm.isErrored());
     }
 
     @Test
     public void canBeTethered() throws Exception {
         initStateMachine(ConnectivityManager.TETHERING_BLUETOOTH);
+
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
-        inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
-
+        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertFalse("Should not be tetherable when tethered", mTestedSm.isAvailable());
-        assertTrue("Should be in a tethered state", mTestedSm.isTethered());
-        assertFalse("Should have no errors when tethered", mTestedSm.isErrored());
     }
 
     @Test
@@ -149,13 +147,10 @@ public class TetherInterfaceStateMachineTest {
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
-        inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
+        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertTrue("Should be ready for tethering again", mTestedSm.isAvailable());
-        assertFalse("Should not be tethered", mTestedSm.isTethered());
-        assertFalse("Should have no errors", mTestedSm.isErrored());
     }
 
     @Test
@@ -164,16 +159,12 @@ public class TetherInterfaceStateMachineTest {
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
         InOrder inOrder = inOrder(mTetherHelper, mNMService);
-        inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
         inOrder.verify(mNMService).getInterfaceConfig(IFACE_NAME);
         inOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
         inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
-
+        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_TETHERED, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertFalse("Should not be tetherable when tethered", mTestedSm.isAvailable());
-        assertTrue("Should be in a tethered state", mTestedSm.isTethered());
-        assertFalse("Should have no errors when tethered", mTestedSm.isErrored());
     }
 
     @Test
@@ -186,9 +177,6 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).enableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).startInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertFalse("Should not be tetherable when tethered", mTestedSm.isAvailable());
-        assertTrue("Should be in a tethered state", mTestedSm.isTethered());
-        assertFalse("Should have no errors when tethered", mTestedSm.isErrored());
     }
 
     @Test
@@ -203,9 +191,6 @@ public class TetherInterfaceStateMachineTest {
         inOrder.verify(mNMService).enableNat(IFACE_NAME, UPSTREAM_IFACE2);
         inOrder.verify(mNMService).startInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE2);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertFalse("Should not be tetherable when tethered", mTestedSm.isAvailable());
-        assertTrue("Should be in a tethered state", mTestedSm.isTethered());
-        assertFalse("Should have no errors when tethered", mTestedSm.isErrored());
     }
 
     @Test
@@ -214,16 +199,13 @@ public class TetherInterfaceStateMachineTest {
 
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_UNREQUESTED);
         InOrder inOrder = inOrder(mNMService, mStatsService, mTetherHelper);
-        inOrder.verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
         inOrder.verify(mStatsService).forceUpdate();
         inOrder.verify(mNMService).stopInterfaceForwarding(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).disableNat(IFACE_NAME, UPSTREAM_IFACE);
         inOrder.verify(mNMService).untetherInterface(IFACE_NAME);
-        inOrder.verify(mTetherHelper).sendTetherStateChangedBroadcast();
+        inOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_NO_ERROR);
         verifyNoMoreInteractions(mNMService, mStatsService, mTetherHelper);
-        assertTrue("Should be ready for tethering again", mTestedSm.isAvailable());
-        assertFalse("Should not be tethered", mTestedSm.isTethered());
-        assertFalse("Should have no errors", mTestedSm.isErrored());
     }
 
     @Test
@@ -235,13 +217,12 @@ public class TetherInterfaceStateMachineTest {
                 doThrow(RemoteException.class).when(mNMService).untetherInterface(IFACE_NAME);
             }
             dispatchCommand(TetherInterfaceStateMachine.CMD_INTERFACE_DOWN);
-            InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration);
+            InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration, mTetherHelper);
             usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
             usbTeardownOrder.verify(mNMService).setInterfaceConfig(
                     IFACE_NAME, mInterfaceConfiguration);
-            verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
-            assertFalse("Should not be available", mTestedSm.isAvailable());
-            assertFalse("Should not be tethered", mTestedSm.isTethered());
+            usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                    IFACE_NAME, mTestedSm, STATE_UNAVAILABLE, TETHER_ERROR_NO_ERROR);
         }
     }
 
@@ -251,15 +232,12 @@ public class TetherInterfaceStateMachineTest {
 
         doThrow(RemoteException.class).when(mNMService).tetherInterface(IFACE_NAME);
         dispatchCommand(TetherInterfaceStateMachine.CMD_TETHER_REQUESTED);
-        InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration);
+        InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration, mTetherHelper);
         usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
         usbTeardownOrder.verify(mNMService).setInterfaceConfig(
                 IFACE_NAME, mInterfaceConfiguration);
-        // Initial call is when we transition to the tethered state on request.
-        verify(mTetherHelper).notifyInterfaceTetheringReadiness(true, mTestedSm);
-        // And this call is to notify that we really aren't requested tethering.
-        verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
-        assertTrue("Expected to see an error reported", mTestedSm.isErrored());
+        usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_TETHER_IFACE_ERROR);
     }
 
     @Test
@@ -268,10 +246,11 @@ public class TetherInterfaceStateMachineTest {
 
         doThrow(RemoteException.class).when(mNMService).enableNat(anyString(), anyString());
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
-        InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration);
+        InOrder usbTeardownOrder = inOrder(mNMService, mInterfaceConfiguration, mTetherHelper);
         usbTeardownOrder.verify(mInterfaceConfiguration).setInterfaceDown();
         usbTeardownOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
-        verify(mTetherHelper).notifyInterfaceTetheringReadiness(false, mTestedSm);
+        usbTeardownOrder.verify(mTetherHelper).notifyInterfaceStateChange(
+                IFACE_NAME, mTestedSm, STATE_AVAILABLE, TETHER_ERROR_ENABLE_NAT_ERROR);
     }
 
     /**
