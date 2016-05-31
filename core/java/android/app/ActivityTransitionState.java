@@ -284,7 +284,7 @@ class ActivityTransitionState {
     }
 
     public boolean startExitBackTransition(final Activity activity) {
-        if (mEnteringNames == null) {
+        if (mEnteringNames == null || mCalledExitCoordinator != null) {
             return false;
         } else {
             if (!mHasExited) {
