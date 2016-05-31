@@ -95,7 +95,7 @@ public class FileOperationService extends Service implements Job.Listener {
     private NotificationManager mNotificationManager;
 
     @GuardedBy("mRunning")
-    private Map<String, JobRecord> mRunning = new HashMap<>();
+    private final Map<String, JobRecord> mRunning = new HashMap<>();
 
     private int mLastServiceId;
 
@@ -176,7 +176,9 @@ public class FileOperationService extends Service implements Job.Listener {
         if (DEBUG) Log.d(
                 TAG, "Scheduling job " + job.id + " to run in " + delay + " milliseconds.");
         ScheduledFuture<?> future = executor.schedule(job, delay, TimeUnit.MILLISECONDS);
-        mRunning.put(jobId, new JobRecord(job, future));
+        synchronized (mRunning) {
+            mRunning.put(jobId, new JobRecord(job, future));
+        }
     }
 
     /**
