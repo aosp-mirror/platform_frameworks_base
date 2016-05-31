@@ -86,17 +86,26 @@ public class FilesActivity extends BaseActivity {
         if (mState.restored) {
             if (DEBUG) Log.d(TAG, "Stack already resolved for uri: " + intent.getData());
         } else if (!mState.stack.isEmpty()) {
-            // If a non-empty stack is present in our state it was read (presumably)
+            // If a non-empty stack is present in our state, it was read (presumably)
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
-            // loading or restoring the stack.
+            // loading or restoring the stack (like URI).
             //
-            // When restoring from a stack, if a URI is present, it should only ever
-            // be a launch URI, or a fake Uri from notifications.
-            // Launch URIs support sensible activity management, but don't specify a real
-            // content target.
-            if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
-            assert(uri == null || uri.getAuthority() == null ||
-                    LauncherActivity.isLaunchUri(uri));
+            // When restoring from a stack, if a URI is present, it should only ever be:
+            // -- a launch URI: Launch URIs support sensible activity management,
+            //    but don't specify a real content target)
+            // -- a fake Uri from notifications. These URIs have no authority (TODO: details).
+            //
+            // Any other URI is *sorta* unexpected...except when browsing an archive
+            // in downloads.
+            if(uri != null
+                    && uri.getAuthority() != null
+                    && !uri.equals(mState.stack.peek())
+                    && !LauncherActivity.isLaunchUri(uri)) {
+                if (DEBUG) Log.w(TAG,
+                        "Launching with non-empty stack. Ignoring unexpected uri: " + uri);
+            } else {
+                if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
+            }
             refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             assert(uri != null);
