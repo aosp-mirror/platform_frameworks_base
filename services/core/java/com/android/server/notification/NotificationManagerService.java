@@ -2582,6 +2582,9 @@ public class NotificationManagerService extends SystemService {
         }
         if (notification.actions != null) {
             for (Notification.Action action: notification.actions) {
+                if (action.actionIntent == null) {
+                    continue;
+                }
                 am.setPendingIntentWhitelistDuration(action.actionIntent.getTarget(), duration);
                 setPendingIntentWhitelistDuration(am, duration, action.getExtras());
                 final RemoteInput[] remoteInputs = action.getRemoteInputs();
