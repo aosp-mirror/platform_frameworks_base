@@ -130,7 +130,7 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">80dp</dimen>
+    <dimen name="status_bar_header_height">104dp</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">116dp</dimen>
@@ -169,8 +169,6 @@
     <dimen name="qs_tile_margin_top">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
-    <dimen name="qs_date_anim_translation">32dp</dimen>
-    <dimen name="qs_date_alarm_anim_translation">22dp</dimen>
     <dimen name="qs_date_collapsed_text_size">14sp</dimen>
     <dimen name="qs_date_text_size">16sp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
@@ -199,7 +197,6 @@
     <dimen name="qs_detail_margin_top">28dp</dimen>
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_expand_margin">0dp</dimen>
     <dimen name="qs_battery_padding">2dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
 
