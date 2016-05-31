@@ -3810,12 +3810,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // If caller has PO (or DO) it can change the password, so see if that's the case first.
             ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
-            final boolean preN = getTargetSdk(admin.info.getPackageName(),
-                    userHandle) <= android.os.Build.VERSION_CODES.M;
-            if (admin == null) {
+            final boolean preN;
+            if (admin != null) {
+                preN = getTargetSdk(admin.info.getPackageName(),
+                        userHandle) <= android.os.Build.VERSION_CODES.M;
+            } else {
                 // Otherwise, make sure the caller has any active admin with the right policy.
                 admin = getActiveAdminForCallerLocked(null,
                         DeviceAdminInfo.USES_POLICY_RESET_PASSWORD);
+                preN = getTargetSdk(admin.info.getPackageName(),
+                        userHandle) <= android.os.Build.VERSION_CODES.M;
 
                 // As of N, password resetting to empty/null is not allowed anymore.
                 // TODO Should we allow DO/PO to set an empty password?
