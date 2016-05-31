@@ -114,7 +114,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ushbu nutq sintezi mexanizmi barcha yozgan matnlaringizni to‘plab olishi mumkin, jumladan kredit karta raqamlari va parollar kabi shaxsiy ma‘lumotlarni ham. U <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> mexanizmi bilan o‘rnatiladi. Ushbu nutq sintezi mexanizmidan foydalanilsinmi?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Bu til uchun nutq sintezatorini yoqish uchun Internetga ulaning."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Bu nutq sintezining misoli"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"Birlamchi til"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Asosiy til"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> – to‘liq qo‘llab-quvvatlanadi"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g> tili tarmoqqa ulanishi lozim"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g> – qo‘llab-quvvatlanmaydi"</string>
