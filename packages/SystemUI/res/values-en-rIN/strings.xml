@@ -498,7 +498,7 @@
     <string name="notification_importance_high" msgid="1729480727023990427">"Always peek. No full screen interruption."</string>
     <string name="notification_importance_max" msgid="2508384624461849111">"Always peek, and allow full screen interruption."</string>
     <string name="notification_more_settings" msgid="816306283396553571">"More settings"</string>
-    <string name="notification_done" msgid="5279426047273930175">"Finished"</string>
+    <string name="notification_done" msgid="5279426047273930175">"Done"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"<xliff:g id="APP_NAME">%1$s</xliff:g> notification controls"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Colour and appearance"</string>
     <string name="night_mode" msgid="3540405868248625488">"Night mode"</string>

@@ -514,7 +514,7 @@
     <string name="night_mode_disclaimer" msgid="598914896926759578">"Android OS এর মূল অংশগুলিতে গাঢ় থিম প্রয়োগ করা হয়েছে যেটা সাধারণত একটি হালকা থিমে প্রদর্শিত হয়, যেমন সেটিংস৷"</string>
     <string name="color_apply" msgid="9212602012641034283">"প্রয়োগ করুন"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"সেটিংস নিশ্চিত করুন"</string>
-    <string name="color_revert_message" msgid="9116001069397996691">"কিছু রঙের সেটিংস এই ডিভাইসকে ব্যবহারের অযোগ্য করে দিতে পারে৷ এই রঙের সেটিংস নিশ্চিত করতে ওকে এ ক্লিক করুন, অন্যথায় ১০ সেকেন্ড পরে এই সেটিংস পুনরায় সেট হবে৷"</string>
+    <string name="color_revert_message" msgid="9116001069397996691">"কিছু রঙের সেটিংস এই ডিভাইসকে ব্যবহারের অযোগ্য করে দিতে পারে৷ এই রঙের সেটিংস নিশ্চিত করতে ঠিক আছে এ ক্লিক করুন, অন্যথায় ১০ সেকেন্ড পরে এই সেটিংস পুনরায় সেট হবে৷"</string>
     <string name="battery_panel_title" msgid="7944156115535366613">"ব্যাটারির ব্যবহার"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"চার্জ করার সময় ব্যাটারি সেভার উপলব্ধ নয়"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ব্যাটারি সেভার"</string>

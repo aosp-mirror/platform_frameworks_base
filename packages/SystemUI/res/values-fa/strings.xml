@@ -340,7 +340,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"این کار «همه» صداها و لرزش‌ها از جمله هشدارها، موسیقی، ویدیوها و بازی‌ها را مسدود می‌کند."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"اعلان‌های کمتر فوری در زیر"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"برای باز کردن دوباره ضربه بزنید"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"دوباره ضربه بزنید تا باز شود"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"برای باز کردن قفل سریع به بالا بکشید"</string>
     <string name="phone_hint" msgid="4872890986869209950">"انگشتتان را از نماد تلفن تند بکشید"</string>
     <string name="voice_hint" msgid="8939888732119726665">"برای «دستیار صوتی»، تند بکشید"</string>
