@@ -157,9 +157,7 @@ public class InstallerConnection {
                 sharedLibraries);
     }
 
-    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
-        final String[] res = execute("merge_profiles", uid, pkgName);
-
+    private boolean safeParseBooleanResult(String[] res) throws InstallerException {
         if ((res == null) || (res.length != 2)) {
             throw new InstallerException("Invalid size result: " + Arrays.toString(res));
         }
@@ -170,6 +168,19 @@ public class InstallerConnection {
         }
 
         return Boolean.parseBoolean(res[1]);
+    }
+
+    public boolean mergeProfiles(int uid, String pkgName) throws InstallerException {
+        final String[] res = execute("merge_profiles", uid, pkgName);
+
+        return safeParseBooleanResult(res);
+    }
+
+    public boolean dumpProfiles(String gid, String packageName, String codePaths)
+            throws InstallerException {
+        final String[] res = execute("dump_profiles", gid, packageName, codePaths);
+
+        return safeParseBooleanResult(res);
     }
 
     private boolean connect() {
