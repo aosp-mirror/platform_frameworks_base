@@ -1582,6 +1582,11 @@ final class TaskRecord {
      * @param globalConfig global configuration to update from.
      */
     void sanitizeOverrideConfiguration(Configuration globalConfig) {
+        // If it's fullscreen, the override config should be empty and we should leave it alone.
+        if (mFullscreen) {
+            return;
+        }
+
         // screenLayout field is set in #calculateOverrideConfig but only part of it is really
         // overridden - aspect ratio and size. Other flags (like layout direction) can be updated
         // separately in global config and they also must be updated in override config.
