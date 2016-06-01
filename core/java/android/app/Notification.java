@@ -4483,6 +4483,35 @@ public class Notification implements Parcelable
             if (!mMessages.isEmpty()) { extras.putParcelableArray(EXTRA_MESSAGES,
                     Message.getBundleArrayForMessages(mMessages));
             }
+
+            fixTitleAndTextExtras(extras);
+        }
+
+        private void fixTitleAndTextExtras(Bundle extras) {
+            Message m = findLatestIncomingMessage();
+            CharSequence text = (m == null) ? null : m.mText;
+            CharSequence sender = m == null ? null
+                    : TextUtils.isEmpty(m.mSender) ? mUserDisplayName : m.mSender;
+            CharSequence title;
+            if (!TextUtils.isEmpty(mConversationTitle)) {
+                if (!TextUtils.isEmpty(sender)) {
+                    BidiFormatter bidi = BidiFormatter.getInstance();
+                    title = mBuilder.mContext.getString(
+                            com.android.internal.R.string.notification_messaging_title_template,
+                            bidi.unicodeWrap(mConversationTitle), bidi.unicodeWrap(m.mSender));
+                } else {
+                    title = mConversationTitle;
+                }
+            } else {
+                title = sender;
+            }
+
+            if (title != null) {
+                extras.putCharSequence(EXTRA_TITLE, title);
+            }
+            if (text != null) {
+                extras.putCharSequence(EXTRA_TEXT, text);
+            }
         }
 
         /**
@@ -4527,6 +4556,10 @@ public class Notification implements Parcelable
                 if (!TextUtils.isEmpty(m.mSender)) {
                     return m;
                 }
+            }
+            if (!mMessages.isEmpty()) {
+                // No incoming messages, fall back to outgoing message
+                return mMessages.get(mMessages.size() - 1);
             }
             return null;
         }

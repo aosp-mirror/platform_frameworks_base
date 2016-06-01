@@ -4289,6 +4289,10 @@
          DO NOT TRANSLATE -->
     <string name="notification_inbox_ellipsis">\u2026</string>
 
+    <!-- Tempalate for Notification.MessagingStyle to join a conversation name with the name of the sender of a message, to make a notification title [CHAR LIMIT=NONE] -->
+    <string name="notification_messaging_title_template"><xliff:g id="conversation_title" example="Tasty Treat Team">%1$s</xliff:g>: <xliff:g id="sender_name" example="Adrian Baker">%2$s</xliff:g></string>
+
+
     <!-- Label describing the number of selected items [CHAR LIMIT=48] -->
     <plurals name="selected_count">
         <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
