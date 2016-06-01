@@ -2732,14 +2732,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mStringNameCache;
     }
 
-    void transformFromScreenToSurfaceSpace(Rect rect) {
+    void transformClipRectFromScreenToSurfaceSpace(Rect clipRect) {
          if (mHScale >= 0) {
-            rect.left = (int) (rect.left / mHScale);
-            rect.right = (int) (rect.right / mHScale);
+            clipRect.left = (int) (clipRect.left / mHScale);
+            clipRect.right = (int) Math.ceil(clipRect.right / mHScale);
         }
         if (mVScale >= 0) {
-            rect.top = (int) (rect.top / mVScale);
-            rect.bottom = (int) (rect.bottom / mVScale);
+            clipRect.top = (int) (clipRect.top / mVScale);
+            clipRect.bottom = (int) Math.ceil(clipRect.bottom / mVScale);
         }
     }
 
