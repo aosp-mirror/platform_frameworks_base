@@ -73,6 +73,8 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+import static android.content.res.Configuration.SCREENLAYOUT_LONG_MASK;
+import static android.content.res.Configuration.SCREENLAYOUT_SIZE_MASK;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -1572,6 +1574,24 @@ final class TaskRecord {
             bounds.set(mBounds);
         }
         return bounds;
+    }
+
+    /**
+     * Update fields that are not overridden for task from global configuration.
+     *
+     * @param globalConfig global configuration to update from.
+     */
+    void sanitizeOverrideConfiguration(Configuration globalConfig) {
+        // screenLayout field is set in #calculateOverrideConfig but only part of it is really
+        // overridden - aspect ratio and size. Other flags (like layout direction) can be updated
+        // separately in global config and they also must be updated in override config.
+        int overrideScreenLayout = mOverrideConfig.screenLayout;
+        int newScreenLayout = globalConfig.screenLayout;
+        newScreenLayout = (newScreenLayout & ~SCREENLAYOUT_LONG_MASK)
+                | (overrideScreenLayout & SCREENLAYOUT_LONG_MASK);
+        newScreenLayout = (newScreenLayout & ~SCREENLAYOUT_SIZE_MASK)
+                | (overrideScreenLayout & SCREENLAYOUT_SIZE_MASK);
+        mOverrideConfig.screenLayout = newScreenLayout;
     }
 
     static Rect validateBounds(Rect bounds) {
