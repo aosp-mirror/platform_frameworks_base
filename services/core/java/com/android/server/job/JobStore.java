@@ -844,8 +844,16 @@ public class JobStore {
         // Inefficient; use only for testing
         public List<JobStatus> getAllJobs() {
             ArrayList<JobStatus> allJobs = new ArrayList<JobStatus>(size());
-            for (int i = mJobs.size(); i >= 0; i--) {
-                allJobs.addAll(mJobs.valueAt(i));
+            for (int i = mJobs.size() - 1; i >= 0; i--) {
+                ArraySet<JobStatus> jobs = mJobs.valueAt(i);
+                if (jobs != null) {
+                    // Use a for loop over the ArraySet, so we don't need to make its
+                    // optional collection class iterator implementation or have to go
+                    // through a temporary array from toArray().
+                    for (int j = jobs.size() - 1; j >= 0; j--) {
+                        allJobs.add(jobs.valueAt(j));
+                    }
+                }
             }
             return allJobs;
         }

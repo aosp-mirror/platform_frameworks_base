@@ -249,6 +249,12 @@ public final class JobStatus {
         return job.getId();
     }
 
+    public void printUniqueId(PrintWriter pw) {
+        UserHandle.formatUid(pw, callingUid);
+        pw.print("/");
+        pw.print(job.getId());
+    }
+
     public int getNumFailures() {
         return numFailures;
     }
@@ -410,6 +416,10 @@ public final class JobStatus {
         return true;
     }
 
+    boolean isConstraintSatisfied(int constraint) {
+        return (satisfiedConstraints&constraint) != 0;
+    }
+
     public boolean shouldDump(int filterUid) {
         return filterUid == -1 || UserHandle.getAppId(getUid()) == filterUid
                 || UserHandle.getAppId(getSourceUid()) == filterUid;
@@ -505,10 +515,22 @@ public final class JobStatus {
     public String toShortString() {
         StringBuilder sb = new StringBuilder();
         sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(" jId=");
+        sb.append(" #");
+        UserHandle.formatUid(sb, callingUid);
+        sb.append("/");
         sb.append(job.getId());
         sb.append(' ');
-        UserHandle.formatUid(sb, callingUid);
+        sb.append(batteryName);
+        return sb.toString();
+    }
+
+    /**
+     * Convenience function to identify a job uniquely without pulling all the data that
+     * {@link #toString()} returns.
+     */
+    public String toShortStringExceptUniqueId() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
         sb.append(batteryName);
         return sb.toString();

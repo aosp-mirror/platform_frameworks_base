@@ -23,6 +23,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +39,7 @@ import android.app.job.JobService;
 import android.app.job.IJobScheduler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,6 +47,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -57,6 +61,8 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -98,17 +104,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG = false;
 
     /** The maximum number of concurrent jobs we run at one time. */
-    private static final int MAX_JOB_CONTEXTS_COUNT = 12;
-    /** The number of MAX_JOB_CONTEXTS_COUNT we reserve for the foreground app. */
-    private static final int FG_JOB_CONTEXTS_COUNT = 4;
+    private static final int MAX_JOB_CONTEXTS_COUNT = 16;
     /** Enforce a per-app limit on scheduled jobs? */
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
-    /** This is the job execution factor that is considered to be heavy use of the system. */
-    private static final float HEAVY_USE_FACTOR = .9f;
-    /** This is the job execution factor that is considered to be moderate use of the system. */
-    private static final float MODERATE_USE_FACTOR = .5f;
+
 
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
@@ -121,34 +122,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
     static final int MSG_CHECK_JOB = 1;
     static final int MSG_STOP_JOB = 2;
     static final int MSG_CHECK_JOB_GREEDY = 3;
-
-    // Policy constants
-    /**
-     * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
-     * early.
-     */
-    static final int MIN_IDLE_COUNT = 1;
-    /**
-     * Minimum # of charging jobs that must be ready in order to force the JMS to schedule things
-     * early.
-     */
-    static final int MIN_CHARGING_COUNT = 1;
-    /**
-     * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
-     * things early.
-     */
-    static final int MIN_CONNECTIVITY_COUNT = 1;  // Run connectivity jobs as soon as ready.
-    /**
-     * Minimum # of content trigger jobs that must be ready in order to force the JMS to schedule
-     * things early.
-     */
-    static final int MIN_CONTENT_COUNT = 1;
-    /**
-     * Minimum # of jobs (with no particular constraints) for which the JMS will be happy running
-     * some work early.
-     * This is correlated with the amount of batching we'll be able to do.
-     */
-    static final int MIN_READY_JOBS_COUNT = 2;
 
     /**
      * Track Services that have currently active or pending jobs. The index is provided by
@@ -186,7 +159,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * Current limit on the number of concurrent JobServiceContext entries we want to
      * keep actively running a job.
      */
-    int mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT;
+    int mMaxActiveJobs = 1;
 
     /**
      * Which uids are currently in the foreground.
@@ -210,6 +183,211 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * The uid whose jobs we would like to assign to a context.
      */
     int[] mTmpAssignPreferredUidForContext = new int[MAX_JOB_CONTEXTS_COUNT];
+
+    /**
+     * All times are in milliseconds. These constants are kept synchronized with the system
+     * global Settings. Any access to this class or its fields should be done while
+     * holding the JobSchedulerService.mLock lock.
+     */
+    private final class Constants extends ContentObserver {
+        // Key names stored in the settings value.
+        private static final String KEY_MIN_IDLE_COUNT = "min_idle_count";
+        private static final String KEY_MIN_CHARGING_COUNT = "min_charging_count";
+        private static final String KEY_MIN_CONNECTIVITY_COUNT = "min_connectivity_count";
+        private static final String KEY_MIN_CONTENT_COUNT = "min_content_count";
+        private static final String KEY_MIN_READY_JOBS_COUNT = "min_ready_jobs_count";
+        private static final String KEY_HEAVY_USE_FACTOR = "heavy_use_factor";
+        private static final String KEY_MODERATE_USE_FACTOR = "moderate_use_factor";
+        private static final String KEY_FG_JOB_COUNT = "fg_job_count";
+        private static final String KEY_BG_NORMAL_JOB_COUNT = "bg_normal_job_count";
+        private static final String KEY_BG_MODERATE_JOB_COUNT = "bg_moderate_job_count";
+        private static final String KEY_BG_LOW_JOB_COUNT = "bg_low_job_count";
+        private static final String KEY_BG_CRITICAL_JOB_COUNT = "bg_critical_job_count";
+
+        private static final int DEFAULT_MIN_IDLE_COUNT = 1;
+        private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
+        private static final int DEFAULT_MIN_CONNECTIVITY_COUNT = 1;
+        private static final int DEFAULT_MIN_CONTENT_COUNT = 1;
+        private static final int DEFAULT_MIN_READY_JOBS_COUNT = 1;
+        private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
+        private static final float DEFAULT_MODERATE_USE_FACTOR = .5f;
+        private static final int DEFAULT_FG_JOB_COUNT = 4;
+        private static final int DEFAULT_BG_NORMAL_JOB_COUNT = 6;
+        private static final int DEFAULT_BG_MODERATE_JOB_COUNT = 4;
+        private static final int DEFAULT_BG_LOW_JOB_COUNT = 2;
+        private static final int DEFAULT_BG_CRITICAL_JOB_COUNT = 1;
+
+        /**
+         * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
+         * early.
+         */
+        int MIN_IDLE_COUNT = DEFAULT_MIN_IDLE_COUNT;
+        /**
+         * Minimum # of charging jobs that must be ready in order to force the JMS to schedule
+         * things early.
+         */
+        int MIN_CHARGING_COUNT = DEFAULT_MIN_CHARGING_COUNT;
+        /**
+         * Minimum # of connectivity jobs that must be ready in order to force the JMS to schedule
+         * things early.  1 == Run connectivity jobs as soon as ready.
+         */
+        int MIN_CONNECTIVITY_COUNT = DEFAULT_MIN_CONNECTIVITY_COUNT;
+        /**
+         * Minimum # of content trigger jobs that must be ready in order to force the JMS to
+         * schedule things early.
+         */
+        int MIN_CONTENT_COUNT = DEFAULT_MIN_CONTENT_COUNT;
+        /**
+         * Minimum # of jobs (with no particular constraints) for which the JMS will be happy
+         * running some work early.  This (and thus the other min counts) is now set to 1, to
+         * prevent any batching at this level.  Since we now do batching through doze, that is
+         * a much better mechanism.
+         */
+        int MIN_READY_JOBS_COUNT = DEFAULT_MIN_READY_JOBS_COUNT;
+        /**
+         * This is the job execution factor that is considered to be heavy use of the system.
+         */
+        float HEAVY_USE_FACTOR = DEFAULT_HEAVY_USE_FACTOR;
+        /**
+         * This is the job execution factor that is considered to be moderate use of the system.
+         */
+        float MODERATE_USE_FACTOR = DEFAULT_MODERATE_USE_FACTOR;
+        /**
+         * The number of MAX_JOB_CONTEXTS_COUNT we reserve for the foreground app.
+         */
+        int FG_JOB_COUNT = DEFAULT_FG_JOB_COUNT;
+        /**
+         * The maximum number of background jobs we allow when the system is in a normal
+         * memory state.
+         */
+        int BG_NORMAL_JOB_COUNT = DEFAULT_BG_NORMAL_JOB_COUNT;
+        /**
+         * The maximum number of background jobs we allow when the system is in a moderate
+         * memory state.
+         */
+        int BG_MODERATE_JOB_COUNT = DEFAULT_BG_MODERATE_JOB_COUNT;
+        /**
+         * The maximum number of background jobs we allow when the system is in a low
+         * memory state.
+         */
+        int BG_LOW_JOB_COUNT = DEFAULT_BG_LOW_JOB_COUNT;
+        /**
+         * The maximum number of background jobs we allow when the system is in a critical
+         * memory state.
+         */
+        int BG_CRITICAL_JOB_COUNT = DEFAULT_BG_CRITICAL_JOB_COUNT;
+
+        private ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public Constants(Handler handler) {
+            super(handler);
+        }
+
+        public void start(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.JOB_SCHEDULER_CONSTANTS), false, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (mLock) {
+                try {
+                    mParser.setString(Settings.Global.getString(mResolver,
+                            Settings.Global.ALARM_MANAGER_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad device idle settings", e);
+                }
+
+                MIN_IDLE_COUNT = mParser.getInt(KEY_MIN_IDLE_COUNT,
+                        DEFAULT_MIN_IDLE_COUNT);
+                MIN_CHARGING_COUNT = mParser.getInt(KEY_MIN_CHARGING_COUNT,
+                        DEFAULT_MIN_CHARGING_COUNT);
+                MIN_CONNECTIVITY_COUNT = mParser.getInt(KEY_MIN_CONNECTIVITY_COUNT,
+                        DEFAULT_MIN_CONNECTIVITY_COUNT);
+                MIN_CONTENT_COUNT = mParser.getInt(KEY_MIN_CONTENT_COUNT,
+                        DEFAULT_MIN_CONTENT_COUNT);
+                MIN_READY_JOBS_COUNT = mParser.getInt(KEY_MIN_READY_JOBS_COUNT,
+                        DEFAULT_MIN_READY_JOBS_COUNT);
+                HEAVY_USE_FACTOR = mParser.getFloat(KEY_HEAVY_USE_FACTOR,
+                        DEFAULT_HEAVY_USE_FACTOR);
+                MODERATE_USE_FACTOR = mParser.getFloat(KEY_MODERATE_USE_FACTOR,
+                        DEFAULT_MODERATE_USE_FACTOR);
+                FG_JOB_COUNT = mParser.getInt(KEY_FG_JOB_COUNT,
+                        DEFAULT_FG_JOB_COUNT);
+                BG_NORMAL_JOB_COUNT = mParser.getInt(KEY_BG_NORMAL_JOB_COUNT,
+                        DEFAULT_BG_NORMAL_JOB_COUNT);
+                if ((FG_JOB_COUNT+BG_NORMAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                    BG_NORMAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+                }
+                BG_MODERATE_JOB_COUNT = mParser.getInt(KEY_BG_MODERATE_JOB_COUNT,
+                        DEFAULT_BG_MODERATE_JOB_COUNT);
+                if ((FG_JOB_COUNT+BG_MODERATE_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                    BG_MODERATE_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+                }
+                BG_LOW_JOB_COUNT = mParser.getInt(KEY_BG_LOW_JOB_COUNT,
+                        DEFAULT_BG_LOW_JOB_COUNT);
+                if ((FG_JOB_COUNT+BG_LOW_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                    BG_LOW_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+                }
+                BG_CRITICAL_JOB_COUNT = mParser.getInt(KEY_BG_CRITICAL_JOB_COUNT,
+                        DEFAULT_BG_CRITICAL_JOB_COUNT);
+                if ((FG_JOB_COUNT+BG_CRITICAL_JOB_COUNT) > MAX_JOB_CONTEXTS_COUNT) {
+                    BG_CRITICAL_JOB_COUNT = MAX_JOB_CONTEXTS_COUNT - FG_JOB_COUNT;
+                }
+            }
+        }
+
+        void dump(PrintWriter pw) {
+            pw.println("  Settings:");
+
+            pw.print("    "); pw.print(KEY_MIN_IDLE_COUNT); pw.print("=");
+            pw.print(MIN_IDLE_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_CHARGING_COUNT); pw.print("=");
+            pw.print(MIN_CHARGING_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_CONNECTIVITY_COUNT); pw.print("=");
+            pw.print(MIN_CONNECTIVITY_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_CONTENT_COUNT); pw.print("=");
+            pw.print(MIN_CONTENT_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_MIN_READY_JOBS_COUNT); pw.print("=");
+            pw.print(MIN_READY_JOBS_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_HEAVY_USE_FACTOR); pw.print("=");
+            pw.print(HEAVY_USE_FACTOR); pw.println();
+
+            pw.print("    "); pw.print(KEY_MODERATE_USE_FACTOR); pw.print("=");
+            pw.print(MODERATE_USE_FACTOR); pw.println();
+
+            pw.print("    "); pw.print(KEY_FG_JOB_COUNT); pw.print("=");
+            pw.print(FG_JOB_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_BG_NORMAL_JOB_COUNT); pw.print("=");
+            pw.print(BG_NORMAL_JOB_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_BG_MODERATE_JOB_COUNT); pw.print("=");
+            pw.print(BG_MODERATE_JOB_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_BG_LOW_JOB_COUNT); pw.print("=");
+            pw.print(BG_LOW_JOB_COUNT); pw.println();
+
+            pw.print("    "); pw.print(KEY_BG_CRITICAL_JOB_COUNT); pw.print("=");
+            pw.print(BG_CRITICAL_JOB_COUNT); pw.println();
+        }
+    }
+
+    final Constants mConstants;
 
     /**
      * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
@@ -550,6 +728,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(DeviceIdleJobsController.get(this));
 
         mHandler = new JobHandler(context.getMainLooper());
+        mConstants = new Constants(mHandler);
         mJobSchedulerStub = new JobSchedulerStub();
         mJobs = JobStore.initAndGet(this);
     }
@@ -563,6 +742,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
+            mConstants.start(getContext().getContentResolver());
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -994,11 +1174,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             public void postProcess() {
                 if (backoffCount > 0 ||
-                        idleCount >= MIN_IDLE_COUNT ||
-                        connectivityCount >= MIN_CONNECTIVITY_COUNT ||
-                        chargingCount >= MIN_CHARGING_COUNT ||
-                        contentCount  >= MIN_CONTENT_COUNT ||
-                        (runnableJobs != null && runnableJobs.size() >= MIN_READY_JOBS_COUNT)) {
+                        idleCount >= mConstants.MIN_IDLE_COUNT ||
+                        connectivityCount >= mConstants.MIN_CONNECTIVITY_COUNT ||
+                        chargingCount >= mConstants.MIN_CHARGING_COUNT ||
+                        contentCount >= mConstants.MIN_CONTENT_COUNT ||
+                        (runnableJobs != null
+                                && runnableJobs.size() >= mConstants.MIN_READY_JOBS_COUNT)) {
                     if (DEBUG) {
                         Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
                     }
@@ -1095,9 +1276,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
     private int adjustJobPriority(int curPriority, JobStatus job) {
         if (curPriority < JobInfo.PRIORITY_TOP_APP) {
             float factor = mJobPackageTracker.getLoadFactor(job);
-            if (factor >= HEAVY_USE_FACTOR) {
+            if (factor >= mConstants.HEAVY_USE_FACTOR) {
                 curPriority += JobInfo.PRIORITY_ADJ_ALWAYS_RUNNING;
-            } else if (factor >= MODERATE_USE_FACTOR) {
+            } else if (factor >= mConstants.MODERATE_USE_FACTOR) {
                 curPriority += JobInfo.PRIORITY_ADJ_OFTEN_RUNNING;
             }
         }
@@ -1135,16 +1316,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
         switch (memLevel) {
             case ProcessStats.ADJ_MEM_FACTOR_MODERATE:
-                mMaxActiveJobs = ((MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT) * 2) / 3;
+                mMaxActiveJobs = mConstants.BG_MODERATE_JOB_COUNT;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_LOW:
-                mMaxActiveJobs = (MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT) / 3;
+                mMaxActiveJobs = mConstants.BG_LOW_JOB_COUNT;
                 break;
             case ProcessStats.ADJ_MEM_FACTOR_CRITICAL:
-                mMaxActiveJobs = 1;
+                mMaxActiveJobs = mConstants.BG_CRITICAL_JOB_COUNT;
                 break;
             default:
-                mMaxActiveJobs = MAX_JOB_CONTEXTS_COUNT - FG_JOB_CONTEXTS_COUNT;
+                mMaxActiveJobs = mConstants.BG_NORMAL_JOB_COUNT;
                 break;
         }
 
@@ -1152,10 +1333,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
         boolean[] act = mTmpAssignAct;
         int[] preferredUidForContext = mTmpAssignPreferredUidForContext;
         int numActive = 0;
+        int numForeground = 0;
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             final JobServiceContext js = mActiveServices.get(i);
-            if ((contextIdToJobMap[i] = js.getRunningJob()) != null) {
+            final JobStatus status = js.getRunningJob();
+            if ((contextIdToJobMap[i] = status) != null) {
                 numActive++;
+                if (status.lastEvaluatedPriority >= JobInfo.PRIORITY_TOP_APP) {
+                    numForeground++;
+                }
             }
             act[i] = false;
             preferredUidForContext[i] = js.getPreferredUid();
@@ -1184,13 +1370,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 JobStatus job = contextIdToJobMap[j];
                 int preferredUid = preferredUidForContext[j];
                 if (job == null) {
-                    if ((numActive < mMaxActiveJobs || priority >= JobInfo.PRIORITY_TOP_APP) &&
+                    if ((numActive < mMaxActiveJobs ||
+                            (priority >= JobInfo.PRIORITY_TOP_APP &&
+                                    numForeground < mConstants.FG_JOB_COUNT)) &&
                             (preferredUid == nextPending.getUid() ||
                                     preferredUid == JobServiceContext.NO_PREFERRED_UID)) {
                         // This slot is free, and we haven't yet hit the limit on
                         // concurrent jobs...  we can just throw the job in to here.
                         minPriorityContextId = j;
-                        numActive++;
                         break;
                     }
                     // No job on this context, but nextPending can't run here because
@@ -1212,11 +1399,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
             if (minPriorityContextId != -1) {
                 contextIdToJobMap[minPriorityContextId] = nextPending;
                 act[minPriorityContextId] = true;
+                numActive++;
+                if (priority >= JobInfo.PRIORITY_TOP_APP) {
+                    numForeground++;
+                }
             }
         }
         if (DEBUG) {
             Slog.d(TAG, printContextIdToJobMap(contextIdToJobMap, "running jobs final"));
         }
+        mJobPackageTracker.noteConcurrency(numActive, numForeground);
         for (int i=0; i<MAX_JOB_CONTEXTS_COUNT; i++) {
             boolean preservePreferredUid = false;
             if (act[i]) {
@@ -1569,36 +1761,49 @@ public final class JobSchedulerService extends com.android.server.SystemService
         final int filterUidFinal = UserHandle.getAppId(filterUid);
         final long now = SystemClock.elapsedRealtime();
         synchronized (mLock) {
+            mConstants.dump(pw);
+            pw.println();
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
-            pw.println("Registered jobs:");
+            pw.print("Registered ");
+            pw.print(mJobs.size());
+            pw.println(" jobs:");
             if (mJobs.size() > 0) {
-                mJobs.forEachJob(new JobStatusFunctor() {
-                    private int index = 0;
-
+                final List<JobStatus> jobs = mJobs.mJobSet.getAllJobs();
+                Collections.sort(jobs, new Comparator<JobStatus>() {
                     @Override
-                    public void process(JobStatus job) {
-                        pw.print("  Job #"); pw.print(index++); pw.print(": ");
-                        pw.println(job.toShortString());
-
-                        // Skip printing details if the caller requested a filter
-                        if (!job.shouldDump(filterUidFinal)) {
-                            return;
+                    public int compare(JobStatus o1, JobStatus o2) {
+                        int uid1 = o1.getUid();
+                        int uid2 = o2.getUid();
+                        int id1 = o1.getJobId();
+                        int id2 = o2.getJobId();
+                        if (uid1 != uid2) {
+                            return uid1 < uid2 ? -1 : 1;
                         }
-
-                        job.dump(pw, "    ", true);
-                        pw.print("    Ready: ");
-                        pw.print(mHandler.isReadyToBeExecutedLocked(job));
-                        pw.print(" (job=");
-                        pw.print(job.isReady());
-                        pw.print(" pending=");
-                        pw.print(mPendingJobs.contains(job));
-                        pw.print(" active=");
-                        pw.print(isCurrentlyActiveLocked(job));
-                        pw.print(" user=");
-                        pw.print(ArrayUtils.contains(mStartedUsers, job.getUserId()));
-                        pw.println(")");
+                        return id1 < id2 ? -1 : (id1 > id2 ? 1 : 0);
                     }
                 });
+                for (JobStatus job : jobs) {
+                    pw.print("  JOB #"); job.printUniqueId(pw); pw.print(": ");
+                    pw.println(job.toShortStringExceptUniqueId());
+
+                    // Skip printing details if the caller requested a filter
+                    if (!job.shouldDump(filterUidFinal)) {
+                        continue;
+                    }
+
+                    job.dump(pw, "    ", true);
+                    pw.print("    Ready: ");
+                    pw.print(mHandler.isReadyToBeExecutedLocked(job));
+                    pw.print(" (job=");
+                    pw.print(job.isReady());
+                    pw.print(" pending=");
+                    pw.print(mPendingJobs.contains(job));
+                    pw.print(" active=");
+                    pw.print(isCurrentlyActiveLocked(job));
+                    pw.print(" user=");
+                    pw.print(ArrayUtils.contains(mStartedUsers, job.getUserId()));
+                    pw.println(")");
+                }
             } else {
                 pw.println("  None.");
             }
