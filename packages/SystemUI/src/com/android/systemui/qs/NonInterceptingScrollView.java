@@ -24,8 +24,6 @@ import android.widget.ScrollView;
  */
 public class NonInterceptingScrollView extends ScrollView {
 
-    private float mInitialY;
-
     public NonInterceptingScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -35,14 +33,7 @@ public class NonInterceptingScrollView extends ScrollView {
         int action = ev.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                mInitialY = ev.getY();
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                requestDisallowInterceptTouchEvent(false);
-                break;
-            default:
-                if (canScrollVertically(ev.getY() > mInitialY ? -1 : 1)) {
+                if (canScrollVertically(1)) {
                     requestDisallowInterceptTouchEvent(true);
                 }
                 break;
