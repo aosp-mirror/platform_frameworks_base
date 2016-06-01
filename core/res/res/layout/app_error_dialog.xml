@@ -38,7 +38,7 @@
             android:id="@+id/aerr_close"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/aerr_close"
+            android:text="@string/aerr_close_app"
             android:drawableStart="@drawable/ic_close"
             style="@style/aerr_list_item"
     />
