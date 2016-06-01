@@ -105,6 +105,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.ResourcesManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
@@ -238,6 +239,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.AttributeCache;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.IntentResolver;
@@ -19133,6 +19135,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         Slog.w(TAG, "Failed to unload " + ps.codePath);
                     }
                 }
+
+                // Try very hard to release any references to this package
+                // so we don't risk the system server being killed due to
+                // open FDs
+                AttributeCache.instance().removePackage(ps.name);
             }
 
             mSettings.writeLPr();
@@ -19141,6 +19148,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         if (DEBUG_INSTALL) Slog.d(TAG, "Unloaded packages " + unloaded);
         sendResourcesChangedBroadcast(false, false, unloaded, null);
+
+        // Try very hard to release any references to this path so we don't risk
+        // the system server being killed due to open FDs
+        ResourcesManager.getInstance().invalidatePath(vol.getPath().getAbsolutePath());
+
+        for (int i = 0; i < 3; i++) {
+            System.gc();
+            System.runFinalization();
+        }
     }
 
     /**

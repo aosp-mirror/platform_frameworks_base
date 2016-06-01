@@ -77,6 +77,26 @@ public final class ResourcesKey {
         return !Configuration.EMPTY.equals(mOverrideConfiguration);
     }
 
+    public boolean isPathReferenced(String path) {
+        if (mResDir != null && mResDir.startsWith(path)) {
+            return true;
+        } else {
+            return anyStartsWith(mSplitResDirs, path) || anyStartsWith(mOverlayDirs, path)
+                    || anyStartsWith(mLibDirs, path);
+        }
+    }
+
+    private static boolean anyStartsWith(String[] list, String prefix) {
+        if (list != null) {
+            for (String s : list) {
+                if (s != null && s.startsWith(prefix)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public int hashCode() {
         return mHash;
