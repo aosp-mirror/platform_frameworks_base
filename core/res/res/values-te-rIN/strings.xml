@@ -55,7 +55,7 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI పూర్తయింది."</string>
     <string name="badPin" msgid="9015277645546710014">"మీరు టైప్ చేసిన పాత పిన్‌ చెల్లదు."</string>
     <string name="badPuk" msgid="5487257647081132201">"మీరు టైప్ చేసిన PUK చెల్లదు."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"మీరు టైప్ చేసిన PINలు సరిపోలలేదు."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"మీరు టైప్ చేసిన పిన్‌లు సరిపోలలేదు."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 సంఖ్యలు లేదా అంతకంటే పొడవు ఉండే PUKని టైప్ చేయండి."</string>
     <string name="needPuk" msgid="919668385956251611">"మీ సిమ్ కార్డు PUK-లాక్ చేయబడింది. దీన్ని అన్‌లాక్ చేయడానికి PUK కోడ్‌ను టైప్ చేయండి."</string>
@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సం.లో</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సం.లో</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> నిమిషాల క్రితం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> నిమిషం క్రితం</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గంటల క్రితం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గంట క్రితం</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రోజుల క్రితం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రోజు క్రితం</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సంవత్సరాల క్రితం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సంవత్సరం క్రితం</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> నిమిషాల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> నిమిషంలో</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గంటల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గంటలో</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రోజుల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రోజులో</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సంవత్సరాల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సంవత్సరంలో</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"వీడియో సమస్య"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"ఈ పరికరంలో ప్రసారం చేయడానికి ఈ వీడియో చెల్లదు."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"ఈ వీడియోను ప్లే చేయడం సాధ్యపడదు."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ఆపివేయబడింది"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"అనువర్తనాన్ని పునఃప్రారంభించు"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"రీసెట్ చేసి, అనువర్తనాన్ని పునఃప్రారంభించు"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"అనువర్తనాన్ని మళ్లీ తెరువు"</string>
     <string name="aerr_report" msgid="5371800241488400617">"అభిప్రాయాన్ని పంపు"</string>
     <string name="aerr_close" msgid="2991640326563991340">"మూసివేయి"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
@@ -1495,7 +1526,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"కొత్త పిన్‌"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"కొత్త పిన్‌ను నిర్ధారించండి"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"నియంత్రణలను సవరించడానికి పిన్‌ను రూపొందించండి"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINలు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"పిన్‌లు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి</item>
@@ -1515,7 +1546,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> తొలగించబడింది"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, వెనుకకు తాకి &amp; అలాగే పట్టుకోండి."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"ఈ స్క్రీన్‌ని అన్‌పిన్ చేయడానికి, స్థూల దృష్టిని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"అనువర్తనం పిన్ చేయబడింది: ఈ పరికరంలో అన్‌పిన్ చేయడానికి అనుమతి లేదు."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"స్క్రీన్ పిన్ చేయబడింది"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>
@@ -1582,6 +1612,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS అభ్యర్థన USSD అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS అభ్యర్థన కొత్త SS అభ్యర్థనగా సవరించబడింది."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"కార్యాలయ ప్రొఫైల్‌"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"విస్తరింపజేయి బటన్"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB పెరిఫెరల్ పోర్ట్"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB పెరిఫెరల్ పోర్ట్"</string>
@@ -1619,8 +1652,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"అన్‌‌పిన్‌ ‌చేయి"</string>
     <string name="app_info" msgid="6856026610594615344">"అనువర్తన సమాచారం"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"సెషన్‌ను పునఃప్రారంభించండి"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"కొత్త డెమో సెషన్‌ను ప్రారంభించడానికి నొక్కండి"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ఈ పరికరాన్ని ఎటువంటి పరిమితులు లేకుండా ఉపయోగించడానికి ఫ్యాక్టరీ రీసెట్ చేయండి"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"మరింత తెలుసుకోవడానికి తాకండి."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> నిలిపివేయబడింది"</string>
 </resources>

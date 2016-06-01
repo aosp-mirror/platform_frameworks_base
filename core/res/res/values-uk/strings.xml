@@ -921,6 +921,54 @@
       <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> років</item>
       <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> року</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> хвилину тому</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> хвилини тому</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> хвилин тому</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> хвилини тому</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> годину тому</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> години тому</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> годин тому</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> години тому</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> день тому</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> дні тому</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> днів тому</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> дня тому</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> рік тому</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> роки тому</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> років тому</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> року тому</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> хвилину</item>
+      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> хвилини</item>
+      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> хвилин</item>
+      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> хвилини</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> годину</item>
+      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> години</item>
+      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> годин</item>
+      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> години</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> день</item>
+      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> дні</item>
+      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> днів</item>
+      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> дня</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> рік</item>
+      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> роки</item>
+      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> років</item>
+      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> року</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Проблема з відео"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Відео не придатне для потокового передавання в цей пристрій."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Неможливо відтворити це відео."</string>
@@ -992,8 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> перестав працювати"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> періодично перестає працювати"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Процес \"<xliff:g id="PROCESS">%1$s</xliff:g>\" періодично перестає працювати"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Перезапустити додаток"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Скинути та перезапустити додаток"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Відкрити додаток знову"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Надіслати відгук"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Закрити"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Вимкнути звук до перезавантаження пристрою"</string>
@@ -1550,7 +1597,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> видалено"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Робоча <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Щоб відкріпити цей екран, натисніть і утримуйте кнопку \"Назад\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Щоб відкріпити цей екран, натисніть і утримуйте кнопку \"Огляд\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Додаток закріплено. Його не можна відкріпити на цьому пристрої."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екран закріплено"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екран відкріплено"</string>
@@ -1633,6 +1679,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Запит SS перетворено на запит USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Запит SS перетворено на новий запит SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Робочий профіль"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Кнопка \"Розгорнути\""</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Периферійний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Периферійний USB-порт"</string>
@@ -1672,8 +1721,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"Відкріпити"</string>
     <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Новий сеанс"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Торкніться, щоб почати новий демо-сеанс"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Відновіть заводські параметри, щоб використовувати пристрій без обмежень"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Торкніться, щоб дізнатися більше."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> вимкнено"</string>
 </resources>

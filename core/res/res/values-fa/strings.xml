@@ -148,7 +148,7 @@
     <string name="httpError" msgid="7956392511146698522">"خطایی در شبکه وجود داشت."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏URL پیدا نشد."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"‏طرح کلی احراز هویت سایت پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorAuth" msgid="1435065629438044534">"تأیید اعتبار ناموفق بود."</string>
+    <string name="httpErrorAuth" msgid="1435065629438044534">"راستی‌آزمایی ناموفق بود."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"احراز هویت از طریق سرور پروکسی انجام نشد."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"اتصال به سرور انجام نشد."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"برقراری ارتباط با سرور ممکن نبود. بعداً دوباره امتحان کنید."</string>
@@ -216,7 +216,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"خاموش کردن"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"گزارش اشکال"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"گرفتن گزارش اشکال"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام رایانامه ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
@@ -350,7 +350,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در رایانهٔ لوحی شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"به برنامه اجازه می‌دهد تا همه رویدادهای تقویم ذخیره‌شده روی تلویزیون از جمله رویدادهای دوستان یا همکاران را بخواند. شاید به برنامه اجازه دهد تا اطلاعات تقویم را صرفنظر از محرمانه بودن یا حساسیت، به اشتراک بگذارد یا ذخیره کند."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"به برنامه امکان می‌دهد همه رویدادهای تقویم ذخیره شده در تلفن شما را بخواند، از جمله رویدادهای دوستان یا همکاران. این ممکن است به برنامه امکان دهد داده‌های تقویم شما را صرفنظر از محرمانه یا حساس بودن آن‌ها به اشتراک گذاشته یا ذخیره کند."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال ایمیل به مهمانان بدون دخالت مالک"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"افزودن یا تغییر رویدادهای تقویم و ارسال رایانامه به مهمانان بدون دخالت مالک"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در رایانهٔ لوحی خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"به برنامه اجازه می‌دهد به افزودن، حذف یا تغییر رویدادهایی بپردازد که می‌توانید در تلویزیون‌تان تغییر دهید، از جمله رویدادهای دوستان یا همکاران خود. این ویژگی شاید به برنامه اجازه دهد پیامهایی را ارسال کند که به نظر می‌رسد از جانب مالکین تقویم است یا رویدادها را بدون اطلاع مالک تغییر دهد."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"به برنامه اجازه می‌دهد رویدادهایی را که می‌توانید در تلفن خود اصلاح نمایید، از جمله رویدادهای دوستان یا همکاران خود را، اضافه یا حذف کرده یا تغییر دهد. این ویژگی ممکن است به برنامه اجازه دهد پیام‌هایی را که به نظر می‌رسد از مالکین تقویم رسیده است ارسال نموده یا رویدادها را بدون اطلاع مالک اصلاح کنند."</string>
@@ -717,7 +717,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"بازگشایی قفل حساب"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (ایمیل)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"نام کاربری (رایانامه)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"گذرواژه"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ورود به سیستم"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"نام کاربر یا گذرواژه نامعتبر است."</string>
@@ -891,6 +891,38 @@
       <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
       <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> دقیقه پیش</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقیقه پیش</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ساعت پیش</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ساعت پیش</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> روز پیش</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> روز پیش</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> سال پیش</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال پیش</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> دقیقه</item>
+      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> دقیقه</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> ساعت</item>
+      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> ساعت</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> روز</item>
+      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> روز</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
+      <item quantity="other">در <xliff:g id="COUNT_1">%d</xliff:g> سال</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشکل در ویدیو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"پخش این ویدیو ممکن نیست."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> مرتب متوقف می‌شود"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> مرتب متوقف می‌شود"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"راه‌اندازی مجدد برنامه"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"بازنشانی و راه‌اندازی مجدد برنامه"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"باز کردن دوباره برنامه"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ارسال بازخورد"</string>
     <string name="aerr_close" msgid="2991640326563991340">"بستن"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"صامت کردن تا وقتی دستگاه راه‌اندازی مجدد شود"</string>
@@ -1364,7 +1395,7 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"پین کدها منطبق نیستند"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"‏تلاش‎های زیادی برای کشیدن الگو صورت گرفته است"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"‏برای بازگشایی قفل، با حساب Google خود وارد سیستم شوید."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (ایمیل)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"نام کاربری (رایانامه)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"گذرواژه"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ورود به سیستم"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"نام کاربری یا گذرواژه نامعتبر."</string>
@@ -1379,9 +1410,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل رایانه لوحی کرده‌اید. رایانه لوحی اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g> دفعه به صورت نادرست سعی کرده‌اید قفل تلویزیون را باز کنید. اکنون تلویزیون به تنظیمات پیش‌فرض کارخانه بازنشانی خواهد شد."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"شما به اشتباه <xliff:g id="NUMBER">%d</xliff:g> بار اقدام به باز کردن قفل تلفن کرده‌اید. این تلفن اکنون به پیش‌فرض کارخانه بازنشانی می‌شود."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"الگوی بازگشایی‌تان را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. <xliff:g id="NUMBER_1">%2$d</xliff:g> پس از \n تلاش ناموفق دیگر، از شما خواسته می‌شود تا با استفاده از یک حساب ایمیل، قفل تلویزیون‌تان را باز کنید.\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب رایانامه قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"الگوی بازگشایی‌تان را <xliff:g id="NUMBER_0">%1$d</xliff:g> دفعه به صورت نادرست رسم کرده‌اید. <xliff:g id="NUMBER_1">%2$d</xliff:g> پس از \n تلاش ناموفق دیگر، از شما خواسته می‌شود تا با استفاده از یک حساب رایانامه، قفل تلویزیون‌تان را باز کنید.\n پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب رایانامه قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"حذف"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
@@ -1512,7 +1543,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> حذف شد"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> محل کار"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"برای برداشتن پین این صفحه، «برگشت» را لمس کنید و نگه‌ دارید."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"برای برداشتن پین این صفحه، «نمای کلی» را لمس کنید و نگه دارید."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"برنامه پین شده است: برداشتن پین در این دستگاه مجاز نیست."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"پین صفحه برداشته شد"</string>
@@ -1522,7 +1552,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"توسط سرپرستتان نصب شد"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. ایمیل، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. رایانامه، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
@@ -1579,6 +1609,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏درخواست SS به درخواست USSD اصلاح می‌شود."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏درخواست SS به درخواست SS جدید اصلاح می‌شود."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"نمایه کاری"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"دکمه بزرگ کردن"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏درگاه جانبی Android USB"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏درگاه جانبی USB"</string>
@@ -1616,8 +1649,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"برداشتن پین"</string>
     <string name="app_info" msgid="6856026610594615344">"اطلاعات برنامه"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"راه‌اندازی مجدد جلسه"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"برای شروع جلسه آزمایشی جدید ضربه بزنید"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"برای استفاده بدون محدودیت از این دستگاه، بازنشانی کارخانه‌ای انجام دهید"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"برای یادگیری بیشتر لمس کنید."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> غیرفعال شد"</string>
 </resources>

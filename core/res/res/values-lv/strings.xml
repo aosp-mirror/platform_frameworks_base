@@ -607,7 +607,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telekss"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobilā tālruņa numurs darbā"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Darba mobilais"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Darba peidžers"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Palīgs"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"Multiziņa"</string>
@@ -906,6 +906,46 @@
       <item quantity="one">pēc <xliff:g id="COUNT_1">%d</xliff:g> g.</item>
       <item quantity="other">pēc <xliff:g id="COUNT_1">%d</xliff:g> g.</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="zero">pirms <xliff:g id="COUNT_1">%d</xliff:g> minūtēm</item>
+      <item quantity="one">pirms <xliff:g id="COUNT_1">%d</xliff:g> minūtes</item>
+      <item quantity="other">pirms <xliff:g id="COUNT_1">%d</xliff:g> minūtēm</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="zero">pirms <xliff:g id="COUNT_1">%d</xliff:g> stundām</item>
+      <item quantity="one">pirms <xliff:g id="COUNT_1">%d</xliff:g> stundas</item>
+      <item quantity="other">pirms <xliff:g id="COUNT_1">%d</xliff:g> stundām</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="zero">pirms <xliff:g id="COUNT_1">%d</xliff:g> dienām</item>
+      <item quantity="one">pirms <xliff:g id="COUNT_1">%d</xliff:g> dienas</item>
+      <item quantity="other">pirms <xliff:g id="COUNT_1">%d</xliff:g> dienām</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="zero">pirms <xliff:g id="COUNT_1">%d</xliff:g> gadiem</item>
+      <item quantity="one">pirms <xliff:g id="COUNT_1">%d</xliff:g> gada</item>
+      <item quantity="other">pirms <xliff:g id="COUNT_1">%d</xliff:g> gadiem</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="zero">pēc <xliff:g id="COUNT_1">%d</xliff:g> minūtēm</item>
+      <item quantity="one">pēc <xliff:g id="COUNT_1">%d</xliff:g> minūtes</item>
+      <item quantity="other">pēc <xliff:g id="COUNT_1">%d</xliff:g> minūtēm</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="zero">pēc <xliff:g id="COUNT_1">%d</xliff:g> stundām</item>
+      <item quantity="one">pēc <xliff:g id="COUNT_1">%d</xliff:g> stundas</item>
+      <item quantity="other">pēc <xliff:g id="COUNT_1">%d</xliff:g> stundām</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="zero">pēc <xliff:g id="COUNT_1">%d</xliff:g> dienām</item>
+      <item quantity="one">pēc <xliff:g id="COUNT_1">%d</xliff:g> dienas</item>
+      <item quantity="other">pēc <xliff:g id="COUNT_1">%d</xliff:g> dienām</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="zero">pēc <xliff:g id="COUNT_1">%d</xliff:g> gadiem</item>
+      <item quantity="one">pēc <xliff:g id="COUNT_1">%d</xliff:g> gada</item>
+      <item quantity="other">pēc <xliff:g id="COUNT_1">%d</xliff:g> gadiem</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video problēma"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Šis video nav derīgs straumēšanai uz šo ierīci."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nevar atskaņot šo video."</string>
@@ -977,8 +1017,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"Lietotne <xliff:g id="PROCESS">%1$s</xliff:g> pārtrauca darboties."</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> atkārtoti pārtrauc darboties"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> atkārtoti pārtrauc darboties"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Restartēt lietotni"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Atiestatīt un restartēt lietotni"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Sūtīt atsauksmes"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Aizvērt"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Nerādīt, līdz ierīce tiks restartēta"</string>
@@ -1531,12 +1571,11 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> tika dzēsts."</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Darbā: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Lai atspraustu šo ekrānu, pieskarieties pogai “Atpakaļ” un turiet to."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Lai atspraustu šo ekrānu, pieskarieties pogai “Kopsavilkums” un turiet to."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Lietotne ir piesprausta. Atspraušana šajā ierīcē nav atļauta."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atsl."</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atjaunināja administrators"</string>
@@ -1606,6 +1645,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS pieprasījums ir mainīts uz USSD pieprasījumu."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS pieprasījums ir mainīts uz jaunu SS pieprasījumu."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Darba profils"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB perifērijas ports"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB perifērijas ports"</string>
@@ -1644,8 +1687,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"Atspraust"</string>
     <string name="app_info" msgid="6856026610594615344">"Lietotnes informācija"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Rūpnīcas datu atiestatīšana ierīces neierobežotai izmantošanai"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pieskarieties, lai uzzinātu vairāk."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> atspējots"</string>
 </resources>

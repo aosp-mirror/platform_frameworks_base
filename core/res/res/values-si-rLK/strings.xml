@@ -893,6 +893,38 @@
       <item quantity="one">ව <xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
       <item quantity="other">ව <xliff:g id="COUNT_1">%d</xliff:g>කදී</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+      <item quantity="other">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one">පැය <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+      <item quantity="other">පැය <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one">දින <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+      <item quantity="other">දින <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one">වසර <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+      <item quantity="other">වසර <xliff:g id="COUNT_1">%d</xliff:g>කට පෙර</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+      <item quantity="other">මිනිත්තු <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">පැය <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+      <item quantity="other">පැය <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">දින <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+      <item quantity="other">දින <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">වසර <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+      <item quantity="other">වසර <xliff:g id="COUNT_1">%d</xliff:g>කින්</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"වීඩියෝ ගැටලුව"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"මේ වීඩියෝව මෙම උපාංගයට ප්‍රවාහනය සඳහා වලංගු නැත."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"මෙම වීඩියෝව ධාවනය කළ නොහැක."</string>
@@ -964,8 +996,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> නැවතී ඇත"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> නැවතෙමින් ඇත"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> නැවතෙමින් ඇත"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"යෙදුම නැවත ආරම්භ කරන්න"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"යෙදුම නැවත සකසා නැවත ආරම්භ කරන්න"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"ප්‍රතිපෝෂණය යවන්න"</string>
     <string name="aerr_close" msgid="2991640326563991340">"වසන්න"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"උපාංගය නැවත ආරම්භ වන තෙක් නිහඬ කරන්න"</string>
@@ -1514,7 +1546,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> මකා දමන ලදි"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"මෙම තිරය ඇමුණුම් ඉවත් කිරීමට, ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"මෙම තිරය ඇමුණුම් ඉවත් කිරීමට, දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලා ගෙන සිටින්න."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"යෙදුම අමුණා ඇත: ගැලවීමට මෙම උපාංගය මත ඉඩ දිය නොහැකිය.‍"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
@@ -1581,6 +1612,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ඉල්ලීම USSD ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ඉල්ලීම නව DIAL ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"කාර්යාල පැතිකඩ"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB පර්යන්ත තොට"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB පර්යන්ත තොට"</string>
@@ -1618,8 +1653,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"ගලවන්න"</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"සීමා කිරීම්වලින් තොරව මෙම උපාංගය භාවිත කිරීමට කර්මාන්ත ශාලා යළි සැකසීම"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"තව දැන ගැනීමට ස්පර්ශ කරන්න."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"අබල කළ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

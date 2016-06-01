@@ -921,6 +921,54 @@
       <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> let</item>
       <item quantity="one">za <xliff:g id="COUNT_0">%d</xliff:g> rok</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="few">před <xliff:g id="COUNT_1">%d</xliff:g> minutami</item>
+      <item quantity="many">před <xliff:g id="COUNT_1">%d</xliff:g> minuty</item>
+      <item quantity="other">před <xliff:g id="COUNT_1">%d</xliff:g> minutami</item>
+      <item quantity="one">před <xliff:g id="COUNT_0">%d</xliff:g> minutou</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="few">před <xliff:g id="COUNT_1">%d</xliff:g> hodinami</item>
+      <item quantity="many">před <xliff:g id="COUNT_1">%d</xliff:g> hodiny</item>
+      <item quantity="other">před <xliff:g id="COUNT_1">%d</xliff:g> hodinami</item>
+      <item quantity="one">před <xliff:g id="COUNT_0">%d</xliff:g> hodinou</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="few">před <xliff:g id="COUNT_1">%d</xliff:g> dny</item>
+      <item quantity="many">před <xliff:g id="COUNT_1">%d</xliff:g> dne</item>
+      <item quantity="other">před <xliff:g id="COUNT_1">%d</xliff:g> dny</item>
+      <item quantity="one">před <xliff:g id="COUNT_0">%d</xliff:g> dnem</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="few">před <xliff:g id="COUNT_1">%d</xliff:g> lety</item>
+      <item quantity="many">před <xliff:g id="COUNT_1">%d</xliff:g> roku</item>
+      <item quantity="other">před <xliff:g id="COUNT_1">%d</xliff:g> lety</item>
+      <item quantity="one">před <xliff:g id="COUNT_0">%d</xliff:g> rokem</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> minuty</item>
+      <item quantity="many">za <xliff:g id="COUNT_1">%d</xliff:g> minuty</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> minut</item>
+      <item quantity="one">za <xliff:g id="COUNT_0">%d</xliff:g> minutu</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> hodiny</item>
+      <item quantity="many">za <xliff:g id="COUNT_1">%d</xliff:g> hodiny</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> hodin</item>
+      <item quantity="one">za <xliff:g id="COUNT_0">%d</xliff:g> hodinu</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> dny</item>
+      <item quantity="many">za <xliff:g id="COUNT_1">%d</xliff:g> dne</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> dnů</item>
+      <item quantity="one">za <xliff:g id="COUNT_0">%d</xliff:g> den</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> roky</item>
+      <item quantity="many">za <xliff:g id="COUNT_1">%d</xliff:g> roku</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> let</item>
+      <item quantity="one">za <xliff:g id="COUNT_0">%d</xliff:g> rok</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Potíže s videem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Toto video nelze přenášet datovým proudem do tohoto zařízení."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nelze přehrát."</string>
@@ -992,8 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> přestal fungovat"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> pravidelně přestává fungovat"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Aplikace <xliff:g id="PROCESS">%1$s</xliff:g> pravidelně přestává fungovat"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Restartovat aplikaci"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Obnovit a restartovat aplikaci"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Znovu spustit aplikaci"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Odeslat zpětnou vazbu"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zavřít"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignorovat do restartu zařízení"</string>
@@ -1550,7 +1597,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"Číslice <xliff:g id="KEY">%1$s</xliff:g> byla smazána"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Pracovní <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Chcete-li tuto obrazovku uvolnit, klepněte na tlačítko Zpět a podržte jej."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Chcete-li tuto obrazovku uvolnit, klepněte na tlačítko Přehled a podržte jej."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikace je připnutá: Odepnutí v tomto zařízení není povoleno."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>
@@ -1633,6 +1679,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Požadavek SS byl změněn na požadavek USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Požadavek SS byl změněn na nový požadavek SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Pracovní profil"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Tlačítko rozbalení"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB pro periferní zařízení – Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB pro periferní zařízení"</string>
@@ -1672,8 +1721,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"Odepnout"</string>
     <string name="app_info" msgid="6856026610594615344">"Informace o aplikaci"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Restartujte relaci"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Klepnutím zahájíte novou demonstrační relaci"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Chcete-li toto zařízení používat bez omezení, obnovte jej do továrního nastavení"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Klepnutím zobrazíte další informace."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> – zakázáno"</string>
 </resources>
