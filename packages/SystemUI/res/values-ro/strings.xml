@@ -248,6 +248,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitări locație active"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ștergeți toate notificările."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Setări pentru notificări"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Setări <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ecranul se va roti în mod automat."</string>

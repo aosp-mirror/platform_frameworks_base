@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"စနစ်၏UI"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ရှင်းလင်းရန်"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ဖယ်ရှားရန်"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"စာရင်းမှ ဖယ်မည်"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"အပ်ပလီကေးရှင်း အချက်အလက်များ"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"သင်၏ မကြာမီက မျက်နှာပြင်များ ဒီမှာ ပေါ်လာကြမည်"</string>
@@ -245,6 +245,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"တည်နေရာပြ တောင်းဆိုချက်များ အသက်ဝင်ရန်"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"သတိပေးချက်အားလုံးအား ဖယ်ရှားခြင်း။"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"အကြောင်းကြားချက် ဆက်တင်များ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ဆက်တင်များ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ဖန်သားပြင်ပေါ်မှာ ပြသမှုက အလိုအလျောက် လှည့်သွားပါမည်"</string>
@@ -320,7 +321,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ရှာဖွေရန်"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ကို မစနိုင်ပါ။"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ကို ဘေးကင်းလုံခြုံသည့်မုဒ်တွင် ပိတ်ထားပါသည်။"</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"အားလုံး ရှင်းလင်းပါ"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"အားလုံး ဖယ်ရှားပါ"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"အက်ပ်သည် မျက်နှာပြင်ခွဲ၍ ပြသခြင်းကို ပံ့ပိုးမထားပါ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"မျက်နှာပြင် ခွဲခြမ်းပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ပွတ်၍ဆွဲထည့်ပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
@@ -387,7 +388,7 @@
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ဘက်ထရီ ချွေတာမှုကို ပိတ်ထားရန်"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> က သင်၏ မျက်နှာပြင် ပေါ်မှာ ပြသထားသည့် အရာတိုင်းကို စတင် ဖမ်းယူမည်။"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"နောက်ထပ် မပြပါနှင့်"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"အားလုံး ရှင်းလင်းရန်"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"အားလုံး ဖယ်ရှားရန်"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"အကြောင်းကြားချက်များ မရှိ"</string>
     <string name="device_owned_footer" msgid="3802752663326030053">"ကိရိယာကို စောင့်ကြပ် နိုင်ပါသည်"</string>
@@ -419,8 +420,8 @@
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"ခေါက်သိမ်းရန်..."</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"မျက်နှာပြင် ပင်ထိုးပြီးပါပြီ"</string>
     <string name="screen_pinning_description" msgid="7238941806855968768">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကိုပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' ကိုထိပြီး ဖိထားပါ။"</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"အဲဒါ ရပြီ"</string>
-    <string name="screen_pinning_negative" msgid="3741602308343880268">"မလို ကျေးဇူးပဲ"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"အဲဒါ ရပါပြီ"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"မလိုတော့ပါ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ဖျောက်ထားမည်"</string>

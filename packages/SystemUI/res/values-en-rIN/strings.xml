@@ -245,6 +245,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Location requests active"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Clear all notifications."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Notification settings"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> settings"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Screen will rotate automatically."</string>
@@ -316,7 +317,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"No recent items"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"You\'ve cleared everything"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Application Info"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen-pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is disabled in safe-mode."</string>
@@ -597,7 +598,7 @@
     <string name="preview" msgid="9077832302472282938">"Preview"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Drag to add tiles"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Drag here to remove"</string>
-    <string name="qs_edit" msgid="2232596095725105230">"(edit)"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Time"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Show hours, minutes and seconds"</item>
