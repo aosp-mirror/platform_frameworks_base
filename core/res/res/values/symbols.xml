@@ -2601,6 +2601,7 @@
 
   <!-- TV Remote Service package -->
   <java-symbol type="string" name="config_tvRemoteServicePackage" />
+  <java-symbol type="string" name="notification_messaging_title_template" />
 
   <java-symbol type="bool" name="config_supportPreRebootSecurityLogs" />
 
