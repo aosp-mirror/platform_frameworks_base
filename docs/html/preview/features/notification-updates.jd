@@ -16,7 +16,7 @@ trainingnavtop=true
   <li><a href="#direct">Direct Reply</a></li>
   <li><a href="#bundle">Bundled Notifications</a></li>
   <li><a href="#custom">Custom Views</a></li>
-  <li><a href="#style">Message Style</a></li>
+  <li><a href="#style">Messaging Style</a></li>
 </ol>
 
 </div>
@@ -378,14 +378,14 @@ Notification notification = new Notification.Builder()
 <h2 id="style">Messaging Style</h2>
 <p>
   Android N introduces a new API for customizing the style of a notification.
-  Using the <code>MessageStyle</code> class, you can change several of the
+  Using the <code>MessagingStyle</code> class, you can change several of the
   labels displayed on the notification, including the conversation title,
   additional messages, and the content view for the notification.
 </p>
 
 <p>
   The following code snippet demonstrates how to customize a notification's
-  style using the <code>MessageStyle</code> class.
+  style using the <code>MessagingStyle</code> class.
 </p>
 
 <pre>
