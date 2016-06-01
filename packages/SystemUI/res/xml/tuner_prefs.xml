@@ -91,13 +91,6 @@
             android:key="alarm_clock"
             android:title="@string/status_bar_alarm" />
 
-        <!-- secure -->
-
-        <com.android.systemui.tuner.ClockPreference
-            android:title="@string/tuner_time"
-            android:summary="%s"
-            android:entries="@array/clock_options" />
-
     </PreferenceScreen>
 
     <PreferenceScreen
