@@ -25,7 +25,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
 import android.telecom.PhoneAccount;
@@ -401,6 +400,20 @@ public class VoicemailContract {
          */
         public static final String SOURCE_PACKAGE = SOURCE_PACKAGE_FIELD;
 
+        /**
+         * The type of the source, which determines how to interpret source-specific states.
+         * Typically this will be set to the same string as
+         * {@link android.telephony.CarrierConfigManager#KEY_VVM_TYPE_STRING}. For example,
+         * "vvm_type_omtp".
+         *
+         * <P>Type: TEXT</P>
+         *
+         * @see #CONFIGURATION_STATE
+         * @see #DATA_CHANNEL_STATE
+         * @see #NOTIFICATION_CHANNEL_STATE
+         */
+        public static final String SOURCE_TYPE = "source_type";
+
         // Note: Multiple entries may exist for a single source if they are differentiated by the
         // PHONE_ACCOUNT_* fields.
 
@@ -433,6 +446,10 @@ public class VoicemailContract {
         public static final String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";
         /**
          * The configuration state of the voicemail source.
+         *
+         * <P>Negative values are reserved to the source for source-specific states, see
+         * {@link #SOURCE_TYPE}
+         *
          * <P> Possible values:
          * {@link #CONFIGURATION_STATE_OK},
          * {@link #CONFIGURATION_STATE_NOT_CONFIGURED},
@@ -440,14 +457,7 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String CONFIGURATION_STATE = "configuration_state";
-        /**
-         * Value of {@link #CONFIGURATION_STATE} passed into
-         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
-         * {@link #CONFIGURATION_STATE} field is not to be changed
-         *
-         * @hide
-         */
-        public static final int CONFIGURATION_STATE_IGNORE = -1;
+
         /** Value of {@link #CONFIGURATION_STATE} to indicate an all OK configuration status. */
         public static final int CONFIGURATION_STATE_OK = 0;
         /**
@@ -465,6 +475,10 @@ public class VoicemailContract {
         /**
          * The data channel state of the voicemail source. This the channel through which the source
          * pulls voicemail data from a remote server.
+         *
+         * <P>Negative values are reserved to the source for source-specific states, see
+         * {@link #SOURCE_TYPE}
+         *
          * <P> Possible values:
          * {@link #DATA_CHANNEL_STATE_OK},
          * {@link #DATA_CHANNEL_STATE_NO_CONNECTION}
@@ -472,14 +486,7 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String DATA_CHANNEL_STATE = "data_channel_state";
-        /**
-         * Value of {@link #DATA_CHANNEL_STATE} passed into
-         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
-         * {@link #DATA_CHANNEL_STATE} field is not to be changed
-         *
-         * @hide
-         */
-        public static final int DATA_CHANNEL_STATE_IGNORE = -1;
+
         /**
          *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel is working fine.
          */
@@ -519,6 +526,10 @@ public class VoicemailContract {
         /**
          * The notification channel state of the voicemail source. This is the channel through which
          * the source gets notified of new voicemails on the remote server.
+         *
+         * <P>Negative values are reserved to the source for source-specific states, see
+         * {@link #SOURCE_TYPE}
+         *
          * <P> Possible values:
          * {@link #NOTIFICATION_CHANNEL_STATE_OK},
          * {@link #NOTIFICATION_CHANNEL_STATE_NO_CONNECTION},
@@ -527,14 +538,7 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String NOTIFICATION_CHANNEL_STATE = "notification_channel_state";
-        /**
-         * Value of {@link #NOTIFICATION_CHANNEL_STATE} passed into
-         * {@link #setStatus(Context, PhoneAccountHandle, int, int, int)} to indicate that the
-         * {@link #NOTIFICATION_CHANNEL_STATE} field is not to be changed
-         *
-         * @hide
-         */
-        public static final int NOTIFICATION_CHANNEL_STATE_IGNORE = -1;
+
         /**
          * Value of {@link #NOTIFICATION_CHANNEL_STATE} to indicate that the notification channel is
          * working fine.
@@ -583,68 +587,6 @@ public class VoicemailContract {
         public static Uri buildSourceUri(String packageName) {
             return Status.CONTENT_URI.buildUpon()
                     .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
-        }
-
-        /**
-         * A helper method to set the status of a voicemail source.
-         *
-         * @param context The context from the package calling the method. This will be the source.
-         * @param accountHandle The handle for the account the source is associated with.
-         * @param configurationState See {@link Status#CONFIGURATION_STATE}
-         * @param dataChannelState See {@link Status#DATA_CHANNEL_STATE}
-         * @param notificationChannelState See {@link Status#NOTIFICATION_CHANNEL_STATE}
-         *
-         * @hide
-         */
-        public static void setStatus(Context context, PhoneAccountHandle accountHandle,
-                int configurationState, int dataChannelState, int notificationChannelState) {
-            ContentValues values = new ContentValues();
-            values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
-                    accountHandle.getComponentName().flattenToString());
-            values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
-            if(configurationState != CONFIGURATION_STATE_IGNORE) {
-                values.put(Status.CONFIGURATION_STATE, configurationState);
-            }
-            if(dataChannelState != DATA_CHANNEL_STATE_IGNORE) {
-                values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
-            }
-            if(notificationChannelState != NOTIFICATION_CHANNEL_STATE_IGNORE) {
-                values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
-            }
-            ContentResolver contentResolver = context.getContentResolver();
-            Uri statusUri = buildSourceUri(context.getPackageName());
-            contentResolver.insert(statusUri, values);
-        }
-
-        /**
-         * A helper method to set the quota of a voicemail source. Unit is unspecified.
-         *
-         * @param context The context from the package calling the method. This will be the source.
-         * @param accountHandle The handle for the account the source is associated with.
-         * @param occupied See {@link Status#QUOTA_OCCUPIED}
-         * @param total See {@link Status#QUOTA_TOTAL}
-         *
-         * @hide
-         */
-        public static void setQuota(Context context, PhoneAccountHandle accountHandle, int occupied,
-                int total) {
-            if (occupied == QUOTA_UNAVAILABLE && total == QUOTA_UNAVAILABLE) {
-                return;
-            }
-            ContentValues values = new ContentValues();
-            values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
-                    accountHandle.getComponentName().flattenToString());
-            values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
-            if (occupied != QUOTA_UNAVAILABLE) {
-                values.put(Status.QUOTA_OCCUPIED,occupied);
-            }
-            if (total != QUOTA_UNAVAILABLE) {
-                values.put(Status.QUOTA_TOTAL,total);
-            }
-
-            ContentResolver contentResolver = context.getContentResolver();
-            Uri statusUri = buildSourceUri(context.getPackageName());
-            contentResolver.insert(statusUri, values);
         }
     }
 }
