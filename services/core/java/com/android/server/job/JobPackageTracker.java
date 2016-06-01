@@ -105,6 +105,8 @@ public final class JobPackageTracker {
         final long mStartElapsedTime;
         final long mStartClockTime;
         long mSummedTime;
+        int mMaxTotalActive;
+        int mMaxFgActive;
 
         public DataSet(DataSet otherTimes) {
             mStartUptimeTime = otherTimes.mStartUptimeTime;
@@ -257,6 +259,12 @@ public final class JobPackageTracker {
                     }
                 }
             }
+            if (mMaxTotalActive > out.mMaxTotalActive) {
+                out.mMaxTotalActive = mMaxTotalActive;
+            }
+            if (mMaxFgActive > out.mMaxFgActive) {
+                out.mMaxFgActive = mMaxFgActive;
+            }
         }
 
         void printDuration(PrintWriter pw, long period, long duration, int count, String suffix) {
@@ -317,6 +325,9 @@ public final class JobPackageTracker {
                     pw.println();
                 }
             }
+            pw.print(prefix); pw.print("  Max concurrency: ");
+            pw.print(mMaxTotalActive); pw.print(" total, ");
+            pw.print(mMaxFgActive); pw.println(" foreground");
         }
     }
 
@@ -364,6 +375,15 @@ public final class JobPackageTracker {
         }
         rebatchIfNeeded(now);
         addEvent(EVENT_STOP_JOB, job.getSourceUid(), job.getBatteryName());
+    }
+
+    public void noteConcurrency(int totalActive, int fgActive) {
+        if (totalActive > mCurDataSet.mMaxTotalActive) {
+            mCurDataSet.mMaxTotalActive = totalActive;
+        }
+        if (fgActive > mCurDataSet.mMaxFgActive) {
+            mCurDataSet.mMaxFgActive = fgActive;
+        }
     }
 
     public float getLoadFactor(JobStatus job) {
