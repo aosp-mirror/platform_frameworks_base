@@ -2,10 +2,9 @@
     <shortcut
         android:shortcutId="ms1"
         android:enabled="true"
-        android:shortcutRank="1"
         android:shortcutIcon="@drawable/icon1"
-        android:shortcutTitle="@string/shortcut_title1"
-        android:shortcutText="@string/shortcut_text1"
+        android:shortcutShortLabel="@string/shortcut_title1"
+        android:shortcutLongLabel="@string/shortcut_text1"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message1"
         android:shortcutCategories="android.shortcut.conversation:android.shortcut.media"
         android:shortcutIntentAction="action1"
@@ -14,27 +13,26 @@
     <shortcut
         android:shortcutId="ms2"
         android:enabled="true"
-        android:shortcutRank="2"
         android:shortcutIcon="@drawable/icon2"
-        android:shortcutTitle="@string/shortcut_title2"
-        android:shortcutText="@string/shortcut_text2"
+        android:shortcutShortLabel="@string/shortcut_title2"
+        android:shortcutLongLabel="@string/shortcut_text2"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message2"
         android:shortcutCategories="android.shortcut.conversation"
         android:shortcutIntentAction="action2"
     />
     <shortcut
         android:shortcutId="ms3"
-        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
     <shortcut
         android:shortcutId="ms4"
-        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
     <shortcut
         android:shortcutId="ms5"
-        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
 </shortcuts>

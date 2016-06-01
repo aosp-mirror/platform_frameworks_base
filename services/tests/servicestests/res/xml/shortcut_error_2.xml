@@ -5,7 +5,7 @@
     />
     <shortcut
         android:shortcutId="x2"
-        android:shortcutTitle="@string/shortcut_title1"
+        android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
 </shortcuts>

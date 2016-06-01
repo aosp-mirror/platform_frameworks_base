@@ -2,10 +2,9 @@
     <shortcut
         android:shortcutId="ms1"
         android:enabled="true"
-        android:shortcutRank="1"
         android:shortcutIcon="@drawable/icon1"
-        android:shortcutTitle="@string/shortcut_title1"
-        android:shortcutText="@string/shortcut_text1"
+        android:shortcutShortLabel="@string/shortcut_title1"
+        android:shortcutLongLabel="@string/shortcut_text1"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message1"
         android:shortcutCategories="android.shortcut.conversation:android.shortcut.media"
         android:shortcutIntentAction="action1"
