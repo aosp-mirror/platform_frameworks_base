@@ -98,6 +98,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mDark;
 
     private int mBgTint = 0;
+    private float mBgAlpha = 1f;
 
     /**
      * Flag to indicate that the notification has been touched once and the second touch will
@@ -392,6 +393,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     public void setDimmed(boolean dimmed, boolean fade) {
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
+            resetBackgroundAlpha();
             if (fade) {
                 fadeDimmedBackground();
             } else {
@@ -594,14 +596,28 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundAnimator.start();
     }
 
+    protected void updateBackgroundAlpha(float transformationAmount) {
+        mBgAlpha = isChildInGroup() && mDimmed ? transformationAmount : 1f;
+        mBackgroundDimmed.setAlpha(mBgAlpha);
+    }
+
+    protected void resetBackgroundAlpha() {
+        updateBackgroundAlpha(0f /* transformationAmount */);
+    }
+
     protected void updateBackground() {
         cancelFadeAnimations();
         if (shouldHideBackground()) {
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else if (mDimmed) {
-            mBackgroundDimmed.setVisibility(View.VISIBLE);
-            mBackgroundNormal.setVisibility(mActivated ? View.VISIBLE : View.INVISIBLE);
+            // When groups are animating to the expanded state from the lockscreen, show the
+            // normal background instead of the dimmed background
+            final boolean dontShowDimmed = isGroupExpansionChanging() && isChildInGroup();
+            mBackgroundDimmed.setVisibility(dontShowDimmed ? View.INVISIBLE : View.VISIBLE);
+            mBackgroundNormal.setVisibility((mActivated || dontShowDimmed)
+                    ? View.VISIBLE
+                    : View.INVISIBLE);
         } else {
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
@@ -876,6 +892,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public void reset() {
         setTintColor(0);
+        resetBackgroundAlpha();
         setShowingLegacyBackground(false);
         setBelowSpeedBump(false);
     }
