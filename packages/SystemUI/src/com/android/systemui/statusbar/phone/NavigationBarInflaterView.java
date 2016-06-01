@@ -26,7 +26,9 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Space;
+
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
 
@@ -219,7 +221,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         String button = extractButton(buttonSpec);
         View v = null;
         if (HOME.equals(button)) {
-            v = inflater.inflate(R.layout.home, parent, false);
+            v = inflater.inflate(SystemUIFactory.getInstance().getHomeLayoutId(), parent, false);
             if (landscape && isSw600Dp()) {
                 setupLandButton(v);
             }

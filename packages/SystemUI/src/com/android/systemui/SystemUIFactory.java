@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -114,5 +115,12 @@ public class SystemUIFactory {
 
     public <T> T createInstance(Class<T> classType) {
         return null;
+    }
+
+    /**
+     * @return The id for the home button layout.
+     */
+    public int getHomeLayoutId() {
+        return R.layout.home;
     }
 }
