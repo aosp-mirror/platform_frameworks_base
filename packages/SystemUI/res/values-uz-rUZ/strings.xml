@@ -247,6 +247,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Joylashuv so‘rovlari yoniq"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Barcha eslatmalarni tozalash."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Bildirishnoma sozlamalari"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> sozlamalari"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran avtomatik buriladi."</string>
@@ -278,7 +279,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv xizmati o‘chiq"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Favqulodda qo‘ng‘iroqlar"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Favqulodda chaqiruvlar"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Sozlamalar"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Vaqt"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Men"</string>
@@ -535,7 +536,7 @@
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Backspace"</string>
     <string name="keyboard_key_media_play_pause" msgid="3861975717393887428">"Ijro/Pauza"</string>
     <string name="keyboard_key_media_stop" msgid="2859963958595908962">"To‘xtatish"</string>
-    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Keyingi"</string>
+    <string name="keyboard_key_media_next" msgid="1894394911630345607">"Keyingisi"</string>
     <string name="keyboard_key_media_previous" msgid="4256072387192967261">"Avvalgi"</string>
     <string name="keyboard_key_media_rewind" msgid="2654808213360820186">"Orqaga qaytarish"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3849417047738200605">"Oldinga o‘tkazish"</string>
