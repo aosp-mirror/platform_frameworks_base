@@ -242,7 +242,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Маштаб перадачы анімацыі"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Шкала працягласці анiматара"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Мадэляванне другасных дысплеяў"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"Прыкладаннi"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Праграмы"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не захоўваць дзеянні"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Знішч. кож.дзеянне, як толькі карыст.пакідае яго"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ліміт фонавага працэсу"</string>
