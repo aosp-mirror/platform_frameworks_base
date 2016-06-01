@@ -94,9 +94,18 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="4dp"
         android:layout_marginStart="4dp"
-        android:orientation="vertical"
-        android:paddingBottom="@dimen/zen_mode_condition_detail_bottom_padding" />
-
+        android:paddingBottom="@dimen/zen_mode_condition_detail_bottom_padding"
+        android:orientation="horizontal" >
+            <RadioGroup
+                    android:id="@+id/zen_radio_buttons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            <LinearLayout
+                    android:id="@+id/zen_radio_buttons_content"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:orientation="vertical"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/zen_alarm_warning"
