@@ -227,7 +227,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         updateSendButton();
     }
 
-    public void onNotificationUpdate() {
+    public void onNotificationUpdateOrReset() {
         boolean sending = mProgressBar.getVisibility() == VISIBLE;
 
         if (sending) {
