@@ -85,6 +85,8 @@ public class ShortcutParser {
 
             int type;
 
+            int rank = 0;
+
             outer:
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                     && (type != XmlPullParser.END_TAG || parser.getDepth() > 0)) {
@@ -99,7 +101,7 @@ public class ShortcutParser {
                 }
                 if (depth == 2 && TAG_SHORTCUT.equals(tag)) {
                     final ShortcutInfo si = parseShortcutAttributes(
-                            service, attrs, packageName, activity, userId);
+                            service, attrs, packageName, activity, userId, rank++);
                     if (ShortcutService.DEBUG) {
                         Slog.d(TAG, "Shortcut=" + si);
                     }
@@ -132,16 +134,15 @@ public class ShortcutParser {
 
     private static ShortcutInfo parseShortcutAttributes(ShortcutService service,
             AttributeSet attrs, String packageName, ComponentName activity,
-            @UserIdInt int userId) {
+            @UserIdInt int userId, int rank) {
         final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
                 R.styleable.Shortcut);
         try {
             final String id = sa.getString(R.styleable.Shortcut_shortcutId);
             final boolean enabled = sa.getBoolean(R.styleable.Shortcut_enabled, true);
-            final int rank = sa.getInt(R.styleable.Shortcut_shortcutRank, 0);
             final int iconResId = sa.getResourceId(R.styleable.Shortcut_shortcutIcon, 0);
-            final int titleResId = sa.getResourceId(R.styleable.Shortcut_shortcutTitle, 0);
-            final int textResId = sa.getResourceId(R.styleable.Shortcut_shortcutText, 0);
+            final int titleResId = sa.getResourceId(R.styleable.Shortcut_shortcutShortLabel, 0);
+            final int textResId = sa.getResourceId(R.styleable.Shortcut_shortcutLongLabel, 0);
             final int disabledMessageResId = sa.getResourceId(
                     R.styleable.Shortcut_shortcutDisabledMessage, 0);
             final String categories = sa.getString(R.styleable.Shortcut_shortcutCategories);
