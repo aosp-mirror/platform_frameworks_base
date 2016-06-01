@@ -32,6 +32,7 @@ import com.android.internal.widget.FloatingToolbar;
 import java.util.List;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -1588,31 +1589,27 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                                 mPrimaryActionModeView.getApplicationWindowToken(),
                                 Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
                         endOnGoingFadeAnimation();
-                        mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA,
-                                0f, 1f);
-                        mFadeAnim.addListener(new Animator.AnimatorListener() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                mPrimaryActionModeView.setVisibility(VISIBLE);
-                            }
 
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                mPrimaryActionModeView.setAlpha(1f);
-                                mFadeAnim = null;
-                            }
+                        if (shouldAnimatePrimaryActionModeView()) {
+                            mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA,
+                                    0f, 1f);
+                            mFadeAnim.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    mPrimaryActionModeView.setVisibility(VISIBLE);
+                                }
 
-                            @Override
-                            public void onAnimationCancel(Animator animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animator animation) {
-
-                            }
-                        });
-                        mFadeAnim.start();
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    mPrimaryActionModeView.setAlpha(1f);
+                                    mFadeAnim = null;
+                                }
+                            });
+                            mFadeAnim.start();
+                        } else {
+                            mPrimaryActionModeView.setAlpha(1f);
+                            mPrimaryActionModeView.setVisibility(VISIBLE);
+                        }
                     }
                 };
             } else {
@@ -1646,33 +1643,34 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (mPrimaryActionModePopup != null) {
             post(mShowPrimaryActionModePopup);
         } else {
-            mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA, 0f, 1f);
-            mFadeAnim.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mPrimaryActionModeView.setVisibility(View.VISIBLE);
-                }
+            if (shouldAnimatePrimaryActionModeView()) {
+                mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA, 0f, 1f);
+                mFadeAnim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        mPrimaryActionModeView.setVisibility(View.VISIBLE);
+                    }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mPrimaryActionModeView.setAlpha(1f);
-                    mFadeAnim = null;
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            mFadeAnim.start();
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        mPrimaryActionModeView.setAlpha(1f);
+                        mFadeAnim = null;
+                    }
+                });
+                mFadeAnim.start();
+            } else {
+                mPrimaryActionModeView.setAlpha(1f);
+                mPrimaryActionModeView.setVisibility(View.VISIBLE);
+            }
         }
         mPrimaryActionModeView.sendAccessibilityEvent(
                 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+    }
+
+    boolean shouldAnimatePrimaryActionModeView() {
+        // We only to animate the action mode in if the decor has already been laid out.
+        // If it hasn't been laid out, it hasn't been drawn to screen yet.
+        return isLaidOut();
     }
 
     private ActionMode createFloatingActionMode(
