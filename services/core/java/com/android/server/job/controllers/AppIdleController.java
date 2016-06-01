@@ -18,6 +18,7 @@ package com.android.server.job.controllers;
 
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -42,6 +43,7 @@ public class AppIdleController extends StateController {
     private static volatile AppIdleController sController;
     private final JobSchedulerService mJobSchedulerService;
     private final UsageStatsManagerInternal mUsageStatsInternal;
+    private boolean mInitializedParoleOn;
     boolean mAppIdleParoleOn;
 
     final class GlobalUpdateFunc implements JobStore.JobStatusFunctor {
@@ -100,12 +102,16 @@ public class AppIdleController extends StateController {
         super(service, context, lock);
         mJobSchedulerService = service;
         mUsageStatsInternal = LocalServices.getService(UsageStatsManagerInternal.class);
-        mAppIdleParoleOn = mUsageStatsInternal.isAppIdleParoleOn();
+        mAppIdleParoleOn = true;
         mUsageStatsInternal.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
     }
 
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
+        if (!mInitializedParoleOn) {
+            mInitializedParoleOn = true;
+            mAppIdleParoleOn = mUsageStatsInternal.isAppIdleParoleOn();
+        }
         String packageName = jobStatus.getSourcePackageName();
         final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
                 jobStatus.getSourceUid(), jobStatus.getSourceUserId());
@@ -122,21 +128,24 @@ public class AppIdleController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(final PrintWriter pw, final int filterUid) {
-        pw.println("AppIdle");
-        pw.println("Parole On: " + mAppIdleParoleOn);
+        pw.print("AppIdle: parole on = ");
+        pw.println(mAppIdleParoleOn);
         mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
             @Override public void process(JobStatus jobStatus) {
                 // Skip printing details if the caller requested a filter
                 if (!jobStatus.shouldDump(filterUid)) {
                     return;
                 }
-                pw.print("  ");
+                pw.print("  #");
+                jobStatus.printUniqueId(pw);
+                pw.print(" from ");
+                UserHandle.formatUid(pw, jobStatus.getSourceUid());
+                pw.print(": ");
                 pw.print(jobStatus.getSourcePackageName());
-                pw.print(": runnable=");
+                pw.print(", runnable=");
                 pw.println((jobStatus.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0);
             }
         });
-        pw.println();
     }
 
     void setAppIdleParoleOn(boolean isAppIdleParoleOn) {

@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.am.ActivityManagerService;
@@ -191,15 +192,19 @@ public class IdleController extends StateController {
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         pw.print("Idle: ");
         pw.println(mIdleTracker.isIdle() ? "true" : "false");
-        pw.println(mTrackedTasks.size());
+        pw.print("Tracking ");
+        pw.print(mTrackedTasks.size());
+        pw.println(":");
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.get(i);
             if (!js.shouldDump(filterUid)) {
                 continue;
             }
-            pw.print("  ");
-            pw.print(String.valueOf(js.getJobId() + "," + js.getUid()));
-            pw.println("..");
+            pw.print("  #");
+            js.printUniqueId(pw);
+            pw.print(" from ");
+            UserHandle.formatUid(pw, js.getSourceUid());
+            pw.println();
         }
     }
 }

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.TimeUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -323,23 +324,17 @@ public class ContentObserverController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.println("Content.");
-        boolean printed = false;
+        pw.println("Content:");
         Iterator<JobStatus> it = mTrackedTasks.iterator();
         while (it.hasNext()) {
             JobStatus js = it.next();
             if (!js.shouldDump(filterUid)) {
                 continue;
             }
-            if (!printed) {
-                pw.print("  ");
-                printed = true;
-            } else {
-                pw.print(",");
-            }
-            pw.print(System.identityHashCode(js));
-        }
-        if (printed) {
+            pw.print("  #");
+            js.printUniqueId(pw);
+            pw.print(" from ");
+            UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
         int N = mObservers.size();
@@ -367,8 +362,10 @@ public class ContentObserverController extends StateController {
                 pw.println("      Jobs:");
                 for (int j=0; j<M; j++) {
                     JobInstance inst = obs.mJobs.valueAt(j);
-                    pw.print("        ");
-                    pw.print(System.identityHashCode(inst.mJobStatus));
+                    pw.print("        #");
+                    inst.mJobStatus.printUniqueId(pw);
+                    pw.print(" from ");
+                    UserHandle.formatUid(pw, inst.mJobStatus.getSourceUid());
                     if (inst.mChangedAuthorities != null) {
                         pw.println(":");
                         if (inst.mTriggerPending) {
