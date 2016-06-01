@@ -53,7 +53,7 @@ private:
 typedef void (*TestBakedOpReceiver)(BakedOpRenderer&, const BakedOpState&);
 
 static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, RecordedOp* op,
-        std::function<void(const Glop& glop)> glopVerifier) {
+        std::function<void(const Glop& glop)> glopVerifier, int expectedGlopCount = 1) {
     // Create op, and wrap with basic state.
     LinearAllocator allocator;
     auto snapshot = TestUtils::makeSnapshot(Matrix4::identity(), Rect(100, 100));
@@ -61,8 +61,8 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
     ASSERT_NE(nullptr, state);
 
     int glopCount = 0;
-    auto glopReceiver = [&glopVerifier, &glopCount] (const Glop& glop) {
-        ASSERT_EQ(glopCount++, 0) << "Only one Glop expected";
+    auto glopReceiver = [&glopVerifier, &glopCount, &expectedGlopCount] (const Glop& glop) {
+        ASSERT_LE(glopCount++, expectedGlopCount) << expectedGlopCount << "glop(s) expected";
         glopVerifier(glop);
     };
     ValidatingBakedOpRenderer renderer(renderThread.renderState(), glopReceiver);
@@ -75,7 +75,8 @@ static void testUnmergedGlopDispatch(renderthread::RenderThread& renderThread, R
     static TestBakedOpReceiver unmergedReceivers[] = BUILD_RENDERABLE_OP_LUT(X);
 #undef X
     unmergedReceivers[op->opId](renderer, *state);
-    ASSERT_EQ(1, glopCount) << "Exactly one Glop expected";
+    ASSERT_EQ(expectedGlopCount, glopCount) << "Exactly " << expectedGlopCount
+            << "Glop(s) expected";
 }
 
 RENDERTHREAD_TEST(BakedOpDispatcher, pathTexture_positionOvalArc) {
@@ -119,12 +120,8 @@ RENDERTHREAD_TEST(BakedOpDispatcher, onLayerOp_bufferless) {
     OffscreenBuffer* buffer = nullptr; // no providing a buffer, should hit rect fallback case
     LayerOp op(Rect(10, 10), Matrix4::identity(), nullptr, &layerPaint, &buffer);
     testUnmergedGlopDispatch(renderThread, &op, [&renderThread] (const Glop& glop) {
-        // rect glop is dispatched with paint props applied
-        EXPECT_EQ(renderThread.renderState().meshState().getUnitQuadVBO(),
-                glop.mesh.vertices.bufferObject) << "Unit quad should be drawn";
-        EXPECT_EQ(nullptr, glop.fill.texture.texture) << "Should be no texture when layer is null";
-        EXPECT_FLOAT_EQ(128 / 255.0f, glop.fill.color.a) << "Rect quad should use op alpha";
-    });
+        ADD_FAILURE() << "Nothing should happen";
+    }, 0);
 }
 
 static int getGlopTransformFlags(renderthread::RenderThread& renderThread, RecordedOp* op) {
