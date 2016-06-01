@@ -17,7 +17,11 @@
 #ifndef AAPT_COMPILE_IDASSIGNER_H
 #define AAPT_COMPILE_IDASSIGNER_H
 
+#include "Resource.h"
 #include "process/IResourceTableConsumer.h"
+
+#include <android-base/macros.h>
+#include <unordered_map>
 
 namespace aapt {
 
@@ -25,8 +29,17 @@ namespace aapt {
  * Assigns IDs to each resource in the table, respecting existing IDs and filling in gaps
  * in between fixed ID assignments.
  */
-struct IdAssigner : public IResourceTableConsumer {
+class IdAssigner : public IResourceTableConsumer {
+public:
+    IdAssigner() = default;
+    explicit IdAssigner(const std::unordered_map<ResourceName, ResourceId>* map) :
+            mAssignedIdMap(map) {
+    }
+
     bool consume(IAaptContext* context, ResourceTable* table) override;
+
+private:
+    const std::unordered_map<ResourceName, ResourceId>* mAssignedIdMap = nullptr;
 };
 
 } // namespace aapt

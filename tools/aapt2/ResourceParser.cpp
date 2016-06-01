@@ -589,17 +589,14 @@ bool ResourceParser::parsePublic(xml::XmlPullParser* parser, ParsedResource* out
 
     outResource->name.type = *parsedType;
 
-    if (Maybe<StringPiece> maybeId = xml::findNonEmptyAttribute(parser, "id")) {
-        android::Res_value val;
-        std::u16string idStr16 = util::utf8ToUtf16(maybeId.value());
-        bool result = android::ResTable::stringToInt(idStr16.data(), idStr16.size(), &val);
-        ResourceId resourceId(val.data);
-        if (!result || !resourceId.isValid()) {
+    if (Maybe<StringPiece> maybeIdStr = xml::findNonEmptyAttribute(parser, "id")) {
+        Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(maybeIdStr.value());
+        if (!maybeId) {
             mDiag->error(DiagMessage(outResource->source)
                          << "invalid resource ID '" << maybeId.value() << "' in <public>");
             return false;
         }
-        outResource->id = resourceId;
+        outResource->id = maybeId.value();
     }
 
     if (*parsedType == ResourceType::kId) {
@@ -626,22 +623,21 @@ bool ResourceParser::parsePublicGroup(xml::XmlPullParser* parser, ParsedResource
         return false;
     }
 
-    Maybe<StringPiece> maybeId = xml::findNonEmptyAttribute(parser, "first-id");
-    if (!maybeId) {
+    Maybe<StringPiece> maybeIdStr = xml::findNonEmptyAttribute(parser, "first-id");
+    if (!maybeIdStr) {
         mDiag->error(DiagMessage(outResource->source)
                      << "<public-group> must have a 'first-id' attribute");
         return false;
     }
 
-    android::Res_value val;
-    std::u16string idStr16 = util::utf8ToUtf16(maybeId.value());
-    bool result = android::ResTable::stringToInt(idStr16.data(), idStr16.size(), &val);
-    ResourceId nextId(val.data);
-    if (!result || !nextId.isValid()) {
+    Maybe<ResourceId> maybeId = ResourceUtils::tryParseResourceId(maybeIdStr.value());
+    if (!maybeId) {
         mDiag->error(DiagMessage(outResource->source)
-                     << "invalid resource ID '" << maybeId.value() << "' in <public-group>");
+                     << "invalid resource ID '" << maybeIdStr.value() << "' in <public-group>");
         return false;
     }
+
+    ResourceId nextId = maybeId.value();
 
     std::string comment;
     bool error = false;

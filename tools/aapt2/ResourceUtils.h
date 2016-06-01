@@ -85,6 +85,11 @@ bool isAttributeReference(const StringPiece& str);
 bool tryParseBool(const StringPiece& str, bool* outValue);
 
 /**
+ * Returns an ID if it the string represented a valid ID.
+ */
+Maybe<ResourceId> tryParseResourceId(const StringPiece& str);
+
+/**
  * Parses an SDK version, which can be an integer, or a letter from A-Z.
  */
 Maybe<int> tryParseSdkVersion(const StringPiece& str);
