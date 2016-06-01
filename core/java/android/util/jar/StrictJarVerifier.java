@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import android.util.apk.ApkSignatureSchemeV2Verifier;
 import libcore.io.Base64;
 import sun.security.jca.Providers;
 import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.SignerInfo;
 
 /**
  * Non-public class used by {@link JarFile} and {@link JarInputStream} to manage
@@ -308,18 +310,29 @@ class StrictJarVerifier {
 
             obj = Providers.startJarVerification();
             PKCS7 block = new PKCS7(blockBytes);
-            if (block.verify(sfBytes) == null) {
-                throw new GeneralSecurityException("Failed to verify signature");
+            SignerInfo[] verifiedSignerInfos = block.verify(sfBytes);
+            if ((verifiedSignerInfos == null) || (verifiedSignerInfos.length == 0)) {
+                throw new GeneralSecurityException(
+                        "Failed to verify signature: no verified SignerInfos");
             }
-            X509Certificate[] blockCerts = block.getCertificates();
-            Certificate[] signerCertChain = null;
-            if (blockCerts != null) {
-                signerCertChain = new Certificate[blockCerts.length];
-                for (int i = 0; i < blockCerts.length; ++i) {
-                    signerCertChain[i] = blockCerts[i];
-                }
+            // Ignore any SignerInfo other than the first one, to be compatible with older Android
+            // platforms which have been doing this for years. See
+            // libcore/luni/src/main/java/org/apache/harmony/security/utils/JarUtils.java
+            // verifySignature method of older platforms.
+            SignerInfo verifiedSignerInfo = verifiedSignerInfos[0];
+            List<X509Certificate> verifiedSignerCertChain =
+                    verifiedSignerInfo.getCertificateChain(block);
+            if (verifiedSignerCertChain == null) {
+                // Should never happen
+                throw new GeneralSecurityException(
+                    "Failed to find verified SignerInfo certificate chain");
+            } else if (verifiedSignerCertChain.isEmpty()) {
+                // Should never happen
+                throw new GeneralSecurityException(
+                    "Verified SignerInfo certificate chain is emtpy");
             }
-            return signerCertChain;
+            return verifiedSignerCertChain.toArray(
+                    new X509Certificate[verifiedSignerCertChain.size()]);
         } catch (IOException e) {
             throw new GeneralSecurityException("IO exception verifying jar cert", e);
         } finally {
