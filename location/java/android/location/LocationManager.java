@@ -2008,7 +2008,7 @@ public class LocationManager {
      * No-op method to keep backward-compatibility.
      * Don't use it. Use {@link #registerGnssMeasurementsCallback} instead.
      * @hide
-     * @deprecated
+     * @deprecated Not supported anymore.
      */
     @Deprecated
     @SystemApi
@@ -2065,7 +2065,7 @@ public class LocationManager {
      * No-op method to keep backward-compatibility.
      * Don't use it. Use {@link #registerGnssNavigationMessageCallback} instead.
      * @hide
-     * @deprecated
+     * @deprecated Not supported anymore.
      */
     @Deprecated
     @SystemApi
