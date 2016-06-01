@@ -187,7 +187,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi dinonaktifkan."</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi diaktifkan."</string>
-    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Seluler <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Ponsel <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Baterai <xliff:g id="STATE">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Mode pesawat nonaktif."</string>
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Mode pesawat aktif."</string>
@@ -245,6 +245,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Permintaan lokasi aktif"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Menghapus semua pemberitahuan."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Setelan pemberitahuan"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> setelan"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Layar akan diputar secara otomatis."</string>
@@ -378,7 +379,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Keluarkan pengguna saat ini"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"KELUARKAN PENGGUNA"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Tambahkan pengguna baru?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\n1Pengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Saat Anda menambahkan pengguna baru, orang tersebut perlu menyiapkan ruangnya sendiri.\n\nPengguna mana pun dapat memperbarui aplikasi untuk semua pengguna lain."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Hapus pengguna?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Semua aplikasi dan data pengguna ini akan dihapus."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Hapus"</string>
