@@ -1735,7 +1735,7 @@ public class NotificationPanelView extends PanelView implements
 
     public void onQsHeightChanged() {
         mQsMaxExpansionHeight = mQsContainer.getDesiredHeight();
-        if (mQsExpanded) {
+        if (mQsExpanded && mQsFullyExpanded) {
             mQsExpansionHeight = mQsMaxExpansionHeight;
             requestScrollerTopPaddingUpdate(false /* animate */);
             requestPanelHeightUpdate();
