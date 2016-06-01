@@ -66,10 +66,10 @@ public class TileQueryHelper {
             if (tile == null || !tile.isAvailable()) {
                 continue;
             }
-            tile.setListening(true);
+            tile.setListening(this, true);
             tile.clearState();
             tile.refreshState();
-            tile.setListening(false);
+            tile.setListening(this, false);
             qsHandler.post(new Runnable() {
                 @Override
                 public void run() {

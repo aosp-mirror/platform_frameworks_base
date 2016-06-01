@@ -55,6 +55,7 @@ public class QuickQSPanel extends QSPanel {
             removeView((View) mTileLayout);
         }
         mTileLayout = new HeaderTileLayout(context);
+        mTileLayout.setListening(mListening);
         addView((View) mTileLayout, 1 /* Between brightness and footer */);
     }
 
@@ -147,6 +148,7 @@ public class QuickQSPanel extends QSPanel {
 
         private final Space mEndSpacer;
         protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+        private boolean mListening;
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -176,6 +178,15 @@ public class QuickQSPanel extends QSPanel {
         }
 
         @Override
+        public void setListening(boolean listening) {
+            if (mListening == listening) return;
+            mListening = listening;
+            for (TileRecord record : mRecords) {
+                record.tile.setListening(this, mListening);
+            }
+        }
+
+        @Override
         public void addTile(TileRecord tile) {
             addView(tile.tileView, getChildCount() - 1 /* Leave icon at end */,
                     generateLayoutParams());
@@ -183,6 +194,7 @@ public class QuickQSPanel extends QSPanel {
             addView(new Space(mContext), getChildCount() - 1 /* Leave icon at end */,
                     generateSpaceParams());
             mRecords.add(tile);
+            tile.tile.setListening(this, mListening);
         }
 
         private LayoutParams generateSpaceParams() {
@@ -208,6 +220,7 @@ public class QuickQSPanel extends QSPanel {
             // Remove its spacer as well.
             removeViewAt(childIndex);
             mRecords.remove(tile);
+            tile.tile.setListening(this, false);
         }
 
         private int getChildIndex(QSTileBaseView tileView) {
