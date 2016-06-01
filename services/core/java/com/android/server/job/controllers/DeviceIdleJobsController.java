@@ -180,13 +180,16 @@ public class DeviceIdleJobsController extends StateController {
                 if (!jobStatus.shouldDump(filterUid)) {
                     return;
                 }
-                pw.print("  ");
+                pw.print("  #");
+                jobStatus.printUniqueId(pw);
+                pw.print(" from ");
+                UserHandle.formatUid(pw, jobStatus.getSourceUid());
+                pw.print(": ");
                 pw.print(jobStatus.getSourcePackageName());
-                pw.print(": runnable=");
+                pw.print(", runnable=");
                 pw.println((jobStatus.satisfiedConstraints
                         & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
             }
         });
-        pw.println();
     }
 }

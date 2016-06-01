@@ -192,7 +192,8 @@ public class JobInfo implements Parcelable {
     private final int flags;
 
     /**
-     * Unique job id associated with this class. This is assigned to your job by the scheduler.
+     * Unique job id associated with this application (uid).  This is the same job ID
+     * you supplied in the {@link Builder} constructor.
      */
     public int getId() {
         return jobId;
@@ -524,9 +525,9 @@ public class JobInfo implements Parcelable {
 
     /** Builder class for constructing {@link JobInfo} objects. */
     public static final class Builder {
-        private int mJobId;
+        private final int mJobId;
+        private final ComponentName mJobService;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
-        private ComponentName mJobService;
         private int mPriority = PRIORITY_DEFAULT;
         private int mFlags;
         // Requirements.
@@ -553,11 +554,15 @@ public class JobInfo implements Parcelable {
         private boolean mBackoffPolicySet = false;
 
         /**
+         * Initialize a new Builder to construct a {@link JobInfo}.
+         *
          * @param jobId Application-provided id for this job. Subsequent calls to cancel, or
-         *               jobs created with the same jobId, will update the pre-existing job with
-         *               the same id.
+         * jobs created with the same jobId, will update the pre-existing job with
+         * the same id.  This ID must be unique across all clients of the same uid
+         * (not just the same package).  You will want to make sure this is a stable
+         * id across app updates, so probably not based on a resource ID.
          * @param jobService The endpoint that you implement that will receive the callback from the
-         *            JobScheduler.
+         * JobScheduler.
          */
         public Builder(int jobId, ComponentName jobService) {
             mJobService = jobService;
