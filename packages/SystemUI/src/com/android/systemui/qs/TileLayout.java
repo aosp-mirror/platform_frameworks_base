@@ -25,6 +25,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;
+    private boolean mListening;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -41,18 +42,32 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         return getTop();
     }
 
+    @Override
+    public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
+        for (TileRecord record : mRecords) {
+            record.tile.setListening(this, mListening);
+        }
+    }
+
     public void addTile(TileRecord tile) {
         mRecords.add(tile);
+        tile.tile.setListening(this, mListening);
         addView(tile.tileView);
     }
 
     @Override
     public void removeTile(TileRecord tile) {
         mRecords.remove(tile);
+        tile.tile.setListening(this, false);
         removeView(tile.tileView);
     }
 
     public void removeAllViews() {
+        for (TileRecord record : mRecords) {
+            record.tile.setListening(this, false);
+        }
         mRecords.clear();
         super.removeAllViews();
     }
