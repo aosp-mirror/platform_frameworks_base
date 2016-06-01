@@ -1617,7 +1617,7 @@
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
     <!-- no translation found for expand_button_content_description (5855955413376384681) -->
     <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Надворешна порта на УСБ за Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

@@ -891,14 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال میں</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> سال میں</item>
     </plurals>
-    <!-- no translation found for duration_minutes_relative (3178131706192980192) -->
-    <!-- no translation found for duration_hours_relative (676894109982008411) -->
-    <!-- no translation found for duration_days_relative (2203515825765397130) -->
-    <!-- no translation found for duration_years_relative (4820062134188885734) -->
-    <!-- no translation found for duration_minutes_relative_future (4655043589817680966) -->
-    <!-- no translation found for duration_hours_relative_future (8084579714205223891) -->
-    <!-- no translation found for duration_days_relative_future (333215369363433992) -->
-    <!-- no translation found for duration_years_relative_future (8644862986413104011) -->
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> منٹ قبل</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> منٹ قبل</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> گھنٹے قبل</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> گھنٹہ قبل</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دن قبل</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دن قبل</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال قبل</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> سال قبل</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> منٹ میں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> منٹ میں</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> گھنٹے میں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> گھنٹہ میں</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دن میں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دن میں</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال میں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> سال میں</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"ویڈیو مسئلہ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"یہ ویڈیو اس آلہ پر سلسلہ بندی کیلئے درست نہیں ہے۔"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"یہ ویڈیو نہیں چل سکتا۔"</string>
@@ -970,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> بند ہو گیا ہے"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> بار بار بند ہوتی ہے"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> بار بار بند ہوتی ہے"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"ایپ دوبارہ کھولیں"</string>
     <string name="aerr_report" msgid="5371800241488400617">"تاثرات بھیجیں"</string>
     <string name="aerr_close" msgid="2991640326563991340">"بند کریں"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"آلہ دوبارہ اسٹارٹ ہونے تک خاموش رکھیں"</string>
@@ -1589,9 +1612,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏SS درخواست میں ترمیم کر کے USSD درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏SS درخواست میں ترمیم کر کے نئی SS درخواست بنا دی گئی ہے۔"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"دفتری پروفائل"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"پھیلائیں بٹن"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏Android USB پیرفرل پورٹ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
@@ -1630,10 +1652,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"پن ہٹائیں"</string>
     <string name="app_info" msgid="6856026610594615344">"ایپ کی معلومات"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
-    <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
-    <skip />
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"سیشن دوبارہ شروع کریں"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"نیا ڈیمو سیشن شروع کرنے کیلئے تھپتھپائیں"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"بغیر کسی حدود کے استعمال کرنے کیلئے اس آلے کو فیکٹری ری سیٹ کریں"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"مزید جاننے کیلئے ٹچ کریں۔"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"غیر فعال کردہ <xliff:g id="LABEL">%1$s</xliff:g>"</string>

@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> har stoppet"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> stopper gjentatte ganger"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> stopper gjentatte ganger"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Åpne appen på nytt"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Send tilbakemelding"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Lukk"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignorer frem til enheten starter på nytt"</string>
@@ -1548,7 +1547,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjermen er løsnet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev opplåsingsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
@@ -1610,9 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-forespørselen er endret til en USSD-forespørsel."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-forespørselen er endret til en ny SS-forespørsel."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Arbeidsprofil"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Knapp for å vise mer"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port for USB-tilleggsutstyr for Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
@@ -1651,10 +1649,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Løsne"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
-    <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
-    <skip />
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Start økten på nytt"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Trykk for å starte en ny demoøkt"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Tilbakestill til fabrikkstandard for å bruke denne enheten uten begrensninger"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Trykk for å finne ut mer."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>

@@ -239,7 +239,7 @@
     <string name="notification_hidden_text" msgid="1135169301897151909">"Contents hidden"</string>
     <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Contents hidden by policy"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
-    <string name="android_system_label" msgid="6577375335728551336">"Android system"</string>
+    <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Switch to Personal"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Switch to Work"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
@@ -971,7 +971,7 @@
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Open"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Edit with"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edit with %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"(edit)"</string>
+    <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Edit"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Share with"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Share with %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Shared"</string>
@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> has stopped"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> keeps stopping"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> keeps stopping"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Open app again"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Send feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Close"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Mute until device restarts"</string>
@@ -1610,9 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS request is modified to USSD request."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS request is modified to new SS request."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Work profile"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Expand button"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
@@ -1651,10 +1649,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
-    <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
-    <skip />
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Restart Session"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Tap to start a new demo session"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Factory reset to use this device without restrictions"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Touch to find out more."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Disabled <xliff:g id="LABEL">%1$s</xliff:g>"</string>
