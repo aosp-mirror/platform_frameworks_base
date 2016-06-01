@@ -48,6 +48,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
@@ -102,6 +103,8 @@ public class ZenModePanel extends LinearLayout {
     private TextView mZenIntroductionCustomize;
     protected LinearLayout mZenConditions;
     private TextView mZenAlarmWarning;
+    private RadioGroup mZenRadioGroup;
+    private LinearLayout mZenRadioGroupContent;
 
     private Callback mCallback;
     private ZenModeController mController;
@@ -117,7 +120,6 @@ public class ZenModePanel extends LinearLayout {
     private Condition mSessionExitCondition;
     private Condition[] mConditions;
     private Condition mTimeCondition;
-    private Condition mTimeUntilAlarmCondition;
     private boolean mVoiceCapable;
 
     public ZenModePanel(Context context, AttributeSet attrs) {
@@ -190,6 +192,8 @@ public class ZenModePanel extends LinearLayout {
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
         mZenAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
+        mZenRadioGroup = (RadioGroup) findViewById(R.id.zen_radio_buttons);
+        mZenRadioGroupContent = (LinearLayout) findViewById(R.id.zen_radio_buttons_content);
     }
 
     @Override
@@ -309,7 +313,12 @@ public class ZenModePanel extends LinearLayout {
 
     protected void addZenConditions(int count) {
         for (int i = 0; i < count; i++) {
-            mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
+            final View rb = mInflater.inflate(R.layout.zen_mode_button, this, false);
+            rb.setId(i);
+            mZenRadioGroup.addView(rb);
+            final View rbc = mInflater.inflate(R.layout.zen_mode_condition, this, false);
+            rbc.setId(i + count);
+            mZenRadioGroupContent.addView(rbc);
         }
     }
 
@@ -388,7 +397,7 @@ public class ZenModePanel extends LinearLayout {
             final ConditionTag tag = getConditionTagAt(i);
             if (tag != null) {
                 if (sameConditionId(tag.condition, mExitCondition)) {
-                    bind(exitCondition, mZenConditions.getChildAt(i), i);
+                    bind(exitCondition, mZenRadioGroupContent.getChildAt(i), i);
                 }
             }
         }
@@ -484,11 +493,11 @@ public class ZenModePanel extends LinearLayout {
         final int conditionCount = mConditions == null ? 0 : mConditions.length;
         if (DEBUG) Log.d(mTag, "handleUpdateConditions conditionCount=" + conditionCount);
         // forever
-        bind(forever(), mZenConditions.getChildAt(FOREVER_CONDITION_INDEX),
+        bind(forever(), mZenRadioGroupContent.getChildAt(FOREVER_CONDITION_INDEX),
                 FOREVER_CONDITION_INDEX);
         // countdown
         if (mCountdownConditionSupported && mTimeCondition != null) {
-            bind(mTimeCondition, mZenConditions.getChildAt(COUNTDOWN_CONDITION_INDEX),
+            bind(mTimeCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
                     COUNTDOWN_CONDITION_INDEX);
         }
         // countdown until alarm
@@ -496,7 +505,7 @@ public class ZenModePanel extends LinearLayout {
             Condition nextAlarmCondition = getTimeUntilNextAlarmCondition();
             if (nextAlarmCondition != null) {
                 bind(nextAlarmCondition,
-                        mZenConditions.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
+                        mZenRadioGroupContent.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
                         COUNTDOWN_ALARM_CONDITION_INDEX);
             }
         }
@@ -544,22 +553,22 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private ConditionTag getConditionTagAt(int index) {
-        return (ConditionTag) mZenConditions.getChildAt(index).getTag();
+        return (ConditionTag) mZenRadioGroupContent.getChildAt(index).getTag();
     }
 
     private int getVisibleConditions() {
         int rt = 0;
-        final int N = mZenConditions.getChildCount();
+        final int N = mZenRadioGroupContent.getChildCount();
         for (int i = 0; i < N; i++) {
-            rt += mZenConditions.getChildAt(i).getVisibility() == VISIBLE ? 1 : 0;
+            rt += mZenRadioGroupContent.getChildAt(i).getVisibility() == VISIBLE ? 1 : 0;
         }
         return rt;
     }
 
     private void hideAllConditions() {
-        final int N = mZenConditions.getChildCount();
+        final int N = mZenRadioGroupContent.getChildCount();
         for (int i = 0; i < N; i++) {
-            mZenConditions.getChildAt(i).setVisibility(GONE);
+            mZenRadioGroupContent.getChildAt(i).setVisibility(GONE);
         }
     }
 
@@ -579,27 +588,14 @@ public class ZenModePanel extends LinearLayout {
         if (DEBUG) Log.d(mTag, "Selecting a default");
         final int favoriteIndex = mPrefs.getMinuteIndex();
         if (favoriteIndex == -1 || !mCountdownConditionSupported) {
-            setChecked(foreverTag.rb, true);
+            foreverTag.rb.setChecked(true);
         } else {
             mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
                     MINUTE_BUCKETS[favoriteIndex], ActivityManager.getCurrentUser());
             mBucketIndex = favoriteIndex;
-            bind(mTimeCondition, mZenConditions.getChildAt(COUNTDOWN_CONDITION_INDEX),
+            bind(mTimeCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
                     COUNTDOWN_CONDITION_INDEX);
-            setChecked(getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb, true);
-        }
-    }
-
-    private void setChecked(RadioButton rb, boolean checked) {
-        final int N = getVisibleConditions();
-        for (int i = 0; i < N; i++) {
-            final ConditionTag tag = getConditionTagAt(i);
-            if (tag != null && tag.rb.isChecked() && !Objects.equals(tag.rb, rb)) {
-                tag.rb.setChecked(false);
-            }
-        }
-        if (rb.isChecked() != checked) {
-            rb.setChecked(checked);
+            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
         }
     }
 
@@ -619,18 +615,18 @@ public class ZenModePanel extends LinearLayout {
         row.setTag(tag);
         final boolean first = tag.rb == null;
         if (tag.rb == null) {
-            tag.rb = (RadioButton) row.findViewById(android.R.id.checkbox);
+            tag.rb = (RadioButton) mZenRadioGroup.getChildAt(rowId);
         }
         tag.condition = condition;
         final Uri conditionId = getConditionId(tag.condition);
-        if (DEBUG) Log.d(mTag, "bind i=" + mZenConditions.indexOfChild(row) + " first=" + first
-                + " condition=" + conditionId);
+        if (DEBUG) Log.d(mTag, "bind i=" + mZenRadioGroupContent.indexOfChild(row) + " first="
+                + first + " condition=" + conditionId);
         tag.rb.setEnabled(enabled);
         tag.rb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (mExpanded && isChecked) {
-                    setChecked(tag.rb, isChecked);
+                    tag.rb.setChecked(true);
                     if (DEBUG) Log.d(mTag, "onCheckedChanged " + conditionId);
                     MetricsLogger.action(mContext, MetricsEvent.QS_DND_CONDITION_SELECT);
                     select(tag.condition);
@@ -681,7 +677,7 @@ public class ZenModePanel extends LinearLayout {
         tag.lines.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setChecked(tag.rb, true);
+                tag.rb.setChecked(true);
             }
         });
 
@@ -770,7 +766,7 @@ public class ZenModePanel extends LinearLayout {
         }
         mTimeCondition = newCondition;
         bind(mTimeCondition, row, rowId);
-        setChecked(tag.rb, true);
+        tag.rb.setChecked(true);
         select(mTimeCondition);
         announceConditionSelection(tag);
     }
