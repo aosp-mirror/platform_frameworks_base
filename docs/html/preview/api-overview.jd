@@ -119,10 +119,10 @@ use. Some of the changes include:</p>
   </li>
 
   <li>
-    <strong>Message style customization</strong>: You can customize more of the
-    user interface labels associated with your notifications using the
-    <code>MessageStyle</code> class. You can configure the message, conversation
-    title, and content view.
+    <strong>Messaging style customization</strong>: You can customize more of
+    the user interface labels associated with your notifications using the
+    <code>MessagingStyle</code> class. You can configure the message,
+    conversation title, and content view.
   </li>
 
   <li>
