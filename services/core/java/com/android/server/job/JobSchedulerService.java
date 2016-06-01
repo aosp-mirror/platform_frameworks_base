@@ -717,6 +717,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
      */
     public JobSchedulerService(Context context) {
         super(context);
+        mHandler = new JobHandler(context.getMainLooper());
+        mConstants = new Constants(mHandler);
+        mJobSchedulerStub = new JobSchedulerStub();
+        mJobs = JobStore.initAndGet(this);
+
         // Create the controllers.
         mControllers = new ArrayList<StateController>();
         mControllers.add(ConnectivityController.get(this));
@@ -726,11 +731,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(AppIdleController.get(this));
         mControllers.add(ContentObserverController.get(this));
         mControllers.add(DeviceIdleJobsController.get(this));
-
-        mHandler = new JobHandler(context.getMainLooper());
-        mConstants = new Constants(mHandler);
-        mJobSchedulerStub = new JobSchedulerStub();
-        mJobs = JobStore.initAndGet(this);
     }
 
     @Override
