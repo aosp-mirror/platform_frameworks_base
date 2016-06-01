@@ -679,7 +679,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Odomknite nakreslením vzoru"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Tiesňové volanie"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Stav tiesne"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zavolať späť"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
@@ -1040,8 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> sa zastavil"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sa opakovane zastavuje"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sa opakovane zastavuje"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Spustiť aplikáciu znova"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Odoslať spätnú väzbu"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zavrieť"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignorovať do reštartu zariadenia"</string>
@@ -1680,9 +1679,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Žiadosť SS bola upravená na žiadosť USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Žiadosť SS bola upravená na novú žiadosť SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Pracovný profil"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Tlačidlo rozbalenia"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB pre periférne zariadenia s Androidom"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

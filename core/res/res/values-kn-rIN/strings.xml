@@ -122,21 +122,21 @@
     <string name="roamingText11" msgid="4154476854426920970">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ಸೇವೆ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi ಕರೆ ಮಾಡುವಿಕೆ"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Wi-Fi ಬಳಸಿಕೊಂಡು ಕರೆ ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಮೊದಲು ಈ ಸಾಧನವನ್ನು ಹೊಂದಿಸಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ತದನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಮತ್ತೆ Wi-Fi ಆನ್‌ ಮಾಡಿ."</item>
+    <item msgid="2254967670088539682">"ವೈ-ಫೈ ಬಳಸಿಕೊಂಡು ಕರೆ ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಮೊದಲು ಈ ಸಾಧನವನ್ನು ಹೊಂದಿಸಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ತದನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಮತ್ತೆ ವೈ-ಫೈ ಆನ್‌ ಮಾಡಿ."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"ನಿಮ್ಮ ವಾಹಕದಲ್ಲಿ ನೋಂದಾಯಿಸಿಕೊಳ್ಳಿ"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi ಕರೆ ಮಾಡುವಿಕೆ"</item>
+    <item msgid="4397097370387921767">"%s ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ಆಫ್"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ವೈ-ಫೈಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"ಸೆಲ್ಯುಲಾರ್‌ಗೆ ಆದ್ಯತೆ ನೀಡಲಾಗಿದೆ"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi ಮಾತ್ರ"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"ವೈ-ಫೈ ಮಾತ್ರ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿಲ್ಲ"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> ಸೆಕೆಂಡುಗಳ ನಂತರ <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -357,9 +357,9 @@
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ಹೆಚ್ಚುವರಿ ಸ್ಥಾನ ಪೂರೈಕೆದಾರರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ಹೆಚ್ಚಿನ ಸ್ಥಾನ ಪೂರೈಕೆದಾರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು GPS ಅಥವಾ ಇತರ ಸ್ಥಾನ ಮೂಲಗಳ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮಧ್ಯ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"ನಿಖರ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ (GPS ಮತ್ತು ನೆಟ್‍ವರ್ಕ್-ಆಧಾರಿತ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ಗ್ಲೊಬಲ್ ಪೊಸಿಷನಿಂಗ್ ಸಿಸ್ಟಮ್ (GPS) ಅಥವಾ ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು Wi-Fi ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ನಿಖರವಾದ ಸ್ಥಾನವನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳು ಆನ್ ಆಗಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವೆಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಇದನ್ನು ಬಳಸಬಹುದು ಮತ್ತು ಹೆಚ್ಚುವರಿ ಬ್ಯಾಟರಿ ಶಕ್ತಿಯನ್ನು ಬಳಸಬಹುದು."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ಗ್ಲೊಬಲ್ ಪೊಸಿಷನಿಂಗ್ ಸಿಸ್ಟಮ್ (GPS) ಅಥವಾ ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ನಿಖರವಾದ ಸ್ಥಾನವನ್ನು ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳು ಆನ್ ಆಗಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವೆಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಇದನ್ನು ಬಳಸಬಹುದು ಮತ್ತು ಹೆಚ್ಚುವರಿ ಬ್ಯಾಟರಿ ಶಕ್ತಿಯನ್ನು ಬಳಸಬಹುದು."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ (ನೆಟ್‌ವರ್ಕ್-ಆಧಾರಿತ)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಈ ಸ್ಥಳವನ್ನು ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು Wi-Fi ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನದ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಸ್ಥಳದ ಸೇವೆಗಳ ಮೂಲಕ ಪಡೆಯಲಾಗಿದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವು ನಿಖರವಾಗಿ ಎಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಇದನ್ನು ಬಳಸಬಹುದು."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪಡೆದುಕೊಳ್ಳಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಈ ಸ್ಥಳವನ್ನು ಸೆಲ್ ಟವರ್‍‍ಗಳು ಮತ್ತು ವೈ-ಫೈ ನಂತಹ ನೆಟ್‍‍ವರ್ಕ್ ಸ್ಥಾನದ ಮೂಲಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಸ್ಥಳದ ಸೇವೆಗಳ ಮೂಲಕ ಪಡೆಯಲಾಗಿದೆ. ಅಪ್ಲಿಕೇಶನ್‍‍ಗಾಗಿ ಅವುಗಳನ್ನು ಬಳಸಲು ಈ ಸ್ಥಾನ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಿರಬೇಕು ಮತ್ತು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಲಭ್ಯವಿರಬೇಕು. ನೀವು ನಿಖರವಾಗಿ ಎಲ್ಲಿರುವಿರಿ ಎಂಬುದನ್ನು ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಇದನ್ನು ಬಳಸಬಹುದು."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ನಿಮ್ಮ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ವಾಲ್ಯೂಮ್ ರೀತಿಯ ಮತ್ತು ಔಟ್‍‍ಪುಟ್‍‍ಗಾಗಿ ಯಾವ ಸ್ಪೀಕರ್ ಬಳಸಬೇಕು ಎಂಬ ರೀತಿಯ ಜಾಗತಿಕ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
@@ -406,14 +406,14 @@
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ನೆಟ್‌ವರ್ಕ್‌ ಸಂಪರ್ಕದ ಸ್ಥಿತಿಯನ್ನು ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ಟೆಥರಡ್ ಸಂಪರ್ಕತೆಯನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ಟೆಥರ್‌ ಮಾಡಲಾದ ನೆಟ್‌ವರ್ಕ್‌ ಸಂಪರ್ಕದ ಸ್ಥಿತಿಯನ್ನು ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi ಸಂಪರ್ಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi ಸಕ್ರಿಯಗೊಂಡಿದೆಯೇ ಮತ್ತು ಸಂಪರ್ಕಿಸಲಾದ Wi-Fi ಸಾಧನಗಳ ಹೆಸರಿನ ಮಾಹಿತಿ ರೀತಿಯ, Wi-Fi ನೆಟ್‍‍ವರ್ಕ್ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi ನಿಂದ ಸಂಪರ್ಕಗೊಳಿಸಿ ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fi ಪ್ರವೇಶ ಕೇಂದ್ರಗಳಿಂದ ಸಂಪರ್ಕ ಹೊಂದಲು ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲು, ಹಾಗೆಯೇ Wi-Fi ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಿಗೆ ಸಾಧನದ ಕನ್ಫಿಗರೇಶನ್‍ ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಸ್ವೀಕಾರಕ್ಕೆ ಅನುಮತಿಸಿ"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಮಾತ್ರವಲ್ಲದೇ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು Wi-Fi ನೆಟ್‍‍ವರ್ಕ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಪ್ಯಾಕೆಟ್‍‍ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್ ಬಳಸುವ ಶಕ್ತಿಗಿಂತಲೂ ಹೆಚ್ಚಿನ ಶಕ್ತಿಯನ್ನು ಬಳಸುತ್ತದೆ."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಟಿವಿ ಮಾತ್ರವಲ್ಲದೆ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾದ ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್‌ಗಿಂತಲೂ ಹೆಚ್ಚು ಪವರ್ ಬಳಸುತ್ತದೆ."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ನಿಮ್ಮ ಫೋನ್ ಮಾತ್ರವಲ್ಲದೇ, ಮಲ್ಟಿಕಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು Wi-Fi ನೆಟ್‍‍ವರ್ಕ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಪ್ಯಾಕೆಟ್‍‍ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್ ಬಳಸುವ ಶಕ್ತಿಗಿಂತಲೂ ಹೆಚ್ಚಿನ ಶಕ್ತಿಯನ್ನು ಬಳಸುತ್ತದೆ."</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"ವೈ-ಫೈ ಸಂಪರ್ಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"ವೈ-ಫೈ ಸಕ್ರಿಯಗೊಂಡಿದೆಯೇ ಮತ್ತು ಸಂಪರ್ಕಿಸಲಾದ ವೈ-ಫೈ ಸಾಧನಗಳ ಹೆಸರಿನ ಮಾಹಿತಿ ರೀತಿಯ, ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"ವೈ-ಫೈ ನಿಂದ ಸಂಪರ್ಕಗೊಳಿಸಿ ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ವೈ-ಫೈ ಪ್ರವೇಶ ಕೇಂದ್ರಗಳಿಂದ ಸಂಪರ್ಕ ಹೊಂದಲು ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲು, ಹಾಗೆಯೇ ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಿಗೆ ಸಾಧನದ ಕನ್ಫಿಗರೇಶನ್‍ ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ವೈ-ಫೈ ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಸ್ವೀಕಾರಕ್ಕೆ ಅನುಮತಿಸಿ"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಮಾತ್ರವಲ್ಲದೇ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಪ್ಯಾಕೆಟ್‍‍ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್ ಬಳಸುವ ಶಕ್ತಿಗಿಂತಲೂ ಹೆಚ್ಚಿನ ಶಕ್ತಿಯನ್ನು ಬಳಸುತ್ತದೆ."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಟಿವಿ ಮಾತ್ರವಲ್ಲದೆ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾದ ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್‌ಗಿಂತಲೂ ಹೆಚ್ಚು ಪವರ್ ಬಳಸುತ್ತದೆ."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ನಿಮ್ಮ ಫೋನ್ ಮಾತ್ರವಲ್ಲದೇ, ಮಲ್ಟಿಕಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಪ್ಯಾಕೆಟ್‍‍ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್ ಬಳಸುವ ಶಕ್ತಿಗಿಂತಲೂ ಹೆಚ್ಚಿನ ಶಕ್ತಿಯನ್ನು ಬಳಸುತ್ತದೆ."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ಬ್ಲೂಟೂತ್‌ ಸೆಟ್ಟಿಂಗ್‍ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ಸ್ಥಳೀಯ ಬ್ಲೂಟೂತ್‌‌ ಟ್ಯಾಬ್ಲೆಟ್‌‌ ಕಾನ್ಫಿಗರ್‌ ಮಾಡಲು ಮತ್ತು ಅನ್ವೇಷಿಸಲು ಹಾಗೂ ರಿಮೊಟ್‌ ಸಾಧನಗಳ ಜೊತೆಗೆ ಜೋಡಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"ಸ್ಥಳೀಯ ಬ್ಲೂಟೂತ್‌ ಟಿವಿಯನ್ನು ಕಾನ್‌ಫಿಗರ್ ಮಾಡಲು, ಮತ್ತು ಅನ್ವೇಷಿಸಲು ಮತ್ತು ದೂರ ಸಾಧನಗಳೊಂದಿಗೆ ಜೋಡಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲಿಸಿದೆ"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ನಿಲ್ಲುತ್ತಲೇ ಇರುತ್ತದೆ"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತೆ ತೆರೆಯಿರಿ"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ಪ್ರತಿಕ್ರಿಯೆ ಕಳುಹಿಸು"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ಮುಚ್ಚು"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ಸಾಧನವು ಮರುಪ್ರಾರಂಭವಾಗುವವರೆಗೂ ಮ್ಯೂಟ್ ಮಾಡಿ"</string>
@@ -1060,28 +1059,28 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ರಿಂಗ್‌ಟೋನ್‌ಗಳು"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ಅಜ್ಞಾತ ರಿಂಗ್‌ಟೋನ್"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
-      <item quantity="other">Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="one">ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="other">ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">ಮುಕ್ತ Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
-      <item quantity="other">ಮುಕ್ತ Wi-Fi ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="one">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
+      <item quantity="other">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ವೈ-ಫೈ ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ವೈ-ಫೈ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ವೈ-ಫೈ ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ಕಳಪೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿದೆ."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ಸಂಪರ್ಕವನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%2$s ವೈಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು %1$s ಅಪ್ಲಿಕೇಶನ್‌ ಬಯಸುತ್ತದೆ"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"ಅಪ್ಲಿಕೇಶನ್"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ಡೈರೆಕ್ಟ್"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಿ. ಇದು Wi-Fi ಕ್ಲೈಂಟ್‌/ಹಾಟ್‌ಸ್ಪಾಟ್ ಅನ್ನು ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi ಡೈರೆಕ್ಟ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಿ. ಇದು ವೈ-ಫೈ ಕ್ಲೈಂಟ್‌/ಹಾಟ್‌ಸ್ಪಾಟ್ ಅನ್ನು ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"ವೈ-ಫೈ ಡೈರೆಕ್ಟ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="accept" msgid="1645267259272829559">"ಸ್ವೀಕರಿಸು"</string>
     <string name="decline" msgid="2112225451706137894">"ನಿರಾಕರಿಸು"</string>
@@ -1091,9 +1090,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"ಗೆ:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ಅಗತ್ಯವಿರುವ ಪಿನ್‌ ಟೈಪ್ ಮಾಡಿ:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ಪಿನ್‌:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ಟ್ಯಾಬ್ಲೆಟ್ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಾಗ ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ Wi-Fi ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಳಿಸಿರುವಾಗ ಟಿವಿಯನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ Wi-Fi ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿರುತ್ತದೆ"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ಫೋನ್ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಾಗ Wi-Fi ನಿಂದ ಅದು ತಾತ್ಕಾಲಿಕವಾಗಿ ಸಂಪರ್ಕ ಕಡಿತಗೊಳ್ಳುತ್ತದೆ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ಟ್ಯಾಬ್ಲೆಟ್ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಾಗ ಅದನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ವೈ-ಫೈ ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಳಿಸಿರುವಾಗ ಟಿವಿಯನ್ನು ತಾತ್ಕಾಲಿಕವಾಗಿ ವೈ-ಫೈ ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿರುತ್ತದೆ"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ಫೋನ್ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ಗೆ ಸಂಪರ್ಕಗೊಂಡಿರುವಾಗ ವೈ-ಫೈ ನಿಂದ ಅದು ತಾತ್ಕಾಲಿಕವಾಗಿ ಸಂಪರ್ಕ ಕಡಿತಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="select_character" msgid="3365550120617701745">"ಅಕ್ಷರವನ್ನು ಸೇರಿಸಿ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯ SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸುತ್ತಿದೆ. ಸಂದೇಶಗಳ ಕಳುಹಿಸುವಿಕೆಯನ್ನು ಮುಂದುವರಿಸುವಂತೆ ಈ ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಲು ನೀವು ಬಯಸುವಿರಾ?"</string>
@@ -1322,12 +1321,12 @@
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ಡೇಟಾ ಮೀತಿಯನ್ನು ತಲುಪಿದೆ"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ಡೇಟಾ ಮೀತಿಯನ್ನು ತಲುಪಿದೆ"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Wi-Fi ಡೇಟಾ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ"</string>
+    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"ವೈ-ಫೈ ಡೇಟಾ ಮಿತಿಯನ್ನು ತಲುಪಿದೆ"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"ಉಳಿದಿರುವ ಆವರ್ತನೆಗೆ ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"ವೈ-ಫೈ ಡೇಟಾ ಮಿತಿ ಮೀರಿದೆ"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ನಿರ್ದಿಷ್ಟಪಡಿಸಿದ ಮಿತಿ ಮೀರಿದೆ."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -1613,9 +1612,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ವಿನಂತಿಯನ್ನು ಹೊಸ SS ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"ವಿಸ್ತರಿಸು ಬಟನ್"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
