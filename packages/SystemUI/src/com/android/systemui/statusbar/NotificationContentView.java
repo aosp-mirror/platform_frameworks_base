@@ -277,15 +277,25 @@ public class NotificationContentView extends FrameLayout {
             mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
-        mPreviousExpandedRemoteInputIntent =
-                mExpandedRemoteInput != null ? mExpandedRemoteInput.getPendingIntent() : null;
+        mPreviousExpandedRemoteInputIntent = null;
+        if (mExpandedRemoteInput != null) {
+            mExpandedRemoteInput.onNotificationUpdateOrReset();
+            if (mExpandedRemoteInput.isActive()) {
+                mPreviousExpandedRemoteInputIntent = mExpandedRemoteInput.getPendingIntent();
+            }
+        }
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
             removeView(mExpandedChild);
             mExpandedRemoteInput = null;
         }
-        mPreviousHeadsUpRemoteInputIntent =
-                mHeadsUpRemoteInput != null ? mHeadsUpRemoteInput.getPendingIntent() : null;
+        mPreviousHeadsUpRemoteInputIntent = null;
+        if (mHeadsUpRemoteInput != null) {
+            mHeadsUpRemoteInput.onNotificationUpdateOrReset();
+            if (mHeadsUpRemoteInput.isActive()) {
+                mPreviousHeadsUpRemoteInputIntent = mHeadsUpRemoteInput.getPendingIntent();
+            }
+        }
         if (mHeadsUpChild != null) {
             mHeadsUpChild.animate().cancel();
             removeView(mHeadsUpChild);
@@ -910,7 +920,7 @@ public class NotificationContentView extends FrameLayout {
                     view.findViewWithTag(RemoteInputView.VIEW_TAG);
 
             if (existing != null) {
-                existing.onNotificationUpdate();
+                existing.onNotificationUpdateOrReset();
             }
 
             if (existing == null && hasRemoteInput) {
