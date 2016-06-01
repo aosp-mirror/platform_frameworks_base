@@ -2723,7 +2723,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
-                    clearAppProfilesLIF(ps.pkg, UserHandle.USER_ALL);
                 }
                 ver.fingerprint = Build.FINGERPRINT;
             }
