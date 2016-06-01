@@ -80,7 +80,7 @@ public class QSIconView extends ViewGroup {
             Drawable d = state.icon != null
                     ? iv.isShown() && mAnimationEnabled ? state.icon.getDrawable(mContext)
                     : state.icon.getInvisibleDrawable(mContext) : null;
-            int padding = state.icon != null ? state.icon.getPadding() : null;
+            int padding = state.icon != null ? state.icon.getPadding() : 0;
             if (d != null && state.autoMirrorDrawable) {
                 d.setAutoMirrored(true);
             }
