@@ -245,6 +245,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"សំណើ​ទីតាំង​សកម្ម"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"សម្អាត​ការ​ជូន​ដំណឹង​ទាំងអស់។"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"​កំណត់​ការ​ជូនដំណឹង"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"ការ​កំណត់ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"នឹង​បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ។"</string>
