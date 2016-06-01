@@ -701,8 +701,8 @@ public class RestrictedLockUtils {
             if (userId != other.userId) {
                 return false;
             }
-            if ((component == null && other == null) ||
-                    (component != null && component.equals(other))) {
+            if ((component == null && other.component == null) ||
+                    (component != null && component.equals(other.component))) {
                 return true;
             }
             return false;
