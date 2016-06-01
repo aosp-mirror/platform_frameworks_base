@@ -169,5 +169,9 @@ interface IWifiManager
     void factoryReset();
 
     Network getCurrentNetwork();
+
+    byte[] retrieveBackupData();
+
+    void restoreBackupData(in byte[] data);
 }
 
