@@ -8040,6 +8040,36 @@ public final class Settings {
         public static final String ALARM_MANAGER_CONSTANTS = "alarm_manager_constants";
 
         /**
+         * Job scheduler specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "min_ready_jobs_count=2,moderate_use_factor=.5"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * min_idle_count                       (int)
+         * min_charging_count                   (int)
+         * min_connectivity_count               (int)
+         * min_content_count                    (int)
+         * min_ready_jobs_count                 (int)
+         * heavy_use_factor                     (float)
+         * moderate_use_factor                  (float)
+         * fg_job_count                         (int)
+         * bg_normal_job_count                  (int)
+         * bg_moderate_job_count                (int)
+         * bg_low_job_count                     (int)
+         * bg_critical_job_count                (int)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * @see com.android.server.job.JobSchedulerService.Constants
+         */
+        public static final String JOB_SCHEDULER_CONSTANTS = "job_scheduler_constants";
+
+        /**
          * ShortcutManager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
