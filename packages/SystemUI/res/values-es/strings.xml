@@ -247,6 +247,7 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
+    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ajustes de notificaciones"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ajustes de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
