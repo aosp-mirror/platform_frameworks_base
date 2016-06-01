@@ -32,7 +32,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"מחק"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"בחר הכל"</string>
     <string name="menu_copy" msgid="3612326052677229148">"העתק אל…"</string>
-    <string name="menu_move" msgid="1828090633118079817">"העברה אל…"</string>
+    <string name="menu_move" msgid="1828090633118079817">"העבר אל…"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"חלון חדש"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"העתק"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"הדבק"</string>
