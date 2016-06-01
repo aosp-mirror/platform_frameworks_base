@@ -640,6 +640,13 @@ public class JobInfo implements Parcelable {
          * <p>Because because setting this property is not compatible with periodic or
          * persisted jobs, doing so will throw an {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
+         *
+         * <p>The following example shows how this feature can be used to monitor for changes
+         * in the photos on a device.</p>
+         *
+         * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/PhotosContentJob.java
+         *      job}
+         *
          * @param uri The content: URI to monitor.
          */
         public Builder addTriggerContentUri(@NonNull TriggerContentUri uri) {
