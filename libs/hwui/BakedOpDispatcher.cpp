@@ -805,27 +805,21 @@ void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, 
     // Note that we don't use op->paint in this function - it's never set on a LayerOp
     OffscreenBuffer* buffer = *op.layerHandle;
 
-    if (CC_UNLIKELY(!buffer)) {
-        // Layer was not allocated, which can occur if there were no draw ops inside. We draw the
-        // equivalent by drawing a rect with the same layer properties (alpha/xfer/filter).
-        int color = SkColorSetA(SK_ColorTRANSPARENT, op.alpha * 255);
-        renderRectForLayer(renderer, op, state,
-                color, op.mode, op.colorFilter);
-    } else {
-        float layerAlpha = op.alpha * state.alpha;
-        Glop glop;
-        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-                .setRoundRectClipState(state.roundRectClipState)
-                .setMeshTexturedIndexedVbo(buffer->vbo, buffer->elementCount)
-                .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
-                .setTransform(state.computedState.transform, TransformFlags::None)
-                .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
-                        Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
-                .build();
-        renderer.renderGlop(state, glop);
-    }
+    if (CC_UNLIKELY(!buffer)) return;
 
-    if (buffer && !buffer->hasRenderedSinceRepaint) {
+    float layerAlpha = op.alpha * state.alpha;
+    Glop glop;
+    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+            .setRoundRectClipState(state.roundRectClipState)
+            .setMeshTexturedIndexedVbo(buffer->vbo, buffer->elementCount)
+            .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
+            .setTransform(state.computedState.transform, TransformFlags::None)
+            .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
+                    Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
+            .build();
+    renderer.renderGlop(state, glop);
+
+    if (!buffer->hasRenderedSinceRepaint) {
         buffer->hasRenderedSinceRepaint = true;
         if (CC_UNLIKELY(Properties::debugLayersUpdates)) {
             // render debug layer highlight
