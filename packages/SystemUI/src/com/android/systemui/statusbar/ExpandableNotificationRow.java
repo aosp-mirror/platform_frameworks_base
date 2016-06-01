@@ -18,9 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -1067,7 +1065,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mIsSystemExpanded = expand;
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
-            if (mChildrenContainer != null) {
+            if (mIsSummaryWithChildren) {
                 mChildrenContainer.updateGroupOverflow();
             }
         }
@@ -1142,7 +1140,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void updateChildrenHeaderAppearance() {
-        if (mChildrenContainer != null) {
+        if (mIsSummaryWithChildren) {
             mChildrenContainer.updateChildrenHeaderAppearance();
         }
     }
