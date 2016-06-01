@@ -836,7 +836,7 @@ public class StaticLayout extends Layout {
                     here = endPos;
                     breakIndex++;
 
-                    if (mLineCount >= mMaximumVisibleLineCount) {
+                    if (mLineCount >= mMaximumVisibleLineCount && mEllipsized) {
                         return;
                     }
                 }
@@ -920,7 +920,25 @@ public class StaticLayout extends Layout {
 
         boolean firstLine = (j == 0);
         boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
-        boolean lastLine = currentLineIsTheLastVisibleOne || (end == bufEnd);
+
+        if (ellipsize != null) {
+            // If there is only one line, then do any type of ellipsis except when it is MARQUEE
+            // if there are multiple lines, just allow END ellipsis on the last line
+            boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
+
+            boolean doEllipsis =
+                    (((mMaximumVisibleLineCount == 1 && moreChars) || (firstLine && !moreChars)) &&
+                            ellipsize != TextUtils.TruncateAt.MARQUEE) ||
+                    (!firstLine && (currentLineIsTheLastVisibleOne || !moreChars) &&
+                            ellipsize == TextUtils.TruncateAt.END);
+            if (doEllipsis) {
+                calculateEllipsis(start, end, widths, widthStart,
+                        ellipsisWidth, ellipsize, j,
+                        textWidth, paint, forceEllipsis);
+            }
+        }
+
+        boolean lastLine = mEllipsized || (end == bufEnd);
 
         if (firstLine) {
             if (trackPad) {
@@ -944,7 +962,6 @@ public class StaticLayout extends Layout {
             }
         }
 
-
         if (needMultiply && !lastLine) {
             double ex = (below - above) * (spacingmult - 1) + spacingadd;
             if (ex >= 0) {
@@ -959,6 +976,15 @@ public class StaticLayout extends Layout {
         lines[off + START] = start;
         lines[off + TOP] = v;
         lines[off + DESCENT] = below + extra;
+
+        // special case for non-ellipsized last visible line when maxLines is set
+        // store the height as if it was ellipsized
+        if (!mEllipsized && currentLineIsTheLastVisibleOne) {
+            // below calculation as if it was the last line
+            int maxLineBelow = includePad ? bottom : below;
+            // similar to the calculation of v below, without the extra.
+            mMaxLineHeight = v + (maxLineBelow - above);
+        }
 
         v += (below - above) + extra;
         lines[off + mColumns + START] = end;
@@ -979,23 +1005,6 @@ public class StaticLayout extends Layout {
         } else {
             mLineDirections[j] = AndroidBidi.directions(dir, chdirs, start - widthStart, chs,
                     start - widthStart, end - start);
-        }
-
-        if (ellipsize != null) {
-            // If there is only one line, then do any type of ellipsis except when it is MARQUEE
-            // if there are multiple lines, just allow END ellipsis on the last line
-            boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
-
-            boolean doEllipsis =
-                        (((mMaximumVisibleLineCount == 1 && moreChars) || (firstLine && !moreChars)) &&
-                                ellipsize != TextUtils.TruncateAt.MARQUEE) ||
-                        (!firstLine && (currentLineIsTheLastVisibleOne || !moreChars) &&
-                                ellipsize == TextUtils.TruncateAt.END);
-            if (doEllipsis) {
-                calculateEllipsis(start, end, widths, widthStart,
-                        ellipsisWidth, ellipsize, j,
-                        textWidth, paint, forceEllipsis);
-            }
         }
 
         mLineCount++;
@@ -1101,7 +1110,7 @@ public class StaticLayout extends Layout {
                 }
             }
         }
-
+        mEllipsized = true;
         mLines[mColumns * line + ELLIPSIS_START] = ellipsisStart;
         mLines[mColumns * line + ELLIPSIS_COUNT] = ellipsisCount;
     }
@@ -1239,6 +1248,25 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
+    /**
+     * Return the total height of this layout.
+     *
+     * @param cap if true and max lines is set, returns the height of the layout at the max lines.
+     *
+     * @hide
+     */
+    public int getHeight(boolean cap) {
+        if (cap && mLineCount >= mMaximumVisibleLineCount && mMaxLineHeight == -1 &&
+                Log.isLoggable(TAG, Log.WARN)) {
+            Log.w(TAG, "maxLineHeight should not be -1. "
+                    + " maxLines:" + mMaximumVisibleLineCount
+                    + " lineCount:" + mLineCount);
+        }
+
+        return cap && mLineCount >= mMaximumVisibleLineCount && mMaxLineHeight != -1 ?
+                mMaxLineHeight : super.getHeight();
+    }
+
     private static native long nNewBuilder();
     private static native void nFreeBuilder(long nativePtr);
     private static native void nFinishBuilder(long nativePtr);
@@ -1276,6 +1304,21 @@ public class StaticLayout extends Layout {
     private int mTopPadding, mBottomPadding;
     private int mColumns;
     private int mEllipsizedWidth;
+
+    /**
+     * Keeps track if ellipsize is applied to the text.
+     */
+    private boolean mEllipsized;
+
+    /**
+     * If maxLines is set, ellipsize is not set, and the actual line count of text is greater than
+     * or equal to maxLine, this variable holds the ideal visual height of the maxLine'th line
+     * starting from the top of the layout. If maxLines is not set its value will be -1.
+     *
+     * The value is the same as getLineTop(maxLines) for ellipsized version where structurally no
+     * more than maxLines is contained.
+     */
+    private int mMaxLineHeight = -1;
 
     private static final int COLUMNS_NORMAL = 4;
     private static final int COLUMNS_ELLIPSIZE = 6;

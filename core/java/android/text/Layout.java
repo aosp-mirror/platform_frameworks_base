@@ -616,6 +616,17 @@ public abstract class Layout {
     }
 
     /**
+     * Return the total height of this layout.
+     *
+     * @param cap if true and max lines is set, returns the height of the layout at the max lines.
+     *
+     * @hide
+     */
+    public int getHeight(boolean cap) {
+        return getHeight();
+    }
+
+    /**
      * Return the base alignment of this layout.
      */
     public final Alignment getAlignment() {

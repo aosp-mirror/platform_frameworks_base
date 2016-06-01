@@ -5030,7 +5030,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * call {@link InputMethodManager#restartInput(View)}.</p>
      * @param hintLocales List of the languages that the user is supposed to switch to no matter
      * what input method subtype is currently used. Set {@code null} to clear the current "hint".
-     * @see #getImeHIntLocales()
+     * @see #getImeHintLocales()
      * @see android.view.inputmethod.EditorInfo#hintLocales
      */
     public void setImeHintLocales(@Nullable LocaleList hintLocales) {
@@ -6857,11 +6857,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy)
-                        .setHyphenationFrequency(mHyphenationFrequency);
+                        .setHyphenationFrequency(mHyphenationFrequency)
+                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
-                            .setEllipsizedWidth(ellipsisWidth)
-                            .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                            .setEllipsizedWidth(ellipsisWidth);
                 }
                 mHintLayout = builder.build();
             }
@@ -6948,11 +6948,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy)
-                    .setHyphenationFrequency(mHyphenationFrequency);
+                    .setHyphenationFrequency(mHyphenationFrequency)
+                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
-                        .setEllipsizedWidth(ellipsisWidth)
-                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                        .setEllipsizedWidth(ellipsisWidth);
             }
             // TODO: explore always setting maxLines
             result = builder.build();
@@ -7222,9 +7222,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return 0;
         }
 
-        int linecount = layout.getLineCount();
-        int pad = getCompoundPaddingTop() + getCompoundPaddingBottom();
-        int desired = layout.getLineTop(linecount);
+        /*
+        * Don't cap the hint to a certain number of lines.
+        * (Do cap it, though, if we have a maximum pixel height.)
+        */
+        int desired = layout.getHeight(cap);
 
         final Drawables dr = mDrawables;
         if (dr != null) {
@@ -7232,31 +7234,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             desired = Math.max(desired, dr.mDrawableHeightRight);
         }
 
-        desired += pad;
+        desired += getCompoundPaddingTop() + getCompoundPaddingBottom();
 
-        if (mMaxMode == LINES) {
-            /*
-             * Don't cap the hint to a certain number of lines.
-             * (Do cap it, though, if we have a maximum pixel height.)
-             */
-            if (cap) {
-                if (linecount > mMaximum) {
-                    desired = layout.getLineTop(mMaximum);
-
-                    if (dr != null) {
-                        desired = Math.max(desired, dr.mDrawableHeightLeft);
-                        desired = Math.max(desired, dr.mDrawableHeightRight);
-                    }
-
-                    desired += pad;
-                    linecount = mMaximum;
-                }
-            }
-        } else {
+        if (mMaxMode != LINES) {
             desired = Math.min(desired, mMaximum);
         }
 
         if (mMinMode == LINES) {
+            int linecount = layout.getLineCount();
             if (linecount < mMinimum) {
                 desired += getLineHeight() * (mMinimum - linecount);
             }
