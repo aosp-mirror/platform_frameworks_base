@@ -591,7 +591,12 @@ public final class MediaCodecInfo {
                     }
                 }
                 levelCaps = createFromProfileLevel(mMime, profile, maxLevel);
-                if (levelCaps != null && !levelCaps.isFormatSupported(format)) {
+                // remove profile from this format otherwise levelCaps.isFormatSupported will
+                // get into this same conditon and loop forever.
+                Map<String, Object> mapWithoutProfile = new HashMap<>(map);
+                mapWithoutProfile.remove(MediaFormat.KEY_PROFILE);
+                MediaFormat formatWithoutProfile = new MediaFormat(mapWithoutProfile);
+                if (levelCaps != null && !levelCaps.isFormatSupported(formatWithoutProfile)) {
                     return false;
                 }
             }
