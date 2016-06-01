@@ -306,7 +306,6 @@ public class VibratorService extends IVibratorService.Stub
             synchronized (mVibrations) {
                 removeVibrationLocked(token);
                 doCancelVibrateLocked();
-                mCurrentVibration = vib;
                 addToPreviousVibrationsLocked(vib);
                 startVibrationLocked(vib);
             }
@@ -368,7 +367,6 @@ public class VibratorService extends IVibratorService.Stub
                 } else {
                     // A negative repeat means that this pattern is not meant
                     // to repeat. Treat it like a simple vibration.
-                    mCurrentVibration = vib;
                     startVibrationLocked(vib);
                 }
                 addToPreviousVibrationsLocked(vib);
@@ -443,8 +441,7 @@ public class VibratorService extends IVibratorService.Stub
             mCurrentVibration = null;
             return;
         }
-        mCurrentVibration = mVibrations.getFirst();
-        startVibrationLocked(mCurrentVibration);
+        startVibrationLocked(mVibrations.getFirst());
     }
 
     // Lock held on mVibrations
@@ -466,7 +463,9 @@ public class VibratorService extends IVibratorService.Stub
                 mode = mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
                     AppOpsManager.OP_VIBRATE, vib.mUid, vib.mOpPkg);
             }
-            if (mode != AppOpsManager.MODE_ALLOWED) {
+            if (mode == AppOpsManager.MODE_ALLOWED) {
+                mCurrentVibration = vib;
+            } else {
                 if (mode == AppOpsManager.MODE_ERRORED) {
                     Slog.w(TAG, "Would be an error: vibrate from uid " + vib.mUid);
                 }
