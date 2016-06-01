@@ -78,6 +78,10 @@ public class CarBatteryController extends BroadcastReceiver implements BatteryCo
     public CarBatteryController(Context context) {
         mContext = context;
 
+        if (mAdapter == null) {
+           return;
+        }
+
         mAdapter.getProfileProxy(context.getApplicationContext(), mHfpServiceListener,
                 BluetoothProfile.HEADSET_CLIENT);
     }

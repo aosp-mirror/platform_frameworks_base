@@ -69,12 +69,16 @@ public class ConnectedDeviceSignalController extends BroadcastReceiver {
         mNetworkSignalView = (ImageView)
                 mSignalsView.findViewById(R.id.connected_device_network_signal);
 
-        mAdapter.getProfileProxy(context.getApplicationContext(), mHfpServiceListener,
-                BluetoothProfile.HEADSET_CLIENT);
-
         TypedValue typedValue = new TypedValue();
         context.getResources().getValue(R.dimen.status_bar_icon_scale_factor, typedValue, true);
         mIconScaleFactor = typedValue.getFloat();
+
+        if (mAdapter == null) {
+          return;
+        }
+
+        mAdapter.getProfileProxy(context.getApplicationContext(), mHfpServiceListener,
+                BluetoothProfile.HEADSET_CLIENT);
     }
 
     public void startListening() {
