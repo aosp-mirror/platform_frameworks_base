@@ -50,7 +50,7 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Хэзээ ч шалгахгүй"</item>
-    <item msgid="6042769699089883931">"Зөвхөн DRM контентыг шалгах"</item>
+    <item msgid="6042769699089883931">"Зөвхөн DRM агуулгыг шалгах"</item>
     <item msgid="9174900380056846820">"Байнга шалгах"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">

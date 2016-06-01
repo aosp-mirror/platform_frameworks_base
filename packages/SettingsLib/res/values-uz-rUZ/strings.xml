@@ -152,7 +152,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Xatoliklar hisoboti"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Menyuda xatoliklar hisobotini yuborish tugmasi ko‘rsatilsin"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Ekranning yoniq turishi"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Qurilmani quvvatlash vaqtida ekran doim yoniq turadi"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Qurilma quvvat olayotganda ekran doim yoniq turadi"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI amallari translatsiyasi jurnali"</string>
     <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Barcha Bluetooth HCI paketlarini bitta faylga saqlash"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Zavod qulfini yechish"</string>

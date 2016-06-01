@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Tving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivér 4x MSAA i apps med OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlfind på ikke-rektangulære klippehandlinger"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"GPU-gengivelse for profil"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU-profilgengivelse"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animationsskala for vindue"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimationsskala"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animatorvarighedsskala"</string>
