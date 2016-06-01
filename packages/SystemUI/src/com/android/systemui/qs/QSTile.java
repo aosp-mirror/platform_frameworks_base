@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
@@ -63,7 +64,7 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
  * handleUpdateState.  Callbacks affecting state should use refreshState to trigger another
  * state update pass on tile looper.
  */
-public abstract class QSTile<TState extends State> implements Listenable {
+public abstract class QSTile<TState extends State> {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
@@ -71,6 +72,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     protected final Context mContext;
     protected final H mHandler;
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    private final ArraySet<Object> mListeners = new ArraySet<>();
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     protected TState mState = newTileState();
@@ -95,6 +97,24 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHost = host;
         mContext = host.getContext();
         mHandler = new H(host.getLooper());
+    }
+
+    /**
+     * Adds or removes a listening client for the tile. If the tile has one or more
+     * listening client it will go into the listening state.
+     */
+    public void setListening(Object listener, boolean listening) {
+        if (listening) {
+            if (mListeners.add(listener) && mListeners.size() == 1) {
+                if (DEBUG) Log.d(TAG, "setListening " + true);
+                mHandler.obtainMessage(H.SET_LISTENING, 1, 0).sendToTarget();
+            }
+        } else {
+            if (mListeners.remove(listener) && mListeners.size() == 0) {
+                if (DEBUG) Log.d(TAG, "setListening " + false);
+                mHandler.obtainMessage(H.SET_LISTENING, 0, 0).sendToTarget();
+            }
+        }
     }
 
     public String getTileSpec() {
@@ -279,6 +299,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         handleRefreshState(null);
     }
 
+    protected abstract void setListening(boolean listening);
+
     protected void handleDestroy() {
         setListening(false);
         mCallbacks.clear();
@@ -312,6 +334,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int DESTROY = 10;
         private static final int CLEAR_STATE = 11;
         private static final int REMOVE_CALLBACKS = 12;
+        private static final int SET_LISTENING = 13;
 
         private H(Looper looper) {
             super(looper);
@@ -364,6 +387,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == CLEAR_STATE) {
                     name = "handleClearState";
                     handleClearState();
+                } else if (msg.what == SET_LISTENING) {
+                    name = "setListening";
+                    setListening(msg.arg1 != 0);
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
