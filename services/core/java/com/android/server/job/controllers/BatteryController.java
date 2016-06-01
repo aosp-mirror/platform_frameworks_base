@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -195,21 +196,21 @@ public class BatteryController extends StateController {
 
     @Override
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.println("Batt.");
-        pw.println("Stable power: " + mChargeTracker.isOnStablePower());
-        Iterator<JobStatus> it = mTrackedTasks.iterator();
-        if (it.hasNext()) {
-            JobStatus jobStatus = it.next();
-            if (jobStatus.shouldDump(filterUid)) {
-                pw.print(String.valueOf(jobStatus.hashCode()));
+        pw.print("Battery: stable power = ");
+        pw.println(mChargeTracker.isOnStablePower());
+        pw.print("Tracking ");
+        pw.print(mTrackedTasks.size());
+        pw.println(":");
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.get(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
             }
+            pw.print("  #");
+            js.printUniqueId(pw);
+            pw.print(" from ");
+            UserHandle.formatUid(pw, js.getSourceUid());
+            pw.println();
         }
-        while (it.hasNext()) {
-            JobStatus jobStatus = it.next();
-            if (jobStatus.shouldDump(filterUid)) {
-                pw.print("," + String.valueOf(jobStatus.hashCode()));
-            }
-        }
-        pw.println();
     }
 }
