@@ -207,7 +207,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREENLAYOUT_COMPAT_NEEDED = 0x10000000;
 
     /**
-     * Bit mask of overall layout of the screen.  Currently there are two
+     * Bit mask of overall layout of the screen.  Currently there are four
      * fields:
      * <p>The {@link #SCREENLAYOUT_SIZE_MASK} bits define the overall size
      * of the screen.  They may be one of

@@ -73,7 +73,6 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_REMOVED;
 import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
-import static com.android.server.am.ActivityStackSupervisor.MOVING;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
@@ -4464,6 +4463,7 @@ final class ActivityStack {
         // Short circuit: if the two configurations are equal (the common case), then there is
         // nothing to do.
         final Configuration newConfig = mService.mConfiguration;
+        r.task.sanitizeOverrideConfiguration(newConfig);
         final Configuration taskConfig = r.task.mOverrideConfig;
         if (r.configuration.equals(newConfig)
                 && r.taskConfigOverride.equals(taskConfig)
