@@ -381,6 +381,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         boolean childInGroup = BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && isChildInGroup;
         mNotificationParent = childInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(childInGroup);
+        resetBackgroundAlpha();
         updateBackgroundForGroupState();
         updateClickAndFocus();
         if (mNotificationParent != null) {
@@ -1072,7 +1073,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mPrivateLayout.setUserExpanding(userLocked);
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setUserLocked(userLocked);
-            if (userLocked) {
+            if (userLocked || (!userLocked && !isGroupExpanded())) {
                 updateBackgroundForGroupState();
             }
         }
