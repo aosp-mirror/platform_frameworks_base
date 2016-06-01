@@ -302,8 +302,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        List<ApplicationInfo> injectInstalledApplications(@UserIdInt int userId) {
-            return getInstalledApplications(userId);
+        List<PackageInfo> injectInstalledPackages(@UserIdInt int userId) {
+            return getInstalledPackages(userId);
         }
 
         @Override
@@ -789,6 +789,27 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         addApplicationInfo(getInjectedPackageInfo(LAUNCHER_2, userId, false), ret);
         addApplicationInfo(getInjectedPackageInfo(LAUNCHER_3, userId, false), ret);
         addApplicationInfo(getInjectedPackageInfo(LAUNCHER_4, userId, false), ret);
+
+        return ret;
+    }
+
+    private void addPackageInfo(PackageInfo pi, List<PackageInfo> list) {
+        if (pi != null) {
+            list.add(pi);
+        }
+    }
+
+    private List<PackageInfo> getInstalledPackages(int userId) {
+        final ArrayList<PackageInfo> ret = new ArrayList<>();
+
+        addPackageInfo(getInjectedPackageInfo(CALLING_PACKAGE_1, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(CALLING_PACKAGE_2, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(CALLING_PACKAGE_3, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(CALLING_PACKAGE_4, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(LAUNCHER_1, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(LAUNCHER_2, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(LAUNCHER_3, userId, false), ret);
+        addPackageInfo(getInjectedPackageInfo(LAUNCHER_4, userId, false), ret);
 
         return ret;
     }
