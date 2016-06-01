@@ -951,6 +951,70 @@
       <item quantity="other">في <xliff:g id="COUNT_1">%d</xliff:g> عام</item>
       <item quantity="one">في <xliff:g id="COUNT_0">%d</xliff:g> عام</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two">قبل دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">قبل ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="two">قبل يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="two">قبل سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
+      <item quantity="many">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="other">قبل <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="one">قبل <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="two">خلال دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="two">خلال ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="two">خلال يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="zero">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="two">خلال سنتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+      <item quantity="few">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنوات</item>
+      <item quantity="many">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="other">خلال <xliff:g id="COUNT_1">%d</xliff:g> سنة</item>
+      <item quantity="one">خلال <xliff:g id="COUNT_0">%d</xliff:g> سنة</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"مشكلة في الفيديو"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"عذرًا، هذا الفيديو غير صالح للبث على هذا الجهاز."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"لا يمكنك تشغيل هذا الفيديو."</string>
@@ -1022,8 +1086,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"توقفت <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"إعادة تشغيل التطبيق"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"إعادة ضبط التطبيق وإعادة تشغيله"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"فتح التطبيق مرة أخرى"</string>
     <string name="aerr_report" msgid="5371800241488400617">"إرسال تعليقات"</string>
     <string name="aerr_close" msgid="2991640326563991340">"إغلاق"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"التعطيل حتى إعادة تشغيل الجهاز"</string>
@@ -1588,7 +1651,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"تم حذف <xliff:g id="KEY">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زر الرجوع مع الاستمرار."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"لإزالة تثبيت هذه الشاشة، يمكنك لمس زر \"نظرة عامة\" مع الاستمرار."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"التطبيق مقيد: ولا يسمح بإلغاء التقييد على هذا الجهاز."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"تم تثبيت الشاشة"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"تم إلغاء تثبيت الشاشة"</string>
@@ -1687,6 +1749,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏يتم تعديل طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏يتم تعديل طلب SS إلى طلب SS الجديد."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"الملف الشخصي للعمل"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"زر \"توسيع\""</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
@@ -1728,8 +1793,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"إزالة تثبيت"</string>
     <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"إعادة تشغيل الجلسة"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"انقر لبدء جلسة عرض توضيحي جديدة"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"يمكنك إعادة تعيين بيانات المصنع لاستخدام هذا الجهاز بدون قيود"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"المس للتعرف على مزيد من المعلومات."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"تم تعطيل <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

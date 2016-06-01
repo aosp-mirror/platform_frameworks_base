@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षमा</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्षमा</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेट अघि</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेट अघि</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टा अघि</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टा अघि</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन अघि</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिन अघि</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष अघि</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्ष अघि</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेटमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेटमा</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टामा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टामा</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिनमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिनमा</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्षमा</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"भिडियो समस्या"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"यो भिडियो यस उपकरणको लागि स्ट्रिमिङ गर्न मान्य छैन।"</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"यो भिडियो चलाउन सक्दैन।"</string>
@@ -968,8 +1000,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> रोकिएको छ"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> रोकिरहन्छ"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> रोकिरहन्छ"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"अनुप्रयोगलाई पुन: सुरु गर्नुहोस्"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"अनुप्रयोगलाई रिसेट गरी पुन: सुरु गर्नुहोस्"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"अनुप्रयोगलाई फेरि खोल्नुहोस्"</string>
     <string name="aerr_report" msgid="5371800241488400617">"प्रतिक्रिया पठाउनुहोस्"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बन्द गर्नुहोस्"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"यन्त्र पुनः सुरु नभएसम्म म्यूट गर्नुहोस्"</string>
@@ -1518,7 +1549,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"यस स्क्रिनलाई अनपिन गर्न पछाडि बटनलाई छोइराख्नुहोस्।"</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"यस स्क्रिनलाई अनपिन गर्न परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"अनुप्रयोग पिन गरियो: यस यन्त्रमा अनपिन गर्ने अनुमति छैन।"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रिन अनपिन गरियो"</string>
@@ -1585,6 +1615,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS अनुरोध USSD अनुरोधमा परिमार्जन गरिएको छ।"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS अनुरोध नयाँ SS अनुरोधमा परिमार्जन गरिएको छ।"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफाइल"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"विस्तृत गर्ने बटन"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB पेरिफेरल पोर्ट"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB पेरिफेरल पोर्ट"</string>
@@ -1622,8 +1655,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन गर्नुहोस्"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"सत्रलाई पुन:सुरु गर्नुहोस्"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"एउटा नयाँ डेमो सम्बन्धी सत्र सुरु गर्न ट्याप गर्नुहोस्"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"यस यन्त्रलाई सीमितताहरू बिना प्रयोग गर्नका लागि फ्याक्ट्री रिसेट गर्नुहोस्"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"थप जान्नका लागि छुनुहोस्।"</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> लाई असक्षम गरियो"</string>
 </resources>

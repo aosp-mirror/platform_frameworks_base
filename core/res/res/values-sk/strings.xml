@@ -679,7 +679,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Telefón odomknete stlačením tlačidla Menu."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Odomknite nakreslením vzoru"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Tiesňové volanie"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Stav tiesne"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Zavolať späť"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Správne!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Skúsiť znova"</string>
@@ -921,6 +921,54 @@
       <item quantity="other">o <xliff:g id="COUNT_1">%d</xliff:g> r.</item>
       <item quantity="one">o <xliff:g id="COUNT_0">%d</xliff:g> r.</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> minútami</item>
+      <item quantity="many">pred <xliff:g id="COUNT_1">%d</xliff:g> minútou</item>
+      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> minútami</item>
+      <item quantity="one">pred <xliff:g id="COUNT_0">%d</xliff:g> minútou</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> hodinami</item>
+      <item quantity="many">pred <xliff:g id="COUNT_1">%d</xliff:g> hodinou</item>
+      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> hodinami</item>
+      <item quantity="one">pred <xliff:g id="COUNT_0">%d</xliff:g> hodinou</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> dňami</item>
+      <item quantity="many">pred <xliff:g id="COUNT_1">%d</xliff:g> dňom</item>
+      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> dňami</item>
+      <item quantity="one">pred <xliff:g id="COUNT_0">%d</xliff:g> dňom</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> rokmi</item>
+      <item quantity="many">pred <xliff:g id="COUNT_1">%d</xliff:g> rokom</item>
+      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> rokmi</item>
+      <item quantity="one">pred <xliff:g id="COUNT_0">%d</xliff:g> rokom</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="few">o <xliff:g id="COUNT_1">%d</xliff:g> minúty</item>
+      <item quantity="many">o <xliff:g id="COUNT_1">%d</xliff:g> minúty</item>
+      <item quantity="other">o <xliff:g id="COUNT_1">%d</xliff:g> minút</item>
+      <item quantity="one">o <xliff:g id="COUNT_0">%d</xliff:g> minútu</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="few">o <xliff:g id="COUNT_1">%d</xliff:g> hodiny</item>
+      <item quantity="many">o <xliff:g id="COUNT_1">%d</xliff:g> hodiny</item>
+      <item quantity="other">o <xliff:g id="COUNT_1">%d</xliff:g> hodín</item>
+      <item quantity="one">o <xliff:g id="COUNT_0">%d</xliff:g> hodinu</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="few">o <xliff:g id="COUNT_1">%d</xliff:g> dni</item>
+      <item quantity="many">o <xliff:g id="COUNT_1">%d</xliff:g> dňa</item>
+      <item quantity="other">o <xliff:g id="COUNT_1">%d</xliff:g> dní</item>
+      <item quantity="one">o <xliff:g id="COUNT_0">%d</xliff:g> deň</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="few">o <xliff:g id="COUNT_1">%d</xliff:g> roky</item>
+      <item quantity="many">o <xliff:g id="COUNT_1">%d</xliff:g> roka</item>
+      <item quantity="other">o <xliff:g id="COUNT_1">%d</xliff:g> rokov</item>
+      <item quantity="one">o <xliff:g id="COUNT_0">%d</xliff:g> rok</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problém s videom"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Je nám ľúto, ale toto video sa nedá streamovať do tohto zariadenia."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Toto video nie je možné prehrať."</string>
@@ -992,8 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> sa zastavil"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sa opakovane zastavuje"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sa opakovane zastavuje"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Reštartovať aplikáciu"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Resetovať a reštartovať aplikáciu"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Spustiť aplikáciu znova"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Odoslať spätnú väzbu"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zavrieť"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignorovať do reštartu zariadenia"</string>
@@ -1550,7 +1597,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"Číslo <xliff:g id="KEY">%1$s</xliff:g> bolo odstránené"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Späť a podržte ho."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Ak chcete uvoľniť túto obrazovku, klepnite na tlačidlo Prehľad a podržte ho."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikácia je pripnutá. Uvoľnenie nie je na tomto zariadení povolené."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka bola pripnutá"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka bola uvoľnená"</string>
@@ -1633,6 +1679,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Žiadosť SS bola upravená na žiadosť USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Žiadosť SS bola upravená na novú žiadosť SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Pracovný profil"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Tlačidlo rozbalenia"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB pre periférne zariadenia s Androidom"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port USB pre periférne zariadenia"</string>
@@ -1672,8 +1721,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"Uvoľniť"</string>
     <string name="app_info" msgid="6856026610594615344">"Info o aplikácii"</string>
     <string name="negative_duration" msgid="5688706061127375131">"-<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Reštartujte reláciu"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Klepnutím začnete novú demo reláciu"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Ak chcete toto zariadenie používať bez obmedzení, obnovte na ňom továrenské nastavenia"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Klepnutím získate ďalšie informácie."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Deaktivovaná miniaplikácia <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

@@ -247,7 +247,7 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qasjen te vendndodhja e kësaj pajisjeje"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasu te kalendari yt"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasje te kalendari yt"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
@@ -891,6 +891,38 @@
       <item quantity="other">në <xliff:g id="COUNT_1">%d</xliff:g> vite</item>
       <item quantity="one">në <xliff:g id="COUNT_0">%d</xliff:g> vit</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuta më parë</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minutë më parë</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> orë më parë</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> orë më parë</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ditë më parë</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ditë më parë</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> vite më parë</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> vit më parë</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">për <xliff:g id="COUNT_1">%d</xliff:g> minuta</item>
+      <item quantity="one">për <xliff:g id="COUNT_0">%d</xliff:g> minutë</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other">për <xliff:g id="COUNT_1">%d</xliff:g> orë</item>
+      <item quantity="one">për <xliff:g id="COUNT_0">%d</xliff:g> orë</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other">për <xliff:g id="COUNT_1">%d</xliff:g> ditë</item>
+      <item quantity="one">për <xliff:g id="COUNT_0">%d</xliff:g> ditë</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other">për <xliff:g id="COUNT_1">%d</xliff:g> vite</item>
+      <item quantity="one">për <xliff:g id="COUNT_0">%d</xliff:g> vit</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problem me videon"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Kjo video nuk ofrohet për transmetim në këtë pajisje."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Videoja nuk mund të luhet."</string>
@@ -962,8 +994,8 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ka ndaluar"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Rinis aplikacionin"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Rivendos dhe rinis aplikacionin"</string>
+    <!-- no translation found for aerr_restart (7581308074153624475) -->
+    <skip />
     <string name="aerr_report" msgid="5371800241488400617">"Dërgo komentin"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Mbyll"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Vendose në heshtje deri kur të riniset pajisja"</string>
@@ -1515,7 +1547,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> u fshi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Puna <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Për të hequr gozhdimin e ekranit, prek dhe mbaj të shtypur \"Prapa\"."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Për të hequr gozhdimin e ekranit, prek dhe mbaj të shtypur \"Përmbledhja\"."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ekrani është i gozhduar. Anulimi i mbërthimit nuk lejohet nga organizata jote."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrani u gozhdua"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrani u hoq nga gozhdimi"</string>
@@ -1582,6 +1613,10 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Kërkesa SS është modifikuar në kërkesën USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Kërkesa SS është e modifikuar në kërkesën e re SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profili i punës"</string>
+    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
+    <skip />
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Porta periferike USB e Androidit"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Porta periferike USB"</string>
@@ -1619,8 +1654,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"Zhgozhdo"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacioni mbi aplikacionin"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Rivendos cilësimet e fabrikës për ta përdorur këtë pajisje pa kufizime"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Prek për të mësuar më shumë."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
 </resources>

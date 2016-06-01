@@ -257,7 +257,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"કૅમેરો"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ચિત્રો લેવાની અને વિડિઓ રેકોર્ડ કરવાની"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો તથા સંચાલિત કરો"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"બોડી સેન્સર્સ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો સામગ્રી પુનર્પ્રાપ્ત કરો"</string>
@@ -537,7 +537,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ઉપકરણ વૈશ્વિક પ્રોક્સી સેટ કરો"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"નીતિ સક્ષમ હોય તે વખતે ઉપયોગ કરવા માટેના ઉપકરણ વૈશ્વિક પ્રોક્સીને સેટ કરો. ફક્ત ઉપકરણના માલિક વૈશ્વિક પ્રોક્સી સેટ કરી શકે છે."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"સ્ક્રીન લૉક પાસવર્ડ સમાપ્તિ સેટ કરો"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"કેટલીવાર સ્ક્રીન લૉક પાસવર્ડ, PIN અથવા નમૂનો બદલવો આવશ્યક છે તેને બદલો."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"કેટલીવાર સ્ક્રીન લૉક પાસવર્ડ, PIN અથવા પેટર્ન બદલવો આવશ્યક છે તેને બદલો."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"સંગ્રહ એન્ક્રિપ્શન સેટ કરો"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"જરૂરી છે કે સંગ્રહિત ઍપ્લિકેશન એન્ક્રિપ્ટ થાય."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"કૅમેરા અક્ષમ કરો"</string>
@@ -891,6 +891,38 @@
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>વ. માં</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>વ. માં</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> મિનિટ પહેલાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> મિનિટ પહેલાં</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> કલાક પહેલાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> કલાક પહેલાં</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> દિવસ પહેલાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> દિવસ પહેલાં</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> વર્ષ પહેલાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> વર્ષ પહેલાં</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> મિનિટમાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> મિનિટમાં</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> કલાકમાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> કલાકમાં</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> દિવસમાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> દિવસમાં</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> વર્ષમાં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> વર્ષમાં</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"વિડિઓમાં સમસ્યા"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"આ ઉપકરણ પર સ્ટ્રીમ કરવા માટે આ વિડિઓ માન્ય નથી."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"આ વિડિઓ ચલાવી શકતાં નથી."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> બંધ થઈ ગઈ છે"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> રોકાઈ રહી છે"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> રોકાઈ રહી છે"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"ઍપ્લિકેશનને ફરીથી પ્રારંભ કરો"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"ફરીથી સેટ કરો અને ઍપ્લિકેશનને ફરીથી પ્રારંભ કરો"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"ઍપ્લિકેશન ફરીથી ખોલો"</string>
     <string name="aerr_report" msgid="5371800241488400617">"પ્રતિસાદ મોકલો"</string>
     <string name="aerr_close" msgid="2991640326563991340">"બંધ કરો"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"ઉપકરણ પુનઃપ્રારંભ ન થાય ત્યાં સુધી મ્યૂટ કરો"</string>
@@ -1515,7 +1546,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> કાઢી નાખી"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"કાર્યાલય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"આ સ્ક્રીનને અનપિન કરવા માટે, પાછળને ટચ કરીને પકડી રાખો."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"આ સ્ક્રીનને અનપિન કરવા માટે, વિહંગાવલોકન કરોને ટચ કરો અને પકડો."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"ઍપ્લિકેશન પિન કરેલ છે. આ ઉપકરણ પર અનપિન કરવાની મંજૂરી નથી."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"સ્ક્રીન પિન કરી"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"સ્ક્રીન અનપિન કરી"</string>
@@ -1582,6 +1612,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS વિનંતીને USSD વિનંતી પર સંશોધિત કરી."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS વિનંતીને નવી SS વિનંતી પર સંશોધિત કરી."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"કાર્ય પ્રોફાઇલ"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"વિસ્તૃત કરો બટન"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB પેરિફેરલ પોર્ટ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB પેરિફેરલ પોર્ટ"</string>
@@ -1619,8 +1652,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"અનપિન કરો"</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"સત્ર પુનઃપ્રારંભ કરો"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"નવું ડેમો સત્ર પ્રારંભ કરવા માટે ટૅપ કરો"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"આ ઉપકરણનો પ્રતિબંધો વિના ઉપયોગ કરવા માટે ફેક્ટરી રીસેટ કરો"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"વધુ જાણવા માટે ટચ કરો."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> અક્ષમ કર્યું"</string>
 </resources>

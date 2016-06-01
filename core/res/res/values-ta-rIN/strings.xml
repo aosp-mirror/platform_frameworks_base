@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ஆண்டுகளில்</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ஆண்டில்</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> நிமிடங்களுக்கு முன்பு</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> நிமிடத்திற்கு முன்பு</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> மணிநேரத்திற்கு முன்பு</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> மணிநேரத்திற்கு முன்பு</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> நாட்களுக்கு முன்பு</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> நாளுக்கு முன்பு</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ஆண்டுகளுக்கு முன்பு</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ஆண்டிற்கு முன்பு</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> நிமிடங்களில்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> நிமிடத்தில்</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> மணிநேரத்தில்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> மணிநேரத்தில்</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> நாட்களில்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> நாளில்</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ஆண்டுகளில்</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ஆண்டில்</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"வீடியோவில் சிக்கல்"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"சாதனத்தில் ஸ்ட்ரீம் செய்வதற்கு இது சரியான வீடியோ அல்ல."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"இந்த வீடியோவை இயக்க முடியவில்லை."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> செயலிழந்தது"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> தொடர்ந்து செயலிழக்கிறது"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> தொடர்ந்து செயலிழக்கிறது"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"பயன்பாட்டை மீண்டும் தொடங்கு"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"பயன்பாட்டை மீட்டமைத்து மீண்டும் தொடங்கு"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"பயன்பாட்டை மீண்டும் திற"</string>
     <string name="aerr_report" msgid="5371800241488400617">"கருத்து தெரிவி"</string>
     <string name="aerr_close" msgid="2991640326563991340">"மூடு"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"சாதனம் மீண்டும் தொடங்கும் வரை முடக்கு"</string>
@@ -1515,7 +1546,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> நீக்கப்பட்டது"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"இந்தத் திரையை விலக்க, \"முந்தையது\" பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"இந்தத் திரையை விலக்க, \"மேலோட்டப் பார்வை\" பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"பயன்பாடு பொருத்தப்பட்டது: பொருத்தியதை நீக்குவதற்கு இந்தச் சாதனத்தில் அனுமதியில்லை."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"திரையின் பின் அகற்றப்பட்டது"</string>
@@ -1582,6 +1612,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS கோரிக்கையானது USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS கோரிக்கையானது புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"விரி பொத்தான்"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB பெரிபெரல் போர்ட்"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB பெரிபெரல் போர்ட்"</string>
@@ -1619,8 +1652,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"அமர்வை மீண்டும் தொடங்கு"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"புதிய டெமோ அமர்வைத் தொடங்க, தட்டவும்"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"இந்தச் சாதனத்தைக் கட்டுப்பாடுகளின்றிப் பயன்படுத்த, ஆரம்ப நிலைக்கு மீட்டமைக்கவும்"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"மேலும் அறிய தொடவும்."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"முடக்கப்பட்டது: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
 </resources>

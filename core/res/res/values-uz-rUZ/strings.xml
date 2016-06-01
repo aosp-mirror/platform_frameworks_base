@@ -891,6 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> yildan keyin</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> yildan keyin</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> daqiqa oldin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> daqiqa oldin</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> soat oldin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> soat oldin</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> kun oldin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> kun oldin</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> yil oldin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> yil oldin</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> daqiqadan keyin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> daqiqadan keyin</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> soatdan keyin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> soatdan keyin</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> kundan keyin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> kundan keyin</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> yildan keyin</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> yildan keyin</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video muammosi"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Ushbu videoni mazkur qurilmada oqimli rejimda ijro etib bo‘lmaydi."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Ushbu videoni ijro etib bo‘lmadi."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni ishdan chiqdi"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> yana ishdan chiqdi"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Ilovani qayta ishga tushirish"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Ilovani qayta tiklash va qayta ishga tushirish"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Ilovani qayta ochish"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
@@ -1168,7 +1199,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"O‘tish"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Qidirish"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Yuborish"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Keyingi"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Keyingisi"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Tayyor"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Old."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Bajarish"</string>
@@ -1211,7 +1242,7 @@
     <string name="tethered_notification_title" msgid="3146694234398202601">"Modem rejimi yoniq"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Sozlash uchun bosing."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Orqaga"</string>
-    <string name="next_button_label" msgid="1080555104677992408">"Keyingi"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Keyingisi"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Tashlab o‘tish"</string>
     <string name="no_matches" msgid="8129421908915840737">"Topilmadi"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Sahifadan topish"</string>
@@ -1515,7 +1546,6 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> raqami o‘chirib tashlandi"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Ish <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"Bu ekrandan chiqish uchun “Orqaga” tugmasini bosib turing."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"Bu ekrandan chiqish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Ilova qadab qo‘yilgan. Uni ekrandan yechish ushbu qurilmada ta’qiqlangan."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran qadab qo‘yildi"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran bo‘shatildi"</string>
@@ -1582,6 +1612,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS so‘rovi USSD so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Ishchi profil"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Yoyish tugmasi"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android tashqi USB porti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Tashqi USB porti"</string>
@@ -1619,8 +1652,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"Olib tashlash"</string>
     <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Yangi seans"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Yangi demo-seans boshlash uchun bosing"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Bu qurilmadan cheklovlarsiz foydalanish uchun zavod sozlamalarini tiklang"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ko‘proq o‘rganish uchun bosing."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> vidjeti o‘chirilgan"</string>
 </resources>

@@ -891,6 +891,38 @@
       <item quantity="other">om <xliff:g id="COUNT_1">%d</xliff:g> år</item>
       <item quantity="one">om <xliff:g id="COUNT_0">%d</xliff:g> år</item>
     </plurals>
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other">for <xliff:g id="COUNT_1">%d</xliff:g> minutter siden</item>
+      <item quantity="one">for <xliff:g id="COUNT_0">%d</xliff:g> minutt siden</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other">for <xliff:g id="COUNT_1">%d</xliff:g> timer siden</item>
+      <item quantity="one">for <xliff:g id="COUNT_0">%d</xliff:g> time siden</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other">for <xliff:g id="COUNT_1">%d</xliff:g> dager siden</item>
+      <item quantity="one">for <xliff:g id="COUNT_0">%d</xliff:g> dag siden</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other">for <xliff:g id="COUNT_1">%d</xliff:g> år siden</item>
+      <item quantity="one">for <xliff:g id="COUNT_0">%d</xliff:g> år siden</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other">om <xliff:g id="COUNT_1">%d</xliff:g> minutter</item>
+      <item quantity="one">om <xliff:g id="COUNT_0">%d</xliff:g> minutt</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other">om <xliff:g id="COUNT_1">%d</xliff:g> timer</item>
+      <item quantity="one">om <xliff:g id="COUNT_0">%d</xliff:g> time</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other">om <xliff:g id="COUNT_1">%d</xliff:g> dager</item>
+      <item quantity="one">om <xliff:g id="COUNT_0">%d</xliff:g> dag</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other">om <xliff:g id="COUNT_1">%d</xliff:g> år</item>
+      <item quantity="one">om <xliff:g id="COUNT_0">%d</xliff:g> år</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Videoproblem"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Denne videoen er ikke gyldig for direkteavspilling på enheten."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Kan ikke spille av denne videoen."</string>
@@ -962,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> har stoppet"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> stopper gjentatte ganger"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> stopper gjentatte ganger"</string>
-    <string name="aerr_restart" msgid="9001379185665886595">"Start appen på nytt"</string>
-    <string name="aerr_reset" msgid="7645427603514220451">"Tilbakestill appen, og start den på nytt"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Åpne appen på nytt"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Send tilbakemelding"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Lukk"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignorer frem til enheten starter på nytt"</string>
@@ -1512,12 +1543,11 @@
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> er slettet"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Jobb-<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="1420543809500606964">"For å løsne denne skjermen, trykk og hold inne Tilbake."</string>
-    <string name="lock_to_app_toast_accessible" msgid="2302154926850846096">"For å løsne denne skjermen, trykk og hold inne Oversikt."</string>
     <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Appen er festet – du kan ikke løsne apper på denne enheten."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjermen er løsnet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev opplåsingsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
@@ -1579,6 +1609,9 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-forespørselen er endret til en USSD-forespørsel."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-forespørselen er endret til en ny SS-forespørsel."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Arbeidsprofil"</string>
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Knapp for å vise mer"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
+    <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port for USB-tilleggsutstyr for Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port for USB-tilleggsutstyr"</string>
@@ -1616,8 +1649,9 @@
     <string name="unpin_target" msgid="3556545602439143442">"Løsne"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Start økten på nytt"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Trykk for å starte en ny demoøkt"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Tilbakestill til fabrikkstandard for å bruke denne enheten uten begrensninger"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Trykk for å finne ut mer."</string>
-    <!-- no translation found for suspended_widget_accessibility (6712143096475264190) -->
-    <skip />
+    <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> er slått av"</string>
 </resources>
