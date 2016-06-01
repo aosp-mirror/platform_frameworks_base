@@ -2862,9 +2862,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
 
             // update status bar mode
-            final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
-                    View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT,
-                    View.STATUS_BAR_TRANSPARENT);
+            final int sbMode = computeStatusBarMode(oldVal, newVal);
 
             // update navigation bar mode
             final int nbMode = mNavigationBarView == null ? -1 : computeBarMode(
@@ -2911,7 +2909,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
     }
 
-    private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
+    protected int computeStatusBarMode(int oldVal, int newVal) {
+        return computeBarMode(oldVal, newVal, getStatusBarTransitions(),
+                View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT,
+                View.STATUS_BAR_TRANSPARENT);
+    }
+
+    protected BarTransitions getStatusBarTransitions() {
+        return mStatusBarView.getBarTransitions();
+    }
+
+    protected int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
             int transientFlag, int translucentFlag, int transparentFlag) {
         final int oldMode = barMode(oldVis, transientFlag, translucentFlag, transparentFlag);
         final int newMode = barMode(newVis, transientFlag, translucentFlag, transparentFlag);
@@ -2933,7 +2941,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void checkBarModes() {
         if (mDemoMode) return;
-        checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions(),
+        checkBarMode(mStatusBarMode, mStatusBarWindowState, getStatusBarTransitions(),
                 mNoAnimationOnNextBarModeChange);
         if (mNavigationBarView != null) {
             checkBarMode(mNavigationBarMode,
