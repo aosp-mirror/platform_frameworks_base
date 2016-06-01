@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ቆሟል"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> አሁንም እያቆመ ነው"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> አሁንም እያቆመ ነው"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"መተግበሪያውን እንደገና ክፈት"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ግብረመልስ ይላኩ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ዝጋ"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"መሣሪያ ዳግም እስኪጀመር ድረስ ድምጽ ያጥፉ"</string>
@@ -1610,9 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ጥያቄ ወደ USSD ጥያቄ ተሻሽሎዋል።"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ጥያቄ ወደ አዲስ SS ጥያቄ ተሻሽሎዋል።"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"የስራ መገለጫ"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"የዘርጋ አዝራር"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"የAndroid USB Peripheral ወደብ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
@@ -1651,10 +1649,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"ንቀል"</string>
     <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
-    <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
-    <skip />
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"ክፍለ-ጊዜን ዳግም ያስጀምሩ"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"አዲስ የማሳያ ክፍለ-ጊዜን ለመጀመር መታ ያድርጉ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ይህን መሣሪያ ያለምንም ገደብ ለመጠቀም የፋብሪካ ዳግም ያስጀምሩ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"የበለጠ ለመረዳት ይንኩ።"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> ተሰናክሏል"</string>
