@@ -829,7 +829,8 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_TEXT, si.getText());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_ID, si.getTextResId());
         ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE, si.getDisabledMessage());
-        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_ID, si.getDisabledMessageResId());
+        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_ID,
+                si.getDisabledMessageResourceId());
         ShortcutService.writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
         ShortcutService.writeAttr(out, ATTR_RANK, si.getRank());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
