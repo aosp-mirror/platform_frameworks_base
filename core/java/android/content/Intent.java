@@ -3174,6 +3174,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
 
     /**
+     * Boolean intent extra to be used with {@link ACTION_MASTER_CLEAR} in order to force a factory
+     * reset even if {@link android.os.UserManager.DISALLOW_FACTORY_RESET} is set.
+     * @hide
+     */
+    public static final String EXTRA_FORCE_MASTER_CLEAR =
+            "android.intent.extra.FORCE_MASTER_CLEAR";
+
+    /**
      * Broadcast action: report that a settings element is being restored from backup.  The intent
      * contains three extras: EXTRA_SETTING_NAME is a string naming the restored setting,
      * EXTRA_SETTING_NEW_VALUE is the value being restored, and EXTRA_SETTING_PREVIOUS_VALUE
