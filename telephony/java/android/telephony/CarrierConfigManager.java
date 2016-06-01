@@ -582,6 +582,20 @@ public class CarrierConfigManager {
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
 
     /**
+     * Boolean to decide whether to use #KEY_CARRIER_NAME_STRING from CarrierConfig app.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
+
+    /**
+     * String to identify carrier name in CarrierConfig app. This string is used only if
+     * #KEY_CARRIER_NAME_OVERRIDE_BOOL is true
+     * @hide
+     */
+    public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
+
+
+    /**
      * If this is true, the SIM card (through Customer Service Profile EF file) will be able to
      * prevent manual operator selection. If false, this SIM setting will be ignored and manual
      * operator selection will always be available. See CPHS4_2.WW6, CPHS B.4.7.1 for more
@@ -785,6 +799,8 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
+        sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
+        sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
 
         // MMS defaults
         sDefaults.putBoolean(KEY_MMS_ALIAS_ENABLED_BOOL, false);
