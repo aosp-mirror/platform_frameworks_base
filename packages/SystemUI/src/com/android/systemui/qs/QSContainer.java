@@ -60,6 +60,7 @@ public class QSContainer extends FrameLayout {
     private QSAnimator mQSAnimator;
     private QSCustomizer mQSCustomizer;
     private NotificationPanelView mPanelView;
+    private boolean mListening;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -209,6 +210,7 @@ public class QSContainer extends FrameLayout {
     public void setExpanded(boolean expanded) {
         if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
         mQsExpanded = expanded;
+        mQSPanel.setListening(mListening && mQsExpanded);
         updateQsState();
     }
 
@@ -227,8 +229,9 @@ public class QSContainer extends FrameLayout {
 
     public void setListening(boolean listening) {
         if (DEBUG) Log.d(TAG, "setListening " + listening);
-        mQSPanel.setListening(listening);
+        mListening = listening;
         mHeader.setListening(listening);
+        mQSPanel.setListening(mListening && mQsExpanded);
     }
 
     public void setQsExpansion(float expansion, float headerTranslation) {
