@@ -2276,6 +2276,8 @@ public class MediaPlayer extends PlayerBase
             Log.w(TAG, "addSubtitleSource called with null InputStream");
         }
 
+        getMediaTimeProvider();
+
         // process each subtitle in its own thread
         final HandlerThread thread = new HandlerThread("SubtitleReadThread",
               Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE);
@@ -2302,7 +2304,12 @@ public class MediaPlayer extends PlayerBase
                 synchronized (mIndexTrackPairs) {
                     mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
                 }
-                track.onData(contents.getBytes(), true /* eos */, ~0 /* runID: keep forever */);
+                Handler h = mTimeProvider.mEventHandler;
+                int what = TimeProvider.NOTIFY;
+                int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, contents.getBytes());
+                Message m = h.obtainMessage(what, arg1, 0, trackData);
+                h.sendMessage(m);
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 
@@ -2501,6 +2508,8 @@ public class MediaPlayer extends PlayerBase
             mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
         }
 
+        getMediaTimeProvider();
+
         final long offset2 = offset;
         final long length2 = length;
         final HandlerThread thread = new HandlerThread(
@@ -2524,7 +2533,12 @@ public class MediaPlayer extends PlayerBase
                             total += bytes;
                         }
                     }
-                    track.onData(bos.toByteArray(), true /* eos */, ~0 /* runID: keep forever */);
+                    Handler h = mTimeProvider.mEventHandler;
+                    int what = TimeProvider.NOTIFY;
+                    int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                    Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, bos.toByteArray());
+                    Message m = h.obtainMessage(what, arg1, 0, trackData);
+                    h.sendMessage(m);
                     return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -3524,6 +3538,7 @@ public class MediaPlayer extends PlayerBase
         private static final int REFRESH_AND_NOTIFY_TIME = 1;
         private static final int NOTIFY_STOP = 2;
         private static final int NOTIFY_SEEK = 3;
+        private static final int NOTIFY_TRACK_DATA = 4;
         private HandlerThread mHandlerThread;
 
         /** @hide */
@@ -3661,6 +3676,12 @@ public class MediaPlayer extends PlayerBase
                 mPausing = true;  // special handling if player disappeared
                 notifyTimedEvent(false /* refreshTime */);
             }
+        }
+
+        private synchronized void notifyTrackData(Pair<SubtitleTrack, byte[]> trackData) {
+            SubtitleTrack track = trackData.first;
+            byte[] data = trackData.second;
+            track.onData(data, true /* eos */, ~0 /* runID: keep forever */);
         }
 
         private synchronized void notifyStop() {
@@ -3894,6 +3915,9 @@ public class MediaPlayer extends PlayerBase
                         break;
                     case NOTIFY_SEEK:
                         notifySeek();
+                        break;
+                    case NOTIFY_TRACK_DATA:
+                        notifyTrackData((Pair<SubtitleTrack, byte[]>)msg.obj);
                         break;
                     }
                 }
