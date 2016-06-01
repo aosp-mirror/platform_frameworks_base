@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> रुक गई है"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> रुक रहा है"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> रुक रही है"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"ऐप्लिकेशन फिर से खोलें"</string>
     <string name="aerr_report" msgid="5371800241488400617">"फ़ीडबैक भेजें"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करें"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"डिवाइस पुन: प्रारंभ होने तक म्यूट करें"</string>
@@ -1610,9 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS अनुरोध को USSD अनुरोध में बदल दिया गया है."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS अनुरोध को नए SS अनुरोध में बदल दिया गया है."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफ़ाइल"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"विस्तृत करें बटन"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB पेरिफ़ेरल पोर्ट"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

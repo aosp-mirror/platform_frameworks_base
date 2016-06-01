@@ -682,7 +682,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Încercați din nou"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Încercați din nou"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S-a depășit numărul maxim de încercări pentru Deblocare facială"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Fără SIM."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Fără SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Nu există card SIM în computerul tablet PC."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"Niciun card SIM în televizor."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefonul nu are card SIM."</string>
@@ -906,14 +906,46 @@
       <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
       <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> an</item>
     </plurals>
-    <!-- no translation found for duration_minutes_relative (3178131706192980192) -->
-    <!-- no translation found for duration_hours_relative (676894109982008411) -->
-    <!-- no translation found for duration_days_relative (2203515825765397130) -->
-    <!-- no translation found for duration_years_relative (4820062134188885734) -->
-    <!-- no translation found for duration_minutes_relative_future (4655043589817680966) -->
-    <!-- no translation found for duration_hours_relative_future (8084579714205223891) -->
-    <!-- no translation found for duration_days_relative_future (333215369363433992) -->
-    <!-- no translation found for duration_years_relative_future (8644862986413104011) -->
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de minute</item>
+      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> ore</item>
+      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de ore</item>
+      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> oră</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
+      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
+      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
+      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
+      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> an</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
+      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de minute</item>
+      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> ore</item>
+      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ore</item>
+      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> oră</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
+      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
+      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
+      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
+      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> an</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problemă video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Acest fișier video nu este valid pentru a fi transmis în flux către acest dispozitiv."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Nu puteți reda acest videoclip"</string>
@@ -985,8 +1017,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> se oprește încontinuu"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> se oprește încontinuu"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Deschideți din nou aplicația"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Trimiteți feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Închideți"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Dezactivați până la repornirea dispozitivului"</string>
@@ -1613,9 +1644,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Solicitarea SS este modificată într-o solicitare USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Solicitarea SS este modificată într-o nouă solicitare SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil de serviciu"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Butonul de extindere"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port USB Android periferic"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

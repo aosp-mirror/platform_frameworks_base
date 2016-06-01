@@ -1040,8 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> перестав працювати"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> періодично перестає працювати"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Процес \"<xliff:g id="PROCESS">%1$s</xliff:g>\" періодично перестає працювати"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Відкрити додаток знову"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Надіслати відгук"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Закрити"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Вимкнути звук до перезавантаження пристрою"</string>
@@ -1680,9 +1679,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Запит SS перетворено на запит USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Запит SS перетворено на новий запит SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Робочий профіль"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Кнопка \"Розгорнути\""</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Периферійний USB-порт Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

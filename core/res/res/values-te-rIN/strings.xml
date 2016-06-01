@@ -55,7 +55,7 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI పూర్తయింది."</string>
     <string name="badPin" msgid="9015277645546710014">"మీరు టైప్ చేసిన పాత పిన్‌ చెల్లదు."</string>
     <string name="badPuk" msgid="5487257647081132201">"మీరు టైప్ చేసిన PUK చెల్లదు."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"మీరు టైప్ చేసిన PINలు సరిపోలలేదు."</string>
+    <string name="mismatchPin" msgid="609379054496863419">"మీరు టైప్ చేసిన పిన్‌లు సరిపోలలేదు."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 నుండి 8 సంఖ్యలు ఉండే పిన్‌ను టైప్ చేయండి."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 సంఖ్యలు లేదా అంతకంటే పొడవు ఉండే PUKని టైప్ చేయండి."</string>
     <string name="needPuk" msgid="919668385956251611">"మీ సిమ్ కార్డు PUK-లాక్ చేయబడింది. దీన్ని అన్‌లాక్ చేయడానికి PUK కోడ్‌ను టైప్ చేయండి."</string>
@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ఆపివేయబడింది"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"అనువర్తనాన్ని మళ్లీ తెరువు"</string>
     <string name="aerr_report" msgid="5371800241488400617">"అభిప్రాయాన్ని పంపు"</string>
     <string name="aerr_close" msgid="2991640326563991340">"మూసివేయి"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
@@ -1527,7 +1526,7 @@
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"కొత్త పిన్‌"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"కొత్త పిన్‌ను నిర్ధారించండి"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"నియంత్రణలను సవరించడానికి పిన్‌ను రూపొందించండి"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINలు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"పిన్‌లు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి</item>
@@ -1613,9 +1612,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS అభ్యర్థన USSD అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS అభ్యర్థన కొత్త SS అభ్యర్థనగా సవరించబడింది."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"కార్యాలయ ప్రొఫైల్‌"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"విస్తరింపజేయి బటన్"</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB పెరిఫెరల్ పోర్ట్"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

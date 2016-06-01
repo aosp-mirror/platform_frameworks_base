@@ -891,14 +891,38 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ildə</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ildə</item>
     </plurals>
-    <!-- no translation found for duration_minutes_relative (3178131706192980192) -->
-    <!-- no translation found for duration_hours_relative (676894109982008411) -->
-    <!-- no translation found for duration_days_relative (2203515825765397130) -->
-    <!-- no translation found for duration_years_relative (4820062134188885734) -->
-    <!-- no translation found for duration_minutes_relative_future (4655043589817680966) -->
-    <!-- no translation found for duration_hours_relative_future (8084579714205223891) -->
-    <!-- no translation found for duration_days_relative_future (333215369363433992) -->
-    <!-- no translation found for duration_years_relative_future (8644862986413104011) -->
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dəqiqə əvvəl</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> dəqiqə əvvəl</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> saat əvvəl</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> saat əvvəl</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> gün əvvəl</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> gün əvvəl</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> il əvvəl</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> il əvvəl</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dəqiqəyə</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> dəqiqəyə</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> saata</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> saata</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> günə</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> günə</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ilə</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ilə</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Video problemi"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Bu video bu cihaza strim olunmaq üçün uyğun deyil."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Bu video oxumur"</string>
@@ -1588,7 +1612,7 @@
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"İş profili"</string>
     <!-- no translation found for expand_button_content_description (5855955413376384681) -->
     <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

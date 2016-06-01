@@ -607,7 +607,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Telekss"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobilā tālruņa numurs darbā"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Darba mobilais"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Darba peidžers"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Palīgs"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"Multiziņa"</string>
@@ -1575,7 +1575,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atsl."</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atjaunināja administrators"</string>
@@ -1647,7 +1647,7 @@
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Darba profils"</string>
     <!-- no translation found for expand_button_content_description (5855955413376384681) -->
     <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB perifērijas ports"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

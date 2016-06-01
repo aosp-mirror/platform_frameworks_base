@@ -891,14 +891,38 @@
       <item quantity="one">em <xliff:g id="COUNT_1">%d</xliff:g> a</item>
       <item quantity="other">em <xliff:g id="COUNT_1">%d</xliff:g> a</item>
     </plurals>
-    <!-- no translation found for duration_minutes_relative (3178131706192980192) -->
-    <!-- no translation found for duration_hours_relative (676894109982008411) -->
-    <!-- no translation found for duration_days_relative (2203515825765397130) -->
-    <!-- no translation found for duration_years_relative (4820062134188885734) -->
-    <!-- no translation found for duration_minutes_relative_future (4655043589817680966) -->
-    <!-- no translation found for duration_hours_relative_future (8084579714205223891) -->
-    <!-- no translation found for duration_days_relative_future (333215369363433992) -->
-    <!-- no translation found for duration_years_relative_future (8644862986413104011) -->
+    <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> minutos atrás</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minutos atrás</item>
+    </plurals>
+    <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> horas atrás</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> horas atrás</item>
+    </plurals>
+    <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> dias atrás</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dias atrás</item>
+    </plurals>
+    <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> anos atrás</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> anos atrás</item>
+    </plurals>
+    <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
+      <item quantity="one">em <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="other">em <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+    </plurals>
+    <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
+      <item quantity="one">em <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+      <item quantity="other">em <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+    </plurals>
+    <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
+      <item quantity="one">em <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
+      <item quantity="other">em <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
+    </plurals>
+    <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
+      <item quantity="one">em <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
+      <item quantity="other">em <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema com o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Este vídeo não é válido para transmissão neste dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Não é possível reproduzir este vídeo."</string>
@@ -970,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> parou"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> apresenta falhas continuamente"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> apresenta falhas continuamente"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Abrir app novamente"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Fechar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Desativar até que dispositivo seja reiniciado"</string>
@@ -1586,9 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"A solicitação SS foi modificada para a solicitação USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"A solicitação SS foi modificada para a nova solicitação SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabalho"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (8707052547957298801) -->
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Botão \"Expandir\""</string>
+    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
     <skip />
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Porta USB periférica Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
