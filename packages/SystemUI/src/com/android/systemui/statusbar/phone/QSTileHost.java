@@ -369,13 +369,15 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     public void addTile(String spec) {
-        if (mTileSpecs.contains(spec)) {
+        final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                TILES_SETTING, ActivityManager.getCurrentUser());
+        final List<String> tileSpecs = loadTileSpecs(mContext, setting);
+        if (tileSpecs.contains(spec)) {
             return;
         }
-        ArrayList<String> specs = new ArrayList<>(mTileSpecs);
-        specs.add(spec);
+        tileSpecs.add(spec);
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
-                TextUtils.join(",", specs), ActivityManager.getCurrentUser());
+                TextUtils.join(",", tileSpecs), ActivityManager.getCurrentUser());
     }
 
     public void addTile(ComponentName tile) {
