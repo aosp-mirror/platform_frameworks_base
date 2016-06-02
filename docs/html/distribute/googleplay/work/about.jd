@@ -56,8 +56,8 @@ page.image=images/distribute/gpfw.jpg
   properly. Businesses are more conscious of data security and
   employee productivity, especially when it comes to features that
   share information with other services.</li>
-  <li>Support the <a href="{@docRoot}work/app-restrictions.html"
-    >App Configuration framework</a> to let an administrator remotely
+  <li>Support <a href="{@docRoot}work/managed-configurations.html"
+    >managed configurations</a> to let an administrator remotely
     configure app settings such as:
     <ul>
       <li>Server address and protocol settings</li>
@@ -74,16 +74,26 @@ page.image=images/distribute/gpfw.jpg
     profile</a> and test that with the
     <a href="{@docRoot}samples/BasicManagedProfile/index.html"
     >BasicManagedProfile sample app</a>.</li>
-  <li>Support <a href="{@docRoot}work/app-restrictions.html">app restrictions</a>
-    so that IT admins can remotely configure your app through leading
-    EMM solutions.</li>
+  <li>Support <a href="{@docRoot}work/managed-configurations.html"
+    >managed configurations</a> so that IT admins can remotely
+    configure your app through leading EMM solutions.</li>
 </ul>
 
 <h3 id="support">Provide support and maintenance</h3>
 
 <ul>
-<li>Consider offering enhanced support to cover extended hours or specific means of contact. Businesses are often willing to pay for this service.</li>
-<li>If you update the App Configuration / App Restrictions schema for your app, make sure it remains backward compatible. This is because it’s possible that different users will have different versions of your app (at least temporarily), and IT admin will want a consistent remote configuration experience between versions to ensure efficient management of apps in the field.</li>
+  <li>
+    Consider offering enhanced support to cover extended hours or
+    specific means of contact. Businesses are often willing to pay for
+    this service.
+  </li>
+  <li>
+    If you update the app configuration / managed configuration schema for
+    your app, make sure it remains backward compatible. This is because
+    it’s possible that different users will have different versions of
+    your app (at least temporarily), and IT admin will want a consistent
+    remote configuration experience between versions to ensure efficient
+    management of apps in the field.</li>
 </ul>
 
 <h2 id=related_resources>Related resources</h2>
