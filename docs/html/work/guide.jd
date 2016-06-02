@@ -10,7 +10,7 @@ page.image=images/work/cards/android-studio_600px.png
     <h2>In this document</h2>
     <ul>
       <li><a href="#managed-profiles">Managed Profiles</a></li>
-      <li><a href="#app-restrictions">Implementing App Restrictions</a></li>
+      <li><a href="#managed-configurations">Implementing Managed Configurations</a></li>
       <li><a href="#cosu">COSU Devices</a></li>
       <li><a href="#sso">Set up Single Sign-on with Chrome Custom Tabs</a></li>
       <li><a href="#testing">Test Your App</a></li>
@@ -32,7 +32,7 @@ page.image=images/work/cards/android-studio_600px.png
     app so it functions best on an Android device with a work profile.
   </li>
   <li>
-    <a href="#app-restrictions">Managed configuration using app restrictions</a>—Modify
+    <a href="#managed-configurations">Managed configurations</a>—Modify
     your app to allow IT administrators the option to specify custom
     settings for your apps.
   </li>
@@ -191,10 +191,10 @@ page.image=images/work/cards/android-studio_600px.png
   <a href="#testing">Test your app with Android for Work</a>.
 </p>
 
-<h2 id="app-restrictions">Implementing App Restrictions</h2>
+<h2 id="managed-configurations">Implementing Managed Configurations</h2>
 
 <p>
-  App restrictions are a set of instructions that IT administrators
+  Managed configurations are a set of instructions that IT administrators
   can use to manage their users’ mobile devices in a specific way.
   These instructions are universal and work across any EMM, allowing
   administrators to remotely configure applications on their users’
@@ -204,7 +204,7 @@ page.image=images/work/cards/android-studio_600px.png
 <p>
   If you’re developing apps for business or government, you may need
   to satisfy your industry’s specific set of requirements. Using
-  application restrictions, the IT administrator can remotely specify
+  managed configurations, the IT administrator can remotely specify
   settings and enforce policies for their users’ Android apps; for
   example:
 </p>
@@ -217,26 +217,26 @@ page.image=images/work/cards/android-studio_600px.png
   <li>Manage bookmarks</li>
 </ul>
 
-<h3>Best practices for implementing app restrictions</h3>
+<h3>Best practices for implementing managed configurations</h3>
 
 <p>
-  The <a href="{@docRoot}work/app-restrictions.html">Set up App Restrictions</a>
+  The <a href="{@docRoot}work/managed-configurations.html">Set up Managed Configurations</a>
   guide is the key source for information on how to build and deploy
-  app restrictions. After you’ve reviewed this documentation, see
+  managed configurations. After you’ve reviewed this documentation, see
   recommendations below for additional guidance.
 </p>
 
 <h4>When first launching the app</h4>
 <p>
-  As soon as you launch an application, you can see if app
-  restrictions are already set for this app in <code>onStart()</code> or
+  As soon as you launch an application, you can see if managed
+  configurations are already set for this app in <code>onStart()</code> or
   <code>onResume()</code>. Additionally, you can find out if your
   application is managed or unmanaged. For example, if
   <a href="{@docRoot}reference/android/content/RestrictionsManager.html#getApplicationRestrictions()"
   ><code>getApplicationRestrictions()</code></a> returns:
   <ul>
     <li><strong>A set of application-specific restrictions</strong>—You
-      can configure the app restrictions silently (without requiring
+      can configure the managed configurations silently (without requiring
       user input).</li>
     <li><strong>An empty bundle</strong>—Your application acts like
       it’s unmanaged (for example, how the app behaves in a personal
@@ -250,12 +250,12 @@ page.image=images/work/cards/android-studio_600px.png
   </ul>
 </p>
 
-<h4>Listen for changes to app restrictions</h4>
+<h4>Listen for changes to managed configurations</h4>
 <p>
-  IT administrators can change app restrictions and what policies they
-  want to enforce on their users at any time. Because of this, we
-  recommend you ensure that your app can accept new restrictions as
-  follows:
+  IT administrators can change managed configurations and what
+  policies they want to enforce on their users at any time. Because of
+  this, we recommend you ensure that your app can accept new
+  restrictions for your managed configuration as follows:
 </p>
 
 <ul>
@@ -318,7 +318,7 @@ page.image=images/work/cards/android-studio_600px.png
 </ol>
 
 <p>
-  A solution to both problems is to authenticate users using Chrome
+  A solution to both problems is to authenticate users using browser
   Custom Tabs, instead of WebView. This ensures that authentication:
 </p>
 <ul>
@@ -335,19 +335,23 @@ page.image=images/work/cards/android-studio_600px.png
 <h3>Requirements</h3>
 
 <p>
-  Chrome Custom Tabs are supported using Platform APIs from API level
-  23 (Android 6.0), and support libraries back to API level 4 (Android
-  1.6). To implement Chrome Custom Tabs, you need to use a supported
-  browser, such as Chrome 45 or later.
+  <a href="https://developer.android.com/topic/libraries/support-library/features.html#custom-tabs"
+  >Custom Tabs</a> are supported back to API level 15 (Android 4.0.3).
+  To use Custom Tabs you need a supported browser, such as Chrome.
+  Chrome 45 and later implement this feature as
+  <a href="https://developer.chrome.com/multidevice/android/customtabs">Chrome Custom Tabs</a>.
 </p>
 
-<h3>How do I implement Chrome Custom Tabs?</h3>
+<h3>How do I implement SSO with Custom Tabs?</h3>
 
 <p>
-  Google, in conjunction with the OpenID Foundation, has published an
-  open source library on GitHub. To set up Chrome Custom Tabs for SSO,
-  see the <a href="https://github.com/openid/AppAuth-Android"
-  >documentation and sample code on GitHub</a>.
+  Google has open sourced an OAuth client library that uses Custom
+  Tabs, contributing it to the OpenID Connect working group of the
+  OpenID Foundation. To set up Custom Tabs for SSO with the
+  AppAuth library, see the <a href="https://github.com/openid/AppAuth-Android"
+  >documentation and sample code on GitHub</a>, or try
+  <a href="https://codelabs.developers.google.com/codelabs/appauth-android-codelab/"
+  >the codelab</a>.
 </p>
 
 <h2 id="testing">Test your App with Android for Work</h2>
@@ -467,7 +471,7 @@ android.app.extra.PROVISIONING_TIME_ZONE=America/New_York</pre>
   <li>Follow the onscreen instructions to set up your target device.</li>
   <li>Once you’ve completed provisioning the device owner, you can test your app on that device. You
     should specifically test how
-    <a href="{@docRoot}work/app-restrictions.html">app restrictions</a>,
+    <a href="{@docRoot}work/managed-configurations.html">managed configurations</a>,
     <a href="{@docRoot}work/managed-profiles.html#sharing_files">URIs</a>, and
     <a href="{@docRoot}work/managed-profiles.html#prevent_failed_intents">intents</a>
     work on that device.</li>
@@ -484,7 +488,7 @@ android.app.extra.PROVISIONING_TIME_ZONE=America/New_York</pre>
 
 <ul>
   <li>App distribution through Play</li>
-  <li>Server-side app restriction configuration</li>
+  <li>Server-side managed configuration</li>
   <li>Server-side profile policy control</li>
 </ul>
 
@@ -510,7 +514,7 @@ android.app.extra.PROVISIONING_TIME_ZONE=America/New_York</pre>
     <ol>
       <li>Set up work devices.</li>
       <li>Distribute your application.</li>
-      <li>Set application restrictions.</li>
+      <li>Set managed configuration.</li>
       <li>Set device policies.</li>
     </ol>
 </ol>
