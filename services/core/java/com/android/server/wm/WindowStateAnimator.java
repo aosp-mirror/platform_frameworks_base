@@ -816,22 +816,11 @@ class WindowStateAnimator {
             mTmpSize.bottom = mTmpSize.top + 1;
         }
 
-        final int displayId = w.getDisplayId();
-        float scale = 1.0f;
-        // Magnification is supported only for the default display.
-        if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {
-            final MagnificationSpec spec =
-                    mService.mAccessibilityController.getMagnificationSpecForWindowLocked(w);
-            if (spec != null && !spec.isNop()) {
-                scale = spec.scale;
-            }
-        }
-
         // Adjust for surface insets.
-        mTmpSize.left -= scale * attrs.surfaceInsets.left;
-        mTmpSize.top -= scale * attrs.surfaceInsets.top;
-        mTmpSize.right += scale * attrs.surfaceInsets.right;
-        mTmpSize.bottom += scale * attrs.surfaceInsets.bottom;
+        mTmpSize.left -= attrs.surfaceInsets.left;
+        mTmpSize.top -= attrs.surfaceInsets.top;
+        mTmpSize.right += attrs.surfaceInsets.right;
+        mTmpSize.bottom += attrs.surfaceInsets.bottom;
     }
 
     boolean hasSurface() {
