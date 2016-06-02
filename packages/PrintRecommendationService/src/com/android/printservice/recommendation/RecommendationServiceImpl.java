@@ -26,6 +26,7 @@ import com.android.printservice.recommendation.plugin.mdnsFilter.MDNSFilterPlugi
 import com.android.printservice.recommendation.plugin.mdnsFilter.VendorConfig;
 import com.android.printservice.recommendation.plugin.mopria.MopriaRecommendationPlugin;
 import com.android.printservice.recommendation.plugin.samsung.SamsungRecommendationPlugin;
+import com.android.printservice.recommendation.plugin.xerox.XeroxPrintServiceRecommendationPlugin;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -80,6 +81,14 @@ public class RecommendationServiceImpl extends RecommendationService
                     false));
         } catch (Exception e) {
             Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_samsung) +
+                    " plugin", e);
+        }
+
+        try {
+            mPlugins.add(new RemotePrintServicePlugin(
+                    new XeroxPrintServiceRecommendationPlugin(this), this, false));
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Could not initiate " + getString(R.string.plugin_vendor_xerox) +
                     " plugin", e);
         }
 
