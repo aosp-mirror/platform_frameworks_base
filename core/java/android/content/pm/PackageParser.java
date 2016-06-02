@@ -270,6 +270,7 @@ public class PackageParser {
         final int nameRes;
         final int labelRes;
         final int iconRes;
+        final int roundIconRes;
         final int logoRes;
         final int bannerRes;
 
@@ -277,7 +278,8 @@ public class PackageParser {
         TypedArray sa;
 
         ParsePackageItemArgs(Package _owner, String[] _outError,
-                int _nameRes, int _labelRes, int _iconRes, int _logoRes, int _bannerRes) {
+                int _nameRes, int _labelRes, int _iconRes, int _roundIconRes, int _logoRes,
+                int _bannerRes) {
             owner = _owner;
             outError = _outError;
             nameRes = _nameRes;
@@ -285,6 +287,7 @@ public class PackageParser {
             iconRes = _iconRes;
             logoRes = _logoRes;
             bannerRes = _bannerRes;
+            roundIconRes = _roundIconRes;
         }
     }
 
@@ -296,10 +299,12 @@ public class PackageParser {
         int flags;
 
         ParseComponentArgs(Package _owner, String[] _outError,
-                int _nameRes, int _labelRes, int _iconRes, int _logoRes, int _bannerRes,
+                int _nameRes, int _labelRes, int _iconRes, int _roundIconRes, int _logoRes,
+                int _bannerRes,
                 String[] _sepProcesses, int _processRes,
                 int _descriptionRes, int _enabledRes) {
-            super(_owner, _outError, _nameRes, _labelRes, _iconRes, _logoRes, _bannerRes);
+            super(_owner, _outError, _nameRes, _labelRes, _iconRes, _roundIconRes, _logoRes,
+                    _bannerRes);
             sepProcesses = _sepProcesses;
             processRes = _processRes;
             descriptionRes = _descriptionRes;
@@ -2508,10 +2513,11 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup);
 
         if (!parsePackageItemInfo(owner, perm.info, outError,
-                "<permission-group>", sa,
+                "<permission-group>", sa, true /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_name,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_label,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_icon,
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_roundIcon,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_logo,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_banner)) {
             sa.recycle();
@@ -2552,10 +2558,11 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermission);
 
         if (!parsePackageItemInfo(owner, perm.info, outError,
-                "<permission>", sa,
+                "<permission>", sa, true /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestPermission_name,
                 com.android.internal.R.styleable.AndroidManifestPermission_label,
                 com.android.internal.R.styleable.AndroidManifestPermission_icon,
+                com.android.internal.R.styleable.AndroidManifestPermission_roundIcon,
                 com.android.internal.R.styleable.AndroidManifestPermission_logo,
                 com.android.internal.R.styleable.AndroidManifestPermission_banner)) {
             sa.recycle();
@@ -2621,10 +2628,11 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestPermissionTree);
 
         if (!parsePackageItemInfo(owner, perm.info, outError,
-                "<permission-tree>", sa,
+                "<permission-tree>", sa, true /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_name,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_label,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_icon,
+                com.android.internal.R.styleable.AndroidManifestPermissionTree_roundIcon,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_logo,
                 com.android.internal.R.styleable.AndroidManifestPermissionTree_banner)) {
             sa.recycle();
@@ -2671,6 +2679,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_name,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_label,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_icon,
+                    com.android.internal.R.styleable.AndroidManifestInstrumentation_roundIcon,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_logo,
                     com.android.internal.R.styleable.AndroidManifestInstrumentation_banner);
             mParseInstrumentationArgs.tag = "<instrumentation>";
@@ -2736,10 +2745,21 @@ public class PackageParser {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestApplication);
 
-        String name = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestApplication_name, 0);
-        if (name != null) {
-            ai.className = buildClassName(pkgName, name, outError);
+        if (!parsePackageItemInfo(owner, ai, outError,
+                "<application>", sa, false /*nameRequired*/,
+                com.android.internal.R.styleable.AndroidManifestApplication_name,
+                com.android.internal.R.styleable.AndroidManifestApplication_label,
+                com.android.internal.R.styleable.AndroidManifestApplication_icon,
+                com.android.internal.R.styleable.AndroidManifestApplication_roundIcon,
+                com.android.internal.R.styleable.AndroidManifestApplication_logo,
+                com.android.internal.R.styleable.AndroidManifestApplication_banner)) {
+            sa.recycle();
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            return false;
+        }
+
+        if (ai.name != null) {
+            ai.className = buildClassName(pkgName, ai.name, outError);
             if (ai.className == null) {
                 sa.recycle();
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -2810,18 +2830,6 @@ public class PackageParser {
             }
         }
 
-        TypedValue v = sa.peekValue(
-                com.android.internal.R.styleable.AndroidManifestApplication_label);
-        if (v != null && (ai.labelRes=v.resourceId) == 0) {
-            ai.nonLocalizedLabel = v.coerceToString();
-        }
-
-        ai.icon = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestApplication_icon, 0);
-        ai.logo = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestApplication_logo, 0);
-        ai.banner = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestApplication_banner, 0);
         ai.theme = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestApplication_theme, 0);
         ai.descriptionRes = sa.getResourceId(
@@ -3335,25 +3343,33 @@ public class PackageParser {
         return true;
     }
 
-    private boolean parsePackageItemInfo(Package owner, PackageItemInfo outInfo,
-            String[] outError, String tag, TypedArray sa,
-            int nameRes, int labelRes, int iconRes, int logoRes, int bannerRes) {
+    private static boolean parsePackageItemInfo(Package owner, PackageItemInfo outInfo,
+            String[] outError, String tag, TypedArray sa, boolean nameRequired,
+            int nameRes, int labelRes, int iconRes, int roundIconRes, int logoRes, int bannerRes) {
         String name = sa.getNonConfigurationString(nameRes, 0);
         if (name == null) {
-            outError[0] = tag + " does not specify android:name";
-            return false;
+            if (nameRequired) {
+                outError[0] = tag + " does not specify android:name";
+                return false;
+            }
+        } else {
+            outInfo.name
+                = buildClassName(owner.applicationInfo.packageName, name, outError);
+            if (outInfo.name == null) {
+                return false;
+            }
         }
 
-        outInfo.name
-            = buildClassName(owner.applicationInfo.packageName, name, outError);
-        if (outInfo.name == null) {
-            return false;
-        }
-
-        int iconVal = sa.getResourceId(iconRes, 0);
-        if (iconVal != 0) {
-            outInfo.icon = iconVal;
+        int roundIconVal = sa.getResourceId(roundIconRes, 0);
+        if (roundIconVal != 0) {
+            outInfo.icon = roundIconVal;
             outInfo.nonLocalizedLabel = null;
+        } else {
+            int iconVal = sa.getResourceId(iconRes, 0);
+            if (iconVal != 0) {
+                outInfo.icon = iconVal;
+                outInfo.nonLocalizedLabel = null;
+            }
         }
 
         int logoVal = sa.getResourceId(logoRes, 0);
@@ -3387,6 +3403,7 @@ public class PackageParser {
                     R.styleable.AndroidManifestActivity_name,
                     R.styleable.AndroidManifestActivity_label,
                     R.styleable.AndroidManifestActivity_icon,
+                    R.styleable.AndroidManifestActivity_roundIcon,
                     R.styleable.AndroidManifestActivity_logo,
                     R.styleable.AndroidManifestActivity_banner,
                     mSeparateProcesses,
@@ -3761,6 +3778,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_name,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
+                    com.android.internal.R.styleable.AndroidManifestActivityAlias_roundIcon,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_logo,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_banner,
                     mSeparateProcesses,
@@ -3915,6 +3933,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestProvider_name,
                     com.android.internal.R.styleable.AndroidManifestProvider_label,
                     com.android.internal.R.styleable.AndroidManifestProvider_icon,
+                    com.android.internal.R.styleable.AndroidManifestProvider_roundIcon,
                     com.android.internal.R.styleable.AndroidManifestProvider_logo,
                     com.android.internal.R.styleable.AndroidManifestProvider_banner,
                     mSeparateProcesses,
@@ -4234,6 +4253,7 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_name,
                     com.android.internal.R.styleable.AndroidManifestService_label,
                     com.android.internal.R.styleable.AndroidManifestService_icon,
+                    com.android.internal.R.styleable.AndroidManifestService_roundIcon,
                     com.android.internal.R.styleable.AndroidManifestService_logo,
                     com.android.internal.R.styleable.AndroidManifestService_banner,
                     mSeparateProcesses,
@@ -4550,8 +4570,14 @@ public class PackageParser {
             outInfo.nonLocalizedLabel = v.coerceToString();
         }
 
-        outInfo.icon = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestIntentFilter_icon, 0);
+        int roundIcon = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestIntentFilter_roundIcon, 0);
+        if (roundIcon != 0) {
+            outInfo.icon = roundIcon;
+        } else {
+            outInfo.icon = sa.getResourceId(
+                    com.android.internal.R.styleable.AndroidManifestIntentFilter_icon, 0);
+        }
 
         outInfo.logo = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_logo, 0);
@@ -5180,45 +5206,13 @@ public class PackageParser {
         public Component(final ParsePackageItemArgs args, final PackageItemInfo outInfo) {
             owner = args.owner;
             intents = new ArrayList<II>(0);
-            String name = args.sa.getNonConfigurationString(args.nameRes, 0);
-            if (name == null) {
+            if (parsePackageItemInfo(args.owner, outInfo, args.outError, args.tag, args.sa,
+                    true /*nameRequired*/, args.nameRes, args.labelRes, args.iconRes,
+                    args.roundIconRes, args.logoRes, args.bannerRes)) {
+                className = outInfo.name;
+            } else {
                 className = null;
-                args.outError[0] = args.tag + " does not specify android:name";
-                return;
             }
-
-            outInfo.name
-                = buildClassName(owner.applicationInfo.packageName, name, args.outError);
-            if (outInfo.name == null) {
-                className = null;
-                args.outError[0] = args.tag + " does not have valid android:name";
-                return;
-            }
-
-            className = outInfo.name;
-
-            int iconVal = args.sa.getResourceId(args.iconRes, 0);
-            if (iconVal != 0) {
-                outInfo.icon = iconVal;
-                outInfo.nonLocalizedLabel = null;
-            }
-
-            int logoVal = args.sa.getResourceId(args.logoRes, 0);
-            if (logoVal != 0) {
-                outInfo.logo = logoVal;
-            }
-
-            int bannerVal = args.sa.getResourceId(args.bannerRes, 0);
-            if (bannerVal != 0) {
-                outInfo.banner = bannerVal;
-            }
-
-            TypedValue v = args.sa.peekValue(args.labelRes);
-            if (v != null && (outInfo.labelRes=v.resourceId) == 0) {
-                outInfo.nonLocalizedLabel = v.coerceToString();
-            }
-
-            outInfo.packageName = owner.packageName;
         }
 
         public Component(final ParseComponentArgs args, final ComponentInfo outInfo) {
