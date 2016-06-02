@@ -8981,6 +8981,14 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_CELLULAR_ON_BOOT = "enable_cellular_on_boot";
+
+        /**
+         * The maximum allowed notification enqueue rate in Hertz.
+         *
+         * Should be a float, and includes both posts and updates.
+         * @hide
+         */
+        public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
     }
 
     /**
