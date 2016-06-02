@@ -128,7 +128,7 @@ Prevents restarting in safe mode
 <p>
 Additional COSU management features launched with Marshmallow make it easier to
 develop and deploy Android devices as a single-use device. If you want to
-enforce server-side app restrictions or server-side profile policy controls,
+enforce server-side managed configurations or server-side profile policy controls,
 you need to use an EMM or make your application a DPC. Follow the instructions
 below as you create your application.
 </p>
@@ -343,7 +343,7 @@ Keep a device’s screen on while plugged in via
 </li>
 
 <li>
-Set default user restrictions via
+Set default user restriction for managed configurations via
 {@link android.app.admin.DevicePolicyManager#addUserRestriction addUserRestriction()}
 </li>
 
@@ -398,7 +398,7 @@ public class CosuActivity extends Activity {
     }
 
     private void setDefaultCosuPolicies(boolean active) {
-        // set user restrictions
+        // set managed configurations
         setUserRestriction(DISALLOW_SAFE_BOOT, active);
         setUserRestriction(DISALLOW_FACTORY_RESET, active);
         setUserRestriction(DISALLOW_ADD_USER, active);
