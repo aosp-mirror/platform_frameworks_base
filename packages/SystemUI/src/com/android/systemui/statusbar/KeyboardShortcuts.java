@@ -72,7 +72,6 @@ public final class KeyboardShortcuts {
     private static final String TAG = KeyboardShortcuts.class.getSimpleName();
     private static final Object sLock = new Object();
     private static KeyboardShortcuts sInstance;
-    private static boolean sIsShowing;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
@@ -131,13 +130,12 @@ public final class KeyboardShortcuts {
                 dismiss();
             }
             getInstance(context).showKeyboardShortcuts(deviceId);
-            sIsShowing = true;
         }
     }
 
     public static void toggle(Context context, int deviceId) {
         synchronized (sLock) {
-            if (sIsShowing) {
+            if (isShowing()) {
                 dismiss();
             } else {
                 show(context, deviceId);
@@ -151,8 +149,12 @@ public final class KeyboardShortcuts {
                 sInstance.dismissKeyboardShortcuts();
                 sInstance = null;
             }
-            sIsShowing = false;
         }
+    }
+
+    private static boolean isShowing() {
+        return sInstance != null && sInstance.mKeyboardShortcutsDialog != null
+                && sInstance.mKeyboardShortcutsDialog.isShowing();
     }
 
     private void loadResources(Context context) {
