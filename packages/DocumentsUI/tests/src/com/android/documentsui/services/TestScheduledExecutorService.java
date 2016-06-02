@@ -80,7 +80,7 @@ public class TestScheduledExecutorService implements ScheduledExecutorService {
 
     @Override
     public Future<?> submit(Runnable task) {
-        throw new UnsupportedOperationException();
+        return schedule(task, 0, TimeUnit.MILLISECONDS);
     }
 
     @Override

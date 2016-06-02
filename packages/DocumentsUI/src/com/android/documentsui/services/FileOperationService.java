@@ -38,17 +38,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.concurrent.GuardedBy;
 
 public class FileOperationService extends Service implements Job.Listener {
 
-    private static final int DEFAULT_DELAY = 0;
-    private static final int MAX_DELAY = 10 * 1000;  // ten seconds
     private static final int POOL_SIZE = 2;  // "pool size", not *max* "pool size".
     private static final int NOTIFICATION_ID_PROGRESS = 0;
     private static final int NOTIFICATION_ID_FAILURE = 1;
@@ -57,7 +54,6 @@ public class FileOperationService extends Service implements Job.Listener {
     public static final String TAG = "FileOperationService";
 
     public static final String EXTRA_JOB_ID = "com.android.documentsui.JOB_ID";
-    public static final String EXTRA_DELAY = "com.android.documentsui.DELAY";
     public static final String EXTRA_OPERATION = "com.android.documentsui.OPERATION";
     public static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
     public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
@@ -87,7 +83,10 @@ public class FileOperationService extends Service implements Job.Listener {
     // The executor and job factory are visible for testing and non-final
     // so we'll have a way to inject test doubles from the test. It's
     // a sub-optimal arrangement.
-    @VisibleForTesting ScheduledExecutorService executor;
+    @VisibleForTesting ExecutorService executor;
+
+    // Use a separate thread pool to prioritize deletions
+    @VisibleForTesting ExecutorService deletionExecutor;
     @VisibleForTesting Factory jobFactory;
 
     private PowerManager mPowerManager;
@@ -103,7 +102,11 @@ public class FileOperationService extends Service implements Job.Listener {
     public void onCreate() {
         // Allow tests to pre-set these with test doubles.
         if (executor == null) {
-            executor = new ScheduledThreadPoolExecutor(POOL_SIZE);
+            executor = Executors.newFixedThreadPool(POOL_SIZE);
+        }
+
+        if (deletionExecutor == null) {
+            deletionExecutor = Executors.newCachedThreadPool();
         }
 
         if (jobFactory == null) {
@@ -168,15 +171,10 @@ public class FileOperationService extends Service implements Job.Listener {
             }
 
             mWakeLock.acquire();
-        }
 
-        assert(job != null);
-        int delay = intent.getIntExtra(EXTRA_DELAY, DEFAULT_DELAY);
-        assert(delay <= MAX_DELAY);
-        if (DEBUG) Log.d(
-                TAG, "Scheduling job " + job.id + " to run in " + delay + " milliseconds.");
-        ScheduledFuture<?> future = executor.schedule(job, delay, TimeUnit.MILLISECONDS);
-        synchronized (mRunning) {
+            assert (job != null);
+            if (DEBUG) Log.d(TAG, "Scheduling job " + job.id + ".");
+            Future<?> future = getExecutorService(operationType).submit(job);
             mRunning.put(jobId, new JobRecord(job, future));
         }
     }
@@ -202,14 +200,6 @@ public class FileOperationService extends Service implements Job.Listener {
             JobRecord record = mRunning.get(jobId);
             if (record != null) {
                 record.job.cancel();
-
-                // If the job hasn't been started, cancel it and explicitly clean up.
-                // If it *has* been started, we wait for it to recognize this, then
-                // allow it stop working in an orderly fashion.
-                if (record.future.getDelay(TimeUnit.MILLISECONDS) > 0) {
-                    record.future.cancel(false);
-                    onFinished(record.job);
-                }
             }
         }
 
@@ -254,6 +244,18 @@ public class FileOperationService extends Service implements Job.Listener {
                 return jobFactory.createDelete(
                         this, getApplicationContext(), this, id, stack, srcs,
                         srcParent);
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    private ExecutorService getExecutorService(@OpType int operationType) {
+        switch (operationType) {
+            case OPERATION_COPY:
+            case OPERATION_MOVE:
+                return executor;
+            case OPERATION_DELETE:
+                return deletionExecutor;
             default:
                 throw new UnsupportedOperationException();
         }
@@ -335,9 +337,9 @@ public class FileOperationService extends Service implements Job.Listener {
 
     private static final class JobRecord {
         private final Job job;
-        private final ScheduledFuture<?> future;
+        private final Future<?> future;
 
-        public JobRecord(Job job, ScheduledFuture<?> future) {
+        public JobRecord(Job job, Future<?> future) {
             this.job = job;
             this.future = future;
         }

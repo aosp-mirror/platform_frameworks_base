@@ -869,12 +869,7 @@ public class DirectoryFragment extends Fragment
                         (TextView) mInflater.inflate(R.layout.dialog_delete_confirmation, null);
                 message.setText(generateDeleteMessage(docs));
 
-                // This "insta-hides" files that are being deleted, because
-                // the delete operation may be not execute immediately (it
-                // may be queued up on the FileOperationService.)
-                // To hide the files locally, we call the hide method on the adapter
-                // ...which a live object...cannot be parceled.
-                // For that reason, for now, we implement this dialog NOT
+                // For now, we implement this dialog NOT
                 // as a fragment (which can survive rotation and have its own state),
                 // but as a simple runtime dialog. So rotating a device with an
                 // active delete dialog...results in that dialog disappearing.
@@ -895,10 +890,7 @@ public class DirectoryFragment extends Fragment
                                 } else {
                                     Log.w(TAG, "Action mode is null before deleting documents.");
                                 }
-                                // Hide the files in the UI...since the operation
-                                // might be queued up on FileOperationService.
-                                // We're walking a line here.
-                                mAdapter.hide(selected.getAll());
+
                                 FileOperations.delete(
                                         getActivity(), docs, srcParent, getDisplayState().stack);
                             }

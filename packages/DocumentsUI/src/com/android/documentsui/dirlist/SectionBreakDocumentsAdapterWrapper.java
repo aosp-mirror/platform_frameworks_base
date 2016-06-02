@@ -20,7 +20,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView.AdapterDataObserver;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 import android.widget.Space;
 
@@ -159,13 +158,6 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
     private int toViewPosition(int p) {
         // If position is greater than or equal to the break, increase by one.
         return (mBreakPosition != -1 && p >= mBreakPosition) ? p + 1 : p;
-    }
-
-    @Override
-    public SparseArray<String> hide(String... ids) {
-        // NOTE: We hear about these changes and adjust break position
-        // in our AdapterDataObserver.
-        return mDelegate.hide(ids);
     }
 
     @Override

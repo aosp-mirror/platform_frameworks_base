@@ -21,12 +21,9 @@ import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
-
-import java.util.List;
 
 @SmallTest
 public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
@@ -64,13 +61,6 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
     // Tests that the item count is correct.
     public void testItemCount() {
         assertEquals(mModel.getItemCount(), mAdapter.getItemCount());
-    }
-
-    // Tests that the item count is correct.
-    public void testHide_ItemCount() {
-        String[] ids = mModel.getModelIds();
-        mAdapter.hide(ids[0], ids[1]);
-        assertEquals(mModel.getItemCount() - 2, mAdapter.getItemCount());
     }
 
     private final class TestEnvironment implements DocumentsAdapter.Environment {
