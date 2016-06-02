@@ -658,9 +658,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     final ArrayMap<String, Set<String>> mKnownCodebase =
             new ArrayMap<String, Set<String>>();
 
-    // Tracks available target package names -> overlay package paths.
-    final ArrayMap<String, ArrayMap<String, PackageParser.Package>> mOverlays =
-        new ArrayMap<String, ArrayMap<String, PackageParser.Package>>();
+    // List of APK paths to load for each user and package. This data is never
+    // persisted by the package manager. Instead, the overlay manager will
+    // ensure the data is up-to-date in runtime.
+    @GuardedBy("mPackages")
+    final SparseArray<ArrayMap<String, ArrayList<String>>> mEnabledOverlayPaths =
+        new SparseArray<ArrayMap<String, ArrayList<String>>>();
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -3705,6 +3708,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             ApplicationInfo ai = PackageParser.generateApplicationInfo(ps.pkg, flags,
                     ps.readUserState(userId), userId);
             if (ai != null) {
+                rebaseEnabledOverlays(ai, userId);
                 ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
             }
             return ai;
@@ -3739,6 +3743,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ApplicationInfo ai = PackageParser.generateApplicationInfo(
                         p, flags, ps.readUserState(userId), userId);
                 if (ai != null) {
+                    rebaseEnabledOverlays(ai, userId);
                     ai.packageName = resolveExternalPackageNameLPr(p);
                 }
                 return ai;
@@ -3753,6 +3758,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         return null;
+    }
+
+    private void rebaseEnabledOverlays(@NonNull ApplicationInfo ai, int userId) {
+        List<String> paths = new ArrayList<>();
+        ArrayMap<String, ArrayList<String>> userSpecificOverlays =
+            mEnabledOverlayPaths.get(userId);
+        if (userSpecificOverlays != null) {
+            if (!"android".equals(ai.packageName)) {
+                ArrayList<String> frameworkOverlays = userSpecificOverlays.get("android");
+                if (frameworkOverlays != null) {
+                    paths.addAll(frameworkOverlays);
+                }
+            }
+
+            ArrayList<String> appOverlays = userSpecificOverlays.get(ai.packageName);
+            if (appOverlays != null) {
+                paths.addAll(appOverlays);
+            }
+        }
+        ai.resourceDirs = paths.size() > 0 ? paths.toArray(new String[paths.size()]) : null;
     }
 
     private String normalizePackageNameLPr(String packageName) {
@@ -7089,6 +7114,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ai = PackageParser.generateApplicationInfo(ps.pkg, effectiveFlags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
+                            rebaseEnabledOverlays(ai, userId);
                             ai.packageName = resolveExternalPackageNameLPr(ps.pkg);
                         }
                     } else {
@@ -7112,6 +7138,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
+                            rebaseEnabledOverlays(ai, userId);
                             ai.packageName = resolveExternalPackageNameLPr(p);
                             list.add(ai);
                         }
@@ -7255,6 +7282,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
                                 ps.readUserState(userId), userId);
                         if (ai != null) {
+                            rebaseEnabledOverlays(ai, userId);
                             finalList.add(ai);
                         }
                     }
@@ -7388,60 +7416,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return finalList;
-    }
-
-    private void createIdmapsForPackageLI(PackageParser.Package pkg) {
-        ArrayMap<String, PackageParser.Package> overlays = mOverlays.get(pkg.packageName);
-        if (overlays == null) {
-            Slog.w(TAG, "Unable to create idmap for " + pkg.packageName + ": no overlay packages");
-            return;
-        }
-        for (PackageParser.Package opkg : overlays.values()) {
-            // Not much to do if idmap fails: we already logged the error
-            // and we certainly don't want to abort installation of pkg simply
-            // because an overlay didn't fit properly. For these reasons,
-            // ignore the return value of createIdmapForPackagePairLI.
-            createIdmapForPackagePairLI(pkg, opkg);
-        }
-    }
-
-    private boolean createIdmapForPackagePairLI(PackageParser.Package pkg,
-            PackageParser.Package opkg) {
-        if (!opkg.mTrustedOverlay) {
-            Slog.w(TAG, "Skipping target and overlay pair " + pkg.baseCodePath + " and " +
-                    opkg.baseCodePath + ": overlay not trusted");
-            return false;
-        }
-        ArrayMap<String, PackageParser.Package> overlaySet = mOverlays.get(pkg.packageName);
-        if (overlaySet == null) {
-            Slog.e(TAG, "was about to create idmap for " + pkg.baseCodePath + " and " +
-                    opkg.baseCodePath + " but target package has no known overlays");
-            return false;
-        }
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-        // TODO: generate idmap for split APKs
-        try {
-            mInstaller.idmap(pkg.baseCodePath, opkg.baseCodePath, sharedGid);
-        } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to generate idmap for " + pkg.baseCodePath + " and "
-                    + opkg.baseCodePath);
-            return false;
-        }
-        PackageParser.Package[] overlayArray =
-            overlaySet.values().toArray(new PackageParser.Package[0]);
-        Comparator<PackageParser.Package> cmp = new Comparator<PackageParser.Package>() {
-            public int compare(PackageParser.Package p1, PackageParser.Package p2) {
-                return p1.mOverlayPriority - p2.mOverlayPriority;
-            }
-        };
-        Arrays.sort(overlayArray, cmp);
-
-        pkg.applicationInfo.resourceDirs = new String[overlayArray.length];
-        int i = 0;
-        for (PackageParser.Package p : overlayArray) {
-            pkg.applicationInfo.resourceDirs[i++] = p.baseCodePath;
-        }
-        return true;
     }
 
     private void scanDirTracedLI(File dir, final int parseFlags, int scanFlags, long currentTime) {
@@ -9932,7 +9906,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         // writer
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
-        boolean createIdmapFailed = false;
         synchronized (mPackages) {
             // We don't expect installation to fail beyond this point
 
@@ -10273,36 +10246,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     mProtectedBroadcasts.add(pkg.protectedBroadcasts.get(i));
                 }
             }
-
-            // Create idmap files for pairs of (packages, overlay packages).
-            // Note: "android", ie framework-res.apk, is handled by native layers.
-            if (pkg.mOverlayTarget != null) {
-                // This is an overlay package.
-                if (pkg.mOverlayTarget != null && !pkg.mOverlayTarget.equals("android")) {
-                    if (!mOverlays.containsKey(pkg.mOverlayTarget)) {
-                        mOverlays.put(pkg.mOverlayTarget,
-                                new ArrayMap<String, PackageParser.Package>());
-                    }
-                    ArrayMap<String, PackageParser.Package> map = mOverlays.get(pkg.mOverlayTarget);
-                    map.put(pkg.packageName, pkg);
-                    PackageParser.Package orig = mPackages.get(pkg.mOverlayTarget);
-                    if (orig != null && !createIdmapForPackagePairLI(orig, pkg)) {
-                        createIdmapFailed = true;
-                    }
-                }
-            } else if (mOverlays.containsKey(pkg.packageName) &&
-                    !pkg.packageName.equals("android")) {
-                // This is a regular package, with one or more known overlay packages.
-                createIdmapsForPackageLI(pkg);
-            }
         }
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-        if (createIdmapFailed) {
-            throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                    "scanPackageLI failed to createIdmap");
-        }
     }
 
     private static void maybeRenameForeignDexMarkers(PackageParser.Package existing,
@@ -20185,6 +20131,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public static final int DUMP_FROZEN = 1 << 19;
         public static final int DUMP_DEXOPT = 1 << 20;
         public static final int DUMP_COMPILER_STATS = 1 << 21;
+        public static final int DUMP_ENABLED_OVERLAYS = 1 << 22;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -20304,6 +20251,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    check-permission <permission> <package> [<user>]: does pkg hold perm?");
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
+                pw.println("    enabled-overlays: dump list of enabled overlay packages");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -20432,6 +20380,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_DEXOPT);
             } else if ("compiler-stats".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_COMPILER_STATS);
+            } else if ("enabled-overlays".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_ENABLED_OVERLAYS);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -20802,6 +20752,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpCompilerStatsLPr(pw, packageName);
             }
 
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_ENABLED_OVERLAYS)) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                dumpEnabledOverlaysLPr(pw);
+            }
+
             if (!checkin && dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
@@ -20895,6 +20850,23 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 stats.dump(ipw);
             }
             ipw.decreaseIndent();
+        }
+    }
+
+    private void dumpEnabledOverlaysLPr(PrintWriter pw) {
+        pw.println("Enabled overlay paths:");
+        final int N = mEnabledOverlayPaths.size();
+        for (int i = 0; i < N; i++) {
+            final int userId = mEnabledOverlayPaths.keyAt(i);
+            pw.println(String.format("    User %d:", userId));
+            final ArrayMap<String, ArrayList<String>> userSpecificOverlays =
+                mEnabledOverlayPaths.valueAt(i);
+            final int M = userSpecificOverlays.size();
+            for (int j = 0; j < M; j++) {
+                final String targetPackageName = userSpecificOverlays.keyAt(j);
+                final ArrayList<String> overlayPackagePaths = userSpecificOverlays.valueAt(j);
+                pw.println(String.format("        %s: %s", targetPackageName, overlayPackagePaths));
+            }
         }
     }
 
@@ -22984,10 +22956,43 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
 
         @Override
-        public boolean setEnabledOverlayPackages(int userId, String targetPackageName,
-                List<String> overlayPackageNames) {
-            // TODO: implement when we integrate OMS properly
-            return false;
+        public boolean setEnabledOverlayPackages(int userId, @NonNull String targetPackageName,
+                @Nullable List<String> overlayPackageNames) {
+            synchronized (mPackages) {
+                if (targetPackageName == null || mPackages.get(targetPackageName) == null) {
+                    Slog.e(TAG, "failed to find package " + targetPackageName);
+                    return false;
+                }
+
+                ArrayList<String> paths = null;
+                if (overlayPackageNames != null) {
+                    final int N = overlayPackageNames.size();
+                    paths = new ArrayList<String>(N);
+                    for (int i = 0; i < N; i++) {
+                        final String packageName = overlayPackageNames.get(i);
+                        final PackageParser.Package pkg = mPackages.get(packageName);
+                        if (pkg == null) {
+                            Slog.e(TAG, "failed to find package " + packageName);
+                            return false;
+                        }
+                        paths.add(pkg.baseCodePath);
+                    }
+                }
+
+                ArrayMap<String, ArrayList<String>> userSpecificOverlays =
+                    mEnabledOverlayPaths.get(userId);
+                if (userSpecificOverlays == null) {
+                    userSpecificOverlays = new ArrayMap<String, ArrayList<String>>();
+                    mEnabledOverlayPaths.put(userId, userSpecificOverlays);
+                }
+
+                if (paths != null && paths.size() > 0) {
+                    userSpecificOverlays.put(targetPackageName, paths);
+                } else {
+                    userSpecificOverlays.remove(targetPackageName);
+                }
+                return true;
+            }
         }
     }
 
