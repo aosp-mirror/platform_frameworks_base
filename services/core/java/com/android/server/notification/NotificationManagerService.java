@@ -181,7 +181,7 @@ public class NotificationManagerService extends SystemService {
             = SystemProperties.getBoolean("debug.child_notifs", true);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
-    static final float MAX_PACKAGE_ENQUEUE_RATE = 50f;
+    static final float DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE = 50f;
 
     // message codes
     static final int MESSAGE_TIMEOUT = 2;
@@ -305,6 +305,7 @@ public class NotificationManagerService extends SystemService {
     private static final int MY_PID = Process.myPid();
     private RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
+    private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
 
     private static class Archive {
         final int mBufferSize;
@@ -817,6 +818,8 @@ public class NotificationManagerService extends SystemService {
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
+        private final Uri NOTIFICATION_RATE_LIMIT_URI
+                = Settings.Global.getUriFor(Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE);
 
         SettingsObserver(Handler handler) {
             super(handler);
@@ -825,6 +828,8 @@ public class NotificationManagerService extends SystemService {
         void observe() {
             ContentResolver resolver = getContext().getContentResolver();
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
                     false, this, UserHandle.USER_ALL);
             update(null);
         }
@@ -842,6 +847,10 @@ public class NotificationManagerService extends SystemService {
                     mNotificationPulseEnabled = pulseEnabled;
                     updateNotificationPulse();
                 }
+            }
+            if (uri == null || NOTIFICATION_RATE_LIMIT_URI.equals(uri)) {
+                mMaxPackageEnqueueRate = Settings.Global.getFloat(resolver,
+                            Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE, mMaxPackageEnqueueRate);
             }
         }
     }
@@ -898,6 +907,10 @@ public class NotificationManagerService extends SystemService {
     @Override
     public void onStart() {
         Resources resources = getContext().getResources();
+
+        mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
+                Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
+                DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE);
 
         mAm = ActivityManagerNative.getDefault();
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
@@ -2369,6 +2382,7 @@ public class NotificationManagerService extends SystemService {
                     pw.println("  mDisableNotificationEffects=" + mDisableNotificationEffects);
                     pw.println("  mCallState=" + callStateToString(mCallState));
                     pw.println("  mSystemReady=" + mSystemReady);
+                    pw.println("  mMaxPackageEnqueueRate=" + mMaxPackageEnqueueRate);
                 }
                 pw.println("  mArchive=" + mArchive.toString());
                 Iterator<StatusBarNotification> iter = mArchive.descendingIterator();
@@ -2512,7 +2526,7 @@ public class NotificationManagerService extends SystemService {
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationList) {
                 final float appEnqueueRate = mUsageStats.getAppEnqueueRate(pkg);
-                if (appEnqueueRate > MAX_PACKAGE_ENQUEUE_RATE) {
+                if (appEnqueueRate > mMaxPackageEnqueueRate) {
                     mUsageStats.registerOverRateQuota(pkg);
                     final long now = SystemClock.elapsedRealtime();
                     if ((now - mLastOverRateLogTime) > MIN_PACKAGE_OVERRATE_LOG_INTERVAL) {
