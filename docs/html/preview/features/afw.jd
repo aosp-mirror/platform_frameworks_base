@@ -47,7 +47,7 @@ page.keywords="android for work", "android N", "enterprise", "QR code"
         <li><a href="#ui-policy">System UI Policy Transparency
                 </a></li>
 
-        <li><a href="#restrictions-mgmt">App Restrictions Management Enhancements
+        <li><a href="#managed-configurations">Managed Configurations Enhancements
                 </a></li>
 
         <li><a href="#location-off">Location Off Switch
@@ -401,11 +401,11 @@ Android N.</p>
   </li>
 </ul>
 
-<h2 id="restrictions-mgmt">App Restrictions Management Enhancements</h2>
+<h2 id="managed-configurations">Managed Configurations Enhancements</h2>
 
 <p>
-  The device or profile owner can enable another application to manage app
-  restrictions via the new
+  The device or profile owner can enable another application to manage
+  configurations via the new
   <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
   method. The nominated application can check whether this permission has been
   granted by calling
@@ -413,7 +413,7 @@ Android N.</p>
 </p>
 
 <p>
-  An application nominated to manage app restrictions can call {@link
+  An application nominated to manage configurations can call {@link
   android.app.admin.DevicePolicyManager#setApplicationRestrictions
   setApplicationRestrictions()} and {@link
   android.app.admin.DevicePolicyManager#getApplicationRestrictions
