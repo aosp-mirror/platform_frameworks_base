@@ -2256,6 +2256,8 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_GESTURES = 459;
 
+    // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
+
     // ------- Begin N Keyboard Shortcuts Helper -----
     // Keyboard Shortcuts Helper is opened/closed.
     KEYBOARD_SHORTCUTS_HELPER = 460;
