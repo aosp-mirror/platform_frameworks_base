@@ -543,12 +543,7 @@ public final class LoadedApk {
         // It is NOT ok to call this function from the system_server (for any of the packages it
         // loads code from) so we explicitly disallow it there.
         if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
-            // Temporarily disable logging of disk reads/writes on the Looper thread
-            // as this is early and necessary. Write is only needed to create the
-            // profile file if it's not already there.
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
             setupJitProfileSupport();
-            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
@@ -572,6 +567,15 @@ public final class LoadedApk {
         if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
             return;
         }
+        // Only set up profile support if the loaded apk has the same uid as the
+        // current process.
+        // Currently, we do not support profiling across different apps.
+        // (e.g. application's uid might be different when the code is
+        // loaded by another app via createApplicationContext)
+        if (mApplicationInfo.uid != Process.myUid()) {
+            return;
+        }
+
         final List<String> codePaths = new ArrayList<>();
         if ((mApplicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
             codePaths.add(mApplicationInfo.sourceDir);
@@ -587,55 +591,11 @@ public final class LoadedApk {
         }
 
         final File profileFile = getPrimaryProfileFile(mPackageName);
-        if (profileFile.exists()) {
-            if (!profileFile.canRead() || !profileFile.canWrite()) {
-                // The apk might be loaded in a context where we don't have permissions
-                // to track the profile (e.g. when loaded by another app via
-                // createApplicationContext)
-                return;
-            }
-        } else {
-            // Profile does not exist. Create it.
-            FileDescriptor fd = null;
-            try {
-                final int permissions = 0600;  // read-write for user.
-                fd = Os.open(profileFile.getAbsolutePath(), OsConstants.O_CREAT, permissions);
-                Os.fchmod(fd, permissions);
-                Os.fchown(fd, mApplicationInfo.uid, mApplicationInfo.uid);
-            } catch (ErrnoException e) {
-                if (e.errno == OsConstants.EACCES) {
-                    // It can happen that the profile file does not exist but the apk is loaded in a
-                    // context where we don't have permissions (e.g. when loaded by another app via
-                    // createApplicationContext)
-                    return;
-                }
-                Log.v(TAG, "Unable to create jit profile file "
-                        + profileFile + ": " + e.getMessage());
-                try {
-                    Os.unlink(profileFile.getAbsolutePath());
-                } catch (ErrnoException unlinkErr) {
-                    if (unlinkErr.errno != OsConstants.ENOENT) {
-                        Log.v(TAG, "Unable to unlink jit profile file "
-                                + profileFile + ": " + unlinkErr.getMessage());
-                    }
-                }
-                return;
-            } finally {
-                IoUtils.closeQuietly(fd);
-            }
-        }
-
         final File foreignDexProfilesFile =
                 Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
-        String foreignDexProfilesPath = null;
-        if (!foreignDexProfilesFile.exists()) {
-            Log.v(TAG, "ForeignDexProfilesPath does not exists:" +
-                    foreignDexProfilesFile.getPath());
-        } else {
-            foreignDexProfilesPath = foreignDexProfilesFile.getAbsolutePath();
-        }
-        VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), mApplicationInfo.dataDir,
-                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesPath);
+
+        VMRuntime.registerAppInfo(profileFile.getPath(), mApplicationInfo.dataDir,
+                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesFile.getPath());
     }
 
     /**
