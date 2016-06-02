@@ -106,14 +106,14 @@ public class VolumeDialog implements TunerService.Tunable {
     private ViewGroup mDialogContentView;
     private ImageButton mExpandButton;
     private final List<VolumeRow> mRows = new ArrayList<>();
-    private final SpTexts mSpTexts;
+    private SpTexts mSpTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
     private final AudioManager mAudioManager;
     private final AccessibilityManager mAccessibilityMgr;
     private int mExpandButtonAnimationDuration;
     private ZenFooter mZenFooter;
-    private final LayoutTransition mLayoutTransition;
+    private LayoutTransition mLayoutTransition;
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveSliderTint;
@@ -149,14 +149,11 @@ public class VolumeDialog implements TunerService.Tunable {
         mCallback = callback;
         mWindowType = windowType;
         mZenModeController = zenModeController;
-        mSpTexts = new SpTexts(mContext);
         mKeyguard = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mAccessibilityMgr = (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mActiveSliderTint = loadColorStateList(R.color.system_accent_color);
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
-        mLayoutTransition = new LayoutTransition();
-        mLayoutTransition.setDuration(new ValueAnimator().getDuration() / 2);
 
         initDialog();
 
@@ -173,6 +170,9 @@ public class VolumeDialog implements TunerService.Tunable {
     private void initDialog() {
         mDialog = new CustomDialog(mContext);
 
+        mSpTexts = new SpTexts(mContext);
+        mLayoutTransition = new LayoutTransition();
+        mLayoutTransition.setDuration(new ValueAnimator().getDuration() / 2);
         mHovering = false;
         mShowing = false;
         final Window window = mDialog.getWindow();
