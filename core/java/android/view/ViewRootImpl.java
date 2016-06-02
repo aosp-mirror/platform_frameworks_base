@@ -3078,16 +3078,22 @@ public final class ViewRootImpl implements ViewParent,
                             // best is probably just to leave things as-is.
                             if (DEBUG_INPUT_RESIZE) Log.v(mTag,
                                     "Too tall; leaving scrollY=" + scrollY);
-                        } else if ((mTempRect.top-scrollY) < vi.top) {
-                            scrollY -= vi.top - (mTempRect.top-scrollY);
+                        }
+                        // Next, check whether top or bottom is covered based on the non-scrolled
+                        // position, and calculate new scrollY (or set it to 0).
+                        // We can't keep using mScrollY here. For example mScrollY is non-zero
+                        // due to IME, then IME goes away. The current value of mScrollY leaves top
+                        // and bottom both visible, but we still need to scroll it back to 0.
+                        else if (mTempRect.top < vi.top) {
+                            scrollY = mTempRect.top - vi.top;
                             if (DEBUG_INPUT_RESIZE) Log.v(mTag,
                                     "Top covered; scrollY=" + scrollY);
-                        } else if ((mTempRect.bottom-scrollY)
-                                > (mView.getHeight()-vi.bottom)) {
-                            scrollY += (mTempRect.bottom-scrollY)
-                                    - (mView.getHeight()-vi.bottom);
+                        } else if (mTempRect.bottom > (mView.getHeight()-vi.bottom)) {
+                            scrollY = mTempRect.bottom - (mView.getHeight()-vi.bottom);
                             if (DEBUG_INPUT_RESIZE) Log.v(mTag,
                                     "Bottom covered; scrollY=" + scrollY);
+                        } else {
+                            scrollY = 0;
                         }
                         handled = true;
                     }
