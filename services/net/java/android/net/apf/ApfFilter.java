@@ -24,9 +24,12 @@ import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpManager;
+import android.net.metrics.ApfProgramEvent;
+import android.net.metrics.IpConnectivityLog;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -140,7 +143,7 @@ public class ApfFilter {
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int DHCP_CLIENT_MAC_OFFSET = ETH_HEADER_LEN + UDP_HEADER_LEN + 28;
 
-    private static int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
+    private static final int ARP_HEADER_OFFSET = ETH_HEADER_LEN;
     private static final byte[] ARP_IPV4_REQUEST_HEADER = new byte[]{
             0, 1, // Hardware type: Ethernet (1)
             8, 0, // Protocol type: IP (0x0800)
@@ -148,11 +151,12 @@ public class ApfFilter {
             4,    // Protocol size: 4
             0, 1  // Opcode: request (1)
     };
-    private static int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
+    private static final int ARP_TARGET_IP_ADDRESS_OFFSET = ETH_HEADER_LEN + 24;
 
     private final ApfCapabilities mApfCapabilities;
     private final IpManager.Callback mIpManagerCallback;
     private final NetworkInterface mNetworkInterface;
+    private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     @VisibleForTesting
     byte[] mHardwareAddress;
     @VisibleForTesting
@@ -213,7 +217,7 @@ public class ApfFilter {
 
     // Returns seconds since Unix Epoch.
     private static long curTime() {
-        return System.currentTimeMillis() / 1000L;
+        return System.currentTimeMillis() / DateUtils.SECOND_IN_MILLIS;
     }
 
     // A class to hold information about an RA.
@@ -760,16 +764,19 @@ public class ApfFilter {
         return gen;
     }
 
+    /**
+     * Generate and install a new filter program.
+     */
     @GuardedBy("this")
     @VisibleForTesting
     void installNewProgramLocked() {
         purgeExpiredRasLocked();
+        ArrayList<Ra> rasToFilter = new ArrayList<>();
         final byte[] program;
         long programMinLifetime = Long.MAX_VALUE;
         try {
             // Step 1: Determine how many RA filters we can fit in the program.
             ApfGenerator gen = beginProgramLocked();
-            ArrayList<Ra> rasToFilter = new ArrayList<Ra>();
             for (Ra ra : mRas) {
                 ra.generateFilterLocked(gen);
                 // Stop if we get too big.
@@ -797,6 +804,9 @@ public class ApfFilter {
             hexDump("Installing filter: ", program, program.length);
         }
         mIpManagerCallback.installPacketFilter(program);
+        int flags = ApfProgramEvent.flagsFor(mIPv4Address != null, mMulticastFilter);
+        mMetricsLog.log(new ApfProgramEvent(
+                programMinLifetime, rasToFilter.size(), mRas.size(), program.length, flags));
     }
 
     // Install a new filter program if the last installed one will die soon.
