@@ -127,7 +127,8 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     @Override
     public int getCustomBackgroundColor() {
-        return mBackgroundColor;
+        // Parent notifications should always use the normal background color
+        return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
     @Override
