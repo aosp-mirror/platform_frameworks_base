@@ -706,7 +706,9 @@ redirects:
 - from: /training/enterprise/app-compatibility.html
   to: /work/managed-profiles.html
 - from: /training/enterprise/app-restrictions.html
-  to: /work/app-restrictions.html
+  to: /work/managed-configurations.html
+- from: /work/app-restrictions.html
+  to: /work/managed-configurations.html
 - from: /training/enterprise/cosu.html
   to: /work/cosu.html
 - from: /training/enterprise/device-management-policy.html

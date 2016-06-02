@@ -1881,7 +1881,7 @@ var RESOURCE_COLLECTIONS = {
       "work/overview.html",
       "work/guide.html",
       "https://www.google.com/work/android/developers/applyDevHub/",
-      "work/app-restrictions.html",
+      "work/managed-configurations.html",
       "work/cosu.html",
       "work/managed-profiles.html"
     ]
@@ -1893,7 +1893,7 @@ var RESOURCE_COLLECTIONS = {
       "https://www.google.com/work/android/",
       "https://developers.google.com/android/work/build-dpc",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=Za0OQo8DRM4",
       "https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX"
     ]
   },
@@ -1901,7 +1901,7 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "work/managed-profiles.html",
-      "work/app-restrictions.html",
+      "work/managed-configurations.html",
       "work/cosu.html",
       "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
       "samples/AppRestrictionSchema/index.html",

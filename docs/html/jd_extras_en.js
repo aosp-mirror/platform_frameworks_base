@@ -3266,10 +3266,10 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "type":"guide"
   },
   {
-    "title":"Set up App Restrictions",
+    "title":"Set up Managed Configurations",
     "titleFriendly":"",
-    "summary": "Learn how to implement app restrictions and configuration settings that can be changed by other apps on the same device.",
-    "url":"https://developer.android.com/work/app-restrictions.html",
+    "summary": "Learn how to implement managed configurations that can be changed by other apps on the same device.",
+    "url":"https://developer.android.com/work/managed-restrictions.html",
     "group":"",
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
@@ -3394,6 +3394,18 @@ METADATA['en'].extras = METADATA['en'].extras.concat([
     "keywords": ["work", "enterprise", "emm"],
     "tags": [],
     "image":"https://i1.ytimg.com/vi/j3QC6hcpy90/maxresdefault.jpg",
+    "lang":"en",
+    "type":"youtube"
+  },
+  {
+    "title":"Your Apps at Work",
+    "titleFriendly":"",
+    "summary":"In this Google I/O 2016 session we’ll give you details for making your app more attractive to businesses.",
+    "url":"https://www.youtube.com/watch?v=Za0OQo8DRM4",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/Za0OQo8DRM4/maxresdefault.jpg",
     "lang":"en",
     "type":"youtube"
   },
@@ -5390,7 +5402,7 @@ METADATA['en'].collections = {
       "work/overview.html",
       "work/guide.html",
       "https://www.google.com/work/android/developers/applyDevHub/",
-      "work/app-restrictions.html",
+      "work/managed-configurations.html",
       "work/cosu.html",
       "work/managed-profiles.html"
     ]
@@ -5402,7 +5414,7 @@ METADATA['en'].collections = {
       "https://www.google.com/work/android/",
       "https://developers.google.com/android/work/build-dpc",
       "https://www.youtube.com/watch?v=jQWB_-o1kz4&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
-      "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
+      "https://www.youtube.com/watch?v=Za0OQo8DRM4",
       "https://www.youtube.com/watch?v=dH41OutAMNM&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX"
     ]
   },
@@ -5410,7 +5422,7 @@ METADATA['en'].collections = {
     "title": "",
     "resources": [
       "work/managed-profiles.html",
-      "work/app-restrictions.html",
+      "work/managed-configurations.html",
       "work/cosu.html",
       "https://www.youtube.com/watch?v=39NkpWkaH8M&index=2&list=PLOU2XLYxmsIKAK2Bhv19H2THwF-22O5WX",
       "samples/AppRestrictionSchema/index.html",
