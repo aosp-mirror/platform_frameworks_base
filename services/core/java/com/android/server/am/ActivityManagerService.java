@@ -11272,6 +11272,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
             return null;
+        } catch (Exception e) {
+            Log.w(TAG, "Exception while determining type of " + uri, e);
+            return null;
         } finally {
             // We need to clear the identity to call removeContentProviderExternalUnchecked
             if (!clearedIdentity) {
