@@ -1104,6 +1104,9 @@
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
   <java-symbol type="string" name="config_demoModeLauncherComponent" />
+  <java-symbol type="string" name="demo_starting_message" />
+  <java-symbol type="string" name="demo_restarting_message" />
+
 
   <java-symbol type="plurals" name="bugreport_countdown" />
   <java-symbol type="plurals" name="duration_hours" />
