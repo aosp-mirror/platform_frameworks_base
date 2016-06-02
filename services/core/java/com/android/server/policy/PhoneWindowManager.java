@@ -262,6 +262,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final String SYSUI_SCREENSHOT_ERROR_RECEIVER =
             "com.android.systemui.screenshot.ScreenshotServiceErrorReceiver";
 
+    private static final int NAV_BAR_BOTTOM = 0;
+    private static final int NAV_BAR_RIGHT = 1;
+    private static final int NAV_BAR_LEFT = 2;
+
     /**
      * Keyguard stuff
      */
@@ -354,9 +358,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mStatusBarHeight;
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
-    boolean mCanHideNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
-    boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
+    int mNavigationBarPosition = NAV_BAR_BOTTOM;
     int[] mNavigationBarHeightForRotationDefault = new int[4];
     int[] mNavigationBarWidthForRotationDefault = new int[4];
     int[] mNavigationBarHeightForRotationInCarMode = new int[4];
@@ -1683,13 +1686,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     @Override
                     public void onSwipeFromBottom() {
-                        if (mNavigationBar != null && mNavigationBarOnBottom) {
+                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
                     @Override
                     public void onSwipeFromRight() {
-                        if (mNavigationBar != null && !mNavigationBarOnBottom) {
+                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_RIGHT) {
+                            requestTransientBars(mNavigationBar);
+                        }
+                    }
+                    @Override
+                    public void onSwipeFromLeft() {
+                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_LEFT) {
                             requestTransientBars(mNavigationBar);
                         }
                     }
@@ -2784,8 +2793,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (win.getAttrs().windowAnimations != 0) {
                 return 0;
             }
-            // This can be on either the bottom or the right.
-            if (mNavigationBarOnBottom) {
+            // This can be on either the bottom or the right or the left.
+            if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
                 if (transit == TRANSIT_EXIT
                         || transit == TRANSIT_HIDE) {
                     return R.anim.dock_bottom_exit;
@@ -2793,13 +2802,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || transit == TRANSIT_SHOW) {
                     return R.anim.dock_bottom_enter;
                 }
-            } else {
+            } else if (mNavigationBarPosition == NAV_BAR_RIGHT) {
                 if (transit == TRANSIT_EXIT
                         || transit == TRANSIT_HIDE) {
                     return R.anim.dock_right_exit;
                 } else if (transit == TRANSIT_ENTER
                         || transit == TRANSIT_SHOW) {
                     return R.anim.dock_right_enter;
+                }
+            } else if (mNavigationBarPosition == NAV_BAR_LEFT) {
+                if (transit == TRANSIT_EXIT
+                        || transit == TRANSIT_HIDE) {
+                    return R.anim.dock_left_exit;
+                } else if (transit == TRANSIT_ENTER
+                        || transit == TRANSIT_SHOW) {
+                    return R.anim.dock_left_enter;
                 }
             }
         } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
@@ -2829,10 +2846,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If the divider is behind the navigation bar, don't animate.
         final Rect frame = win.getFrameLw();
         final boolean behindNavBar = mNavigationBar != null
-                && ((mNavigationBarOnBottom
+                && ((mNavigationBarPosition == NAV_BAR_BOTTOM
                         && frame.top + insets >= mNavigationBar.getFrameLw().top)
-                || (!mNavigationBarOnBottom
-                        && frame.left + insets >= mNavigationBar.getFrameLw().left));
+                || (mNavigationBarPosition == NAV_BAR_RIGHT
+                        && frame.left + insets >= mNavigationBar.getFrameLw().left)
+                || (mNavigationBarPosition == NAV_BAR_LEFT
+                        && frame.right - insets <= mNavigationBar.getFrameLw().right));
         final boolean landscape = frame.height() > frame.width();
         final boolean offscreenLandscape = landscape && (frame.right - insets <= 0
                 || frame.left + insets >= win.getDisplayFrameLw().right);
@@ -4025,7 +4044,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             navVisible |= !canHideNavigationBar();
 
             boolean updateSysUiVisibility = layoutNavigationBar(displayWidth, displayHeight,
-                    displayRotation, uiMode, overscanRight, overscanBottom, dcf, navVisible, navTranslucent,
+                    displayRotation, uiMode, overscanLeft, overscanRight, overscanBottom, dcf, navVisible, navTranslucent,
                     navAllowedHidden, statusBarExpandedNotKeyguard);
             if (DEBUG_LAYOUT) Slog.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
                     mDockLeft, mDockTop, mDockRight, mDockBottom));
@@ -4104,8 +4123,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean layoutNavigationBar(int displayWidth, int displayHeight, int displayRotation,
-            int uiMode, int overscanRight, int overscanBottom, Rect dcf, boolean navVisible,
-            boolean navTranslucent, boolean navAllowedHidden,
+            int uiMode, int overscanLeft, int overscanRight, int overscanBottom, Rect dcf,
+            boolean navVisible, boolean navTranslucent, boolean navAllowedHidden,
             boolean statusBarExpandedNotKeyguard) {
         if (mNavigationBar != null) {
             boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();
@@ -4113,8 +4132,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // size.  We need to do this directly, instead of relying on
             // it to bubble up from the nav bar, because this needs to
             // change atomically with screen rotations.
-            mNavigationBarOnBottom = isNavigationBarOnBottom(displayWidth, displayHeight);
-            if (mNavigationBarOnBottom) {
+            mNavigationBarPosition = navigationBarPosition(displayWidth, displayHeight,
+                    displayRotation);
+            if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
                 // It's a system nav bar or a portrait screen; nav bar goes on bottom.
                 int top = displayHeight - overscanBottom
                         - getNavigationBarHeight(displayRotation, uiMode);
@@ -4140,7 +4160,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // we can tell the app that it is covered by it.
                     mSystemBottom = mTmpNavigationFrame.top;
                 }
-            } else {
+            } else if (mNavigationBarPosition == NAV_BAR_RIGHT) {
                 // Landscape screen; nav bar goes to the right.
                 int left = displayWidth - overscanRight
                         - getNavigationBarWidth(displayRotation, uiMode);
@@ -4166,6 +4186,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // we can tell the app that it is covered by it.
                     mSystemRight = mTmpNavigationFrame.left;
                 }
+            } else if (mNavigationBarPosition == NAV_BAR_LEFT) {
+                // Seascape screen; nav bar goes to the left.
+                int right = overscanLeft + getNavigationBarWidth(displayRotation, uiMode);
+                mTmpNavigationFrame.set(overscanLeft, 0, right, displayHeight);
+                mStableLeft = mStableFullscreenLeft = mTmpNavigationFrame.right;
+                if (transientNavBarShowing) {
+                    mNavigationBarController.setBarShowingLw(true);
+                } else if (navVisible) {
+                    mNavigationBarController.setBarShowingLw(true);
+                    mDockLeft = mTmpNavigationFrame.right;
+                    // TODO: not so sure about those:
+                    mRestrictedScreenLeft = mRestrictedOverscanScreenLeft = mDockLeft;
+                    mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
+                    mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
+                } else {
+                    // We currently want to hide the navigation UI - unless we expanded the status
+                    // bar.
+                    mNavigationBarController.setBarShowingLw(statusBarExpandedNotKeyguard);
+                }
+                if (navVisible && !navTranslucent && !navAllowedHidden
+                        && !mNavigationBar.isAnimatingLw()
+                        && !mNavigationBarController.wasRecentlyTranslucent()) {
+                    // If the nav bar is currently requested to be visible,
+                    // and not in the process of animating on or off, then
+                    // we can tell the app that it is covered by it.
+                    mSystemLeft = mTmpNavigationFrame.right;
+                }
             }
             // Make sure the content and current rectangles are updated to
             // account for the restrictions from the navigation bar.
@@ -4186,8 +4233,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
 
-    private boolean isNavigationBarOnBottom(int displayWidth, int displayHeight) {
-        return !mNavigationBarCanMove || displayWidth < displayHeight;
+    private int navigationBarPosition(int displayWidth, int displayHeight, int displayRotation) {
+        if (mNavigationBarCanMove && displayWidth > displayHeight) {
+            if (displayRotation == Surface.ROTATION_270) {
+                return NAV_BAR_LEFT;
+            } else {
+                return NAV_BAR_RIGHT;
+            }
+        }
+        return NAV_BAR_BOTTOM;
     }
 
     /** {@inheritDoc} */
@@ -4363,7 +4417,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mStatusBar != null && mFocusedWindow == mStatusBar && canReceiveInput(mStatusBar)) {
                 // The status bar forces the navigation bar while it's visible. Make sure the IME
                 // avoids the navigation bar in that case.
-                pf.right = df.right = of.right = cf.right = vf.right = mStableRight;
+                if (mNavigationBarPosition == NAV_BAR_RIGHT) {
+                    pf.right = df.right = of.right = cf.right = vf.right = mStableRight;
+                } else if (mNavigationBarPosition == NAV_BAR_LEFT) {
+                    pf.left = df.left = of.left = cf.left = vf.left = mStableLeft;
+                }
             }
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
@@ -6464,10 +6522,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Only navigation bar
         if (mNavigationBar != null) {
-            if (isNavigationBarOnBottom(displayWidth, displayHeight)) {
+            int position = navigationBarPosition(displayWidth, displayHeight, displayRotation);
+            if (position == NAV_BAR_BOTTOM) {
                 outInsets.bottom = getNavigationBarHeight(displayRotation, mUiMode);
-            } else {
+            } else if (position == NAV_BAR_RIGHT) {
                 outInsets.right = getNavigationBarWidth(displayRotation, mUiMode);
+            } else if (position == NAV_BAR_LEFT) {
+                outInsets.left = getNavigationBarWidth(displayRotation, mUiMode);
             }
         }
     }
