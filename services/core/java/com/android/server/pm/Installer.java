@@ -153,6 +153,11 @@ public final class Installer extends SystemService {
         return mInstaller.mergeProfiles(uid, pkgName);
     }
 
+    public boolean dumpProfiles(String gid, String packageName, String codePaths)
+            throws InstallerException {
+        return mInstaller.dumpProfiles(gid, packageName, codePaths);
+    }
+
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
             throws InstallerException {
         mInstaller.execute("idmap", targetApkPath, overlayApkPath, uid);

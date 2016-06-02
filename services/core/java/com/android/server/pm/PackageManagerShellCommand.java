@@ -105,6 +105,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallWrite();
                 case "compile":
                     return runCompile();
+                case "dump-profiles":
+                    return runDumpProfiles();
                 case "list":
                     return runList();
                 case "uninstall":
@@ -385,6 +387,12 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println();
             return 1;
         }
+    }
+
+    private int runDumpProfiles() throws RemoteException {
+        String packageName = getNextArg();
+        mInterface.dumpProfiles(packageName);
+        return 0;
     }
 
     private int runList() throws RemoteException {

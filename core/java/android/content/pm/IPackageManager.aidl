@@ -482,6 +482,11 @@ interface IPackageManager {
     boolean performDexOptMode(String packageName, boolean checkProfiles,
             String targetCompilerFilter, boolean force);
 
+    /**
+     * Ask the package manager to dump profiles associated with a package.
+     */
+    void dumpProfiles(String packageName);
+
     void forceDexOpt(String packageName);
 
     /**
