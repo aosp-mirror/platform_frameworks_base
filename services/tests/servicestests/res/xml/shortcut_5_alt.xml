@@ -15,7 +15,7 @@
 -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
     <shortcut
-        android:shortcutId="ms1"
+        android:shortcutId="ms1_alt"
         android:enabled="true"
         android:shortcutIcon="@drawable/icon1"
         android:shortcutShortLabel="@string/shortcut_title1"
@@ -26,7 +26,7 @@
         android:shortcutIntentData="http://a.b.c/1"
     />
     <shortcut
-        android:shortcutId="ms2"
+        android:shortcutId="ms2_alt"
         android:enabled="true"
         android:shortcutIcon="@drawable/icon2"
         android:shortcutShortLabel="@string/shortcut_title2"
@@ -36,17 +36,17 @@
         android:shortcutIntentAction="action2"
     />
     <shortcut
-        android:shortcutId="ms3"
+        android:shortcutId="ms3_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
     <shortcut
-        android:shortcutId="ms4"
+        android:shortcutId="ms4_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />
     <shortcut
-        android:shortcutId="ms5"
+        android:shortcutId="ms5_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutIntentAction="android.intent.action.VIEW"
     />

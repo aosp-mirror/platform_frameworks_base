@@ -26,11 +26,13 @@ import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.ShortcutService.ShortcutOperation;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,6 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -126,7 +130,8 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Called when a shortcut is about to be published.  At this point we know the publisher package
+     * Called when a shortcut is about to be published.  At this point we know the publisher
+     * package
      * exists (as opposed to Launcher trying to fetch shortcuts from a non-existent package), so
      * we do some initialization for the package.
      */
@@ -292,12 +297,17 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     /**
-     * Remove a dynamic shortcut by ID.
+     * Remove a dynamic shortcut by ID.  It'll be removed from the dynamic set, but if the shortcut
+     * is pinned, it'll remain as a pinned shortcut, and is still enabled.
      */
     public void deleteDynamicWithId(@NonNull String shortcutId) {
         deleteOrDisableWithId(shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false);
     }
 
+    /**
+     * Disable a dynamic shortcut by ID.  It'll be removed from the dynamic set, but if the shortcut
+     * is pinned, it'll remain as a pinned shortcut but will be disabled.
+     */
     public void disableWithId(@NonNull String shortcutId, String disabledMessage,
             int disabledMessageResId, boolean overrideImmutable) {
         final ShortcutInfo disabled = deleteOrDisableWithId(shortcutId, /* disable =*/ true,
@@ -625,6 +635,10 @@ class ShortcutPackage extends ShortcutPackageItem {
         // (Re-)publish manifest shortcut.
         changed |= publishManifestShortcuts(newManifestShortcutList);
 
+        if (newManifestShortcutList != null) {
+            changed |= pushOutExcessShortcuts();
+        }
+
         if (changed) {
             // This will send a notification to the launcher, and also save .
             s.packageShortcutsChanged(getPackageName(), getPackageUserId());
@@ -641,10 +655,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                     "Package %s: publishing manifest shortcuts", getPackageName()));
         }
         boolean changed = false;
-
-        // TODO: Check dynamic count
-
-        // TODO: Kick out dynamic if too many
 
         // Keep the previous IDs.
         ArraySet<String> toDisableList = null;
@@ -669,7 +679,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 final ShortcutInfo newShortcut = newManifestShortcutList.get(i);
                 final boolean newDisabled = !newShortcut.isEnabled();
 
-                final String id =  newShortcut.getId();
+                final String id = newShortcut.getId();
                 final ShortcutInfo oldShortcut = mShortcuts.get(id);
 
                 boolean wasPinned = false;
@@ -692,7 +702,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                     // Just keep it in toDisableList, so the previous one would be removed.
                     continue;
                 }
-                // TODO: Check dynamic count
 
                 // Note even if enabled=false, we still need to update all fields, so do it
                 // regardless.
@@ -723,6 +732,179 @@ class ShortcutPackage extends ShortcutPackageItem {
             removeOrphans();
         }
         return changed;
+    }
+
+    /**
+     * For each target activity, make sure # of dynamic + manifest shortcuts <= max.
+     * If too many, we'll remove the dynamic with the lowest ranks.
+     */
+    private boolean pushOutExcessShortcuts() {
+        final ShortcutService service = mShortcutUser.mService;
+        final int maxShortcuts = service.getMaxActivityShortcuts();
+
+        boolean changed = false;
+
+        final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> all =
+                sortShortcutsToActivities();
+        for (int outer = all.size() - 1; outer >= 0; outer--) {
+            final ArrayList<ShortcutInfo> list = all.valueAt(outer);
+            if (list.size() <= maxShortcuts) {
+                continue;
+            }
+            // Sort by isManifestShortcut() and getRank().
+            Collections.sort(list, mShortcutTypeAndRankComparator);
+
+            // Keep [0 .. max), and remove (as dynamic) [max .. size)
+            for (int inner = list.size() - 1; inner >= maxShortcuts; inner--) {
+                final ShortcutInfo shortcut = list.get(inner);
+
+                if (shortcut.isManifestShortcut()) {
+                    // This shouldn't happen -- excess shortcuts should all be non-manifest.
+                    // But just in case.
+                    service.wtf("Found manifest shortcuts in excess list.");
+                    continue;
+                }
+                deleteDynamicWithId(shortcut.getId());
+            }
+        }
+        service.verifyStates();
+
+        return changed;
+    }
+
+    /**
+     * To sort by isManifestShortcut() and getRank(). i.e.  manifest shortcuts come before
+     * non-manifest shortcuts, then sort by rank.
+     *
+     * This is used to decide which dynamic shortcuts to remove when an upgraded version has more
+     * manifest shortcuts than before and as a result we need to remove some of the dynamic
+     * shortcuts.  We sort manifest + dynamic shortcuts by this order, and remove the ones with
+     * the last ones.
+     *
+     * (Note the number of manifest shortcuts is always <= the max number, because if there are
+     * more, ShortcutParser would ignore the rest.)
+     */
+    final Comparator<ShortcutInfo> mShortcutTypeAndRankComparator = (ShortcutInfo a,
+            ShortcutInfo b) -> {
+        if (a.isManifestShortcut() && !b.isManifestShortcut()) {
+            return -1;
+        }
+        if (!a.isManifestShortcut() && b.isManifestShortcut()) {
+            return 1;
+        }
+        return a.getRank() - b.getRank();
+    };
+
+    /**
+     * Build a list of shortcuts for each target activity and return as a map. The result won't
+     * contain "floating" shortcuts because they don't belong on any activities.
+     */
+    private ArrayMap<ComponentName, ArrayList<ShortcutInfo>> sortShortcutsToActivities() {
+        final int maxShortcuts = mShortcutUser.mService.getMaxActivityShortcuts();
+
+        final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> activitiesToShortcuts
+                = new ArrayMap<>();
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (si.isFloating()) {
+                continue; // Ignore floating shortcuts, which are not tied to any activities.
+            }
+
+            final ComponentName activity = si.getActivity();
+
+            ArrayList<ShortcutInfo> list = activitiesToShortcuts.get(activity);
+            if (list == null) {
+                list = new ArrayList<>(maxShortcuts * 2);
+                activitiesToShortcuts.put(activity, list);
+            }
+            list.add(si);
+        }
+        return activitiesToShortcuts;
+    }
+
+    /** Used by {@link #enforceShortcutCountsBeforeOperation} */
+    private void incrementCountForActivity(ArrayMap<ComponentName, Integer> counts,
+            ComponentName cn, int increment) {
+        Integer oldValue = counts.get(cn);
+        if (oldValue == null) {
+            oldValue = 0;
+        }
+
+        counts.put(cn, oldValue + increment);
+    }
+
+    /**
+     * Called by
+     * {@link android.content.pm.ShortcutManager#setDynamicShortcuts},
+     * {@link android.content.pm.ShortcutManager#addDynamicShortcuts}, and
+     * {@link android.content.pm.ShortcutManager#updateShortcuts} before actually performing
+     * the operation to make sure the operation wouldn't result in the target activities having
+     * more than the allowed number of dynamic/manifest shortcuts.
+     *
+     * @param newList shortcut list passed to set, add or updateShortcuts().
+     * @param operation add, set or update.
+     * @throws IllegalArgumentException if the operation would result in going over the max
+     *                                  shortcut count for any activity.
+     */
+    public void enforceShortcutCountsBeforeOperation(List<ShortcutInfo> newList,
+            @ShortcutOperation int operation) {
+        final ShortcutService service = mShortcutUser.mService;
+
+        // Current # of dynamic / manifest shortcuts for each activity.
+        // (If it's for update, then don't count dynamic shortcuts, since they'll be replaced
+        // anyway.)
+        final ArrayMap<ComponentName, Integer> counts = new ArrayMap<>(4);
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo shortcut = mShortcuts.valueAt(i);
+
+            if (shortcut.isManifestShortcut()) {
+                incrementCountForActivity(counts, shortcut.getActivity(), 1);
+            } else if (shortcut.isDynamic() && (operation != ShortcutService.OPERATION_SET)) {
+                incrementCountForActivity(counts, shortcut.getActivity(), 1);
+            }
+        }
+
+        for (int i = newList.size() - 1; i >= 0; i--) {
+            final ShortcutInfo newShortcut = newList.get(i);
+            final ComponentName newActivity = newShortcut.getActivity();
+            if (newActivity == null) {
+                if (operation != ShortcutService.OPERATION_UPDATE) {
+                    service.wtf("null Activity found for non-update");
+                }
+                continue; // Activity can be null for update.
+            }
+
+            final ShortcutInfo original = mShortcuts.get(newShortcut.getId());
+            if (original == null) {
+                if (operation == ShortcutService.OPERATION_UPDATE) {
+                    continue; // When updating, ignore if there's no target.
+                }
+                // Add() or set(), and there's no existing shortcut with the same ID.  We're
+                // simply publishing (as opposed to updating) this shortcut, so just +1.
+                incrementCountForActivity(counts, newActivity, 1);
+                continue;
+            }
+            if (original.isFloating() && (operation == ShortcutService.OPERATION_UPDATE)) {
+                // Updating floating shortcuts doesn't affect the count, so ignore.
+                continue;
+            }
+
+            // If it's add() or update(), then need to decrement for the previous activity.
+            // Skip it for set() since it's already been taken care of by not counting the original
+            // dynamic shortcuts in the first loop.
+            if (operation != ShortcutService.OPERATION_SET) {
+                final ComponentName oldActivity = original.getActivity();
+                if (!original.isFloating()) {
+                    incrementCountForActivity(counts, oldActivity, -1);
+                }
+            }
+            incrementCountForActivity(counts, newActivity, 1);
+        }
+
+        // Then make sure none of the activities have more than the max number of shortcuts.
+        for (int i = counts.size() - 1; i >= 0; i--) {
+            service.enforceMaxActivityShortcuts(counts.valueAt(i));
+        }
     }
 
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
@@ -994,5 +1176,47 @@ class ShortcutPackage extends ShortcutPackageItem {
     @VisibleForTesting
     List<ShortcutInfo> getAllShortcutsForTest() {
         return new ArrayList<>(mShortcuts.values());
+    }
+
+    @Override
+    public void verifyStates() {
+        super.verifyStates();
+
+        boolean failed = false;
+
+        final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> all =
+                sortShortcutsToActivities();
+
+        // Make sure each activity won't have more than max shortcuts.
+        for (int i = all.size() - 1; i >= 0; i--) {
+            if (all.valueAt(i).size() > mShortcutUser.mService.getMaxActivityShortcuts()) {
+                failed = true;
+                Log.e(TAG, "Package " + getPackageName() + ": activity " + all.keyAt(i)
+                        + " has " + all.valueAt(i).size() + " shortcuts.");
+            }
+        }
+
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (!(si.isManifestShortcut() || si.isDynamic() || si.isPinned())) {
+                failed = true;
+                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " is not manifest, dynamic or pinned.");
+            }
+            if (si.getActivity() == null) {
+                failed = true;
+                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " has null activity.");
+            }
+            if ((si.isDynamic() || si.isManifestShortcut()) && !si.isEnabled()) {
+                failed = true;
+                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " is not floating, but is disabled.");
+            }
+        }
+
+        if (failed) {
+            throw new IllegalStateException("See logcat for errors");
+        }
     }
 }
