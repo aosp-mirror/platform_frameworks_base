@@ -173,5 +173,7 @@ interface IWifiManager
     byte[] retrieveBackupData();
 
     void restoreBackupData(in byte[] data);
+
+    void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 }
 
