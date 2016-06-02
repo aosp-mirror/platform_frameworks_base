@@ -61,7 +61,11 @@ public class VoiceInteractionServiceInfo {
             throws PackageManager.NameNotFoundException {
         try {
             ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(comp,
-                    PackageManager.GET_META_DATA, userHandle);
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    userHandle);
             if (si != null) {
                 return si;
             }

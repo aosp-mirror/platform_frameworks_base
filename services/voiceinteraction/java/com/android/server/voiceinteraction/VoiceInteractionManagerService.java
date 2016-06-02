@@ -19,7 +19,6 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -415,7 +414,10 @@ public class VoiceInteractionManagerService extends SystemService {
         VoiceInteractionServiceInfo findAvailInteractor(int userHandle, String packageName) {
             List<ResolveInfo> available =
                     mContext.getPackageManager().queryIntentServicesAsUser(
-                            new Intent(VoiceInteractionService.SERVICE_INTERFACE), 0, userHandle);
+                            new Intent(VoiceInteractionService.SERVICE_INTERFACE),
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userHandle);
             int numAvailable = available.size();
 
             if (numAvailable == 0) {
