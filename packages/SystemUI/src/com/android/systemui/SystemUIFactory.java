@@ -25,6 +25,8 @@ import android.view.ViewGroup;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.R;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -129,5 +131,9 @@ public class SystemUIFactory {
      */
     public int getHomeLayoutId() {
         return R.layout.home;
+    }
+
+    public AssistManager createAssistManager(BaseStatusBar bar, Context context) {
+        return new AssistManager(bar, context);
     }
 }

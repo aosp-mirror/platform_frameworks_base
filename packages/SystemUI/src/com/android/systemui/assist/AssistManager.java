@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -103,6 +104,10 @@ public class AssistManager {
         }
     }
 
+    protected boolean shouldShowOrb() {
+        return true;
+    }
+
     public void startAssist(Bundle args) {
         final ComponentName assistComponent = getAssistInfo();
         if (assistComponent == null) {
@@ -110,7 +115,7 @@ public class AssistManager {
         }
 
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
-        if (!isService || !isVoiceSessionRunning()) {
+        if (!isService || (!isVoiceSessionRunning() && shouldShowOrb())) {
             showOrb(assistComponent, isService);
             mView.postDelayed(mHideRunnable, isService
                     ? TIMEOUT_SERVICE
