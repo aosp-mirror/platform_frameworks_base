@@ -372,76 +372,175 @@ public final class TvContract {
         /** The MIME type of a single TV channel. */
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
 
-        /** A generic channel type. */
+        /**
+         * A generic channel type.
+         *
+         * Use this if the current channel is streaming-based or its broadcast system type does not
+         * fit under any other types. This is the default channel type.
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_OTHER = "TYPE_OTHER";
 
-        /** The channel type for NTSC. */
+        /**
+         * The channel type for NTSC.
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_NTSC = "TYPE_NTSC";
 
-        /** The channel type for PAL. */
+        /**
+         * The channel type for PAL.
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_PAL = "TYPE_PAL";
 
-        /** The channel type for SECAM. */
+        /**
+         * The channel type for SECAM.
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_SECAM = "TYPE_SECAM";
 
-        /** The channel type for DVB-T (terrestrial). */
+        /**
+         * The channel type for DVB-T (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_T = "TYPE_DVB_T";
 
-        /** The channel type for DVB-T2 (terrestrial). */
+        /**
+         * The channel type for DVB-T2 (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_T2 = "TYPE_DVB_T2";
 
-        /** The channel type for DVB-S (satellite). */
+        /**
+         * The channel type for DVB-S (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_S = "TYPE_DVB_S";
 
-        /** The channel type for DVB-S2 (satellite). */
+        /**
+         * The channel type for DVB-S2 (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_S2 = "TYPE_DVB_S2";
 
-        /** The channel type for DVB-C (cable). */
+        /**
+         * The channel type for DVB-C (cable).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_C = "TYPE_DVB_C";
 
-        /** The channel type for DVB-C2 (cable). */
+        /**
+         * The channel type for DVB-C2 (cable).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_C2 = "TYPE_DVB_C2";
 
-        /** The channel type for DVB-H (handheld). */
+        /**
+         * The channel type for DVB-H (handheld).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_H = "TYPE_DVB_H";
 
-        /** The channel type for DVB-SH (satellite). */
+        /**
+         * The channel type for DVB-SH (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DVB_SH = "TYPE_DVB_SH";
 
-        /** The channel type for ATSC (terrestrial). */
+        /**
+         * The channel type for ATSC (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ATSC_T = "TYPE_ATSC_T";
 
-        /** The channel type for ATSC (cable). */
+        /**
+         * The channel type for ATSC (cable).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ATSC_C = "TYPE_ATSC_C";
 
-        /** The channel type for ATSC-M/H (mobile/handheld). */
+        /**
+         * The channel type for ATSC-M/H (mobile/handheld).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ATSC_M_H = "TYPE_ATSC_M_H";
 
-        /** The channel type for ISDB-T (terrestrial). */
+        /**
+         * The channel type for ISDB-T (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ISDB_T = "TYPE_ISDB_T";
 
-        /** The channel type for ISDB-Tb (Brazil). */
+        /**
+         * The channel type for ISDB-Tb (Brazil).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ISDB_TB = "TYPE_ISDB_TB";
 
-        /** The channel type for ISDB-S (satellite). */
+        /**
+         * The channel type for ISDB-S (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ISDB_S = "TYPE_ISDB_S";
 
-        /** The channel type for ISDB-C (cable). */
+        /**
+         * The channel type for ISDB-C (cable).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_ISDB_C = "TYPE_ISDB_C";
 
-        /** The channel type for 1seg (handheld). */
+        /**
+         * The channel type for 1seg (handheld).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_1SEG = "TYPE_1SEG";
 
-        /** The channel type for DTMB (terrestrial). */
+        /**
+         * The channel type for DTMB (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_DTMB = "TYPE_DTMB";
 
-        /** The channel type for CMMB (handheld). */
+        /**
+         * The channel type for CMMB (handheld).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_CMMB = "TYPE_CMMB";
 
-        /** The channel type for T-DMB (terrestrial). */
+        /**
+         * The channel type for T-DMB (terrestrial).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_T_DMB = "TYPE_T_DMB";
 
-        /** The channel type for S-DMB (satellite). */
+        /**
+         * The channel type for S-DMB (satellite).
+         *
+         * @see #COLUMN_TYPE
+         */
         public static final String TYPE_S_DMB = "TYPE_S_DMB";
 
         /** A generic service type. */
@@ -540,16 +639,35 @@ public final class TvContract {
         public static final String COLUMN_INPUT_ID = "input_id";
 
         /**
-         * The predefined type of this TV channel.
+         * The broadcast system type of this TV channel.
          *
-         * <p>This is primarily used to indicate which broadcast standard (e.g. ATSC, DVB or ISDB)
-         * the current channel conforms to. The value should match to one of the followings:
-         * {@link #TYPE_OTHER}, {@link #TYPE_DVB_T}, {@link #TYPE_DVB_T2}, {@link #TYPE_DVB_S},
-         * {@link #TYPE_DVB_S2}, {@link #TYPE_DVB_C}, {@link #TYPE_DVB_C2}, {@link #TYPE_DVB_H},
-         * {@link #TYPE_DVB_SH}, {@link #TYPE_ATSC_T}, {@link #TYPE_ATSC_C},
-         * {@link #TYPE_ATSC_M_H}, {@link #TYPE_ISDB_T}, {@link #TYPE_ISDB_TB},
-         * {@link #TYPE_ISDB_S}, {@link #TYPE_ISDB_C}, {@link #TYPE_1SEG}, {@link #TYPE_DTMB},
-         * {@link #TYPE_CMMB}, {@link #TYPE_T_DMB}, {@link #TYPE_S_DMB}
+         * <p>This is used to indicate the broadcast standard (e.g. ATSC, DVB or ISDB) the current
+         * channel conforms to. Use {@link #TYPE_OTHER} for streaming-based channels, which is the
+         * default channel type. The value should match to one of the followings:
+         * {@link #TYPE_1SEG},
+         * {@link #TYPE_ATSC_C},
+         * {@link #TYPE_ATSC_M_H},
+         * {@link #TYPE_ATSC_T},
+         * {@link #TYPE_CMMB},
+         * {@link #TYPE_DTMB},
+         * {@link #TYPE_DVB_C},
+         * {@link #TYPE_DVB_C2},
+         * {@link #TYPE_DVB_H},
+         * {@link #TYPE_DVB_S},
+         * {@link #TYPE_DVB_S2},
+         * {@link #TYPE_DVB_SH},
+         * {@link #TYPE_DVB_T},
+         * {@link #TYPE_DVB_T2},
+         * {@link #TYPE_ISDB_C},
+         * {@link #TYPE_ISDB_S},
+         * {@link #TYPE_ISDB_T},
+         * {@link #TYPE_ISDB_TB},
+         * {@link #TYPE_NTSC},
+         * {@link #TYPE_OTHER},
+         * {@link #TYPE_PAL},
+         * {@link #TYPE_SECAM},
+         * {@link #TYPE_S_DMB}, and
+         * {@link #TYPE_T_DMB}.
          *
          * <p>This is a required field.
          *
