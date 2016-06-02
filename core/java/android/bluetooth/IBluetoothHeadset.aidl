@@ -59,4 +59,5 @@ interface IBluetoothHeadset {
                       String number, int type);
     boolean enableWBS();
     boolean disableWBS();
+    void bindResponse(int ind_id, boolean ind_status);
 }
