@@ -1009,9 +1009,13 @@ public class UserManagerService extends IUserManager.Stub {
                 // in getUserRestrictionSource on who set local policies.
                 mGlobalRestrictionOwnerUserId = userId;
             } else {
-                // When profile owner sets restrictions it passes null global bundle and we reset 
-                // global restriction owner userId.
-                mGlobalRestrictionOwnerUserId = UserHandle.USER_NULL;
+                if (mGlobalRestrictionOwnerUserId == userId) {
+                    // When profile owner sets restrictions it passes null global bundle and we
+                    // reset global restriction owner userId.
+                    // This means this user used to have DO, but now the DO is gone and the user
+                    // instead has PO.
+                    mGlobalRestrictionOwnerUserId = UserHandle.USER_NULL;
+                }
             }
             {
                 // Update local.
