@@ -8248,10 +8248,9 @@ i
     <declare-styleable name="Shortcut">
         <attr name="shortcutId" format="string" />
         <attr name="enabled" />
-        <attr name="shortcutRank" format="integer" />
         <attr name="shortcutIcon" format="reference" />
-        <attr name="shortcutTitle" format="reference" />
-        <attr name="shortcutText" format="reference" />
+        <attr name="shortcutShortLabel" format="reference" />
+        <attr name="shortcutLongLabel" format="reference" />
         <attr name="shortcutDisabledMessage" format="reference" />
         <attr name="shortcutCategories" format="string" />
         <attr name="shortcutIntentAction" format="string" />

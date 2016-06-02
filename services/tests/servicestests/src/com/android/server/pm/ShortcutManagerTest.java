@@ -6359,7 +6359,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(123, si.getIcon().getResId());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -6503,7 +6503,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(123, si.getIcon().getResId());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -6522,7 +6522,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -6542,7 +6542,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getRank());
@@ -6561,7 +6561,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(0, si.getTitleResId());
         assertEquals(0, si.getTextResId());
-        assertEquals(0, si.getDisabledMessageResId());
+        assertEquals(0, si.getDisabledMessageResourceId());
         assertEquals(null, si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(0, si.getRank());
@@ -6680,14 +6680,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setDisabledMessage("xxx").build());
         assertEquals(123, si.getRank());
         assertEquals("xxx", si.getDisabledMessage());
-        assertEquals(0, si.getDisabledMessageResId());
+        assertEquals(0, si.getDisabledMessageResourceId());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setDisabledMessageResId(11111).build());
         assertEquals(123, si.getRank());
         assertEquals(null, si.getDisabledMessage());
-        assertEquals(11111, si.getDisabledMessageResId());
+        assertEquals(11111, si.getDisabledMessageResourceId());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -6808,14 +6808,14 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 .setDisabledMessage("xxx").build());
         assertEquals(123, si.getRank());
         assertEquals("xxx", si.getDisabledMessage());
-        assertEquals(0, si.getDisabledMessageResId());
+        assertEquals(0, si.getDisabledMessageResourceId());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setDisabledMessageResId(11111).build());
         assertEquals(123, si.getRank());
         assertEquals(null, si.getDisabledMessage());
-        assertEquals(11111, si.getDisabledMessageResId());
+        assertEquals(11111, si.getDisabledMessageResourceId());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -6967,7 +6967,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -7074,7 +7074,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
         assertEquals(11, si.getTextResId());
-        assertEquals(12, si.getDisabledMessageResId());
+        assertEquals(12, si.getDisabledMessageResourceId());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -7547,11 +7547,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                     si.getActivity());
             assertEquals(R.string.shortcut_title1, si.getTitleResId());
             assertEquals(R.string.shortcut_text1, si.getTextResId());
-            assertEquals(R.string.shortcut_disabled_message1, si.getDisabledMessageResId());
+            assertEquals(R.string.shortcut_disabled_message1, si.getDisabledMessageResourceId());
             assertEquals(set("android.shortcut.conversation", "android.shortcut.media"),
                     si.getCategories());
             assertEquals("action1", si.getIntent().getAction());
             assertEquals(Uri.parse("http://a.b.c/1"), si.getIntent().getData());
+            assertEquals(0, si.getRank());
 
             // check another
             si = getCallerShortcut("ms2");
@@ -7560,10 +7561,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertEquals(R.drawable.icon2, si.getIconResourceId());
             assertEquals(R.string.shortcut_title2, si.getTitleResId());
             assertEquals(R.string.shortcut_text2, si.getTextResId());
-            assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResId());
+            assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResourceId());
             assertEquals(set("android.shortcut.conversation"), si.getCategories());
             assertEquals("action2", si.getIntent().getAction());
             assertEquals(null, si.getIntent().getData());
+            assertEquals(1, si.getRank());
 
             // check another
             si = getCallerShortcut("ms3");
@@ -7572,10 +7574,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertEquals(0, si.getIconResourceId());
             assertEquals(R.string.shortcut_title1, si.getTitleResId());
             assertEquals(0, si.getTextResId());
-            assertEquals(0, si.getDisabledMessageResId());
+            assertEquals(0, si.getDisabledMessageResourceId());
             assertEquals(null, si.getCategories());
             assertEquals("android.intent.action.VIEW", si.getIntent().getAction());
             assertEquals(null, si.getIntent().getData());
+            assertEquals(2, si.getRank());
         });
     }
 
@@ -7667,7 +7670,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             assertEquals(R.drawable.icon2, si.getIconResourceId());
             assertEquals(R.string.shortcut_title2, si.getTitleResId());
             assertEquals(R.string.shortcut_text2, si.getTextResId());
-            assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResId());
+            assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResourceId());
             assertEquals(Intent.ACTION_VIEW, si.getIntent().getAction());
 
             // Make sure there's no other dangling shortcuts.

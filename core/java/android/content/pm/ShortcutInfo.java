@@ -350,7 +350,7 @@ public final class ShortcutInfo implements Parcelable {
             mTitleResId = 0;
         } else if (source.mTitleResId != 0) {
             mTitle = null;
-            mTitleResId = source.getTitleResId();
+            mTitleResId = source.mTitleResId;
         }
         if (source.mText != null) {
             mText = source.mText;
@@ -490,47 +490,77 @@ public final class ShortcutInfo implements Parcelable {
             return this;
         }
 
-        /** @hide */
-        public Builder setTitleResId(int titleResId) {
-            Preconditions.checkState(mTitle == null, "title already set");
-            mTitleResId = titleResId;
+        /**
+         * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
+         * use it.)
+         */
+        public Builder setShortLabelResId(int shortLabelResId) {
+            Preconditions.checkState(mTitle == null, "shortLabel already set");
+            mTitleResId = shortLabelResId;
             return this;
         }
 
         /**
-         * Sets the title of a shortcut.  This is a mandatory field.
+         * Sets the short title of a shortcut.  This is a mandatory field.
          *
          * <p>This field is intended for a concise description of a shortcut displayed under
          * an icon.  The recommend max length is 10 characters.
          */
         @NonNull
-        public Builder setTitle(@NonNull String title) {
-            Preconditions.checkState(mTitleResId == 0, "titleResId already set");
-            mTitle = Preconditions.checkStringNotEmpty(title, "title");
+        public Builder setShortLabel(@NonNull String shortLabel) {
+            Preconditions.checkState(mTitleResId == 0, "shortLabelResId already set");
+            mTitle = Preconditions.checkStringNotEmpty(shortLabel, "shortLabel");
             return this;
         }
 
-        /** @hide */
-        public Builder setTextResId(int textResId) {
-            Preconditions.checkState(mText == null, "text already set");
-            mTextResId = textResId;
+        /**
+         * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
+         * use it.)
+         */
+        public Builder setLongLabelResId(int longLabelResId) {
+            Preconditions.checkState(mText == null, "longLabel already set");
+            mTextResId = longLabelResId;
             return this;
         }
 
         /**
          * Sets the text of a shortcut.  This is an optional field.
          *
-         * <p>This field is intended to be more descriptive than the shortcut title.
+         * <p>This field is intended to be more descriptive than the shortcut title.  The launcher
+         * shows this instead of the short title, when it has enough space.
          * The recommend max length is 25 characters.
          */
         @NonNull
-        public Builder setText(@NonNull String text) {
-            Preconditions.checkState(mTextResId == 0, "textResId already set");
-            mText = Preconditions.checkStringNotEmpty(text, "text");
+        public Builder setLongLabel(@NonNull String longLabel) {
+            Preconditions.checkState(mTextResId == 0, "longLabelResId already set");
+            mText = Preconditions.checkStringNotEmpty(longLabel, "longLabel");
             return this;
         }
 
-        /** @hide */
+        /** @hide -- old signature, the internal code still uses it. */
+        public Builder setTitle(@NonNull String value) {
+            return setShortLabel(value);
+        }
+
+        /** @hide -- old signature, the internal code still uses it. */
+        public Builder setTitleResId(int value) {
+            return setShortLabelResId(value);
+        }
+
+        /** @hide -- old signature, the internal code still uses it. */
+        public Builder setText(@NonNull String value) {
+            return setLongLabel(value);
+        }
+
+        /** @hide -- old signature, the internal code still uses it. */
+        public Builder setTextResId(int value) {
+            return setLongLabelResId(value);
+        }
+
+        /**
+         * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
+         * use it.)
+         */
         public Builder setDisabledMessageResId(int disabledMessageResId) {
             Preconditions.checkState(mDisabledMessage == null, "disabledMessage already set");
             mDisabledMessageResId = disabledMessageResId;
@@ -641,19 +671,41 @@ public final class ShortcutInfo implements Parcelable {
         return mIcon;
     }
 
-    /**
-     * Return the shortcut title.
-     *
-     * <p>All shortcuts must have a non-empty title, but this method will return null when
-     * {@link #hasKeyFieldsOnly()} is true.
-     */
+    /** @hide -- old signature, the internal code still uses it. */
     @Nullable
     public CharSequence getTitle() {
         return mTitle;
     }
 
-    /** TODO Javadoc */
+    /** @hide -- old signature, the internal code still uses it. */
     public int getTitleResId() {
+        return mTitleResId;
+    }
+
+    /** @hide -- old signature, the internal code still uses it. */
+    @Nullable
+    public CharSequence getText() {
+        return mText;
+    }
+
+    /** @hide -- old signature, the internal code still uses it. */
+    public int getTextResId() {
+        return mTextResId;
+    }
+
+    /**
+     * Return the shorter version of the shortcut title.
+     *
+     * <p>All shortcuts must have a non-empty title, but this method will return null when
+     * {@link #hasKeyFieldsOnly()} is true.
+     */
+    @Nullable
+    public CharSequence getShortLabel() {
+        return mTitle;
+    }
+
+    /** TODO Javadoc */
+    public int getShortLabelResourceId() {
         return mTitleResId;
     }
 
@@ -661,12 +713,12 @@ public final class ShortcutInfo implements Parcelable {
      * Return the shortcut text.
      */
     @Nullable
-    public CharSequence getText() {
+    public CharSequence getLongLabel() {
         return mText;
     }
 
     /** TODO Javadoc */
-    public int getTextResId() {
+    public int getLongLabelResourceId() {
         return mTextResId;
     }
 
@@ -679,7 +731,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /** TODO Javadoc */
-    public int getDisabledMessageResId() {
+    public int getDisabledMessageResourceId() {
         return mDisabledMessageResId;
     }
 
@@ -1104,19 +1156,19 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", activity=");
         sb.append(mActivity);
 
-        sb.append(", title=");
+        sb.append(", shortLabel=");
         sb.append(secure ? "***" : mTitle);
-        sb.append(", titleResId=");
+        sb.append(", resId=");
         sb.append(mTitleResId);
 
-        sb.append(", text=");
+        sb.append(", longLabel=");
         sb.append(secure ? "***" : mText);
-        sb.append(", textResId=");
+        sb.append(", resId=");
         sb.append(mTextResId);
 
         sb.append(", disabledMessage=");
         sb.append(secure ? "***" : mDisabledMessage);
-        sb.append(", disabledMessageResId=");
+        sb.append(", resId=");
         sb.append(mDisabledMessageResId);
 
         sb.append(", categories=");

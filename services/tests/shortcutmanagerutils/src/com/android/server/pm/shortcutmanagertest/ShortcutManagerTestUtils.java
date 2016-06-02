@@ -317,7 +317,7 @@ public class ShortcutManagerTestUtils {
     public static List<ShortcutInfo> assertAllHaveTitle(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
-            assertNotNull("ID " + s.getId(), s.getTitle());
+            assertNotNull("ID " + s.getId(), s.getShortLabel());
         }
         return actualShortcuts;
     }
@@ -325,7 +325,7 @@ public class ShortcutManagerTestUtils {
     public static List<ShortcutInfo> assertAllNotHaveTitle(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
-            assertNull("ID " + s.getId(), s.getTitle());
+            assertNull("ID " + s.getId(), s.getShortLabel());
         }
         return actualShortcuts;
     }
