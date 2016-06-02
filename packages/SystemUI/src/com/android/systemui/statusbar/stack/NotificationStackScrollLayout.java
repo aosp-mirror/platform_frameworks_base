@@ -196,7 +196,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mPanelTracking;
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
-    private boolean mScrollingEnabled;
+    protected boolean mScrollingEnabled;
     protected DismissView mDismissView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
@@ -1182,7 +1182,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (!isScrollingEnabled()) {
             return false;
         }
-        if (ev.getY() < mQsContainer.getBottom()) {
+        if (isInsideQsContainer(ev)) {
             return false;
         }
         mForcedScroll = null;
@@ -1310,6 +1310,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 break;
         }
         return true;
+    }
+
+    protected boolean isInsideQsContainer(MotionEvent ev) {
+        return ev.getY() < mQsContainer.getBottom();
     }
 
     private void onOverScrollFling(boolean open, int initialVelocity) {
