@@ -46788,6 +46788,7 @@ package java.io {
     method public boolean setReadable(boolean);
     method public boolean setWritable(boolean, boolean);
     method public boolean setWritable(boolean);
+    method public java.nio.file.Path toPath();
     method public java.net.URI toURI();
     method public deprecated java.net.URL toURL() throws java.net.MalformedURLException;
     field public static final java.lang.String pathSeparator;
@@ -51007,6 +51008,25 @@ package java.nio.channels {
     ctor public AsynchronousCloseException();
   }
 
+  public abstract class AsynchronousFileChannel implements java.nio.channels.AsynchronousChannel {
+    ctor protected AsynchronousFileChannel();
+    method public abstract void force(boolean) throws java.io.IOException;
+    method public abstract void lock(long, long, boolean, A, java.nio.channels.CompletionHandler<java.nio.channels.FileLock, ? super A>);
+    method public final void lock(A, java.nio.channels.CompletionHandler<java.nio.channels.FileLock, ? super A>);
+    method public abstract java.util.concurrent.Future<java.nio.channels.FileLock> lock(long, long, boolean);
+    method public final java.util.concurrent.Future<java.nio.channels.FileLock> lock();
+    method public static java.nio.channels.AsynchronousFileChannel open(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.util.concurrent.ExecutorService, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.channels.AsynchronousFileChannel open(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public abstract void read(java.nio.ByteBuffer, long, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> read(java.nio.ByteBuffer, long);
+    method public abstract long size() throws java.io.IOException;
+    method public abstract java.nio.channels.AsynchronousFileChannel truncate(long) throws java.io.IOException;
+    method public abstract java.nio.channels.FileLock tryLock(long, long, boolean) throws java.io.IOException;
+    method public final java.nio.channels.FileLock tryLock() throws java.io.IOException;
+    method public abstract void write(java.nio.ByteBuffer, long, A, java.nio.channels.CompletionHandler<java.lang.Integer, ? super A>);
+    method public abstract java.util.concurrent.Future<java.lang.Integer> write(java.nio.ByteBuffer, long);
+  }
+
   public abstract class AsynchronousServerSocketChannel implements java.nio.channels.AsynchronousChannel java.nio.channels.NetworkChannel {
     ctor protected AsynchronousServerSocketChannel(java.nio.channels.spi.AsynchronousChannelProvider);
     method public abstract void accept(A, java.nio.channels.CompletionHandler<java.nio.channels.AsynchronousSocketChannel, ? super A>);
@@ -51115,6 +51135,8 @@ package java.nio.channels {
     method public abstract java.nio.channels.FileLock lock(long, long, boolean) throws java.io.IOException;
     method public final java.nio.channels.FileLock lock() throws java.io.IOException;
     method public abstract java.nio.MappedByteBuffer map(java.nio.channels.FileChannel.MapMode, long, long) throws java.io.IOException;
+    method public static java.nio.channels.FileChannel open(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.channels.FileChannel open(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
     method public abstract long position() throws java.io.IOException;
     method public abstract java.nio.channels.FileChannel position(long) throws java.io.IOException;
     method public abstract int read(java.nio.ByteBuffer) throws java.io.IOException;
@@ -51141,6 +51163,7 @@ package java.nio.channels {
 
   public abstract class FileLock implements java.lang.AutoCloseable {
     ctor protected FileLock(java.nio.channels.FileChannel, long, long, boolean);
+    ctor protected FileLock(java.nio.channels.AsynchronousFileChannel, long, long, boolean);
     method public java.nio.channels.Channel acquiredBy();
     method public final java.nio.channels.FileChannel channel();
     method public final void close() throws java.io.IOException;
@@ -51586,6 +51609,619 @@ package java.nio.charset.spi {
     ctor protected CharsetProvider();
     method public abstract java.nio.charset.Charset charsetForName(java.lang.String);
     method public abstract java.util.Iterator<java.nio.charset.Charset> charsets();
+  }
+
+}
+
+package java.nio.file {
+
+  public class AccessDeniedException extends java.nio.file.FileSystemException {
+    ctor public AccessDeniedException(java.lang.String);
+    ctor public AccessDeniedException(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public final class AccessMode extends java.lang.Enum {
+    method public static java.nio.file.AccessMode valueOf(java.lang.String);
+    method public static final java.nio.file.AccessMode[] values();
+    enum_constant public static final java.nio.file.AccessMode EXECUTE;
+    enum_constant public static final java.nio.file.AccessMode READ;
+    enum_constant public static final java.nio.file.AccessMode WRITE;
+  }
+
+  public class AtomicMoveNotSupportedException extends java.nio.file.FileSystemException {
+    ctor public AtomicMoveNotSupportedException(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public class ClosedDirectoryStreamException extends java.lang.IllegalStateException {
+    ctor public ClosedDirectoryStreamException();
+  }
+
+  public class ClosedFileSystemException extends java.lang.IllegalStateException {
+    ctor public ClosedFileSystemException();
+  }
+
+  public class ClosedWatchServiceException extends java.lang.IllegalStateException {
+    ctor public ClosedWatchServiceException();
+  }
+
+  public abstract interface CopyOption {
+  }
+
+  public final class DirectoryIteratorException extends java.util.ConcurrentModificationException {
+    ctor public DirectoryIteratorException(java.io.IOException);
+  }
+
+  public class DirectoryNotEmptyException extends java.nio.file.FileSystemException {
+    ctor public DirectoryNotEmptyException(java.lang.String);
+  }
+
+  public abstract interface DirectoryStream implements java.io.Closeable java.lang.Iterable {
+    method public abstract java.util.Iterator<T> iterator();
+  }
+
+  public static abstract interface DirectoryStream.Filter {
+    method public abstract boolean accept(T) throws java.io.IOException;
+  }
+
+  public class FileAlreadyExistsException extends java.nio.file.FileSystemException {
+    ctor public FileAlreadyExistsException(java.lang.String);
+    ctor public FileAlreadyExistsException(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public abstract class FileStore {
+    ctor protected FileStore();
+    method public abstract java.lang.Object getAttribute(java.lang.String) throws java.io.IOException;
+    method public abstract V getFileStoreAttributeView(java.lang.Class<V>);
+    method public abstract long getTotalSpace() throws java.io.IOException;
+    method public abstract long getUnallocatedSpace() throws java.io.IOException;
+    method public abstract long getUsableSpace() throws java.io.IOException;
+    method public abstract boolean isReadOnly();
+    method public abstract java.lang.String name();
+    method public abstract boolean supportsFileAttributeView(java.lang.Class<? extends java.nio.file.attribute.FileAttributeView>);
+    method public abstract boolean supportsFileAttributeView(java.lang.String);
+    method public abstract java.lang.String type();
+  }
+
+  public abstract class FileSystem implements java.io.Closeable {
+    ctor protected FileSystem();
+    method public abstract void close() throws java.io.IOException;
+    method public abstract java.lang.Iterable<java.nio.file.FileStore> getFileStores();
+    method public abstract java.nio.file.Path getPath(java.lang.String, java.lang.String...);
+    method public abstract java.nio.file.PathMatcher getPathMatcher(java.lang.String);
+    method public abstract java.lang.Iterable<java.nio.file.Path> getRootDirectories();
+    method public abstract java.lang.String getSeparator();
+    method public abstract java.nio.file.attribute.UserPrincipalLookupService getUserPrincipalLookupService();
+    method public abstract boolean isOpen();
+    method public abstract boolean isReadOnly();
+    method public abstract java.nio.file.WatchService newWatchService() throws java.io.IOException;
+    method public abstract java.nio.file.spi.FileSystemProvider provider();
+    method public abstract java.util.Set<java.lang.String> supportedFileAttributeViews();
+  }
+
+  public class FileSystemAlreadyExistsException extends java.lang.RuntimeException {
+    ctor public FileSystemAlreadyExistsException();
+    ctor public FileSystemAlreadyExistsException(java.lang.String);
+  }
+
+  public class FileSystemException extends java.io.IOException {
+    ctor public FileSystemException(java.lang.String);
+    ctor public FileSystemException(java.lang.String, java.lang.String, java.lang.String);
+    method public java.lang.String getFile();
+    method public java.lang.String getOtherFile();
+    method public java.lang.String getReason();
+  }
+
+  public class FileSystemLoopException extends java.nio.file.FileSystemException {
+    ctor public FileSystemLoopException(java.lang.String);
+  }
+
+  public class FileSystemNotFoundException extends java.lang.RuntimeException {
+    ctor public FileSystemNotFoundException();
+    ctor public FileSystemNotFoundException(java.lang.String);
+  }
+
+  public final class FileSystems {
+    method public static java.nio.file.FileSystem getDefault();
+    method public static java.nio.file.FileSystem getFileSystem(java.net.URI);
+    method public static java.nio.file.FileSystem newFileSystem(java.net.URI, java.util.Map<java.lang.String, ?>) throws java.io.IOException;
+    method public static java.nio.file.FileSystem newFileSystem(java.net.URI, java.util.Map<java.lang.String, ?>, java.lang.ClassLoader) throws java.io.IOException;
+    method public static java.nio.file.FileSystem newFileSystem(java.nio.file.Path, java.lang.ClassLoader) throws java.io.IOException;
+  }
+
+  public final class FileVisitOption extends java.lang.Enum {
+    method public static java.nio.file.FileVisitOption valueOf(java.lang.String);
+    method public static final java.nio.file.FileVisitOption[] values();
+    enum_constant public static final java.nio.file.FileVisitOption FOLLOW_LINKS;
+  }
+
+  public final class FileVisitResult extends java.lang.Enum {
+    method public static java.nio.file.FileVisitResult valueOf(java.lang.String);
+    method public static final java.nio.file.FileVisitResult[] values();
+    enum_constant public static final java.nio.file.FileVisitResult CONTINUE;
+    enum_constant public static final java.nio.file.FileVisitResult SKIP_SIBLINGS;
+    enum_constant public static final java.nio.file.FileVisitResult SKIP_SUBTREE;
+    enum_constant public static final java.nio.file.FileVisitResult TERMINATE;
+  }
+
+  public abstract interface FileVisitor {
+    method public abstract java.nio.file.FileVisitResult postVisitDirectory(T, java.io.IOException) throws java.io.IOException;
+    method public abstract java.nio.file.FileVisitResult preVisitDirectory(T, java.nio.file.attribute.BasicFileAttributes) throws java.io.IOException;
+    method public abstract java.nio.file.FileVisitResult visitFile(T, java.nio.file.attribute.BasicFileAttributes) throws java.io.IOException;
+    method public abstract java.nio.file.FileVisitResult visitFileFailed(T, java.io.IOException) throws java.io.IOException;
+  }
+
+  public final class Files {
+    method public static java.nio.file.Path copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    method public static long copy(java.io.InputStream, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    method public static long copy(java.nio.file.Path, java.io.OutputStream) throws java.io.IOException;
+    method public static java.nio.file.Path createDirectories(java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createDirectory(java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createFile(java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createLink(java.nio.file.Path, java.nio.file.Path) throws java.io.IOException;
+    method public static java.nio.file.Path createSymbolicLink(java.nio.file.Path, java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createTempDirectory(java.nio.file.Path, java.lang.String, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createTempDirectory(java.lang.String, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createTempFile(java.nio.file.Path, java.lang.String, java.lang.String, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.file.Path createTempFile(java.lang.String, java.lang.String, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static void delete(java.nio.file.Path) throws java.io.IOException;
+    method public static boolean deleteIfExists(java.nio.file.Path) throws java.io.IOException;
+    method public static boolean exists(java.nio.file.Path, java.nio.file.LinkOption...);
+    method public static java.util.stream.Stream<java.nio.file.Path> find(java.nio.file.Path, int, java.util.function.BiPredicate<java.nio.file.Path, java.nio.file.attribute.BasicFileAttributes>, java.nio.file.FileVisitOption...) throws java.io.IOException;
+    method public static java.lang.Object getAttribute(java.nio.file.Path, java.lang.String, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static V getFileAttributeView(java.nio.file.Path, java.lang.Class<V>, java.nio.file.LinkOption...);
+    method public static java.nio.file.FileStore getFileStore(java.nio.file.Path) throws java.io.IOException;
+    method public static java.nio.file.attribute.FileTime getLastModifiedTime(java.nio.file.Path, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static java.nio.file.attribute.UserPrincipal getOwner(java.nio.file.Path, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static java.util.Set<java.nio.file.attribute.PosixFilePermission> getPosixFilePermissions(java.nio.file.Path, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static boolean isDirectory(java.nio.file.Path, java.nio.file.LinkOption...);
+    method public static boolean isExecutable(java.nio.file.Path);
+    method public static boolean isHidden(java.nio.file.Path) throws java.io.IOException;
+    method public static boolean isReadable(java.nio.file.Path);
+    method public static boolean isRegularFile(java.nio.file.Path, java.nio.file.LinkOption...);
+    method public static boolean isSameFile(java.nio.file.Path, java.nio.file.Path) throws java.io.IOException;
+    method public static boolean isSymbolicLink(java.nio.file.Path);
+    method public static boolean isWritable(java.nio.file.Path);
+    method public static java.util.stream.Stream<java.lang.String> lines(java.nio.file.Path, java.nio.charset.Charset) throws java.io.IOException;
+    method public static java.util.stream.Stream<java.lang.String> lines(java.nio.file.Path) throws java.io.IOException;
+    method public static java.util.stream.Stream<java.nio.file.Path> list(java.nio.file.Path) throws java.io.IOException;
+    method public static java.nio.file.Path move(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    method public static java.io.BufferedReader newBufferedReader(java.nio.file.Path, java.nio.charset.Charset) throws java.io.IOException;
+    method public static java.io.BufferedReader newBufferedReader(java.nio.file.Path) throws java.io.IOException;
+    method public static java.io.BufferedWriter newBufferedWriter(java.nio.file.Path, java.nio.charset.Charset, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.io.BufferedWriter newBufferedWriter(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public static java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.nio.file.DirectoryStream<java.nio.file.Path> newDirectoryStream(java.nio.file.Path) throws java.io.IOException;
+    method public static java.nio.file.DirectoryStream<java.nio.file.Path> newDirectoryStream(java.nio.file.Path, java.lang.String) throws java.io.IOException;
+    method public static java.nio.file.DirectoryStream<java.nio.file.Path> newDirectoryStream(java.nio.file.Path, java.nio.file.DirectoryStream.Filter<? super java.nio.file.Path>) throws java.io.IOException;
+    method public static java.io.InputStream newInputStream(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.io.OutputStream newOutputStream(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static boolean notExists(java.nio.file.Path, java.nio.file.LinkOption...);
+    method public static java.lang.String probeContentType(java.nio.file.Path) throws java.io.IOException;
+    method public static byte[] readAllBytes(java.nio.file.Path) throws java.io.IOException;
+    method public static java.util.List<java.lang.String> readAllLines(java.nio.file.Path, java.nio.charset.Charset) throws java.io.IOException;
+    method public static java.util.List<java.lang.String> readAllLines(java.nio.file.Path) throws java.io.IOException;
+    method public static A readAttributes(java.nio.file.Path, java.lang.Class<A>, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static java.util.Map<java.lang.String, java.lang.Object> readAttributes(java.nio.file.Path, java.lang.String, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static java.nio.file.Path readSymbolicLink(java.nio.file.Path) throws java.io.IOException;
+    method public static java.nio.file.Path setAttribute(java.nio.file.Path, java.lang.String, java.lang.Object, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public static java.nio.file.Path setLastModifiedTime(java.nio.file.Path, java.nio.file.attribute.FileTime) throws java.io.IOException;
+    method public static java.nio.file.Path setOwner(java.nio.file.Path, java.nio.file.attribute.UserPrincipal) throws java.io.IOException;
+    method public static java.nio.file.Path setPosixFilePermissions(java.nio.file.Path, java.util.Set<java.nio.file.attribute.PosixFilePermission>) throws java.io.IOException;
+    method public static long size(java.nio.file.Path) throws java.io.IOException;
+    method public static java.util.stream.Stream<java.nio.file.Path> walk(java.nio.file.Path, int, java.nio.file.FileVisitOption...) throws java.io.IOException;
+    method public static java.util.stream.Stream<java.nio.file.Path> walk(java.nio.file.Path, java.nio.file.FileVisitOption...) throws java.io.IOException;
+    method public static java.nio.file.Path walkFileTree(java.nio.file.Path, java.util.Set<java.nio.file.FileVisitOption>, int, java.nio.file.FileVisitor<? super java.nio.file.Path>) throws java.io.IOException;
+    method public static java.nio.file.Path walkFileTree(java.nio.file.Path, java.nio.file.FileVisitor<? super java.nio.file.Path>) throws java.io.IOException;
+    method public static java.nio.file.Path write(java.nio.file.Path, byte[], java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.nio.file.Path write(java.nio.file.Path, java.lang.Iterable<? extends java.lang.CharSequence>, java.nio.charset.Charset, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public static java.nio.file.Path write(java.nio.file.Path, java.lang.Iterable<? extends java.lang.CharSequence>, java.nio.file.OpenOption...) throws java.io.IOException;
+  }
+
+  public class InvalidPathException extends java.lang.IllegalArgumentException {
+    ctor public InvalidPathException(java.lang.String, java.lang.String, int);
+    ctor public InvalidPathException(java.lang.String, java.lang.String);
+    method public int getIndex();
+    method public java.lang.String getInput();
+    method public java.lang.String getReason();
+  }
+
+  public final class LinkOption extends java.lang.Enum implements java.nio.file.CopyOption java.nio.file.OpenOption {
+    method public static java.nio.file.LinkOption valueOf(java.lang.String);
+    method public static final java.nio.file.LinkOption[] values();
+    enum_constant public static final java.nio.file.LinkOption NOFOLLOW_LINKS;
+  }
+
+  public final class LinkPermission extends java.security.BasicPermission {
+    ctor public LinkPermission(java.lang.String);
+    ctor public LinkPermission(java.lang.String, java.lang.String);
+  }
+
+  public class NoSuchFileException extends java.nio.file.FileSystemException {
+    ctor public NoSuchFileException(java.lang.String);
+    ctor public NoSuchFileException(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public class NotDirectoryException extends java.nio.file.FileSystemException {
+    ctor public NotDirectoryException(java.lang.String);
+  }
+
+  public class NotLinkException extends java.nio.file.FileSystemException {
+    ctor public NotLinkException(java.lang.String);
+    ctor public NotLinkException(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public abstract interface OpenOption {
+  }
+
+  public abstract interface Path implements java.lang.Comparable java.lang.Iterable java.nio.file.Watchable {
+    method public abstract int compareTo(java.nio.file.Path);
+    method public abstract boolean endsWith(java.nio.file.Path);
+    method public abstract boolean endsWith(java.lang.String);
+    method public abstract boolean equals(java.lang.Object);
+    method public abstract java.nio.file.Path getFileName();
+    method public abstract java.nio.file.FileSystem getFileSystem();
+    method public abstract java.nio.file.Path getName(int);
+    method public abstract int getNameCount();
+    method public abstract java.nio.file.Path getParent();
+    method public abstract java.nio.file.Path getRoot();
+    method public abstract int hashCode();
+    method public abstract boolean isAbsolute();
+    method public abstract java.util.Iterator<java.nio.file.Path> iterator();
+    method public abstract java.nio.file.Path normalize();
+    method public abstract java.nio.file.WatchKey register(java.nio.file.WatchService, java.nio.file.WatchEvent.Kind<?>[], java.nio.file.WatchEvent.Modifier...) throws java.io.IOException;
+    method public abstract java.nio.file.WatchKey register(java.nio.file.WatchService, java.nio.file.WatchEvent.Kind<?>...) throws java.io.IOException;
+    method public abstract java.nio.file.Path relativize(java.nio.file.Path);
+    method public abstract java.nio.file.Path resolve(java.nio.file.Path);
+    method public abstract java.nio.file.Path resolve(java.lang.String);
+    method public abstract java.nio.file.Path resolveSibling(java.nio.file.Path);
+    method public abstract java.nio.file.Path resolveSibling(java.lang.String);
+    method public abstract boolean startsWith(java.nio.file.Path);
+    method public abstract boolean startsWith(java.lang.String);
+    method public abstract java.nio.file.Path subpath(int, int);
+    method public abstract java.nio.file.Path toAbsolutePath();
+    method public abstract java.io.File toFile();
+    method public abstract java.nio.file.Path toRealPath(java.nio.file.LinkOption...) throws java.io.IOException;
+    method public abstract java.lang.String toString();
+    method public abstract java.net.URI toUri();
+  }
+
+  public abstract interface PathMatcher {
+    method public abstract boolean matches(java.nio.file.Path);
+  }
+
+  public final class Paths {
+    method public static java.nio.file.Path get(java.lang.String, java.lang.String...);
+    method public static java.nio.file.Path get(java.net.URI);
+  }
+
+  public class ProviderMismatchException extends java.lang.IllegalArgumentException {
+    ctor public ProviderMismatchException();
+    ctor public ProviderMismatchException(java.lang.String);
+  }
+
+  public class ProviderNotFoundException extends java.lang.RuntimeException {
+    ctor public ProviderNotFoundException();
+    ctor public ProviderNotFoundException(java.lang.String);
+  }
+
+  public class ReadOnlyFileSystemException extends java.lang.UnsupportedOperationException {
+    ctor public ReadOnlyFileSystemException();
+  }
+
+  public abstract interface SecureDirectoryStream implements java.nio.file.DirectoryStream {
+    method public abstract void deleteDirectory(T) throws java.io.IOException;
+    method public abstract void deleteFile(T) throws java.io.IOException;
+    method public abstract V getFileAttributeView(java.lang.Class<V>);
+    method public abstract V getFileAttributeView(T, java.lang.Class<V>, java.nio.file.LinkOption...);
+    method public abstract void move(T, java.nio.file.SecureDirectoryStream<T>, T) throws java.io.IOException;
+    method public abstract java.nio.channels.SeekableByteChannel newByteChannel(T, java.util.Set<? extends java.nio.file.OpenOption>, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public abstract java.nio.file.SecureDirectoryStream<T> newDirectoryStream(T, java.nio.file.LinkOption...) throws java.io.IOException;
+  }
+
+  public class SimpleFileVisitor implements java.nio.file.FileVisitor {
+    ctor protected SimpleFileVisitor();
+    method public java.nio.file.FileVisitResult postVisitDirectory(T, java.io.IOException) throws java.io.IOException;
+    method public java.nio.file.FileVisitResult preVisitDirectory(T, java.nio.file.attribute.BasicFileAttributes) throws java.io.IOException;
+    method public java.nio.file.FileVisitResult visitFile(T, java.nio.file.attribute.BasicFileAttributes) throws java.io.IOException;
+    method public java.nio.file.FileVisitResult visitFileFailed(T, java.io.IOException) throws java.io.IOException;
+  }
+
+  public final class StandardCopyOption extends java.lang.Enum implements java.nio.file.CopyOption {
+    method public static java.nio.file.StandardCopyOption valueOf(java.lang.String);
+    method public static final java.nio.file.StandardCopyOption[] values();
+    enum_constant public static final java.nio.file.StandardCopyOption ATOMIC_MOVE;
+    enum_constant public static final java.nio.file.StandardCopyOption COPY_ATTRIBUTES;
+    enum_constant public static final java.nio.file.StandardCopyOption REPLACE_EXISTING;
+  }
+
+  public final class StandardOpenOption extends java.lang.Enum implements java.nio.file.OpenOption {
+    method public static java.nio.file.StandardOpenOption valueOf(java.lang.String);
+    method public static final java.nio.file.StandardOpenOption[] values();
+    enum_constant public static final java.nio.file.StandardOpenOption APPEND;
+    enum_constant public static final java.nio.file.StandardOpenOption CREATE;
+    enum_constant public static final java.nio.file.StandardOpenOption CREATE_NEW;
+    enum_constant public static final java.nio.file.StandardOpenOption DELETE_ON_CLOSE;
+    enum_constant public static final java.nio.file.StandardOpenOption DSYNC;
+    enum_constant public static final java.nio.file.StandardOpenOption READ;
+    enum_constant public static final java.nio.file.StandardOpenOption SPARSE;
+    enum_constant public static final java.nio.file.StandardOpenOption SYNC;
+    enum_constant public static final java.nio.file.StandardOpenOption TRUNCATE_EXISTING;
+    enum_constant public static final java.nio.file.StandardOpenOption WRITE;
+  }
+
+  public final class StandardWatchEventKinds {
+    field public static final java.nio.file.WatchEvent.Kind<java.nio.file.Path> ENTRY_CREATE;
+    field public static final java.nio.file.WatchEvent.Kind<java.nio.file.Path> ENTRY_DELETE;
+    field public static final java.nio.file.WatchEvent.Kind<java.nio.file.Path> ENTRY_MODIFY;
+    field public static final java.nio.file.WatchEvent.Kind<java.lang.Object> OVERFLOW;
+  }
+
+  public abstract interface WatchEvent {
+    method public abstract T context();
+    method public abstract int count();
+    method public abstract java.nio.file.WatchEvent.Kind<T> kind();
+  }
+
+  public static abstract interface WatchEvent.Kind {
+    method public abstract java.lang.String name();
+    method public abstract java.lang.Class<T> type();
+  }
+
+  public static abstract interface WatchEvent.Modifier {
+    method public abstract java.lang.String name();
+  }
+
+  public abstract interface WatchKey {
+    method public abstract void cancel();
+    method public abstract boolean isValid();
+    method public abstract java.util.List<java.nio.file.WatchEvent<?>> pollEvents();
+    method public abstract boolean reset();
+    method public abstract java.nio.file.Watchable watchable();
+  }
+
+  public abstract interface WatchService implements java.io.Closeable {
+    method public abstract void close() throws java.io.IOException;
+    method public abstract java.nio.file.WatchKey poll();
+    method public abstract java.nio.file.WatchKey poll(long, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException;
+    method public abstract java.nio.file.WatchKey take() throws java.lang.InterruptedException;
+  }
+
+  public abstract interface Watchable {
+    method public abstract java.nio.file.WatchKey register(java.nio.file.WatchService, java.nio.file.WatchEvent.Kind<?>[], java.nio.file.WatchEvent.Modifier...) throws java.io.IOException;
+    method public abstract java.nio.file.WatchKey register(java.nio.file.WatchService, java.nio.file.WatchEvent.Kind<?>...) throws java.io.IOException;
+  }
+
+}
+
+package java.nio.file.attribute {
+
+  public final class AclEntry {
+    method public java.util.Set<java.nio.file.attribute.AclEntryFlag> flags();
+    method public static java.nio.file.attribute.AclEntry.Builder newBuilder();
+    method public static java.nio.file.attribute.AclEntry.Builder newBuilder(java.nio.file.attribute.AclEntry);
+    method public java.util.Set<java.nio.file.attribute.AclEntryPermission> permissions();
+    method public java.nio.file.attribute.UserPrincipal principal();
+    method public java.nio.file.attribute.AclEntryType type();
+  }
+
+  public static final class AclEntry.Builder {
+    method public java.nio.file.attribute.AclEntry build();
+    method public java.nio.file.attribute.AclEntry.Builder setFlags(java.util.Set<java.nio.file.attribute.AclEntryFlag>);
+    method public java.nio.file.attribute.AclEntry.Builder setFlags(java.nio.file.attribute.AclEntryFlag...);
+    method public java.nio.file.attribute.AclEntry.Builder setPermissions(java.util.Set<java.nio.file.attribute.AclEntryPermission>);
+    method public java.nio.file.attribute.AclEntry.Builder setPermissions(java.nio.file.attribute.AclEntryPermission...);
+    method public java.nio.file.attribute.AclEntry.Builder setPrincipal(java.nio.file.attribute.UserPrincipal);
+    method public java.nio.file.attribute.AclEntry.Builder setType(java.nio.file.attribute.AclEntryType);
+  }
+
+  public final class AclEntryFlag extends java.lang.Enum {
+    method public static java.nio.file.attribute.AclEntryFlag valueOf(java.lang.String);
+    method public static final java.nio.file.attribute.AclEntryFlag[] values();
+    enum_constant public static final java.nio.file.attribute.AclEntryFlag DIRECTORY_INHERIT;
+    enum_constant public static final java.nio.file.attribute.AclEntryFlag FILE_INHERIT;
+    enum_constant public static final java.nio.file.attribute.AclEntryFlag INHERIT_ONLY;
+    enum_constant public static final java.nio.file.attribute.AclEntryFlag NO_PROPAGATE_INHERIT;
+  }
+
+  public final class AclEntryPermission extends java.lang.Enum {
+    method public static java.nio.file.attribute.AclEntryPermission valueOf(java.lang.String);
+    method public static final java.nio.file.attribute.AclEntryPermission[] values();
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission APPEND_DATA;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission DELETE;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission DELETE_CHILD;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission EXECUTE;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission READ_ACL;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission READ_ATTRIBUTES;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission READ_DATA;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission READ_NAMED_ATTRS;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission SYNCHRONIZE;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission WRITE_ACL;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission WRITE_ATTRIBUTES;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission WRITE_DATA;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission WRITE_NAMED_ATTRS;
+    enum_constant public static final java.nio.file.attribute.AclEntryPermission WRITE_OWNER;
+    field public static final java.nio.file.attribute.AclEntryPermission ADD_FILE;
+    field public static final java.nio.file.attribute.AclEntryPermission ADD_SUBDIRECTORY;
+    field public static final java.nio.file.attribute.AclEntryPermission LIST_DIRECTORY;
+  }
+
+  public final class AclEntryType extends java.lang.Enum {
+    method public static java.nio.file.attribute.AclEntryType valueOf(java.lang.String);
+    method public static final java.nio.file.attribute.AclEntryType[] values();
+    enum_constant public static final java.nio.file.attribute.AclEntryType ALARM;
+    enum_constant public static final java.nio.file.attribute.AclEntryType ALLOW;
+    enum_constant public static final java.nio.file.attribute.AclEntryType AUDIT;
+    enum_constant public static final java.nio.file.attribute.AclEntryType DENY;
+  }
+
+  public abstract interface AclFileAttributeView implements java.nio.file.attribute.FileOwnerAttributeView {
+    method public abstract java.util.List<java.nio.file.attribute.AclEntry> getAcl() throws java.io.IOException;
+    method public abstract java.lang.String name();
+    method public abstract void setAcl(java.util.List<java.nio.file.attribute.AclEntry>) throws java.io.IOException;
+  }
+
+  public abstract interface AttributeView {
+    method public abstract java.lang.String name();
+  }
+
+  public abstract interface BasicFileAttributeView implements java.nio.file.attribute.FileAttributeView {
+    method public abstract java.lang.String name();
+    method public abstract java.nio.file.attribute.BasicFileAttributes readAttributes() throws java.io.IOException;
+    method public abstract void setTimes(java.nio.file.attribute.FileTime, java.nio.file.attribute.FileTime, java.nio.file.attribute.FileTime) throws java.io.IOException;
+  }
+
+  public abstract interface BasicFileAttributes {
+    method public abstract java.nio.file.attribute.FileTime creationTime();
+    method public abstract java.lang.Object fileKey();
+    method public abstract boolean isDirectory();
+    method public abstract boolean isOther();
+    method public abstract boolean isRegularFile();
+    method public abstract boolean isSymbolicLink();
+    method public abstract java.nio.file.attribute.FileTime lastAccessTime();
+    method public abstract java.nio.file.attribute.FileTime lastModifiedTime();
+    method public abstract long size();
+  }
+
+  public abstract interface DosFileAttributeView implements java.nio.file.attribute.BasicFileAttributeView {
+    method public abstract java.lang.String name();
+    method public abstract java.nio.file.attribute.DosFileAttributes readAttributes() throws java.io.IOException;
+    method public abstract void setArchive(boolean) throws java.io.IOException;
+    method public abstract void setHidden(boolean) throws java.io.IOException;
+    method public abstract void setReadOnly(boolean) throws java.io.IOException;
+    method public abstract void setSystem(boolean) throws java.io.IOException;
+  }
+
+  public abstract interface DosFileAttributes implements java.nio.file.attribute.BasicFileAttributes {
+    method public abstract boolean isArchive();
+    method public abstract boolean isHidden();
+    method public abstract boolean isReadOnly();
+    method public abstract boolean isSystem();
+  }
+
+  public abstract interface FileAttribute {
+    method public abstract java.lang.String name();
+    method public abstract T value();
+  }
+
+  public abstract interface FileAttributeView implements java.nio.file.attribute.AttributeView {
+  }
+
+  public abstract interface FileOwnerAttributeView implements java.nio.file.attribute.FileAttributeView {
+    method public abstract java.nio.file.attribute.UserPrincipal getOwner() throws java.io.IOException;
+    method public abstract java.lang.String name();
+    method public abstract void setOwner(java.nio.file.attribute.UserPrincipal) throws java.io.IOException;
+  }
+
+  public abstract interface FileStoreAttributeView implements java.nio.file.attribute.AttributeView {
+  }
+
+  public final class FileTime implements java.lang.Comparable {
+    method public int compareTo(java.nio.file.attribute.FileTime);
+    method public static java.nio.file.attribute.FileTime from(long, java.util.concurrent.TimeUnit);
+    method public static java.nio.file.attribute.FileTime fromMillis(long);
+    method public long to(java.util.concurrent.TimeUnit);
+    method public long toMillis();
+  }
+
+  public abstract interface GroupPrincipal implements java.nio.file.attribute.UserPrincipal {
+  }
+
+  public abstract interface PosixFileAttributeView implements java.nio.file.attribute.BasicFileAttributeView java.nio.file.attribute.FileOwnerAttributeView {
+    method public abstract java.lang.String name();
+    method public abstract java.nio.file.attribute.PosixFileAttributes readAttributes() throws java.io.IOException;
+    method public abstract void setGroup(java.nio.file.attribute.GroupPrincipal) throws java.io.IOException;
+    method public abstract void setPermissions(java.util.Set<java.nio.file.attribute.PosixFilePermission>) throws java.io.IOException;
+  }
+
+  public abstract interface PosixFileAttributes implements java.nio.file.attribute.BasicFileAttributes {
+    method public abstract java.nio.file.attribute.GroupPrincipal group();
+    method public abstract java.nio.file.attribute.UserPrincipal owner();
+    method public abstract java.util.Set<java.nio.file.attribute.PosixFilePermission> permissions();
+  }
+
+  public final class PosixFilePermission extends java.lang.Enum {
+    method public static java.nio.file.attribute.PosixFilePermission valueOf(java.lang.String);
+    method public static final java.nio.file.attribute.PosixFilePermission[] values();
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission GROUP_EXECUTE;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission GROUP_READ;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission GROUP_WRITE;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OTHERS_EXECUTE;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OTHERS_READ;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OTHERS_WRITE;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OWNER_EXECUTE;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OWNER_READ;
+    enum_constant public static final java.nio.file.attribute.PosixFilePermission OWNER_WRITE;
+  }
+
+  public final class PosixFilePermissions {
+    method public static java.nio.file.attribute.FileAttribute<java.util.Set<java.nio.file.attribute.PosixFilePermission>> asFileAttribute(java.util.Set<java.nio.file.attribute.PosixFilePermission>);
+    method public static java.util.Set<java.nio.file.attribute.PosixFilePermission> fromString(java.lang.String);
+    method public static java.lang.String toString(java.util.Set<java.nio.file.attribute.PosixFilePermission>);
+  }
+
+  public abstract interface UserDefinedFileAttributeView implements java.nio.file.attribute.FileAttributeView {
+    method public abstract void delete(java.lang.String) throws java.io.IOException;
+    method public abstract java.util.List<java.lang.String> list() throws java.io.IOException;
+    method public abstract java.lang.String name();
+    method public abstract int read(java.lang.String, java.nio.ByteBuffer) throws java.io.IOException;
+    method public abstract int size(java.lang.String) throws java.io.IOException;
+    method public abstract int write(java.lang.String, java.nio.ByteBuffer) throws java.io.IOException;
+  }
+
+  public abstract interface UserPrincipal implements java.security.Principal {
+  }
+
+  public abstract class UserPrincipalLookupService {
+    ctor protected UserPrincipalLookupService();
+    method public abstract java.nio.file.attribute.GroupPrincipal lookupPrincipalByGroupName(java.lang.String) throws java.io.IOException;
+    method public abstract java.nio.file.attribute.UserPrincipal lookupPrincipalByName(java.lang.String) throws java.io.IOException;
+  }
+
+  public class UserPrincipalNotFoundException extends java.io.IOException {
+    ctor public UserPrincipalNotFoundException(java.lang.String);
+    method public java.lang.String getName();
+  }
+
+}
+
+package java.nio.file.spi {
+
+  public abstract class FileSystemProvider {
+    ctor protected FileSystemProvider();
+    method public abstract void checkAccess(java.nio.file.Path, java.nio.file.AccessMode...) throws java.io.IOException;
+    method public abstract void copy(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    method public abstract void createDirectory(java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public void createLink(java.nio.file.Path, java.nio.file.Path) throws java.io.IOException;
+    method public void createSymbolicLink(java.nio.file.Path, java.nio.file.Path, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public abstract void delete(java.nio.file.Path) throws java.io.IOException;
+    method public boolean deleteIfExists(java.nio.file.Path) throws java.io.IOException;
+    method public abstract V getFileAttributeView(java.nio.file.Path, java.lang.Class<V>, java.nio.file.LinkOption...);
+    method public abstract java.nio.file.FileStore getFileStore(java.nio.file.Path) throws java.io.IOException;
+    method public abstract java.nio.file.FileSystem getFileSystem(java.net.URI);
+    method public abstract java.nio.file.Path getPath(java.net.URI);
+    method public abstract java.lang.String getScheme();
+    method public static java.util.List<java.nio.file.spi.FileSystemProvider> installedProviders();
+    method public abstract boolean isHidden(java.nio.file.Path) throws java.io.IOException;
+    method public abstract boolean isSameFile(java.nio.file.Path, java.nio.file.Path) throws java.io.IOException;
+    method public abstract void move(java.nio.file.Path, java.nio.file.Path, java.nio.file.CopyOption...) throws java.io.IOException;
+    method public java.nio.channels.AsynchronousFileChannel newAsynchronousFileChannel(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.util.concurrent.ExecutorService, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public abstract java.nio.channels.SeekableByteChannel newByteChannel(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public abstract java.nio.file.DirectoryStream<java.nio.file.Path> newDirectoryStream(java.nio.file.Path, java.nio.file.DirectoryStream.Filter<? super java.nio.file.Path>) throws java.io.IOException;
+    method public java.nio.channels.FileChannel newFileChannel(java.nio.file.Path, java.util.Set<? extends java.nio.file.OpenOption>, java.nio.file.attribute.FileAttribute<?>...) throws java.io.IOException;
+    method public abstract java.nio.file.FileSystem newFileSystem(java.net.URI, java.util.Map<java.lang.String, ?>) throws java.io.IOException;
+    method public java.nio.file.FileSystem newFileSystem(java.nio.file.Path, java.util.Map<java.lang.String, ?>) throws java.io.IOException;
+    method public java.io.InputStream newInputStream(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public java.io.OutputStream newOutputStream(java.nio.file.Path, java.nio.file.OpenOption...) throws java.io.IOException;
+    method public abstract A readAttributes(java.nio.file.Path, java.lang.Class<A>, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public abstract java.util.Map<java.lang.String, java.lang.Object> readAttributes(java.nio.file.Path, java.lang.String, java.nio.file.LinkOption...) throws java.io.IOException;
+    method public java.nio.file.Path readSymbolicLink(java.nio.file.Path) throws java.io.IOException;
+    method public abstract void setAttribute(java.nio.file.Path, java.lang.String, java.lang.Object, java.nio.file.LinkOption...) throws java.io.IOException;
+  }
+
+  public abstract class FileTypeDetector {
+    ctor protected FileTypeDetector();
+    method public abstract java.lang.String probeContentType(java.nio.file.Path) throws java.io.IOException;
   }
 
 }
@@ -56412,6 +57048,8 @@ package java.util {
     ctor public Scanner(java.io.InputStream, java.lang.String);
     ctor public Scanner(java.io.File) throws java.io.FileNotFoundException;
     ctor public Scanner(java.io.File, java.lang.String) throws java.io.FileNotFoundException;
+    ctor public Scanner(java.nio.file.Path) throws java.io.IOException;
+    ctor public Scanner(java.nio.file.Path, java.lang.String) throws java.io.IOException;
     ctor public Scanner(java.lang.String);
     ctor public Scanner(java.nio.channels.ReadableByteChannel);
     ctor public Scanner(java.nio.channels.ReadableByteChannel, java.lang.String);
