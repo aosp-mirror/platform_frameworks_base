@@ -362,13 +362,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final boolean DEBUG_DEXOPT = false;
 
     private static final boolean DEBUG_ABI_SELECTION = false;
-    private static final boolean DEBUG_EPHEMERAL = false;
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_TRIAGED_MISSING = false;
     private static final boolean DEBUG_APP_DATA = false;
 
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
 
-    private static final boolean DISABLE_EPHEMERAL_APPS = true;
+    private static final boolean DISABLE_EPHEMERAL_APPS = !Build.IS_DEBUGGABLE;
 
     private static final int RADIO_UID = Process.PHONE_UID;
     private static final int LOG_UID = Process.LOG_UID;
@@ -2936,17 +2936,20 @@ public class PackageManagerService extends IPackageManager.Stub {
     private @Nullable ComponentName getEphemeralResolverLPr() {
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
-        if (packageArray.length == 0) {
+        if (packageArray.length == 0 && !Build.IS_DEBUGGABLE) {
             if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Ephemeral resolver NOT found; empty package list");
             }
             return null;
         }
 
+        final int resolveFlags =
+                MATCH_DIRECT_BOOT_AWARE
+                | MATCH_DIRECT_BOOT_UNAWARE
+                | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final Intent resolverIntent = new Intent(Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE);
         final List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+                resolveFlags, UserHandle.USER_SYSTEM);
 
         final int N = resolvers.size();
         if (N == 0) {
@@ -2965,7 +2968,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             final String packageName = info.serviceInfo.packageName;
-            if (!possiblePackages.contains(packageName)) {
+            if (!possiblePackages.contains(packageName) && !Build.IS_DEBUGGABLE) {
                 if (DEBUG_EPHEMERAL) {
                     Slog.d(TAG, "Ephemeral resolver not in allowed package list;"
                             + " pkg: " + packageName + ", info:" + info);
@@ -2990,9 +2993,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
+        final int resolveFlags =
+                MATCH_DIRECT_BOOT_AWARE
+                | MATCH_DIRECT_BOOT_UNAWARE
+                | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
         final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
-                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                UserHandle.USER_SYSTEM);
+                resolveFlags, UserHandle.USER_SYSTEM);
         if (matches.size() == 0) {
             return null;
         } else if (matches.size() == 1) {
