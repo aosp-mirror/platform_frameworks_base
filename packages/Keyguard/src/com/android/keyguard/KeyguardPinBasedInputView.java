@@ -239,8 +239,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            onKeyDown(keyCode, event);
-            return true;
+            return onKeyDown(keyCode, event);
         }
         return false;
     }
