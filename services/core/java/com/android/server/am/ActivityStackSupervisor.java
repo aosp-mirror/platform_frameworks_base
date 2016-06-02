@@ -4404,6 +4404,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     "startActivityFromRecentsInner: Task " + taskId + " not found.");
         }
 
+        // Since we don't have an actual source record here, we assume that the currently focused
+        // activity was the source.
+        final ActivityStack focusedStack = getFocusedStack();
+        final ActivityRecord sourceRecord =
+                focusedStack != null ? focusedStack.topActivity() : null;
+
         if (launchStackId != INVALID_STACK_ID) {
             if (task.stack.mStackId != launchStackId) {
                 moveTaskToStackLocked(
@@ -4428,6 +4434,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (launchStackId == DOCKED_STACK_ID) {
                 setResizingDuringAnimation(taskId);
             }
+
+            mService.mActivityStarter.postStartActivityUncheckedProcessing(task.getTopActivity(),
+                    ActivityManager.START_TASK_TO_FRONT,
+                    sourceRecord != null ? sourceRecord.task.stack.mStackId : INVALID_STACK_ID,
+                    sourceRecord, task.stack);
             return ActivityManager.START_TASK_TO_FRONT;
         }
         callingUid = task.mCallingUid;
