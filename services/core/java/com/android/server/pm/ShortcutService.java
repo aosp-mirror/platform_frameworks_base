@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -102,6 +103,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -114,8 +117,6 @@ import java.util.function.Predicate;
 
 /**
  * TODO:
- * - Implement # of dynamic shortcuts cap.
- *
  * - HandleUnlockUser needs to be async.  Wait on it in onCleanupUser.
  *
  * - Implement reportShortcutUsed().
@@ -137,12 +138,12 @@ import java.util.function.Predicate;
  *
  * - Add more call stats.
  *
- * - Rename getMaxDynamicShortcutCount and mMaxDynamicShortcuts
+ * - Rename mMaxDynamicShortcuts, because it includes manifest shortcuts too.
  */
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
 
-    static final boolean DEBUG = true; // STOPSHIP if true
+    static final boolean DEBUG = false; // STOPSHIP if true
     static final boolean DEBUG_LOAD = false; // STOPSHIP if true
     static final boolean DEBUG_PROCSTATE = false; // STOPSHIP if true
 
@@ -328,6 +329,19 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private static final int PROCESS_STATE_FOREGROUND_THRESHOLD =
             ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+
+    static final int OPERATION_SET = 0;
+    static final int OPERATION_ADD = 1;
+    static final int OPERATION_UPDATE = 2;
+
+    /** @hide */
+    @IntDef(value = {
+            OPERATION_SET,
+            OPERATION_ADD,
+            OPERATION_UPDATE
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ShortcutOperation {}
 
     public ShortcutService(Context context) {
         this(context, BackgroundThread.get().getLooper());
@@ -1312,12 +1326,20 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /**
-     * Throw if {@code numShortcuts} is bigger than {@link #mMaxDynamicShortcuts}.
+     * @throws IllegalArgumentException if {@code numShortcuts} is bigger than
+     * {@link #getMaxActivityShortcuts()}.
      */
-    void enforceMaxDynamicShortcuts(int numShortcuts) {
+    void enforceMaxActivityShortcuts(int numShortcuts) {
         if (numShortcuts > mMaxDynamicShortcuts) {
             throw new IllegalArgumentException("Max number of dynamic shortcuts exceeded");
         }
+    }
+
+    /**
+     * Return the max number of dynamic + manifest shortcuts for each launcher icon.
+     */
+    int getMaxActivityShortcuts() {
+        return mMaxDynamicShortcuts;
     }
 
     /**
@@ -1440,11 +1462,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
+            ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_SET);
+
             // Throttling.
             if (!ps.tryApiCall()) {
                 return false;
             }
-            enforceMaxDynamicShortcuts(size);
 
             // Validate the shortcuts.
             for (int i = 0; i < size; i++) {
@@ -1461,6 +1484,9 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
+
         return true;
     }
 
@@ -1476,6 +1502,8 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
+
+            ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_UPDATE);
 
             // Throttling.
             if (!ps.tryApiCall()) {
@@ -1514,6 +1542,8 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         packageShortcutsChanged(packageName, userId);
 
+        verifyStates();
+
         return true;
     }
 
@@ -1530,6 +1560,8 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts);
 
+            ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_ADD);
+
             // Throttling.
             if (!ps.tryApiCall()) {
                 return false;
@@ -1545,6 +1577,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
 
         return true;
     }
@@ -1567,6 +1601,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
     }
 
     @Override
@@ -1584,6 +1620,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
     }
 
     @Override
@@ -1603,6 +1641,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
     }
 
     @Override
@@ -1613,6 +1653,8 @@ public class ShortcutService extends IShortcutService.Stub {
             getPackageShortcutsLocked(packageName, userId).deleteAllDynamicShortcuts();
         }
         packageShortcutsChanged(packageName, userId);
+
+        verifyStates();
     }
 
     @Override
@@ -2023,6 +2065,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 launcher.pinShortcuts(userId, packageName, shortcutIds);
             }
             packageShortcutsChanged(packageName, userId);
+
+            verifyStates();
         }
 
         @Override
@@ -2938,6 +2982,31 @@ public class ShortcutService extends IShortcutService.Stub {
             if (pkg == null) return null;
 
             return pkg.findShortcutById(shortcutId);
+        }
+    }
+
+    /**
+     * Control whether {@link #verifyStates} should be performed.  We always perform it during unit
+     * tests.
+     */
+    @VisibleForTesting
+    boolean injectShouldPerformVerification() {
+        return DEBUG;
+    }
+
+    /**
+     * Check various internal states and throws if there's any inconsistency.
+     * This is normally only enabled during unit tests.
+     */
+    final void verifyStates() {
+        if (injectShouldPerformVerification()) {
+            verifyStatesInner();
+        }
+    }
+
+    private void verifyStatesInner() {
+        synchronized (this) {
+            forEachLoadedUserLocked(u -> u.forAllPackageItems(ShortcutPackageItem::verifyStates));
         }
     }
 }

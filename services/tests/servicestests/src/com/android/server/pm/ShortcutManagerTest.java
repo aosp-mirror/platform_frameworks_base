@@ -17,37 +17,57 @@ package com.android.server.pm;
 
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDisabled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamicOrPinned;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllDynamicOrPinned;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllEnabled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIcon;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconFile;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconResId;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIntents;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllHaveIconFile;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllHaveIconResId;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllHaveIntents;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveTitle;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllImmutable;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllKeyFieldsOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllKeyFieldsOnly;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllManifest;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotHaveIntents;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotHaveTitle;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotKeyFieldsOnly;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotManifest;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllNotHaveIntents;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllNotHaveTitle;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllNotKeyFieldsOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllNotManifest;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllPinned;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllStringsResolved;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertAllStringsResolved;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllUnique;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBitmapSize;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBundleEmpty;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertCallbackNotReceived;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertCallbackReceived;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertCannotUpdateImmutable;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertDynamicAndPinned;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertCallbackNotReceived;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertCallbackReceived;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertCannotUpdateImmutable;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertDynamicAndPinned;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertDynamicOnly;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertDynamicShortcutCountExceeded;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertEmpty;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
+        .assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertShortcutIds;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.cloneShortcutList;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.filterByActivity;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.findShortcut;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.hashSet;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.parceled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.pfdToBitmap;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.resetAll;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
@@ -155,8 +175,8 @@ import java.util.function.Consumer;
 
  * TODO More tests for pinning + manifest shortcuts
  * TODO Manifest shortcuts + app upgrade -> launcher callback.
- *      Also locale change should trigger launcehr callbacks too, when they use strign resoucres.
- *      (not implemented yet.)
+ * Also locale change should trigger launcher callbacks too, when they use strign resoucres.
+ * (not implemented yet.)
  * TODO: Add checks with assertAllNotHaveIcon()
  * TODO: Detailed test for hasShortcutPermissionInner().
  * TODO: Add tests for the command line functions too.
@@ -169,9 +189,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
      * Whether to enable dump or not.  Should be only true when debugging to avoid bugs where
      * dump affecting the behavior.
      */
-    private static final boolean ENABLE_DUMP = true; // DO NOT SUBMIT WITH true
+    private static final boolean ENABLE_DUMP = false; // DO NOT SUBMIT WITH true
 
-    private static final boolean DUMP_IN_TEARDOWN = true; // DO NOT SUBMIT WITH true
+    private static final boolean DUMP_IN_TEARDOWN = false; // DO NOT SUBMIT WITH true
 
     private static final String[] EMPTY_STRINGS = new String[0]; // Just for readability.
 
@@ -262,6 +282,11 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         public ShortcutServiceTestable(ServiceContext context, Looper looper) {
             super(context, looper);
             mContext = context;
+        }
+
+        @Override
+        boolean injectShouldPerformVerification() {
+            return true; // Always verify during unit tests.
         }
 
         @Override
@@ -406,6 +431,25 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         @Override
         protected int injectMyUserId() {
             return UserHandle.getUserId(mInjectedCallingUid);
+        }
+
+        @Override
+        public boolean setDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
+            // Note to simulate the binder RPC, we need to clone the incoming arguments.
+            // Otherwise bad things will happen because they're mutable.
+            return super.setDynamicShortcuts(cloneShortcutList(shortcutInfoList));
+        }
+
+        @Override
+        public boolean addDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
+            // Note to simulate the binder RPC, we need to clone the incoming arguments.
+            return super.addDynamicShortcuts(cloneShortcutList(shortcutInfoList));
+        }
+
+        @Override
+        public boolean updateShortcuts(List<ShortcutInfo> shortcutInfoList) {
+            // Note to simulate the binder RPC, we need to clone the incoming arguments.
+            return super.updateShortcuts(cloneShortcutList(shortcutInfoList));
         }
     }
 
@@ -585,7 +629,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
         mInjectedCurrentTimeLillis = START_TIME;
 
-        mInjectedPackages = new HashMap<>();;
+        mInjectedPackages = new HashMap<>();
         addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 1);
         addPackage(CALLING_PACKAGE_2, CALLING_UID_2, 2);
         addPackage(CALLING_PACKAGE_3, CALLING_UID_3, 3);
@@ -929,9 +973,9 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         mService.dumpInner(pw, null);
         pw.close();
 
-        Log.e(TAG, "Dumping ShortcutService: " + message);
+        Log.v(TAG, "Dumping ShortcutService: " + message);
         for (String line : out.toString().split("\n")) {
-            Log.e(TAG, line);
+            Log.v(TAG, line);
         }
     }
 
@@ -945,7 +989,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private void dumpFileOnLogcat(String path, String message) {
         if (!ENABLE_DUMP) return;
 
-        Log.i(TAG, "Dumping file: " + path + " " + message);
+        Log.v(TAG, "Dumping file: " + path + " " + message);
         final StringBuilder sb = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
@@ -953,7 +997,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
                 Log.i(TAG, line);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Couldn't read file", e);
+            Log.v(TAG, "Couldn't read file", e);
             fail("Exception " + e);
         }
     }
@@ -982,7 +1026,8 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     }
 
     private void waitOnMainThread() throws Throwable {
-        runTestOnUiThread(() -> {});
+        runTestOnUiThread(() -> {
+        });
     }
 
     /**
@@ -991,13 +1036,13 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private ShortcutInfo makeShortcut(String id) {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     private ShortcutInfo makeShortcutWithTitle(String id, String title) {
         return makeShortcut(
                 id, title, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     /**
@@ -1006,7 +1051,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private ShortcutInfo makeShortcutWithTimestamp(String id, long timestamp) {
         final ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         s.setTimestamp(timestamp);
         return s;
     }
@@ -1018,7 +1063,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             ComponentName activity) {
         final ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, activity, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         s.setTimestamp(timestamp);
         return s;
     }
@@ -1029,7 +1074,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
     private ShortcutInfo makeShortcutWithIcon(String id, Icon icon) {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, icon,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
     private ShortcutInfo makePackageShortcut(String packageName, String id) {
@@ -1038,7 +1083,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         setCaller(packageName);
         ShortcutInfo s = makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
-                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* weight =*/ 0);
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
         setCaller(origCaller); // restore the caller
 
         return s;
@@ -1057,6 +1102,26 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
 
     private ShortcutInfo.Builder makeShortcutBuilder() {
         return new ShortcutInfo.Builder(mClientContext);
+    }
+
+    private ShortcutInfo makeShortcutWithActivity(String id, ComponentName activity) {
+        return makeShortcut(
+                id, "Title-" + id, activity, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
+    }
+
+    private ShortcutInfo makeShortcutWithActivityAndTitle(String id, ComponentName activity,
+            String title) {
+        return makeShortcut(
+                id, title, activity, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
+    }
+
+    private ShortcutInfo makeShortcutWithActivityAndRank(String id, ComponentName activity,
+            int rank) {
+        return makeShortcut(
+                id, "Title-" + id, activity, /* icon =*/ null,
+                makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), rank);
     }
 
     /**
@@ -1297,20 +1362,12 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         i.putExtra(Intent.EXTRA_REPLACING, true);
         return i;
     }
+
     private Intent genPackageDataClear(String packageName, int userId) {
         Intent i = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED);
         i.setData(Uri.parse("package:" + packageName));
         i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         return i;
-    }
-
-    private ShortcutInfo parceled(ShortcutInfo si) {
-        Parcel p = Parcel.obtain();
-        p.writeParcelable(si, 0);
-        p.setDataPosition(0);
-        ShortcutInfo si2 = p.readParcelable(getClass().getClassLoader());
-        p.recycle();
-        return si2;
     }
 
     /**
@@ -4509,7 +4566,7 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
         assertNull(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_10));
 
         mService.checkPackageChanges(USER_P0);
-        
+
         assertDynamicAndPinned(getPackageShortcut(CALLING_PACKAGE_1, "s1", USER_0));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s2", USER_0));
         assertDynamicOnly(getPackageShortcut(CALLING_PACKAGE_1, "s3", USER_0));
@@ -7904,5 +7961,435 @@ public class ShortcutManagerTest extends InstrumentationTestCase {
             });
         });
         checkManifestShortcuts_immutable_verify();
+    }
+
+    /**
+     * Make sure the APIs won't work on manifest shortcuts.
+     */
+    public void testManifestShortcuts_tooMany() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
+
+        mService.handleUnlockUser(USER_0);
+
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_5);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // Only the first 3 should be published.
+            assertShortcutIds(mManager.getManifestShortcuts(), "ms1", "ms2", "ms3");
+        });
+    }
+
+    public void testMaxShortcutCount_set() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ComponentName a1 = new ComponentName(mClientContext, ShortcutActivity.class);
+            final ComponentName a2 = new ComponentName(mClientContext, ShortcutActivity2.class);
+            final ShortcutInfo s1_1 = makeShortcutWithActivity("s11", a1);
+            final ShortcutInfo s1_2 = makeShortcutWithActivity("s12", a1);
+            final ShortcutInfo s1_3 = makeShortcutWithActivity("s13", a1);
+            final ShortcutInfo s1_4 = makeShortcutWithActivity("s14", a1);
+            final ShortcutInfo s1_5 = makeShortcutWithActivity("s15", a1);
+            final ShortcutInfo s1_6 = makeShortcutWithActivity("s16", a1);
+            final ShortcutInfo s2_1 = makeShortcutWithActivity("s21", a2);
+            final ShortcutInfo s2_2 = makeShortcutWithActivity("s22", a2);
+            final ShortcutInfo s2_3 = makeShortcutWithActivity("s23", a2);
+            final ShortcutInfo s2_4 = makeShortcutWithActivity("s24", a2);
+
+            // 3 shortcuts for 2 activities -> okay
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            mManager.removeAllDynamicShortcuts();
+
+            // 4 shortcut for activity 1 -> too many.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s1_4, s2_1, s2_2, s2_3));
+            });
+            assertEmpty(mManager.getDynamicShortcuts());
+
+            // 4 shortcut for activity 2 -> too many.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3, s2_4));
+            });
+            assertEmpty(mManager.getDynamicShortcuts());
+
+            // First, set 3.  Then set 4, which should be ignored.
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13");
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.setDynamicShortcuts(list(s2_1, s2_2, s2_3, s2_4));
+            });
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13");
+
+            // Set will remove the old dynamic set, unlike add, so the following should pass.
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13");
+            mManager.setDynamicShortcuts(list(s1_4, s1_5, s1_6));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s14", "s15", "s16");
+
+            // Now, test with 2 manifest shortcuts.
+            mManager.removeAllDynamicShortcuts();
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_2);
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+            assertEquals(2, mManager.getManifestShortcuts().size());
+
+            // Setting 1 to activity 1 will work.
+            mManager.setDynamicShortcuts(list(s1_1, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s21", "s22", "s23");
+            assertEquals(2, mManager.getManifestShortcuts().size());
+
+            // But setting 2 will not.
+            mManager.removeAllDynamicShortcuts();
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.setDynamicShortcuts(list(s1_1, s1_2, s2_1, s2_2, s2_3));
+            });
+            assertEmpty(mManager.getDynamicShortcuts());
+            assertEquals(2, mManager.getManifestShortcuts().size());
+        });
+    }
+
+    public void testMaxShortcutCount_add() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ComponentName a1 = new ComponentName(mClientContext, ShortcutActivity.class);
+            final ComponentName a2 = new ComponentName(mClientContext, ShortcutActivity2.class);
+            final ShortcutInfo s1_1 = makeShortcutWithActivity("s11", a1);
+            final ShortcutInfo s1_2 = makeShortcutWithActivity("s12", a1);
+            final ShortcutInfo s1_3 = makeShortcutWithActivity("s13", a1);
+            final ShortcutInfo s1_4 = makeShortcutWithActivity("s14", a1);
+            final ShortcutInfo s2_1 = makeShortcutWithActivity("s21", a2);
+            final ShortcutInfo s2_2 = makeShortcutWithActivity("s22", a2);
+            final ShortcutInfo s2_3 = makeShortcutWithActivity("s23", a2);
+            final ShortcutInfo s2_4 = makeShortcutWithActivity("s24", a2);
+
+            // 3 shortcuts for 2 activities -> okay
+            mManager.addDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            mManager.removeAllDynamicShortcuts();
+            ;
+
+            // 4 shortcut for activity 1 -> too many.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.addDynamicShortcuts(list(s1_1, s1_2, s1_3, s1_4, s2_1, s2_2, s2_3));
+            });
+            assertEmpty(mManager.getDynamicShortcuts());
+
+            // 4 shortcut for activity 2 -> too many.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.addDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3, s2_4));
+            });
+            assertEmpty(mManager.getDynamicShortcuts());
+
+            // First, set 3.  Then add 1 more, which should be ignored.
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13");
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.addDynamicShortcuts(list(s1_4, s2_1));
+            });
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13");
+
+            // Update existing one, which should work.
+            mManager.addDynamicShortcuts(list(makeShortcutWithActivityAndTitle(
+                    "s11", a1, "xxx"), s2_1));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21");
+            assertEquals("xxx", getCallerShortcut("s11").getTitle());
+
+            // Make sure pinned shortcuts won't affect.
+            // - Pin s11 - s13, and remove all dynamic.
+            runWithCaller(LAUNCHER_1, USER_0, () -> {
+                mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s11", "s12", "s13"),
+                        HANDLE_USER_0);
+            });
+            mManager.removeAllDynamicShortcuts();
+
+            assertEmpty(mManager.getDynamicShortcuts());
+            assertShortcutIds(mManager.getPinnedShortcuts(),
+                    "s11", "s12", "s13");
+
+            // Then add dynamic.
+            mManager.addDynamicShortcuts(list(s1_4, s2_1, s2_2, s2_3));
+
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s14", "s21", "s22", "s23");
+            assertShortcutIds(mManager.getPinnedShortcuts(),
+                    "s11", "s12", "s13");
+
+            // Adding "s11" and "s12" back, should work
+            mManager.addDynamicShortcuts(list(s1_1, s1_2));
+
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s14", "s11", "s12", "s21", "s22", "s23");
+            assertShortcutIds(mManager.getPinnedShortcuts(),
+                    "s11", "s12", "s13");
+
+            // Adding back s13 doesn't work.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.addDynamicShortcuts(list(s1_3));
+            });
+
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a1),
+                    "s11", "s12", "s14");
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a2),
+                    "s21", "s22", "s23");
+
+            // Now swap the activities.
+            mManager.updateShortcuts(list(
+                    makeShortcutWithActivity("s11", a2),
+                    makeShortcutWithActivity("s21", a1)));
+
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a1),
+                    "s21", "s12", "s14");
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a2),
+                    "s11", "s22", "s23");
+
+            // Now, test with 2 manifest shortcuts.
+            mManager.removeAllDynamicShortcuts();
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_2);
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+            assertEquals(2, mManager.getManifestShortcuts().size());
+
+            // Adding one shortcut to activity 1 works fine.
+            mManager.addDynamicShortcuts(list(s1_1, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s21", "s22", "s23");
+            assertEquals(2, mManager.getManifestShortcuts().size());
+
+            // But adding one more doesn't.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.addDynamicShortcuts(list(s1_4, s2_1));
+            });
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s21", "s22", "s23");
+            assertEquals(2, mManager.getManifestShortcuts().size());
+        });
+    }
+
+    public void testMaxShortcutCount_update() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ComponentName a1 = new ComponentName(mClientContext, ShortcutActivity.class);
+            final ComponentName a2 = new ComponentName(mClientContext, ShortcutActivity2.class);
+            final ShortcutInfo s1_1 = makeShortcutWithActivity("s11", a1);
+            final ShortcutInfo s1_2 = makeShortcutWithActivity("s12", a1);
+            final ShortcutInfo s1_3 = makeShortcutWithActivity("s13", a1);
+            final ShortcutInfo s1_4 = makeShortcutWithActivity("s14", a1);
+            final ShortcutInfo s1_5 = makeShortcutWithActivity("s15", a1);
+            final ShortcutInfo s2_1 = makeShortcutWithActivity("s21", a2);
+            final ShortcutInfo s2_2 = makeShortcutWithActivity("s22", a2);
+            final ShortcutInfo s2_3 = makeShortcutWithActivity("s23", a2);
+            final ShortcutInfo s2_4 = makeShortcutWithActivity("s24", a2);
+
+            // 3 shortcuts for 2 activities -> okay
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            // Trying to move s11 from a1 to a2 should fail.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.updateShortcuts(list(makeShortcutWithActivity("s11", a2)));
+            });
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            // Trying to move s21 from a2 to a1 should also fail.
+            assertDynamicShortcutCountExceeded(() -> {
+                mManager.updateShortcuts(list(makeShortcutWithActivity("s21", a1)));
+            });
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            // But, if we do these two at the same time, it should work.
+            mManager.updateShortcuts(list(
+                    makeShortcutWithActivity("s11", a2),
+                    makeShortcutWithActivity("s21", a1)));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a1),
+                    "s21", "s12", "s13");
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a2),
+                    "s11", "s22", "s23");
+
+            // Then reset.
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s11", "s12", "s13", "s21", "s22", "s23");
+
+            // Pin some to have more shortcuts for a1.
+            runWithCaller(LAUNCHER_1, USER_0, () -> {
+                mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s11", "s12", "s13"),
+                        HANDLE_USER_0);
+            });
+            mManager.setDynamicShortcuts(list(s1_4, s1_5, s2_1, s2_2, s2_3));
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s14", "s15", "s21", "s22", "s23");
+            assertShortcutIds(mManager.getPinnedShortcuts(),
+                    "s11", "s12", "s13");
+
+            // a1 already has 2 dynamic shortcuts (and 3 pinned shortcuts that used to belong on it)
+            // But that doesn't matter for update -- the following should still work.
+            mManager.updateShortcuts(list(
+                    makeShortcutWithActivityAndTitle("s11", a1, "xxx1"),
+                    makeShortcutWithActivityAndTitle("s12", a1, "xxx2"),
+                    makeShortcutWithActivityAndTitle("s13", a1, "xxx3"),
+                    makeShortcutWithActivityAndTitle("s14", a1, "xxx4"),
+                    makeShortcutWithActivityAndTitle("s15", a1, "xxx5")));
+            // All the shortcuts should still exist they all belong on same activities,
+            // with the updated titles.
+            assertShortcutIds(mManager.getDynamicShortcuts(),
+                    "s14", "s15", "s21", "s22", "s23");
+            assertShortcutIds(mManager.getPinnedShortcuts(),
+                    "s11", "s12", "s13");
+
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a1),
+                    "s14", "s15");
+            assertShortcutIds(filterByActivity(mManager.getDynamicShortcuts(), a2),
+                    "s21", "s22", "s23");
+
+            assertEquals("xxx1", getCallerShortcut("s11").getTitle());
+            assertEquals("xxx2", getCallerShortcut("s12").getTitle());
+            assertEquals("xxx3", getCallerShortcut("s13").getTitle());
+            assertEquals("xxx4", getCallerShortcut("s14").getTitle());
+            assertEquals("xxx5", getCallerShortcut("s15").getTitle());
+        });
+    }
+
+    public void testShortcutsPushedOutByManifest() {
+        // Change the max number of shortcuts.
+        mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ComponentName a1 = new ComponentName(mClientContext, ShortcutActivity.class);
+            final ComponentName a2 = new ComponentName(mClientContext, ShortcutActivity2.class);
+            final ShortcutInfo s1_1 = makeShortcutWithActivityAndRank("s11", a1, 4);
+            final ShortcutInfo s1_2 = makeShortcutWithActivityAndRank("s12", a1, 3);
+            final ShortcutInfo s1_3 = makeShortcutWithActivityAndRank("s13", a1, 2);
+            final ShortcutInfo s1_4 = makeShortcutWithActivityAndRank("s14", a1, 1);
+            final ShortcutInfo s1_5 = makeShortcutWithActivityAndRank("s15", a1, 0);
+            final ShortcutInfo s2_1 = makeShortcutWithActivityAndRank("s21", a2, 0);
+            final ShortcutInfo s2_2 = makeShortcutWithActivityAndRank("s22", a2, 1);
+            final ShortcutInfo s2_3 = makeShortcutWithActivityAndRank("s23", a2, 2);
+            final ShortcutInfo s2_4 = makeShortcutWithActivityAndRank("s24", a2, 3);
+            final ShortcutInfo s2_5 = makeShortcutWithActivityAndRank("s25", a2, 4);
+
+            // Initial state.
+            mManager.setDynamicShortcuts(list(s1_1, s1_2, s1_3, s2_1, s2_2, s2_3));
+            runWithCaller(LAUNCHER_1, USER_0, () -> {
+                mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s11", "s12", "s21", "s22"),
+                        HANDLE_USER_0);
+            });
+            mManager.setDynamicShortcuts(list(s1_2, s1_3, s1_4, s2_2, s2_3, s2_4));
+            assertShortcutIds(assertAllEnabled(mManager.getDynamicShortcuts()),
+                    "s12", "s13", "s14",
+                    "s22", "s23", "s24");
+            assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
+                    "s11", "s12",
+                    "s21", "s22");
+
+            // Add 1 manifest shortcut to a1.
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_1);
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+            assertEquals(1, mManager.getManifestShortcuts().size());
+
+            // s12 removed.
+            assertShortcutIds(assertAllEnabled(mManager.getDynamicShortcuts()),
+                    "s13", "s14",
+                    "s22", "s23", "s24");
+            assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
+                    "s11", "s12",
+                    "s21", "s22");
+
+            // Add more manifest shortcuts.
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_2);
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
+                    R.xml.shortcut_1_alt);
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+            assertEquals(3, mManager.getManifestShortcuts().size());
+
+            // Note the ones with the highest rank values (== least important) will be removed.
+            assertShortcutIds(assertAllEnabled(mManager.getDynamicShortcuts()),
+                    "s14",
+                    "s22", "s23");
+            assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
+                    "s11", "s12",
+                    "s21", "s22");
+
+            // Add more manifest shortcuts.
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_2);
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
+                    R.xml.shortcut_5_alt); // manifest has 5, but max is 3, so a2 will have 3.
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+            assertEquals(5, mManager.getManifestShortcuts().size());
+
+            assertShortcutIds(assertAllEnabled(mManager.getDynamicShortcuts()),
+                    "s14" // a1 has 1 dynamic
+            ); // a2 has no dynamic
+            assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
+                    "s11", "s12",
+                    "s21", "s22");
+
+            // Update, no manifest shortucts.  This doesn't affect anything.
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                    R.xml.shortcut_0);
+            addManifestShortcutResource(
+                    new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
+                    R.xml.shortcut_0);
+            updatePackageVersion(CALLING_PACKAGE_1, 1);
+            mService.mPackageMonitor.onReceive(getTestContext(),
+                    genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+            assertEquals(0, mManager.getManifestShortcuts().size());
+
+            assertShortcutIds(assertAllEnabled(mManager.getDynamicShortcuts()),
+                    "s14");
+            assertShortcutIds(assertAllEnabled(mManager.getPinnedShortcuts()),
+                    "s11", "s12",
+                    "s21", "s22");
+        });
     }
 }
