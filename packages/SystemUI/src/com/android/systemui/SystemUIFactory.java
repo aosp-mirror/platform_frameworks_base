@@ -126,13 +126,6 @@ public class SystemUIFactory {
         return null;
     }
 
-    /**
-     * @return The id for the home button layout.
-     */
-    public int getHomeLayoutId() {
-        return R.layout.home;
-    }
-
     public AssistManager createAssistManager(BaseStatusBar bar, Context context) {
         return new AssistManager(bar, context);
     }
