@@ -22,8 +22,8 @@ import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -31,7 +31,9 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -54,31 +56,37 @@ import java.util.Set;
  * @see {@link ShortcutManager}.
  */
 public final class ShortcutInfo implements Parcelable {
-    /* @hide */
+    static final String TAG = "Shortcut";
+
+    private static final String RES_TYPE_STRING = "string";
+
+    private static final String ANDROID_PACKAGE_NAME = "android";
+
+    /** @hide */
     public static final int FLAG_DYNAMIC = 1 << 0;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_PINNED = 1 << 1;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_HAS_ICON_RES = 1 << 2;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_HAS_ICON_FILE = 1 << 3;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_KEY_FIELDS_ONLY = 1 << 4;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_MANIFEST = 1 << 5;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_DISABLED = 1 << 6;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_STRINGS_RESOLVED = 1 << 7;
 
-    /* @hide */
+    /** @hide */
     public static final int FLAG_IMMUTABLE = 1 << 8;
 
     /** @hide */
@@ -99,20 +107,24 @@ public final class ShortcutInfo implements Parcelable {
 
     // Cloning options.
 
-    /* @hide */
+    /** @hide */
     private static final int CLONE_REMOVE_ICON = 1 << 0;
 
-    /* @hide */
+    /** @hide */
     private static final int CLONE_REMOVE_INTENT = 1 << 1;
 
-    /* @hide */
+    /** @hide */
     public static final int CLONE_REMOVE_NON_KEY_INFO = 1 << 2;
 
-    /* @hide */
-    public static final int CLONE_REMOVE_FOR_CREATOR = CLONE_REMOVE_ICON;
+    /** @hide */
+    public static final int CLONE_REMOVE_RES_NAMES = 1 << 3;
 
-    /* @hide */
-    public static final int CLONE_REMOVE_FOR_LAUNCHER = CLONE_REMOVE_ICON | CLONE_REMOVE_INTENT;
+    /** @hide */
+    public static final int CLONE_REMOVE_FOR_CREATOR = CLONE_REMOVE_ICON | CLONE_REMOVE_RES_NAMES;
+
+    /** @hide */
+    public static final int CLONE_REMOVE_FOR_LAUNCHER = CLONE_REMOVE_ICON | CLONE_REMOVE_INTENT
+            | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
     @IntDef(flag = true,
@@ -120,6 +132,7 @@ public final class ShortcutInfo implements Parcelable {
                     CLONE_REMOVE_ICON,
                     CLONE_REMOVE_INTENT,
                     CLONE_REMOVE_NON_KEY_INFO,
+                    CLONE_REMOVE_RES_NAMES,
                     CLONE_REMOVE_FOR_CREATOR,
                     CLONE_REMOVE_FOR_LAUNCHER
             })
@@ -144,15 +157,21 @@ public final class ShortcutInfo implements Parcelable {
 
     private int mTitleResId;
 
+    private String mTitleResName;
+
     @Nullable
     private CharSequence mTitle;
 
     private int mTextResId;
 
+    private String mTextResName;
+
     @Nullable
     private CharSequence mText;
 
     private int mDisabledMessageResId;
+
+    private String mDisabledMessageResName;
 
     @Nullable
     private CharSequence mDisabledMessage;
@@ -184,7 +203,9 @@ public final class ShortcutInfo implements Parcelable {
     private int mFlags;
 
     // Internal use only.
-    private int mIconResourceId;
+    private int mIconResId;
+
+    private String mIconResName;
 
     // Internal use only.
     @Nullable
@@ -251,7 +272,7 @@ public final class ShortcutInfo implements Parcelable {
         mLastChangedTimestamp = source.mLastChangedTimestamp;
 
         // Just always keep it since it's cheep.
-        mIconResourceId = source.mIconResourceId;
+        mIconResId = source.mIconResId;
 
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
             mActivity = source.mActivity;
@@ -274,34 +295,232 @@ public final class ShortcutInfo implements Parcelable {
             }
             mRank = source.mRank;
             mExtras = source.mExtras;
+
+            if ((cloneFlags & CLONE_REMOVE_RES_NAMES) == 0) {
+                mTitleResName = source.mTitleResName;
+                mTextResName = source.mTextResName;
+                mDisabledMessageResName = source.mDisabledMessageResName;
+                mIconResName = source.mIconResName;
+            }
         } else {
             // Set this bit.
             mFlags |= FLAG_KEY_FIELDS_ONLY;
         }
     }
 
-    /** @hide */
-    public void resolveStringsRequiringCrossUser(Context context) throws NameNotFoundException {
+    /**
+     * Load a string resource from the publisher app.
+     *
+     * @param resId resource ID
+     * @param defValue default value to be returned when the specified resource isn't found.
+     */
+    private CharSequence getResourceString(Resources res, int resId, CharSequence defValue) {
+        try {
+            return res.getString(resId);
+        } catch (NotFoundException e) {
+            Log.e(TAG, "Resource for ID=" + resId + " not found in package " + mPackageName);
+            return defValue;
+        }
+    }
+
+    /**
+     * Load the string resources for the text fields and set them to the actual value fields.
+     * This will set {@link #FLAG_STRINGS_RESOLVED}.
+     *
+     * @param res {@link Resources} for the publisher.  Must have been loaded with
+     * {@link PackageManager#getResourcesForApplicationAsUser}.
+     *
+     * @hide
+     */
+    public void resolveResourceStrings(@NonNull Resources res) {
         mFlags |= FLAG_STRINGS_RESOLVED;
 
         if ((mTitleResId == 0) && (mTextResId == 0) && (mDisabledMessageResId == 0)) {
             return; // Bail early.
         }
-        final Resources res = context.getPackageManager().getResourcesForApplicationAsUser(
-                mPackageName, mUserId);
 
         if (mTitleResId != 0) {
-            mTitle = res.getString(mTitleResId);
-            mTitleResId = 0;
+            mTitle = getResourceString(res, mTitleResId, mTitle);
         }
         if (mTextResId != 0) {
-            mText = res.getString(mTextResId);
-            mTextResId = 0;
+            mText = getResourceString(res, mTextResId, mText);
         }
         if (mDisabledMessageResId != 0) {
-            mDisabledMessage = res.getString(mDisabledMessageResId);
-            mDisabledMessageResId = 0;
+            mDisabledMessage = getResourceString(res, mDisabledMessageResId, mDisabledMessage);
         }
+    }
+
+    /**
+     * Look up resource name for a given resource ID.
+     *
+     * @return a simple resource name (e.g. "text_1") when {@code withType} is false, or with the
+     * type (e.g. "string/text_1").
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static String lookUpResourceName(@NonNull Resources res, int resId, boolean withType,
+            @NonNull String packageName) {
+        if (resId == 0) {
+            return null;
+        }
+        try {
+            final String fullName = res.getResourceName(resId);
+
+            if (ANDROID_PACKAGE_NAME.equals(getResourcePackageName(fullName))) {
+                // If it's a framework resource, the value won't change, so just return the ID
+                // value as a string.
+                return String.valueOf(resId);
+            }
+            return withType ? getResourceTypeAndEntryName(fullName)
+                    : getResourceEntryName(fullName);
+        } catch (NotFoundException e) {
+            Log.e(TAG, "Resource name for ID=" + resId + " not found in package " + packageName
+                    + ". Resource IDs may change when the application is upgraded, and the system"
+                    + " may not be able to find the correct resource.");
+            return null;
+        }
+    }
+
+    /**
+     * Extract the package name from a fully-donated resource name.
+     * e.g. "com.android.app1:drawable/icon1" -> "com.android.app1"
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getResourcePackageName(@NonNull String fullResourceName) {
+        final int p1 = fullResourceName.indexOf(':');
+        if (p1 < 0) {
+            return null;
+        }
+        return fullResourceName.substring(0, p1);
+    }
+
+    /**
+     * Extract the type name from a fully-donated resource name.
+     * e.g. "com.android.app1:drawable/icon1" -> "drawable"
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getResourceTypeName(@NonNull String fullResourceName) {
+        final int p1 = fullResourceName.indexOf(':');
+        if (p1 < 0) {
+            return null;
+        }
+        final int p2 = fullResourceName.indexOf('/', p1 + 1);
+        if (p2 < 0) {
+            return null;
+        }
+        return fullResourceName.substring(p1 + 1, p2);
+    }
+
+    /**
+     * Extract the type name + the entry name from a fully-donated resource name.
+     * e.g. "com.android.app1:drawable/icon1" -> "drawable/icon1"
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getResourceTypeAndEntryName(@NonNull String fullResourceName) {
+        final int p1 = fullResourceName.indexOf(':');
+        if (p1 < 0) {
+            return null;
+        }
+        return fullResourceName.substring(p1 + 1);
+    }
+
+    /**
+     * Extract the entry name from a fully-donated resource name.
+     * e.g. "com.android.app1:drawable/icon1" -> "icon1"
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getResourceEntryName(@NonNull String fullResourceName) {
+        final int p1 = fullResourceName.indexOf('/');
+        if (p1 < 0) {
+            return null;
+        }
+        return fullResourceName.substring(p1 + 1);
+    }
+
+    /**
+     * Return the resource ID for a given resource ID.
+     *
+     * Basically its' a wrapper over {@link Resources#getIdentifier(String, String, String)}, except
+     * if {@code resourceName} is an integer then it'll just return its value.  (Which also the
+     * aforementioned method would do internally, but not documented, so doing here explicitly.)
+     *
+     * @param res {@link Resources} for the publisher.  Must have been loaded with
+     * {@link PackageManager#getResourcesForApplicationAsUser}.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public static int lookUpResourceId(@NonNull Resources res, @Nullable String resourceName,
+            @Nullable String resourceType, String packageName) {
+        if (resourceName == null) {
+            return 0;
+        }
+        try {
+            try {
+                // It the name can be parsed as an integer, just use it.
+                return Integer.parseInt(resourceName);
+            } catch (NumberFormatException ignore) {
+            }
+
+            return res.getIdentifier(resourceName, resourceType, packageName);
+        } catch (NotFoundException e) {
+            Log.e(TAG, "Resource ID for name=" + resourceName + " not found in package "
+                    + packageName);
+            return 0;
+        }
+    }
+
+    /**
+     * Look up resource names from the resource IDs for the icon res and the text fields, and fill
+     * in the resource name fields.
+     *
+     * @param res {@link Resources} for the publisher.  Must have been loaded with
+     * {@link PackageManager#getResourcesForApplicationAsUser}.
+     *
+     * @hide
+     */
+    public void lookupAndFillInResourceNames(@NonNull Resources res) {
+        if ((mTitleResId == 0) && (mTextResId == 0) && (mDisabledMessageResId == 0)
+                && (mIconResId == 0)) {
+            return; // Bail early.
+        }
+
+        // We don't need types for strings because their types are always "string".
+        mTitleResName = lookUpResourceName(res, mTitleResId, /*withType=*/ false, mPackageName);
+        mTextResName = lookUpResourceName(res, mTextResId, /*withType=*/ false, mPackageName);
+        mDisabledMessageResName = lookUpResourceName(res, mDisabledMessageResId,
+                /*withType=*/ false, mPackageName);
+
+        // But icons have multiple possible types, so include the type.
+        mIconResName = lookUpResourceName(res, mIconResId, /*withType=*/ true, mPackageName);
+    }
+
+    /**
+     * Look up resource IDs from the resource names for the icon res and the text fields, and fill
+     * in the resource ID fields.
+     *
+     * This is called when an app is updated.
+     *
+     * @hide
+     */
+    public void lookupAndFillInResourceIds(@NonNull Resources res) {
+        if ((mTitleResName == null) && (mTextResName == null) && (mDisabledMessageResName == null)
+                && (mIconResName == null)) {
+            return; // Bail early.
+        }
+
+        mTitleResId = lookUpResourceId(res, mTitleResName, RES_TYPE_STRING, mPackageName);
+        mTextResId = lookUpResourceId(res, mTextResName, RES_TYPE_STRING, mPackageName);
+        mDisabledMessageResId = lookUpResourceId(res, mDisabledMessageResName, RES_TYPE_STRING,
+                mPackageName);
+
+        // mIconResName already contains the type, so the third argument is not needed.
+        mIconResId = lookUpResourceId(res, mIconResName, null, mPackageName);
     }
 
     /**
@@ -344,27 +563,38 @@ public final class ShortcutInfo implements Parcelable {
 
         if (source.mIcon != null) {
             mIcon = source.mIcon;
+
+            mIconResId = 0;
+            mIconResName = null;
+            mBitmapPath = null;
         }
         if (source.mTitle != null) {
             mTitle = source.mTitle;
             mTitleResId = 0;
+            mTitleResName = null;
         } else if (source.mTitleResId != 0) {
             mTitle = null;
             mTitleResId = source.mTitleResId;
+            mTitleResName = null;
         }
+
         if (source.mText != null) {
             mText = source.mText;
             mTextResId = 0;
+            mTextResName = null;
         } else if (source.mTextResId != 0) {
             mText = null;
             mTextResId = source.mTextResId;
+            mTextResName = null;
         }
         if (source.mDisabledMessage != null) {
             mDisabledMessage = source.mDisabledMessage;
             mDisabledMessageResId = 0;
+            mDisabledMessageResName = null;
         } else if (source.mDisabledMessageResId != 0) {
             mDisabledMessage = null;
             mDisabledMessageResId = source.mDisabledMessageResId;
+            mDisabledMessageResName = null;
         }
         if (source.mCategories != null) {
             mCategories = clone(source.mCategories);
@@ -983,14 +1213,17 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public void setIconResourceId(int iconResourceId) {
-        mIconResourceId = iconResourceId;
+        if (mIconResId != iconResourceId) {
+            mIconResName = null;
+        }
+        mIconResId = iconResourceId;
     }
 
     /**
      * Get the resource ID for the icon, valid only when {@link #hasIconResource()} } is true.
      */
     public int getIconResourceId() {
-        return mIconResourceId;
+        return mIconResId;
     }
 
     /** @hide */
@@ -1005,6 +1238,9 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide */
     public void setDisabledMessageResId(int disabledMessageResId) {
+        if (mDisabledMessageResId != disabledMessageResId) {
+            mDisabledMessageResName = null;
+        }
         mDisabledMessageResId = disabledMessageResId;
         mDisabledMessage = null;
     }
@@ -1013,6 +1249,47 @@ public final class ShortcutInfo implements Parcelable {
     public void setDisabledMessage(String disabledMessage) {
         mDisabledMessage = disabledMessage;
         mDisabledMessageResId = 0;
+        mDisabledMessageResName = null;
+    }
+
+    /** @hide */
+    public String getTitleResName() {
+        return mTitleResName;
+    }
+
+    /** @hide */
+    public void setTitleResName(String titleResName) {
+        mTitleResName = titleResName;
+    }
+
+    /** @hide */
+    public String getTextResName() {
+        return mTextResName;
+    }
+
+    /** @hide */
+    public void setTextResName(String textResName) {
+        mTextResName = textResName;
+    }
+
+    /** @hide */
+    public String getDisabledMessageResName() {
+        return mDisabledMessageResName;
+    }
+
+    /** @hide */
+    public void setDisabledMessageResName(String disabledMessageResName) {
+        mDisabledMessageResName = disabledMessageResName;
+    }
+
+    /** @hide */
+    public String getIconResName() {
+        return mIconResName;
+    }
+
+    /** @hide */
+    public void setIconResName(String iconResName) {
+        mIconResName = iconResName;
     }
 
     private ShortcutInfo(Parcel source) {
@@ -1035,8 +1312,13 @@ public final class ShortcutInfo implements Parcelable {
         mExtras = source.readParcelable(cl);
         mLastChangedTimestamp = source.readLong();
         mFlags = source.readInt();
-        mIconResourceId = source.readInt();
+        mIconResId = source.readInt();
         mBitmapPath = source.readString();
+
+        mIconResName = source.readString();
+        mTitleResName = source.readString();
+        mTextResName = source.readString();
+        mDisabledMessageResName = source.readString();
 
         int N = source.readInt();
         if (N == 0) {
@@ -1069,8 +1351,13 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mExtras, flags);
         dest.writeLong(mLastChangedTimestamp);
         dest.writeInt(mFlags);
-        dest.writeInt(mIconResourceId);
+        dest.writeInt(mIconResId);
         dest.writeString(mBitmapPath);
+
+        dest.writeString(mIconResName);
+        dest.writeString(mTitleResName);
+        dest.writeString(mTextResName);
+        dest.writeString(mDisabledMessageResName);
 
         if (mCategories != null) {
             final int N = mCategories.size();
@@ -1160,16 +1447,25 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(secure ? "***" : mTitle);
         sb.append(", resId=");
         sb.append(mTitleResId);
+        sb.append("[");
+        sb.append(mTitleResName);
+        sb.append("]");
 
         sb.append(", longLabel=");
         sb.append(secure ? "***" : mText);
         sb.append(", resId=");
         sb.append(mTextResId);
+        sb.append("[");
+        sb.append(mTextResName);
+        sb.append("]");
 
         sb.append(", disabledMessage=");
         sb.append(secure ? "***" : mDisabledMessage);
         sb.append(", resId=");
         sb.append(mDisabledMessageResId);
+        sb.append("[");
+        sb.append(mDisabledMessageResName);
+        sb.append("]");
 
         sb.append(", categories=");
         sb.append(mCategories);
@@ -1195,7 +1491,10 @@ public final class ShortcutInfo implements Parcelable {
         if (includeInternalData) {
 
             sb.append(", iconRes=");
-            sb.append(mIconResourceId);
+            sb.append(mIconResId);
+            sb.append("[");
+            sb.append(mIconResName);
+            sb.append("]");
 
             sb.append(", bitmapPath=");
             sb.append(mBitmapPath);
@@ -1208,11 +1507,13 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public ShortcutInfo(
             @UserIdInt int userId, String id, String packageName, ComponentName activity,
-            Icon icon, CharSequence title, int titleResId, CharSequence text, int textResId,
-            CharSequence disabledMessage, int disabledMessageResId, Set<String> categories,
+            Icon icon, CharSequence title, int titleResId, String titleResName,
+            CharSequence text, int textResId, String textResName,
+            CharSequence disabledMessage, int disabledMessageResId, String disabledMessageResName,
+            Set<String> categories,
             Intent intent, PersistableBundle intentPersistableExtras,
             int rank, PersistableBundle extras, long lastChangedTimestamp,
-            int flags, int iconResId, String bitmapPath) {
+            int flags, int iconResId, String iconResName, String bitmapPath) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -1220,10 +1521,13 @@ public final class ShortcutInfo implements Parcelable {
         mIcon = icon;
         mTitle = title;
         mTitleResId = titleResId;
+        mTitleResName = titleResName;
         mText = text;
         mTextResId = textResId;
+        mTextResName = textResName;
         mDisabledMessage = disabledMessage;
         mDisabledMessageResId = disabledMessageResId;
+        mDisabledMessageResName = disabledMessageResName;
         mCategories = clone(categories);
         mIntent = intent;
         mIntentPersistableExtras = intentPersistableExtras;
@@ -1231,7 +1535,8 @@ public final class ShortcutInfo implements Parcelable {
         mExtras = extras;
         mLastChangedTimestamp = lastChangedTimestamp;
         mFlags = flags;
-        mIconResourceId = iconResId;
+        mIconResId = iconResId;
+        mIconResName = iconResName;
         mBitmapPath = bitmapPath;
     }
 }

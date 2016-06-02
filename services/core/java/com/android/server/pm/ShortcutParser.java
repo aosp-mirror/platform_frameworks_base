@@ -221,6 +221,8 @@ public class ShortcutParser {
                 | ShortcutInfo.FLAG_IMMUTABLE
                 | ((iconResId != 0) ? ShortcutInfo.FLAG_HAS_ICON_RES : 0);
 
+        // Note we don't need to set resource names here yet.  They'll be set when they're about
+        // to be published.
         return new ShortcutInfo(
                 userId,
                 id,
@@ -229,10 +231,13 @@ public class ShortcutParser {
                 null, // icon
                 null, // title string
                 titleResId,
+                null, // title res name
                 null, // text string
                 textResId,
+                null, // text res name
                 null, // disabled message string
                 disabledMessageResId,
+                null, // disabled message res name
                 categories,
                 intent,
                 null, // intent extras
@@ -241,6 +246,7 @@ public class ShortcutParser {
                 service.injectCurrentTimeMillis(),
                 flags,
                 iconResId,
+                null, // icon res name
                 null); // bitmap path
     }
 }

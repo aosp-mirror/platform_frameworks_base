@@ -42,6 +42,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -119,6 +120,9 @@ import java.util.function.Predicate;
 
 /**
  * TODO:
+ * - Deal with the async nature of PACKAGE_ADD.  Basically when a publisher does anything after
+ *   it's upgraded, the manager should make sure the upgrade process has been executed.
+ *
  * - HandleUnlockUser needs to be async.  Wait on it in onCleanupUser.
  *
  * - Implement reportShortcutUsed().
@@ -318,8 +322,10 @@ public class ShortcutService extends IShortcutService.Stub {
         int GET_ACTIVITIES_WITH_METADATA = 6;
         int GET_INSTALLED_APPLICATIONS = 7;
         int CHECK_PACKAGE_CHANGES = 8;
+        int GET_APPLICATION_RESOURCES = 9;
+        int RESOURCE_NAME_LOOKUP = 10;
 
-        int COUNT = CHECK_PACKAGE_CHANGES + 1;
+        int COUNT = RESOURCE_NAME_LOOKUP + 1;
     }
 
     final Object mStatLock = new Object();
@@ -1265,6 +1271,24 @@ public class ShortcutService extends IShortcutService.Stub {
         return scaledBitmap;
     }
 
+    /**
+     * For a shortcut, update all resource names from resource IDs, and also update all
+     * resource-based strings.
+     */
+    void fixUpShortcutResourceNamesAndValues(ShortcutInfo si) {
+        final Resources publisherRes = injectGetResourcesForApplicationAsUser(
+                si.getPackage(), si.getUserId());
+        if (publisherRes != null) {
+            final long start = injectElapsedRealtime();
+            try {
+                si.lookupAndFillInResourceNames(publisherRes);
+            } finally {
+                logDurationStat(Stats.RESOURCE_NAME_LOOKUP, start);
+            }
+            si.resolveResourceStrings(publisherRes);
+        }
+    }
+
     // === Caller validation ===
 
     private boolean isCallerSystem() {
@@ -1327,7 +1351,8 @@ public class ShortcutService extends IShortcutService.Stub {
         throw new SecurityException("Calling package name mismatch");
     }
 
-    void postToHandler(Runnable r) {
+    // Overridden in unit tests to execute r synchronously.
+    void injectPostToHandler(Runnable r) {
         mHandler.post(r);
     }
 
@@ -1370,7 +1395,7 @@ public class ShortcutService extends IShortcutService.Stub {
         } finally {
             injectRestoreCallingIdentity(token);
         }
-        postToHandler(() -> {
+        injectPostToHandler(() -> {
             final ArrayList<ShortcutChangeListener> copy;
             synchronized (mLock) {
                 copy = new ArrayList<>(mListeners);
@@ -1537,11 +1562,17 @@ public class ShortcutService extends IShortcutService.Stub {
                         // TODO When activity is changing, check the dynamic count.
                     }
 
-                    // Note copyNonNullFieldsFrom() does the "udpatable with?" check too.
+                    // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
                     target.copyNonNullFieldsFrom(source);
 
                     if (replacingIcon) {
                         saveIconAndFixUpShortcut(userId, target);
+                    }
+
+                    // When we're updating any resource related fields, re-extract the res names and
+                    // the values.
+                    if (replacingIcon || source.hasStringResources()) {
+                        fixUpShortcutResourceNamesAndValues(target);
                     }
                 }
             }
@@ -1980,21 +2011,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     });
                 }
             }
-            // Resolve all strings if needed.
-            if (!cloneKeyFieldOnly) {
-                final long token = injectClearCallingIdentity();
-                try {
-                    for (int i = ret.size() - 1; i >= 0; i--) {
-                        try {
-                            ret.get(i).resolveStringsRequiringCrossUser(mContext);
-                        } catch (NameNotFoundException e) {
-                            continue;
-                        }
-                    }
-                } finally {
-                    injectRestoreCallingIdentity(token);
-                }
-            }
             return ret;
         }
 
@@ -2217,8 +2233,22 @@ public class ShortcutService extends IShortcutService.Stub {
                 if (DEBUG) {
                     Slog.d(TAG, "onSystemLocaleChangedNoLock: " + mLocaleChangeSequenceNumber.get());
                 }
-                postToHandler(() -> scheduleSaveBaseState());
+                injectPostToHandler(() -> handleLocaleChanged());
             }
+        }
+    }
+
+    void handleLocaleChanged() {
+        if (DEBUG) {
+            Slog.d(TAG, "handleLocaleChanged");
+        }
+        scheduleSaveBaseState();
+
+        final long token = injectClearCallingIdentity();
+        try {
+            forEachLoadedUserLocked(u -> u.forAllPackages(p -> p.resolveResourceStrings()));
+        } finally {
+            injectRestoreCallingIdentity(token);
         }
     }
 
@@ -2468,8 +2498,24 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     XmlResourceParser injectXmlMetaData(ActivityInfo activityInfo, String key) {
-// TODO Doesn't seem like ACROSS_USER is needed, but double check.
         return activityInfo.loadXmlMetaData(mContext.getPackageManager(), key);
+    }
+
+    @Nullable
+    Resources injectGetResourcesForApplicationAsUser(String packageName, int userId) {
+        final long start = injectElapsedRealtime();
+        final long token = injectClearCallingIdentity();
+        try {
+            return mContext.getPackageManager().getResourcesForApplicationAsUser(
+                    packageName, userId);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, "Resources for package " + packageName + " not found");
+            return null;
+        } finally {
+            injectRestoreCallingIdentity(token);
+
+            logDurationStat(Stats.GET_APPLICATION_RESOURCES, start);
+        }
     }
 
     // === Backup & restore ===
@@ -2614,6 +2660,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpStatLS(pw, p, Stats.GET_ACTIVITIES_WITH_METADATA, "getActivities+metadata");
                 dumpStatLS(pw, p, Stats.GET_INSTALLED_APPLICATIONS, "getInstalledApplications");
                 dumpStatLS(pw, p, Stats.CHECK_PACKAGE_CHANGES, "checkPackageChanges");
+                dumpStatLS(pw, p, Stats.GET_APPLICATION_RESOURCES, "getApplicationResources");
+                dumpStatLS(pw, p, Stats.RESOURCE_NAME_LOOKUP, "resourceNameLookup");
             }
 
             for (int i = 0; i < mUsers.size(); i++) {

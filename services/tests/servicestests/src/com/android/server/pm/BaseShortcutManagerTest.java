@@ -22,6 +22,8 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -92,6 +94,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -317,7 +320,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        void postToHandler(Runnable r) {
+        void injectPostToHandler(Runnable r) {
             final long token = mContext.injectClearCallingIdentity();
             r.run();
             mContext.injectRestoreCallingIdentity(token);
@@ -440,6 +443,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected long mInjectedCurrentTimeMillis;
 
     protected boolean mInjectedIsLowRamDevice;
+
+    protected Locale mInjectedLocale = Locale.ENGLISH;
 
     protected int mInjectedCallingUid;
     protected String mInjectedClientPackage;
@@ -597,6 +602,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         // User 0 is always running.
         when(mMockUserManager.isUserRunning(eq(USER_0))).thenAnswer(new AnswerIsUserRunning(true));
 
+        setUpAppResources();
+
+        // Start the service.
         initService();
         setCaller(CALLING_PACKAGE_1);
 
@@ -622,6 +630,53 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     Process.SYSTEM_UID, mInjectedCallingUid);
             return mAnswer;
         }
+    }
+
+    protected void setUpAppResources() throws Exception {
+        setUpAppResources(/* offset = */ 0);
+    }
+
+    protected void setUpAppResources(int ressIdOffset) throws Exception {
+        // ressIdOffset is used to adjust resource IDs to emulate the case where an updated app
+        // has resource IDs changed.
+
+        doAnswer(pmInvocation -> {
+            assertEquals(Process.SYSTEM_UID, mInjectedCallingUid);
+
+            final String packageName = (String) pmInvocation.getArguments()[0];
+            final int userId = (Integer) pmInvocation.getArguments()[1];
+
+            final Resources res = mock(Resources.class);
+
+            doAnswer(resInvocation -> {
+                final int argResId = (Integer) resInvocation.getArguments()[0];
+
+                return "string-" + packageName + "-user:" + userId + "-res:" + argResId
+                        + "/" + mInjectedLocale;
+            }).when(res).getString(anyInt());
+
+            doAnswer(resInvocation -> {
+                final int resId = (Integer) resInvocation.getArguments()[0];
+
+                // Always use the "string" resource type.  The type doesn't matter during the test.
+                return packageName + ":string/r" + resId;
+            }).when(res).getResourceName(anyInt());
+
+            doAnswer(resInvocation -> {
+                final String argResName = (String) resInvocation.getArguments()[0];
+                final String argType = (String) resInvocation.getArguments()[1];
+                final String argPackageName = (String) resInvocation.getArguments()[2];
+
+                // See the above code.  getResourceName() will just use "r" + res ID as the entry
+                // name.
+                String entryName = argResName;
+                if (entryName.contains("/")) {
+                    entryName = ShortcutInfo.getResourceEntryName(entryName);
+                }
+                return Integer.parseInt(entryName.substring(1)) + ressIdOffset;
+            }).when(res).getIdentifier(anyString(), anyString(), anyString());
+            return res;
+        }).when(mMockPackageManager).getResourcesForApplicationAsUser(anyString(), anyInt());
     }
 
     protected static UserInfo withProfileGroupId(UserInfo in, int groupId) {
@@ -667,8 +722,16 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mLauncherApps = null;
         mLauncherAppsMap.clear();
 
-        // Load the setting file.
+        // Send boot sequence events.
         mService.onBootPhase(SystemService.PHASE_LOCK_SETTINGS_READY);
+
+        // Make sure a call to onSystemLocaleChangedNoLock() before PHASE_BOOT_COMPLETED will be
+        // ignored.
+        final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
+        mInternal.onSystemLocaleChangedNoLock();
+        assertEquals(origSequenceNumber, mService.getLocaleChangeSequenceNumber());
+
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
     }
 
     protected void shutdownServices() {
@@ -868,6 +931,18 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         r.run();
 
         setCaller(previousPackage, previousUserId);
+    }
+
+    protected void runWithSystemUid(Runnable r) {
+        final int origUid = mInjectedCallingUid;
+        mInjectedCallingUid = Process.SYSTEM_UID;
+        r.run();
+        mInjectedCallingUid = origUid;
+    }
+
+    protected void lookupAndFillInResourceNames(ShortcutInfo si) {
+        runWithSystemUid(() -> si.lookupAndFillInResourceNames(
+                mService.injectGetResourcesForApplicationAsUser(si.getPackage(), si.getUserId())));
     }
 
     protected int getCallingUserId() {
