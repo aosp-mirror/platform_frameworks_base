@@ -662,6 +662,31 @@ public class RecoverySystem {
     }
 
     /**
+     * Reboot into recovery and wipe the A/B device.
+     *
+     * @param Context      the Context to use.
+     * @param packageFile  the wipe package to be applied.
+     * @param reason       the reason to wipe.
+     *
+     * @throws IOException if something goes wrong.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void rebootWipeAb(Context context, File packageFile, String reason)
+            throws IOException {
+        String reasonArg = null;
+        if (!TextUtils.isEmpty(reason)) {
+            reasonArg = "--reason=" + sanitizeArg(reason);
+        }
+
+        final String filename = packageFile.getCanonicalPath();
+        final String filenameArg = "--wipe_package=" + filename;
+        final String localeArg = "--locale=" + Locale.getDefault().toString();
+        bootCommand(context, "--wipe_ab", filenameArg, reasonArg, localeArg);
+    }
+
+    /**
      * Reboot into the recovery system with the supplied argument.
      * @param args to pass to the recovery utility.
      * @throws IOException if something goes wrong.
