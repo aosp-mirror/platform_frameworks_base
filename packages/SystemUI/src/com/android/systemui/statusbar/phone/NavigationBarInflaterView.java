@@ -221,7 +221,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         String button = extractButton(buttonSpec);
         View v = null;
         if (HOME.equals(button)) {
-            v = inflater.inflate(SystemUIFactory.getInstance().getHomeLayoutId(), parent, false);
+            v = inflater.inflate(R.layout.home, parent, false);
             if (landscape && isSw600Dp()) {
                 setupLandButton(v);
             }
