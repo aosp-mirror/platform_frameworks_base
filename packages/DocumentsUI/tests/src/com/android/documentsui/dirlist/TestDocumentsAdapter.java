@@ -16,7 +16,6 @@
 
 package com.android.documentsui.dirlist;
 
-import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -53,11 +52,6 @@ public class TestDocumentsAdapter extends DocumentsAdapter {
     @Override
     String getModelId(int position) {
         return mModelIds.get(position);
-    }
-
-    @Override
-    public SparseArray<String> hide(String... ids) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

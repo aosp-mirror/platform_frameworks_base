@@ -25,11 +25,9 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
-import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -163,26 +161,6 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
     @Override
     public String getModelId(int adapterPosition) {
         return mModelIds.get(adapterPosition);
-    }
-
-    @Override
-    public SparseArray<String> hide(String... ids) {
-        if (DEBUG) Log.d(TAG, "Hiding ids: " + ids);
-        Set<String> toHide = Sets.newHashSet(ids);
-
-        // Proceed backwards through the list of items, because each removal causes the
-        // positions of all subsequent items to change.
-        SparseArray<String> hiddenItems = new SparseArray<>();
-        for (int i = mModelIds.size() - 1; i >= 0; --i) {
-            String id = mModelIds.get(i);
-            if (toHide.contains(id)) {
-                mHiddenIds.add(id);
-                hiddenItems.put(i, mModelIds.remove(i));
-                notifyItemRemoved(i);
-            }
-        }
-
-        return hiddenItems;
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package com.android.documentsui.services;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.app.Notification;
@@ -43,6 +44,10 @@ public class TestJob extends Job {
 
     void assertStarted() {
         assertTrue(mStarted);
+    }
+
+    void assertNotStarted() {
+        assertFalse(mStarted);
     }
 
     void fail(DocumentInfo doc) {

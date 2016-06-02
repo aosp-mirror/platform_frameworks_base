@@ -23,7 +23,6 @@ import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.SparseArray;
 
 import com.android.documentsui.State;
 
@@ -63,15 +62,6 @@ abstract class DocumentsAdapter
      * @return The model ID of the item at the given adapter position.
      */
     abstract String getModelId(int position);
-
-    /**
-     * Hides a set of items from the associated RecyclerView.
-     *
-     * @param ids The Model IDs of the items to hide.
-     * @return A SparseArray that maps the hidden IDs to their old positions. This can be used
-     *         to {@link #unhide} the items if necessary.
-     */
-    abstract public SparseArray<String> hide(String... ids);
 
     /**
      * Returns a class that yields the span size for a particular element. This is
