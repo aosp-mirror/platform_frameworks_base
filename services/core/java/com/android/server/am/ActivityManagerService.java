@@ -23165,10 +23165,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void updateApplicationInfoLocked(@NonNull List<String> packagesToUpdate, int userId) {
+        final PackageManagerInternal packageManager = getPackageManagerInternalLocked();
         final boolean updateFrameworkRes = packagesToUpdate.contains("android");
         for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
             final ProcessRecord app = mLruProcesses.get(i);
-            if (app.thread == null) {
+            if (app.thread == null || app.pid == Process.myPid()) {
                 continue;
             }
 
@@ -23181,7 +23182,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final String packageName = app.pkgList.keyAt(j);
                 if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
-                        final ApplicationInfo ai = mPackageManagerInt.getApplicationInfo(
+                        final ApplicationInfo ai = packageManager.getApplicationInfo(
                                 packageName, app.userId);
                         if (ai != null) {
                             app.thread.scheduleApplicationInfoChanged(ai);
