@@ -501,9 +501,17 @@ public class ZenModePanel extends LinearLayout {
         if (mCountdownConditionSupported) {
             Condition nextAlarmCondition = getTimeUntilNextAlarmCondition();
             if (nextAlarmCondition != null) {
+                mZenRadioGroup.getChildAt(
+                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.VISIBLE);
+                mZenRadioGroupContent.getChildAt(
+                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.VISIBLE);
                 bind(nextAlarmCondition,
                         mZenRadioGroupContent.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
                         COUNTDOWN_ALARM_CONDITION_INDEX);
+            } else {
+                mZenRadioGroup.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.GONE);
+                mZenRadioGroupContent.getChildAt(
+                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.GONE);
             }
         }
         // ensure something is selected
