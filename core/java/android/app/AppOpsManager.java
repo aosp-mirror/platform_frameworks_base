@@ -717,7 +717,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_UNMUTE_MICROPHONE, // MUTE_MICROPHONE
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
             null, //PROJECT_MEDIA
-            UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
+            null, // ACTIVATE_VPN
             UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
             null, // ASSIST_STRUCTURE
             null, // ASSIST_SCREENSHOT
