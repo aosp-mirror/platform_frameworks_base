@@ -231,6 +231,7 @@ public class ZenModePanel extends LinearLayout {
         mAttachedZen = getSelectedZen(-1);
         mSessionZen = mAttachedZen;
         mTransitionHelper.clear();
+        mController.addCallback(mZenCallback);
         setSessionExitCondition(copy(mExitCondition));
         updateWidgets();
         setRequestingConditions(!mHidden);
@@ -244,6 +245,7 @@ public class ZenModePanel extends LinearLayout {
         mAttached = false;
         mAttachedZen = -1;
         mSessionZen = -1;
+        mController.removeCallback(mZenCallback);
         setSessionExitCondition(null);
         setRequestingConditions(false);
         mTransitionHelper.clear();
@@ -329,7 +331,6 @@ public class ZenModePanel extends LinearLayout {
         handleUpdateManualRule(mController.getManualRule());
         if (DEBUG) Log.d(mTag, "init mExitCondition=" + mExitCondition);
         hideAllConditions();
-        mController.addCallback(mZenCallback);
     }
 
     public void updateLocale() {

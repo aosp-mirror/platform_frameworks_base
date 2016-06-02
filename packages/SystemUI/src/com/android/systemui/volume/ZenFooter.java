@@ -70,16 +70,6 @@ public class ZenFooter extends LinearLayout {
     }
 
     public void init(final ZenModeController controller) {
-        controller.addCallback(new ZenModeController.Callback() {
-            @Override
-            public void onZenChanged(int zen) {
-                setZen(zen);
-            }
-            @Override
-            public void onConfigChanged(ZenModeConfig config) {
-                setConfig(config);
-            }
-        });
         mEndNowButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +80,18 @@ public class ZenFooter extends LinearLayout {
         mConfig = controller.getConfig();
         mController = controller;
         update();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mController.addCallback(mZenCallback);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mController.removeCallback(mZenCallback);
     }
 
     private void setZen(int zen) {
@@ -143,4 +145,14 @@ public class ZenFooter extends LinearLayout {
         mSpTexts.update();
     }
 
+    private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
+        @Override
+        public void onZenChanged(int zen) {
+            setZen(zen);
+        }
+        @Override
+        public void onConfigChanged(ZenModeConfig config) {
+            setConfig(config);
+        }
+    };
 }
