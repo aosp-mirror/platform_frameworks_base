@@ -104,6 +104,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
+    void scheduleAssetsChanged(String packageName, ApplicationInfo ai) throws RemoteException;
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
     void setHttpProxy(String proxy, String port, String exclList,
@@ -225,4 +226,5 @@ public interface IApplicationThread extends IInterface {
     int SCHEDULE_MULTI_WINDOW_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+58;
     int SCHEDULE_PICTURE_IN_PICTURE_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+59;
     int SCHEDULE_LOCAL_VOICE_INTERACTION_STARTED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+60;
+    int SCHEDULE_ASSETS_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+61;
 }

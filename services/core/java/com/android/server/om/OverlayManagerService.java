@@ -676,37 +676,36 @@ public final class OverlayManagerService extends SystemService {
     }
 
     private void updateAssets(final int userId, List<String> targetPackageNames) {
-        // TODO: uncomment when we integrate OMS properly
-        // final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
-        // final boolean updateFrameworkRes = targetPackageNames.contains("android");
-        // if (updateFrameworkRes) {
-        //     targetPackageNames = pm.getTargetPackageNames(userId);
-        // }
+        final PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+        final boolean updateFrameworkRes = targetPackageNames.contains("android");
+        if (updateFrameworkRes) {
+            targetPackageNames = pm.getTargetPackageNames(userId);
+        }
 
-        // final Map<String, String[]> allPaths = new ArrayMap<>(targetPackageNames.size());
-        // synchronized (mLock) {
-        //     final List<String> frameworkPaths = mImpl.onGetEnabledOverlayPaths("android", userId);
-        //     for (final String packageName : targetPackageNames) {
-        //         final List<String> paths = new ArrayList<>();
-        //         paths.addAll(frameworkPaths);
-        //         if (!"android".equals(packageName)) {
-        //             paths.addAll(mImpl.onGetEnabledOverlayPaths(packageName, userId));
-        //         }
-        //         allPaths.put(packageName,
-        //             paths.isEmpty() ? null : paths.toArray(new String[paths.size()]));
-        //     }
-        // }
+        final Map<String, String[]> allPaths = new ArrayMap<>(targetPackageNames.size());
+        synchronized (mLock) {
+            final List<String> frameworkPaths = mImpl.onGetEnabledOverlayPaths("android", userId);
+            for (final String packageName : targetPackageNames) {
+                final List<String> paths = new ArrayList<>();
+                paths.addAll(frameworkPaths);
+                if (!"android".equals(packageName)) {
+                    paths.addAll(mImpl.onGetEnabledOverlayPaths(packageName, userId));
+                }
+                allPaths.put(packageName,
+                    paths.isEmpty() ? null : paths.toArray(new String[paths.size()]));
+            }
+        }
 
-        // for (String packageName : targetPackageNames) {
-        //     pm.setResourceDirs(userId, packageName, allPaths.get(packageName));
-        // }
+        for (String packageName : targetPackageNames) {
+            pm.setResourceDirs(userId, packageName, allPaths.get(packageName));
+        }
 
-        // final IActivityManager am = ActivityManagerNative.getDefault();
-        // try {
-        //     am.updateAssets(userId, targetPackageNames);
-        // } catch (RemoteException e) {
-        //     // Intentionally left empty.
-        // }
+        final IActivityManager am = ActivityManagerNative.getDefault();
+        try {
+            am.updateAssets(userId, targetPackageNames);
+        } catch (RemoteException e) {
+            // Intentionally left empty.
+        }
     }
 
     private void schedulePersistSettings() {

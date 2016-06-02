@@ -19179,6 +19179,57 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public void updateAssets(final int userId, @NonNull final List<String> packageNames) {
+        enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION, "updateAssets()");
+
+        synchronized(this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                updateAssetsLocked(userId, packageNames);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    void updateAssetsLocked(final int userId, @NonNull final List<String> packagesToUpdate) {
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        final Map<String, ApplicationInfo> cache = new ArrayMap<>();
+
+        final boolean updateFrameworkRes = packagesToUpdate.contains("android");
+        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+            final ProcessRecord app = mLruProcesses.get(i);
+            if (app.userId != userId || app.thread == null) {
+                continue;
+            }
+
+            for (final String packageName : app.pkgList.keySet()) {
+                if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
+                    try {
+                        final ApplicationInfo ai;
+                        if (cache.containsKey(packageName)) {
+                            ai = cache.get(packageName);
+                        } else {
+                            ai = pm.getApplicationInfo(packageName, 0, userId);
+                            cache.put(packageName, ai);
+                        }
+
+                        if (ai != null) {
+                            app.thread.scheduleAssetsChanged(packageName, ai);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, String.format("Failed to update %s assets for %s",
+                                    packageName, app));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Decide based on the configuration whether we should shouw the ANR,
      * crash, etc dialogs.  The idea is that if there is no affordence to
      * press the on-screen buttons, or the user experience would be more

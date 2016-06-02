@@ -29,6 +29,7 @@ import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -51,6 +52,8 @@ import java.util.function.Predicate;
 public class ResourcesManager {
     static final String TAG = "ResourcesManager";
     private static final boolean DEBUG = false;
+
+    private static final String FRAMEWORK_RESOURCES_PATH = "/system/framework/framework-res.apk";
 
     private static ResourcesManager sResourcesManager;
 
@@ -914,41 +917,105 @@ public class ResourcesManager {
                 }
             }
 
-            // Bail early if there is no work to do.
-            if (updatedResourceKeys.isEmpty()) {
-                return;
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        }
+    }
+
+    final void applyNewResourceDirsLocked(@NonNull final String baseCodePath,
+            @NonNull final String[] newResourceDirs) {
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
+                    "ResourcesManager#applyNewResourceDirsLocked");
+
+            ApplicationPackageManager.configurationChanged();
+
+            if (Process.myUid() == Process.SYSTEM_UID) {
+                // Resources.getSystem Resources are created on request and aren't tracked by
+                // mResourceReferences.
+                //
+                // If overlays targeting "android" are to be used, we must create the system
+                // resources regardless of whether they already exist, since otherwise the
+                // information on what overlays to use would be lost. This is wasteful for most
+                // applications, so limit this operation to the system user only. (This means
+                // Resources.getSystem() will *not* use overlays for applications.)
+                if (FRAMEWORK_RESOURCES_PATH.equals(baseCodePath)) {
+                    final ResourcesKey key = new ResourcesKey(
+                            FRAMEWORK_RESOURCES_PATH,
+                            null,
+                            newResourceDirs,
+                            null,
+                            Display.DEFAULT_DISPLAY,
+                            null,
+                            null);
+                    final ResourcesImpl impl = createResourcesImpl(key);
+                    Resources.getSystem().setImpl(impl);
+                }
             }
 
-            // Update any references to ResourcesImpl that require reloading.
-            final int resourcesCount = mResourceReferences.size();
-            for (int i = 0; i < resourcesCount; i++) {
-                final Resources r = mResourceReferences.get(i).get();
+
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesImpl impl = mResourceImpls.valueAt(i).get();
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                if (impl != null && key.mResDir != null && key.mResDir.equals(baseCodePath)) {
+
+                    updatedResourceKeys.put(impl, new ResourcesKey(
+                            key.mResDir,
+                            key.mSplitResDirs,
+                            newResourceDirs,
+                            key.mLibDirs,
+                            key.mDisplayId,
+                            key.mOverrideConfiguration,
+                            key.mCompatInfo));
+                }
+            }
+
+            invalidatePath("/");
+
+            redirectResourcesToNewImplLocked(updatedResourceKeys);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    private void redirectResourcesToNewImplLocked(
+            @NonNull final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys) {
+
+        // Bail early if there is no work to do.
+        if (updatedResourceKeys.isEmpty()) {
+            return;
+        }
+
+        // Update any references to ResourcesImpl that require reloading.
+        final int resourcesCount = mResourceReferences.size();
+        for (int i = 0; i < resourcesCount; i++) {
+            final Resources r = mResourceReferences.get(i).get();
+            if (r != null) {
+                final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+                if (key != null) {
+                    final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
+                    if (impl == null) {
+                        throw new Resources.NotFoundException("failed to load");
+                    }
+                    r.setImpl(impl);
+                }
+            }
+        }
+
+        // Update any references to ResourcesImpl that require reloading for each Activity.
+        for (final ActivityResources activityResources : mActivityResourceReferences.values()) {
+            final int resCount = activityResources.activityResources.size();
+            for (int i = 0; i < resCount; i++) {
+                final Resources r = activityResources.activityResources.get(i).get();
                 if (r != null) {
                     final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
                     if (key != null) {
                         final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
                         if (impl == null) {
-                            throw new Resources.NotFoundException("failed to load " + libAsset);
+                            throw new Resources.NotFoundException("failed to load");
                         }
                         r.setImpl(impl);
-                    }
-                }
-            }
-
-            // Update any references to ResourcesImpl that require reloading for each Activity.
-            for (ActivityResources activityResources : mActivityResourceReferences.values()) {
-                final int resCount = activityResources.activityResources.size();
-                for (int i = 0; i < resCount; i++) {
-                    final Resources r = activityResources.activityResources.get(i).get();
-                    if (r != null) {
-                        final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
-                        if (key != null) {
-                            final ResourcesImpl impl = findOrCreateResourcesImplForKeyLocked(key);
-                            if (impl == null) {
-                                throw new Resources.NotFoundException("failed to load " + libAsset);
-                            }
-                            r.setImpl(impl);
-                        }
                     }
                 }
             }

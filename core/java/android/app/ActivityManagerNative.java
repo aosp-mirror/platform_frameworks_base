@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.StackInfo;
 import android.app.assist.AssistContent;
@@ -1222,6 +1223,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             updateConfiguration(config);
+            reply.writeNoException();
+            return true;
+        }
+
+        case UPDATE_ASSETS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int userId = data.readInt();
+            final int N = data.readInt();
+            final List<String> packageNames = new ArrayList<>();
+            for (int i = 0; i < N; i++) {
+                packageNames.add(data.readString());
+            }
+            updateAssets(userId, packageNames);
             reply.writeNoException();
             return true;
         }
@@ -4582,6 +4596,22 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         values.writeToParcel(data, 0);
         mRemote.transact(UPDATE_CONFIGURATION_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    public void updateAssets(final int userId, @NonNull final List<String> packageNames)
+            throws RemoteException
+    {
+        final Parcel data = Parcel.obtain();
+        final Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(userId);
+        data.writeInt(packageNames.size());
+        for (int i = 0; i < packageNames.size(); i++) {
+            data.writeString(packageNames.get(i));
+        }
+        mRemote.transact(UPDATE_ASSETS_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
