@@ -540,12 +540,13 @@ class ActivityStarter {
         } finally {
             mService.mWindowManager.continueSurfaceLayout();
         }
-        postStartActivityUncheckedProcessing(r, err, stack.mStackId);
+        postStartActivityUncheckedProcessing(r, err, stack.mStackId, mSourceRecord, mTargetStack);
         return err;
     }
 
     void postStartActivityUncheckedProcessing(
-            ActivityRecord r, int result, int prevFocusedStackId) {
+            ActivityRecord r, int result, int prevFocusedStackId, ActivityRecord sourceRecord,
+            ActivityStack targetStack) {
 
         if (result < START_SUCCESS) {
             // If someone asked to have the keyguard dismissed on the next activity start,
@@ -559,7 +560,7 @@ class ActivityStarter {
         if (r.task != null && r.task.stack != null) {
             startedActivityStackId = r.task.stack.mStackId;
         } else if (mTargetStack != null) {
-            startedActivityStackId = mTargetStack.mStackId;
+            startedActivityStackId = targetStack.mStackId;
         }
 
         // If we launched the activity from a no display activity that was launched from the home
@@ -567,9 +568,9 @@ class ActivityStarter {
         // noDisplay activity will be finished shortly after.
         // TODO: We should prevent noDisplay activities from affecting task/stack ordering and
         // visibility instead of using this flag.
-        final boolean noDisplayActivityOverHome = mSourceRecord != null
-                && mSourceRecord.noDisplay
-                && mSourceRecord.task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE;
+        final boolean noDisplayActivityOverHome = sourceRecord != null
+                && sourceRecord.noDisplay
+                && sourceRecord.task.getTaskToReturnTo() == HOME_ACTIVITY_TYPE;
         if (startedActivityStackId == DOCKED_STACK_ID
                 && (prevFocusedStackId == HOME_STACK_ID || noDisplayActivityOverHome)) {
             final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
@@ -1811,7 +1812,8 @@ class ActivityStarter {
                 final int result = startActivityUnchecked(
                         pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null, null);
                 postStartActivityUncheckedProcessing(
-                        pal.r, result, mSupervisor.mFocusedStack.mStackId);
+                        pal.r, result, mSupervisor.mFocusedStack.mStackId, mSourceRecord,
+                        mTargetStack);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());
