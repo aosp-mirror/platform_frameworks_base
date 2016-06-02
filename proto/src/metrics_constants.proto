@@ -2260,7 +2260,7 @@ message MetricsEvent {
 
     // ------- Begin N Keyboard Shortcuts Helper -----
     // Keyboard Shortcuts Helper is opened/closed.
-    KEYBOARD_SHORTCUTS_HELPER = 460;
+    KEYBOARD_SHORTCUTS_HELPER = 500;
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
