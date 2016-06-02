@@ -288,22 +288,34 @@ bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApk
 {
     AutoMutex _l(mLock);
     const String8 paths[2] = { String8(targetApkPath), String8(overlayApkPath) };
-    ResTable tables[2];
+    Asset* assets[2] = {NULL, NULL};
+    bool ret = false;
+    {
+        ResTable tables[2];
 
-    for (int i = 0; i < 2; ++i) {
-        asset_path ap;
-        ap.type = kFileTypeRegular;
-        ap.path = paths[i];
-        Asset* ass = openNonAssetInPathLocked("resources.arsc", Asset::ACCESS_BUFFER, ap);
-        if (ass == NULL) {
-            ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
-            return false;
+        for (int i = 0; i < 2; ++i) {
+            asset_path ap;
+            ap.type = kFileTypeRegular;
+            ap.path = paths[i];
+            assets[i] = openNonAssetInPathLocked("resources.arsc",
+                    Asset::ACCESS_BUFFER, ap);
+            if (assets[i] == NULL) {
+                ALOGW("failed to find resources.arsc in %s\n", ap.path.string());
+                goto exit;
+            }
+            if (tables[i].add(assets[i]) != NO_ERROR) {
+                ALOGW("failed to add %s to resource table", paths[i].string());
+                goto exit;
+            }
         }
-        tables[i].add(ass);
+        ret = tables[0].createIdmap(tables[1], targetCrc, overlayCrc,
+                targetApkPath, overlayApkPath, (void**)outData, outSize) == NO_ERROR;
     }
 
-    return tables[0].createIdmap(tables[1], targetCrc, overlayCrc,
-            targetApkPath, overlayApkPath, (void**)outData, outSize) == NO_ERROR;
+exit:
+    delete assets[0];
+    delete assets[1];
+    return ret;
 }
 
 bool AssetManager::addDefaultAssets()
