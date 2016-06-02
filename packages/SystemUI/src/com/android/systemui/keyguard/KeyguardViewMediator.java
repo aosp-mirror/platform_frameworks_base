@@ -360,7 +360,7 @@ public class KeyguardViewMediator extends SystemUI {
             mSwitchingUser = false;
             if (userId != UserHandle.USER_SYSTEM) {
                 UserInfo info = UserManager.get(mContext).getUserInfo(userId);
-                if (info != null && info.isGuest()) {
+                if (info != null && (info.isGuest() || info.isDemo())) {
                     // If we just switched to a guest, try to dismiss keyguard.
                     dismiss();
                 }

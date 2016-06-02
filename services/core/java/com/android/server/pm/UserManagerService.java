@@ -2035,6 +2035,7 @@ public class UserManagerService extends IUserManager.Stub {
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
         final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
+        final boolean isDemo = (flags & UserInfo.FLAG_DEMO) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo;
         UserData userData;
@@ -2052,8 +2053,8 @@ public class UserManagerService extends IUserManager.Stub {
                     Log.e(LOG_TAG, "Cannot add more managed profiles for user " + parentId);
                     return null;
                 }
-                if (!isGuest && !isManagedProfile && isUserLimitReached()) {
-                    // If we're not adding a guest user or a managed profile and the limit has
+                if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
+                    // If we're not adding a guest/demo user or a managed profile and the limit has
                     // been reached, cannot add a user.
                     return null;
                 }
