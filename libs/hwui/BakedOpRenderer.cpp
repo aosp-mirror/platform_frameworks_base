@@ -96,15 +96,15 @@ void BakedOpRenderer::endLayer() {
 }
 
 OffscreenBuffer* BakedOpRenderer::copyToLayer(const Rect& area) {
-    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState,
-            area.getWidth(), area.getHeight());
-    if (!area.isEmpty()) {
+    const uint32_t width = area.getWidth();
+    const uint32_t height = area.getHeight();
+    OffscreenBuffer* buffer = mRenderState.layerPool().get(mRenderState, width, height);
+    if (!area.isEmpty() && width != 0 && height != 0) {
         mCaches.textureState().activateTexture(0);
         mCaches.textureState().bindTexture(buffer->texture.id());
 
         glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-                area.left, mRenderTarget.viewportHeight - area.bottom,
-                area.getWidth(), area.getHeight());
+                area.left, mRenderTarget.viewportHeight - area.bottom, width, height);
     }
     return buffer;
 }
