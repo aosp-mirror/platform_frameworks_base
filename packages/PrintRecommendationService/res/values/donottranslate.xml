@@ -32,10 +32,18 @@
         <item>Hewlett Packard</item>
     </string-array>
 
+    <!-- Samsung plugin -->
     <string-array name="known_print_vendor_info_for_samsung" translatable="false">
         <item>com.sec.app.samsungprintservice</item>
         <item>Samsung Electronics</item>
         <item>Samsung</item>
+    </string-array>
+
+    <!-- Xerox plugin -->
+    <string-array name="known_print_vendor_info_for_xerox" translatable="false">
+        <item>com.xerox.printservice</item>
+        <item>Xerox</item>
+        <item>Xerox</item>
     </string-array>
 
     <array name="known_print_plugin_vendors" translatable="false">
