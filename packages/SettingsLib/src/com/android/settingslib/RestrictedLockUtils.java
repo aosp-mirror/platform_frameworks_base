@@ -616,11 +616,12 @@ public class RestrictedLockUtils {
      */
     public static void sendShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
         final Intent intent = getShowAdminSupportDetailsIntent(context, admin);
-        int adminUserId = UserHandle.myUserId();
-        if (admin.userId != UserHandle.USER_NULL) {
-            adminUserId = admin.userId;
+        int targetUserId = UserHandle.myUserId();
+        if (admin != null && admin.userId != UserHandle.USER_NULL
+                && isCurrentUserOrProfile(context, admin.userId)) {
+            targetUserId = admin.userId;
         }
-        context.startActivityAsUser(intent, new UserHandle(adminUserId));
+        context.startActivityAsUser(intent, new UserHandle(targetUserId));
     }
 
     public static Intent getShowAdminSupportDetailsIntent(Context context, EnforcedAdmin admin) {
@@ -636,6 +637,28 @@ public class RestrictedLockUtils {
             intent.putExtra(Intent.EXTRA_USER_ID, adminUserId);
         }
         return intent;
+    }
+
+    public static boolean isCurrentUserOrProfile(Context context, int userId) {
+        UserManager um = UserManager.get(context);
+        for (UserInfo userInfo : um.getProfiles(UserHandle.myUserId())) {
+            if (userInfo.id == userId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isAdminInCurrentUserOrProfile(Context context, ComponentName admin) {
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        UserManager um = UserManager.get(context);
+        for (UserInfo userInfo : um.getProfiles(UserHandle.myUserId())) {
+            if (dpm.isAdminActiveAsUser(admin, userInfo.id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void setTextViewPadlock(Context context,
