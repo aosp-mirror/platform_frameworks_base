@@ -305,6 +305,11 @@ public class TimePicker extends FrameLayout {
             mLocale = context.getResources().getConfiguration().locale;
         }
 
+        @Override
+        public void setOnTimeChangedListener(OnTimeChangedListener callback) {
+            mOnTimeChangedListener = callback;
+        }
+
         protected static class SavedState extends View.BaseSavedState {
             private final int mHour;
             private final int mMinute;
