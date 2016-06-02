@@ -3379,6 +3379,18 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"youtube"
   },
   {
+    "title":"Your Apps at Work",
+    "titleFriendly":"",
+    "summary":"In this Google I/O 2016 session we’ll give you details for making your app more attractive to businesses.",
+    "url":"https://www.youtube.com/watch?v=Za0OQo8DRM4",
+    "group":"",
+    "keywords": ["work", "enterprise", "emm"],
+    "tags": [],
+    "image":"https://i1.ytimg.com/vi/Za0OQo8DRM4/maxresdefault.jpg",
+    "lang":"en",
+    "type":"youtube"
+  },
+  {
     "title":"Discover YouTube cards",
     "titleFriendly":"",
     "summary":"Find out more about YouTube cards, the options available, and how to use them to get the most from your YouTube content.",
