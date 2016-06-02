@@ -1108,6 +1108,13 @@ public class PropertyValuesHolder implements Cloneable {
         }
     }
 
+    /**
+     * @hide
+     */
+    public Class getValueType() {
+        return mValueType;
+    }
+
     @Override
     public String toString() {
         return mPropertyName + ": " + mKeyframes.toString();
