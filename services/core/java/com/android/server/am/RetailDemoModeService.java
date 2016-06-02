@@ -40,6 +40,7 @@ import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
@@ -56,8 +57,8 @@ public class RetailDemoModeService extends SystemService {
     private static final long SCREEN_WAKEUP_DELAY = 5000;
 
     private ActivityManagerService mAms;
-    private UserManagerService mUms;
     private NotificationManager mNm;
+    private UserManager mUm;
     private PowerManager mPm;
     private PowerManager.WakeLock mWakeLock;
     private Handler mHandler;
@@ -123,10 +124,24 @@ public class RetailDemoModeService extends SystemService {
                 UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
                         UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
                 if (demoUser != null) {
+                    setupDemoUser(demoUser);
                     getActivityManager().switchUser(demoUser.id);
                 }
             }
         });
+    }
+
+    void setupDemoUser(UserInfo userInfo) {
+        UserManager um = getUserManager();
+        UserHandle user = UserHandle.of(userInfo.id);
+        LockPatternUtils lockPatternUtils = new LockPatternUtils(getContext());
+        lockPatternUtils.setLockScreenDisabled(true, userInfo.id);
+        um.setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, user);
+        um.setUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true, user);
+        um.setUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, true, user);
+        um.setUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER, true, user);
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.SKIP_FIRST_USE_HINTS, 1, userInfo.id);
     }
 
     private ActivityManagerService getActivityManager() {
@@ -136,12 +151,11 @@ public class RetailDemoModeService extends SystemService {
         return mAms;
     }
 
-    private UserManagerService getUserManager() {
-        if (mUms == null) {
-            mUms = (UserManagerService) UserManagerService.Stub
-                    .asInterface(ServiceManager.getService(Context.USER_SERVICE));
+    private UserManager getUserManager() {
+        if (mUm == null) {
+            mUm = getContext().getSystemService(UserManager.class);
         }
-        return mUms;
+        return mUm;
     }
 
     private void registerSettingsChangeObserver() {
