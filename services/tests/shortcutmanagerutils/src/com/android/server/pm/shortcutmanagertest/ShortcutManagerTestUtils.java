@@ -31,6 +31,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
@@ -38,6 +39,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.BaseBundle;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
@@ -250,6 +252,17 @@ public class ShortcutManagerTestUtils {
     public static <T> List<T> assertEmpty(List<T> list) {
         assertEquals(0, list.size());
         return list;
+    }
+
+    public static List<ShortcutInfo> filterByActivity(List<ShortcutInfo> list,
+            ComponentName activity) {
+        final ArrayList<ShortcutInfo> ret = new ArrayList<>();
+        for (ShortcutInfo si : list) {
+            if (si.getActivity().equals(activity) && (si.isManifestShortcut() || si.isDynamic())) {
+                ret.add(si);
+            }
+        }
+        return ret;
     }
 
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
@@ -553,6 +566,27 @@ public class ShortcutManagerTestUtils {
             return actualSet.equals(set(ids));
 
         }, "Shortcut IDs=[" + Arrays.toString(ids) + "]", null);
+    }
+
+    public static ShortcutInfo parceled(ShortcutInfo si) {
+        Parcel p = Parcel.obtain();
+        p.writeParcelable(si, 0);
+        p.setDataPosition(0);
+        ShortcutInfo si2 = p.readParcelable(ShortcutManagerTestUtils.class.getClassLoader());
+        p.recycle();
+        return si2;
+    }
+
+    public static List<ShortcutInfo> cloneShortcutList(List<ShortcutInfo> list) {
+        if (list == null) {
+            return null;
+        }
+        final List<ShortcutInfo> ret = new ArrayList<>(list.size());
+        for (ShortcutInfo si : list) {
+            ret.add(parceled(si));
+        }
+
+        return ret;
     }
 
     public static void waitUntil(String message, BooleanSupplier condition) {

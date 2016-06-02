@@ -132,4 +132,10 @@ abstract class ShortcutPackageItem {
 
     public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
+
+    /**
+     * Verify various internal states.
+     */
+    public void verifyStates() {
+    }
 }
