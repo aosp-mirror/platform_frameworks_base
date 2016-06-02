@@ -30,6 +30,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -142,7 +143,8 @@ public class ImmersiveModeConfirmation {
             if (!disabled
                     && (DEBUG_SHOW_EVERY_TIME || !mConfirmed)
                     && userSetupComplete
-                    && !mVrModeEnabled) {
+                    && !mVrModeEnabled
+                    && !UserManager.isDeviceInDemoMode(mContext)) {
                 mHandler.sendEmptyMessageDelayed(H.SHOW, mShowDelayMs);
             }
         } else {
