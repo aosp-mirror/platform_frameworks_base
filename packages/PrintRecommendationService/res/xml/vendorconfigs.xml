@@ -43,14 +43,6 @@
     </vendor>
 
     <vendor>
-        <name>@string/plugin_vendor_xerox</name>
-        <package>com.xerox.printservice</package>
-        <mdns-names>
-            <mdns-name>Xerox</mdns-name>
-        </mdns-names>
-    </vendor>
-
-    <vendor>
         <name>@string/plugin_vendor_epson</name>
         <package>com.epson.mobilephone.android.epsonprintserviceplugin</package>
         <mdns-names>
