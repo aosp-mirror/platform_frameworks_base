@@ -583,43 +583,6 @@ public final class MtpConstants {
      */
     public static final int ASSOCIATION_TYPE_GENERIC_FOLDER = 0x0001;
 
-    /** @removed */
-    public static final int EVENT_UNDEFINED = 0x4000;
-    /** @removed */
-    public static final int EVENT_CANCEL_TRANSACTION = 0x4001;
-    /** @removed */
-    public static final int EVENT_OBJECT_ADDED = 0x4002;
-    /** @removed */
-    public static final int EVENT_OBJECT_REMOVED = 0x4003;
-    /** @removed */
-    public static final int EVENT_STORE_ADDED = 0x4004;
-    /** @removed */
-    public static final int EVENT_STORE_REMOVED = 0x4005;
-    /** @removed */
-    public static final int EVENT_DEVICE_PROP_CHANGED = 0x4006;
-    /** @removed */
-    public static final int EVENT_OBJECT_INFO_CHANGED = 0x4007;
-    /** @removed */
-    public static final int EVENT_DEVICE_INFO_CHANGED = 0x4008;
-    /** @removed */
-    public static final int EVENT_REQUEST_OBJECT_TRANSFER = 0x4009;
-    /** @removed */
-    public static final int EVENT_STORE_FULL = 0x400A;
-    /** @removed */
-    public static final int EVENT_DEVICE_RESET = 0x400B;
-    /** @removed */
-    public static final int EVENT_STORAGE_INFO_CHANGED = 0x400C;
-    /** @removed */
-    public static final int EVENT_CAPTURE_COMPLETE = 0x400D;
-    /** @removed */
-    public static final int EVENT_UNREPORTED_STATUS = 0x400E;
-    /** @removed */
-    public static final int EVENT_OBJECT_PROP_CHANGED = 0xC801;
-    /** @removed */
-    public static final int EVENT_OBJECT_PROP_DESC_CHANGED = 0xC802;
-    /** @removed */
-    public static final int EVENT_OBJECT_REFERENCES_CHANGED = 0xC803;
-
     /** Operation code for GetDeviceInfo */
     public static final int OPERATION_GET_DEVICE_INFO = 0x1001;
     /** Operation code for OpenSession */
