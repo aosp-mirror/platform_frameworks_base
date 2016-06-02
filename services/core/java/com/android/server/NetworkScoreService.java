@@ -17,10 +17,12 @@
 package com.android.server;
 
 import android.Manifest.permission;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
@@ -66,6 +68,20 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @GuardedBy("mPackageMonitorLock")
     private NetworkScorerPackageMonitor mPackageMonitor;
     private ScoringServiceConnection mServiceConnection;
+
+    private BroadcastReceiver mUserIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (DBG) Log.d(TAG, "Received " + action + " for userId " + userId);
+            if (userId == UserHandle.USER_NULL) return;
+
+            if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                onUserUnlocked(userId);
+            }
+        }
+    };
 
     /**
      * Clears scores when the active scorer package is no longer valid and
@@ -138,6 +154,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public NetworkScoreService(Context context) {
         mContext = context;
         mScoreCaches = new HashMap<>();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        // TODO: Need to update when we support per-user scorers. http://b/23422763
+        mContext.registerReceiverAsUser(
+                mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
+                null /* scheduler */);
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -161,6 +182,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     /** Called when the system is ready for us to start third-party code. */
     void systemRunning() {
         if (DBG) Log.d(TAG, "systemRunning");
+        bindToScoringServiceIfNeeded();
+    }
+
+    private void onUserUnlocked(int userId) {
+        registerPackageMonitorIfNeeded();
         bindToScoringServiceIfNeeded();
     }
 
@@ -216,6 +242,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
             // Make sure the connection is connected (idempotent)
             mServiceConnection.connect(mContext);
+        } else { // otherwise make sure it isn't bound.
+            unbindFromScoringServiceIfNeeded();
         }
     }
 
