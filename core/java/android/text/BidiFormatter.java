@@ -355,7 +355,11 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #isRtl(String)}, but takes a CharSequence instead of a string
+     *
+     * @param str CharSequence whose directionality is to be estimated.
+     * @return true if {@code str}'s estimated overall directionality is RTL. Otherwise returns
+     *          false.
      */
     public boolean isRtl(CharSequence str) {
         return mDefaultTextDirectionHeuristic.isRtl(str, 0, str.length());
@@ -398,7 +402,16 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(String, TextDirectionHeuristic, boolean)}, but takes a
+     * CharSequence instead of a string
+     *
+     * @param str The input CharSequence.
+     * @param heuristic The algorithm to be used to estimate the CharSequence's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
+     * @param isolate Whether to directionally isolate the CharSequence to prevent it from garbling
+     *     the content around it
+     * @return Input CharSequence after applying the above processing. {@code null} if {@code str}
+     *     is {@code null}.
      */
     public @Nullable CharSequence unicodeWrap(@Nullable CharSequence str,
             TextDirectionHeuristic heuristic, boolean isolate) {
@@ -437,7 +450,13 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but
+     * assumes {@code isolate} is true.
+     *
+     * @param str The input CharSequence.
+     * @param heuristic The algorithm to be used to estimate the CharSequence's overall direction.
+     *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str, TextDirectionHeuristic heuristic) {
         return unicodeWrap(str, heuristic, true /* isolate */);
@@ -458,7 +477,13 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but uses
+     * the formatter's default direction estimation algorithm.
+     *
+     * @param str The input CharSequence.
+     * @param isolate Whether to directionally isolate the CharSequence to prevent it from garbling
+     *     the content around it
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str, boolean isolate) {
         return unicodeWrap(str, mDefaultTextDirectionHeuristic, isolate);
@@ -476,7 +501,11 @@ public final class BidiFormatter {
     }
 
     /**
-     * @hide
+     * Operates like {@link #unicodeWrap(CharSequence, TextDirectionHeuristic, boolean)}, but uses
+     * the formatter's default direction estimation algorithm and assumes {@code isolate} is true.
+     *
+     * @param str The input CharSequence.
+     * @return Input CharSequence after applying the above processing.
      */
     public CharSequence unicodeWrap(CharSequence str) {
         return unicodeWrap(str, mDefaultTextDirectionHeuristic, true /* isolate */);
