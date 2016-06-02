@@ -701,13 +701,15 @@ public final class SystemServer {
         // as appropriate.
         mSystemServiceManager.startService(UiModeManagerService.class);
 
-        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "UpdatePackagesIfNeeded");
-        try {
-            mPackageManagerService.updatePackagesIfNeeded();
-        } catch (Throwable e) {
-            reportWtf("update packages", e);
+        if (!mOnlyCore) {
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "UpdatePackagesIfNeeded");
+            try {
+                mPackageManagerService.updatePackagesIfNeeded();
+            } catch (Throwable e) {
+                reportWtf("update packages", e);
+            }
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         }
-        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "PerformFstrimIfNeeded");
         try {
