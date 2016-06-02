@@ -93,7 +93,6 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
-        TunerService.get(mContext).addTunable(this, SHOW_SLIDER);
         mHandler = new Handler();
         mFalsingCheck = new Runnable() {
             @Override
@@ -108,6 +107,18 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         mInactiveSliderAlpha =
                 ta.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
         ta.recycle();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        TunerService.get(mContext).addTunable(this, SHOW_SLIDER);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        TunerService.get(mContext).removeTunable(this);
+        super.onDetachedFromWindow();
     }
 
     public void resetFalsingCheck() {
