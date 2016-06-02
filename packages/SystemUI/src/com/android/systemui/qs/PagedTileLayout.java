@@ -31,6 +31,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private View mDecorGroup;
     private PageListener mPageListener;
 
+    private int mPosition;
+    private boolean mOffPage;
+    private boolean mListening;
+
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setAdapter(mAdapter);
@@ -48,6 +52,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             public void onPageScrolled(int position, float positionOffset,
                     int positionOffsetPixels) {
                 if (mPageIndicator == null) return;
+                setCurrentPage(position, positionOffset != 0);
                 mPageIndicator.setLocation(position + positionOffset);
                 if (mPageListener != null) {
                     mPageListener.onPageChanged(positionOffsetPixels == 0 &&
@@ -75,6 +80,52 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             item = mPages.size() - 1 - item;
         }
         super.setCurrentItem(item, smoothScroll);
+    }
+
+    @Override
+    public void setListening(boolean listening) {
+        if (mListening == listening) return;
+        mListening = listening;
+        if (mListening) {
+            mPages.get(mPosition).setListening(listening);
+            if (mOffPage) {
+                mPages.get(mPosition + 1).setListening(listening);
+            }
+        } else {
+            // Make sure no pages are listening.
+            for (int i = 0; i < mPages.size(); i++) {
+                mPages.get(i).setListening(false);
+            }
+        }
+    }
+
+    /**
+     * Sets individual pages to listening or not.  If offPage it will set
+     * the next page after position to listening as well since we are in between
+     * pages.
+     */
+    private void setCurrentPage(int position, boolean offPage) {
+        if (mPosition == position && mOffPage == offPage) return;
+        if (mListening) {
+            if (mPosition != position) {
+                // Clear out the last pages from listening.
+                mPages.get(mPosition).setListening(false);
+                if (mOffPage) {
+                    mPages.get(mPosition + 1).setListening(false);
+                }
+                // Set the new pages to listening
+                mPages.get(position).setListening(true);
+                if (offPage) {
+                    mPages.get(position + 1).setListening(true);
+                }
+            } else if (mOffPage != offPage) {
+                // Whether we are showing position + 1 has changed.
+                mPages.get(mPosition + 1).setListening(offPage);
+            }
+        }
+        // Save the current state.
+        mPosition = position;
+        mOffPage = offPage;
     }
 
     @Override
