@@ -139,7 +139,7 @@ class MtpNotificationManager {
             if (usbInterface.getInterfaceClass() == UsbConstants.USB_SUBCLASS_VENDOR_SPEC &&
                     usbInterface.getInterfaceSubclass() == SUBCLASS_MTP &&
                     usbInterface.getInterfaceProtocol() == PROTOCOL_MTP &&
-                    usbInterface.getName().equals("MTP")) {
+                    "MTP".equals(usbInterface.getName())) {
                 return true;
             }
         }
