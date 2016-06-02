@@ -388,6 +388,11 @@ public class StorageNotification extends SystemUI {
                             buildUnmountPendingIntent(vol)))
                     .setContentIntent(browseIntent)
                     .setCategory(Notification.CATEGORY_SYSTEM);
+            // USB disks notification can be persistent
+            if (disk.isUsb()) {
+                builder.setOngoing(true);
+            }
+
             if (disk.isAdoptable() || disk.isSd()) {
                 builder.setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()));
             }
