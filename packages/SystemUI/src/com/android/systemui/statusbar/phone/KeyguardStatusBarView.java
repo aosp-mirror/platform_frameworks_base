@@ -58,6 +58,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
     private int mSystemIconsSwitcherHiddenExpandedMargin;
+    private View mSystemIconsContainer;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -67,6 +68,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mSystemIconsSuperContainer = findViewById(R.id.system_icons_super_container);
+        mSystemIconsContainer = findViewById(R.id.system_icons_container);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mBatteryLevel = (TextView) findViewById(R.id.battery_level);
@@ -79,17 +81,58 @@ public class KeyguardStatusBarView extends RelativeLayout
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        // Respect font size setting.
-        mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.text_size_small_material));
-        mBatteryLevel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.battery_level_text_size));
-
         MarginLayoutParams lp = (MarginLayoutParams) mMultiUserAvatar.getLayoutParams();
         lp.width = lp.height = getResources().getDimensionPixelSize(
                 R.dimen.multi_user_avatar_keyguard_size);
         mMultiUserAvatar.setLayoutParams(lp);
+
+        lp = (MarginLayoutParams) mMultiUserSwitch.getLayoutParams();
+        lp.width = getResources().getDimensionPixelSize(
+                R.dimen.multi_user_switch_width_keyguard);
+        lp.setMarginEnd(getResources().getDimensionPixelSize(
+                R.dimen.multi_user_switch_keyguard_margin));
+        mMultiUserSwitch.setLayoutParams(lp);
+
+        lp = (MarginLayoutParams) mSystemIconsSuperContainer.getLayoutParams();
+        lp.height = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_header_height);
+        lp.setMarginStart(getResources().getDimensionPixelSize(
+                R.dimen.system_icons_super_container_margin_start));
+        mSystemIconsSuperContainer.setLayoutParams(lp);
+        mSystemIconsSuperContainer.setPaddingRelative(mSystemIconsSuperContainer.getPaddingStart(),
+                mSystemIconsSuperContainer.getPaddingTop(),
+                getResources().getDimensionPixelSize(R.dimen.system_icons_keyguard_padding_end),
+                mSystemIconsSuperContainer.getPaddingBottom());
+
+        lp = (MarginLayoutParams) mSystemIconsContainer.getLayoutParams();
+        lp.height = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_height);
+        mSystemIconsContainer.setLayoutParams(lp);
+
+        lp = (MarginLayoutParams) mBatteryLevel.getLayoutParams();
+        lp.setMarginStart(
+                getResources().getDimensionPixelSize(R.dimen.header_battery_margin_keyguard));
+        mBatteryLevel.setLayoutParams(lp);
+        mBatteryLevel.setPaddingRelative(mBatteryLevel.getPaddingStart(),
+                mBatteryLevel.getPaddingTop(),
+                getResources().getDimensionPixelSize(R.dimen.battery_level_padding_end),
+                mBatteryLevel.getPaddingBottom());
+        mBatteryLevel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.battery_level_text_size));
+
+        // Respect font size setting.
+        mCarrierLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.text_size_small_material));
+        lp = (MarginLayoutParams) mCarrierLabel.getLayoutParams();
+        lp.setMarginStart(
+                getResources().getDimensionPixelSize(R.dimen.keyguard_carrier_text_margin));
+        mCarrierLabel.setLayoutParams(lp);
+
+        lp = (MarginLayoutParams) getLayoutParams();
+        lp.height =  getResources().getDimensionPixelSize(
+                R.dimen.status_bar_header_height_keyguard);
+        setLayoutParams(lp);
     }
 
     private void loadDimens() {
