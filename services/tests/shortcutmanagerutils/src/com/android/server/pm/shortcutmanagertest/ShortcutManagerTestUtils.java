@@ -65,6 +65,10 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Common utility methods for ShortcutManager tests.  This is used by both CTS and the unit tests.
+ * Because it's used by CTS too, it can only access the public APIs.
+ */
 public class ShortcutManagerTestUtils {
     private static final String TAG = "ShortcutManagerUtils";
 
