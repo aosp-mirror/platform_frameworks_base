@@ -742,7 +742,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 synchronized (mImplLock) {
                     mAudioSource = null;
                     mAudioSink.clear();
-                    mAudioPatch = null;
+                    if (mAudioPatch != null) {
+                        mAudioManager.releaseAudioPatch(mAudioPatch);
+                        mAudioPatch = null;
+                    }
                 }
             }
         };
@@ -980,6 +983,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
             if (shouldRecreateAudioPatch) {
                 mCommittedVolume = volume;
+                if (mAudioPatch != null) {
+                    mAudioManager.releaseAudioPatch(mAudioPatch);
+                }
                 mAudioManager.createAudioPatch(
                         audioPatchArray,
                         new AudioPortConfig[] { sourceConfig },
