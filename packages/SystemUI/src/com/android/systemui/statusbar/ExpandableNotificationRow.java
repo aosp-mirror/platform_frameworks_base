@@ -1097,7 +1097,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mIsSystemExpanded = expand;
             notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
-            if (mChildrenContainer != null) {
+            if (mIsSummaryWithChildren) {
                 mChildrenContainer.updateGroupOverflow();
             }
         }
@@ -1172,7 +1172,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void updateChildrenHeaderAppearance() {
-        if (mChildrenContainer != null) {
+        if (mIsSummaryWithChildren) {
             mChildrenContainer.updateChildrenHeaderAppearance();
         }
     }
