@@ -26,7 +26,7 @@ import libcore.util.Objects;
 public class CustomizeTileView extends QSTileView {
 
     private TextView mAppLabel;
-
+    private int mLabelMinLines;
     public CustomizeTileView(Context context, QSIconView icon) {
         super(context, icon);
     }
@@ -34,6 +34,7 @@ public class CustomizeTileView extends QSTileView {
     @Override
     protected void createLabel() {
         super.createLabel();
+        mLabelMinLines = mLabel.getMinLines();
         View view = LayoutInflater.from(mContext).inflate(R.layout.qs_tile_label, null);
         mAppLabel = (TextView) view.findViewById(R.id.tile_label);
         mAppLabel.setAlpha(.6f);
@@ -44,6 +45,9 @@ public class CustomizeTileView extends QSTileView {
     public void setShowAppLabel(boolean showAppLabel) {
         mAppLabel.setVisibility(showAppLabel ? View.VISIBLE : View.GONE);
         mLabel.setSingleLine(showAppLabel);
+        if (!showAppLabel) {
+            mLabel.setMinLines(mLabelMinLines);
+        }
     }
 
     public void setAppLabel(CharSequence label) {
