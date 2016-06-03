@@ -93,7 +93,7 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"スマートフォンのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。仕事用プロファイルが削除され、プロファイルのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%1$d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%2$d</xliff:g>回間違えると、モバイル端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
       <item quantity="other">SIM PINコードが無効です。入力できるのはあと<xliff:g id="NUMBER_1">%d</xliff:g>回です。</item>
@@ -110,9 +110,9 @@
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"通信サービスはありません。"</string>
     <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"入力方法の切り替え"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"機内モード"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後にパターンの入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後に PIN の入力が必要となります"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後にパスワードの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"端末の再起動後はパターンの入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"端末の再起動後は PIN の入力が必要となります"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6504585392626524695">"端末の再起動後はパスワードの入力が必要となります"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="3717506169674397620">"セキュリティを強化するにはパターンが必要です"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="6951483704195396341">"セキュリティを強化するには PIN が必要です"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="7306667546971345027">"セキュリティを強化するにはパスワードが必要です"</string>

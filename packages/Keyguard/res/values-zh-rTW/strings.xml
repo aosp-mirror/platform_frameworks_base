@@ -49,7 +49,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖案解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"密碼解鎖。"</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖形區域。"</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"圖案區域。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"滑動區域。"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 區"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM 卡 PIN 區"</string>
@@ -57,12 +57,12 @@
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"已設定下一個鬧鐘時間：<xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete 鍵"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 鍵"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖形"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形錯誤"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖形"</string>
+    <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM PIN"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"輸入「<xliff:g id="CARRIER">%1$s</xliff:g>」的 SIM 卡 PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN"</string>
@@ -76,7 +76,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK 碼至少必須為 8 碼。"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"重新輸入正確的 PUK 碼。如果錯誤次數過多，SIM 卡將會永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 碼不符"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖形嘗試次數過多"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖案嘗試次數過多"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
