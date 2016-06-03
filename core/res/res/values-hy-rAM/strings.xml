@@ -243,11 +243,11 @@
     <string name="user_owner_label" msgid="1119010402169916617">"Անցնել անհատական պրոֆիլին"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Անցնել աշխատանքային պրոֆիլին"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Կոնտակտներ"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"կոնտակտների հասանելիություն"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"օգտագործել ձեր կոնտակտները"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Տեղադրություն"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"օգտագործել այս սարքի տեղադրությունը"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Օրացույց"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օրացույցի հասանելիություն"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"օգտագործել օրացույցը"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Կարճ հաղորդագրություն"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ուղարկել և դիտել SMS հաղորդագրությունները"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Պահոց"</string>
@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"հիմա"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ր.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ր.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ր</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ր</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ժ.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ժ.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ժ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ժ</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> օր</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> օր</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>օր</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>օր</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> տ.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> տ.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>տ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>տ</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> րոպեից</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> րոպեից</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ր-ից</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ր-ից</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ժամից</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ժամից</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ժ-ից</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ժ-ից</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> օրից</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> օրից</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> տարուց</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>տ.-ուց</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>տ.-ուց</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> րոպե առաջ</item>
@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացն ընդհատվել է"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքը շարունակաբար ընդհատվում է"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը շարունակաբար ընդհատվում է"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Կրկին բացել հավելվածը"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Ուղարկել կարծիք"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Անջատել ձայնը մինչև սարքի վերագործարկումը"</string>
@@ -1610,10 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS հարցումը փոխվել է USSD հարցման:"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS հարցումը փոխվել է նոր SS հարցման:"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Աշխատանքային պրոֆիլ"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"«Ընդարձակել» կոճակ"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"փոխարկել ընդլայնումը"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB արտաքին միացք"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB արտաքին միացք"</string>
@@ -1621,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Փակել ավելորդ տեղեկությունները"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Մեծացնել"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Փակել"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>

@@ -82,10 +82,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"ಅನಪೇಕ್ಷಿತ ಕಿರಿಕಿರಿ ಮಾಡುವ ಕರೆಗಳ ತಿರಸ್ಕಾರ"</string>
     <string name="CndMmi" msgid="3116446237081575808">"ಕರೆ ಮಾಡುವ ಸಂಖ್ಯೆಯ ವಿತರಣೆ"</string>
     <string name="DndMmi" msgid="1265478932418334331">"ಅಡಚಣೆ ಮಾಡಬೇಡ"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡೀಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡೀಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡೀಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡೀಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಿಲ್ಲ"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ಕರೆಮಾಡುವವರ ID ಅನ್ನು ನಿರ್ಬಂಧಿಸದಿರುವಂತೆ ಡಿಫಾಲ್ಟ್ ಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಕರೆ: ನಿರ್ಬಂಧಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ಸೇವೆಯನ್ನು ಪೂರೈಸಲಾಗಿಲ್ಲ."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ನೀವು ಕಾಲರ್‌ ID ಸೆಟ್ಟಿಂಗ್‌ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"ಡೇಟಾ ಸೇವೆಯನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
@@ -306,8 +306,8 @@
     <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"ಪ್ರೊಫೈಲ್ ಮಾಲೀಕರು ಮತ್ತು ಸಾಧನ ಮಾಲೀಕರನ್ನು ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ರನ್‌ ಆಗುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಮರುಕ್ರಮಗೊಳಿಸಿ"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"ಮುನ್ನೆಲೆ ಮತ್ತು ಹಿನ್ನಲೆಗೆ ಕಾರ್ಯಗಳನ್ನು ಸರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ನಿಮ್ಮ ಇನ್‍‍ಪುಟ್ ಇಲ್ಲದೆಯೇ, ಅಪ್ಲಿಕೇಶನ್ ಈ ಕಾರ್ಯವನ್ನು ಮಾಡಬಹುದು."</string>
-    <string name="permlab_enableCarMode" msgid="5684504058192921098">"ಕಾರ್ ಮೋಡ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ಕಾರ್‌ ಮೋಡ್‌ ಸಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"ಕಾರು ಮೋಡ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"ಕಾರು‌ ಮೋಡ್‌ ಸಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"ಇತರೆ ಅಪ್ಲಿಕೇಶನ್‍ಗಳನ್ನು ಮುಚ್ಚಿ"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"ಇತರ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳ ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆಗಳನ್ನು ಅಂತ್ಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಇದು ಇತರ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳ ಚಾಲನೆಯನ್ನು ನಿಲ್ಲಿಸುವುದಕ್ಕೆ ಕಾರಣವಾಗಬಹುದು."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"ಇತರ ಅಪ್ಲಿಕೇಶನ್‍ಗಳ ಮೇಲೆ ಚಿತ್ರಿಸಿ"</string>
@@ -432,27 +432,27 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ಸಮೀಪದ ಕ್ಷೇತ್ರ ಸಂವಹನ (NFC) ಟ್ಯಾಗ್‌ಗಳು, ಕಾರ್ಡ್‌ಗಳು, ಮತ್ತು ಓದುಗರನ್ನು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಬೆರಳಚ್ಚು ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಬೆರಳಚ್ಚು ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಬೆರಳಚ್ಚು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸಾರ್ ಕೊಳೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ತೆಗೆದುಹಾಕಿ."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಬೆರಳಚ್ಚು ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬೆರಳಚ್ಚು ತೆಗೆದುಹಾಕಿ."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಬೆರಳಚ್ಚು ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಬೆರಳಚ್ಚು ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ಫಿಂಗರ್ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ಬೆರಳಚ್ಚು ಐಕಾನ್"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ರೀಡ್‌ ಮಾಡು"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ಒಂದು ಖಾತೆಯ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಖಾತೆಯೊಂದಿಗೆ ಜನರ ಅಪ್ಲಿಕೇಶನ್ ಸಿಂಕ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಇದು ನಿರ್ಧರಿಸಬಹುದು."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ಸಿಂಕ್ ಆನ್ ಮತ್ತು ಸಿಂಕ್ ಆಫ್ ಟಾಗಲ್ ಮಾಡಿ"</string>
@@ -545,29 +545,29 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"ಕೆಲವು ಸ್ಕ್ರೀನ್ ಲಾಕ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"ಕೆಲವು ಪರದೆ ಲಾಕ್‌ನ ವೈಶಿಷ್ಟ್ಯಗಳ ಬಳಕೆಯನ್ನು ತಡೆಯಿರಿ."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"ನಿವಾಸ"</item>
+    <item msgid="8901098336658710359">"ಮನೆ"</item>
     <item msgid="869923650527136615">"ಮೊಬೈಲ್"</item>
     <item msgid="7897544654242874543">"ಕಚೇರಿ"</item>
     <item msgid="1103601433382158155">"ಕಚೇರಿ ಫಾಕ್ಸ್"</item>
-    <item msgid="1735177144948329370">"ನಿವಾಸದ ಫ್ಯಾಕ್ಸ್"</item>
+    <item msgid="1735177144948329370">"ಮನೆಯ ಫ್ಯಾಕ್ಸ್"</item>
     <item msgid="603878674477207394">"ಪೇಜರ್"</item>
     <item msgid="1650824275177931637">"ಇತರೆ"</item>
     <item msgid="9192514806975898961">"ಕಸ್ಟಮ್"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"ನಿವಾಸ"</item>
+    <item msgid="8073994352956129127">"ಮನೆ"</item>
     <item msgid="7084237356602625604">"ಕಚೇರಿ"</item>
     <item msgid="1112044410659011023">"ಇತರೆ"</item>
     <item msgid="2374913952870110618">"ಕಸ್ಟಮ್"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"ನಿವಾಸ"</item>
+    <item msgid="6880257626740047286">"ಮನೆ"</item>
     <item msgid="5629153956045109251">"ಕಚೇರಿ"</item>
     <item msgid="4966604264500343469">"ಇತರೆ"</item>
     <item msgid="4932682847595299369">"ಕಸ್ಟಮ್"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"ನಿವಾಸ"</item>
+    <item msgid="1738585194601476694">"ಮನೆ"</item>
     <item msgid="1359644565647383708">"ಕಚೇರಿ"</item>
     <item msgid="7868549401053615677">"ಇತರೆ"</item>
     <item msgid="3145118944639869809">"ಕಸ್ಟಮ್"</item>
@@ -588,15 +588,15 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"ಕಸ್ಟಮ್"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"ನಿವಾಸ"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"ಮನೆ"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"ಮೊಬೈಲ್"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"ಕಚೇರಿ"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"ಕಚೇರಿ ಫಾಕ್ಸ್"</string>
-    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ನಿವಾಸದ ಫ್ಯಾಕ್ಸ್"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"ಮನೆಯ ಫ್ಯಾಕ್ಸ್"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"ಪೇಜರ್"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"ಇತರೆ"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"ಮರಳಿ ಕರೆಮಾಡು"</string>
-    <string name="phoneTypeCar" msgid="8738360689616716982">"ಕಾರ್"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"ಕಾರು"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"ಕಂಪನಿ ಮುಖ್ಯ"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"ಪ್ರಮುಖ"</string>
@@ -613,16 +613,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"ವಾರ್ಷಿಕೋತ್ಸವ"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"ಇತರೆ"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"ಕಸ್ಟಮ್"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"ಮುಖಪುಟ"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"ಮನೆ"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"ಕಚೇರಿ"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"ಇತರೆ"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"ಮೊಬೈಲ್"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"ಕಸ್ಟಮ್"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"ನಿವಾಸ"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"ಮನೆ"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"ಕಚೇರಿ"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"ಇತರೆ"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"ಕಸ್ಟಮ್"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"ನಿವಾಸ"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"ಮನೆ"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"ಕಚೇರಿ"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"ಇತರೆ"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"ಕಸ್ಟಮ್"</string>
@@ -654,7 +654,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"ಸಹೋದರಿ"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"ಸಂಗಾತಿ"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"ಕಸ್ಟಮ್"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"ನಿವಾಸ"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"ಮನೆ"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"ಕಚೇರಿ"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"ಇತರೆ"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"ಈ ಸಂಪರ್ಕವನ್ನು ವೀಕ್ಷಿಸಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿಲ್ಲ."</string>
@@ -676,8 +676,8 @@
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"ತುರ್ತು"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ಕರೆಗೆ ಹಿಂತಿರುಗು"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"ಸರಿಯಾಗಿದೆ!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸು"</string>
-    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸು"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ಗರಿಷ್ಠ ಫೇಸ್ ಅನ್‍ಲಾಕ್ ಪ್ರಯತ್ನಗಳು ಮೀರಿವೆ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ಯಾವುದೇ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ."</string>
@@ -797,7 +797,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"ನಿಮ್ಮ ಟಿವಿಯಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾದ ಬ್ರೌಸರ್‌ನ ಇತಿಹಾಸ ಬುಕ್‌ಮಾರ್ಕ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಬ್ರೌಸರ್ ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಬಹುದು. ಗಮನಿಸಿ: ವೆಬ್ ಬ್ರೌಸಿಂಗ್ ಸಾಮರ್ಥ್ಯಗಳ ಜೊತೆಗೆ ಮೂರನೇ ವ್ಯಕ್ತಿಯ ಬ್ರೌಸರ್‌ಗಳ ಅಥವಾ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೂಲಕ ಈ ಅನುಮತಿಯು ಕಾರ್ಯಗತಗೊಳಿಸದಿರಬಹುದು."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ನಿಮ್ಮ ಫೋನ್‍‍‍ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ಬ್ರೌಸರ್‍‍ನ ಇತಿಹಾಸ ಅಥವಾ ಬುಕ್‌ಮಾರ್ಕ್ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಬ್ರೌಸರ್‍‍ನ ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಅಥವಾ ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸಿಕೊಡಬಹುದು. ಗಮನಿಸಿ: ಈ ಅನುಮತಿಯನ್ನು ವೆಬ್ ಬ್ರೌಸಿಂಗ್ ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಹೊಂದಿರುವ ಮೂರನೇ-ವ್ಯಕ್ತಿ ಬ್ರೌಸರ್‍‍ಗಳು ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳ ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗುವುದಿಲ್ಲ."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ಅಲಾರಮ್ ಹೊಂದಿಸಿ"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"ಸ್ಥಾಪಿಸಲಾದ ಅಲಾರಂ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಅಲಾರಂ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕೆಲವು ಅಲಾರಂ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸದಿರಬಹುದು."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"ಸ್ಥಾಪಿಸಲಾದ ಅಲಾರಮ್ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಅಲಾರಮ್ ಹೊಂದಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಕೆಲವು ಅಲಾರಮ್ ಗಡಿಯಾರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಕಾರ್ಯಗತಗೊಳಿಸದಿರಬಹುದು."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"ಧ್ವನಿಮೇಲ್ ಸೇರಿಸಿ"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ನಿಮ್ಮ ದ್ವನಿಮೇಲ್‌ ಇನ್‌‌ಬಾಕ್ಸ್‌‌ಗೆ ಸಂದೇಶಗಳನ್ನು ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ಬ್ರೌಸರ್‌ ಜಿಯೋಲೊಕೇಶನ್‌‌ ಅನುಮತಿಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
@@ -984,9 +984,9 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"ಈ ಕ್ರಿಯೆಗೆ ಡಿಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"ಬೇರೆಯ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡೀಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳು &gt; ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾದ ಡಿಫಾಲ್ಟ್‌‌ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ಸಾಧನಕ್ಕೆ ಅಪ್ಲಿಕೇಶನ್‌‌ವೊಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="noApplications" msgid="2991814273936504689">"ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಈ ಕ್ರಿಯೆಗಾಗಿ ಬದ್ಧತೆ ತೋರಿಸುವುದಿಲ್ಲ."</string>
@@ -1045,7 +1045,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ಶಾಂತ ರಿಂಗ್‌ಟೋನ್ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="volume_call" msgid="3941680041282788711">"ಒಳ-ಕರೆಯ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"ಬ್ಲೂಟೂತ್‌‌ ಒಳ-ಕರೆಯ ವಾಲ್ಯೂಮ್"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"ಅಲಾರಂ ವಾಲ್ಯೂಮ್"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"ಅಲಾರಮ್ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_notification" msgid="2422265656744276715">"ಅಧಿಸೂಚನೆಯ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ಬ್ಲೂಟೂತ್‌‌ ವಾಲ್ಯೂಮ್"</string>
@@ -1053,8 +1053,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"ಕರೆಯ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ಮೀಡಿಯಾ ವಾಲ್ಯೂಮ್"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ಅಧಿಸೂಚನೆಯ ವಾಲ್ಯೂಮ್"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"ಡೀಫಾಲ್ಟ್ ರಿಂಗ್‌ಟೋನ್"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ಡೀಫಾಲ್ಟ್ ರಿಂಗ್‌ಟೋನ್ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"ಡಿಫಾಲ್ಟ್ ರಿಂಗ್‌ಟೋನ್"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ಡಿಫಾಲ್ಟ್ ರಿಂಗ್‌ಟೋನ್ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ಯಾವುದೂ ಇಲ್ಲ"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"ರಿಂಗ್‌ಟೋನ್‌ಗಳು"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"ಅಜ್ಞಾತ ರಿಂಗ್‌ಟೋನ್"</string>
@@ -1237,8 +1237,8 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"ಯಾವುದೇ ಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಿಲ್ಲ"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
     <string name="submit" msgid="1602335572089911941">"ಸಲ್ಲಿಸು"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"ಕಾರ್ ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ಕಾರ್ ಮೋಡ್‍ನಿಂದ ನಿರ್ಗಮಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"ಕಾರು ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"ಕಾರು ಮೋಡ್‍ನಿಂದ ನಿರ್ಗಮಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ಟೆಥರಿಂಗ್ ಅಥವಾ ಹಾಟ್‌ಸ್ಪಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="back_button_label" msgid="2300470004503343439">"ಹಿಂದೆ"</string>
@@ -1269,7 +1269,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"ಅಳಿಸುವಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"ಈಗ ಏನೂ ಮಾಡಬೇಡಿ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ಖಾತೆಯೊಂದನ್ನು ಆರಿಸು"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"ಒಂದು ಖಾತೆ ಸೇರಿಸು"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"ಒಂದು ಖಾತೆ ಸೇರಿಸಿ"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"ಖಾತೆ ಸೇರಿಸಿ"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"ಹೆಚ್ಚಿಸಿ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"ಕಡಿಮೆ ಮಾಡಿ"</string>
@@ -1342,8 +1342,8 @@
     <string name="expires_on" msgid="3676242949915959821">"ಈ ದಿನಾಂಕದಂದು ಮುಕ್ತಾಯಗೊಳ್ಳುತ್ತದೆ:"</string>
     <string name="serial_number" msgid="758814067660862493">"ಕ್ರಮ ಸಂಖ್ಯೆ:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್‌ಗಳು:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ಫಿಂಗರ್‌ಪ್ರಿಂಟ್:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ಫಿಂಗರ್‌ಪ್ರಿಂಟ್:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ಬೆರಳಚ್ಚು:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ಬೆರಳಚ್ಚು:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ಚಟುವಟಿಕೆಯನ್ನು ಆರಿಸಿ"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ವಿನಂತಿಯನ್ನು ಹೊಸ SS ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"ವಿಸ್ತರಿಸು ಬಟನ್"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"ವಿಸ್ತರಣೆ ಟಾಗಲ್‌ ಮಾಡಿ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ಪೆರಿಪೆರಲ್ ಪೋರ್ಟ್"</string>
@@ -1622,6 +1621,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ಓವರ್‌ಫ್ಲೋ ಮುಚ್ಚು"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"ಹಿಗ್ಗಿಸು"</string>
     <string name="close_button_text" msgid="3937902162644062866">"ಮುಚ್ಚು"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</item>

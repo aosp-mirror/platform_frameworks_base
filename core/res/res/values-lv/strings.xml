@@ -1017,8 +1017,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Lietotne <xliff:g id="PROCESS">%1$s</xliff:g> pārtrauca darboties."</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> atkārtoti pārtrauc darboties"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> atkārtoti pārtrauc darboties"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Atkārtoti atvērt lietotni"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Sūtīt atsauksmes"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Aizvērt"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Nerādīt, līdz ierīce tiks restartēta"</string>
@@ -1645,10 +1644,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS pieprasījums ir mainīts uz USSD pieprasījumu."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS pieprasījums ir mainīts uz jaunu SS pieprasījumu."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Darba profils"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Poga Izvērst"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"izvērst/sakļaut"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB perifērijas ports"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB perifērijas ports"</string>
@@ -1656,6 +1653,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Aizvērt pārpildes izvēlni"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimizēt"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Aizvērt"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="zero"><xliff:g id="COUNT_1">%1$d</xliff:g> atlasīti</item>
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> atlasīts</item>

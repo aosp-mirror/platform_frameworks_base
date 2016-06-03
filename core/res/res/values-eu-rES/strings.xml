@@ -595,7 +595,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Etxeko faxa"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Bilagailua"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Bestelakoa"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Dei bidezko erantzuna"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Dei-erantzuna"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Autoa"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Laneko nagusia"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -1556,7 +1556,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS eskaera SS eskaera berrira aldatu da."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Work profila"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Zabaltzeko botoia"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"zabaldu edo tolestu"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ataka periferikoa"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ataka periferikoa"</string>
@@ -1622,6 +1621,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Itxi gainfluxua"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizatu"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Itxi"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> hautatuta</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>

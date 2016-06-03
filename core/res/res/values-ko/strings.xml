@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g>이(가) 중지됨"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 계속 중단됨"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g>이(가) 계속 중단됨"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"앱 다시 열기"</string>
     <string name="aerr_report" msgid="5371800241488400617">"의견 보내기"</string>
     <string name="aerr_close" msgid="2991640326563991340">"닫기"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"기기가 다시 시작될 때까지 알림 끄기"</string>
@@ -1610,10 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 요청이 USSD 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 요청이 새로운 SS 요청으로 수정됩니다."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"직장 프로필"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"펼치기 버튼"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"확장 전환"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 주변기기 포트"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 주변기기 포트"</string>
@@ -1621,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"오버플로우 닫기"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"최대화"</string>
     <string name="close_button_text" msgid="3937902162644062866">"닫기"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
