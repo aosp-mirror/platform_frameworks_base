@@ -31,7 +31,7 @@
     <string name="menu_share" msgid="3075149983979628146">"မျှဝေခြင်း"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ဖျက်ပစ်ရန်"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"အားလုံးကို ရွေးရန်"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"သို့ကူးယူရန်…"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"…သို့ကူးယူရန်"</string>
     <string name="menu_move" msgid="1828090633118079817">"...သို့ ရွှေ့ရန်"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"ဝင်းဒိုးသစ်"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ကူးယူရန်"</string>
@@ -39,7 +39,7 @@
     <string name="menu_advanced_show" msgid="4693652895715631401">"စက်ရှိစတိုရုံ ပြပါ"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"စက်ရှိစတိုရုံ ဖျောက်ထားပါ"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ဖိုင်အရွယ်အစား ပြပါ"</string>
-    <string name="menu_file_size_hide" msgid="8881975928502581042">"ဖိုင်အရွယ်အစား ဖျောက်ပါ"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"ဖိုင်အရွယ်အစား ဝှက်ပါ"</string>
     <string name="button_select" msgid="527196987259139214">"ရွေးရန်"</string>
     <string name="button_copy" msgid="8706475544635021302">"ကူးယူရန်"</string>
     <string name="button_move" msgid="2202666023104202232">"ရွေ့မည်"</string>

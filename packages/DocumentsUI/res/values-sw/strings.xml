@@ -117,8 +117,8 @@
     <string name="allow" msgid="7225948811296386551">"Ruhusu"</string>
     <string name="deny" msgid="2081879885755434506">"Kataza"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
-      <item quantity="other">Imechagua <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Imechagua <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> zimechaguliwa</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> imechaguliwa</item>
     </plurals>
     <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
       <item quantity="other">Vipengee <xliff:g id="COUNT_1">%1$d</xliff:g></item>
