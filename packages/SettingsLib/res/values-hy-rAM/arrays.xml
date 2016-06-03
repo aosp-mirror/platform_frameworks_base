@@ -125,7 +125,7 @@
     <item msgid="3191973083884253830">"Ոչ մեկը"</item>
     <item msgid="9089630089455370183">"Logcat"</item>
     <item msgid="5397807424362304288">"Համակարգային հետագիծ (գծապատկերներ)"</item>
-    <item msgid="1340692776955662664">"Կանչել glGetError-ի կույտը"</item>
+    <item msgid="1340692776955662664">"glGetError կանչերի ցուցակ"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"Անջատված"</item>
