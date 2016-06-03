@@ -106,6 +106,11 @@
     <!-- The tiles to display in QuickSettings -->
     <string name="quick_settings_tiles" translatable="false">default</string>
 
+    <!-- The tiles to display in QuickSettings in retail mode -->
+    <string name="quick_settings_tiles_retail_mode" translatable="false">
+        cell,battery,dnd,flashlight,rotation,location
+    </string>
+
     <!-- Whether or not the RSSI tile is capitalized or not. -->
     <bool name="quick_settings_rssi_tile_capitalization">true</bool>
 

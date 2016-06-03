@@ -27,6 +27,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
@@ -320,6 +321,9 @@ public class QSTileHost implements QSTile.Host, Tunable {
             return;
         }
         if (DEBUG) Log.d(TAG, "Recreating tiles");
+        if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
+            newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
+        }
         final List<String> tileSpecs = loadTileSpecs(mContext, newValue);
         int currentUser = ActivityManager.getCurrentUser();
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
