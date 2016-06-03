@@ -593,9 +593,6 @@ i
              the appearance matches the branding of the app requesting the fingerprint scan.-->
         <attr name="fingerprintAuthDrawable" format="reference" />
 
-	<!-- Asset that should be used to show users the position of the NFC antenna on the device. -->
-	<attr name="nfcAntennaPositionDrawable" format="reference" />
-
         <!-- ============ -->
         <!-- Panel styles -->
         <!-- ============ -->
@@ -4594,10 +4591,6 @@ i
             screens with limited space for text. -->
             <enum name="full" value="2" />
         </attr>
-        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
-        <attr name="__removeBeforeMRelease_leftIndents" format="reference" />
-        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
-        <attr name="__removeBeforeMRelease_rightIndents" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
