@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"សំណើ​ទីតាំង​សកម្ម"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"សម្អាត​ការ​ជូន​ដំណឹង​ទាំងអស់។"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">មានការជូនដំណឹង <xliff:g id="NUMBER_1">%s</xliff:g> ទៀតនៅខាងក្នុង</item>
+      <item quantity="one">មានការជូនដំណឹង <xliff:g id="NUMBER_0">%s</xliff:g> ទៀតនៅខាងក្នុង</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"​កំណត់​ការ​ជូនដំណឹង"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"ការ​កំណត់ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"នឹង​បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ។"</string>
@@ -321,7 +324,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APP">%s</xliff:g> ទេ។"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ត្រូវបានបិទដំណើរការក្នុងរបៀបសុវត្ថិភាព"</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ជម្រះទាំងអស់"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"សម្អាតទាំងអស់"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"កម្មវិធីមិនគាំទ្រអេក្រង់បំបែកជាពីរទេ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"អូសនៅទីនេះដើម្បីប្រើអេក្រង់បំបែក"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"បំបែកផ្តេក"</string>
@@ -596,7 +599,7 @@
     <string name="keycode_description" msgid="1403795192716828949">"ប៊ូតុងលេខកូដគ្រាប់ចុចអនុញ្ញាតឲ្យមានការបន្ថែមគ្រាប់ចុចនៃក្តារចុចទៅក្នុងរបាររុករក។ នៅពេលចុចប៊ូតុងទាំងនោះ ពួកវាបង្កើតមុខងារឲ្យគ្រាប់ចុចនៃក្តារចុចដែលបានជ្រើស។ សូមជ្រើសរើសគ្រាប់ចុចសម្រាប់ប៊ូតុងជាមុនសិន មុនពេលដែលរូបភាពត្រូវបានបង្ហាញនៅលើប៊ូតុង។"</string>
     <string name="select_keycode" msgid="7413765103381924584">"ជ្រើសប៊ូតុងក្តារចុច"</string>
     <string name="preview" msgid="9077832302472282938">"មើលជាមុន"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"អូសដើម្បីបន្ថែមចំណងជើង"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"អូសដើម្បីបន្ថែមប្រអប់"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"កែសម្រួល"</string>
     <string name="tuner_time" msgid="6572217313285536011">"ម៉ោង"</string>

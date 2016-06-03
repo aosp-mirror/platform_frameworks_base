@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Maombi ya eneo yanatumika"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Futa arifa zote."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">Kuna arifa <xliff:g id="NUMBER_1">%s</xliff:g> zaidi katika kikundi.</item>
+      <item quantity="one">Kuna arifa <xliff:g id="NUMBER_0">%s</xliff:g> zaidi katika kikundi.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Mipangilio ya arifa"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Mipangilio ya <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skrini itazunguka kiotomatiki."</string>
@@ -366,7 +369,7 @@
     <string name="guest_new_guest" msgid="600537543078847803">"Ongeza aliyealikwa"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"Ondoa aliyealikwa"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"Ungependa kumwondoa aliyealikwa?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Programu zote na data katika kipindi hiki zitafutwa."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Data na programu zote katika kipindi hiki zitafutwa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Ondoa"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Karibu tena, mwalikwa!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"Je, unataka kuendelea na kipindi chako?"</string>

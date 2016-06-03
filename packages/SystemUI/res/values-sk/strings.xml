@@ -249,7 +249,12 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Žiadosti o polohu sú aktívne"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazať všetky upozornenia."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="few">Skupina obsahuje ešte <xliff:g id="NUMBER_1">%s</xliff:g> upozornenia.</item>
+      <item quantity="many">Skupina obsahuje ešte <xliff:g id="NUMBER_1">%s</xliff:g> upozornenia.</item>
+      <item quantity="other">Skupina obsahuje ešte <xliff:g id="NUMBER_1">%s</xliff:g> upozornení.</item>
+      <item quantity="one">Skupina obsahuje ešte <xliff:g id="NUMBER_0">%s</xliff:g> upozornenie.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Nastavenia upozornení"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Nastavenia aplikácie <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka sa automaticky otočí."</string>

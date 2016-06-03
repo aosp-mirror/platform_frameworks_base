@@ -247,7 +247,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Standortanfragen aktiv"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> weitere Benachrichtigungen vorhanden.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> weitere Benachrichtigung vorhanden.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Benachrichtigungseinstellungen"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Einstellungen von <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Bildschirm wird automatisch gedreht."</string>
@@ -588,8 +591,8 @@
     <string name="add_button" msgid="4134946063432258161">"Schaltfläche hinzufügen"</string>
     <string name="save" msgid="2311877285724540644">"Speichern"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Startbildschirm-Schaltfläche fehlt"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Zur Bedienung dieses Geräts wird eine Schaltfläche für den Startbildschirm benötigt. Bitte füge vor dem Speichern eine entsprechende Schaltfläche hinzu."</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Startbildschirmtaste fehlt"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Um dieses Gerät bedienen zu können, braucht man eine Startbildschirmtaste. Bitte füge vor dem Speichern eine entsprechende Schaltfläche hinzu."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Schaltflächenbreite anpassen"</string>
     <string name="clipboard" msgid="1313879395099896312">"Zwischenablage"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"Elemente können direkt in die Zwischenablage gezogen werden. Ebenso können sie direkt aus der Zwischenablage gezogen werden, sofern diese geöffnet ist."</string>
