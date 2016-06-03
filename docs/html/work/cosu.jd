@@ -366,6 +366,17 @@ and implements the relevant COSU device management APIs:
 
 <pre>
 public class CosuActivity extends Activity {
+
+    private ComponentName mAdminComponentName;
+    private DevicePolicyManager mDevicePolicyManager;
+    private PackageManager mPackageManager;
+    private static final String Battery_PLUGGED_ANY = Integer.toString(
+            BatteryManager.BATTERY_PLUGGED_AC |
+            BatteryManager.BATTERY_PLUGGED_USB |
+            BatteryManager.BATTERY_PLUGGED_WIRELESS);
+
+    private static final String DONT_STAY_ON = "0";
+
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -383,27 +394,27 @@ public class CosuActivity extends Activity {
 
         // start lock task mode if it's not already active
         ActivityManager am = (ActivityManager) getSystemService(
-            Context.ACTIVITY_SERVICE);
+                Context.ACTIVITY_SERVICE);
         // ActivityManager.getLockTaskModeState api is not available in pre-M.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             if (!am.isInLockTaskMode()) {
                 startLockTask();
             }
         } else {
-            if (am.getLockTaskModeState() == 
-                ActivityManager.LOCK_TASK_MODE_NONE) {
+            if (am.getLockTaskModeState() ==
+                    ActivityManager.LOCK_TASK_MODE_NONE) {
                 startLockTask();
             }
         }
     }
 
     private void setDefaultCosuPolicies(boolean active) {
-        // set managed configurations
-        setUserRestriction(DISALLOW_SAFE_BOOT, active);
-        setUserRestriction(DISALLOW_FACTORY_RESET, active);
-        setUserRestriction(DISALLOW_ADD_USER, active);
-        setUserRestriction(DISALLOW_MOUNT_PHYSICAL_MEDIA, active);
-        setUserRestriction(DISALLOW_ADJUST_VOLUME, active);
+        // set user restrictions
+        setUserRestriction(UserManager.DISALLOW_SAFE_BOOT, active);
+        setUserRestriction(UserManager.DISALLOW_FACTORY_RESET, active);
+        setUserRestriction(UserManager.DISALLOW_ADD_USER, active);
+        setUserRestriction(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, active);
+        setUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME, active);
 
         // disable keyguard and status bar
         mDevicePolicyManager.setKeyguardDisabled(mAdminComponentName, active);
@@ -415,16 +426,16 @@ public class CosuActivity extends Activity {
         // set System Update policy
 
         if (active){
-          mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName,
-                SystemUpdatePolicy.createWindowedInstallPolicy(60,120));
+            mDevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName,
+                    SystemUpdatePolicy.createWindowedInstallPolicy(60,120));
+        } else {
+            DevicePolicyManager.setSystemUpdatePolicy(mAdminComponentName, null);
         }
-        else
-        
 
         // set this Activity as a lock task package
 
         mDevicePolicyManager.setLockTaskPackages(mAdminComponentName,
-          active ? new String[]{getPackageName()} : new String[]{});
+                active ? new String[]{getPackageName()} : new String[]{});
 
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MAIN);
         intentFilter.addCategory(Intent.CATEGORY_HOME);
@@ -434,38 +445,35 @@ public class CosuActivity extends Activity {
             // set Cosu activity as home intent receiver so that it is started
             // on reboot
             mDevicePolicyManager.addPersistentPreferredActivity(
-                mAdminComponentName, intentFilter, new ComponentName(
-                getPackageName(), CosuModeActivity.class.getName()))
+                    mAdminComponentName, intentFilter, new ComponentName(
+                            getPackageName(), CosuActivity.class.getName()));
         } else {
             mDevicePolicyManager.clearPackagePersistentPreferredActivities(
-                mAdminComponentName, getPackageName());
+                    mAdminComponentName, getPackageName());
         }
     }
 
     private void setUserRestriction(String restriction, boolean disallow) {
         if (disallow) {
-            mDevicePolicyManager.addUserRestriction(mAdminComponentName, 
-                restriction);
+            mDevicePolicyManager.addUserRestriction(mAdminComponentName,
+                    restriction);
         } else {
             mDevicePolicyManager.clearUserRestriction(mAdminComponentName,
-                restriction);
+                    restriction);
         }
     }
 
     private void enableStayOnWhilePluggedIn(boolean enabled) {
-      if (enabled) {
-        mDevicePolicyManager.setGlobalSetting(
-          mAdminComponentName,
-          Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-          BatteryManager.BATTERY_PLUGGED_AC
-          | BatteryManager.BATTERY_PLUGGED_USB
-          | BatteryManager.BATTERY_PLUGGED_WIRELESS);
-      } else {
-        mDevicePolicyManager.setGlobalSetting(
-          mAdminComponentName,
-          Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
-      }
-
+        if (enabled) {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                    Battery_PLUGGED_ANY);
+        } else {
+            mDevicePolicyManager.setGlobalSetting(
+                    mAdminComponentName,
+                    Settings.Global.STAY_ON_WHILE_PLUGGED_IN, DONT_STAY_ON);
+        }
     }
 
     // TODO: Implement the rest of the Activity
