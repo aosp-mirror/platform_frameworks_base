@@ -2084,7 +2084,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         final ExpandableView firstChild = getFirstChildNotGone();
         int firstChildMinHeight = firstChild != null
                 ? firstChild.getIntrinsicHeight()
-                : mCollapsedSize;
+                : mEmptyShadeView != null
+                        ? mEmptyShadeView.getMinHeight()
+                        : mCollapsedSize;
         if (mOwnScrollY > 0) {
             firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
         }
