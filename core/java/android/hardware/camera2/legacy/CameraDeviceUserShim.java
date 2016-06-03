@@ -567,6 +567,13 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
+    public void setDeferredConfiguration(int steamId, OutputConfiguration config) {
+        String err = "Set deferred configuration is not supported on legacy devices";
+        Log.e(TAG, err);
+        throw new ServiceSpecificException(ICameraService.ERROR_INVALID_OPERATION, err);
+    }
+
+    @Override
     public int createInputStream(int width, int height, int format) {
         String err = "Creating input stream is not supported on legacy devices";
         Log.e(TAG, err);
