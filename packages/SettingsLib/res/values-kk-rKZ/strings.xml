@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL трейстерін қосу"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB аудио бағыттау. өшіру"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB перифериялық аудио құр-на автоматты бағ. өшіру"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Орналасу жиектерін көрсету"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Жиектерін көрсету"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Қию шектерін, жиектерін, т.б көрсету."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Оңнан солға орналасу бағытына реттеу"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Экранның орналасу бағытын барлық тілдер үшін оңнан солға қарату"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA қолдану"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"4x MSAA функциясын OpenGL ES 2.0 (ашық графикалық кітапхана) қолданбаларында іске қосу"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Тіктөртбұрышты емес кесу жұмыстарын жөндеу"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"GPU жұмыс уақытын жазу"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU жұмысын жазу"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Терезе анимациясының өлшемі"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Ауысу анимациясының өлшемі"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Аниматор ұзақтығының межесі"</string>
@@ -313,7 +313,7 @@
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарядталуда"</string>
     <string name="battery_info_status_charging_ac" msgid="2909861890674399949">"Айнымалы токпен зар."</string>
     <string name="battery_info_status_charging_ac_short" msgid="7431401092096415502">"Зарядталуда"</string>
-    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB арқылы зарядтау"</string>
+    <string name="battery_info_status_charging_usb" msgid="2207489369680923929">"USB арқылы зарядталуда"</string>
     <string name="battery_info_status_charging_usb_short" msgid="6733371990319101366">"Зарядталуда"</string>
     <string name="battery_info_status_charging_wireless" msgid="3574032603735446573">"Сымсыз зарядтау"</string>
     <string name="battery_info_status_charging_wireless_short" msgid="752569941028903610">"Зарядталуда"</string>
