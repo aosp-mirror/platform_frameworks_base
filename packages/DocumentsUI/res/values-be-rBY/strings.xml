@@ -46,7 +46,7 @@
     <string name="button_dismiss" msgid="3714065566893946085">"Адхіліць"</string>
     <string name="button_retry" msgid="4392027584153752797">"Паўтарыце спробу"</string>
     <string name="sort_name" msgid="9183560467917256779">"Па назве"</string>
-    <string name="sort_date" msgid="586080032956151448">"Па даце ўнясення змен"</string>
+    <string name="sort_date" msgid="586080032956151448">"Па даце змянення"</string>
     <string name="sort_size" msgid="3350681319735474741">"Па памеры"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Паказаць каранёвыя папкі"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Схаваць каранёвыя папкі"</string>

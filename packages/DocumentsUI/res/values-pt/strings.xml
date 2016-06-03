@@ -117,7 +117,7 @@
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Negar"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionado</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
     </plurals>
     <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
