@@ -870,6 +870,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
+        // Send launch end powerhint when idle
+        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
         return true;
     }
 
@@ -2755,6 +2757,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
         }
 
+        // Send launch end powerhint before going sleep
+        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
+
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
@@ -4416,7 +4421,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Work Challenge is present) let startActivityInPackage handle the intercepting.
         if (!mService.mUserController.shouldConfirmCredentials(task.userId)
                 && task.getRootActivity() != null) {
-            mService.mActivityStarter.sendPowerHintForLaunchIfNeeded(true /* forceSend */);
+            mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */);
             mActivityMetricsLogger.notifyActivityLaunching();
             mService.moveTaskToFrontLocked(task.taskId, 0, bOptions);
             mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
