@@ -171,6 +171,12 @@ public class StackScrollAlgorithm {
     }
 
     public static boolean canChildBeDismissed(View v) {
+        if (v instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (row.areGutsExposed()) {
+                return false;
+            }
+        }
         final View veto = v.findViewById(R.id.veto);
         return (veto != null && veto.getVisibility() != View.GONE);
     }
