@@ -12,13 +12,14 @@ page.image=images/cards/card-n-support_2x.png
 <h2>In this document</h2>
 
 <ul>
-  <li><a href="#dp3">Developer Preview 3</a>
+  <li><a href="#dp4">Developer Preview 4</a>
     <ul>
       <li><a href="#general">General advisories</a></li>
-      <li><a href="#new">New in DP3</a></li>
+      <li><a href="#new">New in DP4</a></li>
       <li><a href="#ki">Known issues</a></li>
     </ul>
   </li>
+  <li><a href="#dp3">Developer Preview 3</a></li>
   <li><a href="#dp2">Developer Preview 2</a></li>
   <li><a href="#dp1">Developer Preview 1</a></li>
 </ul>
@@ -42,8 +43,131 @@ page.image=images/cards/card-n-support_2x.png
   please contact the developer directly.
 </p>
 
-<p>To discuss issues or ideas with other developers working with Android N, join the
-<a href="{@docRoot}preview/dev-community">Developer Preview Google+ community</a>.</p>
+<p>
+  To discuss issues or ideas with other developers working with Android N, join
+  the <a href="{@docRoot}preview/dev-community">Developer Preview Google+
+  community</a>.
+</p>
+
+<h2 id="dp4">Developer Preview 4</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: June 2016<br>
+        Build: TODO<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">General advisories</h3>
+
+<p>
+  This Developer Preview release is for <strong>app developers and other early
+  adopters</strong> and is available for daily use, development, or
+  compatibility testing. Please be aware of these general notes about the
+  release:
+</p>
+
+<ul>
+  <li>This release may have various <strong>stability issues</strong> on
+  supported devices. Users may encounter system instability, such as kernel
+  panics and crashes.
+  </li>
+
+  <li>Some apps <strong>may not function as expected</strong> on the new
+  platform version. This includes Google’s apps as well as other apps.
+  </li>
+
+  <li>Developer Preview 4 is <strong>Compatibility Test Suite (CTS)
+  approved</strong> on these devices: <strong>TODO: Need list.</strong>. Apps
+  that depend on CTS approved builds should work normally on these devices
+  (Android Pay for example).
+  </li>
+
+  <li>Developer Preview 4 is <strong>available on all supported
+  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
+  C, General Mobile 4G (Android One), as well as Sony Xperia Z3 (D6603 and
+  D6653 models). <strong>TODO: Confirm this list.</strong>
+  </li>
+</ul>
+
+
+<h3 id="new">New in DP4</h3>
+<!-- TODO -->
+
+<h4 id="">New feature</h4>
+
+<p>Description of new feature.</p>
+
+<h4 id="api-changes">Feature and API changes</h4>
+
+<dl>
+  <dt>
+    <a href="{@docRoot}preview/features/multi-window.html">Multi-Window</a>
+  </dt>
+
+  <dd>
+    The <code>android:minimalHeight</code> and <code>android:minimalWidth</code>
+    attributes have been renamed to <code>android:minHeight</code> and
+    <code>android:minWidth</code>.
+  </dd>
+</dl>
+
+<h4 id="dp4-fixes">Fixes for issues reported by developers</h4>
+
+<p>
+  A number of issues reported by developers have been fixed, including:
+</p>
+
+<ul>
+  <li><strong>TODO</strong>
+</ul>
+
+<p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
+issue tracker</a>.</p>
+
+<h3 id="ki">Known Issues</h3>
+
+<!--
+
+<h4>Product area</h4>
+
+<ul>
+  <li>Description of bug</li>
+</ul>
+
+-->
+
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+<!-- DP3 Release Notes Archive -->
 
 <h2 id="dp3">Developer Preview 3</h2>
 
@@ -60,7 +184,7 @@ page.image=images/cards/card-n-support_2x.png
   </div>
 </div>
 
-<h3 id="general">General advisories</h3>
+<h3 id="dp3-general">General advisories</h3>
 
 <p>
   This Developer Preview release is for <strong>app developers and other early
@@ -94,7 +218,7 @@ page.image=images/cards/card-n-support_2x.png
 </ul>
 
 
-<h3 id="new">New in DP3</h3>
+<h3 id="dp3-new">New in DP3</h3>
 
 <h4 id="">VR Mode for Android</h4>
 
@@ -165,7 +289,7 @@ page.image=images/cards/card-n-support_2x.png
   without the need for a USB connection.
 </p>
 
-<h4 id="api-changes">Feature and API changes</h4>
+<h4 id="dp3-api-changes">Feature and API changes</h4>
 
 <dl>
   <dt>
@@ -278,7 +402,7 @@ page.image=images/cards/card-n-support_2x.png
 <p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
 issue tracker</a>.</p>
 
-<h3 id="ki">Known Issues</h3>
+<h3 id="dp3-ki">Known Issues</h3>
 
 <h4>Accessibility</h4>
 
@@ -495,30 +619,6 @@ issue tracker</a>.</p>
     <code>adb</code> may sometimes disconnect while using JDWP debugging.
   </li>
 </ul>
-
-<!-- TBA, if any
-<h4>Device-specific issues</h4>
-
-<dl>
-  <dt>
-    <strong>Device Name</strong>
-  </dt>
-
-  <dd>
-    Issue 1
-  </dd>
-
-  <dd>
-    Issue 2
-  </dd>
-</dl>
-
--->
-
-
-
-
-
 
 
 <!-- DP2 Release Notes Archive -->
