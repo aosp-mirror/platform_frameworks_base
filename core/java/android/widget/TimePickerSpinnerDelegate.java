@@ -354,11 +354,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setOnTimeChangedListener(TimePicker.OnTimeChangedListener onTimeChangedListener) {
-        mOnTimeChangedListener = onTimeChangedListener;
-    }
-
-    @Override
     public void setEnabled(boolean enabled) {
         mMinuteSpinner.setEnabled(enabled);
         if (mDivider != null) {

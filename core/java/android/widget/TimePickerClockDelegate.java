@@ -481,11 +481,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setOnTimeChangedListener(TimePicker.OnTimeChangedListener callback) {
-        mOnTimeChangedListener = callback;
-    }
-
-    @Override
     public void setEnabled(boolean enabled) {
         mHourView.setEnabled(enabled);
         mMinuteView.setEnabled(enabled);

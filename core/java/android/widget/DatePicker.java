@@ -160,6 +160,16 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
+     * Set the callback that indicates the date has been adjusted by the user.
+     *
+     * @param onDateChangedListener How user is notified date is changed by
+     *            user, can be null.
+     */
+    public void setOnDateChangedListener(OnDateChangedListener onDateChangedListener) {
+        mDelegate.setOnDateChangedListener(onDateChangedListener);
+    }
+
+    /**
      * Update the current date.
      *
      * @param year The year.
@@ -441,6 +451,8 @@ public class DatePicker extends FrameLayout {
         void init(int year, int monthOfYear, int dayOfMonth,
                   OnDateChangedListener onDateChangedListener);
 
+        void setOnDateChangedListener(OnDateChangedListener onDateChangedListener);
+
         void updateDate(int year, int month, int dayOfMonth);
 
         int getYear();
@@ -507,6 +519,11 @@ public class DatePicker extends FrameLayout {
                 mCurrentLocale = locale;
                 onLocaleChanged(locale);
             }
+        }
+
+        @Override
+        public void setOnDateChangedListener(OnDateChangedListener callback) {
+            mOnDateChangedListener = callback;
         }
 
         @Override
