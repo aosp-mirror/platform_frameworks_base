@@ -23,7 +23,7 @@ build:
 
 update prebuilts:
     $ cp out/target/product/shamu/system/priv-app/CtsShimPrivUpgrade/CtsShimPrivUpgrade.apk \
-        cts/hostsidetests/appsecurity/test-apps/IntentFilterApp
+        cts/hostsidetests/appsecurity/test-apps/PrivilegedUpdateApp
     $ cp out/target/product/shamu/system/priv-app/CtsShimPriv/CtsShimPriv.apk \
         frameworks/base/packages/CtsShim
 
@@ -31,3 +31,4 @@ revert manifest:
     $ pushd frameworks/base && git checkout -- packages/CtsShim/build/shim_priv/AndroidManifest.xml && popd
 
 Finally, upload and submit both the cts/ and frameworks/base/ repos.
+
