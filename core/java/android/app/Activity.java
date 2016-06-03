@@ -4219,6 +4219,7 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
             @Nullable Bundle options) {
         if (mParent == null) {
+            options = transferSpringboardActivityOptions(options);
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
@@ -4267,6 +4268,14 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    private Bundle transferSpringboardActivityOptions(Bundle options) {
+        if (options == null && (mWindow != null && !mWindow.isActive())) {
+            return mActivityTransitionState.transferEnterActivityOptions();
+        } else {
+            return options;
+        }
+    }
+
     /**
      * @hide Implement to provide correct calling token.
      */
@@ -4282,6 +4291,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar = mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, this, intent, requestCode,
                 options, user);
@@ -4317,6 +4327,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                         this, mMainThread.getApplicationThread(), mToken, this,
@@ -4349,6 +4360,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
@@ -4788,6 +4800,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode, @Nullable Bundle options) {
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, child,
@@ -4853,6 +4866,7 @@ public class Activity extends ContextThemeWrapper
         if (referrer != null) {
             intent.putExtra(Intent.EXTRA_REFERRER, referrer);
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, who,
@@ -6650,11 +6664,11 @@ public class Activity extends ContextThemeWrapper
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
-        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
     }
 
     final void performCreate(Bundle icicle) {
         restoreHasCurrentPermissionRequest(icicle);
+        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         onCreate(icicle);
         mActivityTransitionState.readState(icicle);
         performCreateCommon();
@@ -6662,6 +6676,7 @@ public class Activity extends ContextThemeWrapper
 
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
         restoreHasCurrentPermissionRequest(icicle);
+        mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         onCreate(icicle, persistentState);
         mActivityTransitionState.readState(icicle);
         performCreateCommon();
