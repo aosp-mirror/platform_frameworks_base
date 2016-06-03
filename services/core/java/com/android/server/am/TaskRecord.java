@@ -492,10 +492,10 @@ final class TaskRecord {
     }
 
     /**
-     * Return true if the input activity has the same intent resolution as the intent this task
+     * Return true if the input activity has the same intent filter as the intent this task
      * record is based on (normally the root activity intent).
      */
-    boolean isSameIntentResolution(ActivityRecord r) {
+    boolean isSameIntentFilter(ActivityRecord r) {
         final Intent intent = new Intent(r.intent);
         // Correct the activity intent for aliasing. The task record intent will always be based on
         // the real activity that will be launched not the alias, so we need to use an intent with
