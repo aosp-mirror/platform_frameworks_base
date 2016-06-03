@@ -2746,4 +2746,5 @@
     <public type="attr" name="shortcutCategories" />
     <public type="attr" name="shortcutIntentAction" />
     <public type="attr" name="shortcutIntentData" />
+    <public type="attr" name="roundIcon" />
 </resources>
