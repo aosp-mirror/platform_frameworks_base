@@ -17,22 +17,29 @@
 package com.android.server.am;
 
 import android.app.ActivityManagerNative;
+import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
-import android.os.ServiceManager;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -43,8 +50,6 @@ import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.pm.UserManagerService;
-
 import java.io.File;
 
 public class RetailDemoModeService extends SystemService {
@@ -54,41 +59,88 @@ public class RetailDemoModeService extends SystemService {
     private static final String DEMO_USER_NAME = "Demo";
     private static final String ACTION_RESET_DEMO = "com.android.server.am.ACTION_RESET_DEMO";
 
-    private static final long SCREEN_WAKEUP_DELAY = 5000;
+    private static final int MSG_TURN_SCREEN_ON = 0;
+    private static final int MSG_INACTIVITY_TIME_OUT = 1;
+    private static final int MSG_START_NEW_SESSION = 2;
 
+    private static final long SCREEN_WAKEUP_DELAY = 2500;
+    private static final long USER_INACTIVITY_TIMEOUT = 30000;
+
+    boolean mDeviceInDemoMode = false;
     private ActivityManagerService mAms;
     private NotificationManager mNm;
     private UserManager mUm;
     private PowerManager mPm;
     private PowerManager.WakeLock mWakeLock;
-    private Handler mHandler;
+    Handler mHandler;
     private ServiceThread mHandlerThread;
     private PendingIntent mResetDemoPendingIntent;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!UserManager.isDeviceInDemoMode(getContext())) {
+            if (!mDeviceInDemoMode) {
                 return;
             }
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_OFF:
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mWakeLock.isHeld()) {
-                                mWakeLock.release();
-                            }
-                            mWakeLock.acquire();
-                        }
-                    }, SCREEN_WAKEUP_DELAY);
+                    mHandler.removeMessages(MSG_TURN_SCREEN_ON);
+                    mHandler.sendEmptyMessageDelayed(MSG_TURN_SCREEN_ON, SCREEN_WAKEUP_DELAY);
                     break;
                 case ACTION_RESET_DEMO:
-                    createAndSwitchToDemoUser();
+                    mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
                     break;
             }
         }
     };
+
+    final class MainHandler extends Handler {
+
+        MainHandler(Looper looper) {
+            super(looper, null, true);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_TURN_SCREEN_ON:
+                    if (mWakeLock.isHeld()) {
+                        mWakeLock.release();
+                    }
+                    mWakeLock.acquire();
+                    break;
+                case MSG_INACTIVITY_TIME_OUT:
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+                    String demoLauncherComponent = getContext().getResources()
+                            .getString(R.string.config_demoModeLauncherComponent);
+                    try {
+                        enabledState = pm.getComponentEnabledSetting(
+                                ComponentName.unflattenFromString(demoLauncherComponent),
+                            getActivityManager().getCurrentUser().id);
+                    } catch (RemoteException exc) {
+                        // XXX: shouldn't happen
+                    }
+                    if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                        Slog.i(TAG, "Restarting session due to user inactivity timeout");
+                        sendEmptyMessage(MSG_START_NEW_SESSION);
+                    }
+                    break;
+                case MSG_START_NEW_SESSION:
+                    if (DEBUG) {
+                        Slog.d(TAG, "Switching to a new demo user");
+                    }
+                    removeMessages(MSG_START_NEW_SESSION);
+                    UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
+                            UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
+                    if (demoUser != null) {
+                        setupDemoUser(demoUser);
+                        getActivityManager().switchUser(demoUser.id);
+                    }
+                    break;
+            }
+        }
+    }
 
     public RetailDemoModeService(Context context) {
         super(context);
@@ -103,6 +155,7 @@ public class RetailDemoModeService extends SystemService {
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(getResetDemoPendingIntent())
+                .setColor(getContext().getColor(R.color.system_notification_accent_color))
                 .build();
     }
 
@@ -112,23 +165,6 @@ public class RetailDemoModeService extends SystemService {
             mResetDemoPendingIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
         }
         return mResetDemoPendingIntent;
-    }
-
-    private void createAndSwitchToDemoUser() {
-        if (DEBUG) {
-            Slog.d(TAG, "Switching to a new demo user");
-        }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
-                        UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
-                if (demoUser != null) {
-                    setupDemoUser(demoUser);
-                    getActivityManager().switchUser(demoUser.id);
-                }
-            }
-        });
     }
 
     void setupDemoUser(UserInfo userInfo) {
@@ -166,14 +202,16 @@ public class RetailDemoModeService extends SystemService {
         final ContentObserver deviceDemoModeSettingObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri, int userId) {
-                boolean deviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
                 if (deviceDemoModeUri.equals(uri)) {
-                    if (deviceInDemoMode) {
-                        createAndSwitchToDemoUser();
+                    mDeviceInDemoMode = UserManager.isDeviceInDemoMode(getContext());
+                    if (mDeviceInDemoMode) {
+                        mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+                    } else if (mWakeLock.isHeld()) {
+                        mWakeLock.release();
                     }
                 }
                 // If device is provisioned and left demo mode - run the cleanup in demo folder
-                if (!deviceInDemoMode && isDeviceProvisioned()) {
+                if (!mDeviceInDemoMode && isDeviceProvisioned()) {
                     // Run on the bg thread to not block the fg thread
                     BackgroundThread.getHandler().post(new Runnable() {
                         @Override
@@ -218,7 +256,8 @@ public class RetailDemoModeService extends SystemService {
         mHandlerThread = new ServiceThread(TAG, android.os.Process.THREAD_PRIORITY_FOREGROUND,
                 false);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper(), null, true);
+        mHandler = new MainHandler(mHandlerThread.getLooper());
+        publishLocalService(RetailDemoModeServiceInternal.class, mLocalService);
     }
 
     @Override
@@ -232,7 +271,8 @@ public class RetailDemoModeService extends SystemService {
         mNm = NotificationManager.from(getContext());
 
         if (UserManager.isDeviceInDemoMode(getContext())) {
-            createAndSwitchToDemoUser();
+            mDeviceInDemoMode = true;
+            mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
         }
         registerSettingsChangeObserver();
         registerBroadcastReceiver();
@@ -240,16 +280,15 @@ public class RetailDemoModeService extends SystemService {
 
     @Override
     public void onSwitchUser(int userId) {
+        if (!mDeviceInDemoMode) {
+            return;
+        }
         if (DEBUG) {
             Slog.d(TAG, "onSwitchUser: " + userId);
         }
         UserInfo ui = getUserManager().getUserInfo(userId);
         if (!ui.isDemo()) {
-            if (UserManager.isDeviceInDemoMode(getContext())) {
-                Slog.wtf(TAG, "Should not allow switch to non-demo user in demo mode");
-            } else if (mWakeLock.isHeld()) {
-                mWakeLock.release();
-            }
+            Slog.wtf(TAG, "Should not allow switch to non-demo user in demo mode");
             return;
         }
         if (!mWakeLock.isHeld()) {
@@ -257,4 +296,23 @@ public class RetailDemoModeService extends SystemService {
         }
         mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
     }
+
+    public RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
+        private static final long USER_ACTIVITY_DEBOUNCE_TIME = 2000;
+        private long mLastUserActivityTime = 0;
+
+        @Override
+        public void onUserActivity() {
+            if (!mDeviceInDemoMode) {
+                return;
+            }
+            long timeOfActivity = SystemClock.uptimeMillis();
+            if (timeOfActivity < mLastUserActivityTime + USER_ACTIVITY_DEBOUNCE_TIME) {
+                return;
+            }
+            mLastUserActivityTime = timeOfActivity;
+            mHandler.removeMessages(MSG_INACTIVITY_TIME_OUT);
+            mHandler.sendEmptyMessageDelayed(MSG_INACTIVITY_TIME_OUT, USER_INACTIVITY_TIMEOUT);
+        }
+    };
 }
