@@ -692,6 +692,7 @@ aidl_files := \
 	frameworks/base/core/java/android/service/quicksettings/Tile.aidl \
 	frameworks/native/aidl/binder/android/os/PersistableBundle.aidl \
 	system/netd/server/binder/android/net/UidRange.aidl \
+	frameworks/base/telephony/java/android/telephony/PcoData.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)
