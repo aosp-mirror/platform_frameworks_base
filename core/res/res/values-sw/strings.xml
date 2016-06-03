@@ -245,15 +245,15 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Mahali"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"itambue mahali kifaa hiki kilipo"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenda"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"fikia kalenda yako"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"tuma na uangalie ujumbe wa SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"itume na iangalie SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hifadhi"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipiga picha na kurekodi video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"piga na udhibiti simu"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vihisi vya Mwili"</string>
@@ -290,7 +290,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Huruhusu programu kusoma mawasiliano ya matangazo ya simu yaliyoingia kwenye kifaa chako. Arifa za matangazo ya simu huwasilishwa katika maeneo mengine ili kukuonya juu ya hali za dharura. Huenda programu hasidi zikatatiza utendajikazi au shughuli ya kifaa chako wakati matangazo ya simu ya dharura yameingia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"kusoma mipasho kutoka vyanzo unavyofuatilia"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Inaruhusu programu kupata maelezo kuhusu mlisho iliyolandanishwa kwa sasa."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"tuma na uangalie ujumbe wa SMS"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"itume na iangalie SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Inaruhusu programu kutuma ujumbe wa SMS. Hii inaweza ikasababisha malipo yasiyotarajiwa. Programu hasidi zinaweza kukugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"soma SMS au MMS zako"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Inaruhusu programu kusoma ujumbe wa SMS uliohifadhiwa kwenye kompyuta kibao yako au SIM kadi. Hii inaruhusu programu kusoma ujumbe wote wa SMS, bila kujali maudhui au usiri."</string>
@@ -520,8 +520,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge kompyuta kibao au ufute data yote ya mtumiaji huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Fuatilia idadi ya manenosiri yasiyo sahihi yanayoingizwa wakati wa kufungua skrini, na ufunge televisheni au ufute data yote ya mtumiaji kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Fuatilia idadi ya manenosiri yasiyo sahihi yaliyoingizwa wakati wa kufungua skrini, na ufunge simu au ufute data yote ya mtumiaji  huyu kama ameingiza manenosiri yasiyo sahihi mara nyingi kupita kiasi."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Badilisha nenosiri la kufunga skrini"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Badilisha nenosiri la kufunga skrini."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Kubadilisha nenosiri la kufunga skrini"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Kubadilisha nenosiri la kufunga skrini."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kufunga skrini"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kudhibiti jinsi na wakati skrini inapofunga."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Kufuta data yote"</string>
@@ -598,11 +598,11 @@
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Simu ya Kampuni"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Kuu"</string>
-    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Pepesi Nyinginezo"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Faksi Nyinginezo"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Redio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleksi"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Nambari ya Simu ya Mkononi ya Kazini"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Simu ya Mkononi ya Kazini"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Peja ya Kazini"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Msaidizi"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -1608,8 +1608,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ombi la SS limerekebishwa na kuwa ombi jipya la SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Wasifu wa kazini"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Kitufe cha kupanua"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"geuza upanuzi"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Mlango wa USB wa Pembeni wa Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Mlango wa USB wa Pembeni"</string>
@@ -1617,6 +1616,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Funga vipengee vya ziada"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Panua"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Funga"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
@@ -1649,6 +1650,10 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Anzisha Kipindi Upya"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Gonga ili uanzishe kipindi kipya cha onyesho"</string>
+    <!-- no translation found for demo_starting_message (7574017688324606624) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Rejesha mipangilio iliyotoka nayo kiwandani ili utumie kifaa hiki bila vikwazo"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Gusa ili kupata maelezo zaidi."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> imezimwa"</string>
