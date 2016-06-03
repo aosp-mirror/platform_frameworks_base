@@ -384,15 +384,17 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     // Set the alpha type for the decode.
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
-    const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(), decodeColorType,
-            alphaType);
+    const SkImageInfo decodeInfo = codec->getInfo().makeWH(size.width(), size.height())
+                                                   .makeColorType(decodeColorType)
+                                                   .makeAlphaType(alphaType);
     SkImageInfo bitmapInfo = decodeInfo;
     if (decodeColorType == kGray_8_SkColorType) {
         // The legacy implementation of BitmapFactory used kAlpha8 for
         // grayscale images (before kGray8 existed).  While the codec
         // recognizes kGray8, we need to decode into a kAlpha8 bitmap
         // in order to avoid a behavior change.
-        bitmapInfo = SkImageInfo::MakeA8(size.width(), size.height());
+        bitmapInfo =
+                bitmapInfo.makeColorType(kAlpha_8_SkColorType).makeAlphaType(kPremul_SkAlphaType);
     }
     SkBitmap decodingBitmap;
     if (!decodingBitmap.setInfo(bitmapInfo) ||
@@ -479,8 +481,8 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
-        outputBitmap.setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
-                scaledColorType, decodingBitmap.alphaType()));
+        outputBitmap.setInfo(
+                bitmapInfo.makeWH(scaledWidth, scaledHeight).makeColorType(scaledColorType));
         if (!outputBitmap.tryAllocPixels(outputAllocator, NULL)) {
             // This should only fail on OOM.  The recyclingAllocator should have
             // enough memory since we check this before decoding using the
