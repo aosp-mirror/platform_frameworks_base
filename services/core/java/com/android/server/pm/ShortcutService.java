@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +68,7 @@ import android.text.format.Time;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.KeyValueListParser;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -277,6 +279,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final IPackageManager mIPackageManager;
     private final PackageManagerInternal mPackageManagerInternal;
     private final UserManager mUserManager;
+    private final UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     @GuardedBy("mLock")
     final SparseIntArray mUidState = new SparseIntArray();
@@ -353,8 +356,11 @@ public class ShortcutService extends IShortcutService.Stub {
         LocalServices.addService(ShortcutServiceInternal.class, new LocalService());
         mHandler = new Handler(looper);
         mIPackageManager = AppGlobals.getPackageManager();
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mUserManager = context.getSystemService(UserManager.class);
+        mPackageManagerInternal = Preconditions.checkNotNull(
+                LocalServices.getService(PackageManagerInternal.class));
+        mUserManager = Preconditions.checkNotNull(context.getSystemService(UserManager.class));
+        mUsageStatsManagerInternal = Preconditions.checkNotNull(
+                LocalServices.getService(UsageStatsManagerInternal.class));
 
         mPackageMonitor.register(context, looper, UserHandle.ALL, /* externalStorage= */ false);
 
@@ -1740,7 +1746,28 @@ public class ShortcutService extends IShortcutService.Stub {
     public void reportShortcutUsed(String packageName, String shortcutId, int userId) {
         verifyCaller(packageName, userId);
 
-        // TODO Implement it.
+        Preconditions.checkNotNull(shortcutId);
+
+        if (DEBUG) {
+            Slog.d(TAG, String.format("reportShortcutUsed: Shortcut %s package %s used on user %d",
+                    shortcutId, packageName, userId));
+        }
+
+        synchronized (mLock) {
+            final ShortcutPackage ps = getPackageShortcutsLocked(packageName, userId);
+            if (ps.findShortcutById(shortcutId) == null) {
+                Log.w(TAG, String.format("reportShortcutUsed: package %s doesn't have shortcut %s",
+                        packageName, shortcutId));
+                return;
+            }
+        }
+
+        final long token = injectClearCallingIdentity();
+        try {
+            mUsageStatsManagerInternal.reportShortcutUsage(packageName, shortcutId, userId);
+        } finally {
+            injectRestoreCallingIdentity(token);
+        }
     }
 
     /**

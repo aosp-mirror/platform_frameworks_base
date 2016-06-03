@@ -17,6 +17,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -357,6 +358,18 @@ public class ShortcutManager {
         }
     }
 
+    /**
+     * Applications that publish shortcuts should call this method whenever an action that's
+     * equivalent to an existing shortcut has been taken by the user.  This includes not only when
+     * the user manually taps a shortcut, but when the user takes an equivalent action within the
+     * application -- for example, when a music player application has a shortcut to playlist X,
+     * then the application should not only report it when the playlist is opened from the
+     * shortcut, but also when the user plays the playlist within the application.
+     *
+     * <p>The information is accessible via {@link UsageStatsManager#queryEvents}
+     * Typically, launcher applications use this information to build a prediction model
+     * so that they can promote the shortcuts that are likely to be used at the moment.
+     */
     public void reportShortcutUsed(String shortcutId) {
         try {
             mService.reportShortcutUsed(mContext.getPackageName(), shortcutId,
