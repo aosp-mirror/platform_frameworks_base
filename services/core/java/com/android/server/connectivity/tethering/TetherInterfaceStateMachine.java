@@ -43,6 +43,8 @@ import java.net.InetAddress;
 public class TetherInterfaceStateMachine extends StateMachine {
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
     private static final int USB_PREFIX_LENGTH = 24;
+    private static final String WIFI_HOST_IFACE_ADDR = "192.168.43.1";
+    private static final int WIFI_HOST_IFACE_PREFIX_LENGTH = 24;
 
     private final static String TAG = "TetherInterfaceSM";
     private final static boolean DBG = false;
@@ -81,13 +83,13 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final INetworkStatsService mStatsService;
     private final IControlsTethering mTetherController;
 
-    private final boolean mUsb;
     private final String mIfaceName;
+    private final int mInterfaceType;
 
     private int mLastError;
     private String mMyUpstreamIfaceName;  // may change over time
 
-    public TetherInterfaceStateMachine(String ifaceName, Looper looper, boolean usb,
+    public TetherInterfaceStateMachine(String ifaceName, Looper looper, int interfaceType,
                     INetworkManagementService nMService, INetworkStatsService statsService,
                     IControlsTethering tetherController) {
         super(ifaceName, looper);
@@ -95,7 +97,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mStatsService = statsService;
         mTetherController = tetherController;
         mIfaceName = ifaceName;
-        mUsb = usb;
+        mInterfaceType = interfaceType;
         setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
 
         mInitialState = new InitialState();
@@ -143,25 +145,38 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     // configured when we start tethering and unconfig'd on error or conclusion
-    private boolean configureUsbIface(boolean enabled, String iface) {
-        if (VDBG) Log.d(TAG, "configureUsbIface(" + enabled + ")");
+    private boolean configureIfaceIp(boolean enabled) {
+        if (VDBG) Log.d(TAG, "configureIfaceIp(" + enabled + ")");
+
+        String ipAsString = null;
+        int prefixLen = 0;
+        if (mInterfaceType == ConnectivityManager.TETHERING_USB) {
+            ipAsString = USB_NEAR_IFACE_ADDR;
+            prefixLen = USB_PREFIX_LENGTH;
+        } else if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
+            ipAsString = WIFI_HOST_IFACE_ADDR;
+            prefixLen = WIFI_HOST_IFACE_PREFIX_LENGTH;
+        } else {
+            // Nothing to do, BT does this elsewhere.
+            return true;
+        }
 
         InterfaceConfiguration ifcg = null;
         try {
-            ifcg = mNMService.getInterfaceConfig(iface);
+            ifcg = mNMService.getInterfaceConfig(mIfaceName);
             if (ifcg != null) {
-                InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
-                ifcg.setLinkAddress(new LinkAddress(addr, USB_PREFIX_LENGTH));
+                InetAddress addr = NetworkUtils.numericToInetAddress(ipAsString);
+                ifcg.setLinkAddress(new LinkAddress(addr, prefixLen));
                 if (enabled) {
                     ifcg.setInterfaceUp();
                 } else {
                     ifcg.setInterfaceDown();
                 }
                 ifcg.clearFlag("running");
-                mNMService.setInterfaceConfig(iface, ifcg);
+                mNMService.setInterfaceConfig(mIfaceName, ifcg);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error configuring interface " + iface, e);
+            Log.e(TAG, "Error configuring interface " + mIfaceName, e);
             return false;
         }
 
@@ -205,12 +220,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class TetheredState extends State {
         @Override
         public void enter() {
-            if (mUsb) {
-                if (!configureUsbIface(true, mIfaceName)) {
-                    setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
-                    transitionTo(mInitialState);
-                    return;
-                }
+            if (!configureIfaceIp(true)) {
+                setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
+                transitionTo(mInitialState);
+                return;
             }
 
             try {
@@ -242,9 +255,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 Log.e(TAG, "Failed to untether interface: " + ee.toString());
             }
 
-            if (mUsb) {
-                configureUsbIface(false, mIfaceName);
-            }
+            configureIfaceIp(false);
         }
 
         private void cleanupUpstream() {

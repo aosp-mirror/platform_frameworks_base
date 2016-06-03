@@ -128,7 +128,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
 
     private Map<String, TetherInterfaceStateMachine> mIfaces; // all tethered/tetherable ifaces
 
-    private BroadcastReceiver mStateReceiver;
+    private final BroadcastReceiver mStateReceiver;
 
     // {@link ComponentName} of the Service used to run tether provisioning.
     private static final ComponentName TETHER_SERVICE = ComponentName.unflattenFromString(Resources
@@ -163,6 +163,9 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private boolean mUsbTetherRequested; // true if USB tethering should be started
                                          // when RNDIS is enabled
 
+    // True iff WiFi tethering should be started when soft AP is ready.
+    private boolean mWifiTetherRequested;
+
     public Tethering(Context context, INetworkManagementService nmService,
             INetworkStatsService statsService) {
         mContext = context;
@@ -184,6 +187,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter);
 
@@ -245,29 +249,22 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         // Never called directly: only called from interfaceLinkStateChanged.
         // See NetlinkHandler.cpp:71.
         if (VDBG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
-        boolean found = false;
-        boolean usb = false;
         synchronized (mPublicSync) {
-            if (isWifi(iface)) {
-                found = true;
-            } else if (isUsb(iface)) {
-                found = true;
-                usb = true;
-            } else if (isBluetooth(iface)) {
-                found = true;
+            int interfaceType = ifaceNameToType(iface);
+            if (interfaceType == ConnectivityManager.TETHERING_INVALID) {
+                return;
             }
-            if (found == false) return;
 
             TetherInterfaceStateMachine sm = mIfaces.get(iface);
             if (up) {
                 if (sm == null) {
-                    sm = new TetherInterfaceStateMachine(iface, mLooper, usb,
+                    sm = new TetherInterfaceStateMachine(iface, mLooper, interfaceType,
                             mNMService, mStatsService, this);
                     mIfaces.put(iface, sm);
                     sm.start();
                 }
             } else {
-                if (isUsb(iface)) {
+                if (interfaceType == ConnectivityManager.TETHERING_USB) {
                     // ignore usb0 down after enabling RNDIS
                     // we will handle disconnect in interfaceRemoved instead
                     if (VDBG) Log.d(TAG, "ignore interface down for " + iface);
@@ -293,7 +290,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
     }
 
-    public boolean isWifi(String iface) {
+    private boolean isWifi(String iface) {
         synchronized (mPublicSync) {
             for (String regex : mTetherableWifiRegexs) {
                 if (iface.matches(regex)) return true;
@@ -302,7 +299,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
     }
 
-    public boolean isBluetooth(String iface) {
+    private boolean isBluetooth(String iface) {
         synchronized (mPublicSync) {
             for (String regex : mTetherableBluetoothRegexs) {
                 if (iface.matches(regex)) return true;
@@ -311,23 +308,23 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
         }
     }
 
+    private int ifaceNameToType(String iface) {
+        if (isWifi(iface)) {
+            return ConnectivityManager.TETHERING_WIFI;
+        } else if (isUsb(iface)) {
+            return ConnectivityManager.TETHERING_USB;
+        } else if (isBluetooth(iface)) {
+            return ConnectivityManager.TETHERING_BLUETOOTH;
+        }
+        return ConnectivityManager.TETHERING_INVALID;
+    }
+
     @Override
     public void interfaceAdded(String iface) {
         if (VDBG) Log.d(TAG, "interfaceAdded " + iface);
-        boolean found = false;
-        boolean usb = false;
         synchronized (mPublicSync) {
-            if (isWifi(iface)) {
-                found = true;
-            }
-            if (isUsb(iface)) {
-                found = true;
-                usb = true;
-            }
-            if (isBluetooth(iface)) {
-                found = true;
-            }
-            if (found == false) {
+            int interfaceType = ifaceNameToType(iface);
+            if (interfaceType == ConnectivityManager.TETHERING_INVALID) {
                 if (VDBG) Log.d(TAG, iface + " is not a tetherable iface, ignoring");
                 return;
             }
@@ -337,7 +334,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 if (VDBG) Log.d(TAG, "active iface (" + iface + ") reported as added, ignoring");
                 return;
             }
-            sm = new TetherInterfaceStateMachine(iface, mLooper, usb,
+            sm = new TetherInterfaceStateMachine(iface, mLooper, interfaceType,
                     mNMService, mStatsService, this);
             mIfaces.put(iface, sm);
             sm.start();
@@ -412,24 +409,19 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
      * for the specified interface.
      */
     private void enableTetheringInternal(int type, boolean enable, ResultReceiver receiver) {
-        boolean isProvisioningRequired = isTetherProvisioningRequired();
+        boolean isProvisioningRequired = enable && isTetherProvisioningRequired();
+        int result;
         switch (type) {
             case ConnectivityManager.TETHERING_WIFI:
-                final WifiManager wifiManager =
-                        (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-                if (wifiManager.setWifiApEnabled(null, enable)) {
-                    sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_NO_ERROR);
-                    if (enable && isProvisioningRequired) {
-                        scheduleProvisioningRechecks(type);
-                    }
-                } else{
-                    sendTetherResult(receiver, ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
+                result = setWifiTethering(enable);
+                if (isProvisioningRequired && result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    scheduleProvisioningRechecks(type);
                 }
+                sendTetherResult(receiver, result);
                 break;
             case ConnectivityManager.TETHERING_USB:
-                int result = setUsbTethering(enable);
-                if (enable && isProvisioningRequired &&
-                        result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                result = setUsbTethering(enable);
+                if (isProvisioningRequired && result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                     scheduleProvisioningRechecks(type);
                 }
                 sendTetherResult(receiver, result);
@@ -446,6 +438,20 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
     private void sendTetherResult(ResultReceiver receiver, int result) {
         if (receiver != null) {
             receiver.send(result, null);
+        }
+    }
+
+    private int setWifiTethering(final boolean enable) {
+        synchronized (mPublicSync) {
+            // Note that we're maintaining a predicate that mWifiTetherRequested always matches
+            // our last request to WifiManager re: its AP enabled status.
+            mWifiTetherRequested = enable;
+            final WifiManager wifiManager =
+                    (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            if (wifiManager.setWifiApEnabled(null /* use existing wifi config */, enable)) {
+                return ConnectivityManager.TETHER_ERROR_NO_ERROR;
+            }
+            return ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
         }
     }
 
@@ -770,7 +776,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     mRndisEnabled = intent.getBooleanExtra(UsbManager.USB_FUNCTION_RNDIS, false);
                     // start tethering if we have a request pending
                     if (usbConnected && mRndisEnabled && mUsbTetherRequested) {
-                        tetherUsb(true);
+                        tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_USB);
                     }
                     mUsbTetherRequested = false;
                 }
@@ -782,31 +788,72 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                     if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
                     mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
                 }
+            } else if (action.equals(WifiManager.WIFI_AP_STATE_CHANGED_ACTION)) {
+                synchronized (Tethering.this.mPublicSync) {
+                    if (!mWifiTetherRequested) {
+                        // We only care when we're trying to tether via our WiFi interface.
+                        return;
+                    }
+                    int curState =  intent.getIntExtra(WifiManager.EXTRA_WIFI_AP_STATE,
+                            WifiManager.WIFI_AP_STATE_DISABLED);
+                    switch (curState) {
+                        case WifiManager.WIFI_AP_STATE_ENABLING:
+                            // We can see this state on the way to both enabled and failure states.
+                            break;
+                        case WifiManager.WIFI_AP_STATE_ENABLED:
+                            // Tell an appropriate interface state machine that it should tether.
+                            tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_WIFI);
+                            break;
+                        case WifiManager.WIFI_AP_STATE_DISABLED:
+                        case WifiManager.WIFI_AP_STATE_DISABLING:
+                        case WifiManager.WIFI_AP_STATE_FAILED:
+                        default:
+                            if (DBG) {
+                                Log.d(TAG, "Canceling WiFi tethering request - AP_STATE=" +
+                                    curState);
+                            }
+                            // Tell an appropriate interface state machine that
+                            // it needs to tear itself down.
+                            tetherMatchingInterfaces(false, ConnectivityManager.TETHERING_WIFI);
+                            setWifiTethering(false);
+                            break;
+                    }
+                }
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 updateConfiguration();
             }
         }
     }
 
-    private void tetherUsb(boolean enable) {
-        if (VDBG) Log.d(TAG, "tetherUsb " + enable);
+    private void tetherMatchingInterfaces(boolean enable, int interfaceType) {
+        if (VDBG) Log.d(TAG, "tetherMatchingInterfaces(" + enable + ", " + interfaceType + ")");
 
-        String[] ifaces = new String[0];
+        String[] ifaces = null;
         try {
             ifaces = mNMService.listInterfaces();
         } catch (Exception e) {
             Log.e(TAG, "Error listing Interfaces", e);
             return;
         }
-        for (String iface : ifaces) {
-            if (isUsb(iface)) {
-                int result = (enable ? tether(iface) : untether(iface));
-                if (result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                    return;
+        String chosenIface = null;
+        if (ifaces != null) {
+            for (String iface : ifaces) {
+                if (ifaceNameToType(iface) == interfaceType) {
+                    chosenIface = iface;
+                    break;
                 }
             }
         }
-        Log.e(TAG, "unable start or stop USB tethering");
+        if (chosenIface == null) {
+            Log.e(TAG, "could not find iface of type " + interfaceType);
+            return;
+        }
+
+        int result = (enable ? tether(chosenIface) : untether(chosenIface));
+        if (result != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+            Log.e(TAG, "unable start or stop tethering on iface " + chosenIface);
+            return;
+        }
     }
 
     // TODO - return copies so people can't tamper
@@ -831,7 +878,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                 if (mRndisEnabled) {
                     final long ident = Binder.clearCallingIdentity();
                     try {
-                        tetherUsb(true);
+                        tetherMatchingInterfaces(true, ConnectivityManager.TETHERING_USB);
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -842,7 +889,7 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
             } else {
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    tetherUsb(false);
+                    tetherMatchingInterfaces(false, ConnectivityManager.TETHERING_USB);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
@@ -1410,15 +1457,10 @@ public class Tethering extends BaseNetworkObserver implements IControlsTethering
                                 for (String iface : ifaces) {
                                     TetherInterfaceStateMachine sm = mIfaces.get(iface);
                                     if (sm != null && sm.isTethered()) {
-                                        if (isUsb(iface)) {
-                                            tethered.add(new Integer(
-                                                    ConnectivityManager.TETHERING_USB));
-                                        } else if (isWifi(iface)) {
-                                            tethered.add(new Integer(
-                                                    ConnectivityManager.TETHERING_WIFI));
-                                        } else if (isBluetooth(iface)) {
-                                            tethered.add(new Integer(
-                                                    ConnectivityManager.TETHERING_BLUETOOTH));
+                                        int interfaceType = ifaceNameToType(iface);
+                                        if (interfaceType !=
+                                                ConnectivityManager.TETHERING_INVALID) {
+                                            tethered.add(new Integer(interfaceType));
                                         }
                                     }
                                 }
