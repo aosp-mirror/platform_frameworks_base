@@ -47,10 +47,14 @@ public class TextViewTransformState extends TransformState {
                 int ownEllipsized = getEllipsisCount();
                 int otherEllipsized = otherTvs.getEllipsisCount();
                 return ownEllipsized == otherEllipsized
-                        && mText.getHeight() == otherTvs.mText.getHeight();
+                        && getInnerHeight(mText) == getInnerHeight(otherTvs.mText);
             }
         }
         return super.sameAs(otherState);
+    }
+
+    private int getInnerHeight(TextView text) {
+        return text.getHeight() - text.getPaddingTop() - text.getPaddingBottom();
     }
 
     private int getEllipsisCount() {
