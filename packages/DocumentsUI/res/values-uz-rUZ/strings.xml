@@ -28,7 +28,7 @@
     <string name="menu_settings" msgid="8239065133341597825">"Xotira sozlamalari"</string>
     <string name="menu_open" msgid="432922957274920903">"Ochish"</string>
     <string name="menu_save" msgid="2394743337684426338">"Saqlash"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Ulashish"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Baham ko‘rish"</string>
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Hammasini belgilash"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>
@@ -38,7 +38,7 @@
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Joylash"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Ichki xotirani ko‘rsatish"</string>
     <string name="menu_advanced_hide" msgid="4218809952721972589">"Ichki xotirani berkitish"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Fayllar hajmini ko‘rsatish"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Fayllar hajmi ko‘rsatilsin"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayllar hajmi ko‘rsatilmasin"</string>
     <string name="button_select" msgid="527196987259139214">"Tanlash"</string>
     <string name="button_copy" msgid="8706475544635021302">"Nusxalash"</string>
