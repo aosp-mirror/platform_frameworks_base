@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Hobespen lehenetsi batzuk ezarrita daude"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Ez dago hobespen lehenetsirik ezarrita"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Testua ahots bihurtzeko eginbidearen ezarpenak"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Testua ahots bihurtzeko eginbidearen irteera"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Testua ahots bihurtzeko eginbidea"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Hizketaren abiadura"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Testua zer abiaduran esaten den"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonua"</string>
@@ -323,7 +323,7 @@
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Administratzaileak kontrolatzen du"</string>
     <string name="enabled_by_admin" msgid="2386503803463071894">"Administratzaileak gaitu du"</string>
     <string name="disabled_by_admin" msgid="3669999613095206948">"Administratzaileak desgaitu du"</string>
-    <string name="home" msgid="3256884684164448244">"Ezarpenen orri nagusia"</string>
+    <string name="home" msgid="3256884684164448244">"Ezarpenen hasierako pantaila"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"% 0"</item>
     <item msgid="8934126114226089439">"% 50"</item>

@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"I-enable ang OpenGL traces"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"I-disable USB audio routing"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"I-disable automatic routing sa USB audio peripheral"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Ipakita mga layout bound"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Ipakita ang layout bounds"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Ipakita ang mga hangganan ng clip, margin, atbp."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Force RTL layout dir."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Force screen layout dir. sa RTL sa lahat ng lokal"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"Puwersahin ang 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Paganahin ang 4x MSAA sa OpenGL ES 2.0 na apps"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"I-debug ang di-parihabang mga clip operation"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Pag-render GPU ng Profile"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Pag-render ng Profile GPU"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Scale ng window animation"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Scale ng transition animation"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Scale ng tagal ng animator"</string>
