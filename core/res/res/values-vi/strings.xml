@@ -597,16 +597,16 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"Khác"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"Số gọi lại"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Ô tô"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Số điện thoại chính của Cơ quan"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Số ĐT CQ chính"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
-    <string name="phoneTypeMain" msgid="6766137010628326916">"Số điện thoại chính"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Số chính"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Số fax Khác"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Số telex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Di động tại cơ quan"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Số máy nhắn tin cơ quan"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Số điện thoại Hỗ trợ"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Di dộng CQ"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Số nhắn tin CQ"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Số hỗ trợ"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Tùy chỉnh"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Ngày sinh"</string>
@@ -1553,7 +1553,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Được cập nhật bởi quản trị viên của bạn"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Đã bị xóa bởi quản trị viên của bạn"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Để giúp tăng tuổi thọ pin, trình tiết kiệm pin sẽ giảm hiệu suất thiết bị của bạn và hạn chế rung, dịch vụ vị trí và hầu hết dữ liệu nền. Email, nhắn tin và các ứng dụng khác dựa trên đồng bộ hóa có thể không cập nhật nếu bạn không mở chúng.\n\nTrình tiết kiệm pin tự động tắt khi thiết bị của bạn đang sạc."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu, nhưng có thể thực hiện việc đó ít thường xuyên hơn. Chẳng hạn, điều này có thể có nghĩa là hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Để giúp giảm mức sử dụng dữ liệu. Trình tiết kiệm dữ liệu chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể truy cập dữ liệu nhưng có thể thực hiện việc đó ít thường xuyên hơn. Ví như, hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Bật"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Yêu cầu SS được sửa đổi thành yêu cầu SS mới."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Hồ sơ công việc"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Nút mở rộng"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"chuyển đổi mở rộng"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Cổng ngoại vi USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Cổng ngoại vi USB"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Đóng tràn"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Tối đa hóa"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Đóng"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other">Đã chọn <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>
@@ -1651,6 +1652,10 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Khởi động lại phiên"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Nhấn để bắt đầu phiên trình diễn mới"</string>
+    <!-- no translation found for demo_starting_message (7574017688324606624) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Khôi phục cài đặt gốc để sử dụng thiết bị này mà không bị hạn chế"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Chạm để tìm hiểu thêm."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Đã tắt <xliff:g id="LABEL">%1$s</xliff:g>"</string>

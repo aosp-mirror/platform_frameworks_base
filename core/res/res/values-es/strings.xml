@@ -505,7 +505,7 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite que una aplicación proporcione y utilice certificados DRM. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"recibir estado de transferencias de Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite que esta aplicación reciba información sobre las transferencias actuales de Android Beam"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"eliminar certificados DRM"</string>
+    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"quitar certificados DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a una aplicación eliminar los certificados DRM. Las aplicaciones normales no deberí­an necesitar este permiso."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"enlazar con el servicio de mensajería de un operador"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite enlazar con la interfaz de nivel superior del servicio de mensajería de un operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha dejado de funcionar"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue sin funcionar"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Volver a abrir la aplicación"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar sugerencias"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
@@ -1327,7 +1326,7 @@
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Límite de datos Wi-Fi superado"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Límite superado en <xliff:g id="SIZE">%s</xliff:g>"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Conexiones automáticas restringidas"</string>
-    <string name="data_usage_restricted_body" msgid="469866376337242726">"Toca para eliminar restricción."</string>
+    <string name="data_usage_restricted_body" msgid="469866376337242726">"Toca para quitar la restricción."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
     <string name="issued_to" msgid="454239480274921032">"Emitido para:"</string>
@@ -1415,7 +1414,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Has dibujado el patrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Si se producen <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, deberás desbloquear la TV mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
+    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>
@@ -1610,10 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La solicitud SS se ha modificado para la solicitud USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS se ha modificado para la nueva solicitud SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Botón Mostrar"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"alternar mostrar y ocultar"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Puerto periférico USB (Android)"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Puerto periférico USB"</string>
@@ -1621,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Cerrar menú adicional"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizar"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Cerrar"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> seleccionados</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> seleccionado</item>
@@ -1651,9 +1650,11 @@
     <string name="unpin_target" msgid="3556545602439143442">"No fijar"</string>
     <string name="app_info" msgid="6856026610594615344">"Información de la aplicación"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Reiniciar sesión"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Toca para iniciar una nueva sesión de demostración"</string>
+    <!-- no translation found for demo_starting_message (7574017688324606624) -->
     <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
+    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
     <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Restablece los datos de fábrica para usar este dispositivo sin restricciones"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>

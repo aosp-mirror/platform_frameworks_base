@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Permintaan SS diubah kepada permintaan SS baharu."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil kerja"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Butang kembangkan"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"togol pengembangan"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port Persisian USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port Persisian USB"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Tutup limpahan"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimumkan"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Tutup"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dipilih</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
@@ -1651,6 +1652,10 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Mulakan Semula Sesi"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Ketik untuk memulakan sesi tunjuk cara baharu"</string>
+    <!-- no translation found for demo_starting_message (7574017688324606624) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Lakukan tetapan semula kilang untuk menggunakan peranti ini tanpa sekatan"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ketik untuk mengetahui lebih lanjut."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> dilumpuhkan"</string>

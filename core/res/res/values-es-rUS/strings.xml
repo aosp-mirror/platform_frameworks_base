@@ -595,9 +595,9 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Fax personal"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Localizador"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Otro"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolución de llamada"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Devolver llamada"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Automóvil"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa principal"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Empresa (principal)"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Principal"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Otro fax"</string>
@@ -1547,7 +1547,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla no fija"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para quitar fijación"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para quitar fijación"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para quitar fijación"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Lo instaló el administrador."</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizado por el administrador"</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS cambió por una nueva solicitud SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Botón Expandir"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"activar o desactivar la expansión"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Puerto USB de periféricos Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Puerto USB de periféricos"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Cerrar la barra de herramientas flotante adicional"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizar"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Cerrar"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementos seleccionados</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento seleccionado</item>
@@ -1651,6 +1652,10 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Reiniciar sesión"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Presiona para iniciar una nueva sesión de demostración"</string>
+    <!-- no translation found for demo_starting_message (7574017688324606624) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Restablece la configuración de fábrica para usar este dispositivo sin restricciones"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Toca para obtener más información."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Se inhabilitó <xliff:g id="LABEL">%1$s</xliff:g>"</string>
