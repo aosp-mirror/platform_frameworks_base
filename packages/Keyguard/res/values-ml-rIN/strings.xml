@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"അൺലോക്കുചെയ്യുന്നതിന് പാസ്‌വേഡ് ടൈപ്പുചെയ്യുക"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"അൺലോക്കുചെയ്യുന്നതിന് പിൻ ടൈപ്പുചെയ്യുക"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"പിൻ കോഡ് തെറ്റാണ്."</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"ചാർജ്ജുചെയ്‌തു"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"ചാർജായി"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"ചാർജ്ജുചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"വേഗത്തിൽ ചാർജുചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"പതുക്കെ ചാർജുചെയ്യുന്നു"</string>

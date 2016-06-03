@@ -48,7 +48,7 @@
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картасының бекітпесін ашуда…"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Кескін арқылы ашу."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin арқылы ашу."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Кілтсөз арқылы ашу."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Құпия сөз арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Кескін арқылы ашу аймағы."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Сырғыту аймағы."</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN аумағы"</string>

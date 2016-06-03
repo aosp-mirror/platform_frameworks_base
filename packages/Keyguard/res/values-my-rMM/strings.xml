@@ -29,7 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"သော့ဖွင့်ရန် စကားဝှက်ကို ရိုက်ထည့်ပါ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"သော့ဖွင့်ရန် PIN ကို ရိုက်ထည့်ပါ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ပင်နံပါတ်မှားနေပါသည်"</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"အားသွင်းနေပါသည်"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"အားသွင်းပြီးပါပြီ"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"အားသွင်းနေ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"လျှင်မြန်စွာ အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"နှေးကွေးစွာ အားသွင်းနေသည်"</string>
