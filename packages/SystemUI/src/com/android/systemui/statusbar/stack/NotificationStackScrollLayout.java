@@ -53,6 +53,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.OverScroller;
+import android.widget.ScrollView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -3600,6 +3601,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
             }
         }
+        // Talkback only listenes to scroll events of certain classes, let's make us a scrollview
+        info.setClassName(ScrollView.class.getName());
     }
 
     /** @hide */
