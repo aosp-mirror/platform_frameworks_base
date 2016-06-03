@@ -215,11 +215,11 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"பேனலை மூடு."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"நேரத்தை அதிகரி."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"நேரத்தைக் குறை."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ஃபிளாஷ்லைட் முடக்கத்தில்."</string>
-    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ஃபிளாஷ்லைட் இல்லை."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ஃபிளாஷ்லைட் இயக்கத்தில்."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"டார்ச் லைட் எரியவில்லை."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"டார்ச் லைட் இல்லை."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"டார்ச் லைட் எரிகிறது"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ஃபிளாஷ்லைட் முடக்கப்பட்டது."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ஃபிளாஷ்லைட் இயக்கப்பட்டது."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"டார்ச் லைட் எரிகிறது"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"வண்ண நேர்மாறு முறை முடக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"வண்ண நேர்மாறு முறை இயக்கப்பட்டது."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"மொபைல் ஹாட்ஸ்பாட் முடக்கப்பட்டது."</string>
@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"இருப்பிடக் கோரிக்கைகள் இயக்கப்பட்டன"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"எல்லா அறிவிப்புகளையும் அழி."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">உள்ளே மேலும் <xliff:g id="NUMBER_1">%s</xliff:g> அறிவிப்புகள் உள்ளன.</item>
+      <item quantity="one">உள்ளே மேலும் <xliff:g id="NUMBER_0">%s</xliff:g> அறிவிப்பு உள்ளது.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"அறிவிப்பு அமைப்புகள்"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> அமைப்புகள்"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"திரை தானாகச் சுழலும்."</string>
@@ -305,7 +308,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"டெதெரிங்"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ஹாட்ஸ்பாட்"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"அறிவிப்புகள்"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ஃபிளாஷ்லைட்"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"டார்ச் லைட்"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"செல்லுலார் தரவு"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"தரவுப் பயன்பாடு"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"மீதமுள்ள தரவு"</string>

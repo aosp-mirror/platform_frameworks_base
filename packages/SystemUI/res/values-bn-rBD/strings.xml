@@ -51,8 +51,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ব্লুটুথ টিথার করা হয়েছে"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতিগুলি সেট আপ করুন"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ফিজিক্যাল কীবোর্ড"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"এই <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপ্লিকেশানটিকে কি USB ডিভাইস অ্যাক্সেস করা মঞ্জুরি দেবেন?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"এই <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপ্লিকেশানটিকে কি USB যন্ত্রাংশ অ্যাক্সেস করার মঞ্জুরি দেবেন?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"এই <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপ্লিকেশানটিকে কি USB ডিভাইস অ্যাক্সেস করা অনুমতি দেবেন?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"এই <xliff:g id="APPLICATION">%1$s</xliff:g> অ্যাপ্লিকেশানটিকে কি USB যন্ত্রাংশ অ্যাক্সেস করার অনুমতি দেবেন?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"যখন এই USB ডিভাইসটি সংযুক্ত থাকে তখন কি <xliff:g id="ACTIVITY">%1$s</xliff:g> খুলবেন?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"যখন এই USB যন্ত্রাংশটি সংযুক্ত থাকে তখন কি <xliff:g id="ACTIVITY">%1$s</xliff:g> খুলবেন?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ইনস্টল থাকা কোনো অ্যাপ্লিকেশান এই USB যন্ত্রাংশের সাথে কাজ করে না৷ <xliff:g id="URL">%1$s</xliff:g> এ এই যন্ত্রাংশের সম্পর্কে আরো জানুন৷"</string>
@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"কম্পিউটারের RSA কী আঙ্গুলের ছাপ হল:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"এই কম্পিউটার থেকে সর্বদা অনুমতি দিন"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ডিবাগিং অনুমোদিত নয়"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ব্যবহারকারী বর্তমানে এই ডিভাইসটিতে সাইন ইন করেছেন তাই USB ডিবাগিং চালু করা যাবে না। এই বৈশিষ্ট্যটি ব্যবহার করতে, অনুগ্রহ করে প্রশাসক ব্যবহারকারীতে পাল্টান।"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"ব্যবহারকারী বর্তমানে এই ডিভাইসটিতে প্রবেশ করুন করেছেন তাই USB ডিবাগিং চালু করা যাবে না। এই বৈশিষ্ট্যটি ব্যবহার করতে, অনুগ্রহ করে প্রশাসক ব্যবহারকারীতে পাল্টান।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"পূর্ণ স্ক্রীণে প্রসারিত করুন"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"স্ক্রীনশট সংরক্ষণ করা হচ্ছে..."</string>
@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"অবস্থান অনুরোধ সক্রিয় রয়েছে"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"সমস্ত বিজ্ঞপ্তি সাফ করুন৷"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>টি"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">ভিতরে আরও <xliff:g id="NUMBER_1">%s</xliff:g>টি বিজ্ঞপ্তি আছে।</item>
+      <item quantity="other">ভিতরে আরও <xliff:g id="NUMBER_1">%s</xliff:g>টি বিজ্ঞপ্তি আছে।</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"বিজ্ঞপ্তির সেটিংস"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> সেটিংস"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"স্ক্রীন স্বয়ংক্রিয়ভাবে ঘুরে যাবে৷"</string>
@@ -426,7 +429,7 @@
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"আপনি পরের বার সেটিংস-এ এটি চালু করলে এটি উপস্থিত হবে"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"লুকান"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> ভলিউম ডায়লগ হতে চায়৷"</string>
-    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"মঞ্জুরি দিন"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"অনুমতি দিন"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"প্রত্যাখ্যান করুন"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="8819536904234337445">"আসলটি পুনঃস্থাপন করতে আলতো চাপ দিন৷"</string>
@@ -638,7 +641,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"দ্রুত সেটিংস খুলুন৷"</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"দ্রুত সেটিংস বন্ধ করুন৷"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"অ্যালার্ম সেট করা হয়েছে৷"</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> হিসেবে সাইন ইন রয়েছেন"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> হিসেবে প্রবেশ করুন রয়েছেন"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"কোন ইন্টারনেট নেই৷"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"বিশদ বিবরণ খুলুন৷"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> সেটিংস খুলুন৷"</string>

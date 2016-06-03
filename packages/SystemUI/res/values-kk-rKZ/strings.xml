@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Орын өтініштері қосылған"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Барлық хабарларды жойыңыз."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">Ішінде тағы <xliff:g id="NUMBER_1">%s</xliff:g> хабарландыру.</item>
+      <item quantity="one">Ішінде тағы <xliff:g id="NUMBER_0">%s</xliff:g> хабарландыру.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Хабарландыру параметрлері"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> параметрлері"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран автоматты түрде бұрылады."</string>
@@ -378,8 +381,8 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Пайдаланушыны шығару"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Ағымдағы пайдаланушыны шығару"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ПАЙДАЛАНУШЫНЫ ШЫҒАРУ"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"Жаңа пайд-ны қосу керек пе?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Жаңа пайдаланушыны қосқанда сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"Жаңа пайдаланушы қосылсын ба?"</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Пайдаланушы жойылсын ба?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Осы пайдаланушының барлық қолданбалары мен деректері жойылады."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Жою"</string>
@@ -571,7 +574,7 @@
     <string name="headset" msgid="4534219457597457353">"Құлақаспап жинағы"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Құлақаспап қосылды"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Құлақаспап жинағы қосылды"</string>
-    <string name="data_saver" msgid="5037565123367048522">"Дерек сақтағыш"</string>
+    <string name="data_saver" msgid="5037565123367048522">"Трафикті үнемдеу"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дерек сақтағыш қосулы"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дерек сақтағышы өшірулі"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Қосулы"</string>
@@ -596,8 +599,8 @@
     <string name="keycode_description" msgid="1403795192716828949">"Кілт коды түймелері пернетақта пернелерін шарлау тақтасына қосуға мүмкіндік береді. Басқан кезде олар таңдалған пернетақта пернесін эмуляциялайды. Алдымен түйме үшін пернені, содан кейін түймеде көрсетілетін кескінді таңдау керек."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Пернетақта түймесін таңдау"</string>
     <string name="preview" msgid="9077832302472282938">"Алдын ала қарау"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Торлар қосу үшін сүйреңіз"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Жою үшін осы жерге сүйреңіз"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Қажеттерін сүйреп қойыңыз"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Керексіздерін осы жерге сүйреңіз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Уақыт"</string>
   <string-array name="clock_options">

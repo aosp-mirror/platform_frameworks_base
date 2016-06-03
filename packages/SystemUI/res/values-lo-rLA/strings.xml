@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"ການຮ້ອງຂໍສະຖານທີ່ທີ່ເຮັດວຽກຢູ່"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ລຶບການແຈ້ງເຕືອນທັງໝົດ."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">ມີ <xliff:g id="NUMBER_1">%s</xliff:g> ການແຈ້ງເຕືອນເພີ່ມເຕີມຢູ່ທາງໃນ.</item>
+      <item quantity="one">ມີ <xliff:g id="NUMBER_0">%s</xliff:g> ການແຈ້ງເຕືອນເພີ່ມເຕີມຢູ່ທາງໃນ.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"​ການ​ຕັ້ງ​ຄ່າ​ການ​ແຈ້ງ​ເຕືອນ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"ການ​ຕັ້ງ​ຄ່າ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ໜ້າຈໍຈະໝຸນໂດຍອັດຕະໂນມັດ."</string>
@@ -378,7 +381,7 @@
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ເອົາຜູ້ໃຊ້ອອກຈາກລະບົບ"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"ອອກ​ຈາກ​ຜູ້​ໃຊ້​ປະ​ຈຸ​ບັນ"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ເອົາຜູ້ໃຊ້ອອກຈາກລະບົບ"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມ​ຜູ່​ໃຊ້​ໃໝ່​ບໍ?"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້ໃຊ້​ໃໝ່, ຜູ້ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບຯຂອງ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"ລຶບຜູ້ໃຊ້ອອກບໍ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
