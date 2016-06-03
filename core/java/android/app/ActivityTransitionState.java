@@ -105,6 +105,12 @@ class ActivityTransitionState {
 
     private boolean mIsEnterTriggered;
 
+    /**
+     * The ActivityOptions Bundle. This is used to transfer ActivityOptions through a
+     * springboard Activity.
+     */
+    private Bundle mEnterBundle;
+
     public ActivityTransitionState() {
     }
 
@@ -150,6 +156,10 @@ class ActivityTransitionState {
     }
 
     public void setEnterActivityOptions(Activity activity, ActivityOptions options) {
+        if (options != null && mEnterBundle == null &&
+                options.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+            mEnterBundle = options.toBundle();
+        }
         final Window window = activity.getWindow();
         if (window == null) {
             return;
@@ -185,7 +195,12 @@ class ActivityTransitionState {
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
         }
         mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
-                resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning());
+                resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning(),
+                mEnterActivityOptions.isCrossTask());
+        if (mEnterActivityOptions.isCrossTask()) {
+            mExitingFrom = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
+            mExitingTo = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
+        }
 
         if (!mIsEnterPostponed) {
             startEnter();
@@ -222,6 +237,13 @@ class ActivityTransitionState {
         mExitingTo = null;
         mExitingToView = null;
         mEnterActivityOptions = null;
+    }
+
+    Bundle transferEnterActivityOptions() {
+        mEnterActivityOptions = null;
+        Bundle options = mEnterBundle;
+        mEnterBundle = null;
+        return options;
     }
 
     public void onStop() {
@@ -275,7 +297,8 @@ class ActivityTransitionState {
     }
 
     private void restoreReenteringViews() {
-        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning()) {
+        if (mEnterTransitionCoordinator != null && mEnterTransitionCoordinator.isReturning() &&
+                !mEnterTransitionCoordinator.isCrossTask()) {
             mEnterTransitionCoordinator.forceViewsToAppear();
             mExitingFrom = null;
             mExitingTo = null;
@@ -302,8 +325,9 @@ class ActivityTransitionState {
                     }
                 }
 
-                mReturnExitCoordinator =
-                        new ExitTransitionCoordinator(activity, mEnteringNames, null, null, true);
+                mReturnExitCoordinator = new ExitTransitionCoordinator(activity,
+                        activity.getWindow(), activity.mEnterTransitionListener, mEnteringNames,
+                        null, null, true);
                 if (enterViewsTransition != null && decor != null) {
                     enterViewsTransition.resume(decor);
                 }
