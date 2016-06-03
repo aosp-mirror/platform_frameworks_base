@@ -523,7 +523,7 @@ onView(withId(R.id.changeTextBt)).perform(click());</pre>
 mDevice = UiDevice.getInstance(getInstrumentation());
 
 // Perform a short press on the HOME button
-mDevice().pressHome();
+mDevice.pressHome();
 
 // Bring up the default launcher by searching for
 // a UI component that matches the content-description for the launcher button
