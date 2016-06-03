@@ -25,63 +25,94 @@ import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import android.view.Menu;
 import android.view.MenuItem;
 
-final class DocumentsMenuManager implements MenuManager {
+final class DocumentsMenuManager extends MenuManager {
 
-  private final State mState;
-  private final SearchViewManager mSearchManager;
+    private final State mState;
+    private final SearchViewManager mSearchManager;
+    private boolean mPicking;
 
-  public DocumentsMenuManager(SearchViewManager searchManager, State displayState) {
-       mSearchManager = searchManager;
-       mState = displayState;
-  }
+    public DocumentsMenuManager(SearchViewManager searchManager, State displayState) {
+        mSearchManager = searchManager;
+        mState = displayState;
 
-  @Override
-  public void updateActionMenu(Menu menu, MenuManager.SelectionDetails selection) {
-      MenuItem open = menu.findItem(R.id.menu_open);
-      MenuItem share = menu.findItem(R.id.menu_share);
-      MenuItem delete = menu.findItem(R.id.menu_delete);
-      MenuItem rename = menu.findItem(R.id.menu_rename);
-      MenuItem selectAll = menu.findItem(R.id.menu_select_all);
-
-      open.setVisible(mState.action == ACTION_GET_CONTENT
-              || mState.action == ACTION_OPEN);
-      share.setVisible(false);
-      delete.setVisible(false);
-      rename.setVisible(false);
-      selectAll.setVisible(mState.allowMultiple);
-
-      Menus.disableHiddenItems(menu);
-  }
+        mPicking = mState.action == ACTION_CREATE
+                || mState.action == ACTION_OPEN_TREE
+                || mState.action == ACTION_PICK_COPY_DESTINATION;
+    }
 
     @Override
     public void updateOptionMenu(Menu menu, DirectoryDetails details) {
-
-        boolean picking = mState.action == ACTION_CREATE
-                || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_PICK_COPY_DESTINATION;
-
-        if (picking) {
+        super.updateOptionMenu(menu, details);
+        if (mPicking) {
             // May already be hidden because the root
             // doesn't support search.
             mSearchManager.showMenu(false);
         }
+    }
 
-        final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-
-        createDir.setVisible(picking);
-        createDir.setEnabled(details.canCreateDirectory());
-
-        // No display options in recent directories
-        if (picking && details.isInRecents()) {
-            final MenuItem grid = menu.findItem(R.id.menu_grid);
-            final MenuItem list = menu.findItem(R.id.menu_list);
+    @Override
+    void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
+     // No display options in recent directories
+        if (mPicking && directoryDetails.isInRecents()) {
             grid.setVisible(false);
             list.setVisible(false);
         }
+    }
 
-        fileSize.setVisible(fileSize.isVisible() && !picking);
+    @Override
+    void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
+        fileSize.setVisible(fileSize.isVisible() && !mPicking);
+    }
 
-        Menus.disableHiddenItems(menu);
+    @Override
+    void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
+        assert(!settings.isVisible());
+    }
+
+    @Override
+    void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {
+        assert(!newWindow.isVisible());
+    }
+
+    @Override
+    void updateSelectAll(MenuItem selectAll, SelectionDetails selectionDetails) {
+        selectAll.setVisible(mState.allowMultiple);
+    }
+
+    @Override
+    void updateCreateDir(MenuItem createDir, DirectoryDetails directoryDetails) {
+        createDir.setVisible(mPicking);
+        createDir.setEnabled(mPicking && directoryDetails.canCreateDirectory());
+    }
+
+    @Override
+    void updateOpen(MenuItem open, SelectionDetails selectionDetails) {
+        open.setVisible(mState.action == ACTION_GET_CONTENT
+                || mState.action == ACTION_OPEN);
+    }
+
+    @Override
+    void updateShare(MenuItem share, SelectionDetails selectionDetails) {
+        share.setVisible(false);
+    }
+
+    @Override
+    void updateDelete(MenuItem delete, SelectionDetails selectionDetails) {
+        delete.setVisible(false);
+    }
+
+    @Override
+    void updateRename(MenuItem rename, SelectionDetails selectionDetails) {
+        rename.setVisible(false);
+    }
+
+    @Override
+    void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails) {
+        assert(!moveTo.isVisible());
+    }
+
+    @Override
+    void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails) {
+        assert(!copyTo.isVisible());
     }
 }

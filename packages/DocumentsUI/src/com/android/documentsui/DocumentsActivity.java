@@ -414,6 +414,11 @@ public class DocumentsActivity extends BaseActivity {
         return mMenuManager;
     }
 
+    @Override
+    public DirectoryDetails getDirectoryDetails() {
+        return mDetails;
+    }
+
     /**
      * Loads the last used path (stack) from Recents (history).
      * The path selected is based on the calling package name. So the last

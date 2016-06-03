@@ -41,9 +41,11 @@ public final class FilesMenuManagerTest {
     private TestMenuItem share;
     private TestMenuItem delete;
     private TestMenuItem createDir;
-    private TestMenuItem pasteFromCb;
     private TestMenuItem settings;
     private TestMenuItem newWindow;
+    private TestMenuItem cut;
+    private TestMenuItem copy;
+    private TestMenuItem paste;
     private TestSelectionDetails selectionDetails;
     private TestDirectoryDetails directoryDetails;
     private TestSearchViewManager testSearchManager;
@@ -57,9 +59,16 @@ public final class FilesMenuManagerTest {
         share = testMenu.findItem(R.id.menu_share);
         delete = testMenu.findItem(R.id.menu_delete);
         createDir = testMenu.findItem(R.id.menu_create_dir);
-        pasteFromCb = testMenu.findItem(R.id.menu_paste_from_clipboard);
         settings = testMenu.findItem(R.id.menu_settings);
         newWindow = testMenu.findItem(R.id.menu_new_window);
+        cut = testMenu.findItem(R.id.menu_cut_to_clipboard);
+        copy = testMenu.findItem(R.id.menu_copy_to_clipboard);
+        paste = testMenu.findItem(R.id.menu_paste_from_clipboard);
+
+        // These items by default are visible
+        testMenu.findItem(R.id.menu_select_all).setVisible(true);
+        testMenu.findItem(R.id.menu_list).setVisible(true);
+        testMenu.findItem(R.id.menu_file_size).setVisible(true);
 
         selectionDetails = new TestSelectionDetails();
         directoryDetails = new TestDirectoryDetails();
@@ -133,15 +142,6 @@ public final class FilesMenuManagerTest {
     }
 
     @Test
-    public void testOptionMenu_hasItemsToPaste() {
-        directoryDetails.hasItemsToPaste = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
-        mgr.updateOptionMenu(testMenu, directoryDetails);
-
-        pasteFromCb.assertEnabled();
-    }
-
-    @Test
     public void testOptionMenu_hasRootSettings() {
         directoryDetails.hasRootSettings = true;
         FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
@@ -157,5 +157,30 @@ public final class FilesMenuManagerTest {
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
         newWindow.assertVisible();
+    }
+
+    @Test
+    public void testContextMenu_NoSelection() {
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        mgr.updateContextMenu(testMenu, null, directoryDetails);
+        cut.assertVisible();
+        copy.assertVisible();
+        cut.assertDisabled();
+        copy.assertDisabled();
+        paste.assertVisible();
+        createDir.assertVisible();
+        delete.assertVisible();
+    }
+
+    @Test
+    public void testContextMenu_Selection() {
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        mgr.updateContextMenu(testMenu, selectionDetails, directoryDetails);
+        cut.assertVisible();
+        copy.assertVisible();
+        paste.assertVisible();
+        rename.assertVisible();
+        createDir.assertVisible();
+        delete.assertVisible();
     }
 }

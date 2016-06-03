@@ -56,6 +56,16 @@ public class TestInputEvent implements Events.InputEvent {
     }
 
     @Override
+    public float getX() {
+        return location.x;
+    }
+
+    @Override
+    public float getY() {
+        return location.y;
+    }
+
+    @Override
     public boolean isOverItem() {
         return position != Integer.MIN_VALUE && position != RecyclerView.NO_POSITION;
     }

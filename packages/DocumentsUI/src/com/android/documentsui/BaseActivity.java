@@ -50,6 +50,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
 
+import com.android.documentsui.MenuManager.DirectoryDetails;
 import com.android.documentsui.SearchViewManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.AnimationView;
@@ -98,6 +99,7 @@ public abstract class BaseActivity extends Activity
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
     public abstract FragmentTuner createFragmentTuner();
     public abstract MenuManager getMenuManager();
+    public abstract DirectoryDetails getDirectoryDetails();
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);
@@ -300,13 +302,6 @@ public abstract class BaseActivity extends Activity
 
             case R.id.menu_list:
                 setViewMode(State.MODE_LIST);
-                return true;
-
-            case R.id.menu_paste_from_clipboard:
-                DirectoryFragment dir = getDirectoryFragment();
-                if (dir != null) {
-                    dir.pasteFromClipboard();
-                }
                 return true;
 
             case R.id.menu_advanced:
