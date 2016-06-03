@@ -247,7 +247,12 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Vietovės užklausos aktyvios"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Išvalyti visus pranešimus."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"Dar <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimas.</item>
+      <item quantity="few">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimai.</item>
+      <item quantity="many">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimo.</item>
+      <item quantity="other">Grupėje yra dar <xliff:g id="NUMBER_1">%s</xliff:g> pranešimų.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Pranešimų nustatymai"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"„<xliff:g id="APP_NAME">%s</xliff:g>“ nustatymai"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekranas bus sukamas automatiškai."</string>

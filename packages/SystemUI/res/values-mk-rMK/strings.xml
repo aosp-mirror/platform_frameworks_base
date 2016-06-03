@@ -149,7 +149,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Нема СИМ картичка."</string>
-    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилни податоци"</string>
+    <string name="accessibility_cell_data" msgid="7080312242791850520">"Мобилен интернет"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Вклучени се мобилните податоци"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилните податоци се исклучени"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Се поврзува со Bluetooth."</string>
@@ -162,8 +162,8 @@
     <string name="accessibility_settings_button" msgid="799583911231893380">"Поставки на систем."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Известувања"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Избриши известување."</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"ГПС е овозможен."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Се добива ГПС..."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS е овозможен."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Се добива GPS..."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Овозможен е телепринтер."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Ѕвонче на вибрации."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Ѕвонче на тивко."</string>
@@ -240,12 +240,15 @@
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Продолжи"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Поврзано на Wi-Fi"</string>
-    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Се пребарува за ГПС"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"Локацијата е поставена со ГПС"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Се пребарува за GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Локацијата е поставена со GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Активни барања за локација"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Исчисти ги сите известувања."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">Уште <xliff:g id="NUMBER_1">%s</xliff:g> известување внатре.</item>
+      <item quantity="other">Уште <xliff:g id="NUMBER_1">%s</xliff:g> известувања внатре.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Поставки на известувања"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Поставки на <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Екранот ќе ротира автоматски."</string>
@@ -306,7 +309,7 @@
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Точка на пристап"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Известувања"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Светилка"</string>
-    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилни податоци"</string>
+    <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилен интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Потрошен интернет"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Преостанати податоци"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Над лимитот"</string>

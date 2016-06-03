@@ -58,8 +58,8 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ಆಪ್‌ಗಳು USB ಪರಿಕರದಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಆ ಬಗ್ಗೆ <xliff:g id="URL">%1$s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ಪರಿಕರ"</string>
     <string name="label_view" msgid="6304565553218192990">"ವೀಕ್ಷಿಸು"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"ಈ USB ಪರಿಕರಕ್ಕಾಗಿ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"ಈ USB ಪರಿಕರಕ್ಕಾಗಿ ಡೀಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"ಈ USB ಪರಿಕರಕ್ಕಾಗಿ ಡಿಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ಈ USB ಪರಿಕರಕ್ಕಾಗಿ ಡಿಫಾಲ್ಟ್ ಆಗಿ ಬಳಸಿ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
@@ -90,7 +90,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ಅನ್‌ಲಾಕ್"</string>
     <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"ಅನ್‌ಲಾಕ್ ಬಟನ್, ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ಗೆ ಕಾಯಲಾಗುತ್ತಿದೆ"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಬೆರಳಚ್ಚು ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ಅನ್‌ಲಾಕ್ ಮಾಡು"</string>
     <string name="phone_label" msgid="2320074140205331708">"ಫೋನ್ ತೆರೆಯಿರಿ"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ಧ್ವನಿ ಸಹಾಯಕವನ್ನು ತೆರೆ"</string>
@@ -211,7 +211,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯು ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯನ್ನು ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"ಸ್ಥಳ ವರದಿಮಾಡುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಂ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"<xliff:g id="TIME">%s</xliff:g> ಗಂಟೆಗೆ ಅಲಾರಮ್ ಹೊಂದಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ಪ್ಯಾನಲ್ ಮುಚ್ಚಿ."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ಹೆಚ್ಚು ಸಮಯ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"ಕಡಿಮೆ ಸಮಯ."</string>
@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"ಸ್ಥಾನ ವಿನಂತಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೆರವುಗೊಳಿಸು."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ಕ್ಕಿಂತ ಹೆಚ್ಚು ಅಧಿಸೂಚನೆಗಳು ಒಳಗಿವೆ.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ಪರದೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಿರುಗುತ್ತದೆ."</string>
@@ -321,7 +324,7 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ಹುಡುಕಾಟ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ಪ್ರಾರಂಭಿಸಲು ಸಾದ್ಯವಿಲ್ಲ."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ಅನ್ನು ಸುರಕ್ಷಿತ ಮೋಡ್‌ನಲ್ಲಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
+    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"ವಿಭಜಿತ ಪರದೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"ವಿಭಜಿತ ಪರದೆಯನ್ನು ಬಳಸಲು ಇಲ್ಲಿ ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ಅಡ್ಡಲಾಗಿ ವಿಭಜಿಸಿದ"</string>

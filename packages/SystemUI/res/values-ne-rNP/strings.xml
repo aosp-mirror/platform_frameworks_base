@@ -43,7 +43,7 @@
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"खोल्नुहोस्"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"ब्याट्री बचत खोल्नुहोस्"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिङहरू"</string>
-    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाइफाइ"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्वत:घुम्ने स्क्रिन"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्युट गर्नुहोस्"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वतः"</string>
@@ -147,7 +147,7 @@
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"रोमिङ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाइफाइ"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM छैन।"</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"सेलुलर डेटा"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"सेलुलर डेटा सक्रिय छ"</string>
@@ -185,8 +185,8 @@
     <string name="accessibility_desc_close" msgid="7479755364962766729">"बन्द गर्नुहोस्"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"प्रयोगकर्ता <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
-    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाइफाइ बन्द गरियो।"</string>
-    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"वाइफाइ खुला गरियो।"</string>
+    <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi बन्द गरियो।"</string>
+    <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wi-Fi खुला गरियो।"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"मोवाइल <xliff:g id="SIGNAL">%1$s</xliff:g>। <xliff:g id="TYPE">%2$s</xliff:g>। <xliff:g id="NETWORK">%3$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"ब्याट्री <xliff:g id="STATE">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"हवाइजहाज मोड बन्द।"</string>
@@ -236,16 +236,19 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटा रोकिएको छ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्यूलर डेटा रोकिएको छ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डेटाको सीमा पुगेकाले, यन्त्रले यस चक्रको बाँकी भागका लागि डेटा प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डेटाको सीमा पुगेकाले, यन्त्रले यस चक्रको बाँकी भागका लागि डेटाको प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुनः सुरु गर्नुहोस्"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इन्टरनेट जडान छैन"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाइफाइ जडित"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi जडित"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSको लागि खोजी गर्दै"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS द्वारा स्थान सेट गरिएको"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"स्थान अनुरोधहरू सक्रिय"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"सबै सूचनाहरू हटाउनुहोस्।"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">भित्र थप <xliff:g id="NUMBER_1">%s</xliff:g> सूचनाहरू छन्।</item>
+      <item quantity="one">भित्र थप <xliff:g id="NUMBER_0">%s</xliff:g> सूचना छ।</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"अधिसूचना सेटिङ्हरू"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> सेटिङ्हरू"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"स्क्रिन स्वतः घुम्ने छ।"</string>
@@ -283,10 +286,10 @@
     <string name="quick_settings_user_label" msgid="5238995632130897840">"मलाई"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"प्रयोगकर्ता"</string>
     <string name="quick_settings_user_new_user" msgid="9030521362023479778">"नयाँ प्रयोगकर्ता"</string>
-    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"वाइफाइ"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"जोडिएको छैन"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"नेटवर्क छैन"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"वाइफाइ बन्द"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi बन्द"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi सक्रिय छ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi नेटवर्क अनुपलब्ध"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
@@ -307,7 +310,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"अधिसूचनाहरू"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"फ्ल्यासलाइट"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"सेलुलर डेटा"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"डेटा प्रयोग"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"डेटाको प्रयोग"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"बाँकी डेटा"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"सीमाभन्दा बढी"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> प्रयोग गरियो"</string>

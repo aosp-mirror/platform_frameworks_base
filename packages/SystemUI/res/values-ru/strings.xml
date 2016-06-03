@@ -249,7 +249,12 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Есть активные запросы на определение местоположения"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Удалить все уведомления"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">Ещё <xliff:g id="NUMBER_1">%s</xliff:g> уведомление.</item>
+      <item quantity="few">Ещё <xliff:g id="NUMBER_1">%s</xliff:g> уведомления.</item>
+      <item quantity="many">Ещё <xliff:g id="NUMBER_1">%s</xliff:g> уведомлений.</item>
+      <item quantity="other">Ещё <xliff:g id="NUMBER_1">%s</xliff:g> уведомления.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Настройки уведомлений"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Настройки приложения \"<xliff:g id="APP_NAME">%s</xliff:g>\""</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран будет поворачиваться автоматически."</string>
@@ -383,7 +388,7 @@
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Выход от имени пользователя"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ВЫЙТИ ОТ ИМЕНИ ПОЛЬЗОВАТЕЛЯ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его необходимо настроить.\n\nОбновлять приложения для всех аккаунтов может любой пользователь устройства."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Удалить аккаунт?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Все приложения и данные этого пользователя будут удалены."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Удалить"</string>
