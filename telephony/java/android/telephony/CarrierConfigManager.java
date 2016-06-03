@@ -700,6 +700,24 @@ public class CarrierConfigManager {
     public static final String KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT =
             "duration_blocking_disabled_after_emergency_int";
 
+    /**
+     * @hide
+     * The default value for preferred CDMA roaming mode (aka CDMA system select.)
+     *          CDMA_ROAMING_MODE_RADIO_DEFAULT = the default roaming mode from the radio
+     *          CDMA_ROAMING_MODE_HOME = Home Networks
+     *          CDMA_ROAMING_MODE_AFFILIATED = Roaming on Affiliated networks
+     *          CDMA_ROAMING_MODE_ANY = Roaming on any networks
+     */
+    public static final String KEY_CDMA_ROAMING_MODE_INT = "cdma_roaming_mode_int";
+    /** @hide */
+    public static final int CDMA_ROAMING_MODE_RADIO_DEFAULT = -1;
+    /** @hide */
+    public static final int CDMA_ROAMING_MODE_HOME = 0;
+    /** @hide */
+    public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
+    /** @hide */
+    public static final int CDMA_ROAMING_MODE_ANY = 2;
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -836,6 +854,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
+        sDefaults.putInt(KEY_CDMA_ROAMING_MODE_INT, CDMA_ROAMING_MODE_RADIO_DEFAULT);
 
         // Used for Sim card State detection app
         sDefaults.putStringArray(KEY_SIM_PROVISIONING_STATUS_DETECTION_CARRIER_APP_STRING_ARRAY,
