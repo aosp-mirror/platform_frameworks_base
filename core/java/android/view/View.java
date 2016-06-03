@@ -4541,7 +4541,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         initializeScrollIndicators = true;
                     }
                     break;
-                case R.styleable.View_pointerShape:
+                case R.styleable.View_pointerIcon:
                     final int resourceId = a.getResourceId(attr, 0);
                     if (resourceId != 0) {
                         setPointerIcon(PointerIcon.loadCustomIcon(
