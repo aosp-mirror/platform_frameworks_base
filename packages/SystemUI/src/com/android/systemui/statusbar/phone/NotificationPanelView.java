@@ -1300,7 +1300,7 @@ public class NotificationPanelView extends PanelView implements
         flingSettings(vel, expand, null, false /* isClick */);
     }
 
-    private void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable,
+    protected void flingSettings(float vel, boolean expand, final Runnable onFinishRunnable,
             boolean isClick) {
         float target = expand ? mQsMaxExpansionHeight : mQsMinExpansionHeight;
         if (target == mQsExpansionHeight) {
