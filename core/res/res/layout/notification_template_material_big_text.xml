@@ -24,10 +24,12 @@
     <include layout="@layout/notification_template_header" />
 
     <LinearLayout
+            android:id="@+id/notification_action_list_margin_target"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top"
             android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:layout_marginBottom="@dimen/notification_action_list_height"
             android:clipToPadding="false"
             android:orientation="vertical">
 
@@ -61,7 +63,7 @@
                 android:id="@+id/notification_material_reply_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-        <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
+    <include layout="@layout/notification_material_action_list" />
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>
