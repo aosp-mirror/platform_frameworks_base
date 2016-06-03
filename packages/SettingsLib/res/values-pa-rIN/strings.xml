@@ -149,7 +149,7 @@
     <string name="enable_adb" msgid="7982306934419797485">"USB ਡੀਬਗਿੰਗ"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"ਡੀਬਗ ਮੋਡ ਜਦੋਂ USB ਕਨੈਕਟ ਕੀਤੀ ਜਾਏ"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB ਡੀਬਗਿੰਗ ਅਧਿਕਾਰ ਰੱਦ ਕਰੋ"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"ਬਗ ਰਿਪੋਰਟ ਸ਼ੌਰਟਕਟ"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"ਬਗ ਰਿਪੋਰਟ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"ਇੱਕ ਬਗ ਰਿਪੋਰਟ ਲੈਣ ਲਈ ਪਾਵਰ ਮੀਨੂ ਵਿੱਚ ਇੱਕ ਬਟਨ ਦਿਖਾਓ"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"ਸਕਿਰਿਆ ਰੱਖੋ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ਸਕ੍ਰੀਨ ਚਾਰਜਿੰਗ ਦੇ ਸਮੇਂ ਕਦੇ ਵੀ ਸਲੀਪ ਨਹੀਂ ਹੋਵੇਗੀ"</string>
@@ -168,7 +168,7 @@
     <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ਸੈਲਿਊਲਰ ਹੈਂਡਓਵਰ ਲਈ ਅਗਰੈਸਿਵ Wi‑Fi"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ Wi‑Fi Roam Scans ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ਸੈਲਿਊਲਰ ਡੇਟਾ ਹਮੇਸ਼ਾ ਕਿਰਿਆਸ਼ੀਲ"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਯੂਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਦਿਖਾਓ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, Wi‑Fi Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ਜਦੋਂ ਸਮਰਥਿਤ ਹੋਵੇ, ਤਾਂ Wi‑Fi ਸੈਲਿਊਲਰ ਨੂੰ ਡੈਟਾ ਕਨੈਕਸ਼ਨ ਹੈਂਡ ਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਅਗ੍ਰੈਸਿਵ ਹੋ ਜਾਏਗਾ, ਜਦੋਂ Wi‑Fi ਸਿਗਨਲ ਘੱਟ ਹੋਵੇ"</string>
@@ -189,7 +189,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਸ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਯੂਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਯੂਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਯੂਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਆੱਫਰ ਕਰਦਾ ਹੈ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>

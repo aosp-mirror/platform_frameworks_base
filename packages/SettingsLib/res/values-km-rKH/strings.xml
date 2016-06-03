@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"លំនាំដើមមួយចំនួនត្រូវបានកំណត់"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"គ្មានការកំណត់លំនាំដើម"</string>
     <string name="tts_settings" msgid="8186971894801348327">"ការ​កំណត់​អត្ថបទ​ទៅ​ជា​កា​និយាយ"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"លទ្ធផល​អត្ថបទ​ទៅ​ការ​និយាយ"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"លទ្ធផល​សំឡេងអានអត្ថបទ​"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"អត្រា​និយាយ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ល្បឿន​ពេល​អាន​​អត្ថបទ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ឡើង​-ចុះ"</string>
