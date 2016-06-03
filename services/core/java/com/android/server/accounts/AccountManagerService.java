@@ -432,6 +432,7 @@ public class AccountManagerService
 
         final HashMap<String, Integer> knownAuth = getAuthenticatorTypeAndUIDForUser(
                 mAuthenticatorCache, accounts.userId);
+        boolean userUnlocked = isLocalUnlockedUser(accounts.userId);
 
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
@@ -530,7 +531,18 @@ public class AccountManagerService
                     if (obsoleteAuthType.contains(accountType)) {
                         Slog.w(TAG, "deleting account " + accountName + " because type "
                                 + accountType + "'s registered authenticator no longer exist.");
-                        db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                        db.beginTransaction();
+                        try {
+                            db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                            // Also delete from CE table if user is unlocked; if user is currently
+                            // locked the account will be removed later by syncDeCeAccountsLocked
+                            if (userUnlocked) {
+                                db.delete(CE_TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
+                            }
+                            db.setTransactionSuccessful();
+                        } finally {
+                            db.endTransaction();
+                        }
                         accountDeleted = true;
 
                         logRecord(db, DebugDbHelper.ACTION_AUTHENTICATOR_REMOVE, TABLE_ACCOUNTS,
