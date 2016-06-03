@@ -610,7 +610,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Radio"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Służbowa komórka"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Komórka służb."</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Pager służbowy"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Asystent"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"Wiadomość MMS"</string>
@@ -1040,7 +1040,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> przestał działać"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> wciąż przestaje działać"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> wciąż przestaje działać"</string>
-    <string name="aerr_restart" msgid="7581308074153624475">"Ponownie otwórz aplikację"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"Otwórz aplikację ponownie"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Prześlij opinię"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zamknij"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ignoruj do momentu ponownego uruchomienia urządzenia"</string>
@@ -1680,8 +1680,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Żądanie SS zostało zmienione na nowe żądanie SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil do pracy"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Przycisk rozwijania"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"przełącz rozwijanie"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port peryferyjny USB na urządzeniu z Androidem"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port peryferyjny USB"</string>
@@ -1689,6 +1688,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zamknij rozszerzony pasek"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksymalizuj"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Zamknij"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="few">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="many">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>

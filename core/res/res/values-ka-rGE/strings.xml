@@ -506,7 +506,7 @@
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android სხივით გადაცემის სტატუსის მიღება"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ნებას რთავს ამ აპლიკაციას, მიიღოს ინფორმაცია მიმდინარე Android Beam-ის ტრანსფერების შესახებ"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM სერტიფიკატების ამოშლა"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"საშუალებას აძლევს აპლიკაციას ამოშალოს DRM სერtიფიკატები. ეს წესით ჩვეულებრივ აპებს არ უნდა დაჭირდეს."</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"საშუალებას აძლევს აპლიკაციას ამოშალოს DRM სერტიფიკატები. ეს წესით ჩვეულებრივ აპებს არ უნდა დაჭირდეს."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"აკავშირებს შეტყობინების გაცვლის მომსახურებას"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"საშუალებას აძლევს მფლობელს შექმნას შეტყობინების გაცვლის მომსახურების უმახლესი დონის ინტერფეისი. არასდროს იქნება საჭირო ნორმალური აპლიკაციებისათვის."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"ოპერატორის სერვისებთან დაკავშირება"</string>
@@ -597,7 +597,7 @@
     <string name="phoneTypeOther" msgid="1544425847868765990">"სხვა"</string>
     <string name="phoneTypeCallback" msgid="2712175203065678206">"გადმოსარეკი"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"მანქანა"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"კომპანიის ძირ. ნომერი"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"ფირმა:მთავარი#"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"მთავარი"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"სხვა ფაქსი"</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS მოთხოვნა შეიცვალა ახალი SS მოთხოვნით."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"სამსახურის პროფილი"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"გაშლის ღილაკი"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"გაშლის გადართვა"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android-ის პერიფერიული USB პორტი"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"პერიფერიული USB პორტი"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"გადავსების დახურვა"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"მაქსიმალური ზომა"</string>
     <string name="close_button_text" msgid="3937902162644062866">"დახურვა"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> შერჩეული</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>

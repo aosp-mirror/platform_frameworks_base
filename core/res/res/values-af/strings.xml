@@ -522,11 +522,11 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die tablet of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die TV of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitor die aantal verkeerde wagwoorde wat ingevoer word wanneer die skerm ontsluit word, en sluit die foon of vee al hierdie gebruiker se data uit as te veel verkeerde wagwoorde ingevoer word."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Verander die skermslot"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Om die skermslot te verander"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Verander die skermslot."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Sluit die skerm"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Om die skerm te sluit"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheer hoe en wanneer die skerm sluit."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Vee alle data uit"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Om alle data uit te vee"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Vee die tablet se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Vee die TV se data sonder waarskuwing uit deur \'n fabriekterugstelling te doen."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Vee die foon se data uit sonder waarskuwing, deur \'n fabrieksterugstelling uit te voer."</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-versoek is gewysig tot nuwe SS-versoek."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Werkprofiel"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Uitvou-knoppie"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"wissel uitvou-aksie"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android-USB-randpoort"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-randpoort"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Maak oorloop toe"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimeer"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Maak toe"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> gekies</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> gekies</item>

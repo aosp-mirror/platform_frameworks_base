@@ -605,7 +605,7 @@
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Télex"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY/TTD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Mobile pro"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Bipeur prof."</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Bipeur pro"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Assistant"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Personnalisé"</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La requête SS a été remplacée par une autre requête SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil professionnel"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Bouton \"Développer\""</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"activer/désactiver le développement"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port du périphérique USB Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port du périphérique USB"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fermer la barre d\'outils en superposition"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Agrandir"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Fermer"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>

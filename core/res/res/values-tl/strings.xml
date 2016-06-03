@@ -255,7 +255,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at nmag-record ng video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumatawag sa telepono at namamahala sa mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Mga Sensor ng Katawan"</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ginawang bagong SS request ang SS request."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profile sa trabaho"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Button na Palawakin"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"i-toggle ang pagpapalawak"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Peripheral Port"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Isara ang overflow"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"I-maximize"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Isara"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>

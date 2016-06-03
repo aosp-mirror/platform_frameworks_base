@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> токтотулду"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"Колдонмону кайра ачуу"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Жооп пикир жөнөтүү"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Жабуу"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Түзмөк өчүрүлүп-күйгүзүлгүчө үнүн өчүрүү"</string>
@@ -1613,10 +1612,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сурамы USSD сурамына өзгөртүлдү."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сурамы жаңы SS сурамына өзгөртүлдү."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жумуш профили"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Жайып көрсөтүү баскычы"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"жайып көрсөтүү баскычын которуштуруу"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Сырткы оюкча"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Сырткы оюкча"</string>
@@ -1624,6 +1621,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Ашып-ташууну жабуу"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Чоңойтуу"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Жабуу"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> тандалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> тандалды</item>

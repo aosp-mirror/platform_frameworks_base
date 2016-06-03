@@ -607,7 +607,7 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Радио"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Број пословног мобилног телефона"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Пословни мобилни"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Пословни пејџер"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Помоћник"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
@@ -1645,8 +1645,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS захтев је промењен у нови SS захтев."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Профил за Work"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Дугме Прошири"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"укључите/искључите проширење"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB порт за периферијске уређаје"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB порт за периферијске уређаје"</string>
@@ -1654,6 +1653,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Затвори преклопни мени"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Увећај"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Затвори"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one">Изабрана је <xliff:g id="COUNT_1">%1$d</xliff:g> ставка</item>
       <item quantity="few">Изабране су <xliff:g id="COUNT_1">%1$d</xliff:g> ставке</item>

@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La sol·licitud SS s\'ha transformat en una sol·licitud SS nova."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil professional"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Botó Desplega"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"desplega o replega"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Port perifèric USB d\'Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Port perifèric USB"</string>
@@ -1619,6 +1618,8 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Tanca el menú addicional"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximitza"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Tanca"</string>
+    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
+    <skip />
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other">Seleccionats: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Seleccionats: <xliff:g id="COUNT_0">%1$d</xliff:g></item>
