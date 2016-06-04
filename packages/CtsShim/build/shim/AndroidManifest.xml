@@ -17,8 +17,10 @@
 <!-- Manifest for the system CTS shim -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.android.cts.ctsshim"
-    tools:ignore="MissingVersion" >
+    package="com.android.cts.ctsshim" >
+
+    <uses-sdk android:minSdkVersion="24"
+        android:targetSdkVersion="24" />
 
     <application
         android:hasCode="false"
