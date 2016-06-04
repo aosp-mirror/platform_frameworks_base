@@ -440,7 +440,7 @@ public class TransitionManager {
             ArrayList<Transition> copy = new ArrayList(runningTransitions);
             for (int i = copy.size() - 1; i >= 0; i--) {
                 final Transition transition = copy.get(i);
-                transition.end();
+                transition.forceToEnd(sceneRoot);
             }
         }
 
