@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -61,12 +62,15 @@ import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
 import android.os.Process;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
+import com.android.internal.util.FakeSettingsProvider;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
@@ -118,8 +122,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class MockContext extends BroadcastInterceptingContext {
+        private final MockContentResolver mContentResolver;
+
         MockContext(Context base) {
             super(base);
+            mContentResolver = new MockContentResolver();
+            mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         }
 
         @Override
@@ -135,9 +143,14 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public Object getSystemService (String name) {
+        public Object getSystemService(String name) {
             if (name == Context.CONNECTIVITY_SERVICE) return mCm;
             return super.getSystemService(name);
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
         }
     }
 
