@@ -7335,14 +7335,24 @@ i
     <declare-styleable name="Wallpaper">
         <attr name="settingsActivity" />
 
-        <!-- Reference to a the wallpaper's thumbnail bitmap. -->
+        <!-- Reference to the wallpaper's thumbnail bitmap. -->
         <attr name="thumbnail" format="reference" />
 
-        <!-- Name of the author of this component, e.g. Google. -->
+        <!-- Name of the author and/or source/collection of this component, e.g. Art Collection, Picasso. -->
         <attr name="author" format="reference" />
 
         <!-- Short description of the component's purpose or behavior. -->
         <attr name="description" />
+
+        <!-- Uri that specifies a link for further context of this wallpaper, e.g. http://www.picasso.org. -->
+        <attr name="contextUri" format="reference" />
+
+        <!-- Title of the uri that specifies a link for further context of this wallpaper, e.g. Explore collection. -->
+        <attr name="contextDescription" format="reference" />
+
+        <!-- Whether to show any metadata when previewing the wallpaper. -->
+        <attr name="showMetadataInPreview" format="boolean" />
+
     </declare-styleable>
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that
