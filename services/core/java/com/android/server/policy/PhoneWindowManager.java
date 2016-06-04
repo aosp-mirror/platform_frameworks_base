@@ -5004,7 +5004,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Keep track of the window if it's dimming but not necessarily fullscreen.
         final boolean reallyVisible = win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw();
-        if (mTopFullscreenOpaqueOrDimmingWindowState == null &&  reallyVisible
+        if (mTopFullscreenOpaqueOrDimmingWindowState == null && reallyVisible
                 && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
