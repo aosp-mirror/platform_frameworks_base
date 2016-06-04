@@ -5479,4 +5479,41 @@ public class TelephonyManager {
         }
         return new ArrayList<CarrierIdentifier>(0);
     }
+
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable metered apns
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable metered apns.
+     * @hide
+     */
+    public void carrierActionSetMeteredApnsEnabled(int subId, boolean enabled) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionSetMeteredApnsEnabled(subId, enabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionSetMeteredApnsEnabled", e);
+        }
+    }
+
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable radio
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable radio.
+     * @hide
+     */
+    public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.carrierActionSetRadioEnabled(subId, enabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#carrierActionSetRadioEnabled", e);
+        }
+    }
 }
+
