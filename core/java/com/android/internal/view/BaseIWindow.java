@@ -95,7 +95,7 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void updatePointerIcon(float x, float y) {
-        InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_NOT_SPECIFIED);
+        InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NOT_SPECIFIED);
     }
 
     @Override
