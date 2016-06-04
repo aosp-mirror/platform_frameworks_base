@@ -1537,6 +1537,11 @@ final class TaskRecord {
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
 
+        // Always set fontScale to be euqal to global. Can't set to 0, as that makes the override
+        // config not equal to EMPTY. Also can't set to 1, as Configuration.updateFrom will use
+        // the override scale as long as it's non-zero, and we'll always use 1.
+        config.fontScale = serviceConfig.fontScale;
+
         // For calculating screen layout, we need to use the non-decor inset screen area for the
         // calculation for compatibility reasons, i.e. screen area without system bars that could
         // never go away in Honeycomb.
@@ -1564,6 +1569,7 @@ final class TaskRecord {
         extracted.smallestScreenWidthDp = config.smallestScreenWidthDp;
         extracted.orientation = config.orientation;
         extracted.screenLayout = config.screenLayout;
+        extracted.fontScale = config.fontScale;
         return extracted;
     }
 
@@ -1597,6 +1603,9 @@ final class TaskRecord {
         newScreenLayout = (newScreenLayout & ~SCREENLAYOUT_SIZE_MASK)
                 | (overrideScreenLayout & SCREENLAYOUT_SIZE_MASK);
         mOverrideConfig.screenLayout = newScreenLayout;
+        // we never override the fontScale, however we need to copy over the global value
+        // so that the default 1.0 doesn't get applied as an override.
+        mOverrideConfig.fontScale = globalConfig.fontScale;
     }
 
     static Rect validateBounds(Rect bounds) {
