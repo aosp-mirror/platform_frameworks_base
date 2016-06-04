@@ -2153,9 +2153,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             loge("EVENT_PROVISIONING_NOTIFICATION from unknown NetworkMonitor");
                             break;
                         }
-                        setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
-                                nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(),
-                                (PendingIntent)msg.obj, nai.networkMisc.explicitlySelected);
+                        if (!nai.networkMisc.provisioningNotificationDisabled) {
+                            setProvNotificationVisibleIntent(true, netId, NotificationType.SIGN_IN,
+                                    nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(),
+                                    (PendingIntent)msg.obj, nai.networkMisc.explicitlySelected);
+                        }
                     }
                     break;
                 }
@@ -2556,6 +2558,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+
         setProvNotificationVisibleIntent(true, nai.network.netId, NotificationType.NO_INTERNET,
                 nai.networkInfo.getType(), nai.networkInfo.getExtraInfo(), pendingIntent, true);
     }

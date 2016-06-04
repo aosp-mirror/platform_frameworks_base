@@ -66,7 +66,6 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
-import com.android.server.connectivity.NetworkAgentInfo;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -618,7 +617,7 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public void exit() {
-             removeMessages(CMD_CAPTIVE_PORTAL_RECHECK);
+            removeMessages(CMD_CAPTIVE_PORTAL_RECHECK);
         }
     }
 
