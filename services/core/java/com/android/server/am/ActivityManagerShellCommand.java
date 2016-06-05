@@ -197,6 +197,7 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    a[ctivities]: activity stack state");
             pw.println("    r[recents]: recent activities state");
             pw.println("    b[roadcasts] [PACKAGE_NAME] [history [-s]]: broadcast state");
+            pw.println("    broadcast-stats [PACKAGE_NAME]: aggregated broadcast statistics");
             pw.println("    i[ntents] [PACKAGE_NAME]: pending intent state");
             pw.println("    p[rocesses] [PACKAGE_NAME]: process state");
             pw.println("    o[om]: out of memory management");
@@ -216,12 +217,14 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  -a: include all available server state.");
             pw.println("  -c: include client state.");
             pw.println("  -p: limit output to given package.");
+            pw.println("  --checkin: output checkin format, resetting data.");
+            pw.println("  --C: output checkin format, not resetting data.");
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
             pw.println("    Print this help text.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
-            pw.println("    Complete stop the given application package.");
+            pw.println("    Completely stop the given application package.");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("    Kill all processes associated with the given application.");
             pw.println("  kill-all");
