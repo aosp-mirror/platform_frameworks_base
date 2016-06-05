@@ -131,18 +131,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            // PendingIntents sent by the AlarmManager are not intercepted by
-            // BroadcastInterceptingContext so we must really register the receiver.
-            // This shouldn't effect the real NetworkMonitors as the action contains a random token.
-            if (filter.getAction(0).startsWith("android.net.netmon.lingerExpired")) {
-                return getBaseContext().registerReceiver(receiver, filter);
-            } else {
-                return super.registerReceiver(receiver, filter);
-            }
-        }
-
-        @Override
         public Object getSystemService(String name) {
             if (name == Context.CONNECTIVITY_SERVICE) return mCm;
             return super.getSystemService(name);
@@ -654,7 +642,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public void waitForIdle() {
             waitForIdle(TIMEOUT_MS);
         }
-
     }
 
     private interface Criteria {
