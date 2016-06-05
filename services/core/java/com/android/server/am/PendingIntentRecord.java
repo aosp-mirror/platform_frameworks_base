@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
@@ -397,7 +398,12 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             pw.print(prefix); pw.print("sent="); pw.print(sent);
                     pw.print(" canceled="); pw.println(canceled);
         }
-        pw.print(prefix); pw.println("whitelistDuration="); pw.println(whitelistDuration);
+        if (whitelistDuration != 0) {
+            pw.print(prefix);
+            pw.print("whitelistDuration=");
+            TimeUtils.formatDuration(whitelistDuration, pw);
+            pw.println();
+        }
     }
 
     public String toString() {
@@ -412,7 +418,9 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         sb.append(' ');
         sb.append(key.typeName());
         if (whitelistDuration > 0) {
-            sb.append( " (whitelistDuration: ").append(whitelistDuration).append("ms)");
+            sb.append( " (whitelist: ");
+            TimeUtils.formatDuration(whitelistDuration, sb);
+            sb.append(")");
         }
         sb.append('}');
         return stringName = sb.toString();

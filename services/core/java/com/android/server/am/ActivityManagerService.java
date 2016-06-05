@@ -41,7 +41,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.ProgressReporter;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
@@ -98,7 +97,6 @@ import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
 import android.app.IUserSwitchObserver;
 import android.app.Instrumentation;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -259,12 +257,10 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
@@ -569,6 +565,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
     final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[2];
+
+    BroadcastStats mLastBroadcastStats;
+    BroadcastStats mCurBroadcastStats;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
         final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
@@ -13775,6 +13774,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         boolean dumpAll = false;
         boolean dumpClient = false;
+        boolean dumpCheckin = false;
+        boolean dumpCheckinFormat = false;
         String dumpPackage = null;
 
         int opti = 0;
@@ -13797,6 +13798,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 dumpClient = true;
+            } else if ("--checkin".equals(opt)) {
+                dumpCheckin = dumpCheckinFormat = true;
+            } else if ("-C".equals(opt)) {
+                dumpCheckinFormat = true;
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
@@ -13834,6 +13839,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 synchronized (this) {
                     dumpBroadcastsLocked(fd, pw, args, opti, true, dumpPackage);
+                }
+            } else if ("broadcast-stats".equals(cmd)) {
+                String[] newArgs;
+                String name;
+                if (opti >= args.length) {
+                    name = null;
+                    newArgs = EMPTY_STRING_ARRAY;
+                } else {
+                    dumpPackage = args[opti];
+                    opti++;
+                    newArgs = new String[args.length - opti];
+                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
+                            args.length - opti);
+                }
+                synchronized (this) {
+                    dumpBroadcastStatsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("intents".equals(cmd) || "i".equals(cmd)) {
                 String[] newArgs;
@@ -13965,7 +13986,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // No piece of data specified, dump everything.
-        if (dumpClient) {
+        if (dumpCheckinFormat) {
+            dumpBroadcastStatsCheckinLocked(fd, pw, args, opti, dumpCheckin, dumpPackage);
+        } else if (dumpClient) {
             ActiveServices.ServiceDumper sdumper;
             synchronized (this) {
                 dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
@@ -13977,6 +14000,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
+                }
+                if (dumpAll || dumpPackage != null) {
+                    dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
                 }
                 dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
@@ -14028,6 +14058,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
+                }
+                if (dumpAll || dumpPackage != null) {
+                    dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
                 }
                 dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
                 pw.println();
@@ -14976,6 +15013,58 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (!printedAnything) {
             pw.println("  (nothing)");
+        }
+    }
+
+    void dumpBroadcastStatsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage) {
+        if (mCurBroadcastStats == null) {
+            return;
+        }
+
+        pw.println("ACTIVITY MANAGER BROADCAST STATS STATE (dumpsys activity broadcast-stats)");
+        final long now = SystemClock.elapsedRealtime();
+        if (mLastBroadcastStats != null) {
+            pw.print("  Last stats (from ");
+            TimeUtils.formatDuration(mLastBroadcastStats.mStartRealtime, now, pw);
+            pw.print(" to ");
+            TimeUtils.formatDuration(mLastBroadcastStats.mEndRealtime, now, pw);
+            pw.print(", ");
+            TimeUtils.formatDuration(mLastBroadcastStats.mEndUptime
+                    - mLastBroadcastStats.mStartUptime, pw);
+            pw.println(" uptime):");
+            if (!mLastBroadcastStats.dumpStats(pw, "    ", dumpPackage)) {
+                pw.println("    (nothing)");
+            }
+            pw.println();
+        }
+        pw.print("  Current stats (from ");
+        TimeUtils.formatDuration(mCurBroadcastStats.mStartRealtime, now, pw);
+        pw.print(" to now, ");
+        TimeUtils.formatDuration(SystemClock.uptimeMillis()
+                - mCurBroadcastStats.mStartUptime, pw);
+        pw.println(" uptime):");
+        if (!mCurBroadcastStats.dumpStats(pw, "    ", dumpPackage)) {
+            pw.println("    (nothing)");
+        }
+    }
+
+    void dumpBroadcastStatsCheckinLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean fullCheckin, String dumpPackage) {
+        if (mCurBroadcastStats == null) {
+            return;
+        }
+
+        if (mLastBroadcastStats != null) {
+            mLastBroadcastStats.dumpCheckinStats(pw, dumpPackage);
+            if (fullCheckin) {
+                mLastBroadcastStats = null;
+                return;
+            }
+        }
+        mCurBroadcastStats.dumpCheckinStats(pw, dumpPackage);
+        if (fullCheckin) {
+            mCurBroadcastStats = null;
         }
     }
 
@@ -17947,9 +18036,32 @@ public final class ActivityManagerService extends ActivityManagerNative
                 queue.enqueueOrderedBroadcastLocked(r);
                 queue.scheduleBroadcastsLocked();
             }
+        } else {
+            // There was nobody interested in the broadcast, but we still want to record
+            // that it happened.
+            if (intent.getComponent() == null && intent.getPackage() == null
+                    && (intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
+                // This was an implicit broadcast... let's record it for posterity.
+                addBroadcastStatLocked(intent.getAction(), callerPackage, 0, 0, 0);
+            }
         }
 
         return ActivityManager.BROADCAST_SUCCESS;
+    }
+
+    final void addBroadcastStatLocked(String action, String srcPackage, int receiveCount,
+            int skipCount, long dispatchTime) {
+        final long now = SystemClock.elapsedRealtime();
+        if (mCurBroadcastStats == null ||
+                (mCurBroadcastStats.mStartRealtime +(24*60*60*1000) < now)) {
+            mLastBroadcastStats = mCurBroadcastStats;
+            if (mLastBroadcastStats != null) {
+                mLastBroadcastStats.mEndRealtime = SystemClock.elapsedRealtime();
+                mLastBroadcastStats.mEndUptime = SystemClock.uptimeMillis();
+            }
+            mCurBroadcastStats = new BroadcastStats();
+        }
+        mCurBroadcastStats.addBroadcast(action, srcPackage, receiveCount, skipCount, dispatchTime);
     }
 
     final Intent verifyBroadcastLocked(Intent intent) {
