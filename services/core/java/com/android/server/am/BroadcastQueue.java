@@ -898,6 +898,12 @@ public final class BroadcastQueue {
 
                     // ... and on to the next...
                     addBroadcastToHistoryLocked(r);
+                    if (r.intent.getComponent() == null && r.intent.getPackage() == null
+                            && (r.intent.getFlags()&Intent.FLAG_RECEIVER_REGISTERED_ONLY) == 0) {
+                        // This was an implicit broadcast... let's record it for posterity.
+                        mService.addBroadcastStatLocked(r.intent.getAction(), r.callerPackage,
+                                r.manifestCount, r.manifestSkipCount, r.finishTime-r.dispatchTime);
+                    }
                     mOrderedBroadcasts.remove(0);
                     r = null;
                     looped = true;
@@ -1082,6 +1088,11 @@ public final class BroadcastQueue {
                             + android.Manifest.permission.INTERACT_ACROSS_USERS);
                     skip = true;
                 }
+            }
+            if (!skip) {
+                r.manifestCount++;
+            } else {
+                r.manifestSkipCount++;
             }
             if (r.curApp != null && r.curApp.crashing) {
                 // If the target process is crashing, just skip it.

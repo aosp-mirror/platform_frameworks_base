@@ -72,6 +72,8 @@ final class BroadcastRecord extends Binder {
     IBinder receiver;       // who is currently running, null if none.
     int state;
     int anrCount;           // has this broadcast record hit any ANRs?
+    int manifestCount;      // number of manifest receivers dispatched.
+    int manifestSkipCount;  // number of manifest receivers skipped.
     BroadcastQueue queue;   // the outbound queue handling this broadcast
 
     static final int IDLE = 0;
