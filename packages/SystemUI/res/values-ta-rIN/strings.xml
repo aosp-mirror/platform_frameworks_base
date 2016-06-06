@@ -365,7 +365,7 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"சுயவிவரத்தைக் காட்டு"</string>
     <string name="user_add_user" msgid="5110251524486079492">"பயனரைச் சேர்"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"புதியவர்"</string>
-    <string name="guest_nickname" msgid="8059989128963789678">"அழைக்கப்பட்டவர்"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"கெஸ்ட்"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"அழைக்கப்பட்டவரைச் சேர்"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"அழைக்கப்பட்டவரை அகற்று"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
@@ -375,7 +375,7 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"உங்கள் அமர்வைத் தொடர விருப்பமா?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"மீண்டும் தொடங்கு"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"தொடரவும்"</string>
-    <string name="guest_notification_title" msgid="1585278533840603063">"அழைக்கப்பட்டவர்"</string>
+    <string name="guest_notification_title" msgid="1585278533840603063">"கெஸ்ட்"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"பயன்பாடுகளையும் தரவையும் நீக்க, விருந்தினர் பயனரை அகற்றவும்"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"அழைக்கப்பட்டவரை அகற்றவா?"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"பயனரை வெளியேற்று"</string>
