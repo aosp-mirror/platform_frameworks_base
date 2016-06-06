@@ -504,8 +504,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     public static final int REASON_NON_SYSTEM_LIBRARY = 5;
     public static final int REASON_SHARED_APK = 6;
     public static final int REASON_FORCED_DEXOPT = 7;
+    public static final int REASON_CORE_APP = 8;
 
-    public static final int REASON_LAST = REASON_FORCED_DEXOPT;
+    public static final int REASON_LAST = REASON_CORE_APP;
 
     /** Special library name that skips shared libraries check during compilation. */
     private static final String SKIP_SHARED_LIBRARY_CHECK = "&";
@@ -2746,6 +2747,41 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // can downgrade to reader
             mSettings.writeLPr();
+
+            // Perform dexopt on all apps that mark themselves as coreApps. We do this pretty
+            // early on (before the package manager declares itself as early) because other
+            // components in the system server might ask for package contexts for these apps.
+            //
+            // Note that "onlyCore" in this context means the system is encrypted or encrypting
+            // (i.e, that the data partition is unavailable).
+            if ((isFirstBoot() || isUpgrade() || VMRuntime.didPruneDalvikCache()) && !onlyCore) {
+                long start = System.nanoTime();
+                List<PackageParser.Package> coreApps = new ArrayList<>();
+                for (PackageParser.Package pkg : mPackages.values()) {
+                    if (pkg.coreApp) {
+                        coreApps.add(pkg);
+                    }
+                }
+
+                int[] stats = performDexOpt(coreApps, false,
+                        getCompilerFilterForReason(REASON_CORE_APP));
+
+                final int elapsedTimeSeconds =
+                        (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start);
+                MetricsLogger.histogram(mContext, "opt_coreapps_time_s", elapsedTimeSeconds);
+
+                if (DEBUG_DEXOPT) {
+                    Slog.i(TAG, "Dex-opt core apps took : " + elapsedTimeSeconds + " seconds (" +
+                            stats[0] + ", " + stats[1] + ", " + stats[2] + ")");
+                }
+
+
+                // TODO: Should we log these stats to tron too ?
+                // MetricsLogger.histogram(mContext, "opt_coreapps_num_dexopted", stats[0]);
+                // MetricsLogger.histogram(mContext, "opt_coreapps_num_skipped", stats[1]);
+                // MetricsLogger.histogram(mContext, "opt_coreapps_num_failed", stats[2]);
+                // MetricsLogger.histogram(mContext, "opt_coreapps_num_total", coreApps.size());
+            }
 
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY,
                     SystemClock.uptimeMillis());
@@ -7235,12 +7271,34 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
         }
 
+        final long startTime = System.nanoTime();
+        final int[] stats = performDexOpt(pkgs, mIsPreNUpgrade /* showDialog */,
+                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT));
+
+        final int elapsedTimeSeconds =
+                (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
+
+        MetricsLogger.histogram(mContext, "opt_dialog_num_dexopted", stats[0]);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_skipped", stats[1]);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_failed", stats[2]);
+        MetricsLogger.histogram(mContext, "opt_dialog_num_total", getOptimizablePackages().size());
+        MetricsLogger.histogram(mContext, "opt_dialog_time_s", elapsedTimeSeconds);
+    }
+
+    /**
+     * Performs dexopt on the set of packages in {@code packages} and returns an int array
+     * containing statistics about the invocation. The array consists of three elements,
+     * which are (in order) {@code numberOfPackagesOptimized}, {@code numberOfPackagesSkipped}
+     * and {@code numberOfPackagesFailed}.
+     */
+    private int[] performDexOpt(List<PackageParser.Package> pkgs, boolean showDialog,
+            String compilerFilter) {
+
         int numberOfPackagesVisited = 0;
         int numberOfPackagesOptimized = 0;
         int numberOfPackagesSkipped = 0;
         int numberOfPackagesFailed = 0;
         final int numberOfPackagesToDexopt = pkgs.size();
-        final long startTime = System.nanoTime();
 
         for (PackageParser.Package pkg : pkgs) {
             numberOfPackagesVisited++;
@@ -7258,7 +7316,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         numberOfPackagesToDexopt + ": " + pkg.packageName);
             }
 
-            if (mIsPreNUpgrade) {
+            if (showDialog) {
                 try {
                     ActivityManagerNative.getDefault().showBootMessage(
                             mContext.getResources().getString(R.string.android_upgrading_apk,
@@ -7274,7 +7332,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // trade-off worth doing to save boot time work.
             int dexOptStatus = performDexOptTraced(pkg.packageName,
                     false /* checkProfiles */,
-                    getCompilerFilterForReason(causeFirstBoot ? REASON_FIRST_BOOT : REASON_BOOT),
+                    compilerFilter,
                     false /* force */);
             switch (dexOptStatus) {
                 case PackageDexOptimizer.DEX_OPT_PERFORMED:
@@ -7292,13 +7350,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
 
-        final int elapsedTimeSeconds =
-                (int) TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_dexopted", numberOfPackagesOptimized);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_skipped", numberOfPackagesSkipped);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_failed", numberOfPackagesFailed);
-        MetricsLogger.histogram(mContext, "opt_dialog_num_total", getOptimizablePackages().size());
-        MetricsLogger.histogram(mContext, "opt_dialog_time_s", elapsedTimeSeconds);
+        return new int[] { numberOfPackagesOptimized, numberOfPackagesSkipped,
+                numberOfPackagesFailed };
     }
 
     @Override
