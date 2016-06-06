@@ -5205,6 +5205,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN)) {
+            // Remove always-on package
+            synchronized (mVpns) {
+                final String alwaysOnPackage = getAlwaysOnVpnPackage(userId);
+                if (alwaysOnPackage != null) {
+                    setAlwaysOnVpnPackage(userId, null, false);
+                    setVpnPackageAuthorization(alwaysOnPackage, userId, false);
+                }
+            }
+
             // Turn VPN off
             VpnConfig vpnConfig = getVpnConfig(userId);
             if (vpnConfig != null) {
@@ -5215,7 +5224,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // in the future without user intervention.
                     setVpnPackageAuthorization(vpnConfig.user, userId, false);
 
-                    prepareVpn(vpnConfig.user, VpnConfig.LEGACY_VPN, userId);
+                    prepareVpn(null, VpnConfig.LEGACY_VPN, userId);
                 }
             }
         }
