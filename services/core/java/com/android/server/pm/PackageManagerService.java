@@ -7677,15 +7677,17 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         destroyAppProfilesLeafLIF(pkg);
-        destroyAppReferenceProfileLeafLIF(pkg, userId);
+        destroyAppReferenceProfileLeafLIF(pkg, userId, true /* removeBaseMarker */);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             destroyAppProfilesLeafLIF(pkg.childPackages.get(i));
-            destroyAppReferenceProfileLeafLIF(pkg.childPackages.get(i), userId);
+            destroyAppReferenceProfileLeafLIF(pkg.childPackages.get(i), userId,
+                    true /* removeBaseMarker */);
         }
     }
 
-    private void destroyAppReferenceProfileLeafLIF(PackageParser.Package pkg, int userId) {
+    private void destroyAppReferenceProfileLeafLIF(PackageParser.Package pkg, int userId,
+            boolean removeBaseMarker) {
         if (pkg.isForwardLocked()) {
             return;
         }
@@ -7702,11 +7704,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             final String useMarker = path.replace('/', '@');
             for (int realUserId : resolveUserIds(userId)) {
                 File profileDir = Environment.getDataProfilesDeForeignDexDirectory(realUserId);
-                File foreignUseMark = new File(profileDir, useMarker);
-                if (foreignUseMark.exists()) {
-                    if (!foreignUseMark.delete()) {
-                        Slog.w(TAG, "Unable to delete foreign user mark for package: "
-                            + pkg.packageName);
+                if (removeBaseMarker) {
+                    File foreignUseMark = new File(profileDir, useMarker);
+                    if (foreignUseMark.exists()) {
+                        if (!foreignUseMark.delete()) {
+                            Slog.w(TAG, "Unable to delete foreign user mark for package: "
+                                    + pkg.packageName);
+                        }
                     }
                 }
 
@@ -7744,7 +7748,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
         clearAppProfilesLeafLIF(pkg);
-        destroyAppReferenceProfileLeafLIF(pkg, userId);
+        // We don't remove the base foreign use marker when clearing profiles because
+        // we will rename it when the app is updated. Unlike the actual profile contents,
+        // the foreign use marker is good across installs.
+        destroyAppReferenceProfileLeafLIF(pkg, userId, false /* removeBaseMarker */);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             clearAppProfilesLeafLIF(pkg.childPackages.get(i));
@@ -8618,6 +8625,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             // We don't expect installation to fail beyond this point
 
+            if (pkgSetting.pkg != null) {
+                maybeRenameForeignDexMarkers(pkgSetting.pkg, pkg, user);
+            }
+
             // Add the new setting to mSettings
             mSettings.insertPackageSettingLPw(pkgSetting, pkg);
             // Add the new setting to mPackages
@@ -8975,6 +8986,74 @@ public class PackageManagerService extends IPackageManager.Stub {
                     "scanPackageLI failed to createIdmap");
         }
         return pkg;
+    }
+
+    private void maybeRenameForeignDexMarkers(PackageParser.Package existing,
+            PackageParser.Package update, UserHandle user) {
+        if (existing.applicationInfo == null || update.applicationInfo == null) {
+            // This isn't due to an app installation.
+            return;
+        }
+
+        final File oldCodePath = new File(existing.applicationInfo.getCodePath());
+        final File newCodePath = new File(update.applicationInfo.getCodePath());
+
+        // The codePath hasn't changed, so there's nothing for us to do.
+        if (Objects.equals(oldCodePath, newCodePath)) {
+            return;
+        }
+
+        File canonicalNewCodePath;
+        try {
+            canonicalNewCodePath = new File(PackageManagerServiceUtils.realpath(newCodePath));
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to get canonical path.", e);
+            return;
+        }
+
+        // This is a bit of a hack. The oldCodePath doesn't exist at this point (because
+        // we've already renamed / deleted it) so we cannot call realpath on it. Here we assume
+        // that the last component of the path (i.e, the name) doesn't need canonicalization
+        // (i.e, that it isn't ".", ".." or a symbolic link). This is a valid assumption for now
+        // but may change in the future. Hopefully this function won't exist at that point.
+        final File canonicalOldCodePath = new File(canonicalNewCodePath.getParentFile(),
+                oldCodePath.getName());
+
+        // Calculate the prefixes of the markers. These are just the paths with "/" replaced
+        // with "@".
+        String oldMarkerPrefix = canonicalOldCodePath.getAbsolutePath().replace('/', '@');
+        if (!oldMarkerPrefix.endsWith("@")) {
+            oldMarkerPrefix += "@";
+        }
+        String newMarkerPrefix = canonicalNewCodePath.getAbsolutePath().replace('/', '@');
+        if (!newMarkerPrefix.endsWith("@")) {
+            newMarkerPrefix += "@";
+        }
+
+        List<String> updatedPaths = update.getAllCodePathsExcludingResourceOnly();
+        List<String> markerSuffixes = new ArrayList<String>(updatedPaths.size());
+        for (String updatedPath : updatedPaths) {
+            String updatedPathName = new File(updatedPath).getName();
+            markerSuffixes.add(updatedPathName.replace('/', '@'));
+        }
+
+        for (int userId : resolveUserIds(user.getIdentifier())) {
+            File profileDir = Environment.getDataProfilesDeForeignDexDirectory(userId);
+
+            for (String markerSuffix : markerSuffixes) {
+                File oldForeignUseMark = new File(profileDir, oldMarkerPrefix + markerSuffix);
+                File newForeignUseMark = new File(profileDir, newMarkerPrefix + markerSuffix);
+                if (oldForeignUseMark.exists()) {
+                    try {
+                        Os.rename(oldForeignUseMark.getAbsolutePath(),
+                                newForeignUseMark.getAbsolutePath());
+                    } catch (ErrnoException e) {
+                        Slog.w(TAG, "Failed to rename foreign use marker", e);
+                        oldForeignUseMark.delete();
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -16311,6 +16390,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         try (PackageFreezer freezer = freezePackage(packageName, "clearApplicationProfileData")) {
             synchronized (mInstallLock) {
                 clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
+                destroyAppReferenceProfileLeafLIF(pkg, UserHandle.USER_ALL,
+                        true /* removeBaseMarker */);
             }
         }
     }
