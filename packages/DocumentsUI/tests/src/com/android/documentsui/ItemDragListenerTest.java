@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -29,6 +30,7 @@ import android.view.View;
 
 import com.android.documentsui.testing.ClipDatas;
 import com.android.documentsui.testing.DragEvents;
+import com.android.documentsui.testing.TestDrawable;
 import com.android.documentsui.testing.TestTimer;
 import com.android.documentsui.testing.Views;
 
@@ -46,6 +48,7 @@ public class ItemDragListenerTest {
     private static final long DELAY_AFTER_HOVERING = ItemDragListener.SPRING_TIMEOUT + 1;
 
     private View mTestView;
+    private TestDrawable mTestBackground;
     private TestDragHost mTestDragHost;
     private TestTimer mTestTimer;
 
@@ -54,9 +57,10 @@ public class ItemDragListenerTest {
     @Before
     public void setUp() {
         mTestView = Views.createTestView();
-
+        mTestBackground = new TestDrawable();
         mTestTimer = new TestTimer();
         mTestDragHost = new TestDragHost();
+
         mListener = new TestDragListener(mTestDragHost, mTestTimer);
     }
 
@@ -85,6 +89,25 @@ public class ItemDragListenerTest {
 
         triggerDragEvent(DragEvent.ACTION_DRAG_ENDED);
         assertNull(mTestDragHost.mHighlightedView);
+    }
+
+    @Test
+    public void testDragLocation_notCrashWithoutBackground() {
+        DragEvent locationEvent = DragEvents.createTestLocationEvent(3, 4);
+        mListener.onDrag(mTestView, locationEvent);
+    }
+
+    @Test
+    public void testDragLocation_setHotSpotOnBackground() {
+        Views.setBackground(mTestView, mTestBackground);
+
+        final float x = 2;
+        final float y = 4;
+        DragEvent locationEvent = DragEvents.createTestLocationEvent(x, y);
+        mListener.onDrag(mTestView, locationEvent);
+
+        assertEquals(x, mTestBackground.hotspotX, 0);
+        assertEquals(y, mTestBackground.hotspotY, 0);
     }
 
     @Test

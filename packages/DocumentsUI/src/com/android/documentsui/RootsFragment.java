@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 
+import android.annotation.LayoutRes;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -26,12 +27,13 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
-import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
@@ -54,7 +56,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -198,6 +202,10 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
      */
     @Override
     public void onViewHovered(View view) {
+        // SpacerView doesn't have DragListener so this view is guaranteed to be a RootItemView.
+        RootItemView itemView = (RootItemView) view;
+        itemView.drawRipple();
+
         final int position = (Integer) view.getTag(R.id.item_position_tag);
         final Item item = mAdapter.getItem(position);
         item.open(this);
@@ -205,10 +213,9 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
 
     @Override
     public void setDropTargetHighlight(View v, boolean highlight) {
-        @ColorRes int colorId = highlight ? R.color.item_doc_background_selected
-                : android.R.color.transparent;
-
-        v.setBackgroundColor(getActivity().getColor(colorId));
+        // SpacerView doesn't have DragListener so this view is guaranteed to be a RootItemView.
+        RootItemView itemView = (RootItemView) v;
+        itemView.setHighlight(highlight);
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
@@ -216,6 +223,8 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Item item = mAdapter.getItem(position);
             item.open(RootsFragment.this);
+
+            ((BaseActivity) getActivity()).setRootsDrawerOpen(false);
         }
     };
 
@@ -223,30 +232,32 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
             final Item item = mAdapter.getItem(position);
-            if (item instanceof AppItem) {
-                showAppDetails(((AppItem) item).info);
-                return true;
-            } else {
-                return false;
-            }
+            return item.showAppDetails(RootsFragment.this);
         }
     };
 
     private static abstract class Item {
-        private final int mLayoutId;
+        private final @LayoutRes int mLayoutId;
+        private final String mStringId;
 
-        public Item(int layoutId) {
+        public Item(@LayoutRes int layoutId, String stringId) {
             mLayoutId = layoutId;
+            mStringId = stringId;
         }
 
         public View getView(View convertView, ViewGroup parent) {
-            // Disable recycling views because 1) it's very unlikely a view can be recycled here;
-            // 2) there is no easy way for us to know with which layout id the convertView was
-            // inflated; and 3) simplicity is much appreciated at this time.
-            convertView = LayoutInflater.from(parent.getContext())
+            if (convertView == null
+                    || (Integer) convertView.getTag(R.id.layout_id_tag) != mLayoutId) {
+                convertView = LayoutInflater.from(parent.getContext())
                         .inflate(mLayoutId, parent, false);
+            }
+            convertView.setTag(R.id.layout_id_tag, mLayoutId);
             bindView(convertView);
             return convertView;
+        }
+
+        boolean showAppDetails(RootsFragment fragment) {
+            return false;
         }
 
         abstract void bindView(View convertView);
@@ -257,11 +268,21 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     }
 
     private static class RootItem extends Item {
+        private static final String STRING_ID_FORMAT = "RootItem{%s/%s}";
+
         public final RootInfo root;
 
         public RootItem(RootInfo root) {
-            super(R.layout.item_root);
+            super(R.layout.item_root, getStringId(root));
             this.root = root;
+        }
+
+        private static String getStringId(RootInfo root) {
+            // Empty URI authority is invalid, so we can use empty string if root.authority is null.
+            // Directly passing null to String.format() will write "null" which can be a valid URI
+            // authority.
+            String authority = (root.authority == null ? "" : root.authority);
+            return String.format(STRING_ID_FORMAT, authority, root.rootId);
         }
 
         @Override
@@ -291,7 +312,7 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         }
 
         @Override
-        public void open(RootsFragment fragment) {
+        void open(RootsFragment fragment) {
             BaseActivity activity = BaseActivity.get(fragment);
             Metrics.logRootVisited(fragment.getActivity(), root);
             activity.onRootPicked(root);
@@ -299,8 +320,11 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     }
 
     private static class SpacerItem extends Item {
+        private static final String STRING_ID = "SpacerItem";
+
         public SpacerItem() {
-            super(R.layout.item_root_spacer);
+            // Multiple spacer items can share the same string id as they're identical.
+            super(R.layout.item_root_spacer, STRING_ID);
         }
 
         @Override
@@ -314,17 +338,33 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         }
 
         @Override
-        public void open(RootsFragment fragment) {
+        void open(RootsFragment fragment) {
             if (DEBUG) Log.d(TAG, "Ignoring click/hover on spacer item.");
         }
     }
 
     private static class AppItem extends Item {
+        private static final String STRING_ID_FORMAT = "AppItem{%s/%s}";
+
         public final ResolveInfo info;
 
         public AppItem(ResolveInfo info) {
-            super(R.layout.item_root);
+            super(R.layout.item_root, getStringId(info));
             this.info = info;
+        }
+
+        private static String getStringId(ResolveInfo info) {
+            ActivityInfo activityInfo = info.activityInfo;
+
+            String component = String.format(
+                    STRING_ID_FORMAT, activityInfo.applicationInfo.packageName, activityInfo.name);
+            return component;
+        }
+
+        @Override
+        boolean showAppDetails(RootsFragment fragment) {
+            fragment.showAppDetails(info);
+            return true;
         }
 
         @Override
@@ -348,7 +388,7 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
         }
 
         @Override
-        public void open(RootsFragment fragment) {
+        void open(RootsFragment fragment) {
             DocumentsActivity activity = DocumentsActivity.get(fragment);
             Metrics.logAppVisited(fragment.getActivity(), info);
             activity.onAppPicked(info);
@@ -356,6 +396,9 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
     }
 
     private static class RootsAdapter extends ArrayAdapter<Item> {
+        private static final Map<String, Long> sIdMap = new HashMap<String, Long>();
+        // the next available id to associate with a new string id
+        private static long sNextAvailableId;
 
         private OnDragListener mDragListener;
 
@@ -427,6 +470,30 @@ public class RootsFragment extends Fragment implements ItemDragListener.DragHost
                 add(new SpacerItem());
                 addAll(apps);
             }
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            // Ensure this method is only called in main thread because we don't have any
+            // concurrency protection.
+            assert(Looper.myLooper() == Looper.getMainLooper());
+
+            String stringId = getItem(position).mStringId;
+
+            long id;
+            if (sIdMap.containsKey(stringId)) {
+                id = sIdMap.get(stringId);
+            } else {
+                id = sNextAvailableId++;
+                sIdMap.put(stringId, id);
+            }
+
+            return id;
         }
 
         @Override

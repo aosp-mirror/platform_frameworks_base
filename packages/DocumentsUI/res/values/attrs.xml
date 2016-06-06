@@ -17,4 +17,8 @@
     <declare-styleable name="DocumentsTheme">
         <attr name="colorActionMode" format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="RootItemView">
+        <attr name="state_highlighted" format="boolean"/>
+    </declare-styleable>
 </resources>
