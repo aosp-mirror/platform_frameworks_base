@@ -230,7 +230,7 @@ public class NotificationData {
             } else if (aRank != bRank) {
                 return aRank - bRank;
             } else {
-                return (int) (nb.getNotification().when - na.getNotification().when);
+                return Long.compare(nb.getNotification().when, na.getNotification().when);
             }
         }
     };
