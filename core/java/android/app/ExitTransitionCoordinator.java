@@ -35,7 +35,6 @@ import android.transition.TransitionManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.Window;
 
 import java.util.ArrayList;
 
@@ -60,20 +59,18 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private Bundle mExitSharedElementBundle;
     private boolean mIsExitStarted;
     private boolean mSharedElementsHidden;
-    private HideSharedElementsCallback mHideSharedElementsCallback;
 
-    public ExitTransitionCoordinator(Activity activity, Window window,
-            SharedElementCallback listener, ArrayList<String> names,
+    public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
             ArrayList<String> accepted, ArrayList<View> mapped, boolean isReturning) {
-        super(window, names, listener, isReturning);
+        super(activity.getWindow(), names, getListener(activity, isReturning), isReturning);
         viewsReady(mapSharedElements(accepted, mapped));
         stripOffscreenViews();
         mIsBackgroundReady = !isReturning;
         mActivity = activity;
     }
 
-    void setHideSharedElementsCallback(HideSharedElementsCallback callback) {
-        mHideSharedElementsCallback = callback;
+    private static SharedElementCallback getListener(Activity activity, boolean isReturning) {
+        return isReturning ? activity.mEnterTransitionListener : activity.mExitTransitionListener;
     }
 
     @Override
@@ -191,9 +188,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
 
     private void hideSharedElements() {
         moveSharedElementsFromOverlay();
-        if (mHideSharedElementsCallback != null) {
-            mHideSharedElementsCallback.hideSharedElements();
-        }
         if (!mIsHidden) {
             hideViews(mSharedElements);
         }
@@ -213,11 +207,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             startTransition(new Runnable() {
                 @Override
                 public void run() {
-                    if (mActivity != null) {
-                        beginTransitions();
-                    } else {
-                        startExitTransition();
-                    }
+                    beginTransitions();
                 }
             });
         }
@@ -517,9 +507,5 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         } else {
             return getWindow().getSharedElementExitTransition();
         }
-    }
-
-    interface HideSharedElementsCallback {
-        void hideSharedElements();
     }
 }
