@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.core.frameworks.perftests">
+
+    <application>
+        <uses-library android:name="android.test.runner" />
+        <activity android:name="android.widget.StubActivity" />
+    </application>
+
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.core.frameworks.perftests"/>
+
+</manifest>
