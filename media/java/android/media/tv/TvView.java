@@ -780,6 +780,8 @@ public class TvView extends ViewGroup {
                 super.updateWindow(force, redrawNeeded);
                 relayoutSessionOverlayView();
             }};
+        // The surface view's content should be treated as secure all the time.
+        mSurfaceView.setSecure(true);
         mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
         if (mWindowZOrder == ZORDER_MEDIA_OVERLAY) {
             mSurfaceView.setZOrderMediaOverlay(true);
