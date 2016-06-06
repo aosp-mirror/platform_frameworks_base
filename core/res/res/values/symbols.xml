@@ -2609,7 +2609,4 @@
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
 
   <java-symbol type="string" name="suspended_widget_accessibility" />
-
-  <!-- Used internally for assistant to launch activity transitions -->
-  <java-symbol type="id" name="cross_task_transition" />
 </resources>
