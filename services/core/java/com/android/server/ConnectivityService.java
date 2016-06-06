@@ -433,15 +433,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Array of <Network,ReadOnlyLocalLogs> tracking network validation and results
     private static final int MAX_VALIDATION_LOGS = 10;
-    private final ArrayDeque<Pair<Network,ReadOnlyLocalLog>> mValidationLogs =
-            new ArrayDeque<Pair<Network,ReadOnlyLocalLog>>(MAX_VALIDATION_LOGS);
+    private static class ValidationLog {
+        final Network mNetwork;
+        final String mNetworkExtraInfo;
+        final ReadOnlyLocalLog mLog;
 
-    private void addValidationLogs(ReadOnlyLocalLog log, Network network) {
+        ValidationLog(Network network, String networkExtraInfo, ReadOnlyLocalLog log) {
+            mNetwork = network;
+            mNetworkExtraInfo = networkExtraInfo;
+            mLog = log;
+        }
+    }
+    private final ArrayDeque<ValidationLog> mValidationLogs =
+            new ArrayDeque<ValidationLog>(MAX_VALIDATION_LOGS);
+
+    private void addValidationLogs(ReadOnlyLocalLog log, Network network, String networkExtraInfo) {
         synchronized(mValidationLogs) {
             while (mValidationLogs.size() >= MAX_VALIDATION_LOGS) {
                 mValidationLogs.removeLast();
             }
-            mValidationLogs.addFirst(new Pair(network, log));
+            mValidationLogs.addFirst(new ValidationLog(network, networkExtraInfo, log));
         }
     }
 
@@ -1950,10 +1961,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             pw.println();
             synchronized (mValidationLogs) {
                 pw.println("mValidationLogs (most recent first):");
-                for (Pair<Network,ReadOnlyLocalLog> p : mValidationLogs) {
-                    pw.println(p.first);
+                for (ValidationLog p : mValidationLogs) {
+                    pw.println(p.mNetwork + " - " + p.mNetworkExtraInfo);
                     pw.increaseIndent();
-                    p.second.dump(fd, pw, args);
+                    p.mLog.dump(fd, pw, args);
                     pw.decreaseIndent();
                 }
             }
@@ -4253,7 +4264,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
-        addValidationLogs(nai.networkMonitor.getValidationLogs(), nai.network);
+        addValidationLogs(nai.networkMonitor.getValidationLogs(), nai.network,
+                networkInfo.getExtraInfo());
         if (DBG) log("registerNetworkAgent " + nai);
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_AGENT, nai));
         return nai.network.netId;
