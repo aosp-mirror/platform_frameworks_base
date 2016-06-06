@@ -903,7 +903,7 @@ redirects:
 - from: /tools/debugging/ddms.html
   to: /studio/profile/ddms.html
 - from: /tools/debugging/debugging-log.html
-  to: /studio/debug/log.html
+  to: /studio/command-line/logcat.html
 - from: /tools/debugging/debugging-memory.html
   to: /studio/profile/investigate-ram.html
 - from: /tools/debugging/debugging-studio.html
