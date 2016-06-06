@@ -103,6 +103,11 @@
         wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location
     </string>
 
+    <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
+    <string name="quick_settings_tiles_stock" translatable="false">
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,work,cast,night
+    </string>
+
     <!-- The tiles to display in QuickSettings -->
     <string name="quick_settings_tiles" translatable="false">default</string>
 
@@ -265,4 +270,3 @@
     <bool name="quick_settings_show_date">false</bool>
 
 </resources>
-
