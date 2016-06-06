@@ -249,7 +249,12 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivne zahteve za lokacijo"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Izbriši vsa obvestila."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"in <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">Notri je še <xliff:g id="NUMBER_1">%s</xliff:g> obvestilo.</item>
+      <item quantity="two">Notri sta še <xliff:g id="NUMBER_1">%s</xliff:g> obvestili.</item>
+      <item quantity="few">Notri so še <xliff:g id="NUMBER_1">%s</xliff:g> obvestila.</item>
+      <item quantity="other">Notri je še <xliff:g id="NUMBER_1">%s</xliff:g> obvestil.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Nastavitve obvestil"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Nastavitve aplikacije <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon se bo samodejno zasukal."</string>

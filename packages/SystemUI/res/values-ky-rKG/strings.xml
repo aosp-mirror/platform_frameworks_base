@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Жайгаштыруу талаптары иштелүүдө"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Бардык эскертмелерди тазалоо."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">Дагы <xliff:g id="NUMBER_1">%s</xliff:g> эскертме бар.</item>
+      <item quantity="one">Дагы <xliff:g id="NUMBER_0">%s</xliff:g> эскертме бар.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Эскертме жөндөөлөрү"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> жөндөөлөрү"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран автоматтык түрдө бурулат."</string>
@@ -296,7 +299,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Жеткиликтүү түзмөктөр жок"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Жарыктыгы"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
-    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Түстөрдү аңтаруу"</string>
+    <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Түстөрдү инверсиялоо"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Түстү тууралоо абалы"</string>
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Дагы жөндөөлөр"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Бүттү"</string>

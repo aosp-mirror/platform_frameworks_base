@@ -246,7 +246,11 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Zahtjevi za lokaciju aktivni su"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Brisanje svih obavijesti."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"još <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">U skupini je još <xliff:g id="NUMBER_1">%s</xliff:g> obavijest.</item>
+      <item quantity="few">U skupini su još <xliff:g id="NUMBER_1">%s</xliff:g> obavijesti.</item>
+      <item quantity="other">U skupini je još <xliff:g id="NUMBER_1">%s</xliff:g> obavijesti.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Postavke obavijesti"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Postavke aplikacije <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon će se automatski zakrenuti."</string>

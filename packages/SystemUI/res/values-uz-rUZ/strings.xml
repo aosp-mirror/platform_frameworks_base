@@ -30,7 +30,7 @@
       <item quantity="one">Umumiy ma’lumot bo‘limida 1 ta ekran bor</item>
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirishnomalar yo‘q"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Joriy"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Hali bajarilmagan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam qoldi"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
@@ -51,7 +51,7 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth bog‘landi"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Kiritish usullarini moslash"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tashqi tugmatag"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovaga USB qurilmaga kirishga ruxsat berilsinmi?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga USB qurilmaga kirish uchun ruxsat berilsinmi?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga USB qurilmaga kirish uchun ruxsat berilsinmi?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB qurilma ulanganda <xliff:g id="ACTIVITY">%1$s</xliff:g> ochilsinmi?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"USB jihoz ulanganda <xliff:g id="ACTIVITY">%1$s</xliff:g> ochilsinmi?"</string>
@@ -247,7 +247,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Joylashuv so‘rovlari yoniq"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Barcha eslatmalarni tozalash."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">Guruhda yana <xliff:g id="NUMBER_1">%s</xliff:g> ta bildirishnoma.</item>
+      <item quantity="one">Guruhda yana <xliff:g id="NUMBER_0">%s</xliff:g> ta bildirishnoma.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Bildirishnoma sozlamalari"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> sozlamalari"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran avtomatik buriladi."</string>
@@ -268,7 +271,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth o‘chirilgan"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Ulangan qurilmalar topilmadi"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Yorqinlik"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burish"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burilish"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekranni avtomatik burish"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="1428962304214992318">"Tanlandi: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Aylanmaydigan qilingan"</string>
@@ -319,7 +322,7 @@
     <string name="recents_empty_message" msgid="808480104164008572">"Hozircha hech narsa yo‘q"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Hammasi o‘chirildi"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Ilova haqida ma’lumot"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"o‘zgarmas ekran"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ekranni mahkamlash"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"qidirish"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"“<xliff:g id="APP">%s</xliff:g>” ilovasini ishga tushirib bo‘lmadi."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Xavfsiz rejimda <xliff:g id="APP">%s</xliff:g> ilovasi o‘chirib qo‘yildi."</string>
