@@ -339,7 +339,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਲਈ ਉੱਪਰ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਤੱਕ ਖੱਬੇ ਪਾਸੇ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਦੁਆਰਾ ਨਿਰਦਿਸ਼ਟ ਅਲਾਰਮ, ਰਿਮਾਈਂਡਰ, ਇਵੈਂਟਸ, ਅਤੇ ਕਾਲਰਸ ਤੋਂ ਇਲਾਵਾ, ਧੁਨੀ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਤੋਂ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਅਨੁਕੂਲਿਤ ਕਰੋ"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਫ਼ੋਨ ਕਾਲ ਕਰਨ ਦੇ ਯੋਗ ਹੋਵੋਗੇ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
@@ -384,7 +384,7 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸਥਾਪਤ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਉਪਭੋਗਤਾ ਹਟਾਉਣਾ ਹੈ?"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਵਰਤੋਂਕਾਰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ਇਸ ਉਪਭੋਗਤਾ ਦੇ ਸਾਰੇ ਐਪਸ ਅਤੇ ਡੈਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ਹਟਾਓ"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
