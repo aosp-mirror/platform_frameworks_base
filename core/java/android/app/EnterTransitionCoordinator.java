@@ -59,14 +59,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsViewsTransitionStarted;
     private Transition mEnterViewsTransition;
     private OnPreDrawListener mViewsReadyListener;
-    private final boolean mIsCrossTask;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
-            ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
+            ArrayList<String> sharedElementNames, boolean isReturning) {
         super(activity.getWindow(), sharedElementNames,
-                getListener(activity, isReturning && !isCrossTask), isReturning);
+                getListener(activity, isReturning), isReturning);
         mActivity = activity;
-        mIsCrossTask = isCrossTask;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -85,10 +83,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                         }
                     });
         }
-    }
-
-    boolean isCrossTask() {
-        return mIsCrossTask;
     }
 
     public void viewInstancesReady(ArrayList<String> accepted, ArrayList<String> localNames,
@@ -331,9 +325,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mActivity == null || decorView == null) {
             return;
         }
-        if (!isCrossTask()) {
-            mActivity.overridePendingTransition(0, 0);
-        }
+        mActivity.overridePendingTransition(0, 0);
         if (!mIsReturning) {
             mWasOpaque = mActivity.convertToTranslucent(null, null);
             Drawable background = decorView.getBackground();
