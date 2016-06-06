@@ -160,7 +160,7 @@
     <string name="httpErrorFile" msgid="2170788515052558676">"ফাইল অ্যাক্সেস করা যায়নি৷"</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"অনুরোধ করা ফাইলটি খুঁজে পাওয়া যায়নি৷"</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"অনেকগুলি অনুরোধের প্রক্রিয়া করা হচ্ছে৷ পরে আবার চেষ্টা করুন৷"</string>
-    <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> এ সাইন ইন ত্রুটি"</string>
+    <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> এ প্রবেশ করুন ত্রুটি"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"সিঙ্ক"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"সিঙ্ক"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"অনেকগুলি <xliff:g id="CONTENT_TYPE">%s</xliff:g> মুছে ফেলা হয়েছে৷"</string>
@@ -292,7 +292,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"আপনার ডিভাইস দ্বারা প্রাপ্ত সেল সম্প্রচার পড়তে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ কয়েকটি স্থানে আপনাকে জরুরি অবস্থার জন্য সতর্ক করতে জরুরি সতর্কতাগুলি বিতরণ করা হয়৷ যখন একটি জরুরি সেল সম্প্রচার প্রাপ্ত হয় তখন ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার ডিভাইসের কার্য সম্পাদনা বা কার্যকলাপে প্রতিবন্ধকতার সৃষ্টি করতে পারে৷"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসাবে নেওয়া ফিডগুলি পড়ে"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"অ্যাপ্লিকেশানকে বর্তমানে সিঙ্ক করা ফিডগুলির সম্পর্কে বিবরণ পেতে দেয়৷"</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার মঞ্জুরি দেবেন?"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS পাঠানো ও দেখা,আপনি কি পরিচিতি কে এগুলি করার অনুমতি দেবেন?"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"অ্যাপ্লিকেশানটিকে SMS বার্তাগুলি পাঠাতে অনুমতি দেয়৷ এর জন্য অপ্রত্যাশিত চার্জ কাটা হতে পারে৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার নিশ্চিতকরণ ছাড়া বার্তা পাঠানোর মাধ্যমে আপনাকে অর্থ চার্জ করতে পারে৷"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"আপনার পাঠ্য বার্তা পড়ুন (SMS বা MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"অ্যাপ্লিকেশানটিকে আপনার ট্যাবলেটে বা আপনার সিম কার্ডে সংরক্ষিত SMS বার্তাগুলি পড়ার অনুমতি দেয়৷ এটি অ্যাপ্লিকেশানটিকে সামগ্রী বা গোপনীয়তার সমস্ত SMS বার্তা নির্বিশেষে পড়ার অনুমতি দেয়৷"</string>
@@ -545,7 +545,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"কিছু স্ক্রীন লক বৈশিষ্ট্য অক্ষম করুন"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"কিছু স্ক্রীন লক বৈশিষ্ট্যের ব্যবহার আটকান।"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"হোম"</item>
+    <item msgid="8901098336658710359">"বাড়ি"</item>
     <item msgid="869923650527136615">"মোবাইল"</item>
     <item msgid="7897544654242874543">"কর্মক্ষেত্র"</item>
     <item msgid="1103601433382158155">"কর্মক্ষেত্রের ফ্যাক্স"</item>
@@ -555,19 +555,19 @@
     <item msgid="9192514806975898961">"কাস্টম"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"হোম"</item>
+    <item msgid="8073994352956129127">"বাড়ি"</item>
     <item msgid="7084237356602625604">"কর্মক্ষেত্র"</item>
     <item msgid="1112044410659011023">"অন্যান্য"</item>
     <item msgid="2374913952870110618">"কাস্টম"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"হোম"</item>
+    <item msgid="6880257626740047286">"বাড়ি"</item>
     <item msgid="5629153956045109251">"কর্মক্ষেত্র"</item>
     <item msgid="4966604264500343469">"অন্যান্য"</item>
     <item msgid="4932682847595299369">"কাস্টম"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"হোম"</item>
+    <item msgid="1738585194601476694">"বাড়ি"</item>
     <item msgid="1359644565647383708">"কর্মক্ষেত্র"</item>
     <item msgid="7868549401053615677">"অন্যান্য"</item>
     <item msgid="3145118944639869809">"কাস্টম"</item>
@@ -588,7 +588,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"কাস্টম"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"হোম"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"বাড়ি"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"মোবাইল"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"কর্মক্ষেত্র"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"কর্মক্ষেত্রের ফ্যাক্স"</string>
@@ -613,16 +613,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"বার্ষিকী"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"অন্যান্য"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"কাস্টম"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"হোম"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"বাড়ি"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"কর্মক্ষেত্র"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"অন্যান্য"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"মোবাইল"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"কাস্টম"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"হোম"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"বাড়ি"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"কর্মক্ষেত্র"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"অন্যান্য"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"কাস্টম"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"হোম"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"বাড়ি"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"কর্মক্ষেত্র"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"অন্যান্য"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"কাস্টম"</string>
@@ -654,7 +654,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"বোন"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"স্বামী বা স্ত্রী"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"কাস্টম"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"হোম"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"বাড়ি"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"কর্মক্ষেত্র"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"অন্যান্য"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"এই পরিচিতিটি দেখার জন্য কোনো অ্যাপ্লিকেশান খুঁজে পাওয়া যায়নি৷"</string>
@@ -703,9 +703,9 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করেছেন৷ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"আপনি আপনার পাসওয়ার্ড <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল টাইপ করেছেন৷ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"আপনি আপনার পাসওয়ার্ড <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল টাইপ করেছেন৷ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google সাইন ইন দিয়ে আপনার ট্যাবলেট আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google সাইন ইন দিয়ে আপনার টিভি আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google সাইন ইন দিয়ে আপনার ফোন আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google প্রবেশ করুন দিয়ে আপনার ট্যাবলেট আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google প্রবেশ করুন দিয়ে আপনার টিভি আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে আপনার আনলক প্যাটার্ন অঙ্কিত করেছেন৷ আপনি <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনাকে Google প্রবেশ করুন দিয়ে আপনার ফোন আনলক করার কথা বলা হবে৷\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> সেকেন্ড পরে আবার চেষ্টা করুন৷"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে ট্যাবলেটটি আনলক করার চেষ্টা করেছেন৷ আরো <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল চেষ্টার পরে, ট্যাবলেটটি ফ্যাক্টরী ডিফল্টে রিসেট হবে এবং ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে৷"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে টিভি আনলক করার চেষ্টা করেছেন৷ <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল প্রচেষ্টার পরে, আপনার টিভি ফ্যাক্টরি ডিফল্টে পুনঃসেট হবে এবং সমস্ত ব্যবহারকারীর ডেটা মুছে যাবে৷"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"আপনি <xliff:g id="NUMBER_0">%1$d</xliff:g> বার ভুল করে ফোনটি আনলক করার চেষ্টা করেছেন৷ আরো <xliff:g id="NUMBER_1">%2$d</xliff:g>টি অসফল চেষ্টার পরে, ফোনটি ফ্যাক্টরী ডিফল্টে রিসেট হবে এবং ব্যবহারকারীর সমস্ত ডেটা মুছে যাবে৷"</string>
@@ -716,10 +716,10 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"প্যাটার্ন ভুলে গেছেন?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"অ্যাকাউন্ট আনলক করুন"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"বিভিন্ন প্যাটার্নের সাহায্যে খুব বেশি বার প্রচেষ্টা করা হয়ে গেছে"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে সাইন ইন করুন৷"</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে প্রবেশ করুন করুন৷"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"ব্যবহারকারীনাম (ইমেল)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"পাসওয়ার্ড"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"সাইন ইন"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"প্রবেশ করুন"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"অবৈধ ব্যবহারকারী নাম অথবা পাসওয়ার্ড৷"</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"আপনার ব্যবহারকারী নাম অথবা পাসওয়ার্ড ভুলে গেছেন?\n"<b>"google.com/accounts/recovery"</b>" এ যান৷"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"পরীক্ষা করা হচ্ছে..."</string>
@@ -1066,15 +1066,15 @@
       <item quantity="one">খোলা ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
       <item quantity="other">খোলা ওয়াই-ফাই নেটওয়ার্কগুলি উপলব্ধ রয়েছে</item>
     </plurals>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে সাইন ইন করুন"</string>
-    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে সাইন ইন করুন"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"ওয়াই-ফাই নেটওয়ার্কে প্রবেশ করুন করুন"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"নেটওয়ার্কে প্রবেশ করুন করুন"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8451173622563841546">"ওয়াই-ফাই -তে কোনো ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"বিকল্পগুলির জন্য আলতো চাপুন"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ওয়াই-ফাই এর সাথে সংযোগ করা যায়নি"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" একটি দুর্বল ইন্টারনেট সংযোগ রয়েছে৷"</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"সংযোগের মঞ্জুরি দেবেন?"</string>
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"সংযোগের অনুমতি দেবেন?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"অ্যাপ্লিকেশান %1$s Wifi নেটওয়ার্ক %2$s এর সাথে সংযোগ করতে চায়"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"একটি অ্যাপ্লিকেশান"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ওয়াই-ফাই ডাইরেক্ট"</string>
@@ -1397,10 +1397,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"সঠিক PUK কোড পুনরায় লিখুন৷ বার বার প্রচেষ্টা করা হলে তা স্থায়ীভাবে সিমটিকে অক্ষম করে দেবে৷"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"পিন কোডগুলি মিলছে না"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"বিভিন্ন প্যাটার্নের সাহায্যে খুব বেশি বার প্রচেষ্টা করা হয়ে গেছে"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে সাইন ইন করুন৷"</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"আনলক করতে আপনার Google অ্যাকাউন্টের মাধ্যমে প্রবেশ করুন করুন৷"</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"ব্যবহারকারী নাম (ইমেল)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"পাসওয়ার্ড"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"সাইন ইন করুন"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"প্রবেশ করুন করুন"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"অবৈধ ব্যবহারকারী নাম অথবা পাসওয়ার্ড৷"</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"আপনার ব্যবহারকারী নাম অথবা পাসওয়ার্ড ভুলে গেছেন?\n"<b>"google.com/accounts/recovery"</b>" এ যান৷"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"অ্যাকাউন্ট পরীক্ষা করা হচ্ছে..."</string>
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS অনুরোধটিকে নতুন SS অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"কর্মস্থলের প্রোফাইল"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"প্রসারিত করার বোতাম"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"টগল সম্প্রসারণ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB পেরিফেরাল পোর্ট"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB পেরিফেরাল পোর্ট"</string>
@@ -1622,6 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ওভারফ্লো বন্ধ করুন"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"বড় করুন"</string>
     <string name="close_button_text" msgid="3937902162644062866">"বন্ধ করুন"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি নির্বাচন করা হয়েছে</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি নির্বাচন করা হয়েছে</item>
@@ -1637,7 +1637,7 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকল ভাষা"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"অনুসন্ধান করুন"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"কাজের মোড বন্ধ আছে"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"অ্যাপ্লিকেশান, পটভূমি সিঙ্ক এবং সম্পর্কিত বৈশিষ্ট্যগুলি সহ কর্মস্থলের প্রোফাইলটিকে কাজ করার মঞ্জুরি দিন।"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"অ্যাপ্লিকেশান, পটভূমি সিঙ্ক এবং সম্পর্কিত বৈশিষ্ট্যগুলি সহ কর্মস্থলের প্রোফাইলটিকে কাজ করার অনুমতি দিন।"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"চালু করুন"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"আপনার নতুন বার্তা আছে"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"দেখার জন্য SMS অ্যাপ্লিকেশান খুলুন"</string>
@@ -1654,6 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"সেশন পুনঃসূচনা করুন"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"একটি নতুন ডেমো সেশন শুরু করতে আলতো চাপ দিন"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"ডেমো শুরু করা হচ্ছে"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"সেশন পুনরায় চালু করা হচ্ছে"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"কোনো বিধিনিষেধ ছাড়াই এই ডিভাইসটিকে ব্যবহার করতে ফ্যাক্টরি রিসেট করুন"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"আরো জানতে স্পর্শ করুন৷"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"অক্ষম করা <xliff:g id="LABEL">%1$s</xliff:g>"</string>

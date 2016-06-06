@@ -255,7 +255,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"mag-record ng audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at nmag-record ng video"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"kumuha ng mga larawan at mag-record ng video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telepono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"tumatawag sa telepono at namamahala sa mga tawag sa telepono"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Mga Sensor ng Katawan"</string>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Ginawang bagong SS request ang SS request."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profile sa trabaho"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Button na Palawakin"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"i-toggle ang pagpapalawak"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB Peripheral Port"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB Peripheral Port"</string>
@@ -1619,6 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Isara ang overflow"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"I-maximize"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Isara"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
@@ -1651,6 +1651,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"I-restart ang Session"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"I-tap upang magsimula ng bagong session ng demo"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"Sinisimulan ang demo"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Nire-restart ang session"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"I-factory reset upang magamit ang device na ito nang walang mga paghihigpit"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Pindutin upang matuto nang higit pa."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Na-disable ang <xliff:g id="LABEL">%1$s</xliff:g>"</string>

@@ -994,8 +994,7 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> is gestopt"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> stopt steeds"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> stopt steeds"</string>
-    <!-- no translation found for aerr_restart (7581308074153624475) -->
-    <skip />
+    <string name="aerr_restart" msgid="7581308074153624475">"App opnieuw openen"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Feedback verzenden"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Sluiten"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Verbergen tot apparaat opnieuw wordt opgestart"</string>
@@ -1554,7 +1553,7 @@
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Verwijderd door je beheerder"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Accubesparing beperkt de prestaties van je apparaat, de trilstand, locatieservices en de meeste achtergrondgegevens om de gebruiksduur van de accu te verlengen.\n\nAccubesparing wordt automatisch uitgeschakeld terwijl je apparaat wordt opgeladen."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. Een app die je momenteel gebruikt, kan data gebruiken, maar minder vaak. Dit kan bijvoorbeeld betekenen dat afbeeldingen niet worden weergegeven totdat je hierop tikt."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Databesparing inschakelen?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Inschakelen"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1610,10 +1609,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-verzoek is gewijzigd in USSD-verzoek."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-verzoek is gewijzigd in nieuw SS-verzoek."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Werkprofiel"</string>
-    <!-- no translation found for expand_button_content_description (5855955413376384681) -->
-    <skip />
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_button_content_description" msgid="5855955413376384681">"Knop voor uitvouwen"</string>
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"uitvouwen in-/uitschakelen"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Poort voor Android-USB-randapparatuur"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Poort voor USB-randapparatuur"</string>
@@ -1621,6 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Overloop sluiten"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximaliseren"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Sluiten"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> geselecteerd</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> geselecteerd</item>
@@ -1651,10 +1649,10 @@
     <string name="unpin_target" msgid="3556545602439143442">"Losmaken"</string>
     <string name="app_info" msgid="6856026610594615344">"App-info"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for reset_retail_demo_mode_title (2187220736280147886) -->
-    <skip />
-    <!-- no translation found for reset_retail_demo_mode_text (5687062656885515019) -->
-    <skip />
+    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Sessie opnieuw starten"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Tik om een nieuwe demosessie te starten"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"Demo starten"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Sessie opnieuw starten"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Zet dit apparaat terug op de fabrieksinstellingen om het zonder beperkingen te gebruiken"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Tik voor meer informatie."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> uitgeschakeld"</string>

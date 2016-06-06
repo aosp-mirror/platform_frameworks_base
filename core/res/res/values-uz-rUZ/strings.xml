@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Nomsiz&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Telefon raqami yo‘q)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Noma’lum"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ovozli xabar"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ovozli pochta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Ulanishda xato yoki noto‘g‘ri MMI kodi."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Bu amal faqat ruxsat etilgan raqamlar uchun mavjud."</string>
@@ -71,8 +71,8 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Chiquvchi raqami"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Qo‘ng‘iroq qiluvchining raqami"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Qo‘ng‘iroq qiluvchining raqamini cheklash"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Boshqa raqamga yo‘naltirish"</string>
-    <string name="CwMmi" msgid="9129678056795016867">"Qo‘ng‘iroqni kutish"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Chaqiruvni yo‘naltirish"</string>
+    <string name="CwMmi" msgid="9129678056795016867">"Chaqiruvni kutish"</string>
     <string name="BaMmi" msgid="455193067926770581">"Qo‘ng‘iroqlarni taqiqlash"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Parolni o‘zgartirish"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN kodni o‘zgartirish"</string>
@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS xabarlarni yuborish va ko‘rish"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Xotira"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi rasm, multimedia va fayllarga kirish"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qurilmangizdagi surat, multimedia va fayllarga kirish"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ovoz yozib olish"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -595,7 +595,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks (uy)"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Peyjer"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Boshqa"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Qayta qo‘ng‘iroq"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Teskari chaqiruv"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Avtomobil"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ofis"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -673,7 +673,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Qulfdan chiqarish yoki favqulodda qo‘ng‘iroqni amalga oshirish uchun \"Menyu\"ni bosing."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Qulfni ochish uchun \"Menyu\"ga bosing."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Qulfni ochish uchun namuna ustiga chizing"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Favqulodda qo‘ng‘iroq"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Favqulodda chaqiruv"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Qo‘ng‘iroqni qaytarish"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"To‘g‘ri!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Qaytadan urining"</string>
@@ -972,9 +972,9 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Tahrirlash"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish…"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Baham ko‘rish"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"“%1$s” orqali ulashish"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Ulashish"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Baham ko‘rish"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Ilovani tanlang"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"%1$s orqali yuborish"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Yuborish"</string>
@@ -1089,7 +1089,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Kimdan:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kimga:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"So‘ralgan PIN kodni kiriting:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kod:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Planshet <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Televizor <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulangan vaqtda Wi-Fi tarmog‘idan vaqtinchalik uziladi"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
@@ -1140,7 +1140,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Xatoliklar hisoboti yuborilmoqda…"</string>
     <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi mumkin."</string>
-    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"ULASHISH"</string>
+    <string name="share_remote_bugreport_action" msgid="6249476773913384948">"BAHAM KO‘RISH"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RAD ETISH"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
     <string name="show_ime" msgid="2506087537466597099">"Tashqi klaviaturadan foydalanilayotganda buni ekranda saqlab turish"</string>
@@ -1346,7 +1346,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 barmoq izi:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Barchasini ko‘rish"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Harakat turini tanlang"</string>
-    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ulashish"</string>
+    <string name="share_action_provider_share_with" msgid="5247684435979149216">"Baham ko‘rish"</string>
     <string name="sending" msgid="3245653681008218030">"Jo‘natilmoqda…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Brauzer ishga tushirilsinmi?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Qo‘ng‘iroqni qabul qilasizmi?"</string>
@@ -1527,7 +1527,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Cheklovlarni o‘zgartirish uchun PIN-kod yaratish"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-kod juda qisqa. Kamida 4 raqamli bo‘lishi kerak."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN kod kamida 4 ta raqamdan iborat bo‘lishi shart."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Ishchi profil"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Yoyish tugmasi"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"ochish yoki yopish"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android tashqi USB porti"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"Tashqi USB porti"</string>
@@ -1622,6 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Qalqib turuvchi asboblar panelini yopish"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimallashtirish"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Yopish"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
@@ -1654,6 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Yangi seans"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Yangi demo-seans boshlash uchun bosing"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"Demo boshlanmoqda"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Seans qayta boshlanmoqda"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Bu qurilmadan cheklovlarsiz foydalanish uchun zavod sozlamalarini tiklang"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Ko‘proq o‘rganish uchun bosing."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> vidjeti o‘chirilgan"</string>

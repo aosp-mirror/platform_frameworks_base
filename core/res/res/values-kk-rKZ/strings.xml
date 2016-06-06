@@ -74,7 +74,7 @@
     <string name="CfMmi" msgid="5123218989141573515">"Қоңырауды басқа нөмірге бағыттау"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Күтудегі қоңырау"</string>
     <string name="BaMmi" msgid="455193067926770581">"Қоңырауды бөгеу"</string>
-    <string name="PwdMmi" msgid="7043715687905254199">"Кілтсөз өзгерту"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"Құпия сөз өзгерту"</string>
     <string name="PinMmi" msgid="3113117780361190304">"PIN өзгерту"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"Қоңырау шалу нөмірі берілген"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"Келген қоңырау нөмірі шектелген"</string>
@@ -188,7 +188,7 @@
     <string name="silent_mode" msgid="7167703389802618663">"Үнсіз режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Сымды қосу"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Сымсыз өшіру"</string>
-    <string name="screen_lock" msgid="799094655496098153">"Экранды бекіту"</string>
+    <string name="screen_lock" msgid="799094655496098153">"Экранды құлыптау"</string>
     <string name="power_off" msgid="4266614107412865048">"Өшіру"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Қоңырау өшірулі"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Қоңырау тербелісі"</string>
@@ -212,7 +212,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Планшет опциялары"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"ТД опциялары"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Телефон опциялары"</string>
-    <string name="global_action_lock" msgid="2844945191792119712">"Экранды бекіту"</string>
+    <string name="global_action_lock" msgid="2844945191792119712">"Экранды құлыптау"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Өшіру"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Вирус туралы хабарлау"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Қате туралы есеп құру"</string>
@@ -513,7 +513,7 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"«Мазаламау» режиміне кіру"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Кілтсөз ережелерін тағайындау"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
@@ -522,10 +522,10 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, теледидарды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран бекітпесін өзгерту"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран бекітпесін өзгерту."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды бекіту"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай бекітілетінін басқару."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран құлпын өзгерту"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран құлпын өзгерту."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды құлыптау"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай құлыптанатынын басқару."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Зауыттық деректерді қалпына келтіруді орындау арқылы ТД деректерін ескертусіз өшіру."</string>
@@ -552,30 +552,30 @@
     <item msgid="1735177144948329370">"Үй факсы"</item>
     <item msgid="603878674477207394">"Пейджер"</item>
     <item msgid="1650824275177931637">"Басқа"</item>
-    <item msgid="9192514806975898961">"Қалыпты"</item>
+    <item msgid="9192514806975898961">"Арнаулы"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Үй"</item>
     <item msgid="7084237356602625604">"Жұмыс"</item>
     <item msgid="1112044410659011023">"Басқа"</item>
-    <item msgid="2374913952870110618">"Қалыпты"</item>
+    <item msgid="2374913952870110618">"Арнаулы"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Үй"</item>
     <item msgid="5629153956045109251">"Жұмыс"</item>
     <item msgid="4966604264500343469">"Басқа"</item>
-    <item msgid="4932682847595299369">"Қалыпты"</item>
+    <item msgid="4932682847595299369">"Арнаулы"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Үй"</item>
     <item msgid="1359644565647383708">"Жұмыс"</item>
     <item msgid="7868549401053615677">"Басқа"</item>
-    <item msgid="3145118944639869809">"Қалыпты"</item>
+    <item msgid="3145118944639869809">"Арнаулы"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Жұмыс"</item>
     <item msgid="4378074129049520373">"Басқа"</item>
-    <item msgid="3455047468583965104">"Қалыпты"</item>
+    <item msgid="3455047468583965104">"Арнаулы"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -587,7 +587,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Қалыпты"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Арнаулы"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Үй"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Ұялы телефон"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Жұмыс"</string>
@@ -595,37 +595,37 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Үй факсы"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Пейджер"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Басқа"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Кері телефон шалу нөмірі"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Кері тел. шалу"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Автокөлік"</string>
-    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Компания негізгі"</string>
-    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN (біріктірілген қызметтердің сандық желісі)"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Компания, негізгі"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
     <string name="phoneTypeMain" msgid="6766137010628326916">"Негізгі"</string>
     <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Басқа факс"</string>
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Радио"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Телекс"</string>
-    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"Tеле тайп, есту қабілеті нашар адамдарға арналған құрал"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Жұмыс ұялы телефоны"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Жұмыс, ұялы"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"Жұмыс пейджері"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Көмек"</string>
-    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS (мультимедиялық хабар жіберу қызметі)"</string>
-    <string name="eventTypeCustom" msgid="7837586198458073404">"Қалыпты"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
+    <string name="eventTypeCustom" msgid="7837586198458073404">"Арнаулы"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"Туған күн"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Мерейтой"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Басқа"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Қалыпты"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Арнаулы"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Үй"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Жұмыс"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Басқа"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Ұялы"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Қалыпты"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Арнаулы"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Үй"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Жұмыс"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Басқа"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Қалыпты"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Арнаулы"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Үй"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Жұмыс"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Басқа"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Қалыпты"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Арнаулы"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -637,8 +637,8 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Жұмыс"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Басқа"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Қалыпты"</string>
-    <string name="relationTypeCustom" msgid="3542403679827297300">"Қалыпты"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Арнаулы"</string>
+    <string name="relationTypeCustom" msgid="3542403679827297300">"Арнаулы"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Көмекші"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Аға-іні"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Бала"</string>
@@ -653,7 +653,7 @@
     <string name="relationTypeRelative" msgid="1799819930085610271">"Туыс"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Әпке/сіңлі/қарындас"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Жұбай"</string>
-    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Қалыпты"</string>
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Арнаулы"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Үй"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Жұмыс"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Басқа"</string>
@@ -718,7 +718,7 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Тым көп кескін әрекеттері"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Ашу үшін Google есептік жазбаңызбен кіріңіз."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Пайдаланушы атауы (эл. пошта)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Кілтсөз"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Құпия сөз"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Кіру"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Пайдаланушы атауы немесе кілтсөз жарамсыз."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Пайдаланушы атауын немесе кілтсөзді ұмытып қалдыңыз ба?\n"<b>"google.com/accounts/recovery"</b>" веб-сайтына кірісіңіз."</string>
@@ -750,7 +750,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Кескін арқылы ашу."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Бет-әлпет арқылы ашу."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin арқылы ашу."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Кілтсөз арқылы ашу."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Құпия сөз арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Кескін арқылы ашу аймағы."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Сырғыту аймағы."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -958,7 +958,7 @@
     <string name="ok" msgid="5970060430562524910">"Жарайды"</string>
     <string name="cancel" msgid="6442560571259935130">"Бас тарту"</string>
     <string name="yes" msgid="5362982303337969312">"Жарайды"</string>
-    <string name="no" msgid="5141531044935541497">"Өшіру"</string>
+    <string name="no" msgid="5141531044935541497">"Бас тарту"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Назар аударыңыз"</string>
     <string name="loading" msgid="7933681260296021180">"Жүктелуде…"</string>
     <string name="capital_on" msgid="1544682755514494298">"Қосулы"</string>
@@ -1053,8 +1053,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Қоңырау дыбысының қаттылығы"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Meдиа дыбысының қаттылығы"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Хабар дыбысының қаттылығы"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Бастапқы қоңырау әуені"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Бастапқы қоңырау әуені (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Әдепкі рингтон"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Әдепкі рингтон (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ешқандай"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Қоңырау әуендері"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Белгісіз қоңырау әуені"</string>
@@ -1290,7 +1290,7 @@
     <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Алдыңғы ай"</string>
     <string name="date_picker_next_month_button" msgid="5559507736887605055">"Келесі ай"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Өшіру"</string>
+    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Жабу"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жою"</string>
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Дайын"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Режим өзгерту"</string>
@@ -1302,7 +1302,7 @@
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> қолданбасымен бөлісу"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Сырғитын тұтқа. Түртіп, ұстап тұрыңыз."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Бекітпесін ашу үшін сипап өтіңіз."</string>
-    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Кілтсөз пернелерін есту үшін құлақаспапты қосыңыз."</string>
+    <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Құпия сөз пернелерін есту үшін құлақаспапты қосыңыз."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Нүкте."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Негізгі бетте жылжу"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Жоғары қарай жылжу"</string>
@@ -1333,10 +1333,10 @@
     <string name="ssl_certificate" msgid="6510040486049237639">"Қауіпсіздік сертификаты"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Бұл сертификат жарамды."</string>
     <string name="issued_to" msgid="454239480274921032">"Кімге берілген:"</string>
-    <string name="common_name" msgid="2233209299434172646">"Ортақ атауы:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Стандартты атауы:"</string>
     <string name="org_name" msgid="6973561190762085236">"Ұйым:"</string>
     <string name="org_unit" msgid="7265981890422070383">"Ұйым бірлігі:"</string>
-    <string name="issued_by" msgid="2647584988057481566">"Басып шығарған:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Берген:"</string>
     <string name="validity_period" msgid="8818886137545983110">"Жарамдылығы:"</string>
     <string name="issued_on" msgid="5895017404361397232">"Шығарылу мезгілі:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Мерзімі аяқталатын күн:"</string>
@@ -1399,7 +1399,7 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Тым көп кескін әрекеттері"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Ашу үшін Google есептік жазбасы арқылы кіріңіз."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Пайдаланушы атауы (эл. пошта)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Кілтсөз"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"Құпия сөз"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Кіру"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Пайдаланушы атауы немесе кілтсөз жарамсыз."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Пайдаланушы атауын немесе кілтсөзді ұмытып қалдыңыз ба?\n"<b>"google.com/accounts/recovery"</b>" веб-сайтына кіріңіз."</string>
@@ -1425,7 +1425,7 @@
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
     <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> ішінен шығу…"</string>
-    <string name="owner_name" msgid="2716755460376028154">"Пайдаланушы"</string>
+    <string name="owner_name" msgid="2716755460376028154">"Құрылғы иесі"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Қателік"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Бұл өзгертуге әкімші рұқсат етпеген"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Бұл әрекетті орындайтын қолданба табылмады"</string>
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сұрауы жаңа SS сұрауына өзгертілді."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жұмыс профилі"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Жаю түймесі"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"жаю/жию"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB перифериялық порты"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB перифериялық порты"</string>
@@ -1622,6 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Артық толуды жабу"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Жазу"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Жабу"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
@@ -1654,6 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Сеансты қайта бастау"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Жаңа демо сеансты бастау үшін түртіңіз"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"Демоны бастау"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Сеансты қайта бастау"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Осы құрылғыны шектеусіз пайдалану үшін зауыттық параметрлерді қалпына келтіріңіз"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Қосымша мәліметтер алу үшін түртіңіз."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> өшірулі"</string>

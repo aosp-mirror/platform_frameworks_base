@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"most"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> p</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> p</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>p</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>p</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ó</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ó</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ó</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ó</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> n</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> n</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>n</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>n</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> é</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> é</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>é</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>é</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> percen belül</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> percen belül</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>p múlva</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>p múlva</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> órán belül</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> órán belül</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ó múlva</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ó múlva</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> napon belül</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> napon belül</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>n múlva</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>n múlva</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> éven belül</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> éven belül</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>é múlva</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>é múlva</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> perccel ezelőtt</item>
@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Az SS-kérés módosítva új SS-kérésre."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Munkaprofil"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"Kibontás gomb"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"kibontás be- és kikapcsolása"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB-perifériaport"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB-perifériaport"</string>
@@ -1619,6 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"További elemeket tartalmazó eszköztár bezárása"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Teljes méret"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Bezárás"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kiválasztva</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kiválasztva</item>
@@ -1651,6 +1651,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Munkamenet újraindítása"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Koppintson az új, bemutató munkamenet indításához"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"Bemutató indítása"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Munkamenet újraindítása"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Állítsa vissza a gyári beállításokat az eszköz korlátozások nélküli használata érdekében"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Érintse meg a további információkért."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"A(z) <xliff:g id="LABEL">%1$s</xliff:g> letiltva"</string>
