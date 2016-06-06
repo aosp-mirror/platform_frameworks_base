@@ -72,14 +72,25 @@ installed the Android N Preview SDK, see <a href=
     "https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
     Method References</a> (also available on API level 23 and lower)
   </li>
+
+  <li>
+    <a class="external-link" href=
+    "https://docs.oracle.com/javase/tutorial/java/annotations/type_annotations.html">
+    Type Annotations</a> (also available on API level 23 and lower)
+  </li>
 </ul>
 
 <p class="note">
-  <strong>Note:</strong> To test lambda expressions and method references on
-  earlier versions of Android, go to your {@code build.gradle}
-  file, and set {@code compileSdkVersion} and {@code targetSdkVersion} to 23 or
-  lower. You will still need to <a href="#configuration">enable the Jack
-  toolchain</a> to use these Java 8 features.
+  <strong>Note:</strong> Type annotation information is only available at
+  compile time, and not during runtime.
+</p>
+
+<p>
+  To test lambda expressions, method references, and type annotations on
+  earlier versions of Android, go to your {@code build.gradle} file, and set
+  {@code compileSdkVersion} and {@code targetSdkVersion} to 23 or lower. You
+  will still need to <a href="#configuration">enable the Jack toolchain</a> to
+  use these Java 8 features.
 </p>
 
 <p>
@@ -108,8 +119,8 @@ installed the Android N Preview SDK, see <a href=
       </li>
 
       <li>and Reflection APIs associated with repeatable annotations, such as
-      <a class="external-link" href=
-      "https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
+        <a class="external-link" href=
+        "https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
         {@code AnnotatedElement.getAnnotationsByType(Class)}</a>
       </li>
     </ul>
