@@ -278,10 +278,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ/ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਜਾਂ ਨਸ਼ਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ਸ਼ੌਰਟਕਟ ਇੰਸਟੌਲ ਕਰੋ"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ੌਰਟਕਟ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ਸ਼ੌਰਟਕਟ ਅਣਇੰਸਟੌਲ ਕਰੋ"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ੌਰਟਕਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ਸ਼ਾਰਟਕੱਟ ਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ਸ਼ਾਰਟਕੱਟ ਅਣਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਰੀਰੂਟ ਕਰੋ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ਐਪ ਨੂੰ ਇੱਕ ਵੱਖ ਨੰਬਰ ਨਾਲ ਕਾਲ ਰੀਡਾਇਰੈਕਟ ਕਰਨ ਜਾਂ ਕਾਲ ਨੂੰ ਪੂਰਾ ਰੋਕਣ ਦੀ ਚੋਣ ਨਾਲ ਇੱਕ ਆਊਟਗੋਇੰਗ ਕਾਲ ਦੇ ਦੌਰਾਨ ਡਾਇਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਨੰਬਰ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ਟੈਕਸਟ ਸੁਨੇਹੇ (SMS) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -1300,7 +1300,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨੂੰ ਲੌਂਚ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਛੋਹਵੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਸਪੱਰਸ਼ ਕਰੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"ਬੋਲੀਆਂ ਗਈਆਂ ਪਾਸਵਰਡ ਕੁੰਜੀਆਂ ਸੁਣਨ ਲਈ ਇੱਕ ਹੈਡਸੈਟ ਪਲਗ ਇਨ ਕਰੋ।"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"ਬਿੰਦੀ।"</string>
@@ -1368,7 +1368,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡਿਵਾਈਸਾਂ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"ਉਪਲਬਧ"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -1550,7 +1550,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ਸਕ੍ਰੀਨ ਅਨਪਿਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ PIN ਮੰਗੋ"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੈਟਰਨ ਅਨਲੌਕ ਕਰਨ ਲਈ ਪੁੱਛੋ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਨਲੌਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ਓਵਰਫਲੋ ਬੰਦ ਕਰੋ"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"ਵੱਡਾ ਕਰੋ"</string>
     <string name="close_button_text" msgid="3937902162644062866">"ਬੰਦ ਕਰੋ"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>

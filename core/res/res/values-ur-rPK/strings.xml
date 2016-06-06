@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ابھی"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> منٹ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> منٹ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> گھنٹے</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> گھنٹہ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دن</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دن</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> سال</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>y</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> منٹ میں</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> منٹ میں</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%d</xliff:g>m میں</item>
+      <item quantity="one">‏<xliff:g id="COUNT_0">%d</xliff:g>m میں</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> گھنٹے میں</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> گھنٹہ میں</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%d</xliff:g>h میں</item>
+      <item quantity="one">‏<xliff:g id="COUNT_0">%d</xliff:g>h میں</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دن میں</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دن میں</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%d</xliff:g>d میں</item>
+      <item quantity="one">‏<xliff:g id="COUNT_0">%d</xliff:g>d میں</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> سال میں</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> سال میں</item>
+      <item quantity="other">‏<xliff:g id="COUNT_1">%d</xliff:g>y میں</item>
+      <item quantity="one">‏<xliff:g id="COUNT_0">%d</xliff:g>y میں</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> منٹ قبل</item>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"اوورفلو بند کریں"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"بڑا کریں"</string>
     <string name="close_button_text" msgid="3937902162644062866">"بند کریں"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> منتخب کردہ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> منتخب کردہ</item>

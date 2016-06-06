@@ -1618,8 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Vala ukuchichima"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Khulisa"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Vala"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> okukhethiwe</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> okukhethiwe</item>

@@ -1301,7 +1301,7 @@
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Kilidi açmaq üçün vurun."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Parolların səsləndirilməsi üçün qulaqlıqları taxın."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Nöqtə."</string>
-    <string name="action_bar_home_description" msgid="5293600496601490216">"Evə gedin"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Evə naviqasiya et"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Yuxarı gedin"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Digər variantlar"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
@@ -1618,8 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Yüklənməni qapadın"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Böyüdün"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Qapadın"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> seçilib</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> seçilib</item>

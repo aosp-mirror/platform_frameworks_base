@@ -876,20 +876,20 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>व</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>मिनिटामध्ये</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मिनिटांमध्ये</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>मि मध्ये</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मि मध्ये</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>तासामध्ये</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>तासांमध्ये</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ता मध्ये</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ता मध्ये</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>दिवसामध्ये</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दिवसांमध्ये</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>दि मध्ये</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दि मध्ये</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>वर्षामध्ये</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्षांमध्ये</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>व मध्ये</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>व मध्ये</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मिनिटापूर्वी</item>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ओव्हरफ्लो बंद करा"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"मोठे करा"</string>
     <string name="close_button_text" msgid="3937902162644062866">"बंद करा"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडला</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>

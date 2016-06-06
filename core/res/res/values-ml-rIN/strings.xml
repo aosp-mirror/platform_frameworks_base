@@ -860,32 +860,32 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ഇപ്പോൾ"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മീറ്റർ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മിനിറ്റ്</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മി</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മി</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മണിക്കൂർ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മണിക്കൂർ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മ</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദിവസം</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദിവസം</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദി</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദി</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>വർഷം</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>വർഷം</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>വർ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>വ</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മീറ്ററിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മീറ്ററിൽ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മിനിറ്റിൽ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മിനിറ്റിൽ</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മണിക്കൂറിൽ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മണിക്കൂറിൽ</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദിവസത്തിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദിവസത്തിൽ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദിനത്തിൽ</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദിനത്തിൽ</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>വർഷത്തിൽ</item>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"വലുതാക്കുക"</string>
     <string name="close_button_text" msgid="3937902162644062866">"അടയ്‌ക്കുക"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
