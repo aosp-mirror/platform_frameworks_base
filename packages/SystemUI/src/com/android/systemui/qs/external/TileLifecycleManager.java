@@ -134,9 +134,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             }
             if (DEBUG) Log.d(TAG, "Binding service " + mIntent + " " + mUser);
             mBindTryCount++;
-            mIsBound = mContext.bindServiceAsUser(mIntent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    mUser);
+            try {
+                mIsBound = mContext.bindServiceAsUser(mIntent, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                        mUser);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Failed to bind to service", e);
+                mIsBound = false;
+            }
         } else {
             if (DEBUG) Log.d(TAG, "Unbinding service " + mIntent + " " + mUser);
             // Give it another chance next time it needs to be bound, out of kindness.
