@@ -528,11 +528,11 @@ public final class Metrics {
 
     // Types for logInvalidScopedAccessRequest
     public static final String SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS =
-            "scoped_directory_access_invalid_args";
+            "docsui_scoped_directory_access_invalid_args";
     public static final String SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY =
-            "scoped_directory_access_invalid_dir";
+            "docsui_scoped_directory_access_invalid_dir";
     public static final String SCOPED_DIRECTORY_ACCESS_ERROR =
-            "scoped_directory_access_error";
+            "docsui_scoped_directory_access_error";
 
     @StringDef(value = {
             SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS,
