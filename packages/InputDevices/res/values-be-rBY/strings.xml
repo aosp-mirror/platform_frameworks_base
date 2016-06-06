@@ -3,8 +3,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Input Devices"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Клавіятура Android"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Англійская (Злучанае Каралеўства)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Англійская (ЗША)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"англійская (Вялікабрытанія)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"англійская (ЗША)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Англійская (ЗША), міжнар. раскладка"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Англійская (ЗША), раскладка Colemak"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Англійская (ЗША), раскладка Дворака"</string>
