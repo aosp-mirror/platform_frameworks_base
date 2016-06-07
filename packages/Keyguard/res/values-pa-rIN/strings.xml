@@ -25,11 +25,11 @@
     <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"SIM PUK ਅਤੇ ਨਵਾਂ PIN ਕੋਡ ਟਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK ਕੋਡ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"ਨਵਾਂ SIM PIN ਕੋਡ"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"ਪਾਸਵਰਡ ਟਾਈਪ ਕਰਨ ਲਈ ਛੋਹਵੋ"</font></string>
+    <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"ਪਾਸਵਰਡ ਟਾਈਪ ਕਰਨ ਲਈ ਸਪੱਰਸ਼ ਕਰੋ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਟਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"ਅਨਲੌਕ ਕਰਨ ਲਈ PIN ਟਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"ਗ਼ਲਤ PIN ਕੋਡ।"</string>
-    <string name="keyguard_charged" msgid="3272223906073492454">"ਚਾਰਜ ਕੀਤਾ"</string>
+    <string name="keyguard_charged" msgid="3272223906073492454">"ਚਾਰਜ ਹੋਇਆ"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"ਚਾਰਜਿੰਗ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="6671162730167305479">"ਤੇਜ਼ੀ ਨਾਲ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="1964714661071163229">"ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
