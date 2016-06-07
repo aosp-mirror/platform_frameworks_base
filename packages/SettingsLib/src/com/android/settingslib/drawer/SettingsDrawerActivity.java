@@ -20,14 +20,17 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
@@ -56,6 +59,9 @@ public class SettingsDrawerActivity extends Activity {
 
     private static List<DashboardCategory> sDashboardCategories;
     private static HashMap<Pair<String, String>, Tile> sTileCache;
+    // Serves as a temporary list of tiles to ignore until we heard back from the PM that they
+    // are disabled.
+    private static ArraySet<ComponentName> sTileBlacklist = new ArraySet<>();
     private static InterestingConfigChanges sConfigTracker;
 
     private final PackageReceiver mPackageReceiver = new PackageReceiver();
@@ -270,6 +276,24 @@ public class SettingsDrawerActivity extends Activity {
         finish();
     }
 
+    public void setTileEnabled(ComponentName component, boolean enabled) {
+        PackageManager pm = getPackageManager();
+        int state = pm.getComponentEnabledSetting(component);
+        boolean isEnabled = state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        if (isEnabled != enabled || state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
+            if (enabled) {
+                sTileBlacklist.remove(component);
+            } else {
+                sTileBlacklist.add(component);
+            }
+            pm.setComponentEnabledSetting(component, enabled
+                    ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+            new CategoriesUpdater().execute();
+        }
+    }
+
     public interface CategoryListener {
         void onCategoriesChanged();
     }
@@ -285,6 +309,15 @@ public class SettingsDrawerActivity extends Activity {
 
         @Override
         protected void onPostExecute(List<DashboardCategory> dashboardCategories) {
+            for (int i = 0; i < dashboardCategories.size(); i++) {
+                DashboardCategory category = dashboardCategories.get(i);
+                for (int j = 0; j < category.tiles.size(); j++) {
+                    Tile tile = category.tiles.get(j);
+                    if (sTileBlacklist.contains(tile.intent.getComponent())) {
+                        category.tiles.remove(j--);
+                    }
+                }
+            }
             sDashboardCategories = dashboardCategories;
             onCategoriesChanged();
         }
