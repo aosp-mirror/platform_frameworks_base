@@ -508,8 +508,8 @@ public class ZenModeHelper {
             pw.println(config);
             return;
         }
-        pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
-                + "events=%s,reminders=%s,whenScreenOff,whenScreenOn=%s)\n",
+        pw.printf("allow(calls=%b,callsFrom=%s,repeatCallers=%b,messages=%b,messagesFrom=%s,"
+                + "events=%b,reminders=%b,whenScreenOff=%b,whenScreenOn=%b)\n",
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
