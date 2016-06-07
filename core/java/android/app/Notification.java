@@ -1294,6 +1294,7 @@ public class Notification implements Parcelable
             // Flags bitwise-ored to mFlags
             private static final int FLAG_AVAILABLE_OFFLINE = 0x1;
             private static final int FLAG_HINT_LAUNCHES_ACTIVITY = 1 << 1;
+            private static final int FLAG_HINT_DISPLAY_INLINE = 1 << 2;
 
             // Default value for flags integer
             private static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
@@ -1479,6 +1480,29 @@ public class Notification implements Parcelable
              */
             public boolean getHintLaunchesActivity() {
                 return (mFlags & FLAG_HINT_LAUNCHES_ACTIVITY) != 0;
+            }
+
+            /**
+             * Set a hint that this Action should be displayed inline.
+             *
+             * @param hintDisplayInline {@code true} if action should be displayed inline, false
+             *        otherwise
+             * @return this object for method chaining
+             */
+            public WearableExtender setHintDisplayActionInline(
+                    boolean hintDisplayInline) {
+                setFlag(FLAG_HINT_DISPLAY_INLINE, hintDisplayInline);
+                return this;
+            }
+
+            /**
+             * Get a hint that this Action should be displayed inline.
+             *
+             * @return {@code true} if the Action should be displayed inline, {@code false} 
+             *         otherwise. The default value is {@code false} if this was never set.
+             */
+            public boolean getHintDisplayActionInline() {
+                return (mFlags & FLAG_HINT_DISPLAY_INLINE) != 0;
             }
         }
     }
