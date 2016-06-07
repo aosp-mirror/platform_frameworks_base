@@ -858,36 +858,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"sasa"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other">Dak <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">Dak <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other">Saa <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">Saa <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other">Siku <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">Siku <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other">miaka <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">mwaka <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>y</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other">kwa dak <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">kwa dak <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other">dak <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="one">dak <xliff:g id="COUNT_0">%d</xliff:g></item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other">kwa saa <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">kwa saa <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other">saa <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="one">saa <xliff:g id="COUNT_0">%d</xliff:g></item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other">kwa siku <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">kwa siku <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other">siku <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="one">siku <xliff:g id="COUNT_0">%d</xliff:g></item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other">kwa miaka <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">kwa maka <xliff:g id="COUNT_0">%d</xliff:g></item>
+      <item quantity="other">miaka <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="one">mwaka <xliff:g id="COUNT_0">%d</xliff:g></item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other">Dakika <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
@@ -1616,8 +1616,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Funga vipengee vya ziada"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Panua"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Funga"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>

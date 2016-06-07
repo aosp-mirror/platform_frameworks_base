@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Mbylle tejkalimin"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimizo"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Mbyll"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> të zgjedhura</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> i zgjedhur</item>

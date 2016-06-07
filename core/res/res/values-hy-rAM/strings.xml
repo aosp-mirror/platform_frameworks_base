@@ -547,8 +547,8 @@
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Տուն"</item>
     <item msgid="869923650527136615">"Բջջային"</item>
-    <item msgid="7897544654242874543">"Աշխատանքային"</item>
-    <item msgid="1103601433382158155">"Աշխատանքային ֆաքս"</item>
+    <item msgid="7897544654242874543">"Աշխատանք"</item>
+    <item msgid="1103601433382158155">"Աշխ․ ֆաքս"</item>
     <item msgid="1735177144948329370">"Տան ֆաքս"</item>
     <item msgid="603878674477207394">"Փեյջեր"</item>
     <item msgid="1650824275177931637">"Այլ"</item>
@@ -556,24 +556,24 @@
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Տուն"</item>
-    <item msgid="7084237356602625604">"Աշխատանքային"</item>
+    <item msgid="7084237356602625604">"Աշխատանք"</item>
     <item msgid="1112044410659011023">"Այլ"</item>
     <item msgid="2374913952870110618">"Հատուկ"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Տան"</item>
-    <item msgid="5629153956045109251">"Աշխատանքային"</item>
+    <item msgid="5629153956045109251">"Աշխատանք"</item>
     <item msgid="4966604264500343469">"Այլ"</item>
     <item msgid="4932682847595299369">"Հատուկ"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Տուն"</item>
-    <item msgid="1359644565647383708">"Աշխատանքային"</item>
+    <item msgid="1359644565647383708">"Աշխատանք"</item>
     <item msgid="7868549401053615677">"Այլ"</item>
     <item msgid="3145118944639869809">"Հատուկ"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Աշխատանքային"</item>
+    <item msgid="7546335612189115615">"Աշխատանք"</item>
     <item msgid="4378074129049520373">"Այլ"</item>
     <item msgid="3455047468583965104">"Հատուկ"</item>
   </string-array>
@@ -590,8 +590,8 @@
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Հատուկ"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Տուն"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Բջջային"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Աշխատանքային"</string>
-    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Աշխատանքային ֆաքս"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Աշխատանք"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Աշխ․ ֆաքս"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Տան ֆաքս"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Փեյջեր"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Այլ"</string>
@@ -604,8 +604,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Ռադիո"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Տելեքս"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Աշխատանքային բջջային համար"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Աշխատանքային փեյջեր"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Աշխ․ բջջային"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Աշխ․ փեյջեր"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Օգնական"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Հատուկ"</string>
@@ -614,16 +614,16 @@
     <string name="eventTypeOther" msgid="7388178939010143077">"Այլ"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Հատուկ"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Տուն"</string>
-    <string name="emailTypeWork" msgid="3548058059601149973">"Աշխատանքային"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Աշխատանք"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Այլ"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Բջջային"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Հատուկ"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Տուն"</string>
-    <string name="postalTypeWork" msgid="5268172772387694495">"Աշխատանքային"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Աշխատանք"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Այլ"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Հատուկ"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Տուն"</string>
-    <string name="imTypeWork" msgid="1371489290242433090">"Աշխատանքային"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Աշխատանք"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Այլ"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Հատուկ"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
@@ -635,7 +635,7 @@
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
-    <string name="orgTypeWork" msgid="29268870505363872">"Աշխատանքային"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Աշխատանք"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Այլ"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"Հատուկ"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Հատուկ"</string>
@@ -655,7 +655,7 @@
     <string name="relationTypeSpouse" msgid="394136939428698117">"Ամուսին"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Հատուկ"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Տուն"</string>
-    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Աշխատանքային"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Աշխատանք"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Այլ"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Այս կոնտակտը դիտելու համար համապատասխան ծրագիր չկա:"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Մուտքագրեք PIN կոդը"</string>
@@ -1618,8 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Փակել ավելորդ տեղեկությունները"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Մեծացնել"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Փակել"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>՝ <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>

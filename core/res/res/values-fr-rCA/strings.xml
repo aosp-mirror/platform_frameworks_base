@@ -537,7 +537,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Définir le serveur mandataire global du mobile"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Indiquer le mandataire global à utiliser pour l\'appareil lorsque la politique est activée. Seul le propriétaire de l\'appareil peut définir le mandataire global."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Déf. expir. m. passe verr. écr."</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modifier la fréquence de modification du mot de passe, du NIP ou du motif de verrouillage de l\'écran."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modifier la fréquence de modification du mot de passe, du NIP ou du schéma de verrouillage de l\'écran."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir cryptage du stockage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exiger le chiffrement des données d\'application stockées"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
@@ -731,7 +731,7 @@
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Cellule ajoutée."</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Cellule <xliff:g id="CELL_INDEX">%1$s</xliff:g> ajoutée"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Schéma terminé."</string>
-    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Zone du motif"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Zone du schéma"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d sur %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Ajouter un widget"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Vide"</string>
@@ -1618,8 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Fermer la barre d\'outils en superposition"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Agrandir"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Fermer"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g> : <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>

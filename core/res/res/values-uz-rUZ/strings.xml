@@ -1089,7 +1089,7 @@
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Kimdan:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kimga:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"So‘ralgan PIN kodni kiriting:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
+    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN kod:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Planshet <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Televizor <xliff:g id="DEVICE_NAME">%1$s</xliff:g> qurilmasiga ulangan vaqtda Wi-Fi tarmog‘idan vaqtinchalik uziladi"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g>ga ulanganligi tufayli vaqtincha Wi-Fi tarmog‘idan uzildi."</string>
@@ -1527,7 +1527,7 @@
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Yangi PIN kodni tasdiqlash"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Cheklovlarni o‘zgartirish uchun PIN-kod yaratish"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-kod mos kelmadi. Qayta urinib ko‘ring."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-kod juda qisqa. Kamida 4 raqamli bo‘lishi kerak."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN kod kamida 4 ta raqamdan iborat bo‘lishi shart."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring</item>
       <item quantity="one">1 soniyadan so‘ng qayta urinib ko‘ring</item>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Qalqib turuvchi asboblar panelini yopish"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimallashtirish"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Yopish"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>

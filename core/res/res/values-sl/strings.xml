@@ -619,7 +619,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Obletnica"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Drugo"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Po meri"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Začetna stran"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Dom"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Služba"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Drugo"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Mobilni"</string>
@@ -874,46 +874,46 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"zdaj"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> l</item>
-      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> l</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> l</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> l</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>l</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g>l</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>l</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>l</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g>m</item>
+      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g>m</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="two">čez <xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="few">čez <xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="other">čez <xliff:g id="COUNT_1">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="one">čez <xliff:g id="COUNT_1">%d</xliff:g> l</item>
@@ -1688,8 +1688,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zapri presežni element"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimiziraj"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Zapri"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> izbran</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> izbrana</item>

@@ -1610,8 +1610,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 请求已修改为新的 SS 请求。"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"工作资料"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"展开按钮"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"切换展开模式"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB 外设端口"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB 外设端口"</string>

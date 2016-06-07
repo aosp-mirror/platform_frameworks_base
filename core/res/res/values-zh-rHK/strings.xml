@@ -860,32 +860,32 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"現在"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 分鐘</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 分鐘</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>分鐘</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>分鐘</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 小時</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 小時</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>小時</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>小時</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 天</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 天</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>天</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>天</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 年</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 年</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>年</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>年</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 分鐘後</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 分鐘後</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>分鐘後</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>分鐘後</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 小時後</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 小時後</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>小時後</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>小時後</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 天後</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> 天後</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>天後</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>天後</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> 年後</item>
@@ -1618,8 +1618,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"關閉工具列溢位功能"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"最大化"</string>
     <string name="close_button_text" msgid="3937902162644062866">"關閉"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>：<xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
