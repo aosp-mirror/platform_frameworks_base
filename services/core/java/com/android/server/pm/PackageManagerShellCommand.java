@@ -1448,6 +1448,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      -s: short summary");
         pw.println("      -d: only list dangerous permissions");
         pw.println("      -u: list only the permissions users will see");
+        pw.println("  dump-profiles TARGET-PACKAGE");
+        pw.println("    Dumps method/class profile files to");
+        pw.println("    /data/misc/profman/TARGET-PACKAGE.txt");
         pw.println("  resolve-activity [--brief] [--components] [--user USER_ID] INTENT");
         pw.println("    Prints the activity that resolves to the given Intent.");
         pw.println("  query-activities [--brief] [--components] [--user USER_ID] INTENT");
