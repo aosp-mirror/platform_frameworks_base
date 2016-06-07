@@ -300,7 +300,7 @@ public class TypedValue {
                 (data>>COMPLEX_UNIT_SHIFT)&COMPLEX_UNIT_MASK,
                 value,
                 metrics);
-        final int res = (int)(f+0.5f);
+        final int res = (int) ((f >= 0) ? (f + 0.5f) : (f - 0.5f));
         if (res != 0) return res;
         if (value == 0) return 0;
         if (value > 0) return 1;
