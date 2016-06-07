@@ -22,5 +22,5 @@
 <resources>
     <integer name="quick_settings_num_rows">2</integer>
 
-    <bool name="quick_settings_show_date">true</bool>
+    <bool name="quick_settings_show_full_alarm">true</bool>
 </resources>
