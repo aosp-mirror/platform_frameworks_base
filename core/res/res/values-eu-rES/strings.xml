@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"orain"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> egun</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> egun</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> e</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> e</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> urte</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> urte</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> u</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> u</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min barru</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min barru</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m barru</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m barru</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h barru</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h barru</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h barru</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h barru</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> egun barru</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> egun barru</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> e barru</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> e barru</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> urte barru</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> urte barru</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> u barru</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> u barru</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other">Duela <xliff:g id="COUNT_1">%d</xliff:g> minutu</item>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Itxi gainfluxua"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maximizatu"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Itxi"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> hautatuta</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>
@@ -1655,10 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Berrabiarazi saioa"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Demo-saio berria hasteko, sakatu hau"</string>
-    <!-- no translation found for demo_starting_message (7574017688324606624) -->
-    <skip />
-    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
-    <skip />
+    <string name="demo_starting_message" msgid="7574017688324606624">"Demoa abiarazten"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Saioa berrabiarazten"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Berrezarri jatorrizko ezarpenak gailua murriztapenik gabe erabili ahal izateko"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Sakatu informazio gehiago lortzeko."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> desgaituta dago"</string>

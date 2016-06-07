@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"dërgo dhe shiko mesazhet SMS"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Hapësira e ruajtjes"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasu te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"qasjen te fotografitë, përmbajtjet audio-vizuale dhe skedarët në pajisje"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
@@ -1621,8 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Mbylle tejkalimin"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"Maksimizo"</string>
     <string name="close_button_text" msgid="3937902162644062866">"Mbyll"</string>
-    <!-- no translation found for notification_messaging_title_template (3452480118762691020) -->
-    <skip />
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> të zgjedhura</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> i zgjedhur</item>
@@ -1655,10 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Rinis sesionin"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Trokit për të nisur një sesion të ri të demonstrimit"</string>
-    <!-- no translation found for demo_starting_message (7574017688324606624) -->
-    <skip />
-    <!-- no translation found for demo_restarting_message (1363894248779727028) -->
-    <skip />
+    <string name="demo_starting_message" msgid="7574017688324606624">"Demonstrimi po niset"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"Sesioni po riniset"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Rivendos cilësimet e fabrikës për ta përdorur këtë pajisje pa kufizime"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Prek për të mësuar më shumë."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
