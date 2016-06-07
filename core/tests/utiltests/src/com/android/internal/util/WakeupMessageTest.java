@@ -45,6 +45,7 @@ public class WakeupMessageTest {
     private static final int TEST_CMD = 18;
     private static final int TEST_ARG1 = 33;
     private static final int TEST_ARG2 = 182;
+    private static final Object TEST_OBJ = "hello";
 
     @Mock AlarmManager mAlarmManager;
     WakeupMessage mMessage;
@@ -92,7 +93,7 @@ public class WakeupMessageTest {
                 mListenerCaptor.capture(), any(Handler.class));
 
         mMessage = new WakeupMessage(context, mHandler, TEST_CMD_NAME, TEST_CMD, TEST_ARG1,
-                TEST_ARG2);
+                TEST_ARG2, TEST_OBJ);
     }
 
     /**
@@ -114,6 +115,7 @@ public class WakeupMessageTest {
         assertEquals("what", TEST_CMD, mHandler.getLastMessage().what);
         assertEquals("arg1", TEST_ARG1, mHandler.getLastMessage().arg1);
         assertEquals("arg2", TEST_ARG2, mHandler.getLastMessage().arg2);
+        assertEquals("obj", TEST_OBJ, mHandler.getLastMessage().obj);
     }
 
     /**
