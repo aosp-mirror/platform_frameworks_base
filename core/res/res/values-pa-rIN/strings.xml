@@ -191,7 +191,7 @@
     <string name="screen_lock" msgid="799094655496098153">"ਸਕ੍ਰੀਨ ਲੌਕ"</string>
     <string name="power_off" msgid="4266614107412865048">"ਪਾਵਰ ਬੰਦ"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"ਰਿੰਗਰ ਬੰਦ"</string>
-    <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਵਾਈਬ੍ਰੇਟ"</string>
+    <string name="silent_mode_vibrate" msgid="7072043388581551395">"ਰਿੰਗਰ ਥਰਥਰਾਹਟ"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"ਰਿੰਗਰ ਚਾਲੂ"</string>
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android ਸਿਸਟਮ ਅਪਡੇਟ"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"ਅਪਡੇਟ ਦੀ ਤਿਆਰੀ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -251,7 +251,7 @@
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦਿਖਾਓ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ਤੇ ਫੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚੋ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
@@ -278,10 +278,10 @@
     <string name="permdesc_statusBarService" msgid="716113660795976060">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਹੋਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ/ਨਸ਼ਟ ਕਰੋ"</string>
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"ਐਪ ਨੂੰ ਸਥਿਤੀ ਬਾਰ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਜਾਂ ਨਸ਼ਟ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ਸ਼ੌਰਟਕਟ ਇੰਸਟੌਲ ਕਰੋ"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ੌਰਟਕਟ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ਸ਼ੌਰਟਕਟ ਅਣਇੰਸਟੌਲ ਕਰੋ"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ੌਰਟਕਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_install_shortcut" msgid="4279070216371564234">"ਸ਼ਾਰਟਕੱਟ ਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦੇ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਜੋੜਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"ਸ਼ਾਰਟਕੱਟ ਅਣਇੰਸਟੌਲ ਕਰੋ"</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਉਪਭੋਗਤਾ ਦਖ਼ਲ ਤੋਂ ਬਿਨਾਂ ਹੋਮਸਕ੍ਰੀਨ ਸ਼ਾਰਟਕੱਟ ਹਟਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"ਆਊਟਗੋਇੰਗ ਕਾਲਾਂ ਰੀਰੂਟ ਕਰੋ"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"ਐਪ ਨੂੰ ਇੱਕ ਵੱਖ ਨੰਬਰ ਨਾਲ ਕਾਲ ਰੀਡਾਇਰੈਕਟ ਕਰਨ ਜਾਂ ਕਾਲ ਨੂੰ ਪੂਰਾ ਰੋਕਣ ਦੀ ਚੋਣ ਨਾਲ ਇੱਕ ਆਊਟਗੋਇੰਗ ਕਾਲ ਦੇ ਦੌਰਾਨ ਡਾਇਲ ਕੀਤਾ ਜਾ ਰਿਹਾ ਨੰਬਰ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"ਟੈਕਸਟ ਸੁਨੇਹੇ (SMS) ਪ੍ਰਾਪਤ ਕਰੋ"</string>
@@ -361,7 +361,7 @@
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ਅੰਦਾਜ਼ਨ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ਐਪ ਨੂੰ ਤੁਹਾਡਾ ਅਨੁਮਾਨਿਤ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਨੈੱਟਵਰਕ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸਰੋਤ ਵਰਤਦੇ ਹੋਏ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਰਾਹੀਂ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਸੈਲ ਟਾਵਰ ਅਤੇ Wi-Fi. ਇਹ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਚਾਲੂ ਅਤੇ ਐਪ ਨੂੰ ਉਹਨਾਂ ਨੂੰ ਵਰਤਣ ਲਈ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਤੇ ਹੋਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ। ਐਪਸ ਇਸਦੀ ਵਰਤੋਂ ਇਹ ਅਨੁਮਾਨ ਲਗਾਉਣ ਲਈ ਕਰ ਸਕਦੇ ਹਨ ਕਿ ਤੁਸੀਂ ਕਿੱਥੇ ਹੋ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਯੂਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ਔਪ ਨੂੰ ਗਲੋਬਲ ਔਡੀਓ ਸੈਟਿੰਗਾਂ ਸੰਸ਼ੋਧਿਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਵੌਲਿਊਮ ਅਤੇ ਆਊਟਪੁਟ ਲਈ ਕਿਹੜਾ ਸਪੀਕਰ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
     <string name="permdesc_recordAudio" msgid="4906839301087980680">"ਐਪ ਨੂੰ ਮਾਈਕ੍ਰੋਫੋਨ ਨਾਲ ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਅਨੁਮਤੀ ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਕਿਸੇ ਵੀ ਸਮੇਂ ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM ਨੂੰ ਕਮਾਂਡਾਂ ਭੇਜੋ"</string>
@@ -1039,20 +1039,20 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"ਕੀ ਹੀਪ ਡੰਪ ਸ਼ੇਅਰ ਕਰਨਾ ਹੈ?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROC">%1$s</xliff:g> ਦੀ ਆਪਣੀ ਪ੍ਰਕਿਰਿਆ ਮੈਮਰੀ ਸੀਮਾ<xliff:g id="SIZE">%2$s</xliff:g> ਵਧ ਗਈ ਹੈ। ਇਸਦੇ ਵਿਕਾਸਕਾਰ ਨਾਲ ਸ਼ੇਅਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਲਈ ਇੱਕ ਹੀਪ ਡੰਪ ਉਪਲਬਧ ਹੈ। ਸਾਵਧਾਨ ਰਹੋ: ਇਸ ਹੀਪ ਡੰਪ ਵਿੱਚ ਤੁਹਾਡੀ ਕੋਈ ਵੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਹੋ ਸਕਦੀ ਹੈ, ਜਿਸਤੇ ਐਪਲੀਕੇਸ਼ਨ ਦੀ ਪਹੁੰਚ ਹੈ।"</string>
     <string name="sendText" msgid="5209874571959469142">"ਟੈਕਸਟ ਲਈ ਇੱਕ ਕਿਰਿਆ ਚੁਣੋ"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"ਰਿੰਗਰ ਵੌਲਯੂਮ"</string>
-    <string name="volume_music" msgid="5421651157138628171">"ਮੀਡੀਆ ਵੌਲਯੂਮ"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"ਰਿੰਗਰ ਵੌਲਿਊਮ"</string>
+    <string name="volume_music" msgid="5421651157138628171">"ਮੀਡੀਆ ਵੌਲਿਊਮ"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth ਰਾਹੀਂ ਪਲੇ ਕਰ ਰਿਹਾ ਹੈ"</string>
-    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ਸਾਈਲੈਂਟ ਰਿੰਗਟੋਨ ਸੈਟ ਕੀਤੀ"</string>
-    <string name="volume_call" msgid="3941680041282788711">"ਇਨ-ਕਾਲ ਵੌਲਯੂਮ"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth ਇਨ-ਕਾਲ ਵੌਲਯੂਮ"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"ਅਲਾਰਮ ਵੌਲਯੂਮ"</string>
-    <string name="volume_notification" msgid="2422265656744276715">"ਸੂਚਨਾ ਵੌਲਯੂਮ"</string>
-    <string name="volume_unknown" msgid="1400219669770445902">"ਵੌਲਯੂਮ"</string>
-    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth ਵੌਲਯੂਮ"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"ਰਿੰਗਟੋਨ ਵੌਲਯੂਮ"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"ਕਾਲ ਵੌਲਯੂਮ"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"ਮੀਡੀਆ ਵੌਲਯੂਮ"</string>
-    <string name="volume_icon_description_notification" msgid="7044986546477282274">"ਸੂਚਨਾ ਵੌਲਯੂਮ"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"ਖਾਮੋਸ਼ ਰਿੰਗਟੋਨ ਸੈੱਟ ਕੀਤੀ"</string>
+    <string name="volume_call" msgid="3941680041282788711">"ਇਨ-ਕਾਲ ਵੌਲਿਊਮ"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Bluetooth ਇਨ-ਕਾਲ ਵੌਲਿਊਮ"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"ਅਲਾਰਮ ਵੌਲਿਊਮ"</string>
+    <string name="volume_notification" msgid="2422265656744276715">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
+    <string name="volume_unknown" msgid="1400219669770445902">"ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"ਰਿੰਗਟੋਨ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"ਕਾਲ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"ਮੀਡੀਆ ਵੌਲਿਊਮ"</string>
+    <string name="volume_icon_description_notification" msgid="7044986546477282274">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"ਕੋਈ ਨਹੀਂ"</string>
@@ -1300,7 +1300,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨੂੰ ਲੌਂਚ ਨਹੀਂ ਕਰ ਸਕਿਆ"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"ਇਸ ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਛੋਹਵੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"ਹੈਂਡਲ ਸਲਾਈਡ ਕਰ ਰਿਹਾ ਹੈ। ਸਪੱਰਸ਼ ਕਰੋ &amp; ਹੋਲਡ ਕਰੋ।"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ਅਨਲੌਕ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ।"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"ਬੋਲੀਆਂ ਗਈਆਂ ਪਾਸਵਰਡ ਕੁੰਜੀਆਂ ਸੁਣਨ ਲਈ ਇੱਕ ਹੈਡਸੈਟ ਪਲਗ ਇਨ ਕਰੋ।"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"ਬਿੰਦੀ।"</string>
@@ -1316,7 +1316,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ਡ੍ਰਾਇਵ"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ਸਟੋਰੇਜ"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"ਸੰਪਾਦਿਤ ਕਰੋ"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"ਡੈਟਾ ਵਰਤੋਂ ਚਿਤਾਵਨੀ"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"ਡੈਟਾ ਉਪਯੋਗ ਚਿਤਾਵਨੀ"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"ਵਰਤੋਂ ਅਤੇ ਸੈਟਿੰਗਾਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋਈ"</string>
@@ -1368,7 +1368,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"ਡਿਵਾਈਸਾਂ ਦੀ ਖੋਜ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"ਡਿਸਕਨੈਕਟ ਕਰੋ"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕਰ ਰਿਹਾ ਹੈ..."</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"ਉਪਲਬਧ"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
@@ -1418,7 +1418,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਨਲੌਕ ਪੈਟਰਨ ਗ਼ਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਫੋਨ ਅਨਲੌਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ਹਟਾਓ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ਕੀ ਵੌਲਯੂਮ ਸਿਫਾਰਿਸ਼ ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਯੂਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ਕੀ ਵੌਲਿਊਮ ਸਿਫਾਰਿਸ਼ ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ਪਹੁੰਚਯੋਗਤਾ ਨੂੰ ਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਦੋ ਉਂਗਲਾਂ ਨੂੰ ਹੇਠਾਂ ਹੋਲਡ ਕਰਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"ਪਹੁੰਚਯੋਗਤਾ ਅਸਮਰਥਿਤ।"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ਪਹੁੰਚਯੋਗਤਾ ਰੱਦ ਕੀਤੀ।"</string>
@@ -1550,13 +1550,13 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ਸਕ੍ਰੀਨ ਅਨਪਿਨ ਕੀਤੀ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ PIN ਮੰਗੋ"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪੈਟਰਨ ਅਨਲੌਕ ਕਰਨ ਲਈ ਪੁੱਛੋ"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਨਲੌਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ਅਨਪਿਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਇੰਸਟੌਲ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਅਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ਤੁਹਾਡੇ ਪ੍ਰਬੰਧਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"ਬੈਟਰੀ ਸਮਰੱਥਾ ਨੂੰ ਬਿਹਤਰ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਵਾਈਬ੍ਰੇਸ਼ਨ, ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਪਿਛੋਕੜ ਡੈਟਾ ਨੂੰ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਮੈਸੇਜਿੰਗ ਅਤੇ ਹੋਰ ਐਪਸ, ਜੋ ਸਿੰਕਿੰਗ ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਆਟੋਮੈਟਿਕਲੀ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਹੀ ਹੁੰਦੀ ਹੈ।"</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"ਡੈਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡੈਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡੈਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਵਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"ਡੈਟਾ ਉਪਯੋਗ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡੈਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡੈਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡੈਟੇ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਵਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡੈਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ਚਾਲੂ ਕਰੋ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1613,8 +1613,7 @@
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ਬੇਨਤੀ ਨਵੀਂ SS ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ਕੰਮ ਪ੍ਰੋਫਾਈਲ"</string>
     <string name="expand_button_content_description" msgid="5855955413376384681">"ਵਿਸਤਾਰ ਬਟਨ"</string>
-    <!-- no translation found for expand_action_accessibility (5307730695723718254) -->
-    <skip />
+    <string name="expand_action_accessibility" msgid="5307730695723718254">"ਟੌਗਲ ਵਿਸਤਾਰ"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ਪੈਰੀਫੈਰਲ ਪੋਰਟ"</string>
@@ -1622,6 +1621,7 @@
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ਓਵਰਫਲੋ ਬੰਦ ਕਰੋ"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"ਵੱਡਾ ਕਰੋ"</string>
     <string name="close_button_text" msgid="3937902162644062866">"ਬੰਦ ਕਰੋ"</string>
+    <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
@@ -1654,6 +1654,8 @@
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"ਸੈਸ਼ਨ ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"ਇੱਕ ਨਵਾਂ ਡੈਮੋ ਸੈਸ਼ਨ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="demo_starting_message" msgid="7574017688324606624">"ਡੈਮੋ ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <string name="demo_restarting_message" msgid="1363894248779727028">"ਸੈਸ਼ਨ ਮੁੜ-ਚਾਲੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬਿਨਾਂ ਪਾਬੰਦੀਆਂ ਦੇ ਵਰਤਣ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"ਹੋਰ ਜਾਣਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
