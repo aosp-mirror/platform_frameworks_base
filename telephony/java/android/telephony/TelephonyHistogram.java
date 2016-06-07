@@ -274,7 +274,7 @@ public final class TelephonyHistogram implements Parcelable {
         out.writeInt(minTimeMs);
         out.writeInt(maxTimeMs);
         out.writeInt(averageTimeMs);
-        out.writeLong(sampleCount);
+        out.writeInt(sampleCount);
         if (initialTimings == null) {
             out.writeInt(ABSENT);
         } else {
