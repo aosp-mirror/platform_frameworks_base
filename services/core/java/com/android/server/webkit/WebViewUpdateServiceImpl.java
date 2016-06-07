@@ -34,6 +34,37 @@ import java.util.List;
  * Implementation of the WebViewUpdateService.
  * This class doesn't depend on the android system like the actual Service does and can be used
  * directly by tests (as long as they implement a SystemInterface).
+ *
+ * This class implements two main features - handling WebView fallback packages and keeping track
+ * of, and preparing, the current WebView implementation. The fallback mechanism is meant to be
+ * uncoupled from the rest of the WebView preparation and does not store any state. The code for
+ * choosing and preparing a WebView implementation needs to keep track of a couple of different
+ * things such as what package is used as WebView implementation.
+ *
+ * The public methods in this class are accessed from WebViewUpdateService either on the UI thread
+ * or on one of multiple Binder threads. This means that the code in this class needs to be
+ * thread-safe. The fallback mechanism shares (almost) no information between threads which makes
+ * it easier to argue about thread-safety (in theory, if timed badly, the fallback mechanism can
+ * incorrectly enable/disable a fallback package but that fault will be corrected when we later
+ * receive an intent for that enabling/disabling). On the other hand, the WebView preparation code
+ * shares state between threads meaning that code that chooses a new WebView implementation or
+ * checks which implementation is being used needs to hold a lock.
+ *
+ * The WebViewUpdateService can be accessed in a couple of different ways.
+ * 1. It is started from the SystemServer at boot - at that point we just initiate some state such
+ * as the WebView preparation class.
+ * 2. The SystemServer calls WebViewUpdateService.prepareWebViewInSystemServer. This happens at boot
+ * and the WebViewUpdateService should not have been accessed before this call. In this call we
+ * enable/disable fallback packages and then choose WebView implementation for the first time.
+ * 3. The update service listens for Intents related to package installs and removals. These intents
+ * are received and processed on the UI thread. Each intent can result in enabling/disabling
+ * fallback packages and changing WebView implementation.
+ * 4. The update service can be reached through Binder calls which are handled on specific binder
+ * threads. These calls can be made from any process. Generally they are used for changing WebView
+ * implementation (from Settings), getting information about the current WebView implementation (for
+ * loading WebView into an app process), or notifying the service about Relro creation being
+ * completed.
+ *
  * @hide
  */
 public class WebViewUpdateServiceImpl {
@@ -550,8 +581,8 @@ public class WebViewUpdateServiceImpl {
          * An introduction to Chromium versionCode scheme:
          * "BBBBPPPAX"
          * BBBB: 4 digit branch number. It monotonically increases over time.
-         * PPP: patch number in the branch. It is padded with zeroes to the left. These three digits may
-         * change their meaning in the future.
+         * PPP: patch number in the branch. It is padded with zeroes to the left. These three digits
+         * may change their meaning in the future.
          * A: architecture digit.
          * X: A digit to differentiate APKs for other reasons.
          *
@@ -589,6 +620,10 @@ public class WebViewUpdateServiceImpl {
          * of all available-by-default and non-fallback WebView provider packages. If there is no
          * such WebView provider package on the system, then return -1, which means all positive
          * versionCode WebView packages are accepted.
+         *
+         * Note that this is a private method in WebViewUpdater that handles a variable
+         * (mMinimumVersionCode) which is shared between threads. Furthermore, this method does not
+         * hold mLock meaning that we must take extra care to ensure this method is thread-safe.
          */
         private int getMinimumVersionCode() {
             if (mMinimumVersionCode > 0) {
