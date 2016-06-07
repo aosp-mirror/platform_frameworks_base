@@ -18,6 +18,7 @@ package android.net.apf;
 
 import static android.system.OsConstants.*;
 
+import android.os.SystemClock;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.apf.ApfGenerator;
@@ -25,6 +26,7 @@ import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpManager;
 import android.net.metrics.ApfProgramEvent;
+import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -72,12 +74,33 @@ import libcore.io.IoBridge;
  * @hide
  */
 public class ApfFilter {
+
+    // Enums describing the outcome of receiving an RA packet.
+    private static enum ProcessRaResult {
+        MATCH,          // Received RA matched a known RA
+        DROPPED,        // Received RA ignored due to MAX_RAS
+        PARSE_ERROR,    // Received RA could not be parsed
+        ZERO_LIFETIME,  // Received RA had 0 lifetime
+        UPDATE_NEW_RA,  // APF program updated for new RA
+        UPDATE_EXPIRY   // APF program updated for expiry
+    }
+
     // Thread to listen for RAs.
     @VisibleForTesting
     class ReceiveThread extends Thread {
         private final byte[] mPacket = new byte[1514];
         private final FileDescriptor mSocket;
         private volatile boolean mStopped;
+
+        // Starting time of the RA receiver thread.
+        private final long mStart = SystemClock.elapsedRealtime();
+
+        private int mReceivedRas;     // Number of received RAs
+        private int mMatchingRas;     // Number of received RAs matching a known RA
+        private int mDroppedRas;      // Number of received RAs ignored due to the MAX_RAS limit
+        private int mParseErrors;     // Number of received RAs that could not be parsed
+        private int mZeroLifetimeRas; // Number of received RAs with a 0 lifetime
+        private int mProgramUpdates;  // Number of APF program updates triggered by receiving a RA
 
         public ReceiveThread(FileDescriptor socket) {
             mSocket = socket;
@@ -97,13 +120,46 @@ public class ApfFilter {
             while (!mStopped) {
                 try {
                     int length = Os.read(mSocket, mPacket, 0, mPacket.length);
-                    processRa(mPacket, length);
+                    updateStats(processRa(mPacket, length));
                 } catch (IOException|ErrnoException e) {
                     if (!mStopped) {
                         Log.e(TAG, "Read error", e);
                     }
                 }
             }
+            logStats();
+        }
+
+        private void updateStats(ProcessRaResult result) {
+            mReceivedRas++;
+            switch(result) {
+                case MATCH:
+                    mMatchingRas++;
+                    return;
+                case DROPPED:
+                    mDroppedRas++;
+                    return;
+                case PARSE_ERROR:
+                    mParseErrors++;
+                    return;
+                case ZERO_LIFETIME:
+                    mZeroLifetimeRas++;
+                    return;
+                case UPDATE_EXPIRY:
+                    mMatchingRas++;
+                    mProgramUpdates++;
+                    return;
+                case UPDATE_NEW_RA:
+                    mProgramUpdates++;
+                    return;
+            }
+        }
+
+        private void logStats() {
+            long durationMs = SystemClock.elapsedRealtime() - mStart;
+            int maxSize = mApfCapabilities.maximumApfProgramSize;
+            mMetricsLog.log(new ApfStats(durationMs, mReceivedRas, mMatchingRas, mDroppedRas,
+                     mZeroLifetimeRas, mParseErrors, mProgramUpdates, maxSize));
         }
     }
 
@@ -216,6 +272,7 @@ public class ApfFilter {
     }
 
     // Returns seconds since Unix Epoch.
+    // TODO: use SystemClock.elapsedRealtime() instead
     private static long curTime() {
         return System.currentTimeMillis() / DateUtils.SECOND_IN_MILLIS;
     }
@@ -809,15 +866,12 @@ public class ApfFilter {
                 programMinLifetime, rasToFilter.size(), mRas.size(), program.length, flags));
     }
 
-    // Install a new filter program if the last installed one will die soon.
-    @GuardedBy("this")
-    private void maybeInstallNewProgramLocked() {
-        if (mRas.size() == 0) return;
-        // If the current program doesn't expire for a while, don't bother updating.
+    /**
+     * Returns {@code true} if a new program should be installed because the current one dies soon.
+     */
+    private boolean shouldInstallnewProgram() {
         long expiry = mLastTimeInstalledProgram + mLastInstalledProgramMinLifetime;
-        if (expiry < curTime() + MAX_PROGRAM_LIFETIME_WORTH_REFRESHING) {
-            installNewProgramLocked();
-        }
+        return expiry < curTime() + MAX_PROGRAM_LIFETIME_WORTH_REFRESHING;
     }
 
     private void hexDump(String msg, byte[] packet, int length) {
@@ -836,7 +890,12 @@ public class ApfFilter {
         }
     }
 
-    private synchronized void processRa(byte[] packet, int length) {
+    /**
+     * Process an RA packet, updating the list of known RAs and installing a new APF program
+     * if the current APF program should be updated.
+     * @return a ProcessRaResult enum describing what action was performed.
+     */
+    private synchronized ProcessRaResult processRa(byte[] packet, int length) {
         if (VDBG) hexDump("Read packet = ", packet, length);
 
         // Have we seen this RA before?
@@ -858,25 +917,34 @@ public class ApfFilter {
                 // Swap to front of array.
                 mRas.add(0, mRas.remove(i));
 
-                maybeInstallNewProgramLocked();
-                return;
+                // If the current program doesn't expire for a while, don't update.
+                if (shouldInstallnewProgram()) {
+                    installNewProgramLocked();
+                    return ProcessRaResult.UPDATE_EXPIRY;
+                }
+                return ProcessRaResult.MATCH;
             }
         }
         purgeExpiredRasLocked();
         // TODO: figure out how to proceed when we've received more then MAX_RAS RAs.
-        if (mRas.size() >= MAX_RAS) return;
+        if (mRas.size() >= MAX_RAS) {
+            return ProcessRaResult.DROPPED;
+        }
         final Ra ra;
         try {
             ra = new Ra(packet, length);
         } catch (Exception e) {
             Log.e(TAG, "Error parsing RA: " + e);
-            return;
+            return ProcessRaResult.PARSE_ERROR;
         }
         // Ignore 0 lifetime RAs.
-        if (ra.isExpired()) return;
+        if (ra.isExpired()) {
+            return ProcessRaResult.ZERO_LIFETIME;
+        }
         log("Adding " + ra);
         mRas.add(ra);
         installNewProgramLocked();
+        return ProcessRaResult.UPDATE_NEW_RA;
     }
 
     /**
