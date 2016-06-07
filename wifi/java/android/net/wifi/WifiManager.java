@@ -2761,4 +2761,17 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Restore state from the older version of back up data.
+     * The old backup data was essentially a backup of wpa_supplicant.conf & ipconfig.txt file.
+     * @hide
+     */
+    public void restoreSupplicantBackupData(byte[] supplicantData, byte[] ipConfigData) {
+        try {
+            mService.restoreSupplicantBackupData(supplicantData, ipConfigData);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
