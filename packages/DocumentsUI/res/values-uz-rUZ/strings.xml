@@ -28,7 +28,7 @@
     <string name="menu_settings" msgid="8239065133341597825">"Xotira sozlamalari"</string>
     <string name="menu_open" msgid="432922957274920903">"Ochish"</string>
     <string name="menu_save" msgid="2394743337684426338">"Saqlash"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Ulashish"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Baham ko‘rish"</string>
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Hammasini belgilash"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>

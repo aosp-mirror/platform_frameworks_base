@@ -19,20 +19,20 @@
     <string name="app_label" msgid="2783841764617238354">"ਦਸਤਾਵੇਜ਼"</string>
     <string name="downloads_label" msgid="959113951084633612">"ਡਾਊਨਲੋਡ"</string>
     <string name="title_open" msgid="4353228937663917801">"ਤੋਂ ਖੋਲ੍ਹੋ"</string>
-    <string name="title_save" msgid="2433679664882857999">"ਇਸ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਕਰੋ"</string>
+    <string name="title_save" msgid="2433679664882857999">"ਇਸ ਵਿੱਚ ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"ਨਵਾਂ ਫੋਲਡਰ"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ਗ੍ਰਿਡ ਵਿਊ"</string>
     <string name="menu_list" msgid="7279285939892417279">"ਸੂਚੀ ਦ੍ਰਿਸ਼"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"ਇਸ ਅਨੁਸਾਰ ਛਾਂਟੋ"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"ਇਸ ਮੁਤਾਬਕ ਛਾਂਟੋ"</string>
     <string name="menu_search" msgid="3816712084502856974">"ਖੋਜੋ"</string>
     <string name="menu_settings" msgid="8239065133341597825">"ਸਟੋਰੇਜ ਸੈਟਿੰਗਾਂ"</string>
     <string name="menu_open" msgid="432922957274920903">"ਖੋਲ੍ਹੋ"</string>
-    <string name="menu_save" msgid="2394743337684426338">"ਸੁਰੱਖਿਅਤ ਕਰੋ"</string>
+    <string name="menu_save" msgid="2394743337684426338">"ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="menu_share" msgid="3075149983979628146">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ਮਿਟਾਓ"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"ਸਭ ਚੁਣੋ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ਇਸ ਵਿੱਚ ਕਾਪੀ ਕਰੋ…"</string>
-    <string name="menu_move" msgid="1828090633118079817">"ਇਸ ਵਿੱਚ ਤਬਦੀਲ ਕਰੋ..."</string>
+    <string name="menu_move" msgid="1828090633118079817">"ਏਥੇ ਤਬਾਦਲਾ ਕਰੋ..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"ਨਵੀਂ ਵਿੰਡੋ"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ਕਾਪੀ ਕਰੋ"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ਪੇਸਟ ਕਰੋ"</string>
@@ -43,7 +43,7 @@
     <string name="button_select" msgid="527196987259139214">"ਚੁਣੋ"</string>
     <string name="button_copy" msgid="8706475544635021302">"ਕਾਪੀ ਕਰੋ"</string>
     <string name="button_move" msgid="2202666023104202232">"ਮੂਵ ਕਰੋ"</string>
-    <string name="button_dismiss" msgid="3714065566893946085">"ਬਰਖਾਸਤ ਕਰੋ"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="button_retry" msgid="4392027584153752797">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="sort_name" msgid="9183560467917256779">"ਨਾਮ ਮੁਤਾਬਕ"</string>
     <string name="sort_date" msgid="586080032956151448">"ਸੋਧੇ ਜਾਣ ਦੀ ਤਾਰੀਖ਼ ਮੁਤਾਬਕ"</string>
