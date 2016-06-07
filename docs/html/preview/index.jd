@@ -57,7 +57,7 @@ footer.hide=1
 
 <div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
-    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#latest">
       <i class="dac-sprite dac-arrow-down-gray"></i>
     </a>
     <ul class="dac-actions">
