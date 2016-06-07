@@ -334,9 +334,13 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_IS_EXTERNAL_CALL = 1<<4;
 
+    /**
+     * Indicates that the connection has CDMA Enhanced Voice Privacy enabled.
+     */
+    public static final int PROPERTY_HAS_CDMA_VOICE_PRIVACY = 1<<5;
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<5
+    // Next PROPERTY value: 1<<6
     //**********************************************************************************************
 
     /**
@@ -529,6 +533,10 @@ public abstract class Connection extends Conferenceable {
 
         if (can(properties, PROPERTY_IS_EXTERNAL_CALL)) {
             builder.append(" PROPERTY_IS_EXTERNAL_CALL");
+        }
+
+        if (can(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+            builder.append(" PROPERTY_HAS_CDMA_VOICE_PRIVACY");
         }
 
         builder.append("]");
