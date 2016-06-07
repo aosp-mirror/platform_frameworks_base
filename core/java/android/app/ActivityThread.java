@@ -1166,12 +1166,22 @@ public final class ActivityThread {
         @Override
         public void dumpDbInfo(final FileDescriptor fd, final String[] args) {
             if (mSystemThread) {
-                // Ensure this invocation is asynchronous to prevent
-                // writer waiting due to buffer cannot be consumed.
+                // Ensure this invocation is asynchronous to prevent writer waiting if buffer cannot
+                // be consumed. But it must duplicate the file descriptor first, since caller might
+                // be closing it.
+                final ParcelFileDescriptor dup;
+                try {
+                    dup = ParcelFileDescriptor.dup(fd);
+                } catch (IOException e) {
+                    Log.w(TAG, "Could not dup FD " + fd.getInt$());
+                    return;
+                }
+
                 AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
                     @Override
                     public void run() {
-                        dumpDatabaseInfo(fd, args);
+                        dumpDatabaseInfo(dup.getFileDescriptor(), args);
+                        IoUtils.closeQuietly(dup);
                     }
                 });
             } else {
