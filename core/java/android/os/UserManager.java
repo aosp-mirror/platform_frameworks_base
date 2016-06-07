@@ -2045,7 +2045,7 @@ public class UserManager {
     }
 
     /**
-     * Returns a {@code Bundle} containing any saved application restrictions for this user, for the
+     * Returns a {@link Bundle} containing any saved application restrictions for this user, for the
      * given package name. Only an application with this package name can call this method.
      *
      * <p>The returned {@link Bundle} consists of key-value pairs, as defined by the application,
@@ -2058,8 +2058,8 @@ public class UserManager {
      * </ul>
      *
      * @param packageName the package name of the calling application
-     * @return a {@code Bundle} with the restrictions for that package, or {@code null} if there
-     * are no saved restrictions.
+     * @return a {@link Bundle} with the restrictions for that package, or an empty {@link Bundle}
+     * if there are no saved restrictions.
      *
      * @see #KEY_RESTRICTIONS_PENDING
      */
