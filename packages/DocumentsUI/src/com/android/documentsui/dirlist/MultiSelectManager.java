@@ -187,7 +187,7 @@ public final class MultiSelectManager {
      * Updates selection to include items in {@code selection}.
      */
     public void updateSelection(Selection selection) {
-        setItemsSelected(selection.toList(), true);
+        setItemsSelected(selection.getAll(), true);
     }
 
     /**
@@ -641,18 +641,13 @@ public final class MultiSelectManager {
         }
 
         /**
-         * Returns an unordered array of selected positions.
+         * Returns an unordered array of selected positions, including any
+         * provisional selection currently in effect.
          */
-        public String[] getAll() {
-            return toList().toArray(new String[0]);
-        }
-
-        /**
-         * Returns an unordered array of selected positions (including any
-         * provisional selections current in effect).
-         */
-        public List<String> toList() {
-            ArrayList<String> selection = new ArrayList<String>(mSelection);
+        public List<String> getAll() {
+            ArrayList<String> selection =
+                    new ArrayList<String>(mSelection.size() + mProvisionalSelection.size());
+            selection.addAll(mSelection);
             selection.addAll(mProvisionalSelection);
             return selection;
         }

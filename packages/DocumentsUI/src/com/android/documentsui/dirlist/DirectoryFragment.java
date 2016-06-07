@@ -1125,8 +1125,7 @@ public class DirectoryFragment extends Fragment
         List<String> modelIds = mAdapter.getModelIds();
 
         // Get the current selection.
-        String[] alreadySelected = mSelectionManager.getSelection().getAll();
-        for (String id : alreadySelected) {
+        for (String id : mSelectionManager.getSelection().getAll()) {
            enabled.add(id);
         }
 
@@ -1790,7 +1789,7 @@ public class DirectoryFragment extends Fragment
         updateLayout(state.derivedMode);
 
         if (mSelection != null) {
-            mSelectionManager.setItemsSelected(mSelection.toList(), true);
+            mSelectionManager.setItemsSelected(mSelection.getAll(), true);
             mSelection.clear();
         }
 
