@@ -46,6 +46,8 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.File;
 import java.text.Collator;
 import java.text.Normalizer;
@@ -123,8 +125,8 @@ public class ApplicationsState {
         mPm = mContext.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mUm = (UserManager) app.getSystemService(Context.USER_SERVICE);
-        for (UserHandle user : mUm.getUserProfiles()) {
-            mEntriesMap.put(user.getIdentifier(), new HashMap<String, AppEntry>());
+        for (int userId : mUm.getProfileIdsWithDisabled(UserHandle.myUserId())) {
+            mEntriesMap.put(userId, new HashMap<String, AppEntry>());
         }
         mThread = new HandlerThread("ApplicationsState.Loader",
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -426,7 +428,8 @@ public class ApplicationsState {
     }
 
     private void addUser(int userId) {
-        if (mUm.getUserProfiles().contains(new UserHandle(userId))) {
+        final int profileIds[] = mUm.getProfileIdsWithDisabled(UserHandle.myUserId());
+        if (ArrayUtils.contains(profileIds, userId)) {
             synchronized (mEntriesMap) {
                 mEntriesMap.put(userId, new HashMap<String, AppEntry>());
                 if (mResumed) {
