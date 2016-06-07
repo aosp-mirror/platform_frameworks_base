@@ -28,10 +28,8 @@ import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
-import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.Pair;
 import android.view.IWindowManager;
 
@@ -57,7 +55,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         private final File mProfileOwnerBase;
 
         public OwnersTestable(DpmMockContext context) {
-            super(context, context.userManager, context.userManagerInternal);
+            super(context.userManager, context.userManagerInternal, context.packageManagerInternal);
             mLegacyFile = new File(context.dataDir, LEGACY_FILE);
             mDeviceOwnerFile = new File(context.dataDir, DEVICE_OWNER_FILE);
             mProfileOwnerBase = new File(context.dataDir, PROFILE_OWNER_FILE_BASE);

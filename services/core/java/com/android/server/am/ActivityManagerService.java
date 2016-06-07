@@ -5374,17 +5374,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         userId = mUserController.handleIncomingUser(pid, uid, userId, false,
                 ALLOW_FULL_ONLY, "clearApplicationUserData", null);
 
-        final DevicePolicyManagerInternal dpmi = LocalServices
-                .getService(DevicePolicyManagerInternal.class);
-        if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
-            throw new SecurityException("Cannot clear data for a device owner or a profile owner");
-        }
 
         long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
+                if (getPackageManagerInternalLocked().canPackageBeWiped(
+                        userId, packageName)) {
+                    throw new SecurityException(
+                            "Cannot clear data for a device owner or a profile owner");
+                }
+
                 try {
                     pkgUid = pm.getPackageUid(packageName, MATCH_UNINSTALLED_PACKAGES, userId);
                 } catch (RemoteException e) {
