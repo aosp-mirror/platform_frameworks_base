@@ -539,7 +539,7 @@ public class BluetoothTestUtils extends Assert {
         try {
             success = completionSemaphore.tryAcquire(DISCOVERABLE_UNDISCOVERABLE_TIMEOUT,
                     TimeUnit.MILLISECONDS);
-            writeOutput(String.format("discoverable() completed in 0 ms");
+            writeOutput(String.format("discoverable() completed in 0 ms"));
         } catch (final InterruptedException e) {
             // This should never happen but just in case it does, the test will fail anyway.
         }
@@ -589,7 +589,7 @@ public class BluetoothTestUtils extends Assert {
         try {
             success = completionSemaphore.tryAcquire(DISCOVERABLE_UNDISCOVERABLE_TIMEOUT,
                     TimeUnit.MILLISECONDS);
-            writeOutput(String.format("undiscoverable() completed in 0 ms");
+            writeOutput(String.format("undiscoverable() completed in 0 ms"));
         } catch (InterruptedException e) {
             // This should never happen but just in case it does, the test will fail anyway.
         }
