@@ -165,7 +165,7 @@
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ਸਮਰਥਿਤ।"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS ਪ੍ਰਾਪਤ ਕਰ ਰਿਹਾ ਹੈ।"</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"ਟੈਲੀ ਟਾਈਪਰਾਈਟਰ ਸਮਰਥਿਤ।"</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"ਰਿੰਗਰ ਵਾਈਬ੍ਰੇਟ।"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"ਰਿੰਗਰ ਥਰਥਰਾਹਟ।"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"ਰਿੰਗਰ ਸਾਈਲੈਂਟ।"</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
@@ -236,7 +236,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ਸੈਲਿਊਲਰ ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ਡੈਟਾ ਰੁਕ ਗਿਆ ਹੈ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ਕਿਉਂਕਿ ਤੁਹਾਡੀ ਸੈਟ ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ ਸੀ,  ਡੀਵਾਈਸ ਨੇ ਇਸ ਬਾਕੀ ਚੱਕਰ ਲਈ ਡੈਟਾ ਵਰਤੋਂ ਰੋਕ ਦਿੱਤੀ ਹੈ।\n\nਇਸਨੂੰ ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰਨ ਨਾਲ ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਵੱਲੋਂ ਖ਼ਰਚੇ ਪਾਏ ਜਾ ਸਕਦੇ ਹਨ।"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ਕਿਉਂਕਿ ਤੁਹਾਡੀ ਸੈਟ ਡੈਟਾ ਸੀਮਾ ਪੂਰੀ ਹੋ ਗਈ ਸੀ,  ਡੀਵਾਈਸ ਨੇ ਇਸ ਬਾਕੀ ਚੱਕਰ ਲਈ ਡੈਟਾ ਉਪਯੋਗ ਰੋਕ ਦਿੱਤਾ ਹੈ।\n\nਇਸਨੂੰ ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰਨ ਨਾਲ ਤੁਹਾਡੇ ਕੈਰੀਅਰ ਵੱਲੋਂ ਖ਼ਰਚੇ ਪਾਏ ਜਾ ਸਕਦੇ ਹਨ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ਕੋਈ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਨਹੀਂ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ਕਨੈਕਟ ਕੀਤਾ"</string>
@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾ ਬੇਨਤੀਆਂ ਸਕਿਰਿਆ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਹਟਾਓ।"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">ਅੰਦਰ <xliff:g id="NUMBER_1">%s</xliff:g> ਹੋਰ ਸੂਚਨਾਵਾਂ।</item>
+      <item quantity="other">ਅੰਦਰ <xliff:g id="NUMBER_1">%s</xliff:g> ਹੋਰ ਸੂਚਨਾਵਾਂ।</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"ਸੂਚਨਾ ਸੈਟਿੰਗਾਂ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ਸੈਟਿੰਗਾਂ"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ਸਕ੍ਰੀਨ ਆਟੋਮੈਟਿਕਲੀ ਰੋਟੇਟ ਕਰੇਗੀ।"</string>
@@ -307,7 +310,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ਫਲੈਸ਼ਲਾਈਟ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ਸੈਲਿਊਲਰ ਡੈਟਾ"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ਡੈਟਾ ਵਰਤੋਂ"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ਡੈਟਾ ਉਪਯੋਗ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ਬਾਕੀ ਡੈਟਾ"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"ਸੀਮਾ ਤੋਂ ਵੱਧ"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ਵਰਤਿਆ"</string>
@@ -327,7 +330,7 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ਹੌਰੀਜ਼ੌਂਟਲ ਸਪਲਿਟ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ਵਰਟੀਕਲ ਸਪਲਿਟ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ਕਸਟਮ ਸਪਲਿਟ"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ਚਾਰਜ ਕੀਤਾ"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ਚਾਰਜ ਹੋਇਆ"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ਚਾਰਜ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ਪੂਰਾ ਹੋਣ ਤੱਕ"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
@@ -336,7 +339,7 @@
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਲਈ ਉੱਪਰ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> ਤੱਕ ਖੱਬੇ ਪਾਸੇ ਸਲਾਈਡ ਕਰੋ।"</string>
     <string name="zen_priority_introduction" msgid="3070506961866919502">"ਤੁਹਾਨੂੰ ਤੁਹਾਡੇ ਦੁਆਰਾ ਨਿਰਦਿਸ਼ਟ ਅਲਾਰਮ, ਰਿਮਾਈਂਡਰ, ਇਵੈਂਟਸ, ਅਤੇ ਕਾਲਰਸ ਤੋਂ ਇਲਾਵਾ, ਧੁਨੀ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਤੋਂ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ।"</string>
-    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਅਨੁਕੂਲਿਤ ਕਰੋ"</string>
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"ਵਿਸ਼ੇਸ਼-ਵਿਉਂਤਬੱਧ ਕਰੋ"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਫ਼ੋਨ ਕਾਲ ਕਰਨ ਦੇ ਯੋਗ ਹੋਵੋਗੇ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ਇਹ ਅਲਾਰਮ, ਸੰਗੀਤ, ਵੀਡੀਓਜ਼, ਅਤੇ ਗੇਮਸ ਸਮੇਤ, ਸਾਰੀਆਂ ਧੁਨੀਆਂ ਅਤੇ ਵਾਇਬ੍ਰੇਸ਼ਨ ਨੂੰ ਬਲੌਕ ਕਰਦਾ ਹੈ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
@@ -381,7 +384,7 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ਉਪਭੋਗਤਾ ਨੂੰ ਲੌਗ ਆਉਟ ਕਰੋ"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"ਕੀ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"ਜਦੋਂ ਤੁਸੀਂ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਸ਼ਾਮਲ ਕਰਦੇ ਹੋ, ਉਸ ਵਿਅਕਤੀ ਨੂੰ ਆਪਣੀ ਜਗ੍ਹਾ ਸਥਾਪਤ ਕਰਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ।\n\nਕੋਈ ਵੀ ਵਰਤੋਂਕਾਰ ਹੋਰ ਸਾਰੇ ਵਰਤੋਂਕਾਰਾਂ ਦੀਆਂ ਐਪਾਂ ਨੂੰ ਅੱਪਡੇਟ ਕਰ ਸਕਦਾ ਹੈ।"</string>
-    <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਉਪਭੋਗਤਾ ਹਟਾਉਣਾ ਹੈ?"</string>
+    <string name="user_remove_user_title" msgid="4681256956076895559">"ਕੀ ਵਰਤੋਂਕਾਰ ਹਟਾਉਣਾ ਹੈ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ਇਸ ਉਪਭੋਗਤਾ ਦੇ ਸਾਰੇ ਐਪਸ ਅਤੇ ਡੈਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ਹਟਾਓ"</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
@@ -435,8 +438,8 @@
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। ਅਣਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। ਥਰਥਰਾਹਟ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ਮਿਊਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ। ਪਹੁੰਚਯੋਗਤਾ ਸੇਵਾਵਾਂ ਮਿਊਟ ਹੋ ਸਕਦੀਆਂ ਹਨ।"</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਯੂਮ ਕੰਟਰੋਲ ਵਿਖਾਏ ਗਏ ਹਨ। ਬਰਖ਼ਾਸਤ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ਵੌਲਯੂਮ ਕੰਟਰੋਲ ਲੁਕਾਏ ਗਏ ਹਨ"</string>
+    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਵਿਖਾਏ ਗਏ ਹਨ। ਬਰਖ਼ਾਸਤ ਕਰਨ ਲਈ ਉੱਪਰ ਸਵਾਈਪ ਕਰੋ।"</string>
+    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ਵੌਲਿਊਮ ਕੰਟਰੋਲ ਲੁਕਾਏ ਗਏ ਹਨ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI ਟਿਊਨਰ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ਜੋਡ਼ੀ ਗਈ ਬੈਟਰੀ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ਜਦੋਂ ਚਾਰਜ ਨਾ ਹੋ ਰਹੀ ਹੋਵੇ ਤਾਂ ਸਥਿਤੀ ਬਾਰ ਦੇ ਅੰਦਰ ਬੈਟਰੀ ਪੱਧਰ ਪ੍ਰਤਿਸ਼ਤਤਾ ਦਿਖਾਓ"</string>
@@ -563,10 +566,10 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"ਸੰਗੀਤ"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"ਕੈਲੰਡਰ"</string>
-    <string name="tuner_full_zen_title" msgid="4540823317772234308">"ਵੌਲਯੂਮ ਕੰਟਰੋਲਾਂ ਨਾਲ ਵਿਖਾਓ"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"ਵੌਲਿਊਮ ਕੰਟਰੋਲਾਂ ਨਾਲ ਵਿਖਾਓ"</string>
     <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <string name="volume_dnd_silent" msgid="4363882330723050727">"ਵੌਲਯੂਮ ਬਟਨ ਸ਼ਾਰਟਕੱਟ"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"ਵੌਲਯੂਮ ਉੱਚੀ ਹੋਣ \'ਤੇ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"ਵੌਲਿਊਮ ਬਟਨ ਸ਼ਾਰਟਕੱਟ"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"ਵੌਲਿਊਮ ਉੱਚੀ ਹੋਣ \'ਤੇ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="battery" msgid="7498329822413202973">"ਬੈਟਰੀ"</string>
     <string name="clock" msgid="7416090374234785905">"ਘੜੀ"</string>
     <string name="headset" msgid="4534219457597457353">"ਹੈੱਡਸੈੱਟ"</string>

@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"የአካባቢ ጥያቄዎች ነቅተዋል"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"ሁሉንም ማሳወቂያዎች አጽዳ"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">ከውስጥ ተጨማሪ <xliff:g id="NUMBER_1">%s</xliff:g> ማሳወቂያዎች።</item>
+      <item quantity="other">ከውስጥ ተጨማሪ <xliff:g id="NUMBER_1">%s</xliff:g> ማሳወቂያዎች።</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"የማሳወቂያ ቅንብሮች"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"የ<xliff:g id="APP_NAME">%s</xliff:g> ቅንብሮች"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"ማያ ገጽ በራስ ሰር ይዞራል።"</string>

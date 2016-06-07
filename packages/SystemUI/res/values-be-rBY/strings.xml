@@ -53,8 +53,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Прывязаныя праз Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Налада метадаў уводу"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Фізічная клавіятура"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Дазволіць праыкладанню <xliff:g id="APPLICATION">%1$s</xliff:g> атрымлiваць доступ да прылады USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Дазволіць прыкладанню <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да прылады USB?"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> атрымлiваць доступ да прылады USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Дазволіць праграме <xliff:g id="APPLICATION">%1$s</xliff:g> доступ да USB-аксесуара?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Адкрыць <xliff:g id="ACTIVITY">%1$s</xliff:g>, калі гэтая USB-прылада падлучаная?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Адкрыць <xliff:g id="ACTIVITY">%1$s</xliff:g>, калі гэтая USB-прылада падлучаная?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Няма ўсталяв. прыкл. для працы з гэтай прыл. USB. Больш падраб. пра гэтую прыл.: <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_three_bars" msgid="2648241415119396648">"Тры слупкi."</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"Сігнал поўны."</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Уключана."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"Адключана."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Выключана."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Падключана."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Падлучэнне."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -249,7 +249,12 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Ёсць актыўныя запыты пра месцазнаходжанне"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Выдалiць усе апавяшчэннi."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="one">Яшчэ <xliff:g id="NUMBER_1">%s</xliff:g> апавяшчэнне ўнутры.</item>
+      <item quantity="few">Яшчэ <xliff:g id="NUMBER_1">%s</xliff:g> апавяшчэнні ўнутры.</item>
+      <item quantity="many">Яшчэ <xliff:g id="NUMBER_1">%s</xliff:g> апавяшчэнняў унутры.</item>
+      <item quantity="other">Яшчэ <xliff:g id="NUMBER_1">%s</xliff:g> апавяшчэння ўнутры.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Налады апавяшчэнняў"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Налады <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран паварочваецца аўтаматычна."</string>
@@ -487,7 +492,7 @@
     <string name="do_not_silence_block" msgid="4070647971382232311">"Не адключаць гук і не блакіраваць"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"Пашыранае кіраванне апавяшчэннямі"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"Уключана"</string>
-    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Адключана"</string>
+    <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Выключана"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"З дапамогай пашыранага кіравання апавяшчэннямі вы можаце задаваць узровень важнасці апавяшчэнняў праграмы ад 0 да 5. \n\n"<b>"Узровень 5"</b>" \n- Паказваць уверсе спіса апавяшчэнняў \n- Дазваляць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 4"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Заўсёды дазваляць кароткі паказ \n\n"<b>"Узровень 3"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n\n"<b>"Узровень 2"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n\n"<b>"Узровень 1"</b>" \n- Забараняць перапыняць рэжым поўнага экрана \n- Ніколі не дазваляць кароткі паказ \n- Ніколі не прайграваць гук і не вібрыраваць \n- Хаваць з экрана блакіроўкі і панэлі стану \n- Паказваць унізе спіса апавяшчэнняў \n\n"<b>"Узровень 0"</b>" \n- Блакіраваць усе апавяшчэнні ад праграмы"</string>
     <string name="user_unspecified_importance" msgid="361613856933432117">"Важнасць: аўтаматычна"</string>
     <string name="blocked_importance" msgid="5035073235408414397">"Важнасць: узровень 0"</string>
@@ -510,7 +515,7 @@
     <string name="night_mode" msgid="3540405868248625488">"Начны рэжым"</string>
     <string name="calibrate_display" msgid="5974642573432039217">"Каліброўка дысплэя"</string>
     <string name="night_mode_on" msgid="5597545513026541108">"Уключана"</string>
-    <string name="night_mode_off" msgid="8035605276956057508">"Адключана"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Выключана"</string>
     <string name="turn_on_automatically" msgid="4167565356762016083">"Уключаць аўтаматычна"</string>
     <string name="turn_on_auto_summary" msgid="2190994512406701520">"Пераключэнне ў начны рэжым у залежнасці ад канкрэтнай мясцовасці і часу сутак"</string>
     <string name="when_night_mode_on" msgid="2969436026899172821">"Калі ўключаны Начны рэжым"</string>
@@ -580,7 +585,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Эканомія трафіку ўключана"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Эканомія трафіку адключана"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Уключана"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"Адключана"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Выключана"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Панэль навігацыі"</string>
     <string name="start" msgid="6873794757232879664">"Пачатак"</string>
     <string name="center" msgid="4327473927066010960">"Цэнтр"</string>

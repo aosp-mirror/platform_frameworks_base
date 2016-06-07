@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"എല്ലാ വിവരങ്ങളും മായ്‌ക്കുക."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other">ഉള്ളിൽ <xliff:g id="NUMBER_1">%s</xliff:g> അറിയിപ്പുകൾ കൂടിയുണ്ട്.</item>
+      <item quantity="one">ഉള്ളിൽ <xliff:g id="NUMBER_0">%s</xliff:g> അറിയിപ്പ് കൂടിയുണ്ട്.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"അറിയിപ്പ് ക്രമീകരണങ്ങൾ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> ക്രമീകരണം"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"സ്‌ക്രീൻ സ്വയമേവ തിരിയും."</string>
@@ -335,7 +338,7 @@
     <string name="description_target_search" msgid="3091587249776033139">"തിരയൽ"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"നിങ്ങൾ വ്യക്തമാക്കിയിട്ടുള്ള അലാറങ്ങൾ, ഓർമ്മപ്പെടുത്തലുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവ ഒഴികെയുള്ള ശബ്‌ദങ്ങളോ വൈബ്രേഷനുകളോ കാരണം നിങ്ങൾക്ക് ശല്യമുണ്ടാകില്ല."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"നിങ്ങൾ വ്യക്തമാക്കിയിട്ടുള്ള അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവ ഒഴികെയുള്ള ശബ്‌ദങ്ങളോ വൈബ്രേഷനുകളോ കാരണം നിങ്ങൾക്ക് ശല്യമുണ്ടാകില്ല."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"ഇഷ്‌ടാനുസൃതമാക്കുക"</string>
     <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"ഇത് അലാറങ്ങൾ, സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയിൽ നിന്നുൾപ്പെടെ എല്ലാ ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളും തടയുന്നു. നിങ്ങൾക്ക് തുടർന്നും ഫോൺ വിളിക്കാനാകും."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"ഇത് അലാറങ്ങൾ, സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയിൽ നിന്നുൾപ്പെടെ എല്ലാ ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളും തടയുന്നു."</string>

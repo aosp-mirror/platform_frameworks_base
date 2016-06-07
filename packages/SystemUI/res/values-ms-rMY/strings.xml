@@ -245,7 +245,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Permintaan lokasi aktif"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Padamkan semua pemberitahuan."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> lagi pemberitahuan di dalam.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> lagi pemberitahuan di dalam.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Tetapan pemberitahuan"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> tetapan"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skrin akan berputar secara automatik."</string>

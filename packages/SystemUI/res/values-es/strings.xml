@@ -21,13 +21,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Quitar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí aparecerán tus pantallas recientes"</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí aparecerán tus aplicaciones recientes"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Descartar aplicaciones recientes"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d pantallas en Visión general</item>
-      <item quantity="one">1 pantalla en Visión general</item>
+      <item quantity="other">%d pantallas en Aplicaciones recientes</item>
+      <item quantity="one">1 pantalla en Aplicaciones recientes</item>
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No tienes notificaciones"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Entrante"</string>
@@ -83,7 +83,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Atrás"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Inicio"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"Visión general"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Aplicaciones recientes"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Buscar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Cámara"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Teléfono"</string>
@@ -183,7 +183,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Ajustes rápidos"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Pantalla de bloqueo."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Ajustes"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Visión general."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Aplicaciones recientes."</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"Cerrar"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Usuario <xliff:g id="USER">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
@@ -247,7 +247,10 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de ubicación activas"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
-    <!-- no translation found for notification_group_overflow_description (4579313201268495404) -->
+    <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación más dentro.</item>
+    </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ajustes de notificaciones"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"Ajustes de <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
@@ -366,22 +369,22 @@
     <string name="user_new_user_name" msgid="426540612051178753">"Nuevo usuario"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"Invitado"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"Añadir invitado"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"Eliminar invitado"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"¿Eliminar invitado?"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"Quitar invitado"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"¿Quitar invitado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Se eliminarán las aplicaciones y los datos de esta sesión."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Eliminar"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Quitar"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Hola de nuevo, invitado"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"¿Quieres continuar con la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sí, continuar"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuario invitado"</string>
-    <string name="guest_notification_text" msgid="335747957734796689">"Para eliminar aplicaciones y datos, quita usuario invitado"</string>
-    <string name="guest_notification_remove_action" msgid="8820670703892101990">"ELIMINAR INVITADO"</string>
+    <string name="guest_notification_text" msgid="335747957734796689">"Para eliminar aplicaciones y datos, quita el usuario invitado"</string>
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"QUITAR INVITADO"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"Salir de usuario"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"Salir de usuario actual"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"SALIR DE USUARIO"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"¿Añadir nuevo usuario?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Al añadir un usuario nuevo, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Al añadir un nuevo usuario, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="user_remove_user_title" msgid="4681256956076895559">"¿Quitar usuario?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Se eliminarán todas las aplicaciones y todos los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Quitar"</string>
@@ -443,7 +446,7 @@
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
     <string name="status_bar" msgid="4877645476959324760">"Barra de estado"</string>
-    <string name="overview" msgid="4018602013895926956">"Visión general"</string>
+    <string name="overview" msgid="4018602013895926956">"Aplicaciones recientes"</string>
     <string name="demo_mode" msgid="2389163018533514619">"Modo de demostración"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"Habilitar modo de demostración"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Mostrar modo de demostración"</string>
@@ -465,15 +468,15 @@
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
     <string name="got_it" msgid="2239653834387972602">"Entendido"</string>
     <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de IU del sistema se ha añadido a Ajustes"</string>
-    <string name="remove_from_settings" msgid="8389591916603406378">"Eliminar de Ajustes"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Eliminar el configurador de IU del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
+    <string name="remove_from_settings" msgid="8389591916603406378">"Quitar de Ajustes"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quitar el configurador de IU del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"La aplicación no está instalada en tu dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostrar los segundos del reloj"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Muestra los segundos del reloj en la barra de estado. Puede afectar a la duración de la batería."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Reorganizar Ajustes rápidos"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostrar brillo en Ajustes rápidos"</string>
     <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Habilitar deslizar dedo hacia arriba para dividir pantalla"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Habilita el gesto de deslizar el dedo hacia arriba desde el botón Visión general para acceder al modo de pantalla dividida"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Habilita el gesto de deslizar el dedo hacia arriba desde el botón Aplicaciones recientes para acceder al modo de pantalla dividida"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"¿Activar Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Para poder conectar tu teclado a tu tablet, debes activar el Bluetooth."</string>
