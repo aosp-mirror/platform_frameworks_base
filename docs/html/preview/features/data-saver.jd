@@ -179,10 +179,13 @@ if (connMgr.isActiveNetworkMetered()) {
   Testing with Android Debug Bridge Commands
 </h2>
 
-The <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
-provides a few commands that you can use to check and configure network
-permissions:
-
+<p>
+  The <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a>
+  provides a few commands that you can use to test your app in Data Saver
+  conditions. You can check and configure network
+  permissions or set wireless networks as metered to test your app on unmetered
+  networks.
+</p>
 <dl>
   <dt>
     <code>$ adb shell dumpsys netpolicy</code>
@@ -230,5 +233,24 @@ permissions:
   <dd>
     Removes the specified package UID from the whitelist to block background
     metered data usage while Data Saver is enabled.
+  </dd>
+
+  <dt>
+    <code>$ adb shell cmd netpolicy list wifi-networks</code>
+  </dt>
+
+  <dd>
+    Lists all wifi networks, displaying whether they're metered.
+  </dd>
+
+
+  <dt>
+    <code>$  adb shell cmd netpolicy set metered-network &lt;WIFI_SSID&gt;
+      true</code>
+  </dt>
+
+  <dd>
+    Sets wifi with the specified SSID as metered, allowing you to simulate a
+    metered network on an unmetered network.
   </dd>
 </dl>
