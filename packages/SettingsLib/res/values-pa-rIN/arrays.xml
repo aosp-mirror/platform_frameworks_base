@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"ਸਕੈਨ ਕਰ ਰਿਹਾ ਹੈ..."</item>
+    <item msgid="8934131797783724664">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</item>
     <item msgid="8513729475867537913">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="515055375277271756">"ਪ੍ਰਮਾਣਿਤ ਕਰ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="1943354004029184381">"IP ਪਤਾ ਪ੍ਰਾਪਤ ਕਰ ਰਿਹਾ ਹੈ..."</item>
@@ -36,7 +36,7 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"ਸਕੈਨ ਕਰ ਰਿਹਾ ਹੈ..."</item>
+    <item msgid="8878186979715711006">"ਸਕੈਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."</item>
     <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਨਾਲ ਪ੍ਰਮਾਣਿਤ ਕਰ ਰਿਹਾ ਹੈ…"</item>
     <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> ਤੋਂ IP ਪਤਾ ਪ੍ਰਾਪਤ ਕਰ ਰਿਹਾ ਹੈ…"</item>

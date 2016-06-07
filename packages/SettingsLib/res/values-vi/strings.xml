@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Đã đặt một số ứng dụng chạy mặc định"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Chưa đặt mặc định"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Cài đặt chuyển văn bản thành giọng nói"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Đầu ra v.bản thành giọng nói"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Đầu ra văn bản thành giọng nói"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Tốc độ nói"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Tốc độ đọc văn bản"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Độ cao"</string>

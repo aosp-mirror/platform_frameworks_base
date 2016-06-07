@@ -177,7 +177,7 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির নির্বাচন করুন"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB কনফিগারেশন নির্বাচন করুন"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB কনফিগারেশন নির্বাচন করুন"</string>
-    <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের মঞ্জুরি দিন"</string>
+    <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের অনুমতি দিন"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"মক অবস্থানগুলি মঞ্জুর করুন"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"অ্যাট্রিবিউট পরিদর্শন দেখা সক্ষম করুন"</string>
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"নতুন Android DHCP ক্লায়েন্টের পরিবর্তে Lollipop এর থেকে DHCP ক্লায়েন্ট ব্যবহার করুন৷"</string>

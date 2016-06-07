@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL ట్రేస్‌లను ప్రారంభించండి"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB ఆడియో రూటిం. నిలిపి."</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"USB ఆడియో పరికరాలకు స్వయం. రూటింగ్‌ను నిలిపివేయండి"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"లేఅవుట్ బౌండ్‌లను చూపండి"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"లేఅవుట్ బౌండ్‌లు చూపు"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL లేఅవుట్ దిశను నిర్భందం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
