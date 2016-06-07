@@ -91,7 +91,7 @@ import android.view.SurfaceView;
  * <p>
  * <h4>Choosing an EGL Configuration</h4>
  * A given Android device may support multiple EGLConfig rendering configurations.
- * The available configurations may differ in how may channels of data are present, as
+ * The available configurations may differ in how many channels of data are present, as
  * well as how many bits are allocated to each channel. Therefore, the first thing
  * GLSurfaceView has to do when starting to render is choose what EGLConfig to use.
  * <p>
