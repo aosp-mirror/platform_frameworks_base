@@ -67,7 +67,9 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
 
         </li>
         <li class="dac-tab-view" data-tab-view="type">
+          <!--
           <div class="dac-filter-item" data-filter-value="type:distribute" data-filter-name="Articles"></div>
+          -->
           <div class="dac-filter-item" data-filter-value="type:youtube" data-filter-name="Videos"></div>
           <div class="dac-filter-item" data-filter-value="type:blog" data-filter-name="Blog posts"></div>
         </li>
@@ -78,7 +80,7 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
   </div>
 
   <div class="resource-flow-layout col-16" id="latest-resources"
-      data-query="type:distribute, type:youtube+tag:googleplay, type:blog+tag:googleplay+tag:featured"
+      data-query="type:youtube+tag:googleplay, type:blog+tag:googleplay+tag:featured"
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
       data-items-per-page="6"
