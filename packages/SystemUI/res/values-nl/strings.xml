@@ -246,8 +246,8 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle meldingen wissen."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
-      <item quantity="other">Nog <xliff:g id="NUMBER_1">%s</xliff:g> meldingen in groep.</item>
-      <item quantity="one">Nog <xliff:g id="NUMBER_0">%s</xliff:g> melding in groep.</item>
+      <item quantity="other">Nog <xliff:g id="NUMBER_1">%s</xliff:g> meldingen in deze groep.</item>
+      <item quantity="one">Nog <xliff:g id="NUMBER_0">%s</xliff:g> melding in deze groep.</item>
     </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Instellingen voor meldingen"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g>-instellingen"</string>
