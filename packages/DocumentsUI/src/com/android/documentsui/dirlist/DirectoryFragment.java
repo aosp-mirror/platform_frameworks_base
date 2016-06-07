@@ -1634,27 +1634,36 @@ public class DirectoryFragment extends Fragment
             // Single tap logic:
             // If the selection manager is active, it gets first whack at handling tap
             // events. Otherwise, tap events are routed to the target DocumentHolder.
-            boolean handled = mSelectionManager.onSingleTapUp(
-                        new MotionInputEvent(e, mRecView));
+            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+            try {
+                boolean handled = mSelectionManager.onSingleTapUp(event);
 
-            if (handled) {
+                if (handled) {
+                    return handled;
+                }
+
+                // Give the DocumentHolder a crack at the event.
+                DocumentHolder holder = getTarget(e);
+                if (holder != null) {
+                    handled = holder.onSingleTapUp(e);
+                }
+
                 return handled;
+            } finally {
+                event.recycle();
             }
-
-            // Give the DocumentHolder a crack at the event.
-            DocumentHolder holder = getTarget(e);
-            if (holder != null) {
-                handled = holder.onSingleTapUp(e);
-            }
-
-            return handled;
         }
 
         @Override
         public void onLongPress(MotionEvent e) {
             // Long-press events get routed directly to the selection manager. They can be
             // changed to route through the DocumentHolder if necessary.
-            mSelectionManager.onLongPress(new MotionInputEvent(e, mRecView));
+            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+            try {
+                mSelectionManager.onLongPress(event);
+            } finally {
+                event.recycle();
+            }
         }
 
         @Override
