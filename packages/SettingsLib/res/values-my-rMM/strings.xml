@@ -84,7 +84,7 @@
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi  ၃ ဘား"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi  အပြည့်ရှိ"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android စနစ်"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အပ်ပလီကေးရှင်းများ"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ဖယ်ရှားထားသော အက်ပ်များ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ဖယ်ရှားထားသော အပလီကေးရှင်းနှင့် သုံးစွဲသူများ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USBမှတဆင့်ချိတ်ဆက်ခြင်း"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"ရွေ့လျားနိုင်သောဟော့စပေါ့"</string>
@@ -165,7 +165,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ကွန်ရက်လုပ်ငန်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
-    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ထိရောက်သည့် Wi‑Fi မှ ဆယ်လူလာ လွှဲပြောင်းမှု"</string>
+    <string name="wifi_aggressive_handover" msgid="9194078645887480917">"ထိရောက်သည့် Wi‑Fi မှ ဆဲလ်လူလာ လွှဲပြောင်းမှု"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi ရွမ်းရှာဖွေမှုကို အမြဲတမ်း ခွင့်ပြုမည်"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ဆဲလ်လူလာဒေတာ အမြဲတမ်းဖွင့်ထားသည်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
@@ -337,5 +337,5 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"ပိုကြီး"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"အကြီးဆုံး"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"စိတ်ကြိုက် (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီနှင့် တုံ့ပြန်ချက်"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"အကူအညီနှင့် အကြံပြုချက်"</string>
 </resources>

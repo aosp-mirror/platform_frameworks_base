@@ -139,10 +139,10 @@
     <string name="choose_profile" msgid="8229363046053568878">"പ്രൊഫൈൽ തിരഞ്ഞെടുക്കുക"</string>
     <string name="category_personal" msgid="1299663247844969448">"വ്യക്തിഗതം"</string>
     <string name="category_work" msgid="8699184680584175622">"ഔദ്യോഗികം"</string>
-    <string name="development_settings_title" msgid="215179176067683667">"ഡവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
+    <string name="development_settings_title" msgid="215179176067683667">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"ഡെവലപ്പർ ഓ‌പ്ഷനുകൾ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="development_settings_summary" msgid="1815795401632854041">"അപ്ലിക്കേഷൻ വികസനത്തിന് ഓപ്ഷനുകൾ സജ്ജീകരിക്കുക"</string>
-    <string name="development_settings_not_available" msgid="4308569041701535607">"ഈ ഉപയോക്താവിനായി ഡവലപ്പർ ഓപ്‌ഷനുകൾ ലഭ്യമല്ല"</string>
+    <string name="development_settings_not_available" msgid="4308569041701535607">"ഈ ഉപയോക്താവിനായി ഡെവലപ്പർ ഓപ്‌ഷനുകൾ ലഭ്യമല്ല"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"ഈ ഉപയോക്താവിനായി VPN ക്രമീകരണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"ഈ ഉപയോക്താവിനായി ടെതറിംഗ് ക്രമീകരണങ്ങൾ ലഭ്യമല്ല"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"ആക്‌സസ്സ് പോയിന്റ് നെയിം ക്രമീകരണങ്ങൾ ഈ ഉപയോക്താവിനായി ലഭ്യമല്ല"</string>

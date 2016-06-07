@@ -282,7 +282,7 @@
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Taj izbor više nije važeći. Pokušajte ponovo."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Pretvori u enkripciju datoteka"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Pretvori…"</string>
-    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Enkripcija datoteka već je izvršena"</string>
+    <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Datoteke su već šifrirane"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Pretvaranje u enkripciju datoteka"</string>
     <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Pretvorite podatkovnu particiju u enkripciju datoteka.\n Upozorenje! Time će se izbrisati svi vaši podaci.\n Značajka je u alfa verziji i možda neće funkcionirati pravilno.\n Pritisnite \"Izbriši i pretvori...\" da biste nastavili."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Izbriši i pretvori…"</string>

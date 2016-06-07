@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL nyomon követése"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Hangátirányítás tiltása"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Hangátirányítás tiltása az USB-s hangeszközöknél"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Elrendezéshatár mutatása"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Elrendezéshatárok"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Kliphatárok, margók stb. megjelenítése."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Elrendezés jobbról balra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Elrendezés jobbról balra minden nyelvnél"</string>
@@ -237,7 +237,7 @@
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA kényszerítése"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"A 4x MSAA engedélyezése az OpenGL ES 2.0-nál"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Nem négyzetes kivágási műveletek hibakeresése"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU-renderelésről"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"GPU-renderelési profil"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Ablakanimáció tempója"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Áttűnési animáció tempója"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animáció tempója"</string>

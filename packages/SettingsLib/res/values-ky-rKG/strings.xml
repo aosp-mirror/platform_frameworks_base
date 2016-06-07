@@ -226,7 +226,7 @@
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"OpenGL трейстерин иштетүү"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"USB аудио багыттама өчүр"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Тышкы USB аудио жабдыктарына авто багыттама өчрүү"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Катмардын чектерин көргөзүү"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Элементтрдн чектрин көрст"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Клиптин чектерин, талааларын ж.б. көргөзүү"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Солдон оңго багытына мажбурлоо"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Экрандын жайгашуу багытын бардык тилдер үчүн Оңдон-солго кылуу"</string>
