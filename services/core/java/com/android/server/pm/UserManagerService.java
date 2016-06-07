@@ -30,6 +30,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -322,6 +323,27 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final LockPatternUtils mLockPatternUtils;
 
+    private final String ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK =
+            "com.android.server.pm.DISABLE_QUIET_MODE_AFTER_UNLOCK";
+
+    private final BroadcastReceiver mDisableQuietModeCallback = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK.equals(intent.getAction())) {
+                final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_ID, 0);
+                setQuietModeEnabled(userHandle, false);
+                if (target != null) {
+                    try {
+                        mContext.startIntentSender(target, null, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+                        /* ignore */
+                    }
+                }
+            }
+        }
+    };
+
     /**
      * Whether all users should be created ephemeral.
      */
@@ -414,6 +436,9 @@ public class UserManagerService extends IUserManager.Stub {
             // user restriction was not a default guest restriction.
             setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
         }
+        mContext.registerReceiver(mDisableQuietModeCallback,
+                new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
+                null, mHandler);
     }
 
     @Override
@@ -703,6 +728,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean trySetQuietModeDisabled(int userHandle, IntentSender target) {
+        checkManageUsersPermission("silence profile");
         if (StorageManager.isUserKeyUnlocked(userHandle)
                 || !mLockPatternUtils.isSecure(userHandle)) {
             // if the user is already unlocked, no need to show a profile challenge
@@ -723,9 +749,24 @@ public class UserManagerService extends IUserManager.Stub {
             if (unlockIntent == null) {
                 return false;
             }
+            final Intent callBackIntent = new Intent(
+                    ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK);
             if (target != null) {
-                unlockIntent.putExtra(Intent.EXTRA_INTENT, target);
+                callBackIntent.putExtra(Intent.EXTRA_INTENT, target);
             }
+            callBackIntent.putExtra(Intent.EXTRA_USER_ID, userHandle);
+            callBackIntent.setPackage(mContext.getPackageName());
+            callBackIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    mContext,
+                    0,
+                    callBackIntent,
+                    PendingIntent.FLAG_CANCEL_CURRENT |
+                            PendingIntent.FLAG_ONE_SHOT |
+                            PendingIntent.FLAG_IMMUTABLE);
+            // After unlocking the challenge, it will disable quiet mode and run the original
+            // intentSender
+            unlockIntent.putExtra(Intent.EXTRA_INTENT, pendingIntent.getIntentSender());
             unlockIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             mContext.startActivity(unlockIntent);
         } finally {
