@@ -84,7 +84,8 @@ public class KernelUidCpuTimeReader {
                     powerMaUs = 0;
                 }
 
-                if (callback != null) {
+                // Only report if there is a callback and if this is not the first read.
+                if (callback != null && mLastTimeReadUs != 0) {
                     long userTimeDeltaUs = userTimeUs;
                     long systemTimeDeltaUs = systemTimeUs;
                     long powerDeltaMaUs = powerMaUs;
