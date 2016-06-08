@@ -19,7 +19,6 @@ package android.text;
 import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.text.style.ParagraphStyle;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
@@ -554,7 +553,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         if (adjustSelection) {
             boolean changed = false;
             if (selectionStart > start && selectionStart < end) {
-                final int offset = (selectionStart - start) * newLen / origLen;
+                final long diff = selectionStart - start;
+                final int offset = Math.toIntExact(diff * newLen / origLen);
                 selectionStart = start + offset;
 
                 changed = true;
@@ -562,7 +562,8 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                         Spanned.SPAN_POINT_POINT);
             }
             if (selectionEnd > start && selectionEnd < end) {
-                final int offset = (selectionEnd - start) * newLen / origLen;
+                final long diff = selectionEnd - start;
+                final int offset = Math.toIntExact(diff * newLen / origLen);
                 selectionEnd = start + offset;
 
                 changed = true;
