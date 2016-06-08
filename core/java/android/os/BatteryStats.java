@@ -2371,6 +2371,20 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     /**
+     * Return the counter keeping track of the amount of battery discharge while the screen was off,
+     * measured in micro-Ampere-hours. This will be non-zero only if the device's battery has
+     * a coulomb counter.
+     */
+    public abstract LongCounter getDischargeScreenOffCoulombCounter();
+
+    /**
+     * Return the counter keeping track of the amount of battery discharge measured in
+     * micro-Ampere-hours. This will be non-zero only if the device's battery has
+     * a coulomb counter.
+     */
+    public abstract LongCounter getDischargeCoulombCounter();
+
+    /**
      * Return the array of discharge step durations.
      */
     public abstract LevelStepTracker getDischargeLevelStepTracker();
@@ -2805,6 +2819,9 @@ public abstract class BatteryStats implements Parcelable {
                 rawRealtime, which);
         final int connChanges = getNumConnectivityChange(which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
+        final long dischargeCount = getDischargeCoulombCounter().getCountLocked(which);
+        final long dischargeScreenOffCount = getDischargeScreenOffCoulombCounter()
+                .getCountLocked(which);
 
         final StringBuilder sb = new StringBuilder(128);
         
@@ -2819,7 +2836,8 @@ public abstract class BatteryStats implements Parcelable {
                 whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
                 totalRealtime / 1000, totalUptime / 1000,
                 getStartClockTime(),
-                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000);
+                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
+                dischargeCount / 1000, dischargeScreenOffCount / 1000);
         
         // Calculate wakelock times across all uids.
         long fullWakeLockTimeTotal = 0;
@@ -3371,6 +3389,39 @@ public abstract class BatteryStats implements Parcelable {
                     formatTimeMs(sb, chargeTimeRemaining / 1000);
             pw.println(sb.toString());
         }
+
+        final LongCounter dischargeCounter = getDischargeCoulombCounter();
+        final long dischargeCount = dischargeCounter.getCountLocked(which);
+        if (dischargeCount >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Discharge: ");
+                sb.append(BatteryStatsHelper.makemAh(dischargeCount / 1000.0));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
+        final LongCounter dischargeScreenOffCounter = getDischargeScreenOffCoulombCounter();
+        final long dischargeScreenOffCount = dischargeScreenOffCounter.getCountLocked(which);
+        if (dischargeScreenOffCount >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Screen off discharge: ");
+                sb.append(BatteryStatsHelper.makemAh(dischargeScreenOffCount / 1000.0));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
+        final long dischargeScreenOnCount = dischargeCount - dischargeScreenOffCount;
+        if (dischargeScreenOnCount >= 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Screen on discharge: ");
+                sb.append(BatteryStatsHelper.makemAh(dischargeScreenOnCount / 1000.0));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
+
         pw.print("  Start clock time: ");
         pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss", getStartClockTime()).toString());
 
