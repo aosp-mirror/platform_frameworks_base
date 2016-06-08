@@ -5952,7 +5952,7 @@ public class Activity extends ContextThemeWrapper
             return false;
         }
         try {
-            return ActivityManagerNative.getDefault().isTopOfTask(mToken);
+            return ActivityManagerNative.getDefault().isTopOfTask(getActivityToken());
         } catch (RemoteException e) {
             return false;
         }
