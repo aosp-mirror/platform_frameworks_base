@@ -873,7 +873,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             ExpandableNotificationRow parent = row.getNotificationParent();
             if (parent != null && parent.areChildrenExpanded()
-                    && (mGearExposedView == parent
+                    && (parent.areGutsExposed()
+                        || mGearExposedView == parent
                         || (parent.getNotificationChildren().size() == 1
                                 && parent.isClearable()))) {
                 // In this case the group is expanded and showing the gear for the
@@ -961,6 +962,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean canChildBeExpanded(View v) {
         return v instanceof ExpandableNotificationRow
                 && ((ExpandableNotificationRow) v).isExpandable()
+                && !((ExpandableNotificationRow) v).areGutsExposed()
                 && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
     }
 
@@ -2097,7 +2099,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         final ExpandableView firstChild = getFirstChildNotGone();
         int firstChildMinHeight = firstChild != null
                 ? firstChild.getIntrinsicHeight()
-                : mCollapsedSize;
+                : mEmptyShadeView != null
+                        ? mEmptyShadeView.getMinHeight()
+                        : mCollapsedSize;
         if (mOwnScrollY > 0) {
             firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
         }
