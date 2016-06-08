@@ -113,6 +113,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -316,7 +317,7 @@ public class ShortcutService extends IShortcutService.Stub {
         int LAUNCHER_PERMISSION_CHECK = 4;
         int CLEANUP_DANGLING_BITMAPS = 5;
         int GET_ACTIVITIES_WITH_METADATA = 6;
-        int GET_INSTALLED_APPLICATIONS = 7;
+        int GET_INSTALLED_PACKAGES = 7;
         int CHECK_PACKAGE_CHANGES = 8;
 
         int COUNT = CHECK_PACKAGE_CHANGES + 1;
@@ -2282,11 +2283,17 @@ public class ShortcutService extends IShortcutService.Stub {
                         cleanUpPackageLocked(pu.packageName, ownerUserId, pu.userId);
                     }
                 }
+                final long now = injectCurrentTimeMillis();
 
                 // Then for each installed app, publish manifest shortcuts when needed.
-                forInstalledApplications(ownerUserId, ai -> {
+                forUpdatedPackages(ownerUserId, user.getLastAppScanTime(), ai -> {
                     user.handlePackageAddedOrUpdated(ai.packageName);
                 });
+
+                // Write the time just before the scan, because there may be apps that have just
+                // been updated, and we want to catch them in the next time.
+                user.setLastAppScanTime(now);
+                scheduleSaveUser(ownerUserId);
             }
         } finally {
             logDurationStat(Stats.CHECK_PACKAGE_CHANGES, start);
@@ -2424,12 +2431,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     @VisibleForTesting
-    List<ApplicationInfo> injectInstalledApplications(@UserIdInt int userId) {
+    List<PackageInfo> injectInstalledPackages(@UserIdInt int userId) {
         final long start = injectElapsedRealtime();
         final long token = injectClearCallingIdentity();
         try {
-            final ParceledListSlice<ApplicationInfo> parceledList =
-                    mIPackageManager.getInstalledApplications(PACKAGE_MATCH_FLAGS, userId);
+            final ParceledListSlice<PackageInfo> parceledList =
+                    mIPackageManager.getInstalledPackages(PACKAGE_MATCH_FLAGS, userId);
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -2441,18 +2448,25 @@ public class ShortcutService extends IShortcutService.Stub {
         } finally {
             injectRestoreCallingIdentity(token);
 
-            logDurationStat(Stats.GET_INSTALLED_APPLICATIONS, start);
+            logDurationStat(Stats.GET_INSTALLED_PACKAGES, start);
         }
     }
 
-    private void forInstalledApplications(@UserIdInt int userId,
+    private void forUpdatedPackages(@UserIdInt int userId, long lastScanTime,
             Consumer<ApplicationInfo> callback) {
-        final List<ApplicationInfo> list = injectInstalledApplications(userId);
+        if (DEBUG) {
+            Slog.d(TAG, "forUpdatedPackages for user " + userId + ", lastScanTime=" + lastScanTime);
+        }
+        final List<PackageInfo> list = injectInstalledPackages(userId);
         for (int i = list.size() - 1; i >= 0; i--) {
-            final ApplicationInfo ai = list.get(i);
+            final PackageInfo pi = list.get(i);
 
-            if ((ai.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
-                callback.accept(ai);
+            if (((pi.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
+                    && (pi.lastUpdateTime >= lastScanTime)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Found updated package " + pi.packageName);
+                }
+                callback.accept(pi.applicationInfo);
             }
         }
     }
@@ -2612,7 +2626,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpStatLS(pw, p, Stats.GET_APPLICATION_INFO, "getApplicationInfo");
                 dumpStatLS(pw, p, Stats.CLEANUP_DANGLING_BITMAPS, "cleanupDanglingBitmaps");
                 dumpStatLS(pw, p, Stats.GET_ACTIVITIES_WITH_METADATA, "getActivities+metadata");
-                dumpStatLS(pw, p, Stats.GET_INSTALLED_APPLICATIONS, "getInstalledApplications");
+                dumpStatLS(pw, p, Stats.GET_INSTALLED_PACKAGES, "getInstalledPackages");
                 dumpStatLS(pw, p, Stats.CHECK_PACKAGE_CHANGES, "checkPackageChanges");
             }
 

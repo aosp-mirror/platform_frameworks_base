@@ -52,6 +52,7 @@ class ShortcutUser {
 
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER = "locale-seq-no";
+    private static final String ATTR_LAST_APP_SCAN_TIME = "last-app-scan-time";
 
     static final class PackageWithUser {
         final int userId;
@@ -107,6 +108,8 @@ class ShortcutUser {
 
     private long mKnownLocaleChangeSequenceNumber;
 
+    private long mLastAppScanTime;
+
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
         mUserId = userId;
@@ -114,6 +117,14 @@ class ShortcutUser {
 
     public int getUserId() {
         return mUserId;
+    }
+
+    public long getLastAppScanTime() {
+        return mLastAppScanTime;
+    }
+
+    public void setLastAppScanTime(long lastAppScanTime) {
+        mLastAppScanTime = lastAppScanTime;
     }
 
     // We don't expose this directly to non-test code because only ShortcutUser should add to/
@@ -258,6 +269,8 @@ class ShortcutUser {
 
         ShortcutService.writeAttr(out, ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER,
                 mKnownLocaleChangeSequenceNumber);
+        ShortcutService.writeAttr(out, ATTR_LAST_APP_SCAN_TIME,
+                mLastAppScanTime);
 
         ShortcutService.writeTagValue(out, TAG_LAUNCHER,
                 mDefaultLauncherComponent);
@@ -298,6 +311,13 @@ class ShortcutUser {
 
         ret.mKnownLocaleChangeSequenceNumber = ShortcutService.parseLongAttribute(parser,
                 ATTR_KNOWN_LOCALE_CHANGE_SEQUENCE_NUMBER);
+
+        // If lastAppScanTime is in the future, that means the clock went backwards.
+        // Just scan all apps again.
+        final long lastAppScanTime = ShortcutService.parseLongAttribute(parser,
+                ATTR_LAST_APP_SCAN_TIME);
+        final long currentTime = s.injectCurrentTimeMillis();
+        ret.mLastAppScanTime = lastAppScanTime < currentTime ? lastAppScanTime : 0;
 
         final int outerDepth = parser.getDepth();
         int type;
@@ -361,6 +381,8 @@ class ShortcutUser {
         pw.print(mUserId);
         pw.print("  Known locale seq#: ");
         pw.print(mKnownLocaleChangeSequenceNumber);
+        pw.print("  Last app scan: ");
+        pw.print(mLastAppScanTime);
         pw.println();
 
         prefix += prefix + "  ";
