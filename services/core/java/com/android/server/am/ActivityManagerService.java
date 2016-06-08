@@ -267,6 +267,7 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -7820,7 +7821,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return ActivityManager.APP_START_MODE_NORMAL;
     }
 
-    private ProviderInfo getProviderInfoLocked(String authority, int userHandle) {
+    private ProviderInfo getProviderInfoLocked(String authority, int userHandle, int pmFlags) {
         ProviderInfo pi = null;
         ContentProviderRecord cpr = mProviderMap.getProviderByName(authority, userHandle);
         if (cpr != null) {
@@ -7828,7 +7829,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             try {
                 pi = AppGlobals.getPackageManager().resolveContentProvider(
-                        authority, PackageManager.GET_URI_PERMISSION_PATTERNS, userHandle);
+                        authority, PackageManager.GET_URI_PERMISSION_PATTERNS | pmFlags,
+                        userHandle);
             } catch (RemoteException ex) {
             }
         }
@@ -7951,7 +7953,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         final String authority = grantUri.uri.getAuthority();
-        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId);
+        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId,
+                MATCH_DEBUG_TRIAGED_MISSING);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission check: " +
                     grantUri.uri.toSafeString());
@@ -8078,7 +8081,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "Granting " + targetPkg + "/" + targetUid + " permission to " + grantUri);
 
         final String authority = grantUri.uri.getAuthority();
-        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId);
+        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId,
+                MATCH_DEBUG_TRIAGED_MISSING);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for grant: " + grantUri.toSafeString());
             return;
@@ -8293,7 +8297,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         final IPackageManager pm = AppGlobals.getPackageManager();
         final String authority = grantUri.uri.getAuthority();
-        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId);
+        final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId,
+                MATCH_DEBUG_TRIAGED_MISSING);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission revoke: "
                     + grantUri.toSafeString());
@@ -8390,7 +8395,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final String authority = uri.getAuthority();
-            final ProviderInfo pi = getProviderInfoLocked(authority, userId);
+            final ProviderInfo pi = getProviderInfoLocked(authority, userId,
+                    MATCH_DEBUG_TRIAGED_MISSING);
             if (pi == null) {
                 Slog.w(TAG, "No content provider found for permission revoke: "
                         + uri.toSafeString());
@@ -8624,8 +8630,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         final long createdTime = readLongAttribute(in, ATTR_CREATED_TIME, now);
 
                         // Sanity check that provider still belongs to source package
+                        // Both direct boot aware and unaware packages are fine as we
+                        // will do filtering at query time to avoid multiple parsing.
                         final ProviderInfo pi = getProviderInfoLocked(
-                                uri.getAuthority(), sourceUserId);
+                                uri.getAuthority(), sourceUserId, MATCH_DIRECT_BOOT_AWARE
+                                        | MATCH_DIRECT_BOOT_UNAWARE);
                         if (pi != null && sourcePkg.equals(pi.packageName)) {
                             int targetUid = -1;
                             try {
@@ -8804,8 +8813,30 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (perms == null) {
                     Slog.w(TAG, "No permission grants found for " + packageName);
                 } else {
+                    final int userId = UserHandle.getUserId(callingUid);
+                    Set<String> existingAuthorities = null;
+
                     for (UriPermission perm : perms.values()) {
                         if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
+                            // Is this provider available in the current boot state? If the user
+                            // is not running and unlocked we check if the provider package exists.
+                            if (!mUserController.isUserRunningLocked(userId,
+                                    ActivityManager.FLAG_AND_UNLOCKED)) {
+                                String authority = perm.uri.uri.getAuthority();
+                                if (existingAuthorities == null
+                                        || !existingAuthorities.contains(authority)) {
+                                    ProviderInfo providerInfo = getProviderInfoLocked(authority,
+                                            userId, MATCH_DEBUG_TRIAGED_MISSING);
+                                    if (providerInfo != null) {
+                                        if (existingAuthorities == null) {
+                                            existingAuthorities = new ArraySet<>();
+                                        }
+                                        existingAuthorities.add(authority);
+                                    } else {
+                                        continue;
+                                    }
+                                }
+                            }
                             result.add(perm.buildPersistedPublicApiObject());
                         }
                     }
