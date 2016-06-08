@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.platform.test.annotations.Presubmit;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
@@ -34,6 +35,7 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
     }
 
     @SmallTest
+    @Presubmit
     public void testArray() throws Exception {
         TextView tv = new TextView(getActivity());
 
