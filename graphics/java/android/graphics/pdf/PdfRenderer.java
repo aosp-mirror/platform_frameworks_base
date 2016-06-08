@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.OsConstants;
+import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 import libcore.io.Libcore;
 
@@ -374,6 +375,8 @@ public final class PdfRenderer implements AutoCloseable {
         public void render(@NonNull Bitmap destination, @Nullable Rect destClip,
                            @Nullable Matrix transform, @RenderMode int renderMode) {
             throwIfClosed();
+
+            destination = Preconditions.checkNotNull(destination, "bitmap null");
 
             if (destination.getConfig() != Config.ARGB_8888) {
                 throw new IllegalArgumentException("Unsupported pixel format");
