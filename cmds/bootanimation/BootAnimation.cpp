@@ -58,7 +58,7 @@
 #include <EGL/eglext.h>
 
 #include "BootAnimation.h"
-#include "AudioPlayer.h"
+#include "audioplay.h"
 
 namespace android {
 
@@ -106,9 +106,7 @@ void BootAnimation::binderDied(const wp<IBinder>&)
     // might be blocked on a condition variable that will never be updated.
     kill( getpid(), SIGKILL );
     requestExit();
-    if (mAudioPlayer != NULL) {
-        mAudioPlayer->requestExit();
-    }
+    audioplay::destroy();
 }
 
 status_t BootAnimation::initTexture(Texture* texture, AssetManager& assets,
@@ -400,9 +398,6 @@ void BootAnimation::checkExit() {
     int exitnow = atoi(value);
     if (exitnow) {
         requestExit();
-        if (mAudioPlayer != NULL) {
-            mAudioPlayer->requestExit();
-        }
     }
 }
 
@@ -524,16 +519,6 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
     }
     char const* s = desString.string();
 
-    // Create and initialize an AudioPlayer if we have an audio_conf.txt file
-    String8 audioConf;
-    if (readFile(animation.zip, "audio_conf.txt", audioConf)) {
-        mAudioPlayer = new AudioPlayer;
-        if (!mAudioPlayer->init(audioConf.string())) {
-            ALOGE("mAudioPlayer.init failed");
-            mAudioPlayer = NULL;
-        }
-    }
-
     // Parse the description file
     for (;;) {
         const char* endl = strstr(s, "\n");
@@ -564,7 +549,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
             part.pause = pause;
             part.path = path;
             part.clockPosY = clockPosY;
-            part.audioFile = NULL;
+            part.audioData = NULL;
             part.animation = NULL;
             if (!parseColor(color, part.backgroundColor)) {
                 ALOGE("> invalid color '#%s'", color);
@@ -580,7 +565,7 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)
             part.playUntilComplete = false;
             part.count = 1;
             part.pause = 0;
-            part.audioFile = NULL;
+            part.audioData = NULL;
             part.animation = loadAnimation(String8(SYSTEM_BOOTANIMATION_FILE));
             if (part.animation != NULL)
                 animation.parts.add(part);
@@ -601,6 +586,7 @@ bool BootAnimation::preloadZip(Animation& animation)
         return false;
     }
 
+    bool hasAudio = false;
     ZipEntryRO entry;
     char name[ANIM_ENTRY_NAME_MAX];
     while ((entry = zip->nextEntry(cookie)) != NULL) {
@@ -624,8 +610,10 @@ bool BootAnimation::preloadZip(Animation& animation)
                             if (map) {
                                 Animation::Part& part(animation.parts.editItemAt(j));
                                 if (leaf == "audio.wav") {
+                                    hasAudio = true;
                                     // a part may have at most one audio file
-                                    part.audioFile = map;
+                                    part.audioData = (uint8_t *)map->getDataPtr();
+                                    part.audioLength = map->getDataLength();
                                 } else if (leaf == "trim.txt") {
                                     part.trimData.setTo((char const*)map->getDataPtr(),
                                                         map->getDataLength());
@@ -640,6 +628,8 @@ bool BootAnimation::preloadZip(Animation& animation)
                                     part.frames.add(frame);
                                 }
                             }
+                        } else {
+                            ALOGE("bootanimation.zip is compressed; must be only stored");
                         }
                     }
                 }
@@ -671,6 +661,12 @@ bool BootAnimation::preloadZip(Animation& animation)
                 break;
             }
         }
+    }
+
+    // Create and initialize audioplay if there is a wav file in any of the animations.
+    if (hasAudio) {
+        ALOGD("found audio.wav, creating playback engine");
+        audioplay::create();
     }
 
     zip->endIteration(cookie);
@@ -763,8 +759,9 @@ bool BootAnimation::playAnimation(const Animation& animation)
                 break;
 
             // only play audio file the first time we animate the part
-            if (r == 0 && mAudioPlayer != NULL && part.audioFile) {
-                mAudioPlayer->playFile(part.audioFile);
+            if (r == 0 && part.audioData) {
+                ALOGD("playing clip for part%d, size=%d", (int) i, part.audioLength);
+                audioplay::playClip(part.audioData, part.audioLength);
             }
 
             glClearColor(
@@ -847,6 +844,11 @@ bool BootAnimation::playAnimation(const Animation& animation)
             }
         }
     }
+
+    // we've finally played everything we're going to play
+    audioplay::setPlaying(false);
+    audioplay::destroy();
+
     return true;
 }
 
