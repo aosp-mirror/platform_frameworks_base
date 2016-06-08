@@ -33,8 +33,8 @@ public final class NetworkSecurityConfigProvider extends Provider {
         put("Alg.Alias.TrustManagerFactory.X509", "PKIX");
     }
 
-    public static void install(Context context, ApplicationInfo info) {
-        ApplicationConfig config = new ApplicationConfig(new ManifestConfigSource(context, info));
+    public static void install(Context context) {
+        ApplicationConfig config = new ApplicationConfig(new ManifestConfigSource(context));
         ApplicationConfig.setDefaultInstance(config);
         int pos = Security.insertProviderAt(new NetworkSecurityConfigProvider(), 1);
         if (pos != 1) {
