@@ -16,8 +16,6 @@
 
 package android.content.pm;
 
-import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.content.res.XmlResourceParser;
 
 import android.graphics.drawable.Drawable;
@@ -151,8 +149,7 @@ public class PackageItemInfo {
      *
      * @hide
      */
-    @SystemApi
-    public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm) {
+    public CharSequence loadSafeLabel(PackageManager pm) {
         // loadLabel() always returns non-null
         String label = loadLabel(pm).toString();
         // strip HTML tags to avoid <br> and other tags overwriting original message
