@@ -46,6 +46,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
@@ -140,13 +141,18 @@ public class RecentsCreateFragment extends Fragment {
             new RecyclerView.OnItemTouchListener() {
                 @Override
                 public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-                    Events.MotionInputEvent event = new Events.MotionInputEvent(e, mRecView);
-                    if (event.isOverItem() && event.isActionUp()) {
-                        final DocumentStack stack = mAdapter.getItem(event.getItemPosition());
-                        ((BaseActivity) getActivity()).onStackPicked(stack);
-                        return true;
+                    final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+                    try {
+                        if (event.isOverItem() && event.isActionUp()) {
+                            final DocumentStack stack = mAdapter.getItem(event.getItemPosition());
+                            ((BaseActivity) getActivity()).onStackPicked(stack);
+                            return true;
+                        }
+
+                        return false;
+                    } finally {
+                        event.recycle();
                     }
-                    return false;
                 }
 
                 @Override

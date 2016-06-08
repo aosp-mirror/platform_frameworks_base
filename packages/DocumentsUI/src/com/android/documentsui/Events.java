@@ -16,8 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.graphics.Point;
+import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.util.Pools;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -133,17 +138,49 @@ public final class Events {
     }
 
     public static final class MotionInputEvent implements InputEvent {
-        private final MotionEvent mEvent;
-        private final int mPosition;
+        private static final String TAG = "MotionInputEvent";
 
-        public MotionInputEvent(MotionEvent event, RecyclerView view) {
-            mEvent = event;
+        private static final Pools.SimplePool<MotionInputEvent> sPool = new Pools.SimplePool<>(1);
+
+        private MotionEvent mEvent;
+        private int mPosition;
+
+        private MotionInputEvent() {
+            if (DEBUG) Log.i(TAG, "Created a new instance.");
+        }
+
+        public static MotionInputEvent obtain(MotionEvent event, RecyclerView view) {
+            // Make sure events are only used in main thread.
+            assert(Looper.myLooper() == Looper.getMainLooper());
+
+            MotionInputEvent instance = sPool.acquire();
+            instance = (instance != null ? instance : new MotionInputEvent());
+
+            instance.mEvent = event;
 
             // Consider determining position lazily as an optimization.
-            View child = view.findChildViewUnder(mEvent.getX(), mEvent.getY());
-            mPosition = (child!= null)
+            View child = view.findChildViewUnder(event.getX(), event.getY());
+            instance.mPosition = (child != null)
                     ? view.getChildAdapterPosition(child)
                     : RecyclerView.NO_POSITION;
+
+            return instance;
+        }
+
+        public void recycle() {
+            // Make sure events are only used in main thread.
+            assert(Looper.myLooper() == Looper.getMainLooper());
+
+            mEvent = null;
+            mPosition = -1;
+
+            boolean released = sPool.release(this);
+            // This assert is used to guarantee we won't generate too many instances that can't be
+            // held in the pool, which indicates our pool size is too small.
+            //
+            // Right now one instance is enough because we expect all instances are only used in
+            // main thread.
+            assert(released);
         }
 
         @Override
