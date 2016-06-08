@@ -2,6 +2,7 @@ package com.android.hotspot2.osu;
 
 import android.util.Log;
 
+import com.android.hotspot2.flow.PlatformAdapter;
 import com.android.hotspot2.pps.HomeSP;
 
 import java.io.IOException;
@@ -30,9 +31,9 @@ public class ClientKeyManager implements X509KeyManager {
     public ClientKeyManager(HomeSP homeSP, KeyStore keyStore) throws IOException {
         mKeyStore = keyStore;
         mAliasMap = new HashMap<>();
-        mAliasMap.put(OSUCertType.AAA, OSUManager.CERT_CLT_CA_ALIAS + homeSP.getFQDN());
-        mAliasMap.put(OSUCertType.Client, OSUManager.CERT_CLT_CERT_ALIAS + homeSP.getFQDN());
-        mAliasMap.put(OSUCertType.PrivateKey, OSUManager.CERT_CLT_KEY_ALIAS + homeSP.getFQDN());
+        mAliasMap.put(OSUCertType.AAA, PlatformAdapter.CERT_CLT_CA_ALIAS + homeSP.getFQDN());
+        mAliasMap.put(OSUCertType.Client, PlatformAdapter.CERT_CLT_CERT_ALIAS + homeSP.getFQDN());
+        mAliasMap.put(OSUCertType.PrivateKey, PlatformAdapter.CERT_CLT_KEY_ALIAS + homeSP.getFQDN());
         mTempKeys = new HashMap<>();
     }
 

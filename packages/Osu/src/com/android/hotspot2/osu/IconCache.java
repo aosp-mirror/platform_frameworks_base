@@ -5,6 +5,7 @@ import android.util.Log;
 import com.android.anqp.HSIconFileElement;
 import com.android.anqp.IconInfo;
 import com.android.hotspot2.Utils;
+import com.android.hotspot2.flow.OSUInfo;
 
 import java.net.ProtocolException;
 import java.nio.BufferUnderflowException;
@@ -132,7 +133,7 @@ public class IconCache extends Thread {
             if (!mBssids.contains(bssid)) {
                 return 0;
             }
-            Log.d("ZXZ", "Updating icon on " + mQueued.size() + " osus");
+            Log.d(OSUManager.TAG, "Updating icon on " + mQueued.size() + " osus");
             for (OSUInfo osuInfo : mQueued) {
                 osuInfo.setIconFileElement(iconFileElement, mFileName);
             }
@@ -188,21 +189,21 @@ public class IconCache extends Thread {
                 HSIconFileElement iconFileElement = get(key, fileName);
                 if (iconFileElement != null) {
                     osuInfo.setIconFileElement(iconFileElement, fileName);
-                    Log.d("ZXZ", "Icon cache hit for " + osuInfo + "/" + fileName);
+                    Log.d(OSUManager.TAG, "Icon cache hit for " + osuInfo + "/" + fileName);
                     modCount++;
                 } else {
                     FileEntry fileEntry = enqueue(key, fileName, osuInfo);
                     if (fileEntry != null) {
-                        Log.d("ZXZ", "Initiating icon query for " + osuInfo + "/" + fileName);
+                        Log.d(OSUManager.TAG, "Initiating icon query for "
+                                + osuInfo + "/" + fileName);
                         mOsuManager.doIconQuery(osuInfo.getBSSID(), fileName);
                     } else {
-                        Log.d("ZXZ", "Piggybacking icon query for " + osuInfo + "/" + fileName);
+                        Log.d(OSUManager.TAG, "Piggybacking icon query for "
+                                + osuInfo + "/" + fileName);
                     }
                 }
             }
         }
-
-        Log.d("ZXZ", "Current keys " + current + " from " + osuInfos);
 
         // Drop all non-current ESS's
         Iterator<EssKey> pendingKeys = mPending.keySet().iterator();
@@ -210,7 +211,6 @@ public class IconCache extends Thread {
             EssKey key = pendingKeys.next();
             if (!current.contains(key)) {
                 pendingKeys.remove();
-                Log.d("ZXZ", "Removing pending " + key);
             }
         }
         Iterator<EssKey> cacheKeys = mCache.keySet().iterator();
@@ -218,7 +218,6 @@ public class IconCache extends Thread {
             EssKey key = cacheKeys.next();
             if (!current.contains(key)) {
                 cacheKeys.remove();
-                Log.d("ZXZ", "Removing cache " + key);
             }
         }
         return modCount;
@@ -235,7 +234,7 @@ public class IconCache extends Thread {
     }
 
     public int notifyIconReceived(long bssid, String fileName, byte[] iconData) {
-        Log.d("ZXZ", String.format("Icon '%s':%d received from %012x",
+        Log.d(OSUManager.TAG, String.format("Icon '%s':%d received from %012x",
                 fileName, iconData != null ? iconData.length : -1, bssid));
         if (fileName == null || iconData == null) {
             return 0;
@@ -273,7 +272,6 @@ public class IconCache extends Thread {
     }
 
     public void tick(boolean wifiOff) {
-        Log.d("ZXZ", "Ticking icon cache: " + wifiOff);
         if (wifiOff) {
             mPending.clear();
             mCache.clear();
@@ -291,10 +289,8 @@ public class IconCache extends Thread {
                 FileEntry fileEntry = fileEntries.next().getValue();
                 long age = now - fileEntry.getTimestamp();
                 if (age > REQUERY_TIMEOUT || fileEntry.getAndIncrementRetry() > MAX_RETRY) {
-                    Log.d("ZXZ", "Timing out " + fileEntry);
                     fileEntries.remove();
                 } else if (age > REQUERY_TIME) {
-                    Log.d("ZXZ", "Retrying " + fileEntry);
                     mOsuManager.doIconQuery(fileEntry.getLastBssid(), fileEntry.getFileName());
                 }
             }

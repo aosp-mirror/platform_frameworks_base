@@ -15,6 +15,7 @@ import com.android.hotspot2.asn1.Asn1Octets;
 import com.android.hotspot2.asn1.Asn1Oid;
 import com.android.hotspot2.asn1.Asn1String;
 import com.android.hotspot2.asn1.OidMappings;
+import com.android.hotspot2.flow.OSUInfo;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

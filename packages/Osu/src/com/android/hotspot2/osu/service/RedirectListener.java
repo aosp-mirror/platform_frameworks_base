@@ -2,7 +2,7 @@ package com.android.hotspot2.osu.service;
 
 import android.util.Log;
 
-import com.android.hotspot2.osu.OSUManager;
+import com.android.hotspot2.flow.PlatformAdapter;
 import com.android.hotspot2.osu.OSUOperationStatus;
 
 import java.io.BufferedReader;
@@ -36,7 +36,7 @@ public class RedirectListener extends Thread {
                     "</body>" +
                     "</html>\r\n";
 
-    private final OSUManager mOSUManager;
+    private final PlatformAdapter mPlatformAdapter;
     private final String mSpName;
     private final ServerSocket mServerSocket;
     private final String mPath;
@@ -47,8 +47,8 @@ public class RedirectListener extends Thread {
     private OSUOperationStatus mUserStatus;
     private volatile boolean mAborted;
 
-    public RedirectListener(OSUManager osuManager, String spName) throws IOException {
-        mOSUManager = osuManager;
+    public RedirectListener(PlatformAdapter platformAdapter, String spName) throws IOException {
+        mPlatformAdapter = platformAdapter;
         mSpName = spName;
         mServerSocket = new ServerSocket(0, 5, InetAddress.getLocalHost());
         Random rnd = new Random(System.currentTimeMillis());
@@ -109,6 +109,10 @@ public class RedirectListener extends Thread {
 
     public void abort() {
         try {
+            synchronized (mLock) {
+                mUserStatus = OSUOperationStatus.UserInputAborted;
+                mLock.notifyAll();
+            }
             mAborted = true;
             mServerSocket.close();
         } catch (IOException ioe) {
@@ -197,6 +201,6 @@ public class RedirectListener extends Thread {
         String message = (status == OSUOperationStatus.UserInputAborted) ?
                 "Browser closed" : null;
 
-        return mOSUManager.notifyUser(status, message, mSpName);
+        return mPlatformAdapter.notifyUser(status, message, mSpName);
     }
 }

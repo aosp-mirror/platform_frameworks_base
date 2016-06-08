@@ -5,6 +5,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.android.hotspot2.Utils;
+import com.android.hotspot2.flow.PlatformAdapter;
 import com.android.hotspot2.pps.HomeSP;
 
 import java.io.ByteArrayInputStream;
@@ -76,7 +77,7 @@ public class OSUSocketFactory {
     }
 
     public static OSUSocketFactory getSocketFactory(KeyStore ks, HomeSP homeSP,
-                                                    OSUManager.FlowType flowType,
+                                                    OSUFlowManager.FlowType flowType,
                                                     Network network, URL url, KeyManager km,
                                                     boolean enforceSecurity)
             throws GeneralSecurityException, IOException {
@@ -87,7 +88,7 @@ public class OSUSocketFactory {
         return new OSUSocketFactory(ks, homeSP, flowType, network, url, km);
     }
 
-    private OSUSocketFactory(KeyStore ks, HomeSP homeSP, OSUManager.FlowType flowType,
+    private OSUSocketFactory(KeyStore ks, HomeSP homeSP, OSUFlowManager.FlowType flowType,
                              Network network,
                              URL url, KeyManager km) throws GeneralSecurityException, IOException {
         mNetwork = network;
@@ -217,10 +218,10 @@ public class OSUSocketFactory {
     private static class WFATrustManager implements X509TrustManager {
         private final KeyStore mKeyStore;
         private final HomeSP mHomeSP;
-        private final OSUManager.FlowType mFlowType;
+        private final OSUFlowManager.FlowType mFlowType;
         private X509Certificate[] mTrustChain;
 
-        private WFATrustManager(KeyStore ks, HomeSP homeSP, OSUManager.FlowType flowType)
+        private WFATrustManager(KeyStore ks, HomeSP homeSP, OSUFlowManager.FlowType flowType)
                 throws CertificateException {
             mKeyStore = ks;
             mHomeSP = homeSP;
@@ -250,12 +251,13 @@ public class OSUSocketFactory {
                         trustAnchors.add(new TrustAnchor(cert, null));
                     }
                 } else {
-                    String prefix = mFlowType == OSUManager.FlowType.Remediation ?
-                            OSUManager.CERT_REM_ALIAS : OSUManager.CERT_POLICY_ALIAS;
+                    String prefix = mFlowType == OSUFlowManager.FlowType.Remediation ?
+                            PlatformAdapter.CERT_REM_ALIAS : PlatformAdapter.CERT_POLICY_ALIAS;
 
                     X509Certificate cert = getCert(mKeyStore, prefix + mHomeSP.getFQDN());
                     if (cert == null) {
-                        cert = getCert(mKeyStore, OSUManager.CERT_SHARED_ALIAS + mHomeSP.getFQDN());
+                        cert = getCert(mKeyStore,
+                                PlatformAdapter.CERT_SHARED_ALIAS + mHomeSP.getFQDN());
                     }
                     if (cert == null) {
                         for (X509Certificate root : getRootCerts(mKeyStore)) {
@@ -300,7 +302,7 @@ public class OSUSocketFactory {
         int index = 0;
         for (int n = 0; n < 1000; n++) {
             Certificate cert = keyStore.getCertificate(
-                    String.format("%s%d", OSUManager.CERT_WFA_ALIAS, index));
+                    String.format("%s%d", PlatformAdapter.CERT_WFA_ALIAS, index));
             if (cert == null) {
                 break;
             } else if (cert instanceof X509Certificate) {

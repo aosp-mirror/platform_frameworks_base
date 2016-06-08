@@ -1,5 +1,9 @@
 package com.android.anqp;
 
+import android.os.Parcel;
+
+import com.android.hotspot2.Utils;
+
 import java.net.ProtocolException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -70,5 +74,18 @@ public class HSIconFileElement extends ANQPElement {
                 "statusCode=" + mStatusCode +
                 ", type='" + mType + '\'' +
                 ", iconData=" + mIconData.length + " bytes }";
+    }
+
+    public HSIconFileElement(Parcel in) {
+        super(Constants.ANQPElementType.HSIconFile);
+        mStatusCode = Utils.mapEnum(in.readInt(), StatusCode.class);
+        mType = in.readString();
+        mIconData = in.readBlob();
+    }
+
+    public void writeParcel(Parcel out) {
+        out.writeInt(mStatusCode.ordinal());
+        out.writeString(mType);
+        out.writeBlob(mIconData);
     }
 }
