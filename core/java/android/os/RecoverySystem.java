@@ -691,12 +691,13 @@ public class RecoverySystem {
         }
     }
 
-    // Read last_install; then report time for update and I/O to tron.
+    // Read last_install; then report time (in seconds) and I/O (in MiB) for
+    // this update to tron.
     // Only report on the reboots immediately after an OTA update.
     private static void parseLastInstallLog(Context context) {
         try (BufferedReader in = new BufferedReader(new FileReader(LAST_INSTALL_FILE))) {
             String line = null;
-            int bytesWritten = -1, bytesStashed = -1;
+            int bytesWrittenInMiB = -1, bytesStashedInMiB = -1;
             int timeTotal = -1;
             while ((line = in.readLine()) != null) {
                 // Here is an example of lines in last_install:
@@ -709,20 +710,35 @@ public class RecoverySystem {
                     continue;
                 }
                 String numString = line.substring(numIndex + 1).trim();
-                int parsedNum;
+                long parsedNum;
                 try {
-                    parsedNum = Integer.parseInt(numString);
+                    parsedNum = Long.parseLong(numString);
                 } catch (NumberFormatException ignored) {
                     Log.e(TAG, "Failed to parse numbers in " + line);
                     continue;
                 }
 
+                final int MiB = 1024 * 1024;
+                int scaled;
+                try {
+                    if (line.startsWith("bytes")) {
+                        scaled = Math.toIntExact(parsedNum / MiB);
+                    } else {
+                        scaled = Math.toIntExact(parsedNum);
+                    }
+                } catch (ArithmeticException ignored) {
+                    Log.e(TAG, "Number overflows in " + line);
+                    continue;
+                }
+
                 if (line.startsWith("time")) {
-                    timeTotal = parsedNum;
+                    timeTotal = scaled;
                 } else if (line.startsWith("bytes_written")) {
-                    bytesWritten = (bytesWritten == -1) ? parsedNum : bytesWritten + parsedNum;
+                    bytesWrittenInMiB = (bytesWrittenInMiB == -1) ? scaled :
+                            bytesWrittenInMiB + scaled;
                 } else if (line.startsWith("bytes_stashed")) {
-                    bytesStashed = (bytesStashed == -1) ? parsedNum : bytesStashed + parsedNum;
+                    bytesStashedInMiB = (bytesStashedInMiB == -1) ? scaled :
+                            bytesStashedInMiB + scaled;
                 }
             }
 
@@ -730,15 +746,15 @@ public class RecoverySystem {
             if (timeTotal != -1) {
                 MetricsLogger.histogram(context, "ota_time_total", timeTotal);
             }
-            if (bytesWritten != -1) {
-                MetricsLogger.histogram(context, "ota_bytes_written", bytesWritten);
+            if (bytesWrittenInMiB != -1) {
+                MetricsLogger.histogram(context, "ota_written_in_MiBs", bytesWrittenInMiB);
             }
-            if (bytesStashed != -1) {
-                MetricsLogger.histogram(context, "ota_bytes_stashed", bytesStashed);
+            if (bytesStashedInMiB != -1) {
+                MetricsLogger.histogram(context, "ota_stashed_in_MiBs", bytesStashedInMiB);
             }
 
-        } catch (IOException ignored) {
-            Log.e(TAG, "Failed to read lines in last_install", ignored);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read lines in last_install", e);
         }
     }
 
