@@ -42,6 +42,7 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,6 +142,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerShowing(true);
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_desc_quick_settings_edit));
+            mHost.getKeyguardMonitor().addCallback(mKeyguardCallback);
         }
     }
 
@@ -156,6 +158,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             mNotifQsContainer.setCustomizerShowing(false);
             announceForAccessibility(mContext.getString(
                     R.string.accessibility_desc_quick_settings));
+            mHost.getKeyguardMonitor().removeCallback(mKeyguardCallback);
         }
     }
 
@@ -200,6 +203,15 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private void save() {
         mTileAdapter.saveSpecs(mHost);
     }
+
+    private final Callback mKeyguardCallback = new Callback() {
+        @Override
+        public void onKeyguardChanged() {
+            if (mHost.getKeyguardMonitor().isShowing()) {
+                hide(0, 0);
+            }
+        }
+    };
 
     private final AnimatorListener mExpandAnimationListener = new AnimatorListenerAdapter() {
         @Override
