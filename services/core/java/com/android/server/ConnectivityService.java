@@ -797,6 +797,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return new NetworkRequest(netCap, TYPE_NONE, nextNetworkRequestId());
     }
 
+    // Used only for testing.
+    // TODO: Delete this and either:
+    // 1. Give Fake SettingsProvider the ability to send settings change notifications (requires
+    //    changing ContentResolver to make registerContentObserver non-final).
+    // 2. Give FakeSettingsProvider an alternative notification mechanism and have the test use it
+    //    by subclassing SettingsObserver.
+    @VisibleForTesting
+    void updateMobileDataAlwaysOn() {
+        mHandler.sendEmptyMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+    }
+
     private void handleMobileDataAlwaysOn() {
         final boolean enable = (Settings.Global.getInt(
                 mContext.getContentResolver(), Settings.Global.MOBILE_DATA_ALWAYS_ON, 0) == 1);

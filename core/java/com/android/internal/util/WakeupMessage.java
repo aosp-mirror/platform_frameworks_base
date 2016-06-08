@@ -45,24 +45,32 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
     protected final String mCmdName;
     @VisibleForTesting
     protected final int mCmd, mArg1, mArg2;
+    @VisibleForTesting
+    protected final Object mObj;
     private boolean mScheduled;
 
     public WakeupMessage(Context context, Handler handler,
-            String cmdName, int cmd, int arg1, int arg2) {
+            String cmdName, int cmd, int arg1, int arg2, Object obj) {
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mHandler = handler;
         mCmdName = cmdName;
         mCmd = cmd;
         mArg1 = arg1;
         mArg2 = arg2;
+        mObj = obj;
     }
 
     public WakeupMessage(Context context, Handler handler, String cmdName, int cmd, int arg1) {
-        this(context, handler, cmdName, cmd, arg1, 0);
+        this(context, handler, cmdName, cmd, arg1, 0, null);
+    }
+
+    public WakeupMessage(Context context, Handler handler,
+            String cmdName, int cmd, int arg1, int arg2) {
+        this(context, handler, cmdName, cmd, arg1, arg2, null);
     }
 
     public WakeupMessage(Context context, Handler handler, String cmdName, int cmd) {
-        this(context, handler, cmdName, cmd, 0, 0);
+        this(context, handler, cmdName, cmd, 0, 0, null);
     }
 
     /**
@@ -99,7 +107,7 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
             mScheduled = false;
         }
         if (stillScheduled) {
-            Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2);
+            Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2, mObj);
             mHandler.handleMessage(msg);
             msg.recycle();
         }
