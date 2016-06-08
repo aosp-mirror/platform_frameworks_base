@@ -30,6 +30,7 @@ import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -53,6 +54,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
 import android.net.RouteInfo;
 import android.net.UidRange;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.IBinder;
@@ -60,12 +62,14 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
@@ -163,6 +167,45 @@ public class Vpn {
     // Handle of user initiating VPN.
     private final int mUserHandle;
 
+    // Listen to package remove and change event in this user
+    private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final Uri data = intent.getData();
+            final String packageName = data == null ? null : data.getSchemeSpecificPart();
+            if (packageName == null) {
+                return;
+            }
+
+            synchronized (Vpn.this) {
+                // Avoid race that always-on package has been unset
+                if (!packageName.equals(getAlwaysOnPackage())) {
+                    return;
+                }
+
+                final String action = intent.getAction();
+                Log.i(TAG, "Received broadcast " + action + " for always-on package " + packageName
+                        + " in user " + mUserHandle);
+
+                switch(action) {
+                    case Intent.ACTION_PACKAGE_REPLACED:
+                        // Start vpn after app upgrade
+                        startAlwaysOnVpn();
+                        break;
+                    case Intent.ACTION_PACKAGE_REMOVED:
+                        final boolean isPackageRemoved = !intent.getBooleanExtra(
+                                Intent.EXTRA_REPLACING, false);
+                        if (isPackageRemoved) {
+                            setAndSaveAlwaysOnPackage(null, false);
+                        }
+                        break;
+                }
+            }
+        }
+    };
+
+    private boolean mIsPackageIntentReceiverRegistered = false;
+
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             int userHandle) {
         mContext = context;
@@ -233,8 +276,35 @@ public class Vpn {
 
         mAlwaysOn = (packageName != null);
         mLockdown = (mAlwaysOn && lockdown);
+        maybeRegisterPackageChangeReceiverLocked(packageName);
         setVpnForcedLocked(mLockdown);
         return true;
+    }
+
+    private void unregisterPackageChangeReceiverLocked() {
+        // register previous intent filter
+        if (mIsPackageIntentReceiverRegistered) {
+            mContext.unregisterReceiver(mPackageIntentReceiver);
+            mIsPackageIntentReceiverRegistered = false;
+        }
+    }
+
+    private void maybeRegisterPackageChangeReceiverLocked(String packageName) {
+        // Unregister IntentFilter listening for previous always-on package change
+        unregisterPackageChangeReceiverLocked();
+
+        if (packageName != null) {
+            mIsPackageIntentReceiverRegistered = true;
+
+            IntentFilter intentFilter = new IntentFilter();
+            // Protected intent can only be sent by system. No permission required in register.
+            intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+            intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+            intentFilter.addDataScheme("package");
+            intentFilter.addDataSchemeSpecificPart(packageName, PatternMatcher.PATTERN_LITERAL);
+            mContext.registerReceiverAsUser(
+                    mPackageIntentReceiver, UserHandle.of(mUserHandle), intentFilter, null, null);
+        }
     }
 
     /**
@@ -246,6 +316,69 @@ public class Vpn {
     public synchronized String getAlwaysOnPackage() {
         enforceControlPermissionOrInternalCaller();
         return (mAlwaysOn ? mPackage : null);
+    }
+
+    /**
+     * Save the always-on package and lockdown config into Settings.Secure
+     */
+    public synchronized void saveAlwaysOnPackage() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final ContentResolver cr = mContext.getContentResolver();
+            Settings.Secure.putStringForUser(cr, Settings.Secure.ALWAYS_ON_VPN_APP,
+                    getAlwaysOnPackage(), mUserHandle);
+            Settings.Secure.putIntForUser(cr, Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
+                    (mLockdown ? 1 : 0), mUserHandle);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Set and save always-on package and lockdown config
+     * @see Vpn#setAlwaysOnPackage(String, boolean)
+     * @see Vpn#saveAlwaysOnPackage()
+     *
+     * @return result of Vpn#setAndSaveAlwaysOnPackage(String, boolean)
+     */
+    private synchronized boolean setAndSaveAlwaysOnPackage(String packageName, boolean lockdown) {
+        if (setAlwaysOnPackage(packageName, lockdown)) {
+            saveAlwaysOnPackage();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return {@code true} if the service was started, the service was already connected, or there
+     *         was no always-on VPN to start. {@code false} otherwise.
+     */
+    public boolean startAlwaysOnVpn() {
+        final String alwaysOnPackage;
+        synchronized (this) {
+            alwaysOnPackage = getAlwaysOnPackage();
+            // Skip if there is no service to start.
+            if (alwaysOnPackage == null) {
+                return true;
+            }
+            // Skip if the service is already established. This isn't bulletproof: it's not bound
+            // until after establish(), so if it's mid-setup onStartCommand will be sent twice,
+            // which may restart the connection.
+            if (getNetworkInfo().isConnected()) {
+                return true;
+            }
+        }
+
+        // Start the VPN service declared in the app's manifest.
+        Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
+        serviceIntent.setPackage(alwaysOnPackage);
+        try {
+            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(mUserHandle)) != null;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "VpnService " + serviceIntent + " failed to start", e);
+            return false;
+        }
     }
 
     /**
@@ -270,11 +403,12 @@ public class Vpn {
      *
      * - oldPackage non-null, newPackage null: App calling VpnService#prepare().
      * - oldPackage null, newPackage non-null: ConfirmDialog calling prepareVpn().
-     * - oldPackage non-null, newPackage=LEGACY_VPN: Used internally to disconnect
+     * - oldPackage null, newPackage=LEGACY_VPN: Used internally to disconnect
      *   and revoke any current app VPN and re-prepare legacy vpn.
      *
-     * TODO: Rename the variables - or split this method into two - and end this
-     * confusion.
+     * TODO: Rename the variables - or split this method into two - and end this confusion.
+     * TODO: b/29032008 Migrate code from prepare(oldPackage=non-null, newPackage=LEGACY_VPN)
+     * to prepare(oldPackage=null, newPackage=LEGACY_VPN)
      *
      * @param oldPackage The package name of the old VPN application
      * @param newPackage The package name of the new VPN application
@@ -284,10 +418,7 @@ public class Vpn {
     public synchronized boolean prepare(String oldPackage, String newPackage) {
         if (oldPackage != null) {
             // Stop an existing always-on VPN from being dethroned by other apps.
-            // TODO: Replace TextUtils.equals by isCurrentPreparedPackage when ConnectivityService
-            // can unset always-on after always-on package is uninstalled. Make sure when package
-            // is reinstalled, the consent dialog is not shown.
-            if (mAlwaysOn && !TextUtils.equals(mPackage, oldPackage)) {
+            if (mAlwaysOn && !isCurrentPreparedPackage(oldPackage)) {
                 return false;
             }
 
@@ -318,9 +449,7 @@ public class Vpn {
         enforceControlPermission();
 
         // Stop an existing always-on VPN from being dethroned by other apps.
-        // TODO: Replace TextUtils.equals by isCurrentPreparedPackage when ConnectivityService
-        // can unset always-on after always-on package is uninstalled
-        if (mAlwaysOn && !TextUtils.equals(mPackage, newPackage)) {
+        if (mAlwaysOn && !isCurrentPreparedPackage(newPackage)) {
             return false;
         }
 
@@ -862,6 +991,7 @@ public class Vpn {
         setVpnForcedLocked(false);
         mAlwaysOn = false;
 
+        unregisterPackageChangeReceiverLocked();
         // Quit any active connections
         agentDisconnect();
     }
