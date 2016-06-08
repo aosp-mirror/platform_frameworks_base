@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -61,12 +62,15 @@ import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
 import android.os.Process;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.mock.MockContentResolver;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
+import com.android.internal.util.FakeSettingsProvider;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
@@ -118,26 +122,23 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     }
 
     private class MockContext extends BroadcastInterceptingContext {
+        private final MockContentResolver mContentResolver;
+
         MockContext(Context base) {
             super(base);
+            mContentResolver = new MockContentResolver();
+            mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         }
 
         @Override
-        public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-            // PendingIntents sent by the AlarmManager are not intercepted by
-            // BroadcastInterceptingContext so we must really register the receiver.
-            // This shouldn't effect the real NetworkMonitors as the action contains a random token.
-            if (filter.getAction(0).startsWith("android.net.netmon.lingerExpired")) {
-                return getBaseContext().registerReceiver(receiver, filter);
-            } else {
-                return super.registerReceiver(receiver, filter);
-            }
-        }
-
-        @Override
-        public Object getSystemService (String name) {
+        public Object getSystemService(String name) {
             if (name == Context.CONNECTIVITY_SERVICE) return mCm;
             return super.getSystemService(name);
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
         }
     }
 
@@ -641,7 +642,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         public void waitForIdle() {
             waitForIdle(TIMEOUT_MS);
         }
-
     }
 
     private interface Criteria {
@@ -1475,6 +1475,73 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         mCellNetworkAgent.disconnect();
         cellNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
         defaultNetworkCallback.expectCallback(CallbackState.LOST, mCellNetworkAgent);
+    }
+
+    @SmallTest
+    public void testMobileDataAlwaysOn() throws Exception {
+        final TestNetworkCallback cellNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        mCm.registerNetworkCallback(cellRequest, cellNetworkCallback);
+
+        final HandlerThread handlerThread = new HandlerThread("MobileDataAlwaysOnFactory");
+        handlerThread.start();
+        NetworkCapabilities filter = new NetworkCapabilities()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_INTERNET);
+        final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
+                mServiceContext, "testFactory", filter);
+        testFactory.setScoreFilter(40);
+
+        // Register the factory and expect it to start looking for a network.
+        testFactory.expectAddRequests(1);
+        testFactory.register();
+        testFactory.waitForNetworkRequests(1);
+        assertTrue(testFactory.getMyStartRequested());
+
+        // Bring up wifi. The factory stops looking for a network.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        testFactory.expectAddRequests(2);  // Because the default request changes score twice.
+        mWiFiNetworkAgent.connect(true);
+        testFactory.waitForNetworkRequests(1);
+        assertFalse(testFactory.getMyStartRequested());
+
+        ContentResolver cr = mServiceContext.getContentResolver();
+
+        // Turn on mobile data always on. The factory starts looking again.
+        testFactory.expectAddRequests(1);
+        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, 1);
+        mService.updateMobileDataAlwaysOn();
+        testFactory.waitForNetworkRequests(2);
+        assertTrue(testFactory.getMyStartRequested());
+
+        // Bring up cell data and check that the factory stops looking.
+        assertEquals(1, mCm.getAllNetworks().length);
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        testFactory.expectAddRequests(2);  // Because the cell request changes score twice.
+        mCellNetworkAgent.connect(true);
+        cellNetworkCallback.expectCallback(CallbackState.AVAILABLE);
+        testFactory.waitForNetworkRequests(2);
+        assertFalse(testFactory.getMyStartRequested());  // Because the cell network outscores us.
+
+        // Check that cell data stays up.
+        mService.waitForIdle();
+        verifyActiveNetwork(TRANSPORT_WIFI);
+        assertEquals(2, mCm.getAllNetworks().length);
+
+        // Turn off mobile data always on and expect the request to disappear...
+        testFactory.expectRemoveRequests(1);
+        Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, 0);
+        mService.updateMobileDataAlwaysOn();
+        testFactory.waitForNetworkRequests(1);
+
+        // ...  and cell data to be torn down.
+        cellNetworkCallback.expectCallback(CallbackState.LOST);
+        assertEquals(1, mCm.getAllNetworks().length);
+
+        testFactory.unregister();
+        mCm.unregisterNetworkCallback(cellNetworkCallback);
+        handlerThread.quit();
     }
 
     private static class TestKeepaliveCallback extends PacketKeepaliveCallback {
