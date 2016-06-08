@@ -43,7 +43,7 @@
             android:ellipsize="start"
             android:inputType="textShortMessage|textAutoCorrect|textCapSentences"
             android:textIsSelectable="true"
-            android:imeOptions="actionSend|flagNoExtractUi" />
+            android:imeOptions="actionNone|flagNoExtractUi" />
 
     <FrameLayout
             android:layout_width="wrap_content"
