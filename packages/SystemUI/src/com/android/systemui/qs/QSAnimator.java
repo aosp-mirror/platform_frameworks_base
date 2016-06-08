@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 import android.widget.TextView;
+
 import com.android.systemui.qs.PagedTileLayout.PageListener;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSTile.Host.Callback;
@@ -65,6 +66,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private boolean mFullRows;
     private int mNumQuickTiles;
     private float mLastPosition;
+    private QSTileHost mHost;
 
     public QSAnimator(QSContainer container, QuickQSPanel quickPanel, QSPanel panel) {
         mQsContainer = container;
@@ -94,6 +96,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     }
 
     public void setHost(QSTileHost qsh) {
+        mHost = qsh;
         qsh.addCallback(this);
         updateAnimators();
     }
@@ -106,6 +109,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onViewDetachedFromWindow(View v) {
+        if (mHost != null) {
+            mHost.removeCallback(this);
+        }
         TunerService.get(mQsContainer.getContext()).removeTunable(this);
     }
 
