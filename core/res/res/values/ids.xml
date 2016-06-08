@@ -122,9 +122,11 @@
 
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SET_PROGRESS}. -->
   <item type="id" name="accessibilityActionSetProgress" />
-  
+
   <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_CONTEXT_CLICK}. -->
   <item type="id" name="accessibilityActionContextClick" />
 
   <item type="id" name="remote_input_tag" />
+
+  <item type="id" name="cross_task_transition" />
 </resources>
