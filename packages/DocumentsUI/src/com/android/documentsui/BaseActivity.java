@@ -72,6 +72,7 @@ public abstract class BaseActivity extends Activity
     private static final String BENCHMARK_TESTING_PACKAGE = "com.android.documentsui.appperftests";
 
     State mState;
+    @Nullable RetainedState mRetainedState;
     RootsCache mRoots;
     SearchViewManager mSearchManager;
     DrawerController mDrawer;
@@ -123,6 +124,10 @@ public abstract class BaseActivity extends Activity
         mState = getState(icicle);
         Metrics.logActivityLaunch(this, mState, intent);
 
+        // we're really interested in retainining state in our very complex
+        // DirectoryFragment. So we do a little code yoga to extend
+        // support to that fragment.
+        mRetainedState = (RetainedState) getLastNonConfigurationInstance();
         mRoots = DocumentsApplication.getRootsCache(this);
 
         getContentResolver().registerContentObserver(
@@ -574,6 +579,24 @@ public abstract class BaseActivity extends Activity
     @Override
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
+    }
+
+    /**
+     * Delegate ths call to the current fragment so it can save selection.
+     * Feel free to expand on this with other useful state.
+     */
+    @Override
+    public RetainedState onRetainNonConfigurationInstance() {
+        RetainedState retained = new RetainedState();
+        DirectoryFragment fragment = DirectoryFragment.get(getFragmentManager());
+        if (fragment != null) {
+            fragment.retainState(retained);
+        }
+        return retained;
+    }
+
+    public @Nullable RetainedState getRetainedState() {
+        return mRetainedState;
     }
 
     @Override
