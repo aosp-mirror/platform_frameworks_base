@@ -345,7 +345,7 @@ public class FastPrintWriter extends PrintWriter {
             if (mOutputStream != null) {
                 CharBuffer charBuffer = CharBuffer.wrap(mText, 0, mPos);
                 CoderResult result = mCharset.encode(charBuffer, mBytes, true);
-                while (true) {
+                while (!mIoError) {
                     if (result.isError()) {
                         throw new IOException(result.toString());
                     } else if (result.isOverflow()) {
