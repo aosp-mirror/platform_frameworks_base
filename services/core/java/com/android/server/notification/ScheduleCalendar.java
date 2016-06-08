@@ -58,11 +58,7 @@ public class ScheduleCalendar {
         final long nextEnd = getNextTime(now, mSchedule.endHour, mSchedule.endMinute);
         long nextScheduleTime = Math.min(nextStart, nextEnd);
 
-        if (mSchedule.exitAtAlarm && mSchedule.nextAlarm > now) {
-            return Math.min(nextScheduleTime, mSchedule.nextAlarm);
-        } else {
-            return nextScheduleTime;
-        }
+        return nextScheduleTime;
     }
 
     private long getNextTime(long now, int hr, int min) {

@@ -43,8 +43,8 @@ import java.util.TimeZone;
  * Built-in zen condition provider for daily scheduled time-based conditions.
  */
 public class ScheduleConditionProvider extends SystemConditionProviderService {
-    private static final String TAG = "ConditionProviders.SCP";
-    private static final boolean DEBUG = true || Log.isLoggable("ConditionProviders", Log.DEBUG);
+    static final String TAG = "ConditionProviders.SCP";
+    static final boolean DEBUG = true || Log.isLoggable("ConditionProviders", Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", ScheduleConditionProvider.class.getName());
@@ -154,6 +154,9 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
                 cal.maybeSetNextAlarm(now, nextUserAlarmTime);
             } else {
                 notifyCondition(conditionId, Condition.STATE_FALSE, "!meetsSchedule");
+                if (nextUserAlarmTime == 0) {
+                    cal.maybeSetNextAlarm(now, nextUserAlarmTime);
+                }
             }
             if (cal != null) {
                 final long nextChangeTime = cal.getNextChangeTime(now);
