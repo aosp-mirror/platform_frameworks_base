@@ -580,7 +580,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Reducir datos está activada"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Reducir datos está desactivada"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Activado"</string>
-    <string name="switch_bar_off" msgid="8803270596930432874">"Desactivar"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Desactivado"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Barra de navegación"</string>
     <string name="start" msgid="6873794757232879664">"Iniciar"</string>
     <string name="center" msgid="4327473927066010960">"Centro"</string>
