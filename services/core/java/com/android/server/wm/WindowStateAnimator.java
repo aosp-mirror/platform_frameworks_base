@@ -230,6 +230,14 @@ class WindowStateAnimator {
 
     boolean mForceScaleUntilResize;
 
+    // WindowState.mHScale and WindowState.mVScale contain the
+    // scale according to client specified layout parameters (e.g.
+    // one layout size, with another surface size, creates such scaling).
+    // Here we track an additional scaling factor used to follow stack
+    // scaling (as in the case of the Pinned stack animation).
+    float mExtraHScale = (float) 1.0;
+    float mExtraVScale = (float) 1.0;
+
     private final Rect mTmpSize = new Rect();
 
     WindowStateAnimator(final WindowState win) {
@@ -1397,8 +1405,8 @@ class WindowStateAnimator {
         mTmpSize.set(w.mShownPosition.x, w.mShownPosition.y, 0, 0);
         calculateSurfaceBounds(w, w.getAttrs());
 
-        float extraHScale = (float) 1.0;
-        float extraVScale = (float) 1.0;
+        mExtraHScale = (float) 1.0;
+        mExtraVScale = (float) 1.0;
 
         // Once relayout has been called at least once, we need to make sure
         // we only resize the client surface during calls to relayout. For
@@ -1429,23 +1437,23 @@ class WindowStateAnimator {
             float surfaceHeight = mSurfaceController.getHeight();
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
-            extraHScale = (mTmpClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
-            extraVScale = (mTmpClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
+            mExtraHScale = (mTmpClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
+            mExtraVScale = (mTmpClipRect.height() - vInsets) / (float)(surfaceHeight - vInsets);
 
             // In the case of ForceScaleToCrop we scale entire tasks together,
             // and so we need to scale our offsets relative to the task bounds
             // or parent and child windows would fall out of alignment.
-            int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - extraHScale));
-            int posY = (int) (mTmpSize.top - w.mAttrs.y * (1 - extraVScale));
+            int posX = (int) (mTmpSize.left - w.mAttrs.x * (1 - mExtraHScale));
+            int posY = (int) (mTmpSize.top - w.mAttrs.y * (1 - mExtraVScale));
             // Imagine we are scaling down. As we scale the buffer down, we decrease the
             // distance between the surface top left, and the start of the surface contents
             // (previously it was surfaceInsets.left pixels in screen space but now it
-            // will be surfaceInsets.left*extraHScale). This means in order to keep the
+            // will be surfaceInsets.left*mExtraHScale). This means in order to keep the
             // non inset content at the same position, we have to shift the whole window
             // forward. Likewise for scaling up, we've increased this distance, and we need
             // to shift by a negative number to compensate.
-            posX += w.getAttrs().surfaceInsets.left * (1 - extraHScale);
-            posY += w.getAttrs().surfaceInsets.top * (1 - extraVScale);
+            posX += w.getAttrs().surfaceInsets.left * (1 - mExtraHScale);
+            posY += w.getAttrs().surfaceInsets.top * (1 - mExtraVScale);
 
             mSurfaceController.setPositionInTransaction(posX, posY, recoveringMemory);
 
@@ -1469,10 +1477,10 @@ class WindowStateAnimator {
 
         updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, recoveringMemory);
 
-        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * extraHScale,
-                mDtDx * w.mVScale * extraVScale,
-                mDsDy * w.mHScale * extraHScale,
-                mDtDy * w.mVScale * extraVScale, recoveringMemory);
+        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
+                mDtDx * w.mVScale * mExtraVScale,
+                mDsDy * w.mHScale * mExtraHScale,
+                mDtDy * w.mVScale * mExtraVScale, recoveringMemory);
 
         if (mSurfaceResized) {
             mReportSurfaceResized = true;
@@ -1558,8 +1566,10 @@ class WindowStateAnimator {
 
             boolean prepared =
                 mSurfaceController.prepareToShowInTransaction(mShownAlpha, mAnimLayer,
-                        mDsDx * w.mHScale, mDtDx * w.mVScale,
-                        mDsDy * w.mHScale, mDtDy * w.mVScale,
+                        mDsDx * w.mHScale * mExtraHScale,
+                        mDtDx * w.mVScale * mExtraVScale,
+                        mDsDy * w.mHScale * mExtraHScale,
+                        mDtDy * w.mVScale * mExtraVScale,
                         recoveringMemory);
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
