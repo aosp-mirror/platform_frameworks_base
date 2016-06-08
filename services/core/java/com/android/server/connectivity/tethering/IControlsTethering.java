@@ -22,6 +22,18 @@ package com.android.server.connectivity.tethering;
  * Interface with methods necessary to notify that a given interface is ready for tethering.
  */
 public interface IControlsTethering {
-    void sendTetherStateChangedBroadcast();
-    void notifyInterfaceTetheringReadiness(boolean isReady, TetherInterfaceStateMachine who);
+    public final int STATE_UNAVAILABLE = 0;
+    public final int STATE_AVAILABLE = 1;
+    public final int STATE_TETHERED = 2;
+
+    /**
+     * Notify that |who| has changed its tethering state.  This may be called from any thread.
+     *
+     * @param iface a network interface (e.g. "wlan0")
+     * @param who corresponding instance of a TetherInterfaceStateMachine
+     * @param state one of IControlsTethering.STATE_*
+     * @param lastError one of ConnectivityManager.TETHER_ERROR_*
+     */
+    void notifyInterfaceStateChange(String iface, TetherInterfaceStateMachine who,
+                                    int state, int lastError);
 }
