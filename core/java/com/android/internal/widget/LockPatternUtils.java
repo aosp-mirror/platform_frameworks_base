@@ -916,23 +916,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Gets whether the device is encrypted.
-     *
-     * @return Whether the device is encrypted.
-     */
-    public static boolean isDeviceEncrypted() {
-        IMountService mountService = IMountService.Stub.asInterface(
-                ServiceManager.getService("mount"));
-        try {
-            return mountService.getEncryptionState() != IMountService.ENCRYPTION_STATE_NONE
-                    && mountService.getPasswordType() != StorageManager.CRYPT_TYPE_DEFAULT;
-        } catch (RemoteException re) {
-            Log.e(TAG, "Error getting encryption state", re);
-        }
-        return true;
-    }
-
-    /**
      * Determine if the device supports encryption, even if it's set to default. This
      * differs from isDeviceEncrypted() in that it returns true even if the device is
      * encrypted with the default password.
