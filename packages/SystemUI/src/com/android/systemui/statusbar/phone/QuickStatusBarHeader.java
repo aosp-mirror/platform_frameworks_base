@@ -92,6 +92,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private float mExpansionAmount;
     protected QSTileHost mHost;
     private View mEdit;
+    private boolean mShowFullAlarm;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -112,8 +113,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
         mDateTimeGroup.setPivotX(0);
         mDateTimeGroup.setPivotY(0);
-        boolean showDate = getResources().getBoolean(R.bool.quick_settings_show_date);
-        findViewById(R.id.date).setVisibility(showDate ? View.VISIBLE : View.GONE);
+        mShowFullAlarm = getResources().getBoolean(R.bool.quick_settings_show_full_alarm);
 
         mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
 
@@ -163,14 +163,16 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
 
         mSecondHalfAnimator = new TouchAnimator.Builder()
-                .addFloat(mAlarmStatus, "alpha", 0, 1)
+                .addFloat(mShowFullAlarm ? mAlarmStatus : findViewById(R.id.date), "alpha", 0, 1)
                 .addFloat(mEmergencyOnly, "alpha", 0, 1)
                 .setStartDelay(.5f)
                 .build();
-        mFirstHalfAnimator = new TouchAnimator.Builder()
-                .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
-                .setEndDelay(.5f)
-                .build();
+        if (mShowFullAlarm) {
+            mFirstHalfAnimator = new TouchAnimator.Builder()
+                    .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
+                    .setEndDelay(.5f)
+                    .build();
+        }
         mDateSizeAnimator = new TouchAnimator.Builder()
                 .addFloat(mDateTimeGroup, "scaleX", 1, mDateScaleFactor)
                 .addFloat(mDateTimeGroup, "scaleY", 1, mDateScaleFactor)
@@ -241,7 +243,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void setExpansion(float headerExpansionFraction) {
         mExpansionAmount = headerExpansionFraction;
         mSecondHalfAnimator.setPosition(headerExpansionFraction);
-        mFirstHalfAnimator.setPosition(headerExpansionFraction);
+        if (mShowFullAlarm) {
+            mFirstHalfAnimator.setPosition(headerExpansionFraction);
+        }
         mDateSizeAnimator.setPosition(headerExpansionFraction);
         mSettingsAlpha.setPosition(headerExpansionFraction);
 
@@ -259,7 +263,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     private void updateAlarmVisibilities() {
-        mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
+        mAlarmStatus.setVisibility(mAlarmShowing && mShowFullAlarm ? View.VISIBLE : View.INVISIBLE);
         mAlarmStatusCollapsed.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
     }
 
