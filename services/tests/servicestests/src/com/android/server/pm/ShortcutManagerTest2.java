@@ -32,6 +32,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.PersistableBundle;
@@ -40,7 +41,6 @@ import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
-import com.android.server.SystemService;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -138,6 +138,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
+
+        assertEquals(0, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
+        assertEquals(0, si.getTextResId());
+        assertEquals(null, si.getTextResName());
+        assertEquals(0, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
     }
 
     public void testShortcutInfoParcel_resId() {
@@ -163,6 +170,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         si.setBitmapPath("abc");
         si.setIconResourceId(456);
 
+        lookupAndFillInResourceNames(si);
+
         si = parceled(si);
 
         assertEquals(getTestContext().getPackageName(), si.getPackage());
@@ -170,8 +179,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(123, si.getIcon().getResId());
         assertEquals(10, si.getTitleResId());
+        assertEquals("r10", si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals("r11", si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals("r12", si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -181,6 +193,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
+        assertEquals("string/r456", si.getIconResName());
     }
 
     public void testShortcutInfoClone() {
@@ -204,6 +217,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         sorig.setBitmapPath("abc");
         sorig.setIconResourceId(456);
 
+        lookupAndFillInResourceNames(sorig);
+
         ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
 
         assertEquals(USER_11, si.getUserId());
@@ -224,6 +239,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
+        assertEquals("string/r456", si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
 
@@ -244,6 +260,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
@@ -263,6 +280,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
@@ -282,6 +300,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
     }
 
     public void testShortcutInfoClone_resId() {
@@ -305,6 +324,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         sorig.setBitmapPath("abc");
         sorig.setIconResourceId(456);
 
+        lookupAndFillInResourceNames(sorig);
+
         ShortcutInfo si = sorig.clone(/* clone flags*/ 0);
 
         assertEquals(USER_11, si.getUserId());
@@ -314,8 +335,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(123, si.getIcon().getResId());
         assertEquals(10, si.getTitleResId());
+        assertEquals("r10", si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals("r11", si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals("r12", si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -325,6 +349,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
         assertEquals("abc", si.getBitmapPath());
         assertEquals(456, si.getIconResourceId());
+        assertEquals("string/r456", si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_CREATOR);
 
@@ -333,8 +358,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals(null, si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
@@ -345,6 +373,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_FOR_LAUNCHER);
 
@@ -353,8 +382,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals(null, si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(123, si.getRank());
@@ -364,6 +396,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
 
         si = sorig.clone(ShortcutInfo.CLONE_REMOVE_NON_KEY_INFO);
 
@@ -372,8 +405,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getActivity());
         assertEquals(null, si.getIcon());
         assertEquals(0, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
         assertEquals(0, si.getTextResId());
+        assertEquals(null, si.getTextResName());
         assertEquals(0, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
         assertEquals(null, si.getCategories());
         assertEquals(null, si.getIntent());
         assertEquals(0, si.getRank());
@@ -383,6 +419,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(null, si.getBitmapPath());
 
         assertEquals(456, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
     }
 
     public void testShortcutInfoClone_minimum() {
@@ -445,6 +482,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         sorig.setBitmapPath("abc");
         sorig.setIconResourceId(456);
 
+        lookupAndFillInResourceNames(sorig);
+
         ShortcutInfo si;
 
         si = sorig.clone(/* flags=*/ 0);
@@ -458,6 +497,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIcon(Icon.createWithResource(mClientContext, 456)).build());
         assertEquals("text", si.getText());
         assertEquals(456, si.getIcon().getResId());
+        assertEquals(0, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
+        assertEquals(null, si.getBitmapPath());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -586,6 +628,9 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIcon(Icon.createWithResource(mClientContext, 456)).build());
         assertEquals(11, si.getTextResId());
         assertEquals(456, si.getIcon().getResId());
+        assertEquals(0, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
+        assertEquals(null, si.getBitmapPath());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -593,6 +638,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(11, si.getTextResId());
         assertEquals("xyz", si.getTitle());
         assertEquals(0, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -600,6 +646,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(11, si.getTextResId());
         assertEquals(null, si.getTitle());
         assertEquals(123, si.getTitleResId());
+        assertEquals(null, si.getTitleResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -607,6 +654,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals("xxx", si.getText());
         assertEquals(0, si.getTextResId());
+        assertEquals(null, si.getTextResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -614,6 +662,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals(null, si.getText());
         assertEquals(1111, si.getTextResId());
+        assertEquals(null, si.getTextResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -621,6 +670,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals("xxx", si.getDisabledMessage());
         assertEquals(0, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -628,6 +678,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals(null, si.getDisabledMessage());
         assertEquals(11111, si.getDisabledMessageResourceId());
+        assertEquals(null, si.getDisabledMessageResName());
 
         si = sorig.clone(/* flags=*/ 0);
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
@@ -731,7 +782,8 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
+                | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
         assertNotNull(si.getBitmapPath()); // Something should be set.
         assertEquals(0, si.getIconResourceId());
         assertTrue(si.getLastChangedTimestamp() < now);
@@ -740,15 +792,14 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
-        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                getTestContext().getResources(), R.drawable.black_32x32));
+        final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
         ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
-                .setIcon(bmp32x32)
+                .setIcon(res32x32)
                 .setTitleResId(10)
                 .setTextResId(11)
                 .setDisabledMessageResId(12)
@@ -778,17 +829,21 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
+        assertEquals("r10", si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals("r11", si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals("r12", si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE, si.getFlags());
-        assertNotNull(si.getBitmapPath()); // Something should be set.
-        assertEquals(0, si.getIconResourceId());
+        assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_RES
+                | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
+        assertNull(si.getBitmapPath());
+        assertEquals(R.drawable.black_32x32, si.getIconResourceId());
         assertTrue(si.getLastChangedTimestamp() < now);
     }
 
@@ -840,7 +895,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(123, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
         assertNull(si.getBitmapPath()); // No icon.
         assertEquals(0, si.getIconResourceId());
     }
@@ -848,15 +903,14 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
     public void testShortcutInfoSaveAndLoad_forBackup_resId() {
         setCaller(CALLING_PACKAGE_1, USER_0);
 
-        final Icon bmp32x32 = Icon.createWithBitmap(BitmapFactory.decodeResource(
-                getTestContext().getResources(), R.drawable.black_32x32));
+        final Icon res32x32 = Icon.createWithResource(mClientContext, R.drawable.black_32x32);
 
         PersistableBundle pb = new PersistableBundle();
         pb.putInt("k", 1);
         ShortcutInfo sorig = new ShortcutInfo.Builder(mClientContext)
                 .setId("id")
                 .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
-                .setIcon(bmp32x32)
+                .setIcon(res32x32)
                 .setTitleResId(10)
                 .setTextResId(11)
                 .setDisabledMessageResId(12)
@@ -885,19 +939,22 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(ShortcutActivity2.class.getName(), si.getActivity().getClassName());
         assertEquals(null, si.getIcon());
         assertEquals(10, si.getTitleResId());
+        assertEquals("r10", si.getTitleResName());
         assertEquals(11, si.getTextResId());
+        assertEquals("r11", si.getTextResName());
         assertEquals(12, si.getDisabledMessageResourceId());
+        assertEquals("r12", si.getDisabledMessageResName());
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
         assertEquals(123, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
-        assertEquals(ShortcutInfo.FLAG_PINNED, si.getFlags());
+        assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
         assertNull(si.getBitmapPath()); // No icon.
         assertEquals(0, si.getIconResourceId());
+        assertEquals(null, si.getIconResName());
     }
-
 
     public void testThrottling() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
@@ -1086,11 +1143,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         final long origSequenceNumber = mService.getLocaleChangeSequenceNumber();
 
-        // onSystemLocaleChangedNoLock before boot completed will be ignored.
-        mInternal.onSystemLocaleChangedNoLock();
-        assertEquals(origSequenceNumber, mService.getLocaleChangeSequenceNumber());
-
-        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mInternal.onSystemLocaleChangedNoLock();
         assertEquals(origSequenceNumber + 1, mService.getLocaleChangeSequenceNumber());
 
@@ -1466,5 +1518,104 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                     eq(CALLING_PACKAGE_2), eq("s3"), eq(USER_10));
 
         });
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testGetResourcePackageName() {
+        assertEquals(null, ShortcutInfo.getResourcePackageName(""));
+        assertEquals(null, ShortcutInfo.getResourcePackageName("abc"));
+        assertEquals("p", ShortcutInfo.getResourcePackageName("p:"));
+        assertEquals("p", ShortcutInfo.getResourcePackageName("p:xx"));
+        assertEquals("pac", ShortcutInfo.getResourcePackageName("pac:"));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testGetResourceTypeName() {
+        assertEquals(null, ShortcutInfo.getResourceTypeName(""));
+        assertEquals(null, ShortcutInfo.getResourceTypeName(":"));
+        assertEquals(null, ShortcutInfo.getResourceTypeName("/"));
+        assertEquals(null, ShortcutInfo.getResourceTypeName("/:"));
+        assertEquals("a", ShortcutInfo.getResourceTypeName(":a/"));
+        assertEquals("type", ShortcutInfo.getResourceTypeName("xxx:type/yyy"));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testGetResourceTypeAndEntryName() {
+        assertEquals(null, ShortcutInfo.getResourceTypeAndEntryName(""));
+        assertEquals(null, ShortcutInfo.getResourceTypeAndEntryName("abc"));
+        assertEquals("", ShortcutInfo.getResourceTypeAndEntryName("p:"));
+        assertEquals("x", ShortcutInfo.getResourceTypeAndEntryName(":x"));
+        assertEquals("x", ShortcutInfo.getResourceTypeAndEntryName("p:x"));
+        assertEquals("xyz", ShortcutInfo.getResourceTypeAndEntryName("pac:xyz"));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testGetResourceEntryName() {
+        assertEquals(null, ShortcutInfo.getResourceEntryName(""));
+        assertEquals(null, ShortcutInfo.getResourceEntryName("ab:"));
+        assertEquals("", ShortcutInfo.getResourceEntryName("/"));
+        assertEquals("abc", ShortcutInfo.getResourceEntryName("/abc"));
+        assertEquals("abc", ShortcutInfo.getResourceEntryName("xyz/abc"));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testLookUpResourceName_systemResources() {
+        // For android system resources, lookUpResourceName will simply return the value as a
+        // string, regardless of "withType".
+        final Resources res = getTestContext().getResources();
+
+        assertEquals("" + android.R.string.cancel, ShortcutInfo.lookUpResourceName(res,
+                android.R.string.cancel, true, getTestContext().getPackageName()));
+        assertEquals("" + android.R.drawable.alert_dark_frame, ShortcutInfo.lookUpResourceName(res,
+                android.R.drawable.alert_dark_frame, true, getTestContext().getPackageName()));
+        assertEquals("" + android.R.string.cancel, ShortcutInfo.lookUpResourceName(res,
+                android.R.string.cancel, false, getTestContext().getPackageName()));
+    }
+
+    public void testLookUpResourceName_appResources() {
+        final Resources res = getTestContext().getResources();
+
+        assertEquals("shortcut_text1", ShortcutInfo.lookUpResourceName(res,
+                R.string.shortcut_text1, false, getTestContext().getPackageName()));
+        assertEquals("string/shortcut_text1", ShortcutInfo.lookUpResourceName(res,
+                R.string.shortcut_text1, true, getTestContext().getPackageName()));
+
+        assertEquals("black_16x64", ShortcutInfo.lookUpResourceName(res,
+                R.drawable.black_16x64, false, getTestContext().getPackageName()));
+        assertEquals("drawable/black_16x64", ShortcutInfo.lookUpResourceName(res,
+                R.drawable.black_16x64, true, getTestContext().getPackageName()));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testLookUpResourceId_systemResources() {
+        final Resources res = getTestContext().getResources();
+
+        assertEquals(android.R.string.cancel, ShortcutInfo.lookUpResourceId(res,
+                "" + android.R.string.cancel, null,
+                getTestContext().getPackageName()));
+        assertEquals(android.R.drawable.alert_dark_frame, ShortcutInfo.lookUpResourceId(res,
+                "" + android.R.drawable.alert_dark_frame, null,
+                getTestContext().getPackageName()));
+    }
+
+    // Test for a ShortcutInfo method.
+    public void testLookUpResourceId_appResources() {
+        final Resources res = getTestContext().getResources();
+
+        assertEquals(R.string.shortcut_text1,
+                ShortcutInfo.lookUpResourceId(res, "shortcut_text1", "string",
+                        getTestContext().getPackageName()));
+
+        assertEquals(R.string.shortcut_text1,
+                ShortcutInfo.lookUpResourceId(res, "string/shortcut_text1", null,
+                        getTestContext().getPackageName()));
+
+        assertEquals(R.drawable.black_16x64,
+                ShortcutInfo.lookUpResourceId(res, "black_16x64", "drawable",
+                        getTestContext().getPackageName()));
+
+        assertEquals(R.drawable.black_16x64,
+                ShortcutInfo.lookUpResourceId(res, "drawable/black_16x64", null,
+                        getTestContext().getPackageName()));
     }
 }
