@@ -123,7 +123,7 @@ con esquinas redondeadas.</li>
 <h3>Dependencias</h3>
 
 <p>Para usar estas características en versiones de Android anteriores a la 5.0 (API nivel 21), incluye
-en tu proyecto la Biblioteca de soporte v7 de Android como una <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">dependencia de Gradle</a>:</p>
+en tu proyecto la Biblioteca de soporte v7 de Android como una <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependencia de Gradle</a>:</p>
 
 <pre>
 dependencies {

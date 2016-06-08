@@ -123,7 +123,7 @@ Android v7 Support Library dengan pembatasan ini:</p>
 <h3>Dependensi</h3>
 
 <p>Untuk menggunakan fitur-fitur ini di versi Android sebelum 5.0 (API level 21), sertakan
-Android v7 Support Library dalam proyek Anda sebagai <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">dependensi Gradle</a>:</p>
+Android v7 Support Library dalam proyek Anda sebagai <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependensi Gradle</a>:</p>
 
 <pre>
 dependencies {
