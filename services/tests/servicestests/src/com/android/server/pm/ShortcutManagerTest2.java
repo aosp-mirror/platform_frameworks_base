@@ -490,6 +490,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
                 .setActivity(new ComponentName("x", "y")).build());
         assertEquals("text", si.getText());
+        assertEquals(123, si.getRank());
         assertEquals(new ComponentName("x", "y"), si.getActivity());
 
         si = sorig.clone(/* flags=*/ 0);
@@ -584,16 +585,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb2).build());
         assertEquals("text", si.getText());
         assertEquals(99, si.getExtras().getInt("x"));
-
-        // Make sure the timestamp gets updated too.
-
-        final long timestamp = si.getLastChangedTimestamp();
-        Thread.sleep(2);
-
-        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setTitle("xyz").build());
-
-        assertTrue(si.getLastChangedTimestamp() > timestamp);
     }
 
     public void testShortcutInfoCopyNonNullFieldsFrom_resId() throws InterruptedException {
@@ -721,16 +712,6 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb2).build());
         assertEquals(11, si.getTextResId());
         assertEquals(99, si.getExtras().getInt("x"));
-
-        // Make sure the timestamp gets updated too.
-
-        final long timestamp = si.getLastChangedTimestamp();
-        Thread.sleep(2);
-
-        si.copyNonNullFieldsFrom(new ShortcutInfo.Builder(getTestContext()).setId("id")
-                .setTitle("xyz").build());
-
-        assertTrue(si.getLastChangedTimestamp() > timestamp);
     }
 
     public void testShortcutInfoSaveAndLoad() throws InterruptedException {
@@ -754,7 +735,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcuts(list(sorig));
+        ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
+                .setId("id2")
+                .setTitle("x")
+                .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setRank(456)
+                .build();
+
+        mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         Thread.sleep(2);
         final long now = System.currentTimeMillis();
@@ -779,7 +768,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
-        assertEquals(123, si.getRank());
+        assertEquals(0, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
@@ -787,6 +776,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNotNull(si.getBitmapPath()); // Something should be set.
         assertEquals(0, si.getIconResourceId());
         assertTrue(si.getLastChangedTimestamp() < now);
+
+        // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
+        // to test it.
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
+        assertEquals(1, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_resId() throws InterruptedException {
@@ -809,7 +803,15 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcuts(list(sorig));
+        ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
+                .setId("id2")
+                .setTitle("x")
+                .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setRank(456)
+                .build();
+
+        mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         Thread.sleep(2);
         final long now = System.currentTimeMillis();
@@ -837,7 +839,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
-        assertEquals(123, si.getRank());
+        assertEquals(0, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_RES
@@ -845,6 +847,11 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertNull(si.getBitmapPath());
         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
         assertTrue(si.getLastChangedTimestamp() < now);
+
+        // Make sure ranks are saved too.  Because of the auto-adjusting, we need two shortcuts
+        // to test it.
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_10);
+        assertEquals(1, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_forBackup() {
@@ -868,11 +875,19 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcuts(list(sorig));
+        ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
+                .setId("id2")
+                .setTitle("x")
+                .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setRank(456)
+                .build();
+
+        mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
         setCaller(LAUNCHER_1, USER_0);
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id"), HANDLE_USER_0);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_0);
 
         // Do backup & restore.
         backupAndRestore();
@@ -892,12 +907,16 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
-        assertEquals(123, si.getRank());
+        assertEquals(0, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
         assertNull(si.getBitmapPath()); // No icon.
         assertEquals(0, si.getIconResourceId());
+
+        // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
+        assertEquals(0, si.getRank());
     }
 
     public void testShortcutInfoSaveAndLoad_forBackup_resId() {
@@ -920,11 +939,19 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setExtras(pb)
                 .build();
 
-        mManager.addDynamicShortcuts(list(sorig));
+        ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
+                .setId("id2")
+                .setTitle("x")
+                .setActivity(new ComponentName(mClientContext, ShortcutActivity2.class))
+                .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
+                .setRank(456)
+                .build();
+
+        mManager.addDynamicShortcuts(list(sorig, sorig2));
 
         // Dynamic shortcuts won't be backed up, so we need to pin it.
         setCaller(LAUNCHER_1, USER_0);
-        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id"), HANDLE_USER_0);
+        mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("id", "id2"), HANDLE_USER_0);
 
         // Do backup & restore.
         backupAndRestore();
@@ -947,13 +974,17 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"), si.getCategories());
         assertEquals("action", si.getIntent().getAction());
         assertEquals("val", si.getIntent().getStringExtra("key"));
-        assertEquals(123, si.getRank());
+        assertEquals(0, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
 
         assertEquals(ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
         assertNull(si.getBitmapPath()); // No icon.
         assertEquals(0, si.getIconResourceId());
         assertEquals(null, si.getIconResName());
+
+        // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
+        si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
+        assertEquals(0, si.getRank());
     }
 
     public void testThrottling() {
