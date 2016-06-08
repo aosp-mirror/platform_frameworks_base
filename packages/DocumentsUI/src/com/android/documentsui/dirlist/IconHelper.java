@@ -258,25 +258,29 @@ public class IconHelper {
             ImageView iconThumb, ImageView iconMime) {
         final Result result = mThumbnailCache.getThumbnail(uri, mCurrentSize);
 
-        final Bitmap cachedThumbnail = result.getThumbnail();
-        iconThumb.setImageBitmap(cachedThumbnail);
+        try {
+            final Bitmap cachedThumbnail = result.getThumbnail();
+            iconThumb.setImageBitmap(cachedThumbnail);
 
-        boolean stale = (docLastModified > result.getLastModified());
-        if (DEBUG) Log.d(TAG, String.format("Load thumbnail for %s, got result %d and stale %b.",
-                uri.toString(), result.getStatus(), stale));
-        if (!result.isExactHit() || stale) {
-            final BiConsumer<View, View> animator =
-                    (cachedThumbnail == null ? ANIM_FADE_IN : ANIM_NO_OP);
-            final LoaderTask task = new LoaderTask(uri, iconMime, iconThumb, mCurrentSize,
-                    docLastModified, animator);
+            boolean stale = (docLastModified > result.getLastModified());
+            if (DEBUG) Log.d(TAG,
+                    String.format("Load thumbnail for %s, got result %d and stale %b.",
+                            uri.toString(), result.getStatus(), stale));
+            if (!result.isExactHit() || stale) {
+                final BiConsumer<View, View> animator =
+                        (cachedThumbnail == null ? ANIM_FADE_IN : ANIM_NO_OP);
+                final LoaderTask task = new LoaderTask(uri, iconMime, iconThumb, mCurrentSize,
+                        docLastModified, animator);
 
-            iconThumb.setTag(task);
+                iconThumb.setTag(task);
 
-            ProviderExecutor.forAuthority(docAuthority).execute(task);
+                ProviderExecutor.forAuthority(docAuthority).execute(task);
+            }
+
+            return result.isHit();
+        } finally {
+            result.recycle();
         }
-        result.recycle();
-
-        return result.isHit();
     }
 
     private void setMimeIcon(ImageView view, Drawable icon) {
