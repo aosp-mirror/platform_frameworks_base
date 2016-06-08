@@ -212,8 +212,6 @@ class ActivityStarter {
         mKeepCurTransition = false;
         mAvoidMoveToFront = false;
 
-        mPowerHintSent = false;
-
         mVoiceSession = null;
         mVoiceInteractor = null;
     }
@@ -947,8 +945,8 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
-    void sendPowerHintForLaunchIfNeeded(boolean forceSend) {
-        // Trigger launch power hint if activity is not in the current task
+    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend) {
+        // Trigger launch power hint if activity being launched is not in the current task
         final ActivityStack focusStack = mSupervisor.getFocusedStack();
         final ActivityRecord curTop = (focusStack == null)
             ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
@@ -956,8 +954,16 @@ class ActivityStarter {
                 curTop.task != null && mStartActivity != null &&
                 curTop.task != mStartActivity.task )) &&
                 mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 0);
+            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 1);
             mPowerHintSent = true;
+        }
+    }
+
+    void sendPowerHintForLaunchEndIfNeeded() {
+        // Trigger launch power hint if activity is launched
+        if (mPowerHintSent && mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerManagerInternal.POWER_HINT_LAUNCH, 0);
+            mPowerHintSent = false;
         }
     }
 
@@ -1022,7 +1028,7 @@ class ActivityStarter {
                 }
             }
 
-            sendPowerHintForLaunchIfNeeded(false /* forceSend */);
+            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
             mReusedActivity = setTargetStackAndMoveToFrontIfNeeded(mReusedActivity);
 
@@ -1147,7 +1153,7 @@ class ActivityStarter {
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.task);
         mTargetStack.mLastPausedActivity = null;
 
-        sendPowerHintForLaunchIfNeeded(false /* forceSend */);
+        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */);
 
         mTargetStack.startActivityLocked(mStartActivity, newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
