@@ -7520,9 +7520,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
         }
-        /* Only the shell or the app user should be able to dump profiles. */
+        /* Only the shell, root, or the app user should be able to dump profiles. */
         int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.SHELL_UID && callingUid != pkg.applicationInfo.uid) {
+        if (callingUid != Process.SHELL_UID &&
+            callingUid != Process.ROOT_UID &&
+            callingUid != pkg.applicationInfo.uid) {
             throw new SecurityException("dumpProfiles");
         }
 
@@ -7530,16 +7532,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
             final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
             try {
-                final File codeFile = new File(pkg.applicationInfo.getCodePath());
-                List<String> allCodePaths = Collections.EMPTY_LIST;
-                if (codeFile != null && codeFile.exists()) {
-                    try {
-                        final PackageLite codePkg = PackageParser.parsePackageLite(codeFile, 0);
-                        allCodePaths = codePkg.getAllCodePaths();
-                    } catch (PackageParserException e) {
-                        // Well, we tried.
-                    }
-                }
+                List<String> allCodePaths = pkg.getAllCodePathsExcludingResourceOnly();
                 String gid = Integer.toString(sharedGid);
                 String codePaths = TextUtils.join(";", allCodePaths);
                 mInstaller.dumpProfiles(gid, packageName, codePaths);
