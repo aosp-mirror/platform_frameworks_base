@@ -118,6 +118,10 @@ public class StorageManager {
     public static final int FLAG_INCLUDE_INVISIBLE = 1 << 10;
 
     private static volatile IMountService sMountService = null;
+    private static final String INTERNAL_STORAGE_SIZE_PATH =
+            "/sys/block/mmcblk0/size";
+    private static final String INTERNAL_STORAGE_SECTOR_SIZE =
+            "/sys/block/mmcblk0/queue/hw_sector_size";
 
     private static final String INTERNAL_STORAGE_SIZE_PATH =
             "/sys/block/mmcblk0/size";
