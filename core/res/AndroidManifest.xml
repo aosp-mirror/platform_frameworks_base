@@ -1416,6 +1416,11 @@
     <permission android:name="android.permission.DVB_DEVICE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows reading the OEM unlock state
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_OEM_UNLOCK_STATE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @hide Allows enabling/disabling OEM unlock
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.OEM_UNLOCK_STATE"
