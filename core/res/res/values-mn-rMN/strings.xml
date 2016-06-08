@@ -860,12 +860,12 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"одоо"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>минут</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>минут</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>мин</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>мин</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>цаг</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>цаг</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ц</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ц</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>хоног</item>
@@ -876,19 +876,19 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>жил</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>минутад</item>
-      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>минутад</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>мин</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>мин</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>цагт</item>
-      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>цагт</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>цаг</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>цаг</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
       <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>хоногт</item>
-      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>хоногт</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>хоног</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>жилд</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>жил</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>жилд</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">

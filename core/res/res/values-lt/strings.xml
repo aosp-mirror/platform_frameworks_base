@@ -874,16 +874,16 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"dabar"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>min</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> val.</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> val.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
       <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> val.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> val.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> d.</item>
@@ -898,16 +898,16 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">po <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="few">po <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="many">po <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="other">po <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
+      <item quantity="one">po <xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="few">po <xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="many">po <xliff:g id="COUNT_1">%d</xliff:g>min</item>
+      <item quantity="other">po <xliff:g id="COUNT_1">%d</xliff:g>min</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one">po <xliff:g id="COUNT_1">%d</xliff:g> val.</item>
-      <item quantity="few">po <xliff:g id="COUNT_1">%d</xliff:g> val.</item>
-      <item quantity="many">po <xliff:g id="COUNT_1">%d</xliff:g> val.</item>
-      <item quantity="other">po <xliff:g id="COUNT_1">%d</xliff:g> val.</item>
+      <item quantity="one">po <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="few">po <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="many">po <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="other">po <xliff:g id="COUNT_1">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
       <item quantity="one">po <xliff:g id="COUNT_1">%d</xliff:g> d.</item>

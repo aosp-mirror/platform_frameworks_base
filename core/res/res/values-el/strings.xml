@@ -253,7 +253,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Αποθηκευτικός χώρος"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"έχει πρόσβαση στις φωτογραφίες/πολυμέσα/αρχεία στη συσκευή σας"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Μικρόφωνο"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"εγγραφή ήχου"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ηχογραφεί"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"γίνεται λήψη φωτογραφιών και εγγραφή βίντεο"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Τηλέφωνο"</string>

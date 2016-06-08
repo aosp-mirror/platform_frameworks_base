@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"O"</string>
+    <string name="byteShort" msgid="8340973892742019101">"B"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
@@ -867,9 +867,9 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"acum"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min.</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -878,33 +878,33 @@
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> zile</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> zi</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ani</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> an</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> min.</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> min.</item>
+      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> min.</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> h</item>
+      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
+      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
+      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
+      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> an</item>
+      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
+      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
+      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> an</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
