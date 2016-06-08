@@ -19,9 +19,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
+import android.content.res.Resources;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -48,6 +51,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import sun.misc.Resource;
+
 /**
  * Package information used by {@link ShortcutService}.
  * User information used by {@link ShortcutService}.
@@ -72,15 +77,19 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_ACTIVITY = "activity";
     private static final String ATTR_TITLE = "title";
     private static final String ATTR_TITLE_RES_ID = "titleid";
+    private static final String ATTR_TITLE_RES_NAME = "titlename";
     private static final String ATTR_TEXT = "text";
     private static final String ATTR_TEXT_RES_ID = "textid";
+    private static final String ATTR_TEXT_RES_NAME = "textname";
     private static final String ATTR_DISABLED_MESSAGE = "dmessage";
     private static final String ATTR_DISABLED_MESSAGE_RES_ID = "dmessageid";
+    private static final String ATTR_DISABLED_MESSAGE_RES_NAME = "dmessagename";
     private static final String ATTR_INTENT = "intent";
     private static final String ATTR_RANK = "rank";
     private static final String ATTR_TIMESTAMP = "timestamp";
     private static final String ATTR_FLAGS = "flags";
-    private static final String ATTR_ICON_RES = "icon-res";
+    private static final String ATTR_ICON_RES_ID = "icon-res";
+    private static final String ATTR_ICON_RES_NAME = "icon-resname";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
 
     private static final String NAME_CATEGORIES = "categories";
@@ -153,6 +162,12 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    @Nullable
+    public Resources getPackageResources() {
+        return mShortcutUser.mService.injectGetResourcesForApplicationAsUser(
+                getPackageName(), getPackageUserId());
+    }
+
     @Override
     protected void onRestoreBlocked() {
         // Can't restore due to version/signature mismatch.  Remove all shortcuts.
@@ -209,8 +224,13 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private void addShortcutInner(@NonNull ShortcutInfo newShortcut) {
+        final ShortcutService s = mShortcutUser.mService;
+
         deleteShortcutInner(newShortcut.getId());
-        mShortcutUser.mService.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
+
+        // Extract Icon and update the icon res ID and the bitmap path.
+        s.saveIconAndFixUpShortcut(getPackageUserId(), newShortcut);
+        s.fixUpShortcutResourceNamesAndValues(newShortcut);
         mShortcuts.put(newShortcut.getId(), newShortcut);
     }
 
@@ -248,7 +268,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // TODO Check max dynamic count.
         // mShortcutUser.mService.enforceMaxDynamicShortcuts(newDynamicCount);
 
-        // Okay, make it dynamic and add.
+        // If it was originally pinned, the new one should be pinned too.
         if (wasPinned) {
             newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
         }
@@ -318,6 +338,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 disabled.setDisabledMessage(disabledMessage);
             } else if (disabledMessageResId != 0) {
                 disabled.setDisabledMessageResId(disabledMessageResId);
+
+                mShortcutUser.mService.fixUpShortcutResourceNamesAndValues(disabled);
             }
         }
     }
@@ -622,10 +644,25 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // For existing shortcuts, update timestamps if they have any resources.
         if (!isNewApp) {
+            Resources publisherRes = null;
+
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 final ShortcutInfo si = mShortcuts.valueAt(i);
 
                 if (si.hasAnyResources()) {
+                    if (!si.isOriginallyFromManifest()) {
+                        if (publisherRes == null) {
+                            publisherRes = getPackageResources();
+                            if (publisherRes == null) {
+                                break; // Resources couldn't be loaded.
+                            }
+                        }
+
+                        // If this shortcut is not from a manifest, then update all resource IDs
+                        // from resource names.  (We don't allow resource strings for
+                        // non-manifest at the moment, but icons can still be resources.)
+                        si.lookupAndFillInResourceIds(publisherRes);
+                    }
                     changed = true;
                     si.setTimestamp(s.injectCurrentTimeMillis());
                 }
@@ -869,7 +906,9 @@ class ShortcutPackage extends ShortcutPackageItem {
             final ComponentName newActivity = newShortcut.getActivity();
             if (newActivity == null) {
                 if (operation != ShortcutService.OPERATION_UPDATE) {
-                    service.wtf("null Activity found for non-update");
+                    // This method may be called before validating shortcuts, so this may happen,
+                    // and is a caller side error.
+                    throw new NullPointerException("activity must be provided");
                 }
                 continue; // Activity can be null for update.
             }
@@ -904,6 +943,36 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Then make sure none of the activities have more than the max number of shortcuts.
         for (int i = counts.size() - 1; i >= 0; i--) {
             service.enforceMaxActivityShortcuts(counts.valueAt(i));
+        }
+    }
+
+    /**
+     * For all the text fields, refresh the string values if they're from resources.
+     */
+    public void resolveResourceStrings() {
+        final ShortcutService s = mShortcutUser.mService;
+        boolean changed = false;
+
+        Resources publisherRes = null;
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+
+            if (si.hasStringResources()) {
+                changed = true;
+
+                if (publisherRes == null) {
+                    publisherRes = getPackageResources();
+                    if (publisherRes == null) {
+                        break; // Resources couldn't be loaded.
+                    }
+                }
+
+                si.resolveResourceStrings(publisherRes);
+                si.setTimestamp(s.injectCurrentTimeMillis());
+            }
+        }
+        if (changed) {
+            s.scheduleSaveUser(getPackageUserId());
         }
     }
 
@@ -1008,11 +1077,15 @@ class ShortcutPackage extends ShortcutPackageItem {
         // writeAttr(out, "icon", si.getIcon());  // We don't save it.
         ShortcutService.writeAttr(out, ATTR_TITLE, si.getTitle());
         ShortcutService.writeAttr(out, ATTR_TITLE_RES_ID, si.getTitleResId());
+        ShortcutService.writeAttr(out, ATTR_TITLE_RES_NAME, si.getTitleResName());
         ShortcutService.writeAttr(out, ATTR_TEXT, si.getText());
         ShortcutService.writeAttr(out, ATTR_TEXT_RES_ID, si.getTextResId());
+        ShortcutService.writeAttr(out, ATTR_TEXT_RES_NAME, si.getTextResName());
         ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE, si.getDisabledMessage());
         ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_ID,
                 si.getDisabledMessageResourceId());
+        ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_NAME,
+                si.getDisabledMessageResName());
         ShortcutService.writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
         ShortcutService.writeAttr(out, ATTR_RANK, si.getRank());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
@@ -1025,7 +1098,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                             | ShortcutInfo.FLAG_DYNAMIC));
         } else {
             ShortcutService.writeAttr(out, ATTR_FLAGS, si.getFlags());
-            ShortcutService.writeAttr(out, ATTR_ICON_RES, si.getIconResourceId());
+            ShortcutService.writeAttr(out, ATTR_ICON_RES_ID, si.getIconResourceId());
+            ShortcutService.writeAttr(out, ATTR_ICON_RES_NAME, si.getIconResName());
             ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
         }
 
@@ -1096,17 +1170,21 @@ class ShortcutPackage extends ShortcutPackageItem {
         // Icon icon;
         String title;
         int titleResId;
+        String titleResName;
         String text;
         int textResId;
+        String textResName;
         String disabledMessage;
         int disabledMessageResId;
+        String disabledMessageResName;
         Intent intent;
         PersistableBundle intentPersistableExtras = null;
         int rank;
         PersistableBundle extras = null;
         long lastChangedTimestamp;
         int flags;
-        int iconRes;
+        int iconResId;
+        String iconResName;
         String bitmapPath;
         ArraySet<String> categories = null;
 
@@ -1115,16 +1193,21 @@ class ShortcutPackage extends ShortcutPackageItem {
                 ATTR_ACTIVITY);
         title = ShortcutService.parseStringAttribute(parser, ATTR_TITLE);
         titleResId = ShortcutService.parseIntAttribute(parser, ATTR_TITLE_RES_ID);
+        titleResName = ShortcutService.parseStringAttribute(parser, ATTR_TITLE_RES_NAME);
         text = ShortcutService.parseStringAttribute(parser, ATTR_TEXT);
         textResId = ShortcutService.parseIntAttribute(parser, ATTR_TEXT_RES_ID);
+        textResName = ShortcutService.parseStringAttribute(parser, ATTR_TEXT_RES_NAME);
         disabledMessage = ShortcutService.parseStringAttribute(parser, ATTR_DISABLED_MESSAGE);
         disabledMessageResId = ShortcutService.parseIntAttribute(parser,
                 ATTR_DISABLED_MESSAGE_RES_ID);
+        disabledMessageResName = ShortcutService.parseStringAttribute(parser,
+                ATTR_DISABLED_MESSAGE_RES_NAME);
         intent = ShortcutService.parseIntentAttribute(parser, ATTR_INTENT);
         rank = (int) ShortcutService.parseLongAttribute(parser, ATTR_RANK);
         lastChangedTimestamp = ShortcutService.parseLongAttribute(parser, ATTR_TIMESTAMP);
         flags = (int) ShortcutService.parseLongAttribute(parser, ATTR_FLAGS);
-        iconRes = (int) ShortcutService.parseLongAttribute(parser, ATTR_ICON_RES);
+        iconResId = (int) ShortcutService.parseLongAttribute(parser, ATTR_ICON_RES_ID);
+        iconResName = ShortcutService.parseStringAttribute(parser, ATTR_ICON_RES_NAME);
         bitmapPath = ShortcutService.parseStringAttribute(parser, ATTR_BITMAP_PATH);
 
         final int outerDepth = parser.getDepth();
@@ -1167,10 +1250,11 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         return new ShortcutInfo(
                 userId, id, packageName, activityComponent, /* icon =*/ null,
-                title, titleResId, text, textResId, disabledMessage, disabledMessageResId,
+                title, titleResId, titleResName, text, textResId, textResName,
+                disabledMessage, disabledMessageResId, disabledMessageResName,
                 categories, intent,
                 intentPersistableExtras, rank, extras, lastChangedTimestamp, flags,
-                iconRes, bitmapPath);
+                iconResId, iconResName, bitmapPath);
     }
 
     @VisibleForTesting
