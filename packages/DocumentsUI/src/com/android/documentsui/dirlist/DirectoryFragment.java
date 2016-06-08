@@ -17,16 +17,14 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Shared.MAX_DOCS_IN_INTENT;
 import static com.android.documentsui.State.MODE_GRID;
 import static com.android.documentsui.State.MODE_LIST;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
-import com.google.common.collect.Lists;
-
 import android.annotation.IntDef;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -47,12 +45,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v13.view.DragStartHelper;
 import android.support.v7.widget.GridLayoutManager;
@@ -96,6 +91,7 @@ import com.android.documentsui.Metrics;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentsLoader;
+import com.android.documentsui.RetainedState;
 import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
@@ -109,14 +105,16 @@ import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
 
+import com.google.common.collect.Lists;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+
+import javax.annotation.Nullable;
 
 /**
  * Display the documents inside a single directory.
@@ -174,8 +172,9 @@ public class DirectoryFragment extends Fragment
     private RootInfo mRoot;
     private DocumentInfo mDocument;
     private String mQuery = null;
-    // Save selection found during creation so it can be restored during directory loading.
-    private Selection mSelection = null;
+    // Note, we use !null to indicate that selection was restored (from rotation).
+    // So don't fiddle with this field unless you've got the bigger picture in mind.
+    private @Nullable Selection mRestoredSelection = null;
     private boolean mSearchMode = false;
 
     private @Nullable BandController mBandController;
@@ -267,9 +266,16 @@ public class DirectoryFragment extends Fragment
         mStateKey = buildStateKey(mRoot, mDocument);
         mQuery = args.getString(Shared.EXTRA_QUERY);
         mType = args.getInt(Shared.EXTRA_TYPE);
-        final Selection selection = args.getParcelable(Shared.EXTRA_SELECTION);
-        mSelection = selection != null ? selection : new Selection();
         mSearchMode = args.getBoolean(Shared.EXTRA_SEARCH_MODE);
+
+        // Restore any selection we may have squirreled away in retained state.
+        @Nullable RetainedState retained = getBaseActivity().getRetainedState();
+        if (retained != null && retained.hasSelection()) {
+            // We claim the selection for ourselves and null it out once used
+            // so we don't have a rando selection hanging around in RetainedState.
+            mRestoredSelection = retained.selection;
+            retained.selection = null;
+        }
 
         mIconHelper = new IconHelper(context, MODE_GRID);
 
@@ -326,29 +332,18 @@ public class DirectoryFragment extends Fragment
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
+    public void retainState(RetainedState state) {
+        state.selection = mSelectionManager.getSelection(new Selection());
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        mSelectionManager.getSelection(mSelection);
 
         outState.putInt(Shared.EXTRA_TYPE, mType);
         outState.putParcelable(Shared.EXTRA_ROOT, mRoot);
         outState.putParcelable(Shared.EXTRA_DOC, mDocument);
         outState.putString(Shared.EXTRA_QUERY, mQuery);
-
-        // Workaround. To avoid crash, write only up to 512 KB of selection.
-        // If more files are selected, then the selection will be lost.
-        final Parcel parcel = Parcel.obtain();
-        try {
-            mSelection.writeToParcel(parcel, 0);
-            if (parcel.dataSize() <= 512 * 1024) {
-                outState.putParcelable(Shared.EXTRA_SELECTION, mSelection);
-            }
-        } finally {
-            parcel.recycle();
-        }
-
         outState.putBoolean(Shared.EXTRA_SEARCH_MODE, mSearchMode);
     }
 
@@ -405,7 +400,7 @@ public class DirectoryFragment extends Fragment
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         if (mTuner.isDocumentEnabled(docMimeType, docFlags)) {
             final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            ((BaseActivity) getActivity()).onDocumentPicked(doc, mModel);
+            getBaseActivity().onDocumentPicked(doc, mModel);
             mSelectionManager.clearSelection();
             return true;
         }
@@ -497,6 +492,12 @@ public class DirectoryFragment extends Fragment
         return mColumnCount;
     }
 
+    // Support method to replace getOwner().foo() with something
+    // slightly less clumsy like: getOwner().foo().
+    private BaseActivity getBaseActivity() {
+        return (BaseActivity) getActivity();
+    }
+
     /**
      * Manages the integration between our ActionMode and MultiSelectManager, initiating
      * ActionMode when there is a selection, canceling it when there is no selection,
@@ -529,15 +530,7 @@ public class DirectoryFragment extends Fragment
                 if (!mTuner.canSelectType(docMimeType, docFlags)) {
                     return false;
                 }
-
-                if (mSelected.size() >= MAX_DOCS_IN_INTENT) {
-                    Snackbars.makeSnackbar(
-                            getActivity(),
-                            R.string.too_many_selected,
-                            Snackbar.LENGTH_SHORT)
-                            .show();
-                    return false;
-                }
+                return mTuner.canSelectType(docMimeType, docFlags);
             }
             return true;
         }
@@ -624,7 +617,15 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mRecView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (mRestoredSelection != null) {
+                // This is a careful little song and dance to avoid haptic feedback
+                // when selection has been restored after rotation. We're
+                // also responsible for cleaning up restored selection so the
+                // object dones't unnecessarily hang around.
+                mRestoredSelection = null;
+            } else {
+                mRecView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            }
 
             int size = mSelectionManager.getSelection().size();
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
@@ -990,7 +991,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public State getDisplayState() {
-        return ((BaseActivity) getActivity()).getDisplayState();
+        return getBaseActivity().getDisplayState();
     }
 
     @Override
@@ -1120,16 +1121,9 @@ public class DirectoryFragment extends Fragment
     public void selectAllFiles() {
         Metrics.logUserAction(getContext(), Metrics.USER_ACTION_SELECT_ALL);
 
-        // Exclude disabled files.
-        Set<String> enabled = new HashSet<String>();
-        List<String> modelIds = mAdapter.getModelIds();
-
-        // Get the current selection.
-        for (String id : mSelectionManager.getSelection().getAll()) {
-           enabled.add(id);
-        }
-
-        for (String id : modelIds) {
+        // Exclude disabled files
+        List<String> enabled = new ArrayList<String>();
+        for (String id : mAdapter.getModelIds()) {
             Cursor cursor = getModel().getItem(id);
             if (cursor == null) {
                 Log.w(TAG, "Skipping selection. Can't obtain cursor for modeId: " + id);
@@ -1137,15 +1131,7 @@ public class DirectoryFragment extends Fragment
             }
             String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
             int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            if (mTuner.canSelectType(docMimeType, docFlags)) {
-                if (enabled.size() >= MAX_DOCS_IN_INTENT) {
-                    Snackbars.makeSnackbar(
-                        getActivity(),
-                        R.string.too_many_in_select_all,
-                        Snackbar.LENGTH_SHORT)
-                        .show();
-                    break;
-                }
+            if (isDocumentEnabled(docMimeType, docFlags)) {
                 enabled.add(id);
             }
         }
@@ -1527,7 +1513,7 @@ public class DirectoryFragment extends Fragment
             }
 
             if (!model.isLoading()) {
-                ((BaseActivity) getActivity()).notifyDirectoryLoaded(
+                getBaseActivity().notifyDirectoryLoaded(
                     model.doc != null ? model.doc.derivedUri : null);
             }
         }
@@ -1797,9 +1783,11 @@ public class DirectoryFragment extends Fragment
 
         updateLayout(state.derivedMode);
 
-        if (mSelection != null) {
-            mSelectionManager.setItemsSelected(mSelection.getAll(), true);
-            mSelection.clear();
+        if (mRestoredSelection != null) {
+            mSelectionManager.setItemsSelected(mRestoredSelection.getAll(), true);
+            // Note, we'll take care of cleaning up retained selection
+            // in the selection handler where we already have some
+            // specialized code to handle when selection was restored.
         }
 
         // Restore any previous instance state
