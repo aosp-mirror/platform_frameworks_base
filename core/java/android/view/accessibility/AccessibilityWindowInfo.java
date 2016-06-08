@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -102,9 +101,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /**
      * Gets the title of the window.
      *
-     * @return The title of the window, or {@code null} if none is available.
+     * @return The title.
      */
-    @Nullable
     public CharSequence getTitle() {
         return mTitle;
     }
