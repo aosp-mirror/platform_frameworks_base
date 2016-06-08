@@ -858,34 +858,34 @@
       <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> klukkustund</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> klukkustundir</item>
     </plurals>
-    <string name="now_string_shortest" msgid="8912796667087856402">"núna"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"nú"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> mín.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> mín.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> klst.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> klst.</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> k.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> k.</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> d.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d.</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ár</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ár</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> á.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> á.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> mín.</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> mín.</item>
+      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> m.</item>
+      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> m.</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> klst.</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> klst.</item>
+      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> k.</item>
+      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> k.</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> d.</item>
+      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> d.</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> ár</item>

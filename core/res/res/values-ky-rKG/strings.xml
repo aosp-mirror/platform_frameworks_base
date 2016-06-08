@@ -545,7 +545,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экрн клпснн айрм функцялрн өчр"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Экранды кулпулоо функцияларынын айрымдарын колдонууга тыюу салуу"</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Башкы бет"</item>
+    <item msgid="8901098336658710359">"Үй"</item>
     <item msgid="869923650527136615">"Мобилдик"</item>
     <item msgid="7897544654242874543">"Жумуш"</item>
     <item msgid="1103601433382158155">"Жумуш факсы"</item>
@@ -555,19 +555,19 @@
     <item msgid="9192514806975898961">"Өзгөчө"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Башкы бет"</item>
+    <item msgid="8073994352956129127">"Үй"</item>
     <item msgid="7084237356602625604">"Жумуш"</item>
     <item msgid="1112044410659011023">"Башка"</item>
     <item msgid="2374913952870110618">"Өзгөчө"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Башкы бет"</item>
+    <item msgid="6880257626740047286">"Үй"</item>
     <item msgid="5629153956045109251">"Жумуш"</item>
     <item msgid="4966604264500343469">"Башка"</item>
     <item msgid="4932682847595299369">"Өзгөчө"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Башкы бет"</item>
+    <item msgid="1738585194601476694">"Үй"</item>
     <item msgid="1359644565647383708">"Жумуш"</item>
     <item msgid="7868549401053615677">"Башка"</item>
     <item msgid="3145118944639869809">"Өзгөчө"</item>
@@ -588,7 +588,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Өзгөчө"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Башкы бет"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Үй"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобилдик"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Жумуш"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Жумуш факсы"</string>
@@ -613,16 +613,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Маараке"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Башка"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Өзгөчө"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Башкы бет"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Жеке"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Жумуш"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Башка"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобилдик"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Өзгөчө"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Башкы бет"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Үй"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Жумуш"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Башка"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Өзгөчө"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Башкы бет"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Үй"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Жумуш"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Башка"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Өзгөчө"</string>
@@ -654,7 +654,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Эже-сиңди"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Жубай"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Өзгөчө"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Башкы бет"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Үй"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Жумуш"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Башка"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Байланышты көрсөтүүчү эч бир колдонмо жок."</string>
@@ -860,24 +860,24 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"азыр"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> мүн.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> мүн.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>мүн.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>мүн.</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> с.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> с.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>с.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>с.</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> к.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> к.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>к.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>к.</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ж.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ж.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ж.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ж.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> мүн. кийин</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> мүн. кийин</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>мүн. кийин</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>мүн. кийин</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> с. кийин</item>

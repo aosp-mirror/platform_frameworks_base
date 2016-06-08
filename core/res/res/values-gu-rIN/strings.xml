@@ -876,20 +876,20 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>વ</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>મિ. માં</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>મિ. માં</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>મિ માં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>મિ માં</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ક. માં</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ક. માં</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ક માં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ક માં</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>દિ. માં</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>દિ. માં</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>દિ માં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>દિ માં</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>વ. માં</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>વ. માં</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>વ માં</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>વ માં</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> મિનિટ પહેલાં</item>

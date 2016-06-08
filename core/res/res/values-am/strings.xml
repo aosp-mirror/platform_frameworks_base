@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"አሁን"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ደ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ደ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደ  ውስጥ </item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደ  ውስጥ </item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ሰ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ሰ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ  ውስጥ </item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g>  ሰ  ውስጥ </item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ቀ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ቀ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g>  ቀ ውስጥ </item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ </item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ዓ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ዓ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ  ውስጥ </item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ  ውስጥ </item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ደ ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ደ ውስጥ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃ ውስጥ</item>
+      <item quantity="other"> በ <xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች ውስጥ</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
+      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
+      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="one">ከ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች በፊት</item>

@@ -876,20 +876,20 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min:n päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min:n päästä</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min päästä</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min päästä</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> t:n päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> t:n päästä</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> t päästä</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> t päästä</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> pv:n päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> pv:n päästä</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> pv päästä</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> pv päästä</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> v:n päästä</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v:n päästä</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> v päästä</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> v päästä</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuuttia sitten</item>

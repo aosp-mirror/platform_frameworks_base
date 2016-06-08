@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"bây giờ"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> phút</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> phút</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ph</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> giờ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> giờ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ngày</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ngày</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ng</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ng</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> năm</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> năm</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>n</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>n</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>ph</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>ph</item>
+      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>ph</item>
+      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>ph</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g>h</item>
+      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>h</item>
+      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g> ngày</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g> ngày</item>
+      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>ng</item>
+      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>ng</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other">trong <xliff:g id="COUNT_1">%d</xliff:g> năm</item>
-      <item quantity="one">trong <xliff:g id="COUNT_0">%d</xliff:g> năm</item>
+      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>n</item>
+      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>n</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> phút trước</item>

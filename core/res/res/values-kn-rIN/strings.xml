@@ -876,20 +876,20 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ವ</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ನಿ ನಲ್ಲಿ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ನಿ ನಲ್ಲಿ</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ನಿ.ದಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ನಿ.ದಲ್ಲಿ</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ಗಂ ನಲ್ಲಿ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ಗಂ ನಲ್ಲಿ</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ಗಂ.ಯಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ಗಂ.ಯಲ್ಲಿ</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ದಿ ನಲ್ಲಿ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ದಿ ನಲ್ಲಿ</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ದಿ.ದಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ದಿ.ದಲ್ಲಿ</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ವ ನಲ್ಲಿ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ವ ನಲ್ಲಿ</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>ವ.ದಲ್ಲಿ</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ವ.ದಲ್ಲಿ</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> ನಿಮಿಷಗಳ ಹಿಂದೆ</item>

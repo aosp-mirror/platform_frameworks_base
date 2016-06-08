@@ -888,12 +888,12 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"الآن"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
       <item quantity="two"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g>دقيقة</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>دقيقة</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
       <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
@@ -904,52 +904,52 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
       <item quantity="two">يومان <xliff:g id="COUNT_1">%d</xliff:g></item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
       <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>يوم</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
       <item quantity="zero"><xliff:g id="COUNT_1">%d</xliff:g> عام</item>
       <item quantity="two">عامان <xliff:g id="COUNT_1">%d</xliff:g></item>
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
       <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> عام</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> عام</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>عام</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>عام</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="zero">في <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
       <item quantity="two">في دقيقتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> دقائق</item>
       <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="other">في <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
-      <item quantity="one">في <xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> دقيقة</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="zero">في <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
       <item quantity="two">في ساعتين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
       <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> ساعات</item>
       <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="other">في <xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
-      <item quantity="one">في <xliff:g id="COUNT_0">%d</xliff:g> ساعة</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g> ساعة</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g>ساعة</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="zero">في <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
       <item quantity="two">في يومين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
-      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
-      <item quantity="other">في <xliff:g id="COUNT_1">%d</xliff:g> يوم</item>
-      <item quantity="one">في <xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أيام</item>
+      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> يومًا</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>يوم</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> يوم</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="zero">في <xliff:g id="COUNT_1">%d</xliff:g> عام</item>
+      <item quantity="zero">في<xliff:g id="COUNT_1">%d</xliff:g> عام</item>
       <item quantity="two">في عامين (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
-      <item quantity="few">في <xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
-      <item quantity="many">في <xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
-      <item quantity="other">في <xliff:g id="COUNT_1">%d</xliff:g> عام</item>
-      <item quantity="one">في <xliff:g id="COUNT_0">%d</xliff:g> عام</item>
+      <item quantity="few">في<xliff:g id="COUNT_1">%d</xliff:g> أعوام</item>
+      <item quantity="many">في<xliff:g id="COUNT_1">%d</xliff:g> عامًا</item>
+      <item quantity="other">في<xliff:g id="COUNT_1">%d</xliff:g>عام</item>
+      <item quantity="one">في<xliff:g id="COUNT_0">%d</xliff:g> عام</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="zero">قبل <xliff:g id="COUNT_1">%d</xliff:g> دقيقة</item>
