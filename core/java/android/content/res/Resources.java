@@ -126,9 +126,9 @@ public class Resources {
      * Returns the most appropriate default theme for the specified target SDK version.
      * <ul>
      * <li>Below API 11: Gingerbread
-     * <li>APIs 11 thru 14: Holo
-     * <li>APIs 14 thru XX: Device default dark
-     * <li>API XX and above: Device default light with dark action bar
+     * <li>APIs 12 thru 14: Holo
+     * <li>APIs 15 thru 23: Device default dark
+     * <li>APIs 24 and above: Device default light with dark action bar
      * </ul>
      *
      * @param curTheme The current theme, or 0 if not specified.
@@ -156,7 +156,7 @@ public class Resources {
         if (targetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             return holo;
         }
-        if (targetSdkVersion < Build.VERSION_CODES.CUR_DEVELOPMENT) {
+        if (targetSdkVersion < Build.VERSION_CODES.N) {
             return dark;
         }
         return deviceDefault;
