@@ -21,13 +21,20 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
+import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
+
+import java.util.List;
+
 import libcore.util.Objects;
 
 /**
@@ -222,15 +229,29 @@ public class TileServiceManager {
             if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                 return;
             }
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                return;
-            }
+
             Uri data = intent.getData();
             String pkgName = data.getEncodedSchemeSpecificPart();
             final ComponentName component = mStateManager.getComponent();
             if (!Objects.equal(pkgName, component.getPackageName())) {
                 return;
             }
+
+            // If the package is being updated, verify the component still exists.
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                Intent queryIntent = new Intent(TileService.ACTION_QS_TILE);
+                queryIntent.setPackage(pkgName);
+                PackageManager pm = context.getPackageManager();
+                List<ResolveInfo> services = pm.queryIntentServicesAsUser(
+                        queryIntent, 0, ActivityManager.getCurrentUser());
+                for (ResolveInfo info : services) {
+                    if (Objects.equal(info.serviceInfo.packageName, component.getPackageName())
+                            && Objects.equal(info.serviceInfo.name, component.getClassName())) {
+                        return;
+                    }
+                }
+            }
+
             mServices.getHost().removeTile(component);
         }
     };
