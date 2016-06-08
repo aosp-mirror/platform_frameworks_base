@@ -1180,8 +1180,11 @@ public final class ActivityThread {
                 AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
                     @Override
                     public void run() {
-                        dumpDatabaseInfo(dup.getFileDescriptor(), args);
-                        IoUtils.closeQuietly(dup);
+                        try {
+                            dumpDatabaseInfo(dup.getFileDescriptor(), args);
+                        } finally {
+                            IoUtils.closeQuietly(dup);
+                        }
                     }
                 });
             } else {
