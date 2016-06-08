@@ -561,7 +561,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testBusyDevice() throws Exception {
         mMtpManager = new TestMtpManager(getContext()) {
             @Override
-            MtpDeviceRecord openDevice(int deviceId) throws IOException {
+            synchronized MtpDeviceRecord openDevice(int deviceId)
+                    throws IOException {
                 throw new BusyDeviceException();
             }
         };
