@@ -126,10 +126,20 @@ public class PersistentDataBlockService extends SystemService {
         SystemProperties.set(OEM_UNLOCK_PROP, enabled ? "1" : "0");
     }
 
-    private void enforceOemUnlockPermission() {
+    private void enforceOemUnlockReadPermission() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.READ_OEM_UNLOCK_STATE)
+                == PackageManager.PERMISSION_DENIED
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.OEM_UNLOCK_STATE)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException("Can't access OEM unlock state. Requires "
+                    + "READ_OEM_UNLOCK_STATE or OEM_UNLOCK_STATE permission.");
+        }
+    }
+
+    private void enforceOemUnlockWritePermission() {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.OEM_UNLOCK_STATE,
-                "Can't access OEM unlock state");
+                "Can't modify OEM unlock state");
     }
 
     private void enforceUid(int callingUid) {
@@ -435,7 +445,7 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public void wipe() {
-            enforceOemUnlockPermission();
+            enforceOemUnlockWritePermission();
 
             synchronized (mLock) {
                 int ret = nativeWipe(mDataBlockFile);
@@ -453,7 +463,7 @@ public class PersistentDataBlockService extends SystemService {
                 return;
             }
 
-            enforceOemUnlockPermission();
+            enforceOemUnlockWritePermission();
             enforceIsAdmin();
 
             // Do not allow oem unlock modification if it has been disallowed.
@@ -472,13 +482,13 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public boolean getOemUnlockEnabled() {
-            enforceOemUnlockPermission();
+            enforceOemUnlockReadPermission();
             return doGetOemUnlockEnabled();
         }
 
         @Override
         public int getFlashLockState() {
-            enforceOemUnlockPermission();
+            enforceOemUnlockReadPermission();
             String locked = SystemProperties.get(FLASH_LOCK_PROP);
             switch (locked) {
                 case FLASH_LOCK_LOCKED:
