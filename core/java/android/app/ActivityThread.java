@@ -79,7 +79,6 @@ import android.os.Trace;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -5132,9 +5131,6 @@ public final class ActivityThread {
         if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
             StrictMode.enableDeathOnFileUriExposure();
         }
-
-        NetworkSecurityPolicy.getInstance().setCleartextTrafficPermitted(
-                (data.appInfo.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0);
 
         if (data.debugMode != IApplicationThread.DEBUG_OFF) {
             // XXX should have option to change the port.
