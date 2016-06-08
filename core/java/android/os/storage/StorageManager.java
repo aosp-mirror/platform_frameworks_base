@@ -123,11 +123,6 @@ public class StorageManager {
     private static final String INTERNAL_STORAGE_SECTOR_SIZE =
             "/sys/block/mmcblk0/queue/hw_sector_size";
 
-    private static final String INTERNAL_STORAGE_SIZE_PATH =
-            "/sys/block/mmcblk0/size";
-    private static final String INTERNAL_STORAGE_SECTOR_SIZE =
-            "/sys/block/mmcblk0/queue/hw_sector_size";
-
     private final Context mContext;
     private final ContentResolver mResolver;
 
