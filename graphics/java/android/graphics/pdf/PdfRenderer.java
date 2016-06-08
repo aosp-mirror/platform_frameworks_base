@@ -163,7 +163,12 @@ public final class PdfRenderer implements AutoCloseable {
 
         synchronized (sPdfiumLock) {
             mNativeDocument = nativeCreate(mInput.getFd(), size);
-            mPageCount = nativeGetPageCount(mNativeDocument);
+            try {
+                mPageCount = nativeGetPageCount(mNativeDocument);
+            } catch (Throwable t) {
+                nativeClose(mNativeDocument);
+                throw t;
+            }
         }
 
         mCloseGuard.open("close");
@@ -368,6 +373,8 @@ public final class PdfRenderer implements AutoCloseable {
          */
         public void render(@NonNull Bitmap destination, @Nullable Rect destClip,
                            @Nullable Matrix transform, @RenderMode int renderMode) {
+            throwIfClosed();
+
             if (destination.getConfig() != Config.ARGB_8888) {
                 throw new IllegalArgumentException("Unsupported pixel format");
             }
