@@ -3388,7 +3388,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *         was no always-on VPN to start. {@code false} otherwise.
      */
     private boolean startAlwaysOnVpn(int userId) {
-        final String alwaysOnPackage;
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
@@ -3397,27 +3396,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.wtf(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            alwaysOnPackage = vpn.getAlwaysOnPackage();
-            // Skip if there is no service to start.
-            if (alwaysOnPackage == null) {
-                return true;
-            }
-            // Skip if the service is already established. This isn't bulletproof: it's not bound
-            // until after establish(), so if it's mid-setup onStartCommand will be sent twice,
-            // which may restart the connection.
-            if (vpn.getNetworkInfo().isConnected()) {
-                return true;
-            }
-        }
 
-        // Start the VPN service declared in the app's manifest.
-        Intent serviceIntent = new Intent(VpnConfig.SERVICE_INTERFACE);
-        serviceIntent.setPackage(alwaysOnPackage);
-        try {
-            return mContext.startServiceAsUser(serviceIntent, UserHandle.of(userId)) != null;
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "VpnService " + serviceIntent + " failed to start", e);
-            return false;
+            return vpn.startAlwaysOnVpn();
         }
     }
 
@@ -3449,17 +3429,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return false;
             }
 
-            // Save the configuration
-            final long token = Binder.clearCallingIdentity();
-            try {
-                final ContentResolver cr = mContext.getContentResolver();
-                Settings.Secure.putStringForUser(cr, Settings.Secure.ALWAYS_ON_VPN_APP,
-                        packageName, userId);
-                Settings.Secure.putIntForUser(cr, Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
-                        (lockdown ? 1 : 0), userId);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            vpn.saveAlwaysOnPackage();
         }
         return true;
     }
