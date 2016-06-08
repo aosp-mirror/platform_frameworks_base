@@ -4223,6 +4223,7 @@ public class Activity extends ContextThemeWrapper
     public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
             @Nullable Bundle options) {
         if (mParent == null) {
+            options = transferSpringboardActivityOptions(options);
             Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
@@ -4271,6 +4272,16 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    private Bundle transferSpringboardActivityOptions(Bundle options) {
+        if (options == null && (mWindow != null && !mWindow.isActive())) {
+            final ActivityOptions activityOptions = getActivityOptions();
+            if (activityOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+                return activityOptions.toBundle();
+            }
+        }
+        return options;
+    }
+
     /**
      * @hide Implement to provide correct calling token.
      */
@@ -4286,6 +4297,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar = mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, this, intent, requestCode,
                 options, user);
@@ -4321,6 +4333,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivity(
                         this, mMainThread.getApplicationThread(), mToken, this,
@@ -4353,6 +4366,7 @@ public class Activity extends ContextThemeWrapper
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
                 mInstrumentation.execStartActivityAsCaller(
                         this, mMainThread.getApplicationThread(), mToken, this,
@@ -4792,6 +4806,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void startActivityFromChild(@NonNull Activity child, @RequiresPermission Intent intent,
             int requestCode, @Nullable Bundle options) {
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, child,
@@ -4857,6 +4872,7 @@ public class Activity extends ContextThemeWrapper
         if (referrer != null) {
             intent.putExtra(Intent.EXTRA_REFERRER, referrer);
         }
+        options = transferSpringboardActivityOptions(options);
         Instrumentation.ActivityResult ar =
             mInstrumentation.execStartActivity(
                 this, mMainThread.getApplicationThread(), mToken, who,
