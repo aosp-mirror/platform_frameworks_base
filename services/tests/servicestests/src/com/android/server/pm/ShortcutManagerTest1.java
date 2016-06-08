@@ -95,6 +95,7 @@ import org.mockito.ArgumentCaptor;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -922,6 +923,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             ShortcutInfo s = getCallerShortcut("s2");
             assertTrue(s.hasIconResource());
             assertEquals(R.drawable.black_32x32, s.getIconResourceId());
+            assertEquals("string/r" + R.drawable.black_32x32, s.getIconResName());
             assertEquals("Title-s2", s.getTitle());
 
             s = getCallerShortcut("s4");
@@ -1091,21 +1093,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testGetShortcuts_resolveStrings() throws Exception {
-        doAnswer(pmInvocation -> {
-            assertEquals(Process.SYSTEM_UID, mInjectedCallingUid);
-
-            final String packageName = (String) pmInvocation.getArguments()[0];
-            final int userId = (Integer) pmInvocation.getArguments()[1];
-
-            final Resources res = mock(Resources.class);
-            doAnswer(resInvocation -> {
-                final int resId = (Integer) resInvocation.getArguments()[0];
-
-                return "string-" + packageName + "-user:" + userId + "-res:" + resId;
-            }).when(res).getString(anyInt());
-            return res;
-        }).when(mMockPackageManager).getResourcesForApplicationAsUser(anyString(), anyInt());
-
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             ShortcutInfo si = new ShortcutInfo.Builder(mClientContext)
                     .setId("id")
@@ -1137,18 +1124,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             List<ShortcutInfo> ret = assertShortcutIds(
                     assertAllStringsResolved(mLauncherApps.getShortcuts(q, HANDLE_USER_0)),
                     "id");
-            assertEquals("string-com.android.test.1-user:0-res:10", ret.get(0).getTitle());
-            assertEquals("string-com.android.test.1-user:0-res:11", ret.get(0).getText());
-            assertEquals("string-com.android.test.1-user:0-res:12",
+            assertEquals("string-com.android.test.1-user:0-res:10/en", ret.get(0).getTitle());
+            assertEquals("string-com.android.test.1-user:0-res:11/en", ret.get(0).getText());
+            assertEquals("string-com.android.test.1-user:0-res:12/en",
                     ret.get(0).getDisabledMessage());
 
             // USER P0
             ret = assertShortcutIds(
                     assertAllStringsResolved(mLauncherApps.getShortcuts(q, HANDLE_USER_P0)),
                     "id");
-            assertEquals("string-com.android.test.1-user:20-res:10", ret.get(0).getTitle());
-            assertEquals("string-com.android.test.1-user:20-res:11", ret.get(0).getText());
-            assertEquals("string-com.android.test.1-user:20-res:12",
+            assertEquals("string-com.android.test.1-user:20-res:10/en", ret.get(0).getTitle());
+            assertEquals("string-com.android.test.1-user:20-res:11/en", ret.get(0).getText());
+            assertEquals("string-com.android.test.1-user:20-res:12/en",
                     ret.get(0).getDisabledMessage());
         });
     }
@@ -3602,6 +3589,84 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 findShortcut(shortcuts.getValue(), "s1").getLastChangedTimestamp());
     }
 
+    /**
+     * Test the case where an updated app has resource IDs changed.
+     */
+    public void testHandlePackageUpdate_resIdChanged() throws Exception {
+        final Icon icon1 = Icon.createWithResource(getTestContext(), /* res ID */ 1000);
+        final Icon icon2 = Icon.createWithResource(getTestContext(), /* res ID */ 1001);
+
+        // Set up shortcuts.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // Note resource strings are not officially supported (they're hidden), but
+            // should work.
+
+            final ShortcutInfo s1 = new ShortcutInfo.Builder(mClientContext)
+                    .setId("s1")
+                    .setActivity(makeComponent(ShortcutActivity.class))
+                    .setIntent(new Intent(Intent.ACTION_VIEW))
+                    .setIcon(icon1)
+                    .setTitleResId(10000)
+                    .setTextResId(10001)
+                    .setDisabledMessageResId(10002)
+                    .build();
+
+            final ShortcutInfo s2 = new ShortcutInfo.Builder(mClientContext)
+                    .setId("s2")
+                    .setActivity(makeComponent(ShortcutActivity.class))
+                    .setIntent(new Intent(Intent.ACTION_VIEW))
+                    .setIcon(icon2)
+                    .setTitleResId(20000)
+                    .build();
+
+            assertTrue(mManager.setDynamicShortcuts(list(s1, s2)));
+        });
+
+        // Verify.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ShortcutInfo s1 = getCallerShortcut("s1");
+            final ShortcutInfo s2 = getCallerShortcut("s2");
+
+            assertEquals(1000, s1.getIconResourceId());
+            assertEquals(10000, s1.getTitleResId());
+            assertEquals(10001, s1.getTextResId());
+            assertEquals(10002, s1.getDisabledMessageResourceId());
+
+            assertEquals(1001, s2.getIconResourceId());
+            assertEquals(20000, s2.getTitleResId());
+            assertEquals(0, s2.getTextResId());
+            assertEquals(0, s2.getDisabledMessageResourceId());
+        });
+
+        mService.saveDirtyInfo();
+        initService();
+
+        // Set up the mock resources again, with an "adjustment".
+        // When the package is updated, the service will fetch the updated res-IDs with res-names,
+        // and the new IDs will have this offset.
+        setUpAppResources(10);
+
+        // Update the package.
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageUpdateIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            final ShortcutInfo s1 = getCallerShortcut("s1");
+            final ShortcutInfo s2 = getCallerShortcut("s2");
+
+            assertEquals(1010, s1.getIconResourceId());
+            assertEquals(10010, s1.getTitleResId());
+            assertEquals(10011, s1.getTextResId());
+            assertEquals(10012, s1.getDisabledMessageResourceId());
+
+            assertEquals(1011, s2.getIconResourceId());
+            assertEquals(20010, s2.getTitleResId());
+            assertEquals(0, s2.getTextResId());
+            assertEquals(0, s2.getDisabledMessageResourceId());
+        });
+    }
+
     protected void prepareForBackupTest() {
 
         prepareCrossProfileDataSet();
@@ -4785,27 +4850,35 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(R.drawable.icon1, si.getIconResourceId());
             assertEquals(new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     si.getActivity());
+
             assertEquals(R.string.shortcut_title1, si.getTitleResId());
+            assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
             assertEquals(R.string.shortcut_text1, si.getTextResId());
+            assertEquals("r" + R.string.shortcut_text1, si.getTextResName());
             assertEquals(R.string.shortcut_disabled_message1, si.getDisabledMessageResourceId());
+            assertEquals("r" + R.string.shortcut_disabled_message1, si.getDisabledMessageResName());
+
             assertEquals(set("android.shortcut.conversation", "android.shortcut.media"),
                     si.getCategories());
             assertEquals("action1", si.getIntent().getAction());
             assertEquals(Uri.parse("http://a.b.c/1"), si.getIntent().getData());
-            assertEquals(0, si.getRank());
 
             // check another
             si = getCallerShortcut("ms2");
 
             assertEquals("ms2", si.getId());
             assertEquals(R.drawable.icon2, si.getIconResourceId());
+
             assertEquals(R.string.shortcut_title2, si.getTitleResId());
+            assertEquals("r" + R.string.shortcut_title2, si.getTitleResName());
             assertEquals(R.string.shortcut_text2, si.getTextResId());
+            assertEquals("r" + R.string.shortcut_text2, si.getTextResName());
             assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResourceId());
+            assertEquals("r" + R.string.shortcut_disabled_message2, si.getDisabledMessageResName());
+
             assertEquals(set("android.shortcut.conversation"), si.getCategories());
             assertEquals("action2", si.getIntent().getAction());
             assertEquals(null, si.getIntent().getData());
-            assertEquals(1, si.getRank());
 
             // check another
             si = getCallerShortcut("ms3");
@@ -4813,12 +4886,113 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals("ms3", si.getId());
             assertEquals(0, si.getIconResourceId());
             assertEquals(R.string.shortcut_title1, si.getTitleResId());
+            assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
+
             assertEquals(0, si.getTextResId());
+            assertEquals(null, si.getTextResName());
             assertEquals(0, si.getDisabledMessageResourceId());
+            assertEquals(null, si.getDisabledMessageResName());
+
             assertEquals(null, si.getCategories());
             assertEquals("android.intent.action.VIEW", si.getIntent().getAction());
             assertEquals(null, si.getIntent().getData());
-            assertEquals(2, si.getRank());
+        });
+    }
+
+    public void testManifestShortcuts_localeChange() {
+        mService.handleUnlockUser(USER_0);
+
+        // Package 1 updated, which has one valid manifest shortcut and one invalid.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.setDynamicShortcuts(list(makeShortcutWithTitle("s1", "title")));
+
+            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
+                    mManager.getManifestShortcuts()))),
+                    "ms1", "ms2");
+
+            // check first shortcut.
+            ShortcutInfo si = getCallerShortcut("ms1");
+
+            assertEquals("ms1", si.getId());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_title1 + "/en",
+                    si.getTitle());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_text1 + "/en",
+                    si.getText());
+            assertEquals("string-com.android.test.1-user:0-res:"
+                            + R.string.shortcut_disabled_message1 + "/en",
+                    si.getDisabledMessage());
+            assertEquals(START_TIME, si.getLastChangedTimestamp());
+
+            // check another
+            si = getCallerShortcut("ms2");
+
+            assertEquals("ms2", si.getId());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_title2 + "/en",
+                    si.getTitle());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_text2 + "/en",
+                    si.getText());
+            assertEquals("string-com.android.test.1-user:0-res:"
+                            + R.string.shortcut_disabled_message2 + "/en",
+                    si.getDisabledMessage());
+            assertEquals(START_TIME, si.getLastChangedTimestamp());
+
+            // Check the dynamic one.
+            si = getCallerShortcut("s1");
+
+            assertEquals("s1", si.getId());
+            assertEquals("title", si.getTitle());
+            assertEquals(null, si.getText());
+            assertEquals(null, si.getDisabledMessage());
+            assertEquals(START_TIME, si.getLastChangedTimestamp());
+        });
+
+        mInjectedCurrentTimeMillis++;
+
+        mInjectedLocale = Locale.JAPANESE;
+        mInternal.onSystemLocaleChangedNoLock();
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // check first shortcut.
+            ShortcutInfo si = getCallerShortcut("ms1");
+
+            assertEquals("ms1", si.getId());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_title1 + "/ja",
+                    si.getTitle());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_text1 + "/ja",
+                    si.getText());
+            assertEquals("string-com.android.test.1-user:0-res:"
+                            + R.string.shortcut_disabled_message1 + "/ja",
+                    si.getDisabledMessage());
+            assertEquals(START_TIME + 1, si.getLastChangedTimestamp());
+
+            // check another
+            si = getCallerShortcut("ms2");
+
+            assertEquals("ms2", si.getId());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_title2 + "/ja",
+                    si.getTitle());
+            assertEquals("string-com.android.test.1-user:0-res:" + R.string.shortcut_text2 + "/ja",
+                    si.getText());
+            assertEquals("string-com.android.test.1-user:0-res:"
+                            + R.string.shortcut_disabled_message2 + "/ja",
+                    si.getDisabledMessage());
+            assertEquals(START_TIME + 1, si.getLastChangedTimestamp());
+
+            // Check the dynamic one.  (locale change shouldn't affect.)
+            si = getCallerShortcut("s1");
+
+            assertEquals("s1", si.getId());
+            assertEquals("title", si.getTitle());
+            assertEquals(null, si.getText());
+            assertEquals(null, si.getDisabledMessage());
+            assertEquals(START_TIME, si.getLastChangedTimestamp()); // Not changed.
         });
     }
 
