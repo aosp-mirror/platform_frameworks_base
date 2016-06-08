@@ -150,11 +150,20 @@ public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
 Picture-in-picture</h2>
 
 <p>When your activity switches to PIP, the system considers the activity in a
-paused state, and calls your activity's <code>onPause()</code> method. Video
-playback should not be paused and should continue playing if the activity is
-paused due to PIP mode. Check for PIP in your activity's
-<code>onPause()</code> method and handle playback appropriately, for
-example:</p>
+paused state, and calls your activity's {@link android.app.Activity#onPause
+onPause()} method. Video playback should not be paused and should continue
+playing if the activity is paused due to PIP mode.</p>
+
+<p>In Android N, you should pause and resume video playback when the system
+calls your activity's {@link android.app.Activity#onStop onStop()} and
+{@link android.app.Activity#onStart onStart()}. By doing this, you can avoid
+having to check if your app is in PIP mode in
+{@link android.app.Activity#onPause onPause()} and explicitly
+continuing playback.</p>
+
+<p>If you have to pause playback in your {@link android.app.Activity#onPause
+onPause()} implementation, check for PIP mode by calling {@code
+isInPictureInPictureMode()} and handle playback appropriately, for example:</p>
 
 <pre>
 &#64;Override
@@ -170,7 +179,8 @@ public void onPause() {
 </pre>
 
 <p>When your activity switches out of PIP mode back to full-screen mode, the
-system resumes your activity and calls your <code>onResume()</code> method.</p>
+system resumes your activity and calls your
+{@link android.app.Activity#onResume onResume()} method.</p>
 
 <h2 id="single_playback">Using a Single Playback Activity for
 Picture-in-picture</h2>
@@ -211,3 +221,11 @@ in any area that can be obscured by the PIP window.</p>
 <p>When an activity is in PIP mode, by default it doesn't get input focus. To
 receive input events while in PIP mode, use
 <code>MediaSession.setMediaButtonReceiver()</code>.</p>
+
+<p>When your app is in PIP mode, video playback in the PIP window can cause
+audio interference with another app, such as a music player app or voice search
+app. To avoid this, request audio focus when you start playing the video,
+and handle audio focus change notifications, as described in
+<a href="{@docRoot}training/managing-audio/audio-focus.html">Managing Audio
+Focus</a>. If you receive notification of audio focus loss when in PIP mode,
+pause or stop video playback.</p>
