@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
@@ -4578,20 +4580,37 @@ public final class ActivityThread {
     }
 
     /**
+     * Creates a new Configuration only if override would modify base. Otherwise returns base.
+     * @param base The base configuration.
+     * @param override The update to apply to the base configuration. Can be null.
+     * @return A Configuration representing base with override applied.
+     */
+    private static Configuration createNewConfigAndUpdateIfNotNull(@NonNull Configuration base,
+            @Nullable Configuration override) {
+        if (override == null) {
+            return base;
+        }
+        Configuration newConfig = new Configuration(base);
+        newConfig.updateFrom(override);
+        return newConfig;
+    }
+
+    /**
      * Decides whether to update an Activity's configuration and whether to tell the
      * Activity/Component about it.
      * @param cb The component callback to notify of configuration change.
      * @param activityToken The Activity binder token for which this configuration change happened.
      *                      If the change is global, this is null.
      * @param newConfig The new configuration.
-     * @param overrideConfig The override config that differentiates the Activity's configuration
+     * @param amOverrideConfig The override config that differentiates the Activity's configuration
      *                       from the base global configuration.
+     *                       This is supplied by ActivityManager.
      * @param reportToActivity Notify the Activity of the change.
      */
     private void performConfigurationChanged(ComponentCallbacks2 cb,
                                              IBinder activityToken,
                                              Configuration newConfig,
-                                             Configuration overrideConfig,
+                                             Configuration amOverrideConfig,
                                              boolean reportToActivity) {
         // Only for Activity objects, check that they actually call up to their
         // superclass implementation.  ComponentCallbacks2 is an interface, so
@@ -4605,7 +4624,6 @@ public final class ActivityThread {
         if ((activity == null) || (activity.mCurrentConfig == null)) {
             shouldChangeConfig = true;
         } else {
-
             // If the new config is the same as the config this Activity
             // is already running with then don't bother calling
             // onConfigurationChanged
@@ -4615,34 +4633,36 @@ public final class ActivityThread {
             }
         }
 
-        if (DEBUG_CONFIGURATION) {
-            Slog.v(TAG, "Config callback " + cb + ": shouldChangeConfig=" + shouldChangeConfig);
-        }
-
         if (shouldChangeConfig) {
+            // Propagate the configuration change to the Activity and ResourcesManager.
+
+            // ContextThemeWrappers may override the configuration for that context.
+            // We must check and apply any overrides defined.
+            Configuration contextThemeWrapperOverrideConfig = null;
+            if (cb instanceof ContextThemeWrapper) {
+                final ContextThemeWrapper contextThemeWrapper = (ContextThemeWrapper) cb;
+                contextThemeWrapperOverrideConfig = contextThemeWrapper.getOverrideConfiguration();
+            }
+
+            // We only update an Activity's configuration if this is not a global
+            // configuration change. This must also be done before the callback,
+            // or else we violate the contract that the new resources are available
+            // in {@link ComponentCallbacks2#onConfigurationChanged(Configuration)}.
             if (activityToken != null) {
-                // We only update an Activity's configuration if this is not a global
-                // configuration change. This must also be done before the callback,
-                // or else we violate the contract that the new resources are available
-                // in {@link ComponentCallbacks2#onConfigurationChanged(Configuration)}.
-                mResourcesManager.updateResourcesForActivity(activityToken, overrideConfig);
+                // Apply the ContextThemeWrapper override if necessary.
+                // NOTE: Make sure the configurations are not modified, as they are treated
+                // as immutable in many places.
+                final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
+                        amOverrideConfig, contextThemeWrapperOverrideConfig);
+                mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig);
             }
 
             if (reportToActivity) {
-                Configuration configToReport = newConfig;
-
-                if (cb instanceof ContextThemeWrapper) {
-                    // ContextThemeWrappers may override the configuration for that context.
-                    // We must check and apply any overrides defined.
-                    ContextThemeWrapper contextThemeWrapper = (ContextThemeWrapper) cb;
-                    final Configuration localOverrideConfig =
-                            contextThemeWrapper.getOverrideConfiguration();
-                    if (localOverrideConfig != null) {
-                        configToReport = new Configuration(newConfig);
-                        configToReport.updateFrom(localOverrideConfig);
-                    }
-                }
-
+                // Apply the ContextThemeWrapper override if necessary.
+                // NOTE: Make sure the configurations are not modified, as they are treated
+                // as immutable in many places.
+                final Configuration configToReport = createNewConfigAndUpdateIfNotNull(
+                        newConfig, contextThemeWrapperOverrideConfig);
                 cb.onConfigurationChanged(configToReport);
             }
 
