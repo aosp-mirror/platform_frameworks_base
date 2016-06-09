@@ -471,6 +471,7 @@
     <protected-broadcast android:name="com.android.ims.IMS_SERVICE_UP" />
     <protected-broadcast android:name="com.android.ims.IMS_INCOMING_CALL" />
     <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_UP" />
+    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_DOWN" />
     <protected-broadcast android:name="com.android.intent.action.IMS_FEATURE_CHANGED" />
     <protected-broadcast android:name="com.android.intent.action.IMS_CONFIG_CHANGED" />
 
