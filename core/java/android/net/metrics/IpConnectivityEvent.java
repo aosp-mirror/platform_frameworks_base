@@ -16,20 +16,13 @@
 
 package android.net.metrics;
 
-import android.net.ConnectivityMetricsLogger;
-import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * {@hide}
- */
+/** {@hide} */
 public abstract class IpConnectivityEvent {
-    private static final int COMPONENT_TAG = ConnectivityMetricsLogger.COMPONENT_TAG_CONNECTIVITY;
+    private static final IpConnectivityLog sMetricsLog = new IpConnectivityLog();
 
-    private static final ConnectivityMetricsLogger sMetricsLogger = new ConnectivityMetricsLogger();
-
-    public static <T extends IpConnectivityEvent & Parcelable> void logEvent(T event) {
-        // TODO: consider using different component for DNS event.
-        sMetricsLogger.logEvent(System.currentTimeMillis(), COMPONENT_TAG, 0, event);
+    static <T extends IpConnectivityEvent & Parcelable> void logEvent(T event) {
+        sMetricsLog.log(System.currentTimeMillis(), event);
     }
-};
+}
