@@ -561,7 +561,7 @@
     <item msgid="9192514806975898961">"Po meri"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Doma"</item>
+    <item msgid="8073994352956129127">"Dom"</item>
     <item msgid="7084237356602625604">"Služba"</item>
     <item msgid="1112044410659011023">"Drugo"</item>
     <item msgid="2374913952870110618">"Po meri"</item>
@@ -573,7 +573,7 @@
     <item msgid="4932682847595299369">"Po meri"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Začetna stran"</item>
+    <item msgid="1738585194601476694">"Dom"</item>
     <item msgid="1359644565647383708">"Služba"</item>
     <item msgid="7868549401053615677">"Drugo"</item>
     <item msgid="3145118944639869809">"Po meri"</item>
@@ -628,7 +628,7 @@
     <string name="postalTypeWork" msgid="5268172772387694495">"Služba"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Drugo"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Po meri"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Začetna stran"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Dom"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Služba"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Drugo"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Po meri"</string>
@@ -660,7 +660,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Sestra"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Zakonski partner"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Po meri"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Domov"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Dom"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Služba"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Drugo"</string>
     <string name="quick_contacts_not_available" msgid="746098007828579688">"Ni aplikacije za ogled tega stika."</string>
