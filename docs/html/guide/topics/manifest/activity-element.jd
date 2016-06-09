@@ -714,7 +714,7 @@ For example:</p>
 &lt;activity
     android:name="com.example.app.ChildActivity"
     android:label="@string/title_child_activity"
-    android:parentActivityName="com.example.myfirstapp.MainActivity" >
+    android:parentActivityName="com.example.app.MainActivity" >
     &lt;!-- Parent activity meta-data to support API level 4+ -->
     &lt;meta-data
         android:name="android.support.PARENT_ACTIVITY"
