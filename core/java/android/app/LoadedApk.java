@@ -1191,14 +1191,18 @@ public final class LoadedApk {
 
         public void performReceive(Intent intent, int resultCode, String data,
                 Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
-            if (ActivityThread.DEBUG_BROADCAST) {
-                int seq = intent.getIntExtra("seq", -1);
-                Slog.i(ActivityThread.TAG, "Enqueueing broadcast " + intent.getAction() + " seq=" + seq
-                        + " to " + mReceiver);
-            }
-            Args args = new Args(intent, resultCode, data, extras, ordered,
+            final Args args = new Args(intent, resultCode, data, extras, ordered,
                     sticky, sendingUser);
-            if (!mActivityThread.post(args)) {
+            if (intent == null) {
+                Log.wtf(TAG, "Null intent received");
+            } else {
+                if (ActivityThread.DEBUG_BROADCAST) {
+                    int seq = intent.getIntExtra("seq", -1);
+                    Slog.i(ActivityThread.TAG, "Enqueueing broadcast " + intent.getAction()
+                            + " seq=" + seq + " to " + mReceiver);
+                }
+            }
+            if (intent == null || !mActivityThread.post(args)) {
                 if (mRegistered && ordered) {
                     IActivityManager mgr = ActivityManagerNative.getDefault();
                     if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
