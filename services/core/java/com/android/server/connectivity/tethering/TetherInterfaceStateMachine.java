@@ -27,7 +27,6 @@ import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.util.IState;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
@@ -98,7 +97,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         mTetherController = tetherController;
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
-        setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
+        mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
 
         mInitialState = new InitialState();
         addState(mInitialState);
@@ -108,40 +107,6 @@ public class TetherInterfaceStateMachine extends StateMachine {
         addState(mUnavailableState);
 
         setInitialState(mInitialState);
-    }
-
-    @Override
-    public String toString() {
-        String res = new String();
-        res += mIfaceName + " - ";
-        IState current = getCurrentState();
-        if (current == mInitialState) res += "InitialState";
-        if (current == mTetheredState) res += "TetheredState";
-        if (current == mUnavailableState) res += "UnavailableState";
-        if (isAvailable()) res += " - Available";
-        if (isTethered()) res += " - Tethered";
-        res += " - lastError =" + getLastError();
-        return res;
-    }
-
-    public int getLastError() {
-        return mLastError;
-    }
-
-    private void setLastError(int error) {
-        mLastError = error;
-    }
-
-    public boolean isAvailable() {
-        return getCurrentState() == mInitialState;
-    }
-
-    public boolean isTethered() {
-        return getCurrentState() == mTetheredState;
-    }
-
-    public boolean isErrored() {
-        return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
     }
 
     // configured when we start tethering and unconfig'd on error or conclusion
@@ -193,7 +158,9 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class InitialState extends State {
         @Override
         public void enter() {
-            mTetherController.sendTetherStateChangedBroadcast();
+            mTetherController.notifyInterfaceStateChange(
+                    mIfaceName, TetherInterfaceStateMachine.this,
+                    IControlsTethering.STATE_AVAILABLE, mLastError);
         }
 
         @Override
@@ -202,8 +169,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             boolean retValue = true;
             switch (message.what) {
                 case CMD_TETHER_REQUESTED:
-                    setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
-                    mTetherController.notifyInterfaceTetheringReadiness(true, TetherInterfaceStateMachine.this);
+                    mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
                     transitionTo(mTetheredState);
                     break;
                 case CMD_INTERFACE_DOWN:
@@ -221,7 +187,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (!configureIfaceIp(true)) {
-                setLastError(ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR);
+                mLastError = ConnectivityManager.TETHER_ERROR_IFACE_CFG_ERROR;
                 transitionTo(mInitialState);
                 return;
             }
@@ -230,19 +196,18 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 mNMService.tetherInterface(mIfaceName);
             } catch (Exception e) {
                 Log.e(TAG, "Error Tethering: " + e.toString());
-                setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
+                mLastError = ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
                 transitionTo(mInitialState);
                 return;
             }
             if (DBG) Log.d(TAG, "Tethered " + mIfaceName);
-            mTetherController.sendTetherStateChangedBroadcast();
+            mTetherController.notifyInterfaceStateChange(
+                    mIfaceName, TetherInterfaceStateMachine.this,
+                    IControlsTethering.STATE_TETHERED, mLastError);
         }
 
         @Override
         public void exit() {
-            mTetherController.notifyInterfaceTetheringReadiness(false,
-                    TetherInterfaceStateMachine.this);
-
             // Note that at this point, we're leaving the tethered state.  We can fail any
             // of these operations, but it doesn't really change that we have to try them
             // all in sequence.
@@ -251,7 +216,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
             try {
                 mNMService.untetherInterface(mIfaceName);
             } catch (Exception ee) {
-                setLastError(ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
+                mLastError = ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR;
                 Log.e(TAG, "Failed to untether interface: " + ee.toString());
             }
 
@@ -315,7 +280,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                                     newUpstreamIfaceName);
                         } catch (Exception e) {
                             Log.e(TAG, "Exception enabling Nat: " + e.toString());
-                            setLastError(ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR);
+                            mLastError = ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
                             transitionTo(mInitialState);
                             return true;
                         }
@@ -327,8 +292,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
                 case CMD_START_TETHERING_ERROR:
                 case CMD_STOP_TETHERING_ERROR:
                 case CMD_SET_DNS_FORWARDERS_ERROR:
-                    setLastErrorAndTransitionToInitialState(
-                            ConnectivityManager.TETHER_ERROR_MASTER_ERROR);
+                    mLastError = ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
+                    transitionTo(mInitialState);
                     break;
                 default:
                     retValue = false;
@@ -348,13 +313,10 @@ public class TetherInterfaceStateMachine extends StateMachine {
     class UnavailableState extends State {
         @Override
         public void enter() {
-            setLastError(ConnectivityManager.TETHER_ERROR_NO_ERROR);
-            mTetherController.sendTetherStateChangedBroadcast();
+            mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
+            mTetherController.notifyInterfaceStateChange(
+                    mIfaceName, TetherInterfaceStateMachine.this,
+                    IControlsTethering.STATE_UNAVAILABLE, mLastError);
         }
-    }
-
-    void setLastErrorAndTransitionToInitialState(int error) {
-        setLastError(error);
-        transitionTo(mInitialState);
     }
 }
