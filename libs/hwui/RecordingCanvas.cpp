@@ -440,8 +440,8 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
 }
 
 void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
-    mDisplayList->pushStagingFunctors.push_back(tree->getFunctor());
     mDisplayList->ref(tree);
+    mDisplayList->vectorDrawables.push_back(tree);
     addOp(alloc().create_trivial<VectorDrawableOp>(
             tree,
             Rect(tree->stagingProperties()->getBounds()),

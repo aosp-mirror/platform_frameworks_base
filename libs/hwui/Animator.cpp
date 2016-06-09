@@ -274,6 +274,10 @@ bool BaseRenderNodeAnimator::updatePlayTime(nsecs_t playTime) {
     return playTime >= mDuration;
 }
 
+nsecs_t BaseRenderNodeAnimator::getRemainingPlayTime() {
+    return mPlayState == PlayState::Reversing ? mPlayTime : mDuration - mPlayTime;
+}
+
 void BaseRenderNodeAnimator::forceEndNow(AnimationContext& context) {
     if (mPlayState < PlayState::Finished) {
         mPlayState = PlayState::Finished;
