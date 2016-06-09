@@ -39,8 +39,10 @@ class MDnsUtils {
         String usbMfg = getString(attributes.get(ATTRIBUTE__USB_MFG));
         String usbMdl = getString(attributes.get(ATTRIBUTE__USB_MDL));
         String mfg = getString(attributes.get(ATTRIBUTE__MFG));
-        return containsVendor(product, vendorValues) || containsVendor(ty, vendorValues) || containsVendor(usbMfg, vendorValues) || containsVendor(mfg, vendorValues) && !(containsString(ty, EXCLUDE_FUJI) || containsString(product, EXCLUDE_FUJI) || containsString(usbMdl, EXCLUDE_FUJI));
-
+        return (containsVendor(product, vendorValues) || containsVendor(ty, vendorValues) ||
+                containsVendor(usbMfg, vendorValues) || containsVendor(mfg, vendorValues)) &&
+                !(containsString(ty, EXCLUDE_FUJI) || containsString(product, EXCLUDE_FUJI) ||
+                        containsString(usbMdl, EXCLUDE_FUJI));
     }
 
     public static String getVendor(NsdServiceInfo networkDevice) {

@@ -60,7 +60,7 @@
     </vendor>
 
     <vendor>
-        <name>@string/plugin_vendor_fuji</name>
+        <name>@string/plugin_vendor_fuji_xerox</name>
         <package>jp.co.fujixerox.prt.PrintUtil.PCL</package>
         <mdns-names>
             <mdns-name>FUJI XEROX</mdns-name>
