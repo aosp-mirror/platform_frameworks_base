@@ -30,6 +30,8 @@ import android.view.Choreographer;
 @HasNativeInterpolator
 public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeInterpolator {
 
+    // If the duration of an animation is more than 300 frames, we cap the sample size to 300.
+    private static final int MAX_SAMPLE_POINTS = 300;
     private TimeInterpolator mSourceInterpolator;
     private final float mLut[];
 
@@ -47,6 +49,7 @@ public class FallbackLUTInterpolator implements NativeInterpolatorFactory, TimeI
         int animIntervalMs = (int) (frameIntervalNanos / TimeUtils.NANOS_PER_MS);
         // We need 2 frame values as the minimal.
         int numAnimFrames = Math.max(2, (int) Math.ceil(((double) duration) / animIntervalMs));
+        numAnimFrames = Math.min(numAnimFrames, MAX_SAMPLE_POINTS);
         float values[] = new float[numAnimFrames];
         float lastFrame = numAnimFrames - 1;
         for (int i = 0; i < numAnimFrames; i++) {
