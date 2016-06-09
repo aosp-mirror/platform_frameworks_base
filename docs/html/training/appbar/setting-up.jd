@@ -68,7 +68,7 @@ These steps describe how to set up a {@link android.support.v7.widget.Toolbar}
 as your activity's app bar:
 
 <ol>
-  <li>Add the the
+  <li>Add the
   <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
   appcompat</a> support library to your project, as described in <a href=
   "{@docRoot}tools/support-library/setup.html">Support Library Setup</a>.
