@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -64,6 +65,9 @@ public class QSDetail extends LinearLayout {
     private boolean mFullyExpanded;
     private View mQsDetailHeaderBack;
     private BaseStatusBarHeader mHeader;
+    private boolean mTriggeredExpand;
+    private int mOpenX;
+    private int mOpenY;
 
     public QSDetail(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -112,6 +116,7 @@ public class QSDetail extends LinearLayout {
     public void setQsPanel(QSPanel panel, BaseStatusBarHeader header) {
         mQsPanel = panel;
         mHeader = header;
+        mHeader.setCallback(mQsPanelCallback);
         mQsPanel.setCallback(mQsPanelCallback);
     }
 
@@ -124,6 +129,12 @@ public class QSDetail extends LinearLayout {
 
     public void setFullyExpanded(boolean fullyExpanded) {
         mFullyExpanded = fullyExpanded;
+    }
+
+    public void setExpanded(boolean qsExpanded) {
+        if (!qsExpanded) {
+            mTriggeredExpand = false;
+        }
     }
 
     private void updateDetailText() {
@@ -160,6 +171,22 @@ public class QSDetail extends LinearLayout {
                         adapter.setToggleState(checked);
                     }
                 });
+            }
+            if (!mFullyExpanded) {
+                mTriggeredExpand = true;
+                mHost.animateToggleQSExpansion();
+            } else {
+                mTriggeredExpand = false;
+            }
+            mOpenX = x;
+            mOpenY = y;
+        } else {
+            // Ensure we collapse into the same point we opened from.
+            x = mOpenX;
+            y = mOpenY;
+            if (mTriggeredExpand) {
+                mHost.animateToggleQSExpansion();
+                mTriggeredExpand = false;
             }
         }
 

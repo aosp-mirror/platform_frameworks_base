@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -56,7 +57,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     private int mPanelPaddingBottom;
     private int mBrightnessPaddingTop;
-    private boolean mExpanded;
+    protected boolean mExpanded;
     protected boolean mListening;
 
     private Callback mCallback;
@@ -70,7 +71,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     private QSCustomizer mCustomizePanel;
     private Record mDetailRecord;
-    private boolean mTriggeredExpand;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -221,7 +221,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         }
         MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
-            mTriggeredExpand = false;
             closeDetail();
         } else {
             logTiles();
@@ -279,6 +278,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     public void setTiles(Collection<QSTile<?>> tiles, boolean collapsedView) {
         for (TileRecord record : mRecords) {
             mTileLayout.removeTile(record);
+            record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
         for (QSTile<?> tile : tiles) {
@@ -294,6 +294,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         return new QSTileView(mContext, tile.createTileView(mContext), collapsedView);
     }
 
+    protected boolean shouldShowDetail() {
+        return mExpanded;
+    }
+
     protected void addTile(final QSTile<?> tile, boolean collapsedView) {
         final TileRecord r = new TileRecord();
         r.tile = tile;
@@ -306,7 +310,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
 
             @Override
             public void onShowDetail(boolean show) {
-                QSPanel.this.showDetail(show, r);
+                // Both the collapsed and full QS panels get this callback, this check determines
+                // which one should handle showing the detail.
+                if (shouldShowDetail()) {
+                    QSPanel.this.showDetail(show, r);
+                }
             }
 
             @Override
@@ -330,6 +338,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             }
         };
         r.tile.addCallback(callback);
+        r.callback = callback;
         final View.OnClickListener click = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -390,17 +399,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     protected void handleShowDetail(Record r, boolean show) {
-        if (show) {
-            if (!mExpanded) {
-                mTriggeredExpand = true;
-                mHost.animateToggleQSExpansion();
-            } else {
-                mTriggeredExpand = false;
-            }
-        } else if (mTriggeredExpand) {
-            mHost.animateToggleQSExpansion();
-            mTriggeredExpand = false;
-        }
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
         } else {
@@ -520,6 +518,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         public QSTile<?> tile;
         public QSTileBaseView tileView;
         public boolean scanState;
+        public QSTile.Callback callback;
     }
 
     public interface Callback {
