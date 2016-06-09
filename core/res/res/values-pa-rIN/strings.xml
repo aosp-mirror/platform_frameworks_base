@@ -243,23 +243,23 @@
     <string name="user_owner_label" msgid="1119010402169916617">"ਨਿੱਜੀ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"ਕੰਮ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ਸੰਪਰਕ"</string>
-    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਨੂੰ ਐਕਸੈਸ ਕਰੋ"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ਟਿਕਾਣਾ"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਤੱਕ ਪਹੁੰਚੋ"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ਇਸ ਡੀਵਾਈਸ ਦੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ਕੈਲੰਡਰ"</string>
-    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ਆਪਣੇ ਕੈਲੰਡਰ ਦੀ ਐਕਸੈਸ ਕਰੋ"</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦਿਖਾਓ"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ਸਟੋਰੇਜ"</string>
-    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣ"</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ਆਪਣੀ ਡੀਵਾਈਸ ’ਤੇ ਫੋਟੋਆਂ, ਮੀਡੀਆ ਅਤੇ ਫਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ਮਾਈਕ੍ਰੋਫੋਨ"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ਔਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ਕੈਮਰਾ"</string>
-    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਖਿੱਚੋ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"ਤਸਵੀਰਾਂ ਲੈਣ ਅਤੇ ਵੀਡੀਓ ਰਿਕਾਰਡ ਕਰਨ"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ਫੋਨ"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰੋ ਅਤੇ ਉਹਨਾਂ ਨੂੰ ਪ੍ਰਬੰਧਿਤ ਕਰੋ"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"ਫ਼ੋਨ ਕਾਲਾਂ ਕਰਨ ਅਤੇ ਉਹਨਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ਸਰੀਰ ਸੰਵੇਦਕ"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਮਹੱਤਵਪੂਰਣ ਲੱਛਣਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡੈਟਾ ਤੱਕ ਪਹੁੰਚ"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ਆਪਣੇ ਸਰੀਰ ਦੇ ਅਹਿਮ ਚਿੰਨ੍ਹਾਂ ਬਾਰੇ ਸੰਵੇਦਕ ਡੈਟੇ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ਵਿੰਡੋ ਸਮੱਗਰੀ ਮੁੜ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ਇੱਕ ਵਿੰਡੋ ਦੀ ਸਮੱਗਰੀ ਦੀ ਜਾਂਚ ਕਰੋ, ਜਿਸ ਨਾਲ ਤੁਸੀਂ ਇੰਟਰੈਕਟ ਕਰ ਰਹੇ ਹੋ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ਐਕਸਪਲੋਰ ਬਾਇ ਟਚ ਚਾਲੂ ਕਰੋ"</string>
@@ -292,7 +292,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਵੱਲੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਸੈਲ ਪ੍ਰਸਾਰਨ ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਸੈਲ ਪ੍ਰਸਾਰਨ ਚਿਤਾਵਨੀਆਂ ਤੁਹਾਨੂੰ ਐਮਰਜੈਂਸੀ ਸਥਿਤੀਆਂ ਦੀ ਚਿਤਾਵਨੀ ਦੇਣ ਲਈ ਕੁਝ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਤੇ ਪ੍ਰਦਾਨ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਦੇ ਪ੍ਰਦਰਸ਼ਨ ਜਾਂ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾ ਸਕਦੇ ਹਨ ਜਦੋਂ ਇੱਕ ਐਮਰਜੈਂਸੀ ਸੈਲ ਪ੍ਰਸਾਰਨ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ਸਬਸਕ੍ਰਾਈਬ ਕੀਤੇ ਫੀਡਸ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"ਐਪ ਨੂੰ ਵਰਤਮਾਨ ਵਿੱਚ ਸਿੰਕ ਕੀਤੇ ਫੀਡਸ ਬਾਰੇ ਵੇਰਵੇ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦਿਖਾਓ"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS ਸੁਨੇਹੇ ਭੇਜਣ ਅਤੇ ਦੇਖਣ"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"ਐਪ ਨੂੰ SMS ਸੁਨੇਹੇ ਭੇਜਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਸਦੇ ਸਿੱਟੇ ਵਜੋਂ ਅਕਲਪਿਤ ਖ਼ਰਚੇ ਪੈ ਸਕਦੇ ਹਨ। ਖ਼ਰਾਬ ਐਪਸ ਤੁਹਾਡੀ ਪੁਸ਼ਟੀ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਕੇ ਤੁਹਾਨੂੰ ਖ਼ਰਚੇ ਪਾ ਸਕਦੇ ਹਨ।"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ਤੁਹਾਡੇ ਟੈਕਸਟ ਸੁਨੇਹੇ (SMS ਜਾਂ MMS) ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ਐਪ ਨੂੰ ਤੁਹਾਡੀ ਟੈਬਲੇਟ ਜਾਂ SIM ਕਾਰਡ ਤੇ ਸਟੋਰ ਕੀਤੇ SMS ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ ਸਾਰੇ SMS ਸੁਨੇਹੇ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ, ਸਮੱਗਰੀ ਜਾਂ ਗੁਪਤਤਾ ਤੇ ਧਿਆਨ ਦਿੱਤੇ ਬਿਨਾਂ।"</string>
