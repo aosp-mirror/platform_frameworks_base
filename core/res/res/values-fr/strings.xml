@@ -860,8 +860,8 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"mainten."</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
@@ -876,8 +876,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="other">dans <xliff:g id="COUNT_1">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
       <item quantity="one">dans <xliff:g id="COUNT_1">%d</xliff:g> h</item>

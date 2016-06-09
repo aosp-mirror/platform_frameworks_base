@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"ఇప్పుడు"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ని.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ని.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ని</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ని</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గం.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గం.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>గం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>గం</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రో.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రో.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>రో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>రో</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సం.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సం.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>సం</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>సం</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ని.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ని.లో</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ని.లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ని.లో</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గం.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గం.లో</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>గంటల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>గంటలో</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రో.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రో.లో</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>రోజుల్లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>రోజులో</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సం.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సం.లో</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>సం.లో</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>సం.లో</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> నిమిషాల క్రితం</item>
