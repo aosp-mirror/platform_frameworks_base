@@ -60,9 +60,9 @@ static jint Typeface_getStyle(JNIEnv* env, jobject obj, jlong faceHandle) {
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray) {
     ScopedLongArrayRO families(env, familyArray);
-    std::vector<FontFamily*> familyVec;
+    std::vector<minikin::FontFamily*> familyVec;
     for (size_t i = 0; i < families.size(); i++) {
-        FontFamily* family = reinterpret_cast<FontFamily*>(families[i]);
+        minikin::FontFamily* family = reinterpret_cast<minikin::FontFamily*>(families[i]);
         familyVec.push_back(family);
     }
     return reinterpret_cast<jlong>(Typeface::createFromFamilies(familyVec));

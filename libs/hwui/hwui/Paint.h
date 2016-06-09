@@ -64,11 +64,11 @@ public:
         return mMinikinLangListId;
     }
 
-    void setFontVariant(FontVariant variant) {
+    void setFontVariant(minikin::FontVariant variant) {
         mFontVariant = variant;
     }
 
-    FontVariant getFontVariant() const {
+    minikin::FontVariant getFontVariant() const {
         return mFontVariant;
     }
 
@@ -84,7 +84,7 @@ private:
     float mLetterSpacing = 0;
     std::string mFontFeatureSettings;
     uint32_t mMinikinLangListId;
-    FontVariant mFontVariant;
+    minikin::FontVariant mFontVariant;
     uint32_t mHyphenEdit = 0;
 };
 

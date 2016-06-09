@@ -43,7 +43,7 @@ static void resolveStyle(Typeface* typeface) {
         weight = 9;
     }
     bool italic = (typeface->fSkiaStyle & SkTypeface::kItalic) != 0;
-    typeface->fStyle = FontStyle(weight, italic);
+    typeface->fStyle = minikin::FontStyle(weight, italic);
 }
 
 Typeface* gDefaultTypeface = NULL;
@@ -54,13 +54,13 @@ pthread_once_t gDefaultTypefaceOnce = PTHREAD_ONCE_INIT;
 // typeface is set.
 // TODO: investigate why layouts are being created before Typeface.java
 // class initialization.
-static FontCollection *makeFontCollection() {
-    std::vector<FontFamily *>typefaces;
+static minikin::FontCollection *makeFontCollection() {
+    std::vector<minikin::FontFamily *>typefaces;
     const char *fns[] = {
         "/system/fonts/Roboto-Regular.ttf",
     };
 
-    FontFamily *family = new FontFamily();
+    minikin::FontFamily *family = new minikin::FontFamily();
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         ALOGD("makeFontCollection adding %s", fn);
@@ -69,7 +69,7 @@ static FontCollection *makeFontCollection() {
             // TODO: might be a nice optimization to get access to the underlying font
             // data, but would require us opening the file ourselves and passing that
             // to the appropriate Create method of SkTypeface.
-            MinikinFont *font = new MinikinFontSkia(skFace, NULL, 0, 0);
+            minikin::MinikinFont *font = new MinikinFontSkia(skFace, NULL, 0, 0);
             family->addFont(font);
             font->Unref();
         } else {
@@ -78,13 +78,13 @@ static FontCollection *makeFontCollection() {
     }
     typefaces.push_back(family);
 
-    FontCollection *result = new FontCollection(typefaces);
+    minikin::FontCollection *result = new minikin::FontCollection(typefaces);
     family->Unref();
     return result;
 }
 
 static void getDefaultTypefaceOnce() {
-    Layout::init();
+  minikin::Layout::init();
     if (gDefaultTypeface == NULL) {
         // We expect the client to set a default typeface, but provide a
         // default so we can make progress before that happens.
@@ -131,16 +131,16 @@ Typeface* Typeface::createWeightAlias(Typeface* src, int weight) {
     return result;
 }
 
-Typeface* Typeface::createFromFamilies(const std::vector<FontFamily*>& families) {
+Typeface* Typeface::createFromFamilies(const std::vector<minikin::FontFamily*>& families) {
     Typeface* result = new Typeface;
-    result->fFontCollection = new FontCollection(families);
+    result->fFontCollection = new minikin::FontCollection(families);
     if (families.empty()) {
         ALOGW("createFromFamilies creating empty collection");
         result->fSkiaStyle = SkTypeface::kNormal;
     } else {
-        const FontStyle defaultStyle;
-        FontFamily* firstFamily = reinterpret_cast<FontFamily*>(families[0]);
-        MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
+        const minikin::FontStyle defaultStyle;
+        minikin::FontFamily* firstFamily = reinterpret_cast<minikin::FontFamily*>(families[0]);
+        minikin::MinikinFont* mf = firstFamily->getClosestMatch(defaultStyle).font;
         if (mf != NULL) {
             SkTypeface* skTypeface = reinterpret_cast<MinikinFontSkia*>(mf)->GetSkTypeface();
             // TODO: probably better to query more precise style from family, will be important

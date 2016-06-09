@@ -503,7 +503,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
-    const int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    const int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
                                        contextCount, x, y, bidiFlags, *paint, typeface);
@@ -517,7 +517,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
 
-    int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
@@ -567,7 +567,7 @@ static void freeCaches(JNIEnv* env, jobject) {
 }
 
 static void freeTextLayoutCaches(JNIEnv* env, jobject) {
-    Layout::purgeCaches();
+    minikin::Layout::purgeCaches();
 }
 
 }; // namespace CanvasJNI

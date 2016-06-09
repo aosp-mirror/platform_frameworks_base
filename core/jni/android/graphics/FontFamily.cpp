@@ -41,21 +41,21 @@ namespace android {
 
 static jlong FontFamily_create(JNIEnv* env, jobject clazz, jstring lang, jint variant) {
     if (lang == NULL) {
-        return (jlong)new FontFamily(variant);
+        return (jlong)new minikin::FontFamily(variant);
     }
     ScopedUtfChars str(env, lang);
-    uint32_t langId = FontStyle::registerLanguageList(str.c_str());
-    return (jlong)new FontFamily(langId, variant);
+    uint32_t langId = minikin::FontStyle::registerLanguageList(str.c_str());
+    return (jlong)new minikin::FontFamily(langId, variant);
 }
 
 static void FontFamily_unref(JNIEnv* env, jobject clazz, jlong familyPtr) {
-    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     fontFamily->Unref();
 }
 
-static jboolean addSkTypeface(FontFamily* family, SkTypeface* face, const void* fontData,
+static jboolean addSkTypeface(minikin::FontFamily* family, SkTypeface* face, const void* fontData,
         size_t fontSize, int ttcIndex) {
-    MinikinFont* minikinFont = new MinikinFontSkia(face, fontData, fontSize, ttcIndex);
+    minikin::MinikinFont* minikinFont = new MinikinFontSkia(face, fontData, fontSize, ttcIndex);
     bool result = family->addFont(minikinFont);
     minikinFont->Unref();
     return result;
@@ -111,7 +111,7 @@ static jboolean FontFamily_addFont(JNIEnv* env, jobject clazz, jlong familyPtr, 
         ALOGE("addFont failed to create font");
         return false;
     }
-    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     return addSkTypeface(fontFamily, face, fontPtr, (size_t)fontSize, ttcIndex);
 }
 
@@ -177,9 +177,10 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         ALOGE("addFont failed to create font, invalid request");
         return false;
     }
-    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
-    MinikinFont* minikinFont = new MinikinFontSkia(face, fontPtr, (size_t)fontSize, ttcIndex);
-    fontFamily->addFont(minikinFont, FontStyle(weight / 100, isItalic));
+    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
+    minikin::MinikinFont* minikinFont =
+            new MinikinFontSkia(face, fontPtr, (size_t)fontSize, ttcIndex);
+    fontFamily->addFont(minikinFont, minikin::FontStyle(weight / 100, isItalic));
     minikinFont->Unref();
     return true;
 }
@@ -219,7 +220,7 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;
     }
-    FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
+    minikin::FontFamily* fontFamily = reinterpret_cast<minikin::FontFamily*>(familyPtr);
     return addSkTypeface(fontFamily, face, buf, bufSize, /* ttcIndex */ 0);
 }
 
