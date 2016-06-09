@@ -860,32 +860,32 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"indi"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>dəq</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>dəq</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>saat</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>saat</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>st</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>st</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>gün</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>gün</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>g</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>g</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>il</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>il</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>i</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>i</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>dəqiqədə</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>dəqiqədə</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d-də</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d-də</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>saata</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>saata</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g>s-da</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g>s-da</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>gündə</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>gündə</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>g-də</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>g-də</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ildə</item>

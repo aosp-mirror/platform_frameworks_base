@@ -253,7 +253,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medieinnhold og filer på enheten din"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spill inn lyd"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ta opp lyd"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder og ta opp video"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>

@@ -860,20 +860,20 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"jetzt"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> d</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> T.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> T.</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> J.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> J.</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
       <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -884,12 +884,12 @@
       <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> d</item>
-      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> d</item>
+      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> T.</item>
+      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> T.</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> a</item>
-      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> a</item>
+      <item quantity="other">in <xliff:g id="COUNT_1">%d</xliff:g> J.</item>
+      <item quantity="one">in <xliff:g id="COUNT_0">%d</xliff:g> J.</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other">vor <xliff:g id="COUNT_1">%d</xliff:g> Minuten</item>
