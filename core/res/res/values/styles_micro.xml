@@ -14,6 +14,36 @@
      limitations under the License.
 -->
 <resources>
+    <!-- Preference styles -->
+    <eat-comment/>
+    <style name="Preference.Micro" parent="Preference.Material">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.CheckBoxPreference" parent="Preference.Material.CheckBoxPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.SwitchPreference" parent="Preference.Material.SwitchPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.PreferenceScreen" parent="Preference.Material.PreferenceScreen">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.DialogPreference" parent="Preference.Material.DialogPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.DialogPreference.YesNoPreference" parent="Preference.Material.DialogPreference.YesNoPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.DialogPreference.SeekBarPreference" parent="Preference.Material.DialogPreference.SeekBarPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.DialogPreference.EditTextPreference" parent="Preference.Material.DialogPreference.EditTextPreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+    <style name="Preference.Micro.RingtonePreference" parent="Preference.Material.RingtonePreference">
+        <item name="layout">@layout/preference_micro</item>
+    </style>
+
     <style name="Animation.Micro"/>
 
     <style name="Animation.Micro.Activity" parent="Animation.Material.Activity">
@@ -88,11 +118,11 @@
     </style>
 
     <style name="TextAppearance.Micro.Body1">
-        <item name="textSize">@dimen/text_size_body1_micro</item>
+        <item name="textSize">@dimen/text_size_body_1_micro</item>
     </style>
 
     <style name="TextAppearance.Micro.Body2">
-        <item name="textSize">@dimen/text_size_body2_micro</item>
+        <item name="textSize">@dimen/text_size_body_2_micro</item>
     </style>
 
     <style name="TextAppearance.Micro.Caption">

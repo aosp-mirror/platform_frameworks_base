@@ -17,8 +17,8 @@
     <dimen name="text_size_headline_micro">22sp</dimen>
     <dimen name="text_size_title_micro">20sp</dimen>
     <dimen name="text_size_subtitle_micro">18sp</dimen>
-    <dimen name="text_size_body1_micro">16sp</dimen>
-    <dimen name="text_size_body2_micro">14sp</dimen>
+    <dimen name="text_size_body_1_micro">16sp</dimen>
+    <dimen name="text_size_body_2_micro">14sp</dimen>
     <dimen name="text_size_caption_micro">12sp</dimen>
 
     <dimen name="text_size_large_micro">20sp</dimen>
