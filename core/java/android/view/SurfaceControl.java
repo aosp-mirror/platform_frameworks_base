@@ -51,6 +51,7 @@ public class SurfaceControl {
 
     private static native void nativeSetLayer(long nativeObject, int zorder);
     private static native void nativeSetPosition(long nativeObject, float x, float y);
+    private static native void nativeSetPositionAppliesWithResize(long nativeObject);
     private static native void nativeSetSize(long nativeObject, int w, int h);
     private static native void nativeSetTransparentRegionHint(long nativeObject, Region region);
     private static native void nativeSetAlpha(long nativeObject, float alpha);
@@ -405,6 +406,16 @@ public class SurfaceControl {
     public void setPosition(float x, float y) {
         checkNotReleased();
         nativeSetPosition(mNativeObject, x, y);
+    }
+
+    /**
+     * If the size changes in this transaction, position updates specified
+     * in this transaction will not complete until a buffer of the new size
+     * arrives.
+     */
+    public void setPositionAppliesWithResize() {
+        checkNotReleased();
+        nativeSetPositionAppliesWithResize(mNativeObject);
     }
 
     public void setSize(int w, int h) {
