@@ -8619,7 +8619,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             // We don't expect installation to fail beyond this point
 
             if (pkgSetting.pkg != null) {
-                maybeRenameForeignDexMarkers(pkgSetting.pkg, pkg, user);
+                // Note that |user| might be null during the initial boot scan. If a codePath
+                // for an app has changed during a boot scan, it's due to an app update that's
+                // part of the system partition and marker changes must be applied to all users.
+                maybeRenameForeignDexMarkers(pkgSetting.pkg, pkg,
+                    (user != null) ? user : UserHandle.ALL);
             }
 
             // Add the new setting to mSettings
