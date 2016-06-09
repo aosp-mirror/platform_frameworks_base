@@ -2615,4 +2615,6 @@
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
+
+  <java-symbol type="bool" name="config_useRoundIcon" />
 </resources>
