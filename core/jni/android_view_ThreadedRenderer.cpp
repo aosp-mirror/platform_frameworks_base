@@ -32,6 +32,7 @@
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
+#include <utils/Timers.h>
 #include <android_runtime/android_view_Surface.h>
 #include <system/window.h>
 
@@ -44,6 +45,7 @@
 #include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
 #include <JankTracker.h>
+#include <PropertyValuesAnimatorSet.h>
 #include <RenderNode.h>
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
@@ -122,6 +124,31 @@ private:
     std::vector<OnFinishedEvent> mOnFinishedEvents;
 };
 
+class FinishAndInvokeListener : public MessageHandler {
+public:
+    explicit FinishAndInvokeListener(PropertyValuesAnimatorSet* anim)
+            : mAnimator(anim) {
+        mListener = anim->getOneShotListener();
+        mRequestId = anim->getRequestId();
+    }
+
+    virtual void handleMessage(const Message& message) {
+        if (mAnimator->getRequestId() == mRequestId) {
+            // Request Id has not changed, meaning there's no animation lifecyle change since the
+            // message is posted, so go ahead and call finish to make sure the PlayState is properly
+            // updated. This is needed because before the next frame comes in from UI thread to
+            // trigger an animation update, there could be reverse/cancel etc. So we need to update
+            // the playstate in time to ensure all the subsequent events get chained properly.
+            mAnimator->end();
+        }
+        mListener->onAnimationFinished(nullptr);
+    }
+private:
+    sp<PropertyValuesAnimatorSet> mAnimator;
+    sp<AnimationListener> mListener;
+    uint32_t mRequestId;
+};
+
 class RenderingException : public MessageHandler {
 public:
     RenderingException(JavaVM* vm, const std::string& message)
@@ -160,6 +187,15 @@ public:
 
     virtual void prepareTree(TreeInfo& info) override {
         info.errorHandler = this;
+
+        for (auto& anim : mVectorDrawableAnimators) {
+            // Assume that the property change in VD from the animators will not be consumed. Mark
+            // otherwise if the VDs are found in the display list tree. For VDs that are not in
+            // the display list tree, we stop providing animation pulses by 1) removing them from
+            // the animation list, 2) post a delayed message to end them at end time so their
+            // listeners can receive the corresponding callbacks.
+            anim->getVectorDrawable()->setPropertyChangeWillBeConsumed(false);
+        }
         // TODO: This is hacky
         info.windowInsetLeft = -stagingProperties().getLeft();
         info.windowInsetTop = -stagingProperties().getTop();
@@ -169,14 +205,44 @@ public:
         info.windowInsetLeft = 0;
         info.windowInsetTop = 0;
         info.errorHandler = nullptr;
+
+        for (auto it = mVectorDrawableAnimators.begin(); it != mVectorDrawableAnimators.end();) {
+            if (!(*it)->getVectorDrawable()->getPropertyChangeWillBeConsumed()) {
+                // Vector Drawable is not in the display list, we should remove this animator from
+                // the list and post a delayed message to end the animator.
+                detachVectorDrawableAnimator(it->get());
+                it = mVectorDrawableAnimators.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        info.out.hasAnimations |= !mVectorDrawableAnimators.empty();
     }
 
     void sendMessage(const sp<MessageHandler>& handler) {
         mLooper->sendMessage(handler, 0);
     }
 
+    void sendMessageDelayed(const sp<MessageHandler>& handler, nsecs_t delayInMs) {
+        mLooper->sendMessageDelayed(ms2ns(delayInMs), handler, 0);
+    }
+
     void attachAnimatingNode(RenderNode* animatingNode) {
         mPendingAnimatingRenderNodes.push_back(animatingNode);
+    }
+
+    void attachPendingVectorDrawableAnimators() {
+        mVectorDrawableAnimators.insert(mPendingVectorDrawableAnimators.begin(),
+                mPendingVectorDrawableAnimators.end());
+        mPendingVectorDrawableAnimators.clear();
+    }
+
+    void detachAnimators() {
+        // Remove animators from the list and post a delayed message in future to end the animator
+        for (auto& anim : mVectorDrawableAnimators) {
+            detachVectorDrawableAnimator(anim.get());
+        }
+        mVectorDrawableAnimators.clear();
     }
 
     void doAttachAnimatingNodes(AnimationContext* context) {
@@ -187,17 +253,57 @@ public:
         mPendingAnimatingRenderNodes.clear();
     }
 
+    void runVectorDrawableAnimators(AnimationContext* context) {
+        for (auto it = mVectorDrawableAnimators.begin(); it != mVectorDrawableAnimators.end();) {
+            (*it)->pushStaging(*context);
+            if ((*it)->animate(*context)) {
+                it = mVectorDrawableAnimators.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     void destroy() {
         for (auto& renderNode : mPendingAnimatingRenderNodes) {
             renderNode->animators().endAllStagingAnimators();
         }
         mPendingAnimatingRenderNodes.clear();
+        mPendingVectorDrawableAnimators.clear();
+    }
+
+    void addVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) {
+        mPendingVectorDrawableAnimators.insert(anim);
     }
 
 private:
     sp<Looper> mLooper;
     JavaVM* mVm;
     std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
+    std::set< sp<PropertyValuesAnimatorSet> > mPendingVectorDrawableAnimators;
+    std::set< sp<PropertyValuesAnimatorSet> > mVectorDrawableAnimators;
+    void detachVectorDrawableAnimator(PropertyValuesAnimatorSet* anim) {
+        if (anim->isInfinite() || !anim->isRunning()) {
+            // Do not need to post anything if the animation is infinite (i.e. no meaningful
+            // end listener action), or if the animation has already ended.
+            return;
+        }
+        nsecs_t remainingTimeInMs = anim->getRemainingPlayTime();
+        // Post a delayed onFinished event that is scheduled to be handled when the animator ends.
+        if (anim->getOneShotListener()) {
+            // VectorDrawable's oneshot listener is updated when there are user triggered animation
+            // lifecycle changes, such as start(), end(), etc. By using checking and clearing
+            // one shot listener, we ensure the same end listener event gets posted only once.
+            // Therefore no duplicates. Another benefit of using one shot listener is that no
+            // removal is necessary: the end time of animation will not change unless triggered by
+            // user events, in which case the already posted listener's id will become stale, and
+            // the onFinished callback will then be ignored.
+            sp<FinishAndInvokeListener> message
+                    = new FinishAndInvokeListener(anim);
+            sendMessageDelayed(message, remainingTimeInMs);
+            anim->clearOneShotListener();
+        }
+    }
 };
 
 class AnimationContextBridge : public AnimationContext {
@@ -213,14 +319,26 @@ public:
     virtual void startFrame(TreeInfo::TraversalMode mode) {
         if (mode == TreeInfo::MODE_FULL) {
             mRootNode->doAttachAnimatingNodes(this);
+            mRootNode->attachPendingVectorDrawableAnimators();
         }
         AnimationContext::startFrame(mode);
+        // Run VectorDrawable animators in the beginning of the frame instead of during prepareTree,
+        // because one VD can be in multiple render nodes' display list. So it's more simple to
+        // run them all at once before prepareTree than running them or checking whether they have
+        // already ran in each RenderNode. Note that these animators don't damage the RenderNodes.
+        // The damaging is done in prepareTree as needed after checking whether a VD has been
+        // modified.
+        mRootNode->runVectorDrawableAnimators(this);
     }
 
     // Runs any animations still left in mCurrentFrameAnimations
     virtual void runRemainingAnimations(TreeInfo& info) {
         AnimationContext::runRemainingAnimations(info);
         postOnFinishedEvents();
+    }
+
+    virtual void detachAnimators() override {
+        mRootNode->detachAnimators();
     }
 
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
@@ -230,6 +348,7 @@ public:
 
     virtual void destroy() {
         AnimationContext::destroy();
+        detachAnimators();
         postOnFinishedEvents();
     }
 
@@ -527,6 +646,13 @@ static void android_view_ThreadedRenderer_registerAnimatingRenderNode(JNIEnv* en
     rootRenderNode->attachAnimatingNode(animatingNode);
 }
 
+static void android_view_ThreadedRenderer_registerVectorDrawableAnimator(JNIEnv* env, jobject clazz,
+        jlong rootNodePtr, jlong animatorPtr) {
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
+    PropertyValuesAnimatorSet* animator = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorPtr);
+    rootRenderNode->addVectorDrawableAnimator(animator);
+}
+
 static void android_view_ThreadedRenderer_invokeFunctor(JNIEnv* env, jobject clazz,
         jlong functorPtr, jboolean waitForCompletion) {
     Functor* functor = reinterpret_cast<Functor*>(functorPtr);
@@ -738,6 +864,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(JJ)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
+    { "nRegisterVectorDrawableAnimator", "(JJ)V", (void*) android_view_ThreadedRenderer_registerVectorDrawableAnimator },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nBuildLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_buildLayer },

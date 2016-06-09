@@ -62,19 +62,23 @@ public:
     }
     bool mayRunAsync() { return mMayRunAsync; }
     ANDROID_API void start();
-    ANDROID_API void reset();
+    ANDROID_API virtual void reset();
     ANDROID_API void reverse();
     // Terminates the animation at its current progress.
     ANDROID_API void cancel();
 
     // Terminates the animation and skip to the end of the animation.
-    ANDROID_API void end();
+    ANDROID_API virtual void end();
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
     void detach() { mTarget = nullptr; }
-    void pushStaging(AnimationContext& context);
-    bool animate(AnimationContext& context);
+    ANDROID_API void pushStaging(AnimationContext& context);
+    ANDROID_API bool animate(AnimationContext& context);
+
+    // Returns the remaining time in ms for the animation. Note this should only be called during
+    // an animation on RenderThread.
+    ANDROID_API nsecs_t getRemainingPlayTime();
 
     bool isRunning() { return mPlayState == PlayState::Running
             || mPlayState == PlayState::Reversing; }

@@ -30,6 +30,11 @@ void PropertyValuesAnimatorSet::addPropertyAnimator(PropertyValuesHolder* proper
             interpolator, startDelay, duration, repeatCount);
     mAnimators.emplace_back(animator);
     setListener(new PropertyAnimatorSetListener(this));
+
+    // Check whether any child animator is infinite after adding it them to the set.
+    if (repeatCount == -1) {
+        mIsInfinite = true;
+    }
 }
 
 PropertyValuesAnimatorSet::PropertyValuesAnimatorSet()
@@ -78,13 +83,25 @@ void PropertyValuesAnimatorSet::onPlayTimeChanged(nsecs_t playTime) {
 void PropertyValuesAnimatorSet::start(AnimationListener* listener) {
     init();
     mOneShotListener = listener;
+    mRequestId++;
     BaseRenderNodeAnimator::start();
 }
 
 void PropertyValuesAnimatorSet::reverse(AnimationListener* listener) {
     init();
     mOneShotListener = listener;
+    mRequestId++;
     BaseRenderNodeAnimator::reverse();
+}
+
+void PropertyValuesAnimatorSet::reset() {
+    mRequestId++;
+    BaseRenderNodeAnimator::reset();
+}
+
+void PropertyValuesAnimatorSet::end() {
+    mRequestId++;
+    BaseRenderNodeAnimator::end();
 }
 
 void PropertyValuesAnimatorSet::init() {
