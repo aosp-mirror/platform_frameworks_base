@@ -1505,6 +1505,14 @@
         android:label="@string/permlab_manageUsers"
         android:description="@string/permdesc_manageUsers" />
 
+    <!-- @hide Allows an application to create, remove users and get the list of
+         users on the device. Applications holding this permission can only create restricted,
+         guest, and managed users. For creating other kind of users,
+         {@link android.Manifest.permission#MANAGE_USERS} is needed.
+         This permission is not available to third party applications. -->
+    <permission android:name="android.permission.CREATE_USERS"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to get full detailed information about
          recently running tasks, with full fidelity to the real state.
          @hide -->
