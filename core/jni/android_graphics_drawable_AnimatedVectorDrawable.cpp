@@ -142,14 +142,24 @@ static jlong createRootAlphaPropertyHolder(JNIEnv*, jobject, jlong nativePtr, jf
             startValue, endValue);
     return reinterpret_cast<jlong>(newHolder);
 }
-static void setPropertyHolderData(JNIEnv* env, jobject, jlong propertyHolderPtr,
+static void setFloatPropertyHolderData(JNIEnv* env, jobject, jlong propertyHolderPtr,
         jfloatArray srcData, jint length) {
-
     jfloat* propertyData = env->GetFloatArrayElements(srcData, nullptr);
-    PropertyValuesHolder* holder = reinterpret_cast<PropertyValuesHolder*>(propertyHolderPtr);
+    PropertyValuesHolderImpl<float>* holder =
+            reinterpret_cast<PropertyValuesHolderImpl<float>*>(propertyHolderPtr);
     holder->setPropertyDataSource(propertyData, length);
     env->ReleaseFloatArrayElements(srcData, propertyData, JNI_ABORT);
 }
+
+static void setIntPropertyHolderData(JNIEnv* env, jobject, jlong propertyHolderPtr,
+        jintArray srcData, jint length) {
+    jint* propertyData = env->GetIntArrayElements(srcData, nullptr);
+    PropertyValuesHolderImpl<int>* holder =
+            reinterpret_cast<PropertyValuesHolderImpl<int>*>(propertyHolderPtr);
+    holder->setPropertyDataSource(propertyData, length);
+    env->ReleaseIntArrayElements(srcData, propertyData, JNI_ABORT);
+}
+
 static void start(JNIEnv* env, jobject, jlong animatorSetPtr, jobject finishListener, jint id) {
     PropertyValuesAnimatorSet* set = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorSetPtr);
     AnimationListener* listener = createAnimationListener(env, finishListener, id);
@@ -181,7 +191,8 @@ static const JNINativeMethod gMethods[] = {
     {"nCreatePathColorPropertyHolder", "!(JIII)J", (void*)createPathColorPropertyHolder},
     {"nCreatePathPropertyHolder", "!(JIFF)J", (void*)createPathPropertyHolder},
     {"nCreateRootAlphaPropertyHolder", "!(JFF)J", (void*)createRootAlphaPropertyHolder},
-    {"nSetPropertyHolderData", "(J[FI)V", (void*)setPropertyHolderData},
+    {"nSetPropertyHolderData", "(J[FI)V", (void*)setFloatPropertyHolderData},
+    {"nSetPropertyHolderData", "(J[II)V", (void*)setIntPropertyHolderData},
     {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)start},
     {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)reverse},
     {"nEnd", "!(J)V", (void*)end},
