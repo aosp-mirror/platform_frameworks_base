@@ -70,6 +70,7 @@ public class StatusBarWindowView extends FrameLayout {
     private View mBrightnessMirror;
 
     private int mRightInset = 0;
+    private int mLeftInset = 0;
 
     private PhoneStatusBar mService;
     private final Paint mTransparentSrcPaint = new Paint();
@@ -93,25 +94,26 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     protected boolean fitSystemWindows(Rect insets) {
         if (getFitsSystemWindows()) {
-            boolean paddingChanged = insets.left != getPaddingLeft()
-                    || insets.top != getPaddingTop()
+            boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();
 
             // Super-special right inset handling, because scrims and backdrop need to ignore it.
-            if (insets.right != mRightInset) {
+            if (insets.right != mRightInset || insets.left != mLeftInset) {
                 mRightInset = insets.right;
+                mLeftInset = insets.left;
                 applyMargins();
             }
-            // Drop top inset, apply left inset and pass through bottom inset.
+            // Drop top inset, and pass through bottom inset.
             if (paddingChanged) {
-                setPadding(insets.left, 0, 0, 0);
+                setPadding(0, 0, 0, 0);
             }
             insets.left = 0;
             insets.top = 0;
             insets.right = 0;
         } else {
-            if (mRightInset != 0) {
+            if (mRightInset != 0 || mLeftInset != 0) {
                 mRightInset = 0;
+                mLeftInset = 0;
                 applyMargins();
             }
             boolean changed = getPaddingLeft() != 0
@@ -127,13 +129,16 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     private void applyMargins() {
+        mService.mScrimController.setLeftInset(mLeftInset);
         final int N = getChildCount();
         for (int i = 0; i < N; i++) {
             View child = getChildAt(i);
             if (child.getLayoutParams() instanceof LayoutParams) {
                 LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                if (!lp.ignoreRightInset && lp.rightMargin != mRightInset) {
+                if (!lp.ignoreRightInset
+                        && (lp.rightMargin != mRightInset || lp.leftMargin != mLeftInset)) {
                     lp.rightMargin = mRightInset;
+                    lp.leftMargin = mLeftInset;
                     child.requestLayout();
                 }
             }
