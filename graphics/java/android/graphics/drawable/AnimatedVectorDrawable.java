@@ -46,6 +46,7 @@ import android.util.IntArray;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.PathParser;
+import android.util.Property;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.DisplayListCanvas;
@@ -390,9 +391,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                             R.styleable.AnimatedVectorDrawableTarget_animation, 0);
                     if (animResId != 0) {
                         if (theme != null) {
-                            final Animator objectAnimator = AnimatorInflater.loadAnimator(
+                            // The animator here could be ObjectAnimator or AnimatorSet.
+                            final Animator animator = AnimatorInflater.loadAnimator(
                                     res, theme, animResId, pathErrorScale);
-                            state.addTargetAnimator(target, objectAnimator);
+                            updateAnimatorProperty(animator, target, state.mVectorDrawable);
+                            state.addTargetAnimator(target, animator);
                         } else {
                             // The animation may be theme-dependent. As a
                             // workaround until Animator has full support for
@@ -412,6 +415,36 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         // If we don't have any pending animations, we don't need to hold a
         // reference to the resources.
         mRes = state.mPendingAnims == null ? null : res;
+    }
+
+    private static void updateAnimatorProperty(Animator animator, String targetName,
+            VectorDrawable vectorDrawable) {
+        if (animator instanceof ObjectAnimator) {
+            // Change the property of the Animator from using reflection based on the property
+            // name to a Property object that wraps the setter and getter for modifying that
+            // specific property for a given object. By replacing the reflection with a direct call,
+            // we can largely reduce the time it takes for a animator to modify a VD property.
+            PropertyValuesHolder[] holders = ((ObjectAnimator) animator).getValues();
+            for (int i = 0; i < holders.length; i++) {
+                PropertyValuesHolder pvh = holders[i];
+                String propertyName = pvh.getPropertyName();
+                Object targetNameObj = vectorDrawable.getTargetByName(targetName);
+                Property property = null;
+                if (targetNameObj instanceof VectorDrawable.VObject) {
+                    property = ((VectorDrawable.VObject) targetNameObj).getProperty(propertyName);
+                } else if (targetNameObj instanceof VectorDrawable.VectorDrawableState) {
+                    property = ((VectorDrawable.VectorDrawableState) targetNameObj)
+                            .getProperty(propertyName);
+                }
+                if (property != null) {
+                    pvh.setProperty(property);
+                }
+            }
+        } else if (animator instanceof AnimatorSet) {
+            for (Animator anim : ((AnimatorSet) animator).getChildAnimations()) {
+                updateAnimatorProperty(anim, targetName, vectorDrawable);
+            }
+        }
     }
 
     /**
@@ -616,8 +649,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
                 for (int i = 0, count = pendingAnims.size(); i < count; i++) {
                     final PendingAnimator pendingAnimator = pendingAnims.get(i);
-                    final Animator objectAnimator = pendingAnimator.newInstance(res, t);
-                    addTargetAnimator(pendingAnimator.target, objectAnimator);
+                    final Animator animator = pendingAnimator.newInstance(res, t);
+                    updateAnimatorProperty(animator, pendingAnimator.target, mVectorDrawable);
+                    addTargetAnimator(pendingAnimator.target, animator);
                 }
             }
         }
