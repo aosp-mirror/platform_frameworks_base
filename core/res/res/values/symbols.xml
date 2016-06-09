@@ -2617,4 +2617,7 @@
   <java-symbol type="id" name="cross_task_transition" />
 
   <java-symbol type="bool" name="config_useRoundIcon" />
+
+  <!-- For System navigation keys -->
+  <java-symbol type="bool" name="config_supportSystemNavigationKeys" />
 </resources>

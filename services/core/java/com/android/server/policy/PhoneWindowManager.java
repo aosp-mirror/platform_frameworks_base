@@ -5851,7 +5851,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     private void interceptStatusBarKey(KeyEvent event) {
         final int e = event.getKeyCode();
-        if (event.getAction() == KeyEvent.ACTION_UP) {
+        if (event.getAction() == KeyEvent.ACTION_UP && areSystemNavigationKeysEnabled()) {
             boolean doOpen = false;
             boolean doClose = false;
             doOpen = (e == KeyEvent.KEYCODE_FP_NAV_DOWN);
@@ -7262,6 +7262,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean isGlobalAccessibilityGestureEnabled() {
         return Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED, 0) == 1;
+    }
+
+    private boolean areSystemNavigationKeysEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SYSTEM_NAVIGATION_KEYS_ENABLED, 0) == 1;
     }
 
     @Override

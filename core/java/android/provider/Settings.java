@@ -9025,6 +9025,13 @@ public final class Settings {
          * @hide
          */
         public static final String MAX_NOTIFICATION_ENQUEUE_RATE = "max_notification_enqueue_rate";
+
+        /**
+         * Whether SystemUI navigation keys is enabled.
+         * @hide
+         */
+        public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
+                "system_navigation_keys_enabled";
     }
 
     /**
