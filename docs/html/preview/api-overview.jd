@@ -701,48 +701,37 @@ before unlock. All other data is unavailable until the User confirms their lock
 For more information, see <a href="{@docRoot}preview/features/direct-boot.html">Direct Boot</a>.</p>
 </p>
 
-
 <h2 id="key_attestation">Key Attestation</h2>
 
-<p>Hardware-backed keystores provide a much safer method to create, store,
-and use cryptographic keys on Android devices. They protect keys from the
-Linux kernel, potential Android vulnerabilities, and extraction
-from rooted devices.</p>
+<p>
+  Android N introduces <em>key attestation</em>, a new security tool that helps
+  you make sure that the key pairs stored within a device's <a class=
+  "external-link" href=
+  "https://source.android.com/security/keystore/"><em>hardware-backed
+  keystore</em></a> properly protect the sensitive information that your app
+  uses. By using this tool, you gain additional confidence that your app
+  interacts with keys that reside in secure hardware, even if the device
+  running your app is rooted. If you use keys from the hardware-backed keystore
+  in your apps, you should use this tool, particularly if you use the keys to
+  verify sensitive information within your app.
+</p>
 
-<p>To make it easier and more secure to use hardware-backed keystores,
-Android N introduces Key Attestation. Apps and off-devices can use Key
-Attestation to strongly determine whether an RSA or EC key pair is
-hardware-backed, what the properties of the key pair are, and what
-  constraints are applied to its usage and validity. </p>
+<p>
+  Key attestation allows you to verify that an RSA or EC key pair has been
+  created and stored in a device’s hardware-backed keystore within the device’s
+  trusted execution environment (TEE). The tool also allows you to use an
+  off-device service, such as your app's back-end server, to determine and
+  strongly verify the uses and validity of the key pair. These features provide
+  an additional level of security that protects the key pair, even if someone
+  roots the device or compromises the security of the Android platform running
+  on the device.
+</p>
 
-<p>Apps and off-device services can request information about a key pair
-through an X.509 attestation certificate which must be signed by a valid
-attestation key. The attestation key is an ECDSA signing key which is
-injected into the device’s hardware-backed keystore at the factory.
-Therefore, an attestation certificate signed by a valid attestation
-key confirms the existence of a hardware-backed keystore, along with
-  details of key pairs in that keystore.</p>
-
-<p>To ensure that the device is using a secure, official Android factory
-image, Key Attestation requires that the device <a
-class="external-link"
-href="https://source.android.com/security/verifiedboot/verified-boot.html#bootloader_requirements">bootloader</a>
-provide the following information to the <a class="external-link"
-href="https://source.android.com/security/trusty/index.html">Trusted
-Execution Environment (TEE)</a>:</p>
-
-<ul>
-<li>The OS version and patch level installed on the device</li>
-<li>The <a href="https://source.android.com/security/verifiedboot/index.html"
-class="external-link" >Verified Boot</a> public key and lock status</li>
-  </ul>
-
-<p>For more information about the hardware-backed keystore feature,
-see the guide for <a href="https://source.android.com/security/keystore/"
-class="external-link">Hardware-backed Keystore</a>.</p>
-
-<p>In addition to Key Attestation, Android N also introduces
-  fingerprint-bound keys that are not revoked on fingerprint enrollment.</p>
+<p>
+  For more information, see the
+  <a href="{@docRoot}preview/features/key-attestation.html">Key Attestation</a>
+  developer documentation.
+</p>
 
 <h2 id="network_security_config">Network Security Config</h2>
 
