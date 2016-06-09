@@ -1314,7 +1314,6 @@ class WindowStateAnimator {
     }
 
     private int resolveStackClip() {
-
         // App animation overrides window animation stack clip mode.
         if (mAppAnimator != null && mAppAnimator.animation != null) {
             return mAppAnimator.getStackClip();
@@ -1420,6 +1419,9 @@ class WindowStateAnimator {
         // aren't observing known issues here outside of PiP resizing. (Typically
         // the other windows that use -1 are PopupWindows which aren't likely
         // to be rendering while we resize).
+
+        boolean wasForceScaled = mForceScaleUntilResize;
+
         if (!w.inPinnedWorkspace() || (!w.mRelayoutCalled || w.mInRelayout)) {
             mSurfaceResized = mSurfaceController.setSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
@@ -1428,13 +1430,17 @@ class WindowStateAnimator {
         }
         mForceScaleUntilResize = mForceScaleUntilResize && !mSurfaceResized;
 
-
         calculateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect);
+
+        float surfaceWidth = mSurfaceController.getWidth();
+        float surfaceHeight = mSurfaceController.getHeight();
+
         if ((task != null && task.mStack.getForceScaleToCrop()) || mForceScaleUntilResize) {
             int hInsets = w.getAttrs().surfaceInsets.left + w.getAttrs().surfaceInsets.right;
             int vInsets = w.getAttrs().surfaceInsets.top + w.getAttrs().surfaceInsets.bottom;
-            float surfaceWidth = mSurfaceController.getWidth();
-            float surfaceHeight = mSurfaceController.getHeight();
+            if (!mForceScaleUntilResize) {
+                mSurfaceController.forceScaleableInTransaction(true);
+            }
             // We want to calculate the scaling based on the content area, not based on
             // the entire surface, so that we scale in sync with windows that don't have insets.
             mExtraHScale = (mTmpClipRect.width() - hInsets) / (float)(surfaceWidth - hInsets);
@@ -1455,7 +1461,8 @@ class WindowStateAnimator {
             posX += w.getAttrs().surfaceInsets.left * (1 - mExtraHScale);
             posY += w.getAttrs().surfaceInsets.top * (1 - mExtraVScale);
 
-            mSurfaceController.setPositionInTransaction(posX, posY, recoveringMemory);
+            mSurfaceController.setPositionInTransaction((float)Math.floor(posX),
+                    (float)Math.floor(posY), recoveringMemory);
 
             // Since we are scaled to fit in our previously desired crop, we can now
             // expose the whole window in buffer space, and not risk extending
@@ -1467,12 +1474,28 @@ class WindowStateAnimator {
             // We need to ensure for each surface, that we disable transformation matrix
             // scaling in the same transaction which we resize the surface in.
             // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
-            // then take over the scaling until the new buffer arrives, and things 
+            // then take over the scaling until the new buffer arrives, and things
             // will be seamless.
             mForceScaleUntilResize = true;
         } else {
             mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
                     recoveringMemory);
+        }
+
+        // If we are ending the scaling mode. We switch to SCALING_MODE_FREEZE
+        // to prevent further updates until buffer latch. Normally position
+        // would continue to apply immediately. But we need a different position
+        // before and after resize (since we have scaled the shadows, as discussed
+        // above).
+        if (wasForceScaled && !mForceScaleUntilResize) {
+            mSurfaceController.setPositionAppliesWithResizeInTransaction(true);
+            mSurfaceController.forceScaleableInTransaction(false);
+        }
+        if (w.inPinnedWorkspace()) {
+            mTmpClipRect.set(0, 0, -1, -1);
+            task.mStack.getDimBounds(mTmpFinalClipRect);
+            mTmpFinalClipRect.inset(-w.mAttrs.surfaceInsets.left, -w.mAttrs.surfaceInsets.top,
+                    -w.mAttrs.surfaceInsets.right, -w.mAttrs.surfaceInsets.bottom);
         }
 
         updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, recoveringMemory);
