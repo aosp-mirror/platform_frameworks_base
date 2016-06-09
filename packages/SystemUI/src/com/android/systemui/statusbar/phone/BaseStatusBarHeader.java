@@ -20,6 +20,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -44,4 +45,5 @@ public abstract class BaseStatusBarHeader extends RelativeLayout implements
     public abstract void setBatteryController(BatteryController batteryController);
     public abstract void setNextAlarmController(NextAlarmController nextAlarmController);
     public abstract void setUserInfoController(UserInfoController userInfoController);
+    public abstract void setCallback(Callback qsPanelCallback);
 }
