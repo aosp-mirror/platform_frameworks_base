@@ -77,6 +77,11 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
+    protected boolean shouldShowDetail() {
+        return !mExpanded;
+    }
+
+    @Override
     protected void drawTile(TileRecord r, State state) {
         if (state instanceof SignalState) {
             State copy = r.tile.newTileState();
@@ -87,11 +92,6 @@ public class QuickQSPanel extends QSPanel {
             state = copy;
         }
         super.drawTile(r, state);
-    }
-
-    @Override
-    protected void showDetail(boolean show, Record r) {
-        // Do nothing, will be handled by the QSPanel.
     }
 
     @Override
