@@ -5346,7 +5346,13 @@ public class WindowManagerService extends IWindowManager.Stub
         // If this isn't coming from the system then don't allow disabling the lockscreen
         // to bypass security.
         if (Binder.getCallingUid() != Process.SYSTEM_UID && isKeyguardSecure()) {
-            Log.d(TAG_WM, "current mode is SecurityMode, ignore hide keyguard");
+            Log.d(TAG_WM, "current mode is SecurityMode, ignore disableKeyguard");
+            return;
+        }
+
+        // If this isn't coming from the current user, ignore it.
+        if (Binder.getCallingUserHandle().getIdentifier() != mCurrentUserId) {
+            Log.d(TAG_WM, "non-current user, ignore disableKeyguard");
             return;
         }
 
@@ -5660,6 +5666,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mCurrentProfileIds = currentProfileIds;
             mAppTransition.setCurrentUser(newUserId);
             mPolicy.setCurrentUserLw(newUserId);
+
+            // If keyguard was disabled, re-enable it
+            // TODO: Keep track of keyguardEnabled state per user and use here...
+            // e.g. enabled = mKeyguardDisableHandler.getEnabledStateForUser(newUserId);
+            mPolicy.enableKeyguard(true);
 
             // Hide windows that should not be seen by the new user.
             final int numDisplays = mDisplayContents.size();
@@ -10022,6 +10033,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void createWallpaperInputConsumer(InputChannel inputChannel) {
         synchronized (mWindowMap) {
             mWallpaperInputConsumer = new InputConsumerImpl(this, "wallpaper input", inputChannel);
@@ -10030,6 +10042,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void removeWallpaperInputConsumer() {
         synchronized (mWindowMap) {
             if (mWallpaperInputConsumer != null) {
@@ -11125,6 +11138,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
             throws RemoteException {
         if (!checkCallingPermission(Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
