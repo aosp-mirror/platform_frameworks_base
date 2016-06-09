@@ -138,6 +138,4 @@
       <item quantity="other">删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 项？</item>
       <item quantity="one">删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 项？</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"抱歉，您一次最多只能选择 1000 项"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"只能选择 1000 项"</string>
 </resources>

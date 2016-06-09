@@ -162,6 +162,4 @@
       <item quantity="many">Удалить <xliff:g id="COUNT_1">%1$d</xliff:g> объектов?</item>
       <item quantity="other">Удалить <xliff:g id="COUNT_1">%1$d</xliff:g> объекта?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"Можно выбрать не более 1000 объектов"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"Можно выбрать не более 1000 объектов"</string>
 </resources>
