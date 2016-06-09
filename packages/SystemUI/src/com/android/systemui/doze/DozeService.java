@@ -39,6 +39,8 @@ import android.service.dreams.DreamService;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.DozeParameters.PulseSchedule;
@@ -538,6 +540,10 @@ public class DozeService extends DreamService {
             mWakeLock.acquire();
             try {
                 if (DEBUG) Log.d(mTag, "onTrigger: " + triggerEventToString(event));
+                if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
+                    int subType = (int) event.values[0];
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_AMBIENT_GESTURE, subType);
+                }
                 if (mDebugVibrate) {
                     final Vibrator v = (Vibrator) mContext.getSystemService(
                             Context.VIBRATOR_SERVICE);
