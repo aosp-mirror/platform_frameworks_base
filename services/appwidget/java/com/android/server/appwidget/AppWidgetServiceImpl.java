@@ -590,8 +590,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (provider.maskedBySuspendedPackage) {
                 UserInfo userInfo = mUserManager.getUserInfo(providerUserId);
                 showBadge = userInfo.isManagedProfile();
-                onClickIntent = mDevicePolicyManagerInternal.createPackageSuspendedDialogIntent(
-                        providerPackage, providerUserId);
+                onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
+                        providerUserId, true);
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
                 onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
