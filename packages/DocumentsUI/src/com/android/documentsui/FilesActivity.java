@@ -487,7 +487,7 @@ public class FilesActivity extends BaseActivity {
         }
 
         @Override
-        protected Void run(Uri... params) {
+        public Void run(Uri... params) {
             final Uri uri = params[0];
 
             final RootsCache rootsCache = DocumentsApplication.getRootsCache(mOwner);
@@ -512,7 +512,7 @@ public class FilesActivity extends BaseActivity {
         }
 
         @Override
-        protected void finish(Void result) {
+        public void finish(Void result) {
             mOwner.refreshCurrentRootAndDirectory(AnimationView.ANIM_NONE);
         }
     }

@@ -25,6 +25,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -39,7 +40,6 @@ import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -389,20 +389,25 @@ public class Model {
         return mIsLoading;
     }
 
-    List<DocumentInfo> getDocuments(Selection items) {
-        final int size = (items != null) ? items.size() : 0;
+    List<DocumentInfo> getDocuments(Selection selection) {
+        final int size = (selection != null) ? selection.size() : 0;
 
         final List<DocumentInfo> docs =  new ArrayList<>(size);
-        for (String modelId: items.getAll()) {
+        // NOTE: That as this now iterates over only final (non-provisional) selection.
+        for (String modelId: selection) {
             final Cursor cursor = getItem(modelId);
             if (cursor == null) {
-                Log.w(TAG,
-                        "Skipping document. Unabled to obtain cursor for modelId: " + modelId);
+                Log.w(TAG, "Skipping document. Unabled to obtain cursor for modelId: " + modelId);
                 continue;
             }
             docs.add(DocumentInfo.fromDirectoryCursor(cursor));
         }
         return docs;
+    }
+
+    public Uri getItemUri(String modelId) {
+        final Cursor cursor = getItem(modelId);
+        return DocumentInfo.getUri(cursor);
     }
 
     void addUpdateListener(UpdateListener listener) {

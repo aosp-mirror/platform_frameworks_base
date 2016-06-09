@@ -110,7 +110,7 @@ public final class Shared {
     /**
      * Maximum number of items in a Binder transaction packet.
      */
-    public static final int MAX_DOCS_IN_INTENT = 1000;
+    public static final int MAX_DOCS_IN_INTENT = 500;
 
     private static final Collator sCollator;
 

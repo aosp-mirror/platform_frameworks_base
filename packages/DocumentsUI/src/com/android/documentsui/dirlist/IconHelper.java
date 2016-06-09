@@ -47,6 +47,7 @@ import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.ThumbnailCache;
 import com.android.documentsui.ThumbnailCache.Result;
+import com.android.documentsui.model.DocumentInfo;
 
 import java.util.function.BiConsumer;
 
@@ -293,22 +294,20 @@ public class IconHelper {
         view.setAlpha(0f);
     }
 
-    /**
-     * Gets a mime icon or package icon for a file.
-     *
-     * @param context
-     * @param authority The authority string of the file.
-     * @param id The document ID of the file.
-     * @param mimeType The mime type of the file.
-     * @param icon The custom icon (if any) of the file.
-     * @return
-     */
-    public Drawable getDocumentIcon(Context context, String authority, String id,
-            String mimeType, int icon) {
+    private Drawable getDocumentIcon(
+        Context context, String authority, String id, String mimeType, int icon) {
         if (icon != 0) {
             return IconUtils.loadPackageIcon(context, authority, icon);
         } else {
             return IconUtils.loadMimeIcon(context, mimeType, authority, id, mMode);
         }
+    }
+
+    /**
+     * Returns a mime icon or package icon for a {@link DocumentInfo}.
+     */
+    public Drawable getDocumentIcon(Context context, DocumentInfo doc) {
+        return getDocumentIcon(
+                context, doc.authority, doc.documentId, doc.mimeType, doc.icon);
     }
 }
