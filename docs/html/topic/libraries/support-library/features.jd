@@ -619,7 +619,7 @@ package provides APIs to support adding and managing custom tabs in your apps. <
 <a href="{@docRoot}reference/android/support/customtabs/CustomTabsService.html">Custom Tabs
 Service</a>
 and
-<a href="{@docRoot}reference/android/support/customtabs/CustomTabsSCallback.html">Custom Tabs
+<a href="{@docRoot}reference/android/support/customtabs/CustomTabsCallback.html">Custom Tabs
 Callback</a>.  </p>
 
 
