@@ -166,8 +166,9 @@ class ActivityStarter {
     private Intent mNewTaskIntent;
     private ActivityStack mSourceStack;
     private ActivityStack mTargetStack;
-    // TODO: Is the mMoveHome flag really needed?
-    private boolean mMovedHome;
+    // Indicates that we moved other task and are going to put something on top soon, so
+    // we don't want to show it redundantly or accidentally change what's shown below.
+    private boolean mMovedOtherTask;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
@@ -204,7 +205,7 @@ class ActivityStarter {
         mSourceStack = null;
 
         mTargetStack = null;
-        mMovedHome = false;
+        mMovedOtherTask = false;
         mMovedToFront = false;
         mNoAnimation = false;
         mKeepCurTransition = false;
@@ -1013,7 +1014,6 @@ class ActivityStarter {
                 resumeTargetStackIfNeeded();
                 return START_RETURN_INTENT_TO_CALLER;
             }
-
             setTaskFromIntentActivity(mReusedActivity);
 
             if (!mAddingToTask && mReuseTask == null) {
@@ -1082,7 +1082,7 @@ class ActivityStarter {
                 Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            if (!mMovedHome) {
+            if (!mMovedOtherTask) {
                 updateTaskReturnToType(mStartActivity.task, mLaunchFlags, topStack);
             }
         } else if (mSourceRecord != null) {
@@ -1443,7 +1443,7 @@ class ActivityStarter {
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.task);
                 }
-                mMovedHome = true;
+                mMovedOtherTask = true;
 
                 // If the launch flags carry both NEW_TASK and CLEAR_TASK, the task's activities
                 // will be cleared soon by ActivityStarter in setTaskFromIntentActivity().
@@ -1521,6 +1521,10 @@ class ActivityStarter {
             mReuseTask = intentActivity.task;
             mReuseTask.performClearTaskLocked();
             mReuseTask.setIntent(mStartActivity);
+            // When we clear the task - focus will be adjusted, which will bring another task
+            // to top before we launch the activity we need. This will temporary swap their
+            // mTaskToReturnTo values and we don't want to overwrite them accidentally.
+            mMovedOtherTask = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                 || mLaunchSingleInstance || mLaunchSingleTask) {
             ActivityRecord top = intentActivity.task.performClearTaskLocked(mStartActivity,
