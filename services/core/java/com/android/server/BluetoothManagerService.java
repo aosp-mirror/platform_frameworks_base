@@ -222,7 +222,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             } catch (RemoteException e) {
                                 Slog.e(TAG,"Unable to call onBrEdrDown", e);
                             } finally {
-                                mBluetoothLock.readLock().lock();
+                                mBluetoothLock.readLock().unlock();
                             }
                         } else if (st == BluetoothAdapter.STATE_ON){
                             // disable without persisting the setting
