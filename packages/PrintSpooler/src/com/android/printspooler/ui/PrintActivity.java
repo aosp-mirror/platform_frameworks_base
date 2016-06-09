@@ -614,6 +614,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        mMediaSizeComparator.onConfigurationChanged(newConfig);
+
         if (mPrintPreviewController != null) {
             mPrintPreviewController.onOrientationChanged();
         }
