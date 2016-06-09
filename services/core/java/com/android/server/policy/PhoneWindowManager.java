@@ -2598,8 +2598,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final PhoneWindow win = new PhoneWindow(context);
             win.setIsStartingWindow(true);
 
-            final Resources r = context.getResources();
-            win.setTitle(r.getText(labelRes, nonLocalizedLabel));
+            CharSequence label = context.getResources().getText(labelRes, null);
+            // Only change the accessibility title if the label is localized
+            if (label != null) {
+                win.setTitle(label, true);
+            } else {
+                win.setTitle(nonLocalizedLabel, false);
+            }
 
             win.setType(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);
