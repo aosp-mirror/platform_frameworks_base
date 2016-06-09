@@ -140,11 +140,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         @Override
         public void onClick(View v) {
             if (!mShowingPublic && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
+                mGroupExpansionChanging = true;
                 final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
                 boolean nowExpanded = mGroupManager.toggleGroupExpansion(mStatusBarNotification);
                 mOnExpandClickListener.onExpandClicked(mEntry, nowExpanded);
-                mGroupExpansionChanging = true;
-                updateBackgroundForGroupState();
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTIFICATION_GROUP_EXPANDER,
                         nowExpanded);
                 logExpansionEvent(true /* userAction */, wasExpanded);
@@ -1336,6 +1335,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mChildrenContainer != null) {
             mChildrenContainer.setChildrenExpanded(expanded);
         }
+        updateBackgroundForGroupState();
         updateClickAndFocus();
     }
 
