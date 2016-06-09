@@ -29,13 +29,19 @@ public class ManifestConfigSource implements ConfigSource {
 
     private final Object mLock = new Object();
     private final Context mContext;
-    private final ApplicationInfo mInfo;
+    private final int mApplicationInfoFlags;
+    private final int mTargetSdkVersion;
+    private final int mConfigResourceId;
 
     private ConfigSource mConfigSource;
 
-    public ManifestConfigSource(Context context, ApplicationInfo info) {
+    public ManifestConfigSource(Context context) {
         mContext = context;
-        mInfo = info;
+        // Cache values because ApplicationInfo is mutable and apps do modify it :(
+        ApplicationInfo info = context.getApplicationInfo();
+        mApplicationInfoFlags = info.flags;
+        mTargetSdkVersion = info.targetSdkVersion;
+        mConfigResourceId = info.networkSecurityConfigRes;
     }
 
     @Override
@@ -53,29 +59,24 @@ public class ManifestConfigSource implements ConfigSource {
             if (mConfigSource != null) {
                 return mConfigSource;
             }
-            int targetSdkVersion = mInfo.targetSdkVersion;
-            int configResourceId = 0;
-            if (mInfo != null) {
-                configResourceId = mInfo.networkSecurityConfigRes;
-            }
 
             ConfigSource source;
-            if (configResourceId != 0) {
-                boolean debugBuild = (mInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            if (mConfigResourceId != 0) {
+                boolean debugBuild = (mApplicationInfoFlags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
                 if (DBG) {
                     Log.d(LOG_TAG, "Using Network Security Config from resource "
-                            + mContext.getResources().getResourceEntryName(configResourceId)
+                            + mContext.getResources().getResourceEntryName(mConfigResourceId)
                             + " debugBuild: " + debugBuild);
                 }
-                source = new XmlConfigSource(mContext, configResourceId, debugBuild,
-                        targetSdkVersion);
+                source = new XmlConfigSource(mContext, mConfigResourceId, debugBuild,
+                        mTargetSdkVersion);
             } else {
                 if (DBG) {
                     Log.d(LOG_TAG, "No Network Security Config specified, using platform default");
                 }
                 boolean usesCleartextTraffic =
-                        (mInfo.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
-                source = new DefaultConfigSource(usesCleartextTraffic, targetSdkVersion);
+                        (mApplicationInfoFlags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
+                source = new DefaultConfigSource(usesCleartextTraffic, mTargetSdkVersion);
             }
             mConfigSource = source;
             return mConfigSource;

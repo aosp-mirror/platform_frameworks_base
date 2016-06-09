@@ -5258,7 +5258,7 @@ public final class ActivityThread {
         // code is loaded to prevent issues with instances of TLS objects being created before
         // the provider is installed.
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "NetworkSecurityConfigProvider.install");
-        NetworkSecurityConfigProvider.install(appContext, data.appInfo);
+        NetworkSecurityConfigProvider.install(appContext);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Continue loading instrumentation.
