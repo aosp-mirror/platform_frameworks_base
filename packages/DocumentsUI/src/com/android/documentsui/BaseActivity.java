@@ -54,6 +54,7 @@ import com.android.documentsui.SearchViewManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.FragmentTuner;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
@@ -95,6 +96,8 @@ public abstract class BaseActivity extends Activity
 
     public abstract void onDocumentPicked(DocumentInfo doc, Model model);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
+    public abstract FragmentTuner createFragmentTuner();
+    public abstract MenuManager getMenuManager();
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);

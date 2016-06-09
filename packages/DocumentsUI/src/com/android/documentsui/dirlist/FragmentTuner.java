@@ -49,16 +49,6 @@ public abstract class FragmentTuner {
         mState = state;
     }
 
-    public static FragmentTuner pick(Context context, State state) {
-        switch (state.action) {
-            case ACTION_BROWSE:
-                return new FilesTuner(context, state);
-            default:
-                return new DocumentsTuner(context, state);
-        }
-    }
-
-
     // Subtly different from isDocumentEnabled. The reason may be illuminated as follows.
     // A folder is enabled such that it may be double clicked, even in settings
     // when the folder itself cannot be selected. This may also be true of container types.
@@ -85,13 +75,12 @@ public abstract class FragmentTuner {
         return false;
     }
 
-    abstract void updateActionMenu(Menu menu, SelectionDetails selection);
     abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
 
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
-    private static final class DocumentsTuner extends FragmentTuner {
+    public static final class DocumentsTuner extends FragmentTuner {
 
         // We use this to keep track of whether a model has been previously loaded or not so we can
         // open the drawer on empty directories on first launch
@@ -147,25 +136,6 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        public void updateActionMenu(Menu menu, SelectionDetails selection) {
-
-            MenuItem open = menu.findItem(R.id.menu_open);
-            MenuItem share = menu.findItem(R.id.menu_share);
-            MenuItem delete = menu.findItem(R.id.menu_delete);
-            MenuItem rename = menu.findItem(R.id.menu_rename);
-            MenuItem selectAll = menu.findItem(R.id.menu_select_all);
-
-            open.setVisible(mState.action == ACTION_GET_CONTENT
-                    || mState.action == ACTION_OPEN);
-            share.setVisible(false);
-            delete.setVisible(false);
-            rename.setVisible(false);
-            selectAll.setVisible(mState.allowMultiple);
-
-            Menus.disableHiddenItems(menu);
-        }
-
-        @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
             boolean showDrawer = false;
 
@@ -196,7 +166,7 @@ public abstract class FragmentTuner {
     /**
      * Provides support for Files activity specific specializations of DirectoryFragment.
      */
-    private static final class FilesTuner extends FragmentTuner {
+    public static final class FilesTuner extends FragmentTuner {
 
         // We use this to keep track of whether a model has been previously loaded or not so we can
         // open the drawer on empty directories on first launch
@@ -206,43 +176,7 @@ public abstract class FragmentTuner {
             super(context, state);
         }
 
-        @Override
-        public void updateActionMenu(Menu menu, SelectionDetails selection) {
 
-            menu.findItem(R.id.menu_open).setVisible(false);  // "open" is never used in Files.
-
-            // Commands accessible only via keyboard...
-            MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
-            MenuItem paste = menu.findItem(R.id.menu_paste_from_clipboard);
-
-            // Commands visible in the UI...
-            MenuItem rename = menu.findItem(R.id.menu_rename);
-            MenuItem moveTo = menu.findItem(R.id.menu_move_to);
-            MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
-            MenuItem share = menu.findItem(R.id.menu_share);
-            MenuItem delete = menu.findItem(R.id.menu_delete);
-
-            // copy is not visible, keyboard only
-            copy.setEnabled(!selection.containsPartialFiles());
-
-            // Commands usually on action-bar, so we always manage visibility.
-            share.setVisible(!selection.containsDirectories() && !selection.containsPartialFiles());
-            delete.setVisible(selection.canDelete());
-
-            share.setEnabled(!selection.containsDirectories() && !selection.containsPartialFiles());
-            delete.setEnabled(selection.canDelete());
-
-            // Commands always in overflow, so we don't bother showing/hiding...
-            copyTo.setVisible(true);
-            moveTo.setVisible(true);
-            rename.setVisible(true);
-
-            copyTo.setEnabled(!selection.containsPartialFiles());
-            moveTo.setEnabled(!selection.containsPartialFiles() && selection.canDelete());
-            rename.setEnabled(!selection.containsPartialFiles() && selection.canRename());
-
-            Menus.disableHiddenItems(menu, copy, paste);
-        }
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
@@ -270,18 +204,5 @@ public abstract class FragmentTuner {
         public boolean dragAndDropEnabled() {
             return true;
         }
-    }
-
-    /**
-     * Access to meta data about the selection.
-     */
-    interface SelectionDetails {
-        boolean containsDirectories();
-        boolean containsPartialFiles();
-
-        // TODO: Update these to express characteristics instead of answering concrete questions,
-        // since the answer to those questions is (or can be) activity specific.
-        boolean canDelete();
-        boolean canRename();
     }
 }

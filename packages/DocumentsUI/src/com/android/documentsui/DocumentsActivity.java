@@ -43,10 +43,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.documentsui.MenuManager.DirectoryDetails;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.AnimationView;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.FragmentTuner;
+import com.android.documentsui.dirlist.FragmentTuner.DocumentsTuner;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DurableUtils;
@@ -64,6 +67,8 @@ import java.util.List;
 public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
     private static final String TAG = "DocumentsActivity";
+    private DocumentsMenuManager mMenuManager;
+    private DirectoryDetails mDetails;
 
     public DocumentsActivity() {
         super(R.layout.documents_activity, TAG);
@@ -72,6 +77,8 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        mMenuManager = new DocumentsMenuManager(mSearchManager, getDisplayState());
+        mDetails = new DirectoryDetails(this);
 
         if (mState.action == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
@@ -214,43 +221,14 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        mMenuManager.updateOptionMenu(menu, mDetails);
 
         final DocumentInfo cwd = getCurrentDirectory();
-
-        boolean picking = mState.action == ACTION_CREATE
-                || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_PICK_COPY_DESTINATION;
-
-        if (picking) {
-            // May already be hidden because the root
-            // doesn't support search.
-            mSearchManager.showMenu(false);
-        }
-
-        final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem grid = menu.findItem(R.id.menu_grid);
-        final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-
-
-        createDir.setVisible(picking);
-        createDir.setEnabled(canCreateDirectory());
-
-        // No display options in recent directories
-        boolean inRecents = cwd == null;
-        if (picking && inRecents) {
-            grid.setVisible(false);
-            list.setVisible(false);
-        }
-
-        fileSize.setVisible(fileSize.isVisible() && !picking);
 
         if (mState.action == ACTION_CREATE) {
             final FragmentManager fm = getFragmentManager();
             SaveFragment.get(fm).prepareForDirectory(cwd);
         }
-
-        Menus.disableHiddenItems(menu);
 
         return true;
     }
@@ -422,6 +400,18 @@ public class DocumentsActivity extends BaseActivity {
 
     public static DocumentsActivity get(Fragment fragment) {
         return (DocumentsActivity) fragment.getActivity();
+    }
+
+    @Override
+    public FragmentTuner createFragmentTuner() {
+        // Currently DocumentsTuner maintains a state specific to the fragment instance. Because of
+        // that, we create a new instance everytime it is needed
+        return new DocumentsTuner(this, getDisplayState());
+    }
+
+    @Override
+    public MenuManager getMenuManager() {
+        return mMenuManager;
     }
 
     /**

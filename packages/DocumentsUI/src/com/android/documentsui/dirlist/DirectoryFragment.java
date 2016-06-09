@@ -85,6 +85,7 @@ import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.ItemDragListener;
+import com.android.documentsui.MenuManager;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.Metrics;
@@ -181,6 +182,7 @@ public class DirectoryFragment extends Fragment
     private @Nullable ActionMode mActionMode;
 
     private DirectoryDragListener mOnDragListener;
+    private MenuManager mMenuManager;
 
     /**
      * A callback to show snackbar at the beginning of moving and copying.
@@ -320,7 +322,9 @@ public class DirectoryFragment extends Fragment
         // Make sure this is done after the RecyclerView is set up.
         mFocusManager = new FocusManager(context, mRecView, mModel);
 
-        mTuner = FragmentTuner.pick(getContext(), state);
+        final BaseActivity activity = getBaseActivity();
+        mTuner = activity.createFragmentTuner();
+        mMenuManager = activity.getMenuManager();
         mClipper = DocumentsApplication.getDocumentClipper(getContext());
 
         final ActivityManager am = (ActivityManager) context.getSystemService(
@@ -504,7 +508,7 @@ public class DirectoryFragment extends Fragment
      * and clearing selection when action mode is explicitly exited by the user.
      */
     private final class SelectionModeListener implements MultiSelectManager.Callback,
-            ActionMode.Callback, FragmentTuner.SelectionDetails {
+            ActionMode.Callback, MenuManager.SelectionDetails {
 
         private Selection mSelected = new Selection();
 
@@ -680,7 +684,7 @@ public class DirectoryFragment extends Fragment
 
         private void updateActionMenu() {
             assert(mMenu != null);
-            mTuner.updateActionMenu(mMenu, this);
+            mMenuManager.updateActionMenu(mMenu, this);
             Menus.disableHiddenItems(mMenu);
         }
 
