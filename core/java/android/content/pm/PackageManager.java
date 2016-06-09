@@ -2692,7 +2692,7 @@ public abstract class PackageManager {
      * @return Returns an array of one or more packages assigned to the user
      * id, or null if there are no known packages with the given id.
      */
-    public abstract String[] getPackagesForUid(int uid);
+    public abstract @Nullable String[] getPackagesForUid(int uid);
 
     /**
      * Retrieve the official name associated with a user id.  This name is
@@ -2705,7 +2705,7 @@ public abstract class PackageManager {
      * @return Returns a unique name for the given user id, or null if the
      * user id is not currently assigned.
      */
-    public abstract String getNameForUid(int uid);
+    public abstract @Nullable String getNameForUid(int uid);
 
     /**
      * Return the user id associated with a shared user name. Multiple
