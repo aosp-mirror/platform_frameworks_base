@@ -677,7 +677,7 @@ a bitmap drawable that's 48x48 pixels for medium-density screens, all the differ
   <li>48x48 (1.0x baseline) for medium-density</li>
   <li>72x72 (1.5x) for high-density</li>
   <li>96x96 (2.0x) for extra-high-density</li>
-  <li>180x180 (3.0x) for extra-extra-high-density</li>
+  <li>144x144 (3.0x) for extra-extra-high-density</li>
   <li>192x192 (4.0x) for extra-extra-extra-high-density (launcher icon only; see
     <a href="#xxxhdpi-note">note</a> above)</li>
 </ul>
