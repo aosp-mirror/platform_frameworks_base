@@ -1576,8 +1576,11 @@ public class WallpaperManager {
         final String whichProp;
         final int defaultResId;
         if (which == FLAG_LOCK) {
+            /* Factory-default lock wallpapers are not yet supported
             whichProp = PROP_LOCK_WALLPAPER;
             defaultResId = com.android.internal.R.drawable.default_lock_wallpaper;
+            */
+            return null;
         } else {
             whichProp = PROP_WALLPAPER;
             defaultResId = com.android.internal.R.drawable.default_wallpaper;
