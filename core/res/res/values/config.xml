@@ -967,6 +967,9 @@
          If so, this should be set to 'false' in an overlay. -->
     <bool name="config_enable_emergency_call_while_sim_locked">true</bool>
 
+    <!-- Is the lock-screen disabled for new users by default -->
+    <bool name="config_disableLockscreenByDefault">false</bool>
+
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Recent apps view in SystemUI
