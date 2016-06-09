@@ -17,7 +17,6 @@
 package android.security.net.config;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import java.security.Security;
 import java.security.Provider;
 
