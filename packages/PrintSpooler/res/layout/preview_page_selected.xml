@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2016 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -20,14 +20,13 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/preview_page_margin"
     android:orientation="vertical"
-    android:background="@color/unselected_page_background_color"
-    android:elevation="@dimen/unselected_page_elevation" >
+    android:background="@android:color/white"
+    android:elevation="@dimen/selected_page_elevation" >
 
     <com.android.printspooler.widget.PageContentView
         android:id="@+id/page_content"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:alpha="0.5">
+        android:layout_height="fill_parent">
     </com.android.printspooler.widget.PageContentView>
 
     <RelativeLayout
@@ -35,8 +34,7 @@
         android:layout_width="fill_parent"
         android:layout_height="@dimen/preview_page_footer_height"
         android:background="@color/material_grey_500"
-        android:orientation="horizontal"
-        android:alpha="0.5">
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/page_number"
@@ -54,7 +52,7 @@
             android:layout_marginRight="8dip"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_remove_circle">
+            android:src="@drawable/ic_check_circle">
         </ImageView>
 
     </RelativeLayout>

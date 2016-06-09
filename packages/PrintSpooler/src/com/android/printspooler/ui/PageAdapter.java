@@ -297,7 +297,14 @@ public final class PageAdapter extends Adapter<ViewHolder> {
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
+        View page;
+
+        if (viewType == 0) {
+            page = mLayoutInflater.inflate(R.layout.preview_page_selected, parent, false);
+        } else {
+            page = mLayoutInflater.inflate(R.layout.preview_page, parent, false);
+        }
+
         return new MyViewHolder(page);
     }
 
@@ -345,9 +352,9 @@ public final class PageAdapter extends Adapter<ViewHolder> {
         content.init(provider, mEmptyState, mErrorState, mMediaSize, mMinMargins);
 
         if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) >= 0) {
-            page.setSelected(true, false);
+            page.setSelected(true);
         } else {
-            page.setSelected(false, false);
+            page.setSelected(false);
         }
 
         page.setContentDescription(mContext.getString(R.string.page_description_template,
@@ -362,6 +369,15 @@ public final class PageAdapter extends Adapter<ViewHolder> {
     @Override
     public int getItemCount() {
         return mSelectedPageCount;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mConfirmedPagesInDocument.indexOfKey(computePageIndexInDocument(position)) >= 0) {
+            return 0;
+        } else {
+            return 1;
+        }
     }
 
     @Override
@@ -821,14 +837,14 @@ public final class PageAdapter extends Adapter<ViewHolder> {
             final int pageInDocument = computePageIndexInDocument(pageInAdapter);
             if (mConfirmedPagesInDocument.indexOfKey(pageInDocument) < 0) {
                 mConfirmedPagesInDocument.put(pageInDocument, null);
-                page.setSelected(true, true);
             } else {
                 if (mConfirmedPagesInDocument.size() <= 1) {
                     return;
                 }
                 mConfirmedPagesInDocument.remove(pageInDocument);
-                page.setSelected(false, true);
             }
+
+            notifyItemChanged(pageInAdapter);
         }
     }
 }
