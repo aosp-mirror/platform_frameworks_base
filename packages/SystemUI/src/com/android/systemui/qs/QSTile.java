@@ -161,6 +161,10 @@ public abstract class QSTile<TState extends State> {
         mHandler.obtainMessage(H.ADD_CALLBACK, callback).sendToTarget();
     }
 
+    public void removeCallback(Callback callback) {
+        mHandler.obtainMessage(H.REMOVE_CALLBACK, callback).sendToTarget();
+    }
+
     public void removeCallbacks() {
         mHandler.sendEmptyMessage(H.REMOVE_CALLBACKS);
     }
@@ -222,6 +226,10 @@ public abstract class QSTile<TState extends State> {
     private void handleAddCallback(Callback callback) {
         mCallbacks.add(callback);
         handleRefreshState(null);
+    }
+
+    private void handleRemoveCallback(Callback callback) {
+        mCallbacks.remove(callback);
     }
 
     private void handleRemoveCallbacks() {
@@ -334,7 +342,8 @@ public abstract class QSTile<TState extends State> {
         private static final int DESTROY = 10;
         private static final int CLEAR_STATE = 11;
         private static final int REMOVE_CALLBACKS = 12;
-        private static final int SET_LISTENING = 13;
+        private static final int REMOVE_CALLBACK = 13;
+        private static final int SET_LISTENING = 14;
 
         private H(Looper looper) {
             super(looper);
@@ -350,6 +359,9 @@ public abstract class QSTile<TState extends State> {
                 } else if (msg.what == REMOVE_CALLBACKS) {
                     name = "handleRemoveCallbacks";
                     handleRemoveCallbacks();
+                } else if (msg.what == REMOVE_CALLBACK) {
+                    name = "handleRemoveCallback";
+                    handleRemoveCallback((QSTile.Callback) msg.obj);
                 } else if (msg.what == CLICK) {
                     name = "handleClick";
                     if (mState.disabledByPolicy) {
