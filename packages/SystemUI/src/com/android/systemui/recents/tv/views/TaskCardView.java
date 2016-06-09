@@ -56,6 +56,7 @@ public class TaskCardView extends LinearLayout {
     private ImageView mBadgeView;
     private Task mTask;
     private boolean mDismissState;
+    private boolean mTouchExplorationEnabled;
     private int mCornerRadius;
 
     private ViewFocusAnimator mViewFocusAnimator;
@@ -90,7 +91,8 @@ public class TaskCardView extends LinearLayout {
                 R.dimen.recents_task_view_rounded_corners_radius);
         mRecentsRowFocusAnimationHolder = new RecentsRowFocusAnimationHolder(this, mInfoFieldView);
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (!ssp.isTouchExplorationEnabled()) {
+        mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
+        if (!mTouchExplorationEnabled) {
             mDismissIconView.setVisibility(VISIBLE);
         } else {
             mDismissIconView.setVisibility(GONE);
@@ -237,10 +239,15 @@ public class TaskCardView extends LinearLayout {
     private void setDismissState(boolean dismissState) {
         if (mDismissState != dismissState) {
             mDismissState = dismissState;
-            if (dismissState) {
-                mDismissAnimationsHolder.startEnterAnimation();
-            } else {
-                mDismissAnimationsHolder.startExitAnimation();
+            // Check for touch exploration to ensure dismiss icon/text do not
+            // get animated. This should be removed based on decision from
+            // b/29208918
+            if (!mTouchExplorationEnabled) {
+                if (dismissState) {
+                    mDismissAnimationsHolder.startEnterAnimation();
+                } else {
+                    mDismissAnimationsHolder.startExitAnimation();
+                }
             }
         }
     }
