@@ -1203,9 +1203,6 @@ final class AccessibilityController {
             window.layer = windowState.mLayer;
             window.token = windowState.mClient.asBinder();
             window.title = windowState.mAttrs.accessibilityTitle;
-            if (window.title == null) {
-                window.title = windowState.mAttrs.getTitle();
-            }
             window.accessibilityIdOfAnchor = windowState.mAttrs.accessibilityIdOfAnchor;
 
             WindowState attachedWindow = windowState.mAttachedWindow;
