@@ -13881,7 +13881,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                             args.length - opti);
                 }
                 synchronized (this) {
-                    dumpBroadcastStatsLocked(fd, pw, args, opti, true, dumpPackage);
+                    if (dumpCheckinFormat) {
+                        dumpBroadcastStatsCheckinLocked(fd, pw, args, opti, dumpCheckin,
+                                dumpPackage);
+                    } else {
+                        dumpBroadcastStatsLocked(fd, pw, args, opti, true, dumpPackage);
+                    }
                 }
             } else if ("intents".equals(cmd) || "i".equals(cmd)) {
                 String[] newArgs;
