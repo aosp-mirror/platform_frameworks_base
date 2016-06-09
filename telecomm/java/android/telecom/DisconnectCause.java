@@ -275,6 +275,12 @@ public final class DisconnectCause implements Parcelable {
             case CONNECTION_MANAGER_NOT_SUPPORTED:
                 code = "CONNECTION_MANAGER_NOT_SUPPORTED";
                 break;
+            case CALL_PULLED:
+                code = "CALL_PULLED";
+                break;
+            case ANSWERED_ELSEWHERE:
+                code = "ANSWERED_ELSEWHERE";
+                break;
             default:
                 code = "invalid code: " + mDisconnectCode;
                 break;
