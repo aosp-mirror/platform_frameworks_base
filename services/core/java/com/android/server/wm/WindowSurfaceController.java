@@ -176,7 +176,7 @@ class WindowSurfaceController {
         if (SHOW_TRANSACTIONS) logSurface(
                 "CROP " + clipRect.toShortString(), null);
         try {
-            if (clipRect.width() > 0 && clipRect.height() > 0) {
+            if (clipRect.width() != 0 && clipRect.height() != 0) {
                 mSurfaceControl.setWindowCrop(clipRect);
                 mHiddenForCrop = false;
                 updateVisibility();
@@ -234,6 +234,10 @@ class WindowSurfaceController {
                 }
             }
         }
+    }
+
+    void setPositionAppliesWithResizeInTransaction(boolean recoveringMemory) {
+        mSurfaceControl.setPositionAppliesWithResize();
     }
 
     void setMatrixInTransaction(float dsdx, float dtdx, float dsdy, float dtdy,
@@ -551,6 +555,13 @@ class WindowSurfaceController {
                 mPosition.set(x, y);
             }
             super.setPosition(x, y);
+        }
+
+        @Override
+        public void setPositionAppliesWithResize() {
+            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setPositionAppliesWithResize(): OLD: "
+                    + this + ". Called by" + Debug.getCallers(9));
+            super.setPositionAppliesWithResize();
         }
 
         @Override
