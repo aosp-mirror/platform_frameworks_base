@@ -437,15 +437,25 @@ Number Slow draw: 23342
 </p>
 
 <ul>
-  <li>Rendering Performance 101
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=HXQhu6qfTVU">
+      Rendering Performance 101</a>
   </li>
-  <li>Why 60fps?
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=CaMTIgxCSqU">
+      Why 60fps?</a>
   </li>
-  <li>Android UI and the GPU
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=WH9AFhgwmDw">
+      Android, UI, and the GPU</a>
   </li>
-  <li>Invalidations Layouts and performance
+  <li>
+    <a class="external-link" href="https://www.youtube.com/watch?v=we6poP0kw6E">
+      Invalidations, Layouts, and Performance</a>
   </li>
-  <li>Analyzing UI Performance with Systrace
+  <li>
+    <a href="{@docRoot}studio/profile/systrace.html">
+      Analyzing UI Performance with Systrace</a>
   </li>
 </ul>
 
