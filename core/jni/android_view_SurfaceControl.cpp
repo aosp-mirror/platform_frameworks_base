@@ -248,6 +248,15 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfl
     }
 }
 
+static void nativeSetPositionAppliesWithResize(JNIEnv* env, jclass clazz,
+        jlong nativeObject) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    status_t err = ctrl->setPositionAppliesWithResize();
+    if (err < 0 && err != NO_INIT) {
+        doThrowIAE(env);
+    }
+}
+
 static void nativeSetSize(JNIEnv* env, jclass clazz, jlong nativeObject, jint w, jint h) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     status_t err = ctrl->setSize(w, h);
@@ -658,6 +667,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetLayer },
     {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
+    {"nativeSetPositionAppliesWithResize", "(J)V",
+            (void*)nativeSetPositionAppliesWithResize },
     {"nativeSetSize", "(JII)V",
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JLandroid/graphics/Region;)V",
