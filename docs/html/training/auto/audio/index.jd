@@ -20,6 +20,7 @@ page.image=auto/images/assets/icons/media_app_playback.png
       <li><a href="#overview">Provide Audio Services</a></li>
       <li><a href="#config_manifest">Configure Your Manifest</a></li>
       <li><a href="#isconnected">Determine if Your App is Connected</a></li>
+      <li><a href="#alarm">Handle Alarms</a></li>
       <li><a href="#implement_browser">Build a Browser Service</a></li>
       <li><a href="#implement_callback">Implement Play Controls</a></li>
       <li><a href="#support_voice">Support Voice Actions</a></li>
@@ -239,6 +240,44 @@ BroadcastReceiver receiver = new BroadcastReceiver() {
 registerReceiver(receiver, filter);
 </pre>
 
+<h2 id="alarm">Handle Alarms</h2>
+<p>
+To prevent user distraction, Android Auto media apps must not start playing audio
+ through the car speakers unless a user consciously starts playback (such as
+ when the user presses play in your app). Even a user-scheduled alarm from the
+ media app must not start playing music through the car speakers.
+ If your media app has an alarm feature, the app should determine if the phone
+ is in
+<a href="{@docRoot}reference/android/content/res/Configuration.html#UI_MODE_TYPE_CAR">car mode</a>
+before playing any audio. Your app can do this by calling
+<a href="{@docRoot}reference/android/app/UiModeManager.html">UiModeManager.getCurrentModeType()</a>,
+ which checks whether the device is running in car mode.
+</p>
+
+<p>
+If the device is in car mode, media apps that support alarms must do one of the
+following things:
+
+<ul>
+<li>Disable the alarm.</li>
+<li>Play the alarm over
+<a href="{@docRoot}reference/android/media/AudioManager.html">STREAM_ALARM</a>,
+ and provide a UI on the phone screen to disable the alarm.</li>
+</ul>
+
+The following code snippet checks whether an app is running in car mode:
+<pre>
+ public static boolean isCarUiMode(Context c) {
+      UiModeManager uiModeManager = (UiModeManager) c.getSystemService(Context.UI_MODE_SERVICE);
+      if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR) {
+            LogHelper.d(TAG, "Running in Car mode");
+            return true;
+      } else {
+          LogHelper.d(TAG, "Running on a non-Car mode");
+          return false;
+        }
+  }
+</pre>
 
 <h2 id="implement_browser">Build a Browser Service</h2>
 
