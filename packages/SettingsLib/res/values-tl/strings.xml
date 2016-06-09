@@ -242,7 +242,7 @@
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Scale ng transition animation"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Scale ng tagal ng animator"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"I-simulate, ika-2 display"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"Mga App"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Huwag magtago ng mga aktibidad"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Sirain ang bawat aktibidad sa sandaling iwan ito ng user"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Limitasyon ng proseso sa background"</string>
