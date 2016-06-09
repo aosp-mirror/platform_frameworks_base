@@ -156,7 +156,7 @@ public class ResourcesManager {
      * Protected so that tests can override and returns something a fixed value.
      */
     @VisibleForTesting
-    protected DisplayMetrics getDisplayMetrics(int displayId) {
+    protected @NonNull DisplayMetrics getDisplayMetrics(int displayId) {
         DisplayMetrics dm = new DisplayMetrics();
         final Display display =
                 getAdjustedDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
@@ -250,14 +250,14 @@ public class ResourcesManager {
         // already.
         if (key.mResDir != null) {
             if (assets.addAssetPath(key.mResDir) == 0) {
-                throw new IllegalArgumentException("failed to add asset path " + key.mResDir);
+                throw new Resources.NotFoundException("failed to add asset path " + key.mResDir);
             }
         }
 
         if (key.mSplitResDirs != null) {
             for (final String splitResDir : key.mSplitResDirs) {
                 if (assets.addAssetPath(splitResDir) == 0) {
-                    throw new IllegalArgumentException(
+                    throw new Resources.NotFoundException(
                             "failed to add split asset path " + splitResDir);
                 }
             }
@@ -303,7 +303,7 @@ public class ResourcesManager {
         return config;
     }
 
-    private ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
+    private @NonNull ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
         AssetManager assets = createAssetManager(key);
         DisplayMetrics dm = getDisplayMetrics(key.mDisplayId);
         Configuration config = generateConfig(key, dm);
@@ -359,7 +359,7 @@ public class ResourcesManager {
      * Gets an existing Resources object tied to this Activity, or creates one if it doesn't exist
      * or the class loader is different.
      */
-    private Resources getOrCreateResourcesForActivityLocked(@NonNull IBinder activityToken,
+    private @NonNull Resources getOrCreateResourcesForActivityLocked(@NonNull IBinder activityToken,
             @NonNull ClassLoader classLoader, @NonNull ResourcesImpl impl) {
         final ActivityResources activityResources = getOrCreateActivityResourcesStructLocked(
                 activityToken);
@@ -393,7 +393,7 @@ public class ResourcesManager {
      * Gets an existing Resources object if the class loader and ResourcesImpl are the same,
      * otherwise creates a new Resources object.
      */
-    private Resources getOrCreateResourcesLocked(@NonNull ClassLoader classLoader,
+    private @NonNull Resources getOrCreateResourcesLocked(@NonNull ClassLoader classLoader,
             @NonNull ResourcesImpl impl) {
         // Find an existing Resources that has this ResourcesImpl set.
         final int refCount = mResourceReferences.size();
@@ -441,7 +441,7 @@ public class ResourcesManager {
      *                    {@link ClassLoader#getSystemClassLoader()} is used.
      * @return a Resources object from which to access resources.
      */
-    public Resources createBaseActivityResources(@NonNull IBinder activityToken,
+    public @NonNull Resources createBaseActivityResources(@NonNull IBinder activityToken,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
             @Nullable String[] overlayDirs,
@@ -495,7 +495,7 @@ public class ResourcesManager {
      *         {@link #applyConfigurationToResourcesLocked(Configuration, CompatibilityInfo)}
      *         is called.
      */
-    private Resources getOrCreateResources(@Nullable IBinder activityToken,
+    private @NonNull Resources getOrCreateResources(@Nullable IBinder activityToken,
             @NonNull ResourcesKey key, @NonNull ClassLoader classLoader) {
         synchronized (this) {
             if (DEBUG) {
@@ -603,7 +603,7 @@ public class ResourcesManager {
      * {@link ClassLoader#getSystemClassLoader()} is used.
      * @return a Resources object from which to access resources.
      */
-    public Resources getResources(@Nullable IBinder activityToken,
+    public @NonNull Resources getResources(@Nullable IBinder activityToken,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
             @Nullable String[] overlayDirs,
