@@ -31,6 +31,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.CountDownTimer;
 import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
@@ -460,6 +461,7 @@ public class TaskViewHeader extends FrameLayout
         mDismissButton.setContentDescription(t.dismissDescription);
         mDismissButton.setOnClickListener(this);
         mDismissButton.setClickable(false);
+        ((RippleDrawable) mDismissButton.getBackground()).setForceSoftware(true);
 
         // When freeform workspaces are enabled, then update the move-task button depending on the
         // current task
@@ -477,6 +479,7 @@ public class TaskViewHeader extends FrameLayout
             }
             mMoveTaskButton.setOnClickListener(this);
             mMoveTaskButton.setClickable(false);
+            ((RippleDrawable) mMoveTaskButton.getBackground()).setForceSoftware(true);
         }
 
         if (Recents.getDebugFlags().isFastToggleRecentsEnabled()) {
