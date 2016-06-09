@@ -878,8 +878,8 @@
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> dan</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> dana</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> dan</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dan</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
       <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> god</item>
@@ -898,8 +898,8 @@
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
       <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
-      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
-      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="few">za <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
+      <item quantity="other">za <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="one">za <xliff:g id="COUNT_1">%d</xliff:g> god</item>

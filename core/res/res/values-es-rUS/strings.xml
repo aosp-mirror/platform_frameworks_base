@@ -868,12 +868,12 @@
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> días</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> día</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> años</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> año</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
       <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -884,8 +884,8 @@
       <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> días</item>
-      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> día</item>
+      <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one">en <xliff:g id="COUNT_0">%d</xliff:g> d</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
       <item quantity="other">en <xliff:g id="COUNT_1">%d</xliff:g> años</item>
