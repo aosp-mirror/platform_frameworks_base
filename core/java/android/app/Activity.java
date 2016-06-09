@@ -57,6 +57,7 @@ import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -5027,13 +5028,18 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     public Uri getReferrer() {
         Intent intent = getIntent();
-        Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
-        if (referrer != null) {
-            return referrer;
-        }
-        String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
-        if (referrerName != null) {
-            return Uri.parse(referrerName);
+        try {
+            Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+            if (referrer != null) {
+                return referrer;
+            }
+            String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
+            if (referrerName != null) {
+                return Uri.parse(referrerName);
+            }
+        } catch (BadParcelableException e) {
+            Log.w(TAG, "Cannot read referrer from intent;"
+                    + " intent extras contain unknown custom Parcelable objects");
         }
         if (mReferrer != null) {
             return new Uri.Builder().scheme("android-app").authority(mReferrer).build();
