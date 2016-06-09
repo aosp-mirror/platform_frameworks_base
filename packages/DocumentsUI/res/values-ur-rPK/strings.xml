@@ -138,6 +138,4 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> آئٹمز حذف کریں؟</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> آئٹم حذف کریں؟</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"معذرت، آپ ایک وقت میں صرف 1000 آئٹمز تک منتخب کر سکتے ہیں"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"صرف 1000 آئٹمز منتخب ہو سکے"</string>
 </resources>

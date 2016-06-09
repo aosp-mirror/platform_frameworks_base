@@ -138,6 +138,4 @@
       <item quantity="other">លុបធាតុ <xliff:g id="COUNT_1">%1$d</xliff:g> ឬ?</item>
       <item quantity="one">លុបធាតុ <xliff:g id="COUNT_0">%1$d</xliff:g> ឬ?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"សូមអភ័យទោស អ្នកអាចជ្រើសបានតែ 1000 ធាតុតែប៉ុណ្ណោះក្នុងមួយលើក"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"អាចជ្រើសបានតែ 1000 ធាតុប៉ុណ្ណោះ"</string>
 </resources>

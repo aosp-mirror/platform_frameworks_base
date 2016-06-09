@@ -138,6 +138,4 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta element o‘chirib tashlansinmi?</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta element o‘chirib tashlansinmi?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"Faqat 1000 tagacha obyektni tanlash mumkin"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"Faqat 1000 tagacha obyektni tanlash mumkin"</string>
 </resources>

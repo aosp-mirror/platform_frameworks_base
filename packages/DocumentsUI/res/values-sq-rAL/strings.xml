@@ -138,6 +138,4 @@
       <item quantity="other">Të fshihen <xliff:g id="COUNT_1">%1$d</xliff:g> artikuj?</item>
       <item quantity="one">Të fshihet <xliff:g id="COUNT_0">%1$d</xliff:g> artikull?</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"Na vjen keq, mund të zgjedhësh vetëm deri në 1000 artikuj në të njëjtën kohë."</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"Vetëm 1000 artikuj mund të zgjidheshin"</string>
 </resources>

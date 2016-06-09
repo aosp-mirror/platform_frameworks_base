@@ -138,6 +138,4 @@
       <item quantity="one">Ջնջե՞լ <xliff:g id="COUNT_1">%1$d</xliff:g> տարր:</item>
       <item quantity="other">Ջնջե՞լ <xliff:g id="COUNT_1">%1$d</xliff:g> տարր:</item>
     </plurals>
-    <string name="too_many_selected" msgid="6781456208116966753">"Ներեցեք, միաժամանակ հնարավոր է ընտրել առավելագույնը 1000 տարր"</string>
-    <string name="too_many_in_select_all" msgid="8281987479885307456">"Հաջողվեց ընտրել միայն 1000 տարր"</string>
 </resources>
