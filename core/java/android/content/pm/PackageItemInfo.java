@@ -29,7 +29,9 @@ import android.text.Html;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
-
+import android.text.BidiFormatter;
+import android.text.TextPaint;
+import android.text.Html;
 import java.text.Collator;
 import java.util.Comparator;
 
@@ -44,7 +46,6 @@ import java.util.Comparator;
  */
 public class PackageItemInfo {
     private static final float MAX_LABEL_SIZE_PX = 500f;
-
     /**
      * Public name of this item. From the "android:name" attribute.
      */
@@ -145,7 +146,7 @@ public class PackageItemInfo {
         }
         return packageName;
     }
-
+ 
     /**
      * Same as {@link #loadLabel(PackageManager)} with the addition that
      * the returned label is safe for being presented in the UI since it
