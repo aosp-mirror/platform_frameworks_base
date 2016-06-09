@@ -2511,7 +2511,6 @@ public class PackageParser {
 
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup);
-
         if (!parsePackageItemInfo(owner, perm.info, outError,
                 "<permission-group>", sa, true /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_name,
@@ -3360,7 +3359,9 @@ public class PackageParser {
             }
         }
 
-        int roundIconVal = sa.getResourceId(roundIconRes, 0);
+        final boolean useRoundIcon =
+                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_useRoundIcon);
+        int roundIconVal = useRoundIcon ? sa.getResourceId(roundIconRes, 0) : 0;
         if (roundIconVal != 0) {
             outInfo.icon = roundIconVal;
             outInfo.nonLocalizedLabel = null;
@@ -4570,10 +4571,12 @@ public class PackageParser {
             outInfo.nonLocalizedLabel = v.coerceToString();
         }
 
-        int roundIcon = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestIntentFilter_roundIcon, 0);
-        if (roundIcon != 0) {
-            outInfo.icon = roundIcon;
+        final boolean useRoundIcon =
+                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_useRoundIcon);
+        int roundIconVal = useRoundIcon ? sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestIntentFilter_roundIcon, 0) : 0;
+        if (roundIconVal != 0) {
+            outInfo.icon = roundIconVal;
         } else {
             outInfo.icon = sa.getResourceId(
                     com.android.internal.R.styleable.AndroidManifestIntentFilter_icon, 0);
