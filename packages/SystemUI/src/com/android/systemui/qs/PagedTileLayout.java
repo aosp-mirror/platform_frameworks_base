@@ -109,23 +109,28 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (mListening) {
             if (mPosition != position) {
                 // Clear out the last pages from listening.
-                mPages.get(mPosition).setListening(false);
+                setPageListening(mPosition, false);
                 if (mOffPage) {
-                    mPages.get(mPosition + 1).setListening(false);
+                    setPageListening(mPosition + 1, false);
                 }
                 // Set the new pages to listening
-                mPages.get(position).setListening(true);
+                setPageListening(position, true);
                 if (offPage) {
-                    mPages.get(position + 1).setListening(true);
+                    setPageListening(position + 1, true);
                 }
             } else if (mOffPage != offPage) {
                 // Whether we are showing position + 1 has changed.
-                mPages.get(mPosition + 1).setListening(offPage);
+                setPageListening(mPosition + 1, offPage);
             }
         }
         // Save the current state.
         mPosition = position;
         mOffPage = offPage;
+    }
+
+    private void setPageListening(int position, boolean listening) {
+        if (position >= mPages.size()) return;
+        mPages.get(position).setListening(listening);
     }
 
     @Override
