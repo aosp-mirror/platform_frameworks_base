@@ -25,6 +25,7 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LI
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.PluralsRes;
 import android.app.Notification;
 import android.app.Notification.Builder;
@@ -48,6 +49,8 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService.OpType;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +62,18 @@ import java.util.Map;
  */
 abstract public class Job implements Runnable {
     private static final String TAG = "Job";
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATE_CREATED, STATE_STARTED, STATE_COMPLETED, STATE_CANCELED})
+    @interface State {}
+    static final int STATE_CREATED = 0;
+    static final int STATE_STARTED = 1;
+    static final int STATE_COMPLETED = 2;
+    /**
+     * A job is in canceled state as long as {@link #cancel()} is called on it, even after it is
+     * completed.
+     */
+    static final int STATE_CANCELED = 3;
 
     static final String INTENT_TAG_WARNING = "warning";
     static final String INTENT_TAG_FAILURE = "failure";
@@ -77,7 +92,7 @@ abstract public class Job implements Runnable {
     final Notification.Builder mProgressBuilder;
 
     private final Map<String, ContentProviderClient> mClients = new HashMap<>();
-    private volatile boolean mCanceled;
+    private volatile @State int mState = STATE_CREATED;
 
     /**
      * A simple progressable job, much like an AsyncTask, but with support
@@ -111,6 +126,12 @@ abstract public class Job implements Runnable {
 
     @Override
     public final void run() {
+        if (isCanceled()) {
+            // Canceled before running
+            return;
+        }
+
+        mState = STATE_STARTED;
         listener.onStart(this);
         try {
             start();
@@ -120,6 +141,7 @@ abstract public class Job implements Runnable {
             Log.e(TAG, "Operation failed due to an unhandled runtime exception.", e);
             Metrics.logFileOperationErrors(service, operationType, failedFiles);
         } finally {
+            mState = (mState == STATE_STARTED) ? STATE_COMPLETED : mState;
             listener.onFinished(this);
         }
     }
@@ -127,8 +149,7 @@ abstract public class Job implements Runnable {
     abstract void start();
 
     abstract Notification getSetupNotification();
-    // TODO: Progress notification for deletes.
-    // abstract Notification getProgressNotification(long bytesCopied);
+    abstract Notification getProgressNotification();
     abstract Notification getFailureNotification();
 
     abstract Notification getWarningNotification();
@@ -158,13 +179,21 @@ abstract public class Job implements Runnable {
         }
     }
 
+    final @State int getState() {
+        return mState;
+    }
+
     final void cancel() {
-        mCanceled = true;
+        mState = STATE_CANCELED;
         Metrics.logFileOperationCancelled(service, operationType);
     }
 
     final boolean isCanceled() {
-        return mCanceled;
+        return mState == STATE_CANCELED;
+    }
+
+    final boolean isFinished() {
+        return mState == STATE_CANCELED || mState == STATE_COMPLETED;
     }
 
     final ContentResolver getContentResolver() {
@@ -321,6 +350,5 @@ abstract public class Job implements Runnable {
     interface Listener {
         void onStart(Job job);
         void onFinished(Job job);
-        void onProgress(CopyJob job);
     }
 }

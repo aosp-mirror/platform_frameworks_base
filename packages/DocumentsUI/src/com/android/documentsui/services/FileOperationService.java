@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
@@ -35,6 +36,7 @@ import com.android.documentsui.services.Job.Factory;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,9 +87,12 @@ public class FileOperationService extends Service implements Job.Listener {
     // a sub-optimal arrangement.
     @VisibleForTesting ExecutorService executor;
 
-    // Use a separate thread pool to prioritize deletions
+    // Use a separate thread pool to prioritize deletions.
     @VisibleForTesting ExecutorService deletionExecutor;
     @VisibleForTesting Factory jobFactory;
+
+    // Use a handler to schedule monitor tasks.
+    @VisibleForTesting Handler handler;
 
     private PowerManager mPowerManager;
     private PowerManager.WakeLock mWakeLock;  // the wake lock, if held.
@@ -113,6 +118,11 @@ public class FileOperationService extends Service implements Job.Listener {
             jobFactory = Job.Factory.instance;
         }
 
+        if (handler == null) {
+            // Monitor tasks are small enough to schedule them on main thread.
+            handler = new Handler();
+        }
+
         if (DEBUG) Log.d(TAG, "Created.");
         mPowerManager = getSystemService(PowerManager.class);
         mNotificationManager = getSystemService(NotificationManager.class);
@@ -121,11 +131,20 @@ public class FileOperationService extends Service implements Job.Listener {
     @Override
     public void onDestroy() {
         if (DEBUG) Log.d(TAG, "Shutting down executor.");
-        List<Runnable> unfinished = executor.shutdownNow();
+
+        List<Runnable> unfinishedCopies = executor.shutdownNow();
+        List<Runnable> unfinishedDeletions = deletionExecutor.shutdownNow();
+        List<Runnable> unfinished =
+                new ArrayList<>(unfinishedCopies.size() + unfinishedDeletions.size());
+        unfinished.addAll(unfinishedCopies);
+        unfinished.addAll(unfinishedDeletions);
         if (!unfinished.isEmpty()) {
             Log.w(TAG, "Shutting down, but executor reports running jobs: " + unfinished);
         }
+
         executor = null;
+        deletionExecutor = null;
+        handler = null;
         if (DEBUG) Log.d(TAG, "Destroyed.");
     }
 
@@ -154,7 +173,6 @@ public class FileOperationService extends Service implements Job.Listener {
         // Track the service supplied id so we can stop the service once we're out of work to do.
         mLastServiceId = serviceId;
 
-        Job job = null;
         synchronized (mRunning) {
             if (mWakeLock == null) {
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -164,7 +182,7 @@ public class FileOperationService extends Service implements Job.Listener {
             DocumentInfo srcParent = intent.getParcelableExtra(EXTRA_SRC_PARENT);
             DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
 
-            job = createJob(operationType, jobId, srcs, srcParent, stack);
+            Job job = createJob(operationType, jobId, srcs, srcParent, stack);
 
             if (job == null) {
                 return;
@@ -301,38 +319,43 @@ public class FileOperationService extends Service implements Job.Listener {
     @Override
     public void onStart(Job job) {
         if (DEBUG) Log.d(TAG, "onStart: " + job.id);
-        mNotificationManager.notify(job.id, NOTIFICATION_ID_PROGRESS, job.getSetupNotification());
+
+        // Show start up notification
+        mNotificationManager.notify(
+                job.id, NOTIFICATION_ID_PROGRESS, job.getSetupNotification());
+
+        // Set up related monitor
+        JobMonitor monitor = new JobMonitor(job, mNotificationManager, handler);
+        monitor.start();
     }
 
     @Override
     public void onFinished(Job job) {
+        assert(job.isFinished());
         if (DEBUG) Log.d(TAG, "onFinished: " + job.id);
 
-        // Dismiss the ongoing copy notification when the copy is done.
-        mNotificationManager.cancel(job.id, NOTIFICATION_ID_PROGRESS);
+        // Use the same thread of monitors to tackle notifications to avoid race conditions.
+        // Otherwise we may fail to dismiss progress notification.
+        handler.post(() -> {
+            // Dismiss the ongoing copy notification when the copy is done.
+            mNotificationManager.cancel(job.id, NOTIFICATION_ID_PROGRESS);
 
-        if (job.hasFailures()) {
-            Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
-            mNotificationManager.notify(
-                job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
-        }
+            if (job.hasFailures()) {
+                Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
+                mNotificationManager.notify(
+                        job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
+            }
 
-        if (job.hasWarnings()) {
-            if (DEBUG) Log.d(TAG, "Job finished with warnings.");
-            mNotificationManager.notify(
-                    job.id, NOTIFICATION_ID_WARNING, job.getWarningNotification());
-        }
+            if (job.hasWarnings()) {
+                if (DEBUG) Log.d(TAG, "Job finished with warnings.");
+                mNotificationManager.notify(
+                        job.id, NOTIFICATION_ID_WARNING, job.getWarningNotification());
+            }
+        });
 
         synchronized (mRunning) {
             deleteJob(job);
         }
-    }
-
-    @Override
-    public void onProgress(CopyJob job) {
-        if (DEBUG) Log.d(TAG, "onProgress: " + job.id);
-        mNotificationManager.notify(
-                job.id, NOTIFICATION_ID_PROGRESS, job.getProgressNotification());
     }
 
     private static final class JobRecord {
@@ -342,6 +365,47 @@ public class FileOperationService extends Service implements Job.Listener {
         public JobRecord(Job job, Future<?> future) {
             this.job = job;
             this.future = future;
+        }
+    }
+
+    /**
+     * A class used to periodically polls state of a job.
+     *
+     * <p>It's possible that jobs hang because underlying document providers stop responding. We
+     * still need to update notifications if jobs hang, so instead of jobs pushing their states,
+     * we poll states of jobs.
+     */
+    private static final class JobMonitor implements Runnable {
+        private static final long INITIAL_PROGRESS_DELAY_MILLIS = 10L;
+        private static final long PROGRESS_INTERVAL_MILLIS = 500L;
+
+        private final Job mJob;
+        private final NotificationManager mNotificationManager;
+        private final Handler mHandler;
+
+        private JobMonitor(Job job, NotificationManager notificationManager, Handler handler) {
+            mJob = job;
+            mNotificationManager = notificationManager;
+            mHandler = handler;
+        }
+
+        private void start() {
+            // Delay the first update to avoid dividing by 0 when calculate speed
+            mHandler.postDelayed(this, INITIAL_PROGRESS_DELAY_MILLIS);
+        }
+
+        @Override
+        public void run() {
+            if (mJob.isFinished()) {
+                // Finish notification is already shown. Progress notification is removed.
+                // Just finish itself.
+                return;
+            }
+
+            mNotificationManager.notify(
+                    mJob.id, NOTIFICATION_ID_PROGRESS, mJob.getProgressNotification());
+
+            mHandler.postDelayed(this, PROGRESS_INTERVAL_MILLIS);
         }
     }
 

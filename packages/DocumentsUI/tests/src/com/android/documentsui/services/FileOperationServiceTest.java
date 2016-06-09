@@ -20,6 +20,7 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_CO
 import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 import static com.android.documentsui.services.FileOperations.createBaseIntent;
 import static com.android.documentsui.services.FileOperations.createJobId;
+
 import static com.google.android.collect.Lists.newArrayList;
 
 import android.content.Context;
@@ -31,13 +32,11 @@ import android.test.suitebuilder.annotation.MediumTest;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.Job.Listener;
+import com.android.documentsui.testing.TestHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO: Test progress updates.
- */
 @MediumTest
 public class FileOperationServiceTest extends ServiceTestCase<FileOperationService> {
 
@@ -49,6 +48,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
     private FileOperationService mService;
     private TestScheduledExecutorService mExecutor;
     private TestScheduledExecutorService mDeletionExecutor;
+    private TestHandler mHandler;
     private TestJobFactory mJobFactory;
 
     public FileOperationServiceTest() {
@@ -62,6 +62,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
 
         mExecutor = new TestScheduledExecutorService();
         mDeletionExecutor = new TestScheduledExecutorService();
+        mHandler = new TestHandler();
         mJobFactory = new TestJobFactory();
 
         // Install test doubles.
@@ -72,6 +73,9 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
 
         assertNull(mService.deletionExecutor);
         mService.deletionExecutor = mDeletionExecutor;
+
+        assertNull(mService.handler);
+        mService.handler = mHandler;
 
         assertNull(mService.jobFactory);
         mService.jobFactory = mJobFactory;
@@ -128,6 +132,29 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mJobFactory.assertNoCopyJobsStarted();
     }
 
+    public void testUpdatesNotification() throws Exception {
+        startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
+        mExecutor.runAll();
+
+        // Assert monitoring continues until job is done
+        assertTrue(mHandler.hasScheduledMessage());
+        // Two notifications -- one for setup; one for progress
+        assertEquals(2, mJobFactory.copyJobs.get(0).getNumOfNotifications());
+    }
+
+    public void testStopsUpdatingNotificationAfterFinished() throws Exception {
+        startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
+        mExecutor.runAll();
+
+        mHandler.dispatchNextMessage();
+        // Assert monitoring stops once job is completed.
+        assertFalse(mHandler.hasScheduledMessage());
+
+        // Assert no more notification is generated after finish.
+        assertEquals(2, mJobFactory.copyJobs.get(0).getNumOfNotifications());
+
+    }
+
     public void testHoldsWakeLockWhileWorking() throws Exception {
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
 
@@ -154,11 +181,12 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         startService(createCopyIntent(newArrayList(ALPHA_DOC), BETA_DOC));
 
         mExecutor.assertAlive();
+        mDeletionExecutor.assertAlive();
 
         mExecutor.runAll();
         shutdownService();
 
-        mExecutor.assertShutdown();
+        assertExecutorsShutdown();
     }
 
     public void testShutdownStopsExecutor_AfterMixedFailures() throws Exception {
@@ -170,7 +198,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mExecutor.runAll();
         shutdownService();
 
-        mExecutor.assertShutdown();
+        assertExecutorsShutdown();
     }
 
     public void testShutdownStopsExecutor_AfterTotalFailure() throws Exception {
@@ -183,7 +211,7 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         mExecutor.runAll();
         shutdownService();
 
-        mExecutor.assertShutdown();
+        assertExecutorsShutdown();
     }
 
     private Intent createCopyIntent(ArrayList<DocumentInfo> files, DocumentInfo dest)
@@ -217,10 +245,21 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         return destDoc;
     }
 
+    private void assertExecutorsShutdown() {
+        mExecutor.assertShutdown();
+        mDeletionExecutor.assertShutdown();
+    }
+
     private final class TestJobFactory extends Job.Factory {
 
-        final List<TestJob> copyJobs = new ArrayList<>();
-        final List<TestJob> deleteJobs = new ArrayList<>();
+        private final List<TestJob> copyJobs = new ArrayList<>();
+        private final List<TestJob> deleteJobs = new ArrayList<>();
+
+        private Runnable mJobRunnable = () -> {
+            // The following statement is executed concurrently to Job.start() in real situation.
+            // Call it in TestJob.start() to mimic this behavior.
+            mHandler.dispatchNextMessage();
+        };
 
         void assertAllCopyJobsStarted() {
             for (TestJob job : copyJobs) {
@@ -258,7 +297,8 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
                 throw new RuntimeException("Empty srcs not supported!");
             }
 
-            TestJob job = new TestJob(service, appContext, listener, OPERATION_COPY, id, stack);
+            TestJob job = new TestJob(
+                    service, appContext, listener, OPERATION_COPY, id, stack, mJobRunnable);
             copyJobs.add(job);
             return job;
         }
@@ -271,7 +311,8 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
                 throw new RuntimeException("Empty srcs not supported!");
             }
 
-            TestJob job = new TestJob(service, appContext, listener, OPERATION_DELETE, id, stack);
+            TestJob job = new TestJob(
+                    service, appContext, listener, OPERATION_DELETE, id, stack, mJobRunnable);
             deleteJobs.add(job);
 
             return job;

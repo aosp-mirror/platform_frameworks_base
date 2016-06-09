@@ -21,6 +21,7 @@ import static android.provider.DocumentsContract.buildChildDocumentsUri;
 import static android.provider.DocumentsContract.buildDocumentUri;
 import static android.provider.DocumentsContract.getDocumentId;
 import static android.provider.DocumentsContract.isChildDocument;
+
 import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_CONVERTED;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
@@ -45,8 +46,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.system.ErrnoException;
-import android.system.Os;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -62,7 +61,6 @@ import libcore.io.IoUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +68,6 @@ import java.util.List;
 class CopyJob extends Job {
 
     private static final String TAG = "CopyJob";
-    private static final int PROGRESS_INTERVAL_MILLIS = 500;
 
     final List<DocumentInfo> mSrcs;
     final ArrayList<DocumentInfo> convertedFiles = new ArrayList<>();
@@ -78,8 +75,7 @@ class CopyJob extends Job {
     private long mStartTime = -1;
 
     private long mBatchSize;
-    private long mBytesCopied;
-    private long mLastNotificationTime;
+    private volatile long mBytesCopied;
     // Speed estimation
     private long mBytesCopiedSample;
     private long mSampleTime;
@@ -127,16 +123,13 @@ class CopyJob extends Job {
         return getSetupNotification(service.getString(R.string.copy_preparing));
     }
 
-    public boolean shouldUpdateProgress() {
-        // Wait a while between updates :)
-        return elapsedRealtime() - mLastNotificationTime > PROGRESS_INTERVAL_MILLIS;
-    }
-
     Notification getProgressNotification(@StringRes int msgId) {
+        updateRemainingTimeEstimate();
+
         if (mBatchSize >= 0) {
             double completed = (double) this.mBytesCopied / mBatchSize;
             mProgressBuilder.setProgress(100, (int) (completed * 100), false);
-            mProgressBuilder.setContentInfo(
+            mProgressBuilder.setSubText(
                     NumberFormat.getPercentInstance().format(completed));
         } else {
             // If the total file size failed to compute on some files, then show
@@ -153,12 +146,10 @@ class CopyJob extends Job {
             mProgressBuilder.setContentText(null);
         }
 
-        // Remember when we last returned progress so we can provide an answer
-        // in shouldUpdateProgress.
-        mLastNotificationTime = elapsedRealtime();
         return mProgressBuilder.build();
     }
 
+    @Override
     public Notification getProgressNotification() {
         return getProgressNotification(R.string.copy_remaining);
     }
@@ -170,11 +161,14 @@ class CopyJob extends Job {
     /**
      * Generates an estimate of the remaining time in the copy.
      */
-    void updateRemainingTimeEstimate() {
+    private void updateRemainingTimeEstimate() {
         long elapsedTime = elapsedRealtime() - mStartTime;
 
+        // mBytesCopied is modified in worker thread, but this method is called in monitor thread,
+        // so take a snapshot of mBytesCopied to make sure the updated estimate is consistent.
+        final long bytesCopied = mBytesCopied;
         final long sampleDuration = elapsedTime - mSampleTime;
-        final long sampleSpeed = ((mBytesCopied - mBytesCopiedSample) * 1000) / sampleDuration;
+        final long sampleSpeed = ((bytesCopied - mBytesCopiedSample) * 1000) / sampleDuration;
         if (mSpeed == 0) {
             mSpeed = sampleSpeed;
         } else {
@@ -182,13 +176,13 @@ class CopyJob extends Job {
         }
 
         if (mSampleTime > 0 && mSpeed > 0) {
-            mRemainingTime = ((mBatchSize - mBytesCopied) * 1000) / mSpeed;
+            mRemainingTime = ((mBatchSize - bytesCopied) * 1000) / mSpeed;
         } else {
             mRemainingTime = 0;
         }
 
         mSampleTime = elapsedTime;
-        mBytesCopiedSample = mBytesCopied;
+        mBytesCopiedSample = bytesCopied;
     }
 
     @Override
@@ -273,10 +267,6 @@ class CopyJob extends Job {
      */
     private void makeCopyProgress(long bytesCopied) {
         onBytesCopied(bytesCopied);
-        if (shouldUpdateProgress()) {
-            updateRemainingTimeEstimate();
-            listener.onProgress(this);
-        }
     }
 
     /**
@@ -308,6 +298,7 @@ class CopyJob extends Job {
                     Log.e(TAG, "Provider side copy failed for: " + src.derivedUri
                             + " due to an exception: " + e);
                 }
+
                 // If optimized copy fails, then fallback to byte-by-byte copy.
                 if (DEBUG) Log.d(TAG, "Fallback to byte-by-byte copy for: " + src.derivedUri);
             }
@@ -418,14 +409,16 @@ class CopyJob extends Job {
                     src = DocumentInfo.fromCursor(cursor, srcDir.authority);
                     processDocument(src, srcDir, destDir);
                 } catch (RuntimeException e) {
-                    Log.e(TAG, "Failed to recursively process a file %s due to an exception."
-                            .format(srcDir.derivedUri.toString()), e);
+                    Log.e(TAG, String.format(
+                            "Failed to recursively process a file %s due to an exception.",
+                            srcDir.derivedUri.toString()), e);
                     success = false;
                 }
             }
         } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to copy a file %s to %s. "
-                    .format(srcDir.derivedUri.toString(), destDir.derivedUri.toString()), e);
+            Log.e(TAG, String.format(
+                    "Failed to copy a file %s to %s. ",
+                    srcDir.derivedUri.toString(), destDir.derivedUri.toString()), e);
             success = false;
         } finally {
             IoUtils.closeQuietly(cursor);
