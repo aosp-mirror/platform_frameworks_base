@@ -860,36 +860,36 @@
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"अहिले"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेट</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मिनेट</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेट</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टा</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>घन्टा</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टा</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दिन</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिन</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्ष</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्ष</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेटमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेटमा</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मिनेटमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>मिनेटमा</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टामा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टामा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>घन्टामा</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिनमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिनमा</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दिनमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>दिनमा</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्षमा</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्षमा</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>वर्षमा</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेट अघि</item>
