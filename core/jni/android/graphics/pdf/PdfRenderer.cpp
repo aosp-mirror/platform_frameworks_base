@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "PdfUtils.h"
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
@@ -43,86 +45,28 @@ static struct {
     jfieldID y;
 } gPointClassInfo;
 
-// See PdfEditor.cpp
-extern int sUnmatchedPdfiumInitRequestCount;
-
-static void initializeLibraryIfNeeded() {
-    if (sUnmatchedPdfiumInitRequestCount == 0) {
-        FPDF_InitLibrary();
-    }
-    sUnmatchedPdfiumInitRequestCount++;
-}
-
-static void destroyLibraryIfNeeded() {
-    sUnmatchedPdfiumInitRequestCount--;
-    if (sUnmatchedPdfiumInitRequestCount == 0) {
-       FPDF_DestroyLibrary();
-    }
-}
-
-static int getBlock(void* param, unsigned long position, unsigned char* outBuffer,
-        unsigned long size) {
-    const int fd = reinterpret_cast<intptr_t>(param);
-    const int readCount = pread(fd, outBuffer, size, position);
-    if (readCount < 0) {
-        ALOGE("Cannot read from file descriptor. Error:%d", errno);
-        return 0;
-    }
-    return 1;
-}
-
-static jlong nativeCreate(JNIEnv* env, jclass thiz, jint fd, jlong size) {
-    initializeLibraryIfNeeded();
-
-    FPDF_FILEACCESS loader;
-    loader.m_FileLen = size;
-    loader.m_Param = reinterpret_cast<void*>(intptr_t(fd));
-    loader.m_GetBlock = &getBlock;
-
-    FPDF_DOCUMENT document = FPDF_LoadCustomDocument(&loader, NULL);
-
-    if (!document) {
-        const long error = FPDF_GetLastError();
-        switch (error) {
-            case FPDF_ERR_PASSWORD:
-            case FPDF_ERR_SECURITY: {
-                jniThrowExceptionFmt(env, "java/lang/SecurityException",
-                        "cannot create document. Error: %ld", error);
-            } break;
-            default: {
-                jniThrowExceptionFmt(env, "java/io/IOException",
-                        "cannot create document. Error: %ld", error);
-            } break;
-        }
-        destroyLibraryIfNeeded();
-        return -1;
-    }
-
-    return reinterpret_cast<jlong>(document);
-}
-
 static jlong nativeOpenPageAndGetSize(JNIEnv* env, jclass thiz, jlong documentPtr,
         jint pageIndex, jobject outSize) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
 
     FPDF_PAGE page = FPDF_LoadPage(document, pageIndex);
-
     if (!page) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "cannot load page");
         return -1;
     }
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
 
     double width = 0;
     double height = 0;
 
-    const int result = FPDF_GetPageSizeByIndex(document, pageIndex, &width, &height);
-
+    int result = FPDF_GetPageSizeByIndex(document, pageIndex, &width, &height);
     if (!result) {
         jniThrowException(env, "java/lang/IllegalStateException",
                     "cannot get page size");
         return -1;
     }
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
 
     env->SetIntField(outSize, gPointClassInfo.x, width);
     env->SetIntField(outSize, gPointClassInfo.y, height);
@@ -133,22 +77,7 @@ static jlong nativeOpenPageAndGetSize(JNIEnv* env, jclass thiz, jlong documentPt
 static void nativeClosePage(JNIEnv* env, jclass thiz, jlong pagePtr) {
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     FPDF_ClosePage(page);
-}
-
-static void nativeClose(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    FPDF_CloseDocument(document);
-    destroyLibraryIfNeeded();
-}
-
-static jint nativeGetPageCount(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    return FPDF_GetPageCount(document);
-}
-
-static jboolean nativeScaleForPrinting(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    return FPDF_VIEWERREF_GetPrintScaling(document);
+    HANDLE_PDFIUM_ERROR_STATE(env)
 }
 
 static void DropContext(void* data) {
@@ -284,7 +213,7 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
 }
 
 static const JNINativeMethod gPdfRenderer_Methods[] = {
-    {"nativeCreate", "(IJ)J", (void*) nativeCreate},
+    {"nativeCreate", "(IJ)J", (void*) nativeOpen},
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},
     {"nativeScaleForPrinting", "(J)Z", (void*) nativeScaleForPrinting},

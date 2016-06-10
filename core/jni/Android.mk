@@ -138,6 +138,7 @@ LOCAL_SRC_FILES:= \
     android/graphics/pdf/PdfDocument.cpp \
     android/graphics/pdf/PdfEditor.cpp \
     android/graphics/pdf/PdfRenderer.cpp \
+    android/graphics/pdf/PdfUtils.cpp \
     android_media_AudioRecord.cpp \
     android_media_AudioSystem.cpp \
     android_media_AudioTrack.cpp \
