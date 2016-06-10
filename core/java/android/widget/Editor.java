@@ -162,15 +162,15 @@ public class Editor {
     boolean mAllowUndo = true;
 
     // Cursor Controllers.
-    InsertionPointCursorController mInsertionPointCursorController;
+    private InsertionPointCursorController mInsertionPointCursorController;
     SelectionModifierCursorController mSelectionModifierCursorController;
     // Action mode used when text is selected or when actions on an insertion cursor are triggered.
     ActionMode mTextActionMode;
-    boolean mInsertionControllerEnabled;
-    boolean mSelectionControllerEnabled;
+    private boolean mInsertionControllerEnabled;
+    private boolean mSelectionControllerEnabled;
 
     // Used to highlight a word when it is corrected by the IME
-    CorrectionHighlighter mCorrectionHighlighter;
+    private CorrectionHighlighter mCorrectionHighlighter;
 
     InputContentType mInputContentType;
     InputMethodState mInputMethodState;
@@ -184,7 +184,7 @@ public class Editor {
         }
         boolean needsRecord() { return isDirty || !renderNode.isValid(); }
     }
-    TextRenderNode[] mTextRenderNodes;
+    private TextRenderNode[] mTextRenderNodes;
 
     boolean mFrozenWithFocus;
     boolean mSelectionMoved;
@@ -195,10 +195,9 @@ public class Editor {
 
     boolean mDiscardNextActionUp;
     boolean mIgnoreActionUpEvent;
-    private boolean mIgnoreNextMouseActionUpOrDown;
 
     long mShowCursor;
-    Blink mBlink;
+    private Blink mBlink;
 
     boolean mCursorVisible = true;
     boolean mSelectAllOnFocus;
@@ -206,7 +205,7 @@ public class Editor {
 
     CharSequence mError;
     boolean mErrorWasChanged;
-    ErrorPopup mErrorPopup;
+    private ErrorPopup mErrorPopup;
 
     /**
      * This flag is set if the TextView tries to display an error before it
@@ -214,7 +213,7 @@ public class Editor {
      * It causes the error to be shown later, when onAttachedToWindow()
      * is called.
      */
-    boolean mShowErrorAfterAttach;
+    private boolean mShowErrorAfterAttach;
 
     boolean mInBatchEditControllers;
     boolean mShowSoftInputOnFocus = true;
@@ -223,9 +222,9 @@ public class Editor {
 
     boolean mIsBeingLongClicked;
 
-    SuggestionsPopupWindow mSuggestionsPopupWindow;
+    private SuggestionsPopupWindow mSuggestionsPopupWindow;
     SuggestionRangeSpan mSuggestionRangeSpan;
-    Runnable mShowSuggestionRunnable;
+    private Runnable mShowSuggestionRunnable;
 
     final Drawable[] mCursorDrawable = new Drawable[2];
     int mCursorCount; // Current number of used mCursorDrawable: 0 (resource=0), 1 or 2 (split)
@@ -237,7 +236,7 @@ public class Editor {
     // Global listener that detects changes in the global position of the TextView
     private PositionListener mPositionListener;
 
-    float mLastDownPositionX, mLastDownPositionY;
+    private float mLastDownPositionX, mLastDownPositionY;
     private float mContextMenuAnchorX, mContextMenuAnchorY;
     Callback mCustomSelectionActionModeCallback;
     Callback mCustomInsertionActionModeCallback;
@@ -264,7 +263,7 @@ public class Editor {
     // - SelectionSpans, for which we need to call updateSelection if an IME is attached
     private SpanController mSpanController;
 
-    WordIterator mWordIterator;
+    private WordIterator mWordIterator;
     SpellChecker mSpellChecker;
 
     // This word iterator is set with text and used to determine word boundaries
@@ -279,7 +278,7 @@ public class Editor {
 
     final ProcessTextIntentActionsHandler mProcessTextIntentActionsHandler;
 
-    final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
+    private final CursorAnchorInfoNotifier mCursorAnchorInfoNotifier = new CursorAnchorInfoNotifier();
 
     private final Runnable mShowFloatingToolbar = new Runnable() {
         @Override
@@ -931,9 +930,6 @@ public class Editor {
         mWordIteratorWithText = null;
     }
 
-    /**
-     * @hide
-     */
     public WordIterator getWordIterator() {
         if (mWordIterator == null) {
             mWordIterator = new WordIterator(mTextView.getTextServicesLocale());
@@ -1285,7 +1281,6 @@ public class Editor {
                 mBlink.uncancel();
                 makeBlink();
             }
-            final InputMethodManager imm = InputMethodManager.peekInstance();
             if (mTextView.hasSelection() && !extractedTextModeWillBeStarted()) {
                 refreshTextActionMode();
             }
@@ -2017,7 +2012,7 @@ public class Editor {
         return selectionStarted;
     }
 
-    boolean extractedTextModeWillBeStarted() {
+    private boolean extractedTextModeWillBeStarted() {
         if (!(mTextView.isInExtractedMode())) {
             final InputMethodManager imm = InputMethodManager.peekInstance();
             return  imm != null && imm.isFullscreenMode();
@@ -2170,7 +2165,7 @@ public class Editor {
         return mSelectionControllerEnabled;
     }
 
-    InsertionPointCursorController getInsertionController() {
+    private InsertionPointCursorController getInsertionController() {
         if (!mInsertionControllerEnabled) {
             return null;
         }
@@ -2185,7 +2180,7 @@ public class Editor {
         return mInsertionPointCursorController;
     }
 
-    SelectionModifierCursorController getSelectionController() {
+    private SelectionModifierCursorController getSelectionController() {
         if (!mSelectionControllerEnabled) {
             return null;
         }
@@ -2200,9 +2195,6 @@ public class Editor {
         return mSelectionModifierCursorController;
     }
 
-    /**
-     * @hide
-     */
     @VisibleForTesting
     public Drawable[] getCursorDrawable() {
         return mCursorDrawable;
@@ -2677,7 +2669,7 @@ public class Editor {
      * pop-up should be displayed.
      * Also monitors {@link Selection} to call back to the attached input method.
      */
-    class SpanController implements SpanWatcher {
+    private class SpanController implements SpanWatcher {
 
         private static final int DISPLAY_TIMEOUT_MS = 3000; // 3 secs
 
