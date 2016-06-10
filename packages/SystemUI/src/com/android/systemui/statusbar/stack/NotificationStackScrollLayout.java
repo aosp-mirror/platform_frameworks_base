@@ -1958,8 +1958,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // we're ending up at the same location as we are now, lets just skip the animation
                 bottom = finalBottom;
             } else {
-                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
-                        - lastView.getExtraBottomPadding());
+                bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
                 bottom = Math.min(bottom, getHeight());
             }
         } else {
