@@ -41,9 +41,24 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import static com.android.SdkConstants.AUTO_COMPLETE_TEXT_VIEW;
+import static com.android.SdkConstants.BUTTON;
+import static com.android.SdkConstants.CHECKED_TEXT_VIEW;
+import static com.android.SdkConstants.CHECK_BOX;
+import static com.android.SdkConstants.EDIT_TEXT;
+import static com.android.SdkConstants.IMAGE_BUTTON;
+import static com.android.SdkConstants.MULTI_AUTO_COMPLETE_TEXT_VIEW;
+import static com.android.SdkConstants.RADIO_BUTTON;
+import static com.android.SdkConstants.SEEK_BAR;
+import static com.android.SdkConstants.SPINNER;
+import static com.android.SdkConstants.TEXT_VIEW;
 import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 
 /**
@@ -52,12 +67,28 @@ import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 public final class BridgeInflater extends LayoutInflater {
 
     private final LayoutlibCallback mLayoutlibCallback;
+    /**
+     * If true, the inflater will try to replace the framework widgets with the AppCompat versions.
+     * Ideally, this should be based on the activity being an AppCompat activity but since that is
+     * not trivial to check from layoutlib, we currently base the decision on the current theme
+     * being an AppCompat theme.
+     */
+    private boolean mLoadAppCompatViews;
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
     private Map<View, String> mOpenDrawerLayouts;
 
     // Keep in sync with the same value in LayoutInflater.
     private static final int[] ATTRS_THEME = new int[] {com.android.internal.R.attr.theme };
+
+    private static final String APPCOMPAT_WIDGET_PREFIX = "android.support.v7.widget.AppCompat";
+    /** List of platform widgets that have an AppCompat version */
+    private static final Set<String> APPCOMPAT_VIEWS = Collections.unmodifiableSet(
+            new HashSet<>(
+                    Arrays.asList(TEXT_VIEW, "ImageSwitcher", BUTTON, EDIT_TEXT, SPINNER,
+                            IMAGE_BUTTON, CHECK_BOX, RADIO_BUTTON, CHECKED_TEXT_VIEW,
+                            AUTO_COMPLETE_TEXT_VIEW, MULTI_AUTO_COMPLETE_TEXT_VIEW, "RatingBar",
+                            SEEK_BAR)));
 
     /**
      * List of class prefixes which are tried first by default.
@@ -74,13 +105,15 @@ public final class BridgeInflater extends LayoutInflater {
         return sClassPrefixList;
     }
 
-    protected BridgeInflater(LayoutInflater original, Context newContext) {
+    private BridgeInflater(LayoutInflater original, Context newContext) {
         super(original, newContext);
         newContext = getBaseContext(newContext);
         if (newContext instanceof BridgeContext) {
             mLayoutlibCallback = ((BridgeContext) newContext).getLayoutlibCallback();
+            mLoadAppCompatViews = ((BridgeContext) newContext).isAppCompatTheme();
         } else {
             mLayoutlibCallback = null;
+            mLoadAppCompatViews = false;
         }
     }
 
@@ -90,10 +123,11 @@ public final class BridgeInflater extends LayoutInflater {
      * @param context The Android application context.
      * @param layoutlibCallback the {@link LayoutlibCallback} object.
      */
-    public BridgeInflater(Context context, LayoutlibCallback layoutlibCallback) {
+    public BridgeInflater(BridgeContext context, LayoutlibCallback layoutlibCallback) {
         super(context);
         mLayoutlibCallback = layoutlibCallback;
         mConstructorArgs[0] = context;
+        mLoadAppCompatViews = context.isAppCompatTheme();
     }
 
     @Override
@@ -101,26 +135,36 @@ public final class BridgeInflater extends LayoutInflater {
         View view = null;
 
         try {
-            // First try to find a class using the default Android prefixes
-            for (String prefix : sClassPrefixList) {
+            if (mLoadAppCompatViews && APPCOMPAT_VIEWS.contains(name)) {
+                // We are using an AppCompat theme so try to load the appcompat views
+                view = loadCustomView(APPCOMPAT_WIDGET_PREFIX + name, attrs);
+
+                if (view == null) {
+                    mLoadAppCompatViews = false; // Do not try anymore
+                }
+            } else {
+
+                // First try to find a class using the default Android prefixes
+                for (String prefix : sClassPrefixList) {
+                    try {
+                        view = createView(name, prefix, attrs);
+                        if (view != null) {
+                            break;
+                        }
+                    } catch (ClassNotFoundException e) {
+                        // Ignore. We'll try again using the base class below.
+                    }
+                }
+
+                // Next try using the parent loader. This will most likely only work for
+                // fully-qualified class names.
                 try {
-                    view = createView(name, prefix, attrs);
-                    if (view != null) {
-                        break;
+                    if (view == null) {
+                        view = super.onCreateView(name, attrs);
                     }
                 } catch (ClassNotFoundException e) {
-                    // Ignore. We'll try again using the base class below.
+                    // Ignore. We'll try again using the custom view loader below.
                 }
-            }
-
-            // Next try using the parent loader. This will most likely only work for
-            // fully-qualified class names.
-            try {
-                if (view == null) {
-                    view = super.onCreateView(name, attrs);
-                }
-            } catch (ClassNotFoundException e) {
-                // Ignore. We'll try again using the custom view loader below.
             }
 
             // Finally try again using the custom view loader
