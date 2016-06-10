@@ -438,6 +438,14 @@
     <string name="select_logd_size_title">Logger buffer sizes</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
     <string name="select_logd_size_dialog_title">Select Logger sizes per log buffer</string>
+    <!-- UI debug setting: store logs persistently -->
+    <string name="dev_logpersist_clear_warning_title">Clear logger persistent storage?</string>
+    <!-- Warning text to user about the implications of enabling USB debugging -->
+    <string name="dev_logpersist_clear_warning_message">When we no longer are monitoring with the persistent logger, we are required to erase the logger data resident on your device.</string>
+    <!-- Title of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=32] -->
+    <string name="select_logpersist_title">Store logger data persistently on device</string>
+    <!-- UI debug setting: select which logs to store persistently [CHAR LIMIT=80] -->
+    <string name="select_logpersist_dialog_title">Select log buffers to store persistently on device</string>
     <!-- UI debug setting: select USB configuration -->
     <string name="select_usb_configuration_title">Select USB Configuration</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->

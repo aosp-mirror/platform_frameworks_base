@@ -138,6 +138,27 @@
         <item>16M per log buffer</item>
     </string-array>
 
+    <!-- Values for logpersist state selection preference. -->
+    <string-array name="select_logpersist_values" translatable="false" >
+        <item></item>
+        <item>all</item>
+        <item>default,security,kernel</item>
+    </string-array>
+
+    <!-- Titles for logpersist state selection preference. [CHAR LIMIT=14] -->
+    <string-array name="select_logpersist_titles">
+        <item>Off</item>
+        <item>All</item>
+        <item>All but radio</item>
+    </string-array>
+
+    <!-- Summaries for logpersist state selection preference. [CHAR LIMIT=50]-->
+    <string-array name="select_logpersist_summaries" >
+        <item>Off</item>
+        <item>All log buffers</item>
+        <item>All but radio log buffers</item>
+    </string-array>
+
     <!-- Titles for window animation scale preference. [CHAR LIMIT=35] -->
     <string-array name="window_animation_scale_entries">
         <item>Animation off</item>
