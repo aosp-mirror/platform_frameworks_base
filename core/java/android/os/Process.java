@@ -329,7 +329,6 @@ public class Process {
      */
     public static final int SCHED_RESET_ON_FORK = 0x40000000;
 
-
     // Keep in sync with SP_* constants of enum type SchedPolicy
     // declared in system/core/include/cutils/sched_policy.h,
     // except THREAD_GROUP_DEFAULT does not correspond to any SP_* value.
