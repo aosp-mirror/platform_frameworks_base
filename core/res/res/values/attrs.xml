@@ -535,13 +535,15 @@
 
         <!-- Flag indicating whether this Window's transition should overlap with
              the exiting transition of the calling Activity. Corresponds to
-             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}. -->
+             {@link android.view.Window#setAllowEnterTransitionOverlap(boolean)}.
+             The default value is true. -->
         <attr name="windowAllowEnterTransitionOverlap" format="boolean"/>
 
         <!-- Flag indicating whether this Window's transition should overlap with
              the exiting transition of the called Activity when the called Activity
              finishes. Corresponds to
-             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}. -->
+             {@link android.view.Window#setAllowReturnTransitionOverlap(boolean)}.
+             The default value is true. -->
         <attr name="windowAllowReturnTransitionOverlap" format="boolean"/>
 
         <!-- Indicates whether or not shared elements should use an overlay
