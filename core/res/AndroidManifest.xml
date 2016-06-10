@@ -361,6 +361,7 @@
     <!-- Added in N -->
     <protected-broadcast android:name="android.intent.action.ANR" />
     <protected-broadcast android:name="android.intent.action.CALL" />
+    <protected-broadcast android:name="android.intent.action.CALL_PRIVILEGED" />
     <protected-broadcast android:name="android.intent.action.DROPBOX_ENTRY_ADDED" />
     <protected-broadcast android:name="android.intent.action.INPUT_METHOD_CHANGED" />
     <protected-broadcast android:name="android.intent.action.internal_sim_state_changed" />
