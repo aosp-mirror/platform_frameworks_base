@@ -6878,9 +6878,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
-                    if (mHasFeatureWatch) {
-                        theme = com.android.internal.R.style.Theme_Micro_Dialog_Alert;
-                    } else if (mContext.getPackageManager().hasSystemFeature(FEATURE_TELEVISION)) {
+                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_TELEVISION)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
                         theme = 0;

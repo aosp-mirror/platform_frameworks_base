@@ -29,8 +29,8 @@
                 android:layout_height="wrap_content">
             <!-- Top Panel -->
             <FrameLayout
-                    android:paddingLeft="@dimen/dialog_padding_micro"
-                    android:paddingRight="@dimen/dialog_padding_micro"
+                    android:paddingLeft="?dialogPreferredPadding"
+                    android:paddingRight="?dialogPreferredPadding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/topPanel">
@@ -48,9 +48,9 @@
                 <TextView android:id="@+id/message"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Micro.AlertDialog.Message"
-                        android:paddingStart="@dimen/dialog_padding_micro"
-                        android:paddingEnd="@dimen/dialog_padding_micro"
+                        android:textAppearance="@style/TextAppearance.Material.Body1"
+                        android:paddingStart="?dialogPreferredPadding"
+                        android:paddingEnd="?dialogPreferredPadding"
                         android:paddingTop="8dip"
                         android:paddingBottom="8dip"/>
             </FrameLayout>
@@ -78,31 +78,31 @@
                         android:dividerPadding="0dip"
                         android:orientation="vertical"
                         android:minHeight="@dimen/alert_dialog_button_bar_height"
-                        android:paddingBottom="@dimen/dialog_padding_micro"
+                        android:paddingBottom="?dialogPreferredPadding"
                         style="?android:attr/buttonBarStyle"
                         android:layoutDirection="locale"
                         android:measureWithLargestChild="true">
                     <Button android:id="@+id/button1"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="@dimen/dialog_padding_micro"
-                            android:layout_marginRight="@dimen/dialog_padding_micro"
+                            android:layout_marginLeft="?dialogPreferredPadding"
+                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     <Button android:id="@+id/button3"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="@dimen/dialog_padding_micro"
-                            android:layout_marginRight="@dimen/dialog_padding_micro"
+                            android:layout_marginLeft="?dialogPreferredPadding"
+                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     <Button android:id="@+id/button2"
                             android:layout_gravity="start"
                             android:layout_weight="1"
-                            android:layout_marginLeft="@dimen/dialog_padding_micro"
-                            android:layout_marginRight="@dimen/dialog_padding_micro"
+                            android:layout_marginLeft="?dialogPreferredPadding"
+                            android:layout_marginRight="?dialogPreferredPadding"
                             style="?android:attr/buttonBarButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />

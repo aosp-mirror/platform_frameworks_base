@@ -119,8 +119,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
         <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
-        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_material</item>
-        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_start_material</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_end_material</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -153,9 +153,9 @@ please see themes_device_defaults.xml.
         <item name="windowBackground">?attr/colorBackground</item>
         <item name="windowClipToOutline">true</item>
         <item name="windowFrame">@null</item>
-        <item name="windowNoTitle">false</item>
+        <item name="windowNoTitle">@bool/config_windowNoTitleDefault</item>
         <item name="windowFullscreen">false</item>
-        <item name="windowOverscan">false</item>
+        <item name="windowOverscan">@bool/config_windowOverscanByDefault</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -164,7 +164,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Material</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Activity</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-        <item name="windowActionBar">true</item>
+        <item name="windowActionBar">@bool/config_windowActionBarSupported</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
@@ -480,8 +480,8 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
         <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
         <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
-        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_material</item>
-        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_start_material</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_end_material</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -514,9 +514,9 @@ please see themes_device_defaults.xml.
         <item name="windowBackground">?attr/colorBackground</item>
         <item name="windowClipToOutline">true</item>
         <item name="windowFrame">@null</item>
-        <item name="windowNoTitle">false</item>
+        <item name="windowNoTitle">@bool/config_windowNoTitleDefault</item>
         <item name="windowFullscreen">false</item>
-        <item name="windowOverscan">false</item>
+        <item name="windowOverscan">@bool/config_windowOverscanByDefault</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -525,7 +525,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleBackgroundStyle">@style/WindowTitleBackground.Material</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Activity</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
-        <item name="windowActionBar">true</item>
+        <item name="windowActionBar">@bool/config_windowActionBarSupported</item>
         <item name="windowActionModeOverlay">false</item>
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
@@ -874,7 +874,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
-        <item name="windowIsFloating">true</item>
+        <item name="windowIsFloating">@bool/config_dialogWindowIsFloating</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
@@ -1080,7 +1080,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
-        <item name="windowIsFloating">true</item>
+        <item name="windowIsFloating">@bool/config_dialogWindowIsFloating</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
@@ -1090,10 +1090,10 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="listPreferredItemPaddingLeft">24dip</item>
-        <item name="listPreferredItemPaddingRight">24dip</item>
-        <item name="listPreferredItemPaddingStart">24dip</item>
-        <item name="listPreferredItemPaddingEnd">24dip</item>
+        <item name="listPreferredItemPaddingLeft">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingRight">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
 
         <item name="listDivider">@null</item>
 
@@ -1201,10 +1201,10 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="listPreferredItemPaddingLeft">24dip</item>
-        <item name="listPreferredItemPaddingRight">24dip</item>
-        <item name="listPreferredItemPaddingStart">24dip</item>
-        <item name="listPreferredItemPaddingEnd">24dip</item>
+        <item name="listPreferredItemPaddingLeft">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingRight">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
 
         <item name="listDivider">@null</item>
 
