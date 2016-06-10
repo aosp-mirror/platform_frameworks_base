@@ -319,6 +319,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         transformUpdateNeeded = true;
     } else if (!layerMatchesWidthAndHeight(mLayer, getWidth(), getHeight())) {
 #if HWUI_NEW_OPS
+        // TODO: remove now irrelevant, currently enqueued damage (respecting damage ordering)
+        // Or, ideally, maintain damage between frames on node/layer so ordering is always correct
         RenderState& renderState = mLayer->renderState;
         if (properties().fitsOnLayer()) {
             mLayer = renderState.layerPool().resize(mLayer, getWidth(), getHeight());
