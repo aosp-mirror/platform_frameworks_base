@@ -2836,8 +2836,8 @@ public abstract class BatteryStats implements Parcelable {
                 whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
                 totalRealtime / 1000, totalUptime / 1000,
                 getStartClockTime(),
-                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
-                dischargeCount / 1000, dischargeScreenOffCount / 1000);
+                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000);
+
         
         // Calculate wakelock times across all uids.
         long fullWakeLockTimeTotal = 0;
@@ -2987,12 +2987,14 @@ public abstract class BatteryStats implements Parcelable {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
                     getDischargeStartLevel()-getDischargeCurrentLevel(),
                     getDischargeStartLevel()-getDischargeCurrentLevel(),
-                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff());
+                    getDischargeAmountScreenOn(), getDischargeAmountScreenOff(),
+                    dischargeCount / 1000, dischargeScreenOffCount / 1000);
         } else {
             dumpLine(pw, 0 /* uid */, category, BATTERY_DISCHARGE_DATA,
                     getLowDischargeAmountSinceCharge(), getHighDischargeAmountSinceCharge(),
                     getDischargeAmountScreenOnSinceCharge(),
-                    getDischargeAmountScreenOffSinceCharge());
+                    getDischargeAmountScreenOffSinceCharge(),
+                    dischargeCount / 1000, dischargeScreenOffCount / 1000);
         }
         
         if (reqUid < 0) {
