@@ -2007,7 +2007,7 @@ public abstract class Window {
      * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
      * transition of the calling Activity. When true, the transition will start as soon as possible.
      * When false, the transition will wait until the remote exiting transition completes before
-     * starting.
+     * starting. The default value is true.
      *
      * @param allow true to start the enter transition when possible or false to
      *              wait until the exiting transition completes.
@@ -2020,7 +2020,7 @@ public abstract class Window {
      * {@link #setEnterTransition(android.transition.Transition)} overlaps with the exit
      * transition of the calling Activity. When true, the transition will start as soon as possible.
      * When false, the transition will wait until the remote exiting transition completes before
-     * starting.
+     * starting. The default value is true.
      *
      * @return true when the enter transition should start as soon as possible or false to
      * when it should wait until the exiting transition completes.
@@ -2034,6 +2034,7 @@ public abstract class Window {
      * transition of the called Activity when reentering after if finishes. When true,
      * the transition will start as soon as possible. When false, the transition will wait
      * until the called Activity's exiting transition completes before starting.
+     * The default value is true.
      *
      * @param allow true to start the transition when possible or false to wait until the
      *              called Activity's exiting transition completes.
@@ -2047,6 +2048,7 @@ public abstract class Window {
      * transition of the called Activity when reentering after if finishes. When true,
      * the transition will start as soon as possible. When false, the transition will wait
      * until the called Activity's exiting transition completes before starting.
+     * The default value is true.
      *
      * @return true when the transition should start when possible or false when it should wait
      * until the called Activity's exiting transition completes.
