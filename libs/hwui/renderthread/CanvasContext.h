@@ -187,7 +187,12 @@ private:
     EglManager& mEglManager;
     sp<Surface> mNativeSurface;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
+    // stopped indicates the CanvasContext will reject actual redraw operations,
+    // and defer repaint until it is un-stopped
     bool mStopped = false;
+    // CanvasContext is dirty if it has received an update that it has not
+    // painted onto its surface.
+    bool mIsDirty = false;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;
     struct SwapHistory {
