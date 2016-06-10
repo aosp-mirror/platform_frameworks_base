@@ -14,10 +14,5 @@
      limitations under the License.
 -->
 <resources>
-    <!-- Theme for the dialog shown when an app crashes or ANRs. Override to make it dark. -->
-    <style name="Theme.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert">
-        <item name="windowContentTransitions">false</item>
-        <item name="windowActivityTransitions">false</item>
-        <item name="windowCloseOnTouchOutside">false</item>
-    </style>
+    <item name="text_line_spacing_multiplier_material" format="float" type="dimen">1.2</item>
 </resources>

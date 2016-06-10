@@ -24,6 +24,8 @@
 
     <!-- Preference fragment padding, sides -->
     <dimen name="preference_fragment_padding_side_material">0dp</dimen>
+    <!-- Preference fragment padding, vertical -->
+    <dimen name="preference_fragment_padding_vertical_material">0dp</dimen>
 
     <!-- Preference breadcrumbs padding, start padding -->
     <dimen name="preference_breadcrumbs_padding_start_material">12dp</dimen>
@@ -53,6 +55,8 @@
     <!-- Default padding for list items. This should match the action bar
          content inset so that ListActivity items line up correctly. -->
     <dimen name="list_item_padding_horizontal_material">@dimen/action_bar_content_inset_material</dimen>
+    <dimen name="list_item_padding_start_material">@dimen/action_bar_content_inset_material</dimen>
+    <dimen name="list_item_padding_end_material">@dimen/action_bar_content_inset_material</dimen>
 
     <!-- Padding to add to the start of the overflow action button. -->
     <dimen name="action_bar_overflow_padding_start_material">6dp</dimen>
@@ -83,6 +87,8 @@
     <dimen name="text_size_large_material">22sp</dimen>
     <dimen name="text_size_medium_material">18sp</dimen>
     <dimen name="text_size_small_material">14sp</dimen>
+
+    <item name="text_line_spacing_multiplier_material" format="float" type="dimen">1.0</item>
 
     <dimen name="text_edit_floating_toolbar_elevation">2dp</dimen>
     <dimen name="text_edit_floating_toolbar_margin">20dp</dimen>

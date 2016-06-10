@@ -13,8 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <dimen name="dialog_padding_micro">32dp</dimen>
-    <dimen name="list_item_padding_left_micro">40dp</dimen>
-    <dimen name="list_item_padding_right_micro">24dp</dimen>
+
+<!-- These resources are around just to allow their values to be customized
+     for watch products.  Do not translate. -->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Don't clip on round screens so the list can scroll past the rounded edges. -->
+    <bool name="config_preferenceFragmentClipToPadding">false</bool>
 </resources>
