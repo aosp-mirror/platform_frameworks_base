@@ -1065,7 +1065,7 @@ public class WifiConfiguration implements Parcelable {
             return mHasEverConnected;
         }
 
-        private NetworkSelectionStatus() {
+        public NetworkSelectionStatus() {
             // previously stored configs will not have this parameter, so we default to false.
             mHasEverConnected = false;
         };
@@ -1313,7 +1313,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * network selection related member
      */
-    private final NetworkSelectionStatus mNetworkSelectionStatus = new NetworkSelectionStatus();
+    private NetworkSelectionStatus mNetworkSelectionStatus = new NetworkSelectionStatus();
 
     /**
      * @hide
@@ -1322,6 +1322,15 @@ public class WifiConfiguration implements Parcelable {
     public NetworkSelectionStatus getNetworkSelectionStatus() {
         return mNetworkSelectionStatus;
     }
+
+    /**
+     * Set the network selection status
+     * @hide
+     */
+    public void setNetworkSelectionStatus(NetworkSelectionStatus status) {
+        mNetworkSelectionStatus = status;
+    }
+
     /**
      * @hide
      * Linked Configurations: represent the set of Wificonfigurations that are equivalent
