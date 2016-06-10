@@ -432,7 +432,10 @@ public class TelephonyIntents {
      * The intent will have the following extra values:</p>
      * <ul>
      *   <li>apnType</li><dd>A string with the apn type.</dd>
-     *   <li>pcoValue</li><dd>A integer read from modem.</dd>
+     *   <li>apnProto</li><dd>A string with the protocol of the apn connection (IP,IPV6,
+     *                        IPV4V6)</dd>
+     *   <li>pcoId</li><dd>An integer indicating the pco id for the data.</dd>
+     *   <li>pcoValue</li><dd>A byte array of pco data read from modem.</dd>
      *   <li>subId</dt><li>Sub Id which associated the data connection.</dd>
      * </ul>
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
@@ -444,7 +447,9 @@ public class TelephonyIntents {
     public static final String EXTRA_REDIRECTION_URL_KEY = "redirectionUrl";
     public static final String EXTRA_ERROR_CODE_KEY = "errorCode";
     public static final String EXTRA_APN_TYPE_KEY = "apnType";
-    public static final String EXTRA_PCO_KEY = "pco";
+    public static final String EXTRA_APN_PROTO_KEY = "apnProto";
+    public static final String EXTRA_PCO_ID_KEY = "pcoId";
+    public static final String EXTRA_PCO_VALUE_KEY = "pcoValue";
 
 
    /**
