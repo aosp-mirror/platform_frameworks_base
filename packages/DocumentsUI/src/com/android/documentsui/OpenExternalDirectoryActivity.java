@@ -20,6 +20,7 @@ import static android.os.Environment.isStandardDirectory;
 import static android.os.Environment.STANDARD_DIRECTORIES;
 import static android.os.storage.StorageVolume.EXTRA_DIRECTORY_NAME;
 import static android.os.storage.StorageVolume.EXTRA_STORAGE_VOLUME;
+
 import static com.android.documentsui.LocalPreferences.getScopedAccessPermissionStatus;
 import static com.android.documentsui.LocalPreferences.PERMISSION_ASK;
 import static com.android.documentsui.LocalPreferences.PERMISSION_ASK_AGAIN;
@@ -201,14 +202,23 @@ public class OpenExternalDirectoryActivity extends Activity {
         final List<VolumeInfo> volumes = sm.getVolumes();
         if (DEBUG) Log.d(TAG, "Number of volumes: " + volumes.size());
         File internalRoot = null;
+        boolean found = true;
         for (VolumeInfo volume : volumes) {
             if (isRightVolume(volume, root, userId)) {
+                found = true;
                 internalRoot = volume.getInternalPathForUser(userId);
                 // Must convert path before calling getDocIdForFileCreateNewDir()
                 if (DEBUG) Log.d(TAG, "Converting " + root + " to " + internalRoot);
                 file = isRoot ? internalRoot : new File(internalRoot, directory);
+                volumeUuid = storageVolume.getUuid();
                 volumeLabel = sm.getBestVolumeDescription(volume);
-                volumeUuid = volume.getFsUuid();
+                if (TextUtils.isEmpty(volumeLabel)) {
+                    volumeLabel = storageVolume.getDescription(activity);
+                }
+                if (TextUtils.isEmpty(volumeLabel)) {
+                    volumeLabel = activity.getString(android.R.string.unknownName);
+                    Log.w(TAG, "No volume description  for " + volume + "; using " + volumeLabel);
+                }
                 break;
             }
         }
@@ -229,7 +239,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             return true;
         }
 
-        if (volumeLabel == null) {
+        if (!found) {
             Log.e(TAG, "Could not get volume for " + file);
             logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_ERROR);
             return false;
@@ -280,12 +290,12 @@ public class OpenExternalDirectoryActivity extends Activity {
         final boolean isVisible = volume.isVisibleForWrite(userId);
         if (DEBUG)
             Log.d(TAG, "Volume: " + volume + " userId: " + userId + " root: " + root
-                    + " volumePath: " + volume.getPath().getPath()
+                    + " volumePath: " + volume.getPath()
                     + " pathForUser: " + path
                     + " internalPathForUser: " + volume.getInternalPath()
                     + " isVisible: " + isVisible);
 
-        return volume.isVisibleForWrite(userId) && root.equals(path);
+        return isVisible && root.equals(path);
     }
 
     private static Uri getGrantedUriPermission(Context context, ContentProviderClient provider,
@@ -455,7 +465,7 @@ public class OpenExternalDirectoryActivity extends Activity {
                 message = TextUtils.expandTemplate(
                         getText(mIsPrimary ? R.string.open_external_dialog_request_primary_volume
                                 : R.string.open_external_dialog_request),
-                        mAppLabel, directory, mVolumeLabel);
+                                mAppLabel, directory, mVolumeLabel);
             }
             final TextView messageField = (TextView) view.findViewById(R.id.message);
             messageField.setText(message);
