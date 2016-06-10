@@ -1938,7 +1938,7 @@ public final class ViewRootImpl implements ViewParent,
                 mSurfaceHolder.setSurfaceFrameSize(mWidth, mHeight);
                 mSurfaceHolder.mSurfaceLock.unlock();
                 if (mSurface.isValid()) {
-                    if (!hadSurface || surfaceGenerationId != mSurface.getGenerationId()) {
+                    if (!hadSurface) {
                         mSurfaceHolder.ungetCallbacks();
 
                         mIsCreating = true;
@@ -1951,7 +1951,7 @@ public final class ViewRootImpl implements ViewParent,
                         }
                         surfaceChanged = true;
                     }
-                    if (surfaceChanged) {
+                    if (surfaceChanged || surfaceGenerationId != mSurface.getGenerationId()) {
                         mSurfaceHolderCallback.surfaceChanged(mSurfaceHolder,
                                 lp.format, mWidth, mHeight);
                         SurfaceHolder.Callback callbacks[] = mSurfaceHolder.getCallbacks();
