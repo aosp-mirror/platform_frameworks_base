@@ -1431,6 +1431,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 for (UpdateRecord record : records) {
                     if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
                         LocationRequest locationRequest = record.mRequest;
+
+                        // Don't assign battery blame for update records whose
+                        // client has no permission to receive location data.
+                        if (!providerRequest.locationRequests.contains(locationRequest)) {
+                            continue;
+                        }
+
                         if (locationRequest.getInterval() <= thresholdInterval) {
                             if (record.mReceiver.mWorkSource != null
                                     && record.mReceiver.mWorkSource.size() > 0
