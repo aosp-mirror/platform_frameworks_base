@@ -6036,7 +6036,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (appId < 0 && packageName != null) {
             try {
                 appId = UserHandle.getAppId(AppGlobals.getPackageManager()
-                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId));
+                        .getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, 0));
             } catch (RemoteException e) {
             }
         }
