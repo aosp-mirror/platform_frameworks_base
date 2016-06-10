@@ -86,7 +86,9 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
             ATRACE_FORMAT("Optimize HW Layer DisplayList %s %ux%u",
                     layerNode->getName(), layerNode->getWidth(), layerNode->getHeight());
 
-            const Rect& layerDamage = layers.entries()[i].damage;
+            Rect layerDamage = layers.entries()[i].damage;
+            // TODO: ensure layer damage can't be larger than layer
+            layerDamage.doIntersect(0, 0, layer->viewportWidth, layer->viewportHeight);
             layerNode->computeOrdering();
 
             // map current light center into RenderNode's coordinate space
