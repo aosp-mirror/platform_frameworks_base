@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2016 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:viewportWidth="1102"
+        android:viewportHeight="642"
+        android:width="1102px"
+        android:height="642px">
+
+    <group
+        android:translateX="-126.347"
+        android:translateY="6.7928655e-4">
+
+
+        <path
+            android:fillColor="#94c147"
+            android:pathData="
+            m 552.777,147.57
+            c -14.147,0 -25.622,11.652 -25.622,26.02
+            v 101.68
+            c 0,14.372 11.475,26.019 25.622,26.019 14.147,0 25.61,-11.646 25.61,-26.019
+            V 173.59
+            c 0.001,-14.368 -11.462,-26.02 -25.61,-26.02
+            z
+
+            m -309.011,0
+            c -14.155,0 -25.618,11.652 -25.618,26.02
+            v 101.68
+            c 0,14.372 11.462,26.019 25.618,26.019 14.153,0 25.623,-11.646 25.623,-26.019
+            V 173.59
+            c -0.008,-14.368 -11.475,-26.02 -25.623,-26.02
+            z" />
+
+
+        <path
+        android:fillColor="#94c147"
+        android:pathData="m 284.799,148.364 v 185.768 c 0,11.035 8.948,19.98 19.983,19.98 h 22.815 v 56.567 c 0,14.37 11.47,26.016 25.623,26.016 14.148,0 25.623,-11.646 25.623,-26.016 v -56.567 h 39.878 v 56.567 c 0,14.37 11.463,26.016 25.61,26.016 14.147,0 25.622,-11.646 25.622,-26.016 v -56.567 h 22.828 c 11.022,0 19.971,-8.953 19.971,-19.98 V 148.364 H 284.799 l 0,0 z" />
+
+        <group
+        android:name="head"
+        android:pivotX="400"
+        android:pivotY="131.105">
+
+        <path
+        android:fillColor="#94c147"
+        android:pathData="m 452.302,52.105 21.057,-30.572 c 1.245,-1.819 0.939,-4.199 -0.695,-5.329 -1.637,-1.123 -3.968,-0.568 -5.225,1.251 l -21.875,31.75 c -14.404,-5.682 -30.418,-8.844 -47.293,-8.844 -16.87,0 -32.893,3.162 -47.297,8.844 l -21.875,-31.75 c -1.257,-1.819 -3.589,-2.375 -5.225,-1.251 -1.636,1.124 -1.946,3.509 -0.696,5.329 l 21.057,30.572 c -33.464,15.57 -56.951,45.166 -59.941,79.706 H 512.25 C 509.259,97.271 485.772,67.676 452.302,52.105 z M 350.187,100.28 c -6.965,0 -12.617,-5.646 -12.617,-12.616 0,-6.958 5.647,-12.61 12.617,-12.61 6.97,0 12.603,5.652 12.603,12.61 0,6.965 -5.64,12.616 -12.603,12.616 z m 97.744,0 c -6.97,0 -12.609,-5.646 -12.609,-12.616 0,-6.958 5.64,-12.61 12.609,-12.61 6.971,0 12.61,5.652 12.61,12.61 0,6.965 -5.64,12.616 -12.61,12.616 z" />
+        </group>
+
+    </group>
+
+</vector>
