@@ -25,7 +25,7 @@ parent.link=manifest-intro.html
           android:<a href="#hwaccel">hardwareAccelerated</a>=["true" | "false"]
           android:<a href="#icon">icon</a>="<i>drawable resource</i>"
           android:<a href="#label">label</a>="<i>string resource</i>"
-          android:<a href="#lmode">launchMode</a>=["multiple" | "singleTop" |
+          android:<a href="#lmode">launchMode</a>=["standard" | "singleTop" |
                               "singleTask" | "singleInstance"]
           android:<a href="#maxRecents">maxRecents</a>="<i>integer</i>"
           android:<a href="#multi">multiprocess</a>=["true" | "false"]
