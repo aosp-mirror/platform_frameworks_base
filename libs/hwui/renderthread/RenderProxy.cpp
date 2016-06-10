@@ -514,6 +514,10 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
     post(task);
 }
 
+int RenderProxy::getRenderThreadTid() {
+    return mRenderThread.getTid();
+}
+
 CREATE_BRIDGE3(addRenderNode, CanvasContext* context, RenderNode* node, bool placeFront) {
     args->context->addRenderNode(args->node, args->placeFront);
     return nullptr;

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.ActivityManagerNative;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
@@ -917,8 +918,18 @@ public final class ThreadedRenderer {
         synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
             mInitialized = true;
+            initSched(context, renderProxy);
             initGraphicsStats(context, renderProxy);
             initAssetAtlas(context, renderProxy);
+        }
+
+        private static void initSched(Context context, long renderProxy) {
+            try {
+                int tid = nGetRenderThreadTid(renderProxy);
+                ActivityManagerNative.getDefault().setRenderThread(tid);
+            } catch (Throwable t) {
+                Log.w(LOG_TAG, "Failed to set scheduler for RenderThread", t);
+            }
         }
 
         private static void initGraphicsStats(Context context, long renderProxy) {
@@ -979,6 +990,7 @@ public final class ThreadedRenderer {
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
     private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
+    private static native int nGetRenderThreadTid(long nativeProxy);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
