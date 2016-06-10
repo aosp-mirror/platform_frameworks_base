@@ -9849,7 +9849,11 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         synchronized(this) {
             if (mActiveRestoreSession != null) {
-                Slog.d(TAG, "Restore session requested but one already active");
+                Slog.i(TAG, "Restore session requested but one already active");
+                return null;
+            }
+            if (mBackupRunning) {
+                Slog.i(TAG, "Restore session requested but currently running backups");
                 return null;
             }
             mActiveRestoreSession = new ActiveRestoreSession(packageName, transport);
