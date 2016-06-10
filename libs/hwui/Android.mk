@@ -256,6 +256,7 @@ LOCAL_SRC_FILES += \
     tests/unit/MatrixTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/RenderNodeTests.cpp \
+    tests/unit/RenderPropertiesTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/SnapshotTests.cpp \
     tests/unit/StringUtilsTests.cpp \
