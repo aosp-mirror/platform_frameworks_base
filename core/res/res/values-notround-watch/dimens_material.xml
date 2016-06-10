@@ -14,16 +14,10 @@
      limitations under the License.
 -->
 <resources>
-    <dimen name="text_size_headline_micro">22sp</dimen>
-    <dimen name="text_size_title_micro">20sp</dimen>
-    <dimen name="text_size_subtitle_micro">18sp</dimen>
-    <dimen name="text_size_body_1_micro">16sp</dimen>
-    <dimen name="text_size_body_2_micro">14sp</dimen>
-    <dimen name="text_size_caption_micro">12sp</dimen>
+    <dimen name="dialog_padding_material">8dp</dimen>
+    <dimen name="preference_fragment_padding_vertical_material">0dp</dimen>
 
-    <dimen name="text_size_large_micro">20sp</dimen>
-    <dimen name="text_size_medium_micro">18sp</dimen>
-    <dimen name="text_size_small_micro">16sp</dimen>
-
-    <item name="line_spacing_multiplier_micro" format="float" type="dimen">1.2</item>
+    <dimen name="list_item_padding_horizontal_material">16dp</dimen>
+    <dimen name="list_item_padding_start_material">16dp</dimen>
+    <dimen name="list_item_padding_end_material">16dp</dimen>
 </resources>
