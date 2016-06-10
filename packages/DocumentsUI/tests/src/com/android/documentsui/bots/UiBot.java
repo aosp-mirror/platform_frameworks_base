@@ -17,20 +17,20 @@
 package com.android.documentsui.bots;
 
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static android.support.test.espresso.matcher.ViewMatchers.withResourceName;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withResourceName;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.is;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -41,21 +41,22 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
-import android.support.test.uiautomator.Until;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toolbar;
-import junit.framework.AssertionFailedError;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.view.menu.ActionMenuItemView;
 
+import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -80,7 +81,10 @@ public class UiBot extends BaseBot {
     }
 
     public void assertBreadcrumbTitle(String expected) {
-        onView(isAssignableFrom(Spinner.class)).check(matches(withBreadcrumbTitle(is(expected))));
+        if (!isTablet()) {
+            onView(allOf(isAssignableFrom(Spinner.class), withId(R.id.breadcrumb)))
+            .check(matches(withBreadcrumbTitle(is(expected))));
+        }
   }
 
     public void assertMenuEnabled(int id, boolean enabled) {
@@ -206,6 +210,43 @@ public class UiBot extends BaseBot {
         return mContext.getResources().getBoolean(R.bool.full_bar_search_view)
                 ? findObject("com.android.documentsui:id/menu_search")
                 : findObject("com.android.documentsui:id/menu_search", "android:id/search_button");
+    }
+
+    public void clickBreadcrumbItem(String label) throws UiObjectNotFoundException {
+        if (isTablet()) {
+            findBreadcrumb(label).click();
+        } else {
+            findMenuWithName(label).click();
+        }
+    }
+
+    public void clickDropdownBreadcrumb() throws UiObjectNotFoundException {
+        assertFalse(isTablet());
+        onView(isAssignableFrom(Spinner.class)).perform(click());
+    }
+
+    public UiObject findBreadcrumb(String label) throws UiObjectNotFoundException {
+        final UiSelector breadcrumbList = new UiSelector().resourceId(
+                "com.android.documentsui:id/breadcrumb");
+
+        // Wait for the first list item to appear
+        new UiObject(breadcrumbList.childSelector(new UiSelector())).waitForExists(mTimeout);
+
+        return mDevice.findObject(breadcrumbList.childSelector(new UiSelector().text(label)));
+    }
+
+    public void assertBreadcrumbItemsPresent(String... labels) throws UiObjectNotFoundException {
+        List<String> absent = new ArrayList<>();
+        for (String label : labels) {
+            // For non-Tablet devices, a dropdown List menu is shown instead
+            if (isTablet() ? !findBreadcrumb(label).exists() : findMenuWithName(label) == null) {
+                absent.add(label);
+            }
+        }
+        if (!absent.isEmpty()) {
+            Assert.fail("Expected documents " + Arrays.asList(labels)
+                    + ", but missing " + absent);
+        }
     }
 
     UiObject findActionModeBar() {
