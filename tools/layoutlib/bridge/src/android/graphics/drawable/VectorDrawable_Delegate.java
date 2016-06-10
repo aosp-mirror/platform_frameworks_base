@@ -96,6 +96,14 @@ public class VectorDrawable_Delegate {
     }
 
     @LayoutlibDelegate
+    static long nCreateTreeFromCopy(long rendererToCopyPtr, long rootGroupPtr) {
+        VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
+        VPathRenderer_Delegate rendererToCopy = VNativeObject.getDelegate(rendererToCopyPtr);
+        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rendererToCopy,
+                rootGroup));
+    }
+
+    @LayoutlibDelegate
     static void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
             float viewportHeight) {
         VPathRenderer_Delegate nativePathRenderer = VNativeObject.getDelegate(rendererPtr);
@@ -1033,6 +1041,14 @@ public class VectorDrawable_Delegate {
             mRootGroup = rootGroup;
             mPath = new Path();
             mRenderPath = new Path();
+        }
+
+        private VPathRenderer_Delegate(VPathRenderer_Delegate rendererToCopy,
+                VGroup_Delegate rootGroup) {
+            this(rootGroup);
+            mViewportWidth = rendererToCopy.mViewportWidth;
+            mViewportHeight = rendererToCopy.mViewportHeight;
+            mRootAlpha = rendererToCopy.mRootAlpha;
         }
 
         private float getRootAlpha() {
