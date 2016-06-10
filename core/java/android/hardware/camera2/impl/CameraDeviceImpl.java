@@ -1644,41 +1644,6 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     public class CameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
-        //
-        // Constants below need to be kept up-to-date with
-        // frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
-        //
-
-        //
-        // Error codes for onCameraError
-        //
-
-        /**
-         * Camera has been disconnected
-         */
-        public static final int ERROR_CAMERA_DISCONNECTED = 0;
-        /**
-         * Camera has encountered a device-level error
-         * Matches CameraDevice.StateCallback#ERROR_CAMERA_DEVICE
-         */
-        public static final int ERROR_CAMERA_DEVICE = 1;
-        /**
-         * Camera has encountered a service-level error
-         * Matches CameraDevice.StateCallback#ERROR_CAMERA_SERVICE
-         */
-        public static final int ERROR_CAMERA_SERVICE = 2;
-        /**
-         * Camera has encountered an error processing a single request.
-         */
-        public static final int ERROR_CAMERA_REQUEST = 3;
-        /**
-         * Camera has encountered an error producing metadata for a single capture
-         */
-        public static final int ERROR_CAMERA_RESULT = 4;
-        /**
-         * Camera has encountered an error producing an image buffer for a single capture
-         */
-        public static final int ERROR_CAMERA_BUFFER = 5;
 
         @Override
         public IBinder asBinder() {
@@ -1709,11 +1674,14 @@ public class CameraDeviceImpl extends CameraDevice
                     case ERROR_CAMERA_DEVICE:
                     case ERROR_CAMERA_SERVICE:
                         mInError = true;
+                        final int publicErrorCode = (errorCode == ERROR_CAMERA_DEVICE) ?
+                                StateCallback.ERROR_CAMERA_DEVICE :
+                                StateCallback.ERROR_CAMERA_SERVICE;
                         Runnable r = new Runnable() {
                             @Override
                             public void run() {
                                 if (!CameraDeviceImpl.this.isClosed()) {
-                                    mDeviceCallback.onError(CameraDeviceImpl.this, errorCode);
+                                    mDeviceCallback.onError(CameraDeviceImpl.this, publicErrorCode);
                                 }
                             }
                         };
@@ -2085,7 +2053,7 @@ public class CameraDeviceImpl extends CameraDevice
             public void run() {
                 if (!isClosed()) {
                     mDeviceCallback.onError(CameraDeviceImpl.this,
-                            CameraDeviceCallbacks.ERROR_CAMERA_SERVICE);
+                            StateCallback.ERROR_CAMERA_SERVICE);
                 }
             }
         };
