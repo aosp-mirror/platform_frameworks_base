@@ -14,7 +14,10 @@
      limitations under the License.
 -->
 <resources>
-    <dimen name="dialog_padding_micro">8dp</dimen>
-    <dimen name="list_item_padding_left_micro">16dp</dimen>
-    <dimen name="list_item_padding_right_micro">16dp</dimen>
+    <dimen name="dialog_padding_material">32dp</dimen>
+    <dimen name="preference_fragment_padding_vertical_material">22dp</dimen>
+
+    <dimen name="list_item_padding_horizontal_material">32dp</dimen>
+    <dimen name="list_item_padding_start_material">40dp</dimen>
+    <dimen name="list_item_padding_end_material">24dp</dimen>
 </resources>

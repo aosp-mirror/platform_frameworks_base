@@ -14,21 +14,14 @@
      limitations under the License.
 -->
 <resources>
-    <color name="foreground_micro_dark">@color/white</color>
-    <color name="foreground_micro_light">@color/black</color>
+    <color name="background_material_dark">@color/micro_blue_grey_b15</color>
+    <color name="background_floating_material_dark">@color/micro_blue_grey_b30</color>
 
-    <color name="background_micro_dark">@color/micro_blue_grey_b15</color>
-    <color name="background_micro_light">@color/white</color>
-    <color name="background_floating_micro_dark">@color/micro_blue_grey_b30</color>
-    <color name="background_floating_micro_light">@color/micro_blue_grey_500</color>
+    <color name="primary_material_dark">@color/micro_blue_grey_b65</color>
+    <color name="primary_dark_material_dark">@color/micro_blue_grey_b40</color>
 
-    <color name="primary_micro_dark">@color/micro_blue_grey_b65</color>
-    <color name="primary_dark_micro_dark">@color/micro_blue_grey_b40</color>
-
-    <color name="accent_micro_light">@color/micro_blue_grey_500</color>
-    <color name="accent_micro_dark">@color/micro_blue_grey_b100</color>
-
-    <color name="button_micro_dark">@color/micro_button_gray</color>
+    <color name="accent_material_dark">@color/micro_blue_grey_b100</color>
+    <color name="accent_material_light">@color/micro_blue_grey_500</color>
 
     <!-- Primary & accent colors -->
     <eat-comment />

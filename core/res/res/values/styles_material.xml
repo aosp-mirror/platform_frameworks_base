@@ -40,7 +40,10 @@ please see styles_device_defaults.xml.
         <item name="layout">@layout/preference_list_fragment_material</item>
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingTop">@dimen/preference_fragment_padding_vertical_material</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_vertical_material</item>
         <item name="divider">?attr/listDivider</item>
+        <item name="clipToPadding">@bool/config_preferenceFragmentClipToPadding</item>
     </style>
 
     <style name="PreferenceActivity.Material">
@@ -134,6 +137,8 @@ please see styles_device_defaults.xml.
     <style name="PreferenceFragmentList.Material">
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
+        <item name="paddingTop">@dimen/preference_fragment_padding_vertical_material</item>
+        <item name="paddingBottom">@dimen/preference_fragment_padding_vertical_material</item>
     </style>
 
     <!-- Begin Material theme styles -->
@@ -147,6 +152,7 @@ please see styles_device_defaults.xml.
         <item name="textColorLink">?attr/textColorLink</item>
         <item name="textSize">@dimen/text_size_body_1_material</item>
         <item name="fontFamily">@string/font_family_body_1_material</item>
+        <item name="lineSpacingMultiplier">@dimen/text_line_spacing_multiplier_material</item>
     </style>
 
     <style name="TextAppearance.Material.Display4">
@@ -1190,6 +1196,7 @@ please see styles_device_defaults.xml.
         <item name="listItemLayout">@layout/select_dialog_item_material</item>
         <item name="multiChoiceItemLayout">@layout/select_dialog_multichoice_material</item>
         <item name="singleChoiceItemLayout">@layout/select_dialog_singlechoice_material</item>
+        <item name="controllerType">@integer/config_alertDialogController</item>
     </style>
 
     <style name="AlertDialog.Material.Light" />
@@ -1224,7 +1231,7 @@ please see styles_device_defaults.xml.
     <style name="DialogWindowTitleBackground.Material.Light" />
 
     <style name="DialogWindowTitle.Material">
-        <item name="maxLines">1</item>
+        <item name="maxLines">@integer/config_dialogWindowTitleMaxLines</item>
         <item name="scrollHorizontally">true</item>
         <item name="textAppearance">@style/TextAppearance.Material.DialogWindowTitle</item>
     </style>

@@ -13,22 +13,29 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <style name="Theme.DeviceDefault" parent="Theme.Micro" />
-    <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Micro" />
-    <style name="Theme.DeviceDefault.Dialog" parent="Theme.Micro.Dialog" />
-    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Micro.Dialog" />
-    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
-    <style name="Theme.DeviceDefault.InputMethod" parent="Theme.Micro.InputMethod"  />
-    <style name="Theme.DeviceDefault.Panel" parent="Theme.Micro.Panel"  />
-    <style name="Theme.DeviceDefault.Light" parent="Theme.Micro.Light" />
-    <style name="Theme.DeviceDefault.Light.NoActionBar" parent="Theme.Micro.Light" />
-    <style name="Theme.DeviceDefault.Light.DarkActionBar" parent="Theme.Micro.Light" />
-    <style name="Theme.DeviceDefault.Light.Dialog" parent="Theme.Micro.Dialog" />
-    <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="Theme.Micro.Dialog" />
-    <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
-    <style name="Theme.DeviceDefault.Light.Panel" parent="Theme.Micro.Light.Panel"  />
-    <style name="Theme.DeviceDefault.Settings" parent="Theme.Micro" />
-    <style name="Theme.DeviceDefault.Wallpaper" parent="Theme.Micro" />
-</resources>
 
+<!--
+===============================================================
+                        PLEASE READ
+===============================================================
+This file contains the themes that are the Device Defaults.
+If you want to edit themes to skin your device, do it here.
+We recommend that you do not edit themes.xml and instead edit
+this file.
+
+Editing this file instead of themes.xml will greatly simplify
+merges for future platform versions and CTS compliance will be
+easier.
+===============================================================
+                        PLEASE READ
+===============================================================
+ -->
+<resources>
+    <!-- Theme used for the intent picker activity. -->
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Material">
+        <item name="colorControlActivated">?attr/colorControlHighlight</item>
+        <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
+    </style>
+
+</resources>
