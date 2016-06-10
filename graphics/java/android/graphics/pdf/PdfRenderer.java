@@ -374,7 +374,9 @@ public final class PdfRenderer implements AutoCloseable {
          */
         public void render(@NonNull Bitmap destination, @Nullable Rect destClip,
                            @Nullable Matrix transform, @RenderMode int renderMode) {
-            throwIfClosed();
+            if (mNativePage == 0) {
+                throw new NullPointerException();
+            }
 
             destination = Preconditions.checkNotNull(destination, "bitmap null");
 
