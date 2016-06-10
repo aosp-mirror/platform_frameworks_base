@@ -20,5 +20,6 @@ import android.content.Intent;
 import android.os.IRemoteCallback;
 
 oneway interface IEphemeralResolver {
-    void getEphemeralResolveInfoList(IRemoteCallback callback, int digestPrefix, int sequence);
+    void getEphemeralResolveInfoList(IRemoteCallback callback, in int[] digestPrefix,
+            int prefixMask, int sequence);
 }

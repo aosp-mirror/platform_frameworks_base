@@ -39,14 +39,19 @@ import java.util.List;
 public abstract class EphemeralResolverService extends Service {
     public static final String EXTRA_RESOLVE_INFO = "com.android.internal.app.RESOLVE_INFO";
     public static final String EXTRA_SEQUENCE = "com.android.internal.app.SEQUENCE";
+    private static final String EXTRA_PREFIX = "com.android.internal.app.PREFIX";
     private Handler mHandler;
 
     /**
      * Called to retrieve resolve info for ephemeral applications.
      *
      * @param digestPrefix The hash prefix of the ephemeral's domain.
+     * @param prefixMask A mask that was applied to each digest prefix. This should
+     *      be used when comparing against the digest prefixes as all bits might
+     *      not be set.
      */
-    protected abstract List<EphemeralResolveInfo> getEphemeralResolveInfoList(int digestPrefix);
+    protected abstract List<EphemeralResolveInfo> getEphemeralResolveInfoList(
+            int digestPrefix[], int prefixMask);
 
     @Override
     protected final void attachBaseContext(Context base) {
@@ -59,10 +64,13 @@ public abstract class EphemeralResolverService extends Service {
         return new IEphemeralResolver.Stub() {
             @Override
             public void getEphemeralResolveInfoList(
-                    IRemoteCallback callback, int digestPrefix, int sequence) {
-                mHandler.obtainMessage(ServiceHandler.MSG_GET_EPHEMERAL_RESOLVE_INFO,
-                        digestPrefix, sequence, callback)
-                    .sendToTarget();
+                    IRemoteCallback callback, int digestPrefix[], int prefixMask, int sequence) {
+                final Message msg = mHandler.obtainMessage(
+                        ServiceHandler.MSG_GET_EPHEMERAL_RESOLVE_INFO, prefixMask, sequence, callback);
+                final Bundle data = new Bundle();
+                data.putIntArray(EXTRA_PREFIX, digestPrefix);
+                msg.setData(data);
+                msg.sendToTarget();
             }
         };
     }
@@ -81,8 +89,9 @@ public abstract class EphemeralResolverService extends Service {
             switch (action) {
                 case MSG_GET_EPHEMERAL_RESOLVE_INFO: {
                     final IRemoteCallback callback = (IRemoteCallback) message.obj;
+                    final int[] digestPrefix = message.getData().getIntArray(EXTRA_PREFIX);
                     final List<EphemeralResolveInfo> resolveInfo =
-                            getEphemeralResolveInfoList(message.arg1);
+                            getEphemeralResolveInfoList(digestPrefix, message.arg1);
                     final Bundle data = new Bundle();
                     data.putInt(EXTRA_SEQUENCE, message.arg2);
                     data.putParcelableList(EXTRA_RESOLVE_INFO, resolveInfo);
