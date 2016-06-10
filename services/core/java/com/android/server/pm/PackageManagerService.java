@@ -5000,10 +5000,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         final byte[] hostBytes = intent.getData().getHost().getBytes();
         final byte[] digestBytes = digest.digest(hostBytes);
         int shaPrefix =
-                digestBytes[0] << 24
-                | digestBytes[1] << 16
-                | digestBytes[2] << 8
-                | digestBytes[3] << 0;
+                (digestBytes[0] & 0xFF) << 24
+                | (digestBytes[1] & 0xFF) << 16
+                | (digestBytes[2] & 0xFF) << 8
+                | (digestBytes[3] & 0xFF) << 0;
         final List<EphemeralResolveInfo> ephemeralResolveInfoList =
                 mEphemeralResolverConnection.getEphemeralResolveInfoList(shaPrefix);
         if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
