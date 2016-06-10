@@ -46,6 +46,8 @@ class OtaDexoptShellCommand extends ShellCommand {
                     return runOtaDone();
                 case "step":
                     return runOtaStep();
+                case "progress":
+                    return runOtaProgress();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -78,6 +80,13 @@ class OtaDexoptShellCommand extends ShellCommand {
 
     private int runOtaStep() throws RemoteException {
         mInterface.dexoptNextPackage();
+        return 0;
+    }
+
+    private int runOtaProgress() throws RemoteException {
+        final float progress = mInterface.getProgress();
+        final PrintWriter pw = getOutPrintWriter();
+        pw.format("%.2f", progress);
         return 0;
     }
 
