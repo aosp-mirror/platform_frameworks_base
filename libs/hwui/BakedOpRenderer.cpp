@@ -66,8 +66,13 @@ void BakedOpRenderer::startRepaintLayer(OffscreenBuffer* offscreenBuffer, const 
             offscreenBuffer->texture.id(), 0);
     GL_CHECKPOINT(LOW);
 
-    LOG_ALWAYS_FATAL_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE,
-            "framebuffer incomplete!");
+    int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    LOG_ALWAYS_FATAL_IF(status != GL_FRAMEBUFFER_COMPLETE,
+            "framebuffer incomplete, status %d, textureId %d, size %dx%d",
+            status,
+            offscreenBuffer->texture.id(),
+            offscreenBuffer->texture.width(),
+            offscreenBuffer->texture.height());
 
     // Change the viewport & ortho projection
     setViewport(offscreenBuffer->viewportWidth, offscreenBuffer->viewportHeight);
