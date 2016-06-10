@@ -25,16 +25,13 @@ import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
-import android.support.test.rule.UiThreadTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.documentsui.ThumbnailCache.Result;
 import com.android.documentsui.testing.Bitmaps;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -55,11 +52,6 @@ public class ThumbnailCacheTest {
 
     private static final long LAST_MODIFIED = 100;
 
-    // We need this rule to help us run tests in main thread. It'll be applied to each test
-    // annotated with @UiThreadTest.
-    @Rule
-    public UiThreadTestRule uiThreadRule = new UiThreadTestRule();
-
     private static final int CACHE_SIZE_LIMIT =
             MIDSIZE_BITMAP.getByteCount() + LARGE_BITMAP.getByteCount();
 
@@ -71,7 +63,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testMiss() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -81,7 +72,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_Exact() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -92,7 +82,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_Smaller() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -103,7 +92,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_Larger() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -114,7 +102,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_Larger_HasBothSize() {
         mCache.putThumbnail(URI_0, LARGE_SIZE, LARGE_BITMAP, LAST_MODIFIED);
         mCache.putThumbnail(URI_0, SMALL_SIZE, SMALL_BITMAP, LAST_MODIFIED);
@@ -126,7 +113,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_Exact_MultiplePut() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -141,7 +127,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testHit_EqualLastModified() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
 
@@ -151,7 +136,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testEvictOldest_SizeExceeded() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
         mCache.putThumbnail(URI_1, SMALL_SIZE, SMALL_BITMAP, LAST_MODIFIED);
@@ -163,7 +147,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCacheShrink_OnTrimMemory_Moderate() {
         mCache.putThumbnail(URI_0, MID_SIZE, MIDSIZE_BITMAP, LAST_MODIFIED);
         mCache.putThumbnail(URI_0, SMALL_SIZE, SMALL_BITMAP, LAST_MODIFIED);
@@ -176,7 +159,6 @@ public class ThumbnailCacheTest {
     }
 
     @Test
-    @UiThreadTest
     public void testCacheShrink_OnTrimMemory_Background() {
         mCache.putThumbnail(URI_0, LARGE_SIZE, LARGE_BITMAP, LAST_MODIFIED);
         mCache.putThumbnail(URI_0, SMALL_SIZE, SMALL_BITMAP, LAST_MODIFIED);

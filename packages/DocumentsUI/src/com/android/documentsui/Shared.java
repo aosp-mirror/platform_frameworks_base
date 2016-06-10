@@ -21,10 +21,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.WindowManager;
 
 import java.text.Collator;
@@ -212,5 +214,11 @@ public final class Shared {
         Intent intent = activity.getIntent();
         return isProductivityMode(activity, intent)
                 || intent.getBooleanExtra(DocumentsContract.EXTRA_FANCY_FEATURES, false);
+    }
+
+    public static void checkMainLoop() {
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            Log.e(TAG, "Calling from non-UI thread!");
+        }
     }
 }

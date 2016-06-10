@@ -22,7 +22,6 @@ import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Looper;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.Pools;
@@ -196,8 +195,7 @@ public class ThumbnailCache {
 
         private static Result obtain(@Status int status, @Nullable Bitmap thumbnail,
                 @Nullable Point size, long lastModified) {
-            // Make sure this method is only called from main thread.
-            assert(Looper.myLooper() == Looper.getMainLooper());
+            Shared.checkMainLoop();
 
             Result instance = sPool.acquire();
             instance = (instance != null ? instance : new Result());
@@ -213,8 +211,7 @@ public class ThumbnailCache {
         private Result() {}
 
         public void recycle() {
-            // Make sure this method is only called from main thread.
-            assert(Looper.myLooper() == Looper.getMainLooper());
+            Shared.checkMainLoop();
 
             mStatus = -1;
             mThumbnail = null;

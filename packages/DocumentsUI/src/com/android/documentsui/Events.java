@@ -19,7 +19,6 @@ package com.android.documentsui;
 import static com.android.documentsui.Shared.DEBUG;
 
 import android.graphics.Point;
-import android.os.Looper;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pools;
@@ -150,8 +149,7 @@ public final class Events {
         }
 
         public static MotionInputEvent obtain(MotionEvent event, RecyclerView view) {
-            // Make sure events are only used in main thread.
-            assert(Looper.myLooper() == Looper.getMainLooper());
+            Shared.checkMainLoop();
 
             MotionInputEvent instance = sPool.acquire();
             instance = (instance != null ? instance : new MotionInputEvent());
@@ -168,8 +166,7 @@ public final class Events {
         }
 
         public void recycle() {
-            // Make sure events are only used in main thread.
-            assert(Looper.myLooper() == Looper.getMainLooper());
+            Shared.checkMainLoop();
 
             mEvent = null;
             mPosition = -1;
