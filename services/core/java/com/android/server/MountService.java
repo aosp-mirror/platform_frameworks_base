@@ -3031,7 +3031,8 @@ class MountService extends IMountService.Stub
                 if (forWrite) {
                     match = vol.isVisibleForWrite(userId);
                 } else {
-                    match = vol.isVisibleForRead(userId) || includeInvisible;
+                    match = vol.isVisibleForRead(userId)
+                            || (includeInvisible && vol.getPath() != null);
                 }
                 if (!match) continue;
 
