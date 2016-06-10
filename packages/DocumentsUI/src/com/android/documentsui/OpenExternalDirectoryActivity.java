@@ -287,15 +287,16 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static boolean isRightVolume(VolumeInfo volume, String root, int userId) {
         final File userPath = volume.getPathForUser(userId);
         final String path = userPath == null ? null : volume.getPathForUser(userId).getPath();
-        final boolean isVisible = volume.isVisibleForWrite(userId);
+        final boolean isMounted = volume.isMountedReadable();
         if (DEBUG)
-            Log.d(TAG, "Volume: " + volume + " userId: " + userId + " root: " + root
-                    + " volumePath: " + volume.getPath()
-                    + " pathForUser: " + path
-                    + " internalPathForUser: " + volume.getInternalPath()
-                    + " isVisible: " + isVisible);
+            Log.d(TAG, "Volume: " + volume
+                    + "\n\tuserId: " + userId
+                    + "\n\tuserPath: " + userPath
+                    + "\n\troot: " + root
+                    + "\n\tpath: " + path
+                    + "\n\tisMounted: " + isMounted);
 
-        return isVisible && root.equals(path);
+        return isMounted && root.equals(path);
     }
 
     private static Uri getGrantedUriPermission(Context context, ContentProviderClient provider,
