@@ -135,9 +135,8 @@ public class AnimationHandler {
     }
 
     private void doAnimationFrame(long frameTime) {
-        int size = mAnimationCallbacks.size();
         long currentTime = SystemClock.uptimeMillis();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < mAnimationCallbacks.size(); i++) {
             final AnimationFrameCallback callback = mAnimationCallbacks.get(i);
             if (callback == null) {
                 continue;
