@@ -57,10 +57,10 @@ public final class EphemeralResolveInfo implements Parcelable {
 
         mDigestBytes = generateDigest(uri);
         mDigestPrefix =
-                mDigestBytes[0] << 24
-                | mDigestBytes[1] << 16
-                | mDigestBytes[2] << 8
-                | mDigestBytes[3] << 0;
+                (mDigestBytes[0] & 0xFF) << 24
+                | (mDigestBytes[1] & 0xFF) << 16
+                | (mDigestBytes[2] & 0xFF) << 8
+                | (mDigestBytes[3] & 0xFF) << 0;
         mFilters.addAll(filters);
         mPackageName = packageName;
     }
