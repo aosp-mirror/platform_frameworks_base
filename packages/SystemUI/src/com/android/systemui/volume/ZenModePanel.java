@@ -122,6 +122,9 @@ public class ZenModePanel extends LinearLayout {
     private Condition mTimeCondition;
     private boolean mVoiceCapable;
 
+    protected int mZenModeConditionLayoutId;
+    protected int mZenModeButtonLayoutId;
+
     public ZenModePanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
@@ -130,6 +133,8 @@ public class ZenModePanel extends LinearLayout {
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
         mSpTexts = new SpTexts(mContext);
         mVoiceCapable = Util.isVoiceCapable(mContext);
+        mZenModeConditionLayoutId = R.layout.zen_mode_condition;
+        mZenModeButtonLayoutId = R.layout.zen_mode_button;
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
 
@@ -315,10 +320,10 @@ public class ZenModePanel extends LinearLayout {
 
     protected void addZenConditions(int count) {
         for (int i = 0; i < count; i++) {
-            final View rb = mInflater.inflate(R.layout.zen_mode_button, this, false);
+            final View rb = mInflater.inflate(mZenModeButtonLayoutId, this, false);
             rb.setId(i);
             mZenRadioGroup.addView(rb);
-            final View rbc = mInflater.inflate(R.layout.zen_mode_condition, this, false);
+            final View rbc = mInflater.inflate(mZenModeConditionLayoutId, this, false);
             rbc.setId(i + count);
             mZenRadioGroupContent.addView(rbc);
         }
