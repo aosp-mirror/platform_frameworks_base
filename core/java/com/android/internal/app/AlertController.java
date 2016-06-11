@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -175,6 +176,11 @@ public class AlertController {
         final TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.alertDialogCenterButtons, outValue, true);
         return outValue.data != 0;
+    }
+
+    private static boolean isWatch(Context context) {
+        return (context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_WATCH)
+                == Configuration.UI_MODE_TYPE_WATCH;
     }
 
     public static final AlertController create(Context context, DialogInterface di, Window window) {
@@ -886,8 +892,14 @@ public class AlertController {
             listView.setAdapter(mAdapter);
             final int checkedItem = mCheckedItem;
             if (checkedItem > -1) {
-                listView.setItemChecked(checkedItem + listView.getHeaderViewsCount(), true);
-                listView.setSelection(checkedItem + listView.getHeaderViewsCount());
+                // TODO: Remove temp watch specific code
+                if (isWatch(mContext)) {
+                    listView.setItemChecked(checkedItem + listView.getHeaderViewsCount(), true);
+                    listView.setSelection(checkedItem + listView.getHeaderViewsCount());
+                } else {
+                    listView.setItemChecked(checkedItem, true);
+                    listView.setSelection(checkedItem);
+                }
             }
         }
     }
@@ -1066,8 +1078,13 @@ public class AlertController {
                             if (mCheckedItems != null) {
                                 boolean isItemChecked = mCheckedItems[position];
                                 if (isItemChecked) {
-                                    listView.setItemChecked(
-                                            position + listView.getHeaderViewsCount(), true);
+                                    // TODO: Remove temp watch specific code
+                                    if (isWatch(mContext)) {
+                                        listView.setItemChecked(
+                                                position + listView.getHeaderViewsCount(), true);
+                                    } else {
+                                        listView.setItemChecked(position, true);
+                                    }
                                 }
                             }
                             return view;
@@ -1088,9 +1105,16 @@ public class AlertController {
                         public void bindView(View view, Context context, Cursor cursor) {
                             CheckedTextView text = (CheckedTextView) view.findViewById(R.id.text1);
                             text.setText(cursor.getString(mLabelIndex));
-                            listView.setItemChecked(
-                                    cursor.getPosition() + listView.getHeaderViewsCount(),
-                                    cursor.getInt(mIsCheckedIndex) == 1);
+                            // TODO: Remove temp watch specific code
+                            if (isWatch(mContext)) {
+                                listView.setItemChecked(
+                                        cursor.getPosition() + listView.getHeaderViewsCount(),
+                                        cursor.getInt(mIsCheckedIndex) == 1);
+                            } else {
+                                listView.setItemChecked(
+                                        cursor.getPosition(),
+                                        cursor.getInt(mIsCheckedIndex) == 1);
+                            }
                         }
 
                         @Override
@@ -1133,7 +1157,10 @@ public class AlertController {
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                        position -= listView.getHeaderViewsCount();
+                        // TODO: Remove temp watch specific code
+                        if (isWatch(mContext)) {
+                            position -= listView.getHeaderViewsCount();
+                        }
                         mOnClickListener.onClick(dialog.mDialogInterface, position);
                         if (!mIsSingleChoice) {
                             dialog.mDialogInterface.dismiss();
@@ -1144,7 +1171,10 @@ public class AlertController {
                 listView.setOnItemClickListener(new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                        position -= listView.getHeaderViewsCount();
+                        // TODO: Remove temp watch specific code
+                        if (isWatch(mContext)) {
+                            position -= listView.getHeaderViewsCount();
+                        }
                         if (mCheckedItems != null) {
                             mCheckedItems[position] = listView.isItemChecked(position);
                         }
