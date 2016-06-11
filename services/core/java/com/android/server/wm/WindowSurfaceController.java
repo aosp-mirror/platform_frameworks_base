@@ -185,7 +185,7 @@ class WindowSurfaceController {
         if (SHOW_TRANSACTIONS) logSurface(
                 "CROP " + clipRect.toShortString(), null);
         try {
-            if (clipRect.width() != 0 && clipRect.height() != 0) {
+            if (clipRect.width() > 0 && clipRect.height() > 0) {
                 mSurfaceControl.setWindowCrop(clipRect);
                 mHiddenForCrop = false;
                 updateVisibility();
@@ -197,6 +197,20 @@ class WindowSurfaceController {
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error setting crop surface of " + this
                     + " crop=" + clipRect.toShortString(), e);
+            if (!recoveringMemory) {
+                mAnimator.reclaimSomeSurfaceMemory("crop", true);
+            }
+        }
+    }
+
+    void clearCropInTransaction(boolean recoveringMemory) {
+        if (SHOW_TRANSACTIONS) logSurface(
+                "CLEAR CROP", null);
+        try {
+            Rect clipRect = new Rect(0, 0, -1, -1);
+            mSurfaceControl.setWindowCrop(clipRect);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error setting clearing crop of " + this, e);
             if (!recoveringMemory) {
                 mAnimator.reclaimSomeSurfaceMemory("crop", true);
             }
