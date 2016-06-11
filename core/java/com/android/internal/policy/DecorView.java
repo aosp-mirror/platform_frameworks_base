@@ -1586,7 +1586,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private ActionMode createStandaloneActionMode(ActionMode.Callback callback) {
         endOnGoingFadeAnimation();
         cleanupPrimaryActionMode();
-        if (mPrimaryActionModeView == null) {
+        // We want to create new mPrimaryActionModeView in two cases: if there is no existing
+        // instance at all, or if there is one, but it is detached from window. The latter case
+        // might happen when app is resized in multi-window mode and decor view is preserved
+        // along with the main app window. Keeping mPrimaryActionModeView reference doesn't cause
+        // app memory leaks because killMode() is called when the dismiss animation ends and from
+        // cleanupPrimaryActionMode() invocation above.
+        if (mPrimaryActionModeView == null || !mPrimaryActionModeView.isAttachedToWindow()) {
             if (mWindow.isFloating()) {
                 // Use the action bar theme.
                 final TypedValue outValue = new TypedValue();
@@ -1652,6 +1658,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 ViewStub stub = (ViewStub) findViewById(R.id.action_mode_bar_stub);
                 if (stub != null) {
                     mPrimaryActionModeView = (ActionBarContextView) stub.inflate();
+                    mPrimaryActionModePopup = null;
                 }
             }
         }
@@ -2316,9 +2323,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 }
                 if (mPrimaryActionModeView != null) {
                     endOnGoingFadeAnimation();
+                    // Store action mode view reference, so we can access it safely when animation
+                    // ends. mPrimaryActionModePopup is set together with mPrimaryActionModeView,
+                    // so no need to store reference to it in separate variable.
+                    final ActionBarContextView lastActionModeView = mPrimaryActionModeView;
                     mFadeAnim = ObjectAnimator.ofFloat(mPrimaryActionModeView, View.ALPHA,
                             1f, 0f);
                     mFadeAnim.addListener(new Animator.AnimatorListener() {
+
                                 @Override
                                 public void onAnimationStart(Animator animation) {
 
@@ -2326,12 +2338,17 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
-                                    mPrimaryActionModeView.setVisibility(GONE);
-                                    if (mPrimaryActionModePopup != null) {
-                                        mPrimaryActionModePopup.dismiss();
+                                    // If mPrimaryActionModeView has changed - it means that we've
+                                    // cleared the content while preserving decor view. We don't
+                                    // want to change the state of new instances accidentally here.
+                                    if (lastActionModeView == mPrimaryActionModeView) {
+                                        lastActionModeView.setVisibility(GONE);
+                                        if (mPrimaryActionModePopup != null) {
+                                            mPrimaryActionModePopup.dismiss();
+                                        }
+                                        lastActionModeView.killMode();
+                                        mFadeAnim = null;
                                     }
-                                    mPrimaryActionModeView.removeAllViews();
-                                    mFadeAnim = null;
                                 }
 
                                 @Override
