@@ -1289,9 +1289,13 @@ class WindowStateAnimator {
     void updateSurfaceWindowCrop(Rect clipRect, Rect finalClipRect, boolean recoveringMemory) {
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "updateSurfaceWindowCrop: win=" + mWin
                 + " clipRect=" + clipRect + " finalClipRect=" + finalClipRect);
-        if (!clipRect.equals(mLastClipRect)) {
-            mLastClipRect.set(clipRect);
-            mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);
+        if (clipRect != null) {
+            if (!clipRect.equals(mLastClipRect)) {
+                mLastClipRect.set(clipRect);
+                mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);
+            }
+        } else {
+            mSurfaceController.clearCropInTransaction(recoveringMemory);
         }
         if (!finalClipRect.equals(mLastFinalClipRect)) {
             mLastFinalClipRect.set(finalClipRect);
@@ -1480,14 +1484,16 @@ class WindowStateAnimator {
             mSurfaceController.setPositionAppliesWithResizeInTransaction(true);
             mSurfaceController.forceScaleableInTransaction(false);
         }
+
+        Rect clipRect = mTmpClipRect;
         if (w.inPinnedWorkspace()) {
-            mTmpClipRect.set(0, 0, -1, -1);
+            clipRect = null;
             task.mStack.getDimBounds(mTmpFinalClipRect);
             mTmpFinalClipRect.inset(-w.mAttrs.surfaceInsets.left, -w.mAttrs.surfaceInsets.top,
                     -w.mAttrs.surfaceInsets.right, -w.mAttrs.surfaceInsets.bottom);
         }
 
-        updateSurfaceWindowCrop(mTmpClipRect, mTmpFinalClipRect, recoveringMemory);
+        updateSurfaceWindowCrop(clipRect, mTmpFinalClipRect, recoveringMemory);
 
         mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale * mExtraHScale,
                 mDtDx * w.mVScale * mExtraVScale,
