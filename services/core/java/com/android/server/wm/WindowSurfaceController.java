@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static android.view.Surface.SCALING_MODE_FREEZE;
 import static android.view.Surface.SCALING_MODE_SCALE_TO_WINDOW;
 
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -78,7 +79,15 @@ class WindowSurfaceController {
 
         title = name;
 
-        if (DEBUG_SURFACE_TRACE) {
+        // For opaque child windows placed under parent windows,
+        // we use a special SurfaceControl which mirrors commands
+        // to a black-out layer placed one Z-layer below the surface.
+        // This prevents holes to whatever app/wallpaper is underneath.
+        if (animator.mWin.isChildWindow() &&
+                animator.mWin.mSubLayer < 0) {
+            mSurfaceControl = new SurfaceControlWithBackground(s,
+                    name, w, h, format, flags);
+        } else if (DEBUG_SURFACE_TRACE) {
             mSurfaceControl = new SurfaceTrace(
                     s, name, w, h, format, flags);
         } else {
@@ -728,6 +737,127 @@ class WindowSurfaceController {
                     + " crop=" + mWindowCrop.toShortString()
                     + " opaque=" + mIsOpaque
                     + " (" + mDsdx + "," + mDtdx + "," + mDsdy + "," + mDtdy + ")";
+        }
+    }
+
+    private static class SurfaceControlWithBackground extends SurfaceControl {
+        private SurfaceControl mBackgroundControl;
+        private boolean mOpaque = true;
+        private boolean mVisible = false;
+
+        public SurfaceControlWithBackground(SurfaceSession s,
+                       String name, int w, int h, int format, int flags)
+                   throws OutOfResourcesException {
+            super(s, name, w, h, format, flags);
+            mBackgroundControl = new SurfaceControl(s, name, w, h,
+                    PixelFormat.OPAQUE, flags | SurfaceControl.FX_SURFACE_DIM);
+            mOpaque = (flags & SurfaceControl.OPAQUE) != 0;
+        }
+
+        @Override
+        public void setAlpha(float alpha) {
+            super.setAlpha(alpha);
+            mBackgroundControl.setAlpha(alpha);
+        }
+
+        @Override
+        public void setLayer(int zorder) {
+            super.setLayer(zorder);
+            mBackgroundControl.setLayer(zorder - 1);
+        }
+
+        @Override
+        public void setPosition(float x, float y) {
+            super.setPosition(x, y);
+            mBackgroundControl.setPosition(x, y);
+        }
+
+        @Override
+        public void setSize(int w, int h) {
+            super.setSize(w, h);
+            mBackgroundControl.setSize(w, h);
+        }
+
+        @Override
+        public void setWindowCrop(Rect crop) {
+            super.setWindowCrop(crop);
+            mBackgroundControl.setWindowCrop(crop);
+        }
+
+        @Override
+        public void setFinalCrop(Rect crop) {
+            super.setFinalCrop(crop);
+            mBackgroundControl.setFinalCrop(crop);
+        }
+
+        @Override
+        public void setLayerStack(int layerStack) {
+            super.setLayerStack(layerStack);
+            mBackgroundControl.setLayerStack(layerStack);
+        }
+
+        @Override
+        public void setOpaque(boolean isOpaque) {
+            super.setOpaque(isOpaque);
+            mOpaque = isOpaque;
+            updateBackgroundVisibility();
+        }
+
+        @Override
+        public void setSecure(boolean isSecure) {
+            super.setSecure(isSecure);
+        }
+
+        @Override
+        public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
+            super.setMatrix(dsdx, dtdx, dsdy, dtdy);
+            mBackgroundControl.setMatrix(dsdx, dtdx, dsdy, dtdy);
+        }
+
+        @Override
+        public void hide() {
+            mVisible = false;
+            super.hide();
+            updateBackgroundVisibility();
+        }
+
+        @Override
+        public void show() {
+            mVisible = true;
+            super.show();
+            updateBackgroundVisibility();
+        }
+
+        @Override
+        public void destroy() {
+            super.destroy();
+            mBackgroundControl.destroy();
+        }
+
+        @Override
+        public void release() {
+            super.release();
+            mBackgroundControl.release();
+        }
+
+        @Override
+        public void setTransparentRegionHint(Region region) {
+            super.setTransparentRegionHint(region);
+            mBackgroundControl.setTransparentRegionHint(region);
+        }
+
+        @Override
+        public void deferTransactionUntil(IBinder handle, long frame) {
+            super.deferTransactionUntil(handle, frame);
+            mBackgroundControl.deferTransactionUntil(handle, frame);
+        }
+
+        private void updateBackgroundVisibility() {
+            if (mOpaque && mVisible) {
+                mBackgroundControl.show();
+            } else {
+                mBackgroundControl.hide();
+            }
         }
     }
 }
