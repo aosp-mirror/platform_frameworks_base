@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_checked="true"
-          android:color="@*android:color/material_deep_teal_500" />
+          android:color="?android:attr/colorAccent" />
     <item android:color="@android:color/black"
           android:alpha=".54" />
 </selector>

@@ -22,7 +22,8 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
     android:clickable="true"
-    android:gravity="center">
+    android:gravity="center"
+    android:theme="@*android:style/ThemeOverlay.DeviceDefault.Accent">
 
     <TextView android:id="@+id/switch_text"
         android:layout_height="wrap_content"
@@ -42,7 +43,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:background="@null"
-        android:theme="@style/ThemeOverlay.SwitchBar" />
+        android:background="@null" />
 
 </LinearLayout>

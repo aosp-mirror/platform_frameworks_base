@@ -20,8 +20,8 @@
     android:id="@+id/screen_pinning_text_area"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/screen_pinning_request_bg"
-    android:gravity="center_vertical" >
+    android:background="?android:attr/colorAccent"
+    android:gravity="center_vertical">
 
     <TextView
         android:id="@+id/screen_pinning_title"
