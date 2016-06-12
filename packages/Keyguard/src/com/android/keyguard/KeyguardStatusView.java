@@ -18,10 +18,15 @@ package com.android.keyguard;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -48,6 +53,12 @@ public class KeyguardStatusView extends GridLayout {
     private TextClock mDateView;
     private TextClock mClockView;
     private TextView mOwnerInfo;
+
+    private SettingsObserver mSettingsObserver;
+    private boolean mShowClock;
+    private boolean mShowDate;
+    private boolean mShowAlarm;
+
     //On the first boot, keygard will start to receiver TIME_TICK intent.
     //And onScreenTurnedOff will not get called if power off when keyguard is not started.
     //Set initial value to false to skip the above case.
@@ -129,6 +140,7 @@ public class KeyguardStatusView extends GridLayout {
         // Disable elegant text height because our fancy colon makes the ymin value huge for no
         // reason.
         mClockView.setElegantTextHeight(false);
+        mSettingsObserver = new SettingsObserver(new Handler());
     }
 
     @Override
@@ -165,7 +177,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     void refreshAlarmStatus(AlarmManager.AlarmClockInfo nextAlarm) {
-        if (nextAlarm != null) {
+        if (nextAlarm != null && mShowAlarm) {
             String alarm = formatNextAlarm(mContext, nextAlarm);
             mAlarmStatusView.setText(alarm);
             mAlarmStatusView.setContentDescription(
@@ -202,12 +214,14 @@ public class KeyguardStatusView extends GridLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mInfoCallback);
+        mSettingsObserver.observe();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
+        mSettingsObserver.unobserve();
     }
 
     private String getOwnerInfo() {
@@ -232,6 +246,15 @@ public class KeyguardStatusView extends GridLayout {
         return false;
     }
 
+    private void updateLockscreen() {
+        // Lockscreeen Clock
+        mClockView = (TextClock) findViewById(R.id.clock_view);
+        mClockView.setVisibility(mShowClock ? View.VISIBLE : View.INVISIBLE);
+        // Lockscreeen Date
+        mDateView = (TextClock) findViewById(R.id.date_view);
+        mDateView.setVisibility(mShowDate ? View.VISIBLE : View.GONE);
+    }
+
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
     // This is an optimization to ensure we only recompute the patterns when the inputs change.
     private static final class Patterns {
@@ -243,7 +266,10 @@ public class KeyguardStatusView extends GridLayout {
         static void update(Context context, boolean hasAlarm) {
             final Locale locale = Locale.getDefault();
             final Resources res = context.getResources();
-            final String dateViewSkel = res.getString(hasAlarm
+            final ContentResolver resolver = context.getContentResolver();
+            final boolean mShowAlarm = Settings.System.getIntForUser(resolver,
+                    Settings.System.SHOW_LOCKSCREEN_ALARM, 1, UserHandle.USER_CURRENT) == 1;
+            final String dateViewSkel = res.getString(hasAlarm && mShowAlarm
                     ? R.string.abbrev_wday_month_day_no_year_alarm
                     : R.string.abbrev_wday_month_day_no_year);
             final String clockView12Skel = res.getString(R.string.clock_12hr_format);
@@ -267,6 +293,50 @@ public class KeyguardStatusView extends GridLayout {
             clockView12 = clockView12.replace(':', '\uee01');
 
             cacheKey = key;
+        }
+    }
+
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_LOCKSCREEN_ALARM), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_LOCKSCREEN_CLOCK), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_LOCKSCREEN_DATE), false, this, UserHandle.USER_ALL);
+            update();
+        }
+
+        void unobserve() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.SHOW_LOCKSCREEN_ALARM))) {
+                refresh();
+            }
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            int currentUserId = ActivityManager.getCurrentUser();
+
+            mShowAlarm = Settings.System.getIntForUser(
+                    resolver, Settings.System.SHOW_LOCKSCREEN_ALARM, 1, currentUserId) == 1;
+            mShowClock = Settings.System.getIntForUser(
+                    resolver, Settings.System.SHOW_LOCKSCREEN_CLOCK, 1, currentUserId) == 1;
+            mShowDate = Settings.System.getIntForUser(
+                    resolver, Settings.System.SHOW_LOCKSCREEN_DATE, 1, currentUserId) == 1;
+            updateLockscreen();
         }
     }
 }
