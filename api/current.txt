@@ -49413,6 +49413,9 @@ package java.lang.annotation {
   public abstract class Inherited implements java.lang.annotation.Annotation {
   }
 
+  public abstract class Native implements java.lang.annotation.Annotation {
+  }
+
   public abstract class Repeatable implements java.lang.annotation.Annotation {
   }
 
