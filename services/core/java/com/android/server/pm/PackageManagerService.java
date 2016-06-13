@@ -102,11 +102,11 @@ import static com.android.server.pm.PermissionsState.PERMISSION_OPERATION_SUCCES
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
-import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
@@ -621,6 +621,8 @@ public class PackageManagerService extends IPackageManager.Stub {
      */
     @GuardedBy("mPackages")
     final ArraySet<String> mFrozenPackages = new ArraySet<>();
+
+    final ProtectedPackages mProtectedPackages = new ProtectedPackages();
 
     boolean mRestoredSettings;
 
@@ -16409,9 +16411,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
-        final DevicePolicyManagerInternal dpmi = LocalServices
-                .getService(DevicePolicyManagerInternal.class);
-        if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+        if (mProtectedPackages.canPackageBeWiped(userId, packageName)) {
             throw new SecurityException("Cannot clear data for a device owner or a profile owner");
         }
         // Queue up an async operation since the package deletion may take a little while.
@@ -17738,10 +17738,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         + Binder.getCallingPid()
                         + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
             }
-            // Don't allow changing profile and device owners. Calling into DPMS, so no locking.
-            final DevicePolicyManagerInternal dpmi = LocalServices
-                    .getService(DevicePolicyManagerInternal.class);
-            if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+            // Don't allow changing profile and device owners.
+            if (mProtectedPackages.canPackageStateBeChanged(userId, packageName)) {
                 throw new SecurityException("Cannot disable a device owner or a profile owner");
             }
         }
@@ -20837,6 +20835,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
                 int userId) {
             return PackageManagerService.this.getHomeActivitiesAsUser(allHomeCandidates, userId);
+        }
+
+        @Override
+        public void setDeviceAndProfileOwnerPackages(
+                int deviceOwnerUserId, String deviceOwnerPackage,
+                SparseArray<String> profileOwnerPackages) {
+            mProtectedPackages.setDeviceAndProfileOwnerPackages(
+                    deviceOwnerUserId, deviceOwnerPackage, profileOwnerPackages);
+        }
+
+        @Override
+        public boolean canPackageBeWiped(int userId, String packageName) {
+            return mProtectedPackages.canPackageBeWiped(userId,
+                    packageName);
         }
     }
 

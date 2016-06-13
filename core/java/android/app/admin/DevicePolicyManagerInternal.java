@@ -17,7 +17,6 @@
 package android.app.admin;
 
 import android.content.Intent;
-import android.os.UserHandle;
 
 import java.util.List;
 
@@ -72,17 +71,6 @@ public abstract class DevicePolicyManagerInternal {
      * @return true if the uid is an active admin with the given policy.
      */
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
-
-    /**
-     * Checks if a given package has a device or a profile owner for the given user.
-     * <p>
-     * <em>Note: does <b>not</b> support negative userIds like {@link UserHandle#USER_ALL}</em>
-     *
-     * @param packageName The package to check
-     * @param userId the userId to check for.
-     * @return true if package has a device or profile owner, false otherwise.
-     */
-    public abstract boolean hasDeviceOwnerOrProfileOwner(String packageName, int userId);
 
     /**
      * Creates an intent to show the admin support dialog to let the user know that the package is
