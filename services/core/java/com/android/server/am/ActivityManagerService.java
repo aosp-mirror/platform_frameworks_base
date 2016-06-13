@@ -17784,6 +17784,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 getPackageManagerInternalLocked().getApplicationInfo(
                                         ssp,
                                         userId);
+                        if (aInfo == null) {
+                            Slog.w(TAG, "Dropping ACTION_PACKAGE_REPLACED for non-existent pkg:"
+                                    + " ssp=" + ssp + " data=" + data);
+                            return ActivityManager.BROADCAST_SUCCESS;
+                        }
                         mStackSupervisor.updateActivityApplicationInfoLocked(aInfo);
                         sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REPLACED,
                                 new String[] {ssp}, userId);
