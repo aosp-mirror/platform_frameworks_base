@@ -76,6 +76,12 @@ Android N Preview SDK in Android Studio as follows:</p>
 
 <h3 id="docs-dl">Get the N Preview reference documentation</h3>
 
+<p class="note">
+  <strong>Note:</strong> The N Preview (API level 24) reference documentation
+  is now available online at <a href=
+  "{@docRoot}reference/">developer.android.com/reference/</a>.
+</p>
+
 <p>
   Detailed information about the Android N APIs is available in the N Preview
   reference documentation, which you can download from the following table.
@@ -95,7 +101,7 @@ Android N Preview SDK in Android Studio as follows:</p>
       >n-preview-3-docs.zip</a></td>
     <td width="100%">
       MD5: 19bcfd057a1f9dd01ffbb3d8ff7b8d81<br>
-      SHA-1: 9224bd4445cd7f653c4c294d362ccb195a2101e7 
+      SHA-1: 9224bd4445cd7f653c4c294d362ccb195a2101e7
     </td>
   </tr>
 </table>
