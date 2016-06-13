@@ -908,7 +908,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 if (operation != ShortcutService.OPERATION_UPDATE) {
                     // This method may be called before validating shortcuts, so this may happen,
                     // and is a caller side error.
-                    throw new NullPointerException("activity must be provided");
+                    throw new NullPointerException("Activity must be provided");
                 }
                 continue; // Activity can be null for update.
             }

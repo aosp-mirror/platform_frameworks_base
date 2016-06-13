@@ -697,6 +697,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return getInstrumentation().getContext();
     }
 
+    protected ShortcutManager getManager() {
+        return mManager;
+    }
+
     protected void deleteAllSavedFiles() {
         // Empty the data directory.
         if (mInjectedFilePathRoot.exists()) {
