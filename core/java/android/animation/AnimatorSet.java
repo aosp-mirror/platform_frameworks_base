@@ -819,6 +819,8 @@ public final class AnimatorSet extends Animator {
                 }
             }
             if (allDone) {
+                mStarted = false;
+                mPaused = false;
                 // If this was the last child animation to end, then notify listeners that this
                 // AnimatorSet has ended
                 if (mListeners != null) {
@@ -829,8 +831,6 @@ public final class AnimatorSet extends Animator {
                         tmpListeners.get(i).onAnimationEnd(this);
                     }
                 }
-                mStarted = false;
-                mPaused = false;
             }
         }
     }
