@@ -21,7 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
-import android.text.format.DateFormat;
+import android.icu.text.DateFormat;
+import android.icu.text.DisplayContext;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -36,7 +37,7 @@ public class DateView extends TextView {
 
     private final Date mCurrentTime = new Date();
 
-    private SimpleDateFormat mDateFormat;
+    private DateFormat mDateFormat;
     private String mLastText;
     private String mDatePattern;
 
@@ -100,8 +101,9 @@ public class DateView extends TextView {
     protected void updateClock() {
         if (mDateFormat == null) {
             final Locale l = Locale.getDefault();
-            final String fmt = DateFormat.getBestDateTimePattern(l, mDatePattern);
-            mDateFormat = new SimpleDateFormat(fmt, l);
+            DateFormat format = DateFormat.getInstanceForSkeleton(mDatePattern, l);
+            format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+            mDateFormat = format;
         }
 
         mCurrentTime.setTime(System.currentTimeMillis());
