@@ -209,7 +209,9 @@ public class RecentsTransitionHelper {
             EventBus.getDefault().send(new LaunchTaskSucceededEvent(taskIndexFromFront));
         } else {
             // Dismiss the task if we fail to launch it
-            taskView.dismissTask();
+            if (taskView != null) {
+                taskView.dismissTask();
+            }
 
             // Keep track of failed launches
             EventBus.getDefault().send(new LaunchTaskFailedEvent());
