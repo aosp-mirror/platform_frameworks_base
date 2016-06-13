@@ -602,7 +602,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         long currentTime = AnimationUtils.currentAnimationTimeMillis();
         mStartTime = currentTime - seekTime;
         mStartTimeCommitted = true; // do not allow start time to be compensated for jank
-        if (!mRunning) {
+        if (!isPulsingInternal()) {
+            // If the animation loop hasn't started, the startTime will be adjusted in the first
+            // frame based on seek fraction.
             mSeekFraction = fraction;
         }
         mOverallFraction = fraction;
@@ -980,6 +982,10 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStarted = true;
         mPaused = false;
         mRunning = false;
+        // Resets mLastFrameTime when start() is called, so that if the animation was running,
+        // calling start() would put the animation in the
+        // started-but-not-yet-reached-the-first-frame phase.
+        mLastFrameTime = 0;
         AnimationHandler animationHandler = AnimationHandler.getInstance();
         animationHandler.addAnimationFrameCallback(this, (long) (mStartDelay * sDurationScale));
 
@@ -1095,7 +1101,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
      */
     @Override
     public void reverse() {
-        if (mRunning) {
+        if (isPulsingInternal()) {
             long currentTime = AnimationUtils.currentAnimationTimeMillis();
             long currentPlayTime = currentTime - mStartTime;
             long timeLeft = getScaledDuration() - currentPlayTime;
@@ -1103,6 +1109,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             mStartTimeCommitted = true; // do not allow start time to be compensated for jank
             mReversing = !mReversing;
         } else if (mStarted) {
+            mReversing = !mReversing;
             end();
         } else {
             start(true);
@@ -1174,6 +1181,15 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mListeners != null) {
             notifyStartListeners();
         }
+    }
+
+    /**
+     * Internal only: This tracks whether the animation has gotten on the animation loop. Note
+     * this is different than {@link #isRunning()} in that the latter tracks the time after start()
+     * is called (or after start delay if any), which may be before the animation loop starts.
+     */
+    private boolean isPulsingInternal() {
+        return mLastFrameTime > 0;
     }
 
     /**
