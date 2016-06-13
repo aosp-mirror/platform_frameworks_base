@@ -4570,12 +4570,21 @@ public class Notification implements Parcelable
                     : mConversationTitle;
             boolean hasTitle = !TextUtils.isEmpty(title);
 
-            if (!hasTitle && mMessages.size() == 1) {
-                CharSequence sender = mMessages.get(0).mSender;
-                CharSequence text = mMessages.get(0).mText;
+            if (mMessages.size() == 1) {
+                // Special case for a single message: Use the big text style
+                // so the collapsed and expanded versions match nicely.
+                CharSequence bigTitle;
+                CharSequence text;
+                if (hasTitle) {
+                    bigTitle = title;
+                    text = makeMessageLine(mMessages.get(0));
+                } else {
+                    bigTitle = mMessages.get(0).mSender;
+                    text = mMessages.get(0).mText;
+                }
                 RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                         mBuilder.getBigTextLayoutResource(),
-                        false /* progress */, sender, null /* text */);
+                        false /* progress */, bigTitle, null /* text */);
                 BigTextStyle.applyBigTextContentView(mBuilder, contentView, text);
                 return contentView;
             }
@@ -4601,6 +4610,8 @@ public class Notification implements Parcelable
             contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
                     mBuilder.mN.mLargeIcon == null ? 0 : (hasTitle ? 1 : 2));
 
+            int contractedChildId = View.NO_ID;
+            Message contractedMessage = findLatestIncomingMessage();
             int firstMessage = Math.max(0, mMessages.size() - rowIds.length);
             while (firstMessage + i < mMessages.size() && i < rowIds.length) {
                 Message m = mMessages.get(firstMessage + i);
@@ -4609,8 +4620,15 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(rowId, View.VISIBLE);
                 contentView.setTextViewText(rowId, makeMessageLine(m));
 
+                if (contractedMessage == m) {
+                    contractedChildId = rowId;
+                }
+
                 i++;
             }
+            // Record this here to allow transformation between the contracted and expanded views.
+            contentView.setInt(R.id.notification_messaging, "setContractedChildId",
+                    contractedChildId);
             return contentView;
         }
 

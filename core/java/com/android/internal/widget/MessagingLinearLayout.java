@@ -48,6 +48,11 @@ public class MessagingLinearLayout extends ViewGroup {
 
     private int mIndentLines;
 
+    /**
+     * Id of the child that's also visible in the contracted layout.
+     */
+    private int mContractedChildId;
+
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
@@ -255,12 +260,27 @@ public class MessagingLinearLayout extends ViewGroup {
         return copy;
     }
 
-    @RemotableViewMethod
     /**
      * Sets how many lines should be indented to avoid a floating image.
      */
+    @RemotableViewMethod
     public void setNumIndentLines(int numberLines) {
         mIndentLines = numberLines;
+    }
+
+    /**
+     * Set id of the child that's also visible in the contracted layout.
+     */
+    @RemotableViewMethod
+    public void setContractedChildId(int contractedChildId) {
+        mContractedChildId = contractedChildId;
+    }
+
+    /**
+     * Get id of the child that's also visible in the contracted layout.
+     */
+    public int getContractedChildId() {
+        return mContractedChildId;
     }
 
     public static class LayoutParams extends MarginLayoutParams {
