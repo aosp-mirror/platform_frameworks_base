@@ -137,7 +137,7 @@ alt="Project pane after importing samples into Android Studio" id="figure1" />
 
 <ol style="1">
 <li>Select your project in the Android Studio <em>Project</em> panel.</li>
-<li>From the <strong>Build</strong> menu, choose <strong>Make Module &lt;module-name&gt; </strong>.</li>
+<li>From the <strong>Build</strong> menu, choose <strong>Make Module &lt;module-name&gt; </strong>; or select <strong> Build APK </strong> to generate APK.</li>
 <li>Resolve any dependency issues, and then compile. As Figure 2 shows, you can select individual projects to compile by choosing them from the configuration pulldown.</li>
 
 <img src="../images/config-pulldown.png"
