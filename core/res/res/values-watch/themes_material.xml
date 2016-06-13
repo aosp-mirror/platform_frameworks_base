@@ -37,6 +37,5 @@ please see styles_device_defaults.xml.
         <item name="windowAnimationStyle">@style/Animation.InputMethod</item>
         <item name="imeFullscreenBackground">?colorBackground</item>
         <item name="imeExtractEnterAnimation">@anim/input_method_extract_enter</item>
-        <item name="imeExtractExitAnimation">@anim/input_method_extract_exit</item>
     </style>
 </resources>
