@@ -697,7 +697,7 @@ public final class KeyboardShortcuts {
         if (displayLabelDrawable != null) {
             shortcutKeys.add(new StringOrDrawable(displayLabelDrawable));
         } else if (displayLabelString != null) {
-            shortcutKeys.add(new StringOrDrawable(displayLabelString.toUpperCase()));
+            shortcutKeys.add(new StringOrDrawable(displayLabelString));
         }
         return shortcutKeys;
     }
@@ -716,7 +716,7 @@ public final class KeyboardShortcuts {
                             mModifierDrawables.get(supportedModifier)));
                 } else {
                     shortcutKeys.add(new StringOrDrawable(
-                            mModifierNames.get(supportedModifier).toUpperCase()));
+                            mModifierNames.get(supportedModifier)));
                 }
                 modifiers &= ~supportedModifier;
             }
