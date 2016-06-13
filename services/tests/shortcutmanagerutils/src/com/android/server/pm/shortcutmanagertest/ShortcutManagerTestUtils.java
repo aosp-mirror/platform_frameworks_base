@@ -289,8 +289,6 @@ public class ShortcutManagerTestUtils {
             String expectedExceptionMessageRegex, Runnable r) {
         try {
             r.run();
-            Assert.fail("Expected exception type " + expectedExceptionType.getName()
-                    + " was not thrown (message=" + message + ")");
         } catch (Throwable e) {
             Assert.assertTrue(
                     "Expected exception type was " + expectedExceptionType.getName()
@@ -299,7 +297,10 @@ public class ShortcutManagerTestUtils {
             if (expectedExceptionMessageRegex != null) {
                 MoreAsserts.assertContainsRegex(expectedExceptionMessageRegex, e.getMessage());
             }
+            return; // Pass
         }
+        Assert.fail("Expected exception type " + expectedExceptionType.getName()
+                + " was not thrown");
     }
 
     public static List<ShortcutInfo> assertShortcutIds(List<ShortcutInfo> actualShortcuts,

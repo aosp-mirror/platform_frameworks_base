@@ -254,9 +254,9 @@ public final class ShortcutInfo implements Parcelable {
      */
     public void enforceMandatoryFields() {
         Preconditions.checkStringNotEmpty(mId, "Shortcut ID must be provided");
-        Preconditions.checkNotNull(mActivity, "activity must be provided");
+        Preconditions.checkNotNull(mActivity, "Activity must be provided");
         if (mTitle == null && mTitleResId == 0) {
-            throw new IllegalArgumentException("Shortcut title must be provided");
+            throw new IllegalArgumentException("Short label must be provided");
         }
         Preconditions.checkNotNull(mIntent, "Shortcut Intent must be provided");
     }
