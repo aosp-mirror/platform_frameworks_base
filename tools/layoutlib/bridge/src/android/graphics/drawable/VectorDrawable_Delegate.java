@@ -973,7 +973,7 @@ public class VectorDrawable_Delegate {
         public VPath_Delegate(VPath_Delegate copy) {
             mPathName = copy.mPathName;
             mChangingConfigurations = copy.mChangingConfigurations;
-            mNodes = PathParser_Delegate.deepCopyNodes(copy.mNodes);
+            mNodes = copy.mNodes != null ? PathParser_Delegate.deepCopyNodes(copy.mNodes) : null;
         }
 
         public void toPath(Path path) {
