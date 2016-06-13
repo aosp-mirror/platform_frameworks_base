@@ -16033,9 +16033,9 @@ package android.icu.text {
 
   public class DateIntervalFormat extends android.icu.text.UFormat {
     method public final java.lang.StringBuffer format(java.lang.Object, java.lang.StringBuffer, java.text.FieldPosition);
-    method public final java.lang.StringBuffer format(android.icu.util.DateInterval, java.lang.StringBuffer, java.text.FieldPosition);
-    method public final java.lang.StringBuffer format(android.icu.util.Calendar, android.icu.util.Calendar, java.lang.StringBuffer, java.text.FieldPosition);
-    method public android.icu.text.DateFormat getDateFormat();
+    method public final synchronized java.lang.StringBuffer format(android.icu.util.DateInterval, java.lang.StringBuffer, java.text.FieldPosition);
+    method public final synchronized java.lang.StringBuffer format(android.icu.util.Calendar, android.icu.util.Calendar, java.lang.StringBuffer, java.text.FieldPosition);
+    method public synchronized android.icu.text.DateFormat getDateFormat();
     method public android.icu.text.DateIntervalInfo getDateIntervalInfo();
     method public static final android.icu.text.DateIntervalFormat getInstance(java.lang.String);
     method public static final android.icu.text.DateIntervalFormat getInstance(java.lang.String, java.util.Locale);
