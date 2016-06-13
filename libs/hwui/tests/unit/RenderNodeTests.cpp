@@ -16,13 +16,26 @@
 
 #include <gtest/gtest.h>
 
+#include "AnimationContext.h"
+#include "DamageAccumulator.h"
+#include "IContextFactory.h"
 #include "RenderNode.h"
 #include "TreeInfo.h"
+#include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
 #include "utils/Color.h"
 
 using namespace android;
 using namespace android::uirenderer;
+using namespace android::uirenderer::renderthread;
+
+class ContextFactory : public android::uirenderer::IContextFactory {
+public:
+    android::uirenderer::AnimationContext* createAnimationContext
+        (android::uirenderer::renderthread::TimeLord& clock) override {
+        return new android::uirenderer::AnimationContext(clock);
+    }
+};
 
 TEST(RenderNode, hasParents) {
     auto child = TestUtils::createNode(0, 0, 200, 400,
@@ -88,4 +101,32 @@ TEST(RenderNode, releasedCallback) {
     EXPECT_EQ(1, refcnt);
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     EXPECT_EQ(0, refcnt);
+}
+
+RENDERTHREAD_TEST(RenderNode, prepareTree_nullableDisplayList) {
+    ContextFactory contextFactory;
+    CanvasContext canvasContext(renderThread, false, nullptr, &contextFactory);
+    TreeInfo info(TreeInfo::MODE_RT_ONLY, canvasContext);
+    DamageAccumulator damageAccumulator;
+    info.damageAccumulator = &damageAccumulator;
+    info.observer = nullptr;
+
+    {
+        auto nonNullDLNode = TestUtils::createNode(0, 0, 200, 400,
+                [](RenderProperties& props, TestCanvas& canvas) {
+            canvas.drawColor(Color::Red_500, SkXfermode::kSrcOver_Mode);
+        });
+        TestUtils::syncHierarchyPropertiesAndDisplayList(nonNullDLNode);
+        EXPECT_TRUE(nonNullDLNode->getDisplayList());
+        nonNullDLNode->prepareTree(info);
+    }
+
+    {
+        auto nullDLNode = TestUtils::createNode(0, 0, 200, 400, nullptr);
+        TestUtils::syncHierarchyPropertiesAndDisplayList(nullDLNode);
+        EXPECT_FALSE(nullDLNode->getDisplayList());
+        nullDLNode->prepareTree(info);
+    }
+
+    canvasContext.destroy(nullptr);
 }
