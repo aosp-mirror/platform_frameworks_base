@@ -53,3 +53,4 @@ LOCAL_SRC_FILES := CtsShim.apk
 
 include $(BUILD_PREBUILT)
 
+include $(call all-makefiles-under,$(LOCAL_PATH))
