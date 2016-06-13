@@ -240,6 +240,22 @@ public class Environment {
         return new File(getDataDirectory(), "system");
     }
 
+    /**
+     * Returns the base directory for per-user system directory, device encrypted.
+     * {@hide}
+     */
+    public static File getDataSystemDeDirectory() {
+        return buildPath(getDataDirectory(), "system_de");
+    }
+
+    /**
+     * Returns the base directory for per-user system directory, credential encrypted.
+     * {@hide}
+     */
+    public static File getDataSystemCeDirectory() {
+        return buildPath(getDataDirectory(), "system_ce");
+    }
+
     /** {@hide} */
     public static File getDataSystemCeDirectory(int userId) {
         return buildPath(getDataDirectory(), "system_ce", String.valueOf(userId));
