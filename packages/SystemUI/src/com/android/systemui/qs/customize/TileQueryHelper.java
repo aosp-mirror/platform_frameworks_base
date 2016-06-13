@@ -28,6 +28,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.TileService;
+import android.widget.Button;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTile.DrawableIcon;
@@ -109,6 +111,8 @@ public class TileQueryHelper {
         }
         TileInfo info = new TileInfo();
         info.state = state;
+        info.state.minimalAccessibilityClassName = info.state.expandedAccessibilityClassName =
+                Button.class.getName();
         info.spec = spec;
         info.appLabel = appLabel;
         info.isSystem = isSystem;
