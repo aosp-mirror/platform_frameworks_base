@@ -46,11 +46,12 @@ import android.service.vr.IVrListener;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.VrListenerService;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
-
 import com.android.internal.R;
+import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.utils.ManagedApplicationService.PendingEvent;
@@ -67,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -197,29 +199,44 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
     private final class NotificationAccessManager {
         private final SparseArray<ArraySet<String>> mAllowedPackages = new SparseArray<>();
+        private final ArrayMap<String, Integer> mNotificationAccessPackageToUserId =
+                new ArrayMap<>();
 
         public void update(Collection<String> packageNames) {
             int currentUserId = ActivityManager.getCurrentUser();
-
-            UserHandle currentUserHandle = new UserHandle(currentUserId);
 
             ArraySet<String> allowed = mAllowedPackages.get(currentUserId);
             if (allowed == null) {
                 allowed = new ArraySet<>();
             }
 
+            // Make sure we revoke notification access for listeners in other users
+            final int listenerCount = mNotificationAccessPackageToUserId.size();
+            for (int i = listenerCount - 1; i >= 0; i--) {
+                final int grantUserId = mNotificationAccessPackageToUserId.valueAt(i);
+                if (grantUserId != currentUserId) {
+                    String packageName = mNotificationAccessPackageToUserId.keyAt(i);
+                    revokeNotificationListenerAccess(packageName, grantUserId);
+                    revokeNotificationPolicyAccess(packageName);
+                    revokeCoarseLocationPermissionIfNeeded(packageName, grantUserId);
+                    mNotificationAccessPackageToUserId.removeAt(i);
+                }
+            }
+
             for (String pkg : allowed) {
                 if (!packageNames.contains(pkg)) {
-                    revokeNotificationListenerAccess(pkg);
+                    revokeNotificationListenerAccess(pkg, currentUserId);
                     revokeNotificationPolicyAccess(pkg);
-                    revokeCoarseLocationAccess(pkg, currentUserHandle);
+                    revokeCoarseLocationPermissionIfNeeded(pkg, currentUserId);
+                    mNotificationAccessPackageToUserId.remove(pkg);
                 }
             }
             for (String pkg : packageNames) {
                 if (!allowed.contains(pkg)) {
                     grantNotificationPolicyAccess(pkg);
-                    grantNotificationListenerAccess(pkg, currentUserHandle);
-                    grantCoarseLocationAccess(pkg, currentUserHandle);
+                    grantNotificationListenerAccess(pkg, currentUserId);
+                    grantCoarseLocationPermissionIfNeeded(pkg, currentUserId);
+                    mNotificationAccessPackageToUserId.put(pkg, currentUserId);
                 }
             }
 
@@ -228,7 +245,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             mAllowedPackages.put(currentUserId, allowed);
         }
     }
-
 
     /**
      * Called when a user, package, or setting changes that could affect whether or not the
@@ -535,17 +551,33 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    private void updateOverlayStateLocked(ComponentName exemptedComponent) {
+    private void updateOverlayStateLocked(String exemptedPackage, int newUserId, int oldUserId) {
+        AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+
+        // If user changed drop restrictions for the old user.
+        if (oldUserId != newUserId) {
+            appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+                    false, mOverlayToken, null, oldUserId);
+        }
+
+        // Apply the restrictions for the current user based on vr state
+        String[] exemptions = (exemptedPackage == null) ? new String[0] :
+                new String[] { exemptedPackage };
+
+        appOpsManager.setUserRestrictionForUser(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+                mVrModeEnabled, mOverlayToken, exemptions, newUserId);
+    }
+
+    private void updateDependentAppOpsLocked(String newVrServicePackage, int newUserId,
+            String oldVrServicePackage, int oldUserId) {
+        // If VR state changed and we also have a VR service change.
+        if (Objects.equals(newVrServicePackage, oldVrServicePackage)) {
+            return;
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
-            AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
-            if (appOpsManager != null) {
-                String[] exemptions = (exemptedComponent == null) ? new String[0] :
-                        new String[] { exemptedComponent.getPackageName() };
-
-                appOpsManager.setUserRestriction(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                        mVrModeEnabled, mOverlayToken, exemptions);
-            }
+            // Set overlay exception state based on VR enabled and current service
+            updateOverlayStateLocked(newVrServicePackage, newUserId, oldUserId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -578,8 +610,12 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 return validUserComponent; // Disabled -> Disabled transition does nothing.
             }
 
+            String oldVrServicePackage = mCurrentVrService != null
+                    ? mCurrentVrService.getComponent().getPackageName() : null;
+            final int oldUserId = mCurrentVrModeUser;
+
             // Always send mode change events.
-            changeVrModeLocked(enabled, (enabled && validUserComponent) ? component : null);
+            changeVrModeLocked(enabled);
 
             if (!enabled || !validUserComponent) {
                 // Unbind whatever is running
@@ -606,11 +642,24 @@ public class VrManagerService extends SystemService implements EnabledComponentC
                 }
             }
 
-            if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent))  {
+            if (calling != null && !Objects.equals(calling, mCurrentVrModeComponent)) {
                 mCurrentVrModeComponent = calling;
+                sendUpdatedCaller = true;
+            }
+
+            if (mCurrentVrModeUser != userId) {
                 mCurrentVrModeUser = userId;
                 sendUpdatedCaller = true;
             }
+
+            String newVrServicePackage = mCurrentVrService != null
+                    ? mCurrentVrService.getComponent().getPackageName() : null;
+            final int newUserId = mCurrentVrModeUser;
+
+            // Update AppOps settings that change state when entering/exiting VR mode, or changing
+            // the current VrListenerService.
+            updateDependentAppOpsLocked(newVrServicePackage, newUserId,
+                    oldVrServicePackage, oldUserId);
 
             if (mCurrentVrService != null && sendUpdatedCaller) {
                 final ComponentName c = mCurrentVrModeComponent;
@@ -645,18 +694,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         return true;
     }
 
-    private void grantCoarseLocationAccess(String pkg, UserHandle userId) {
-        PackageManager pm = mContext.getPackageManager();
-        pm.grantRuntimePermission(pkg, android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                userId);
-    }
-
-    private void revokeCoarseLocationAccess(String pkg, UserHandle userId) {
-        PackageManager pm = mContext.getPackageManager();
-        pm.revokeRuntimePermission(pkg,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION, userId);
-    }
-
     private void grantNotificationPolicyAccess(String pkg) {
         NotificationManager nm = mContext.getSystemService(NotificationManager.class);
         nm.setNotificationPolicyAccessGranted(pkg, true);
@@ -670,14 +707,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         nm.setNotificationPolicyAccessGranted(pkg, false);
     }
 
-    private void grantNotificationListenerAccess(String pkg, UserHandle userId) {
+    private void grantNotificationListenerAccess(String pkg, int userId) {
         PackageManager pm = mContext.getPackageManager();
         ArraySet<ComponentName> possibleServices = EnabledComponentsObserver.loadComponentNames(pm,
-                userId.getIdentifier(), NotificationListenerService.SERVICE_INTERFACE,
+                userId, NotificationListenerService.SERVICE_INTERFACE,
                 android.Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE);
         ContentResolver resolver = mContext.getContentResolver();
 
-        ArraySet<String> current = getCurrentNotifListeners(resolver);
+        ArraySet<String> current = getNotificationListeners(resolver, userId);
 
         for (ComponentName c : possibleServices) {
             String flatName = c.flattenToString();
@@ -689,14 +726,16 @@ public class VrManagerService extends SystemService implements EnabledComponentC
 
         if (current.size() > 0) {
             String flatSettings = formatSettings(current);
-            Settings.Secure.putString(resolver, Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    flatSettings);
+            Settings.Secure.putStringForUser(resolver,
+                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                    flatSettings, userId);
         }
     }
 
-    private void revokeNotificationListenerAccess(String pkg) {
+    private void revokeNotificationListenerAccess(String pkg, int userId) {
         ContentResolver resolver = mContext.getContentResolver();
-        ArraySet<String> current = getCurrentNotifListeners(resolver);
+
+        ArraySet<String> current = getNotificationListeners(resolver, userId);
 
         ArrayList<String> toRemove = new ArrayList<>();
 
@@ -710,14 +749,37 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         current.removeAll(toRemove);
 
         String flatSettings = formatSettings(current);
-        Settings.Secure.putString(resolver, Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                flatSettings);
-
+        Settings.Secure.putStringForUser(resolver,
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                flatSettings, userId);
     }
 
-    private ArraySet<String> getCurrentNotifListeners(ContentResolver resolver) {
-        String flat = Settings.Secure.getString(resolver,
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+    private void grantCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().grantRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
+    }
+
+    private void revokeCoarseLocationPermissionIfNeeded(String pkg, int userId) {
+        // Don't clobber the user if permission set in current state explicitly
+        if (!isPermissionUserUpdated(Manifest.permission.ACCESS_COARSE_LOCATION, pkg, userId)) {
+            mContext.getPackageManager().revokeRuntimePermission(pkg,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, new UserHandle(userId));
+        }
+    }
+
+    private boolean isPermissionUserUpdated(String permission, String pkg, int userId) {
+        final int flags = mContext.getPackageManager().getPermissionFlags(
+                permission, pkg, new UserHandle(userId));
+        return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                | PackageManager.FLAG_PERMISSION_USER_FIXED)) != 0;
+    }
+
+    private ArraySet<String> getNotificationListeners(ContentResolver resolver, int userId) {
+        String flat = Settings.Secure.getStringForUser(resolver,
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS, userId);
 
         ArraySet<String> current = new ArraySet<>();
         if (flat != null) {
@@ -763,9 +825,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      * Note: Must be called while holding {@code mLock}.
      *
      * @param enabled new state of the VR mode.
-     * @param exemptedComponent a component to exempt from AppOps restrictions for overlays.
      */
-    private void changeVrModeLocked(boolean enabled, ComponentName exemptedComponent) {
+    private void changeVrModeLocked(boolean enabled) {
         if (mVrModeEnabled != enabled) {
             mVrModeEnabled = enabled;
 
@@ -773,7 +834,6 @@ public class VrManagerService extends SystemService implements EnabledComponentC
             Slog.i(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
             setVrModeNative(mVrModeEnabled);
 
-            updateOverlayStateLocked(exemptedComponent);
             onVrModeChangedLocked();
         }
     }
