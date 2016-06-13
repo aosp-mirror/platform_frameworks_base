@@ -80,14 +80,16 @@ public class AutoTileManager {
             new NightModeController.Listener() {
         @Override
         public void onNightModeChanged() {
-            mHost.addTile("night");
-            Prefs.putBoolean(mContext, Key.QS_NIGHT_ADDED, true);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mHost.getNightModeController().removeListener(mNightModeListener);
-                }
-            });
+            if (mHost.getNightModeController().isEnabled()) {
+                mHost.addTile("night");
+                Prefs.putBoolean(mContext, Key.QS_NIGHT_ADDED, true);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHost.getNightModeController().removeListener(mNightModeListener);
+                    }
+                });
+            }
         }
 
         @Override
