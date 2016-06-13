@@ -138,7 +138,7 @@ public class QSFooter implements OnClickListener, DialogInterface.OnClickListene
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             final Intent settingsIntent = new Intent(ACTION_VPN_SETTINGS);
-            mContext.startActivityAsUser(settingsIntent, UserHandle.CURRENT);
+            mHost.startActivityDismissingKeyguard(settingsIntent);
         }
     }
 
