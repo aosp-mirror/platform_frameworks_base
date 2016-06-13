@@ -286,35 +286,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * Only intended for use by generated reflected code.  (Simple reduction)
-     *
-     * @hide
-     */
-    protected void reduce(int slot, Allocation ain, Allocation aout, LaunchOptions sc) {
-        mRS.validate();
-        mRS.validateObject(ain);
-        mRS.validateObject(aout);
-
-        if (ain == null || aout == null) {
-            throw new RSIllegalArgumentException(
-                "Both ain and aout are required to be non-null.");
-        }
-
-        long in_id = ain.getID(mRS);
-        long out_id = aout.getID(mRS);
-
-        int[] limits = null;
-        if (sc != null) {
-            limits = new int[2];
-
-            limits[0] = sc.xstart;
-            limits[1] = sc.xend;
-        }
-
-        mRS.nScriptReduce(getID(mRS), slot, in_id, out_id, limits);
-    }
-
-    /**
      * Only intended for use by generated reflected code.  (General reduction)
      *
      */
@@ -350,7 +321,7 @@ public class Script extends BaseObj {
             limits[5] = sc.zend;
         }
 
-        mRS.nScriptReduceNew(getID(mRS), slot, in_ids, out_id, limits);
+        mRS.nScriptReduce(getID(mRS), slot, in_ids, out_id, limits);
     }
 
     long[] mInIdsBuffer;
