@@ -17,25 +17,6 @@
 LOCAL_PATH := $(my-dir)
 
 ###########################################################
-# Variant: Privileged app
-
-include $(CLEAR_VARS)
-# this needs to be a privileged application
-LOCAL_PRIVILEGED_MODULE := true
-
-LOCAL_MODULE_TAGS := optional
-LOCAL_SDK_VERSION := current
-LOCAL_PROGUARD_ENABLED := disabled
-LOCAL_DEX_PREOPT := false
-
-LOCAL_PACKAGE_NAME := CtsShimPriv
-
-LOCAL_MANIFEST_FILE := shim_priv/AndroidManifest.xml
-
-include $(BUILD_PACKAGE)
-
-
-###########################################################
 # Variant: Privileged app upgrade
 
 include $(CLEAR_VARS)
@@ -52,7 +33,34 @@ LOCAL_PACKAGE_NAME := CtsShimPrivUpgrade
 LOCAL_MANIFEST_FILE := shim_priv_upgrade/AndroidManifest.xml
 
 include $(BUILD_PACKAGE)
+my_shim_priv_upgrade_apk := $(LOCAL_BUILT_MODULE)
 
+###########################################################
+# Variant: Privileged app
+
+include $(CLEAR_VARS)
+# this needs to be a privileged application
+LOCAL_PRIVILEGED_MODULE := true
+
+LOCAL_MODULE_TAGS := optional
+LOCAL_SDK_VERSION := current
+LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_DEX_PREOPT := false
+
+LOCAL_PACKAGE_NAME := CtsShimPriv
+
+# Generate the upgrade key by taking the hash of the built CtsShimPrivUpgrade apk
+gen := $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),,true)/AndroidManifest.xml
+$(gen): PRIVATE_CUSTOM_TOOL = sed -e "s/__HASH__/`sha512sum $(PRIVATE_INPUT_APK) | cut -d' ' -f1`/" $< >$@
+$(gen): PRIVATE_INPUT_APK := $(my_shim_priv_upgrade_apk)
+$(gen): $(LOCAL_PATH)/shim_priv/AndroidManifest.xml $(my_shim_priv_upgrade_apk)
+	$(transform-generated-source)
+
+my_shim_priv_upgrade_apk :=
+
+LOCAL_FULL_MANIFEST_FILE := $(gen)
+
+include $(BUILD_PACKAGE)
 
 ###########################################################
 # Variant: System app
