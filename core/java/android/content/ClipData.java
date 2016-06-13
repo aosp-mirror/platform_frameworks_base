@@ -669,6 +669,24 @@ public class ClipData implements Parcelable {
     }
 
     /**
+     * Create a new clip.
+     *
+     * @param description The ClipDescription describing the clip contents.
+     * @param items The items in the clip. Not that a defensive copy of this
+     *     list is not made, so caution should be taken to ensure the
+     *     list is not available for further modification.
+     * @hide
+     */
+    public ClipData(ClipDescription description, ArrayList<Item> items) {
+        mClipDescription = description;
+        if (items == null) {
+            throw new NullPointerException("item is null");
+        }
+        mIcon = null;
+        mItems = items;
+    }
+
+    /**
      * Create a new clip that is a copy of another clip.  This does a deep-copy
      * of all items in the clip.
      *
@@ -1009,10 +1027,12 @@ public class ClipData implements Parcelable {
     public static final Parcelable.Creator<ClipData> CREATOR =
         new Parcelable.Creator<ClipData>() {
 
+            @Override
             public ClipData createFromParcel(Parcel source) {
                 return new ClipData(source);
             }
 
+            @Override
             public ClipData[] newArray(int size) {
                 return new ClipData[size];
             }
