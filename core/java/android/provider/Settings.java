@@ -6249,6 +6249,21 @@ public final class Settings {
                 "automatic_storage_manager_enabled";
 
         /**
+         * How many days of information for the automatic storage manager to retain on the device.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN =
+                "automatic_storage_manager_days_to_retain";
+
+        /**
+         * Default number of days of information for the automatic storage manager to retain.
+         *
+         * @hide
+         */
+        public static final int AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_DEFAULT = 90;
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
