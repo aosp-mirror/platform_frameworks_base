@@ -16,9 +16,9 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.Nullable;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.Environment;
@@ -28,6 +28,7 @@ import android.os.UserManagerInternal;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -54,8 +55,8 @@ import libcore.io.IoUtils;
  * Stores and restores state for the Device and Profile owners. By definition there can be
  * only one device owner, but there may be a profile owner for each user.
  *
- * <p>This class is not thread safe.  (i.e. access to this class must always be synchronized
- * in the caller side.)
+ * <p>This class is thread safe, so individual methods can safely be called without locking.
+ * However, caller must still synchronize on their side to ensure integrity between multiple calls.
  */
 class Owners {
     private static final String TAG = "DevicePolicyManagerService";
@@ -101,6 +102,8 @@ class Owners {
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
 
+    private final Object mLock = new Object();
+
     public Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal) {
@@ -113,47 +116,49 @@ class Owners {
      * Load configuration from the disk.
      */
     void load() {
-        // First, try to read from the legacy file.
-        final File legacy = getLegacyConfigFileWithTestOverride();
+        synchronized (mLock) {
+            // First, try to read from the legacy file.
+            final File legacy = getLegacyConfigFileWithTestOverride();
 
-        final List<UserInfo> users = mUserManager.getUsers();
+            final List<UserInfo> users = mUserManager.getUsers();
 
-        if (readLegacyOwnerFile(legacy)) {
-            if (DEBUG) {
-                Log.d(TAG, "Legacy config file found.");
-            }
+            if (readLegacyOwnerFileLocked(legacy)) {
+                if (DEBUG) {
+                    Log.d(TAG, "Legacy config file found.");
+                }
 
-            // Legacy file exists, write to new files and remove the legacy one.
-            writeDeviceOwner();
-            for (int userId : getProfileOwnerKeys()) {
-                writeProfileOwner(userId);
-            }
-            if (DEBUG) {
-                Log.d(TAG, "Deleting legacy config file");
-            }
-            if (!legacy.delete()) {
-                Slog.e(TAG, "Failed to remove the legacy setting file");
-            }
-        } else {
-            // No legacy file, read from the new format files.
-            new DeviceOwnerReadWriter().readFromFileLocked();
+                // Legacy file exists, write to new files and remove the legacy one.
+                writeDeviceOwner();
+                for (int userId : getProfileOwnerKeys()) {
+                    writeProfileOwner(userId);
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "Deleting legacy config file");
+                }
+                if (!legacy.delete()) {
+                    Slog.e(TAG, "Failed to remove the legacy setting file");
+                }
+            } else {
+                // No legacy file, read from the new format files.
+                new DeviceOwnerReadWriter().readFromFileLocked();
 
+                for (UserInfo ui : users) {
+                    new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
+                }
+            }
+            mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
             for (UserInfo ui : users) {
-                new ProfileOwnerReadWriter(ui.id).readFromFileLocked();
+                mUserManagerInternal.setUserManaged(ui.id, hasProfileOwner(ui.id));
             }
+            if (hasDeviceOwner() && hasProfileOwner(getDeviceOwnerUserId())) {
+                Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
+                        getDeviceOwnerUserId()));
+            }
+            pushToPackageManagerLocked();
         }
-        mUserManagerInternal.setDeviceManaged(hasDeviceOwner());
-        for (UserInfo ui : users) {
-            mUserManagerInternal.setUserManaged(ui.id, hasProfileOwner(ui.id));
-        }
-        if (hasDeviceOwner() && hasProfileOwner(getDeviceOwnerUserId())) {
-            Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
-                    getDeviceOwnerUserId()));
-        }
-        pushToPackageManager();
     }
 
-    private void pushToPackageManager() {
+    private void pushToPackageManagerLocked() {
         final SparseArray<String> po = new SparseArray<>();
         for (int i = mProfileOwners.size() - 1; i >= 0; i--) {
             po.put(mProfileOwners.keyAt(i), mProfileOwners.valueAt(i).packageName);
@@ -164,27 +169,50 @@ class Owners {
     }
 
     String getDeviceOwnerPackageName() {
-        return mDeviceOwner != null ? mDeviceOwner.packageName : null;
+        synchronized (mLock) {
+            return mDeviceOwner != null ? mDeviceOwner.packageName : null;
+        }
     }
 
     int getDeviceOwnerUserId() {
-        return mDeviceOwnerUserId;
+        synchronized (mLock) {
+            return mDeviceOwnerUserId;
+        }
+    }
+
+    @Nullable
+    Pair<Integer, ComponentName> getDeviceOwnerUserIdAndComponent() {
+        synchronized (mLock) {
+            if (mDeviceOwner == null) {
+                return null;
+            } else {
+                return Pair.create(mDeviceOwnerUserId, mDeviceOwner.admin);
+            }
+        }
     }
 
     String getDeviceOwnerName() {
-        return mDeviceOwner != null ? mDeviceOwner.name : null;
+        synchronized (mLock) {
+            return mDeviceOwner != null ? mDeviceOwner.name : null;
+        }
     }
 
     ComponentName getDeviceOwnerComponent() {
-        return mDeviceOwner != null ? mDeviceOwner.admin : null;
+        synchronized (mLock) {
+            return mDeviceOwner != null ? mDeviceOwner.admin : null;
+        }
     }
 
     String getDeviceOwnerRemoteBugreportUri() {
-        return mDeviceOwner != null ? mDeviceOwner.remoteBugreportUri : null;
+        synchronized (mLock) {
+            return mDeviceOwner != null ? mDeviceOwner.remoteBugreportUri : null;
+        }
     }
 
     String getDeviceOwnerRemoteBugreportHash() {
-        return mDeviceOwner != null ? mDeviceOwner.remoteBugreportHash : null;
+        synchronized (mLock) {
+            return mDeviceOwner != null ? mDeviceOwner.remoteBugreportHash : null;
+        }
     }
 
     void setDeviceOwner(ComponentName admin, String ownerName, int userId) {
@@ -192,132 +220,172 @@ class Owners {
             Slog.e(TAG, "Invalid user id for device owner user: " + userId);
             return;
         }
-        // For a newly set DO, there's no need for migration.
-        setDeviceOwnerWithRestrictionsMigrated(admin, ownerName, userId,
-                /* userRestrictionsMigrated =*/ true);
+        synchronized (mLock) {
+            // For a newly set DO, there's no need for migration.
+            setDeviceOwnerWithRestrictionsMigrated(admin, ownerName, userId,
+                    /* userRestrictionsMigrated =*/ true);
+        }
     }
 
     // Note this should be only called during migration.  Normally when DO is set,
     // userRestrictionsMigrated should always be true.
     void setDeviceOwnerWithRestrictionsMigrated(ComponentName admin, String ownerName, int userId,
             boolean userRestrictionsMigrated) {
-        mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated,
-                /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
-        mDeviceOwnerUserId = userId;
+        synchronized (mLock) {
+            mDeviceOwner = new OwnerInfo(ownerName, admin, userRestrictionsMigrated,
+                    /* remoteBugreportUri =*/ null, /* remoteBugreportHash =*/ null);
+            mDeviceOwnerUserId = userId;
 
-        mUserManagerInternal.setDeviceManaged(true);
-        pushToPackageManager();
+            mUserManagerInternal.setDeviceManaged(true);
+            pushToPackageManagerLocked();
+        }
     }
 
     void clearDeviceOwner() {
-        mDeviceOwner = null;
-        mDeviceOwnerUserId = UserHandle.USER_NULL;
+        synchronized (mLock) {
+            mDeviceOwner = null;
+            mDeviceOwnerUserId = UserHandle.USER_NULL;
 
-        mUserManagerInternal.setDeviceManaged(false);
-        pushToPackageManager();
+            mUserManagerInternal.setDeviceManaged(false);
+            pushToPackageManagerLocked();
+        }
     }
 
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
-        // For a newly set PO, there's no need for migration.
-        mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
-                /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
-                /* remoteBugreportHash =*/ null));
-        mUserManagerInternal.setUserManaged(userId, true);
-        pushToPackageManager();
+        synchronized (mLock) {
+            // For a newly set PO, there's no need for migration.
+            mProfileOwners.put(userId, new OwnerInfo(ownerName, admin,
+                    /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
+                    /* remoteBugreportHash =*/ null));
+            mUserManagerInternal.setUserManaged(userId, true);
+            pushToPackageManagerLocked();
+        }
     }
 
     void removeProfileOwner(int userId) {
-        mProfileOwners.remove(userId);
-        mUserManagerInternal.setUserManaged(userId, false);
-        pushToPackageManager();
+        synchronized (mLock) {
+            mProfileOwners.remove(userId);
+            mUserManagerInternal.setUserManaged(userId, false);
+            pushToPackageManagerLocked();
+        }
     }
 
     ComponentName getProfileOwnerComponent(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null ? profileOwner.admin : null;
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            return profileOwner != null ? profileOwner.admin : null;
+        }
     }
 
     String getProfileOwnerName(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null ? profileOwner.name : null;
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            return profileOwner != null ? profileOwner.name : null;
+        }
     }
 
     String getProfileOwnerPackage(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null ? profileOwner.packageName : null;
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            return profileOwner != null ? profileOwner.packageName : null;
+        }
     }
 
     Set<Integer> getProfileOwnerKeys() {
-        return mProfileOwners.keySet();
+        synchronized (mLock) {
+            return mProfileOwners.keySet();
+        }
     }
 
     SystemUpdatePolicy getSystemUpdatePolicy() {
-        return mSystemUpdatePolicy;
+        synchronized (mLock) {
+            return mSystemUpdatePolicy;
+        }
     }
 
     void setSystemUpdatePolicy(SystemUpdatePolicy systemUpdatePolicy) {
-        mSystemUpdatePolicy = systemUpdatePolicy;
+        synchronized (mLock) {
+            mSystemUpdatePolicy = systemUpdatePolicy;
+        }
     }
 
     void clearSystemUpdatePolicy() {
-        mSystemUpdatePolicy = null;
+        synchronized (mLock) {
+            mSystemUpdatePolicy = null;
+        }
     }
 
     boolean hasDeviceOwner() {
-        return mDeviceOwner != null;
+        synchronized (mLock) {
+            return mDeviceOwner != null;
+        }
     }
 
     boolean isDeviceOwnerUserId(int userId) {
-        return mDeviceOwner != null && mDeviceOwnerUserId == userId;
+        synchronized (mLock) {
+            return mDeviceOwner != null && mDeviceOwnerUserId == userId;
+        }
     }
 
     boolean hasProfileOwner(int userId) {
-        return getProfileOwnerComponent(userId) != null;
+        synchronized (mLock) {
+            return getProfileOwnerComponent(userId) != null;
+        }
     }
 
     /**
      * @return true if user restrictions need to be migrated for DO.
      */
     boolean getDeviceOwnerUserRestrictionsNeedsMigration() {
-        return mDeviceOwner != null && !mDeviceOwner.userRestrictionsMigrated;
+        synchronized (mLock) {
+            return mDeviceOwner != null && !mDeviceOwner.userRestrictionsMigrated;
+        }
     }
 
     /**
      * @return true if user restrictions need to be migrated for PO.
      */
     boolean getProfileOwnerUserRestrictionsNeedsMigration(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null && !profileOwner.userRestrictionsMigrated;
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            return profileOwner != null && !profileOwner.userRestrictionsMigrated;
+        }
     }
 
     /** Sets the user restrictions migrated flag, and also writes to the file. */
     void setDeviceOwnerUserRestrictionsMigrated() {
-        if (mDeviceOwner != null) {
-            mDeviceOwner.userRestrictionsMigrated = true;
+        synchronized (mLock) {
+            if (mDeviceOwner != null) {
+                mDeviceOwner.userRestrictionsMigrated = true;
+            }
+            writeDeviceOwner();
         }
-        writeDeviceOwner();
     }
 
     /** Sets the remote bugreport uri and hash, and also writes to the file. */
     void setDeviceOwnerRemoteBugreportUriAndHash(String remoteBugreportUri,
             String remoteBugreportHash) {
-        if (mDeviceOwner != null) {
-            mDeviceOwner.remoteBugreportUri = remoteBugreportUri;
-            mDeviceOwner.remoteBugreportHash = remoteBugreportHash;
+        synchronized (mLock) {
+            if (mDeviceOwner != null) {
+                mDeviceOwner.remoteBugreportUri = remoteBugreportUri;
+                mDeviceOwner.remoteBugreportHash = remoteBugreportHash;
+            }
+            writeDeviceOwner();
         }
-        writeDeviceOwner();
     }
 
     /** Sets the user restrictions migrated flag, and also writes to the file.  */
     void setProfileOwnerUserRestrictionsMigrated(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        if (profileOwner != null) {
-            profileOwner.userRestrictionsMigrated = true;
+        synchronized (mLock) {
+            OwnerInfo profileOwner = mProfileOwners.get(userId);
+            if (profileOwner != null) {
+                profileOwner.userRestrictionsMigrated = true;
+            }
+            writeProfileOwner(userId);
         }
-        writeProfileOwner(userId);
     }
 
-    private boolean readLegacyOwnerFile(File file) {
+    private boolean readLegacyOwnerFileLocked(File file) {
         if (!file.exists()) {
             // Already migrated or the device has no owners.
             return false;
@@ -383,7 +451,7 @@ class Owners {
     }
 
     void writeDeviceOwner() {
-        synchronized (this) {
+        synchronized (mLock) {
             if (DEBUG) {
                 Log.d(TAG, "Writing to device owner file");
             }
@@ -392,7 +460,7 @@ class Owners {
     }
 
     void writeProfileOwner(int userId) {
-        synchronized (this) {
+        synchronized (mLock) {
             if (DEBUG) {
                 Log.d(TAG, "Writing to profile owner file for user " + userId);
             }
