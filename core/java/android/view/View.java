@@ -20538,6 +20538,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "startDragAndDrop: data=" + data + " flags=" + flags);
         }
+        if (mAttachInfo == null) {
+            Log.w(VIEW_LOG_TAG, "startDragAndDrop called on a detached view.");
+            return false;
+        }
         boolean okay = false;
 
         Point shadowSize = new Point();
@@ -20614,6 +20618,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "cancelDragAndDrop");
         }
+        if (mAttachInfo == null) {
+            Log.w(VIEW_LOG_TAG, "cancelDragAndDrop called on a detached view.");
+            return;
+        }
         if (mAttachInfo.mDragToken != null) {
             try {
                 mAttachInfo.mSession.cancelDragAndDrop(mAttachInfo.mDragToken);
@@ -20635,6 +20643,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public final void updateDragShadow(DragShadowBuilder shadowBuilder) {
         if (ViewDebug.DEBUG_DRAG) {
             Log.d(VIEW_LOG_TAG, "updateDragShadow");
+        }
+        if (mAttachInfo == null) {
+            Log.w(VIEW_LOG_TAG, "updateDragShadow called on a detached view.");
+            return;
         }
         if (mAttachInfo.mDragToken != null) {
             try {
