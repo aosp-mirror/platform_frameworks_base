@@ -182,7 +182,7 @@ public interface IActivityManager extends IInterface {
     public IBinder peekService(Intent service, String resolvedType, String callingPackage)
             throws RemoteException;
 
-    public boolean bindBackupAgent(ApplicationInfo appInfo, int backupRestoreMode)
+    public boolean bindBackupAgent(String packageName, int backupRestoreMode, int userId)
             throws RemoteException;
     public void clearPendingBackup() throws RemoteException;
     public void backupAgentCreated(String packageName, IBinder agent) throws RemoteException;
