@@ -42,6 +42,12 @@ interface IOtaDexopt {
     boolean isDone();
 
     /**
+     * Return the progress (0..1) made in this session. When {@link #isDone() isDone} returns
+     * true, the progress value will be 1.
+     */
+    float getProgress();
+
+    /**
      * Optimize the next package. Note: this command is synchronous, that is, only returns after
      * the package has been dexopted (or dexopting failed).
      */
