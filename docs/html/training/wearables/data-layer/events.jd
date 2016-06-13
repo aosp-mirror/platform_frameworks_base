@@ -22,21 +22,21 @@ the call ends up making with listeners.
 <h2 id="Wait">Wait for the Status of Data Layer Calls</h2>
 
 <p>You'll notice that calls to the Data Layer API sometimes return a
-<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>,
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>,
 such as
-<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>putDataItem()</code></a>.
-As soon as the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a> is created,
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>putDataItem()</code></a>.
+As soon as the <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a> is created,
 the operation is queued in the background. If you do nothing else after this, the operation
 eventually completes silently. However, you'll usually want to do something with the result
 after the operation completes, so the
-<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>
 lets you wait for the result status, either synchronously or asynchronously.
 </p>
 
 <h3 id="async-waiting">Asynchronous calls</h3>
 <p>If your code is running on the main UI thread, do not make blocking calls
 to the Data Layer API. You can run the calls asynchronously by adding a callback method
-to the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a> object,
+to the <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a> object,
 which fires when the operation is completed:</p>
 <pre>
 pendingResult.setResultCallback(new ResultCallback&lt;DataItemResult&gt;() {
@@ -51,12 +51,12 @@ pendingResult.setResultCallback(new ResultCallback&lt;DataItemResult&gt;() {
 
 <h3 id="sync-waiting">Synchronous calls</h3>
 <p>If your code is running on a separate handler thread in a background service (which is the case
-in a <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>),
+in a <a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>),
 it's fine for the calls to block. In this case, you can call
-<a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html#await()"><code>await()</code></a>
-on the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html#await()"><code>await()</code></a>
+on the <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>
 object, which blocks until the request completes and returns a
-<a href="{@docRoot}reference/com/google/android/gms/common/api/Result.html"><code>Result</code></a>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/Result.html"><code>Result</code></a>
 object:
 </p>
 
@@ -79,7 +79,7 @@ To listen for data layer events, you have two options:
 </p>
 <ul>
    <li>Create a service that extends <a href
-="https://developer.android.com/reference/com/google/android/gms/wearable/WearableListenerService.html">
+="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService.html">
 {@code WearableListenerService}</a>.</li>
    <li>Create an activity that implements <a
 href="https://developer.android.com/reference/com/google/android/gms/wearable/DataApi.DataListener.html">
@@ -215,7 +215,7 @@ The next section explains how to use an intent filter with this listener.
 
 <p>
 An intent filter for the
-<a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService.html">
 {@code WearableListenerService}</a> example shown in the previous section might look like this:
 
 <pre>
@@ -250,21 +250,20 @@ You can also match a literal path or path prefix. If you are matching by path
 or path prefix, you must specify a wildcard or specific host.
 If you do not do so, the system ignores the path you specified.
 </p>
+
 <p>
 For more information on the filter types that Wear supports, see the
 API reference documentation for <a
 href="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService">
 {@code WearableListenerService}</a>.
-
-
 </p>
+
 <p>
 For more information on data filters and matching rules, see the API reference
 documentation for the <a
 href="{@docRoot}guide/topics/manifest/data-element.html">{@code data}</a>
 manifest element.
 </p>
-
 
 <p>When matching intent filters, there are two important rules to remember:</p>
 <ul>
@@ -282,10 +281,10 @@ change. In such a case, you can listen for events in an activity by
 implementing one or more of the following interfaces:
 </p>
 <ul>
-  <li><a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.DataListener.html"><code>
+  <li><a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.DataListener.html"><code>
   DataApi.DataListener</code></a></li>
 
-  <li><a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">
+  <li><a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">
   <code>MessageApi.MessageListener</code></a></li>
 
   <li><a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener.html">{@code CapabilityApi.CapabilityListener}</a></li>
@@ -295,21 +294,21 @@ implementing one or more of the following interfaces:
 <ol>
 <li>Implement the desired interfaces.</li>
 <li>In {@link android.app.Activity#onCreate onCreate()}, create an instance of
-<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code>
 </a>to work with the Data Layer API.</li>
 
 <li>
-In {@link android.app.Activity#onStart onStart()}, call <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">
+In {@link android.app.Activity#onStart onStart()}, call <a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">
 <code>connect()</code></a> to connect the client to Google Play services.
 </li>
 
 <li>When the connection to Google Play services is established, the system calls
-<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)"><code>onConnected()</code></a>. This is where you call
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)"><code>onConnected()</code></a>. This is where you call
 
-<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">
 <code>DataApi.addListener()</code></a>,
 
-<a href="{@docRoot}android/reference/com/google/android/gms/wearable/CapabilityApi.CapabilityListener">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/MessageApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener, android.net.Uri, int)">
 <code>MessageApi.addListener()</code></a>, or
 
 <a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/CapabilityApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient,%20com.google.android.gms.wearable.CapabilityApi.CapabilityListener,%20android.net.Uri,%20int)">
@@ -317,14 +316,16 @@ In {@link android.app.Activity#onStart onStart()}, call <a href="{@docRoot}refer
 interested in listening for data layer events.</li>
 
 <li>In {@link android.app.Activity#onStop onStop()}, unregister any listeners with
-<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)"><code>DataApi.removeListener()</code></a>,
-<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)"><code>MessageApi.removeListener()</code></a>, or
-<a href="http://developer.android.com/reference/com/google/android/gms/wearable/MessageApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient,%20com.google.android.gms.wearable.MessageApi.MessageListener)">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)"><code>DataApi.removeListener()</code></a>,
+
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/MessageApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)"><code>MessageApi.removeListener()</code></a>, or
+
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/CapabilityApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.CapabilityApi.CapabilityListener)">
 {@code CapabilityApi.removeListener()}</a>.</li>
 
 
 <p>An alternative to adding listeners in
-<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)"><code>onConnected()</code></a>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)"><code>onConnected()</code></a>
 and removing them in
 {@link android.app.Activity#onStop onStop()} is to add a filtered listener in an activity’s {@link android.app.Activity#onResume onResume()} and
 remove it in {@link android.app.Activity#onPause onPause()}, so as to only receive data that is relevant to the
@@ -332,18 +333,18 @@ current application state.</p>
 
 
 <li>Implement
-<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.DataListener.html#onDataChanged(com.google.android.gms.wearable.DataEventBuffer)">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.DataListener.html#onDataChanged(com.google.android.gms.wearable.DataEventBuffer)">
 <code>onDataChanged()</code></a>,
   <a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/MessageApi.MessageListener.html#onMessageReceived(com.google.android.gms.wearable.MessageEvent)">
   <code>onMessageReceived()</code></a>,
   <a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService.html#onCapabilityChanged(com.google.android.gms.wearable.CapabilityInfo)">
 {@code onCapabilityChanged()}</a>,
-or methods from <a href="http://developer.android.com/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html">
+or methods from <a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/ChannelApi.ChannelListener.html">
 Channel API listener methods</a>, depending on the interfaces that you implemented.</li>
 </ol>
 
 <p>Here's an example that implements
-<a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.DataListener.html"><code>DataApi.DataListener</code></a>:</p>
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/DataApi.DataListener.html"><code>DataApi.DataListener</code></a>:</p>
 
 <pre>
 public class MainActivity extends Activity implements
@@ -403,7 +404,7 @@ public class MainActivity extends Activity implements
 <h3>Using Filters with Listener Activities</h3>
 <p>
 Just as you can specify intent filters for manifest-based
-<a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html">
+<a href="https://developers.google.com/android/reference/com/google/android/gms/wearable/WearableListenerService.html">
 <code>WearableListenerService</code></a> objects, you can also use intent filters when registering a
 listener through the Wearable API. The same rules are applicable to both
 API-based listeners manifest-based listeners.
@@ -411,7 +412,7 @@ API-based listeners manifest-based listeners.
 
 <p>
 A common pattern is to register a listener with a specific path or path prefix
-in an activity’s{@link android.app.Activity#onResume onResume()} method, and to
+in an activity’s {@link android.app.Activity#onResume onResume()} method, and to
 remove the listener in the activity’s {@link android.app.Activity#onPause onPause()} method.
 Implementing listeners in this fashion allows your application to more selectively receive events,
 improving its design and efficiency.
