@@ -752,20 +752,12 @@ public class RenderScript {
         rsnScriptForEach(mContext, id, slot, ains, aout, params, limits);
     }
 
-    native void rsnScriptReduce(long con, long id, int slot, long ain,
+    native void rsnScriptReduce(long con, long id, int slot, long[] ains,
                                 long aout, int[] limits);
-    synchronized void nScriptReduce(long id, int slot, long ain, long aout,
+    synchronized void nScriptReduce(long id, int slot, long ains[], long aout,
                                     int[] limits) {
         validate();
-        rsnScriptReduce(mContext, id, slot, ain, aout, limits);
-    }
-
-    native void rsnScriptReduceNew(long con, long id, int slot, long[] ains,
-                                   long aout, int[] limits);
-    synchronized void nScriptReduceNew(long id, int slot, long ains[], long aout,
-                                       int[] limits) {
-        validate();
-        rsnScriptReduceNew(mContext, id, slot, ains, aout, limits);
+        rsnScriptReduce(mContext, id, slot, ains, aout, limits);
     }
 
     native void rsnScriptInvokeV(long con, long id, int slot, byte[] params);
