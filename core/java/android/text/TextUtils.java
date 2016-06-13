@@ -1303,22 +1303,32 @@ public class TextUtils {
         return width;
     }
 
-    private static final char FIRST_RIGHT_TO_LEFT = '\u0590';
-
+    // Returns true if the character's presence could affect RTL layout.
+    //
+    // In order to be fast, the code is intentionally rough and quite conservative in its
+    // considering inclusion of any non-BMP or surrogate characters or anything in the bidi
+    // blocks or any bidi formatting characters with a potential to affect RTL layout.
     /* package */
-    static boolean doesNotNeedBidi(CharSequence s, int start, int end) {
-        for (int i = start; i < end; i++) {
-            if (s.charAt(i) >= FIRST_RIGHT_TO_LEFT) {
-                return false;
-            }
-        }
-        return true;
+    static boolean couldAffectRtl(char c) {
+        return (0x0590 <= c && c <= 0x08FF) ||  // RTL scripts
+                c == 0x200E ||  // Bidi format character
+                c == 0x200F ||  // Bidi format character
+                (0x202A <= c && c <= 0x202E) ||  // Bidi format characters
+                (0x2066 <= c && c <= 0x2069) ||  // Bidi format characters
+                (0xD800 <= c && c <= 0xDFFF) ||  // Surrogate pairs
+                (0xFB1D <= c && c <= 0xFDFF) ||  // Hebrew and Arabic presentation forms
+                (0xFE70 <= c && c <= 0xFEFE);  // Arabic presentation forms
     }
 
+    // Returns true if there is no character present that may potentially affect RTL layout.
+    // Since this calls couldAffectRtl() above, it's also quite conservative, in the way that
+    // it may return 'false' (needs bidi) although careful consideration may tell us it should
+    // return 'true' (does not need bidi).
     /* package */
     static boolean doesNotNeedBidi(char[] text, int start, int len) {
-        for (int i = start, e = i + len; i < e; i++) {
-            if (text[i] >= FIRST_RIGHT_TO_LEFT) {
+        final int end = start + len;
+        for (int i = start; i < end; i++) {
+            if (couldAffectRtl(text[i])) {
                 return false;
             }
         }

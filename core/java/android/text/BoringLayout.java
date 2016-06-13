@@ -247,17 +247,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 final int len = end - start;
                 for (int i = 0; i < len; i++) {
                     final char c = buffer[i];
-
-                    if (c == '\n' || c == '\t' ||
-                            (c >= 0x0590 && c <= 0x08FF) ||  // RTL scripts
-                            c == 0x200E ||  // Bidi format character
-                            c == 0x200F ||  // Bidi format character
-                            (c >= 0x202A && c <= 0x202E) ||  // Bidi format characters
-                            (c >= 0x2066 && c <= 0x2069) ||  // Bidi format characters
-                            (c >= 0xD800 && c <= 0xDFFF) ||  // surrogate pairs
-                            (c >= 0xFB1D && c <= 0xFDFF) ||  // Hebrew and Arabic presentation forms
-                            (c >= 0xFE70 && c <= 0xFEFE) // Arabic presentation forms
-                       ) {
+                    if (c == '\n' || c == '\t' || TextUtils.couldAffectRtl(c)) {
                         return true;
                     }
                 }
