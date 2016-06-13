@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.Environment;
 import android.os.UserHandle;
@@ -28,6 +29,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -86,6 +88,7 @@ class Owners {
 
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
@@ -98,10 +101,12 @@ class Owners {
     // Local system update policy controllable by device owner.
     private SystemUpdatePolicy mSystemUpdatePolicy;
 
-    public Owners(Context context, UserManager userManager,
-            UserManagerInternal userManagerInternal) {
+    public Owners(UserManager userManager,
+            UserManagerInternal userManagerInternal,
+            PackageManagerInternal packageManagerInternal) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
+        mPackageManagerInternal = packageManagerInternal;
     }
 
     /**
@@ -145,6 +150,17 @@ class Owners {
             Slog.w(TAG, String.format("User %d has both DO and PO, which is not supported",
                     getDeviceOwnerUserId()));
         }
+        pushToPackageManager();
+    }
+
+    private void pushToPackageManager() {
+        final SparseArray<String> po = new SparseArray<>();
+        for (int i = mProfileOwners.size() - 1; i >= 0; i--) {
+            po.put(mProfileOwners.keyAt(i), mProfileOwners.valueAt(i).packageName);
+        }
+        mPackageManagerInternal.setDeviceAndProfileOwnerPackages(
+                mDeviceOwnerUserId, (mDeviceOwner != null ? mDeviceOwner.packageName : null),
+                po);
     }
 
     String getDeviceOwnerPackageName() {
@@ -190,6 +206,7 @@ class Owners {
         mDeviceOwnerUserId = userId;
 
         mUserManagerInternal.setDeviceManaged(true);
+        pushToPackageManager();
     }
 
     void clearDeviceOwner() {
@@ -197,6 +214,7 @@ class Owners {
         mDeviceOwnerUserId = UserHandle.USER_NULL;
 
         mUserManagerInternal.setDeviceManaged(false);
+        pushToPackageManager();
     }
 
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
@@ -205,11 +223,13 @@ class Owners {
                 /* userRestrictionsMigrated =*/ true, /* remoteBugreportUri =*/ null,
                 /* remoteBugreportHash =*/ null));
         mUserManagerInternal.setUserManaged(userId, true);
+        pushToPackageManager();
     }
 
     void removeProfileOwner(int userId) {
         mProfileOwners.remove(userId);
         mUserManagerInternal.setUserManaged(userId, false);
+        pushToPackageManager();
     }
 
     ComponentName getProfileOwnerComponent(int userId) {

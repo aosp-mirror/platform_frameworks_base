@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.SparseArray;
 
 import java.util.List;
 
@@ -147,4 +148,16 @@ public abstract class PackageManagerInternal {
      */
     public abstract ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
             int userId);
+
+    /**
+     * Called by DeviceOwnerManagerService to set the package names of device owner and profile
+     * owners.
+     */
+    public abstract void setDeviceAndProfileOwnerPackages(
+            int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
+
+    /**
+     * Whether a package's data be cleared.
+     */
+    public abstract boolean canPackageBeWiped(int userId, String packageName);
 }
