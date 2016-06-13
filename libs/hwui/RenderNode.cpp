@@ -421,12 +421,14 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     prepareSubTree(info, childFunctorsNeedLayer, mDisplayList);
     pushLayerUpdate(info);
 
-    for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
-        // If any vector drawable in the display list needs update, damage the node.
-        if (vectorDrawable->isDirty()) {
-            damageSelf(info);
+    if (mDisplayList) {
+        for (auto& vectorDrawable : mDisplayList->getVectorDrawables()) {
+            // If any vector drawable in the display list needs update, damage the node.
+            if (vectorDrawable->isDirty()) {
+                damageSelf(info);
+            }
+            vectorDrawable->setPropertyChangeWillBeConsumed(true);
         }
-        vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }
 
     info.damageAccumulator->popTransform();
