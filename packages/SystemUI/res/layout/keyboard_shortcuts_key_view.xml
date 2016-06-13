@@ -23,4 +23,5 @@
           android:textColor="@color/ksh_key_item_color"
           android:singleLine="true"
           android:gravity="center"
-          android:textSize="@dimen/ksh_item_text_size"/>
+          android:textSize="@dimen/ksh_item_text_size"
+          android:textAllCaps="true"/>
