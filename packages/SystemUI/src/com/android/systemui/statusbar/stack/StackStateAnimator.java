@@ -485,6 +485,7 @@ public class StackStateAnimator {
                 child.setTag(TAG_ANIMATOR_HEIGHT, null);
                 child.setTag(TAG_START_HEIGHT, null);
                 child.setTag(TAG_END_HEIGHT, null);
+                child.setActualHeightAnimating(false);
                 if (!mWasCancelled && child instanceof ExpandableNotificationRow) {
                     ((ExpandableNotificationRow) child).setGroupExpansionChanging(
                             false /* isExpansionChanging */);
@@ -505,6 +506,7 @@ public class StackStateAnimator {
         child.setTag(TAG_ANIMATOR_HEIGHT, animator);
         child.setTag(TAG_START_HEIGHT, child.getActualHeight());
         child.setTag(TAG_END_HEIGHT, newEndValue);
+        child.setActualHeightAnimating(true);
     }
 
     private void startInsetAnimation(final ExpandableView child,
