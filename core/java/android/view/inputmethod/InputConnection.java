@@ -16,6 +16,8 @@
 
 package android.view.inputmethod;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyCharacterMap;
@@ -836,4 +838,33 @@ public interface InputConnection {
      * <p>Note: This does nothing when called from input methods.</p>
      */
     public void closeConnection();
+
+    /**
+     * Called by the input method to insert a content such as PNG image to the editor.
+     *
+     * <p>In order to avoid variety of compatibility issues, this focuses on a simple use case,
+     * where we expect editors and IMEs work cooperatively as follows:</p>
+     * <ul>
+     *     <li>Editor must keep {@link EditorInfo#contentMimeTypes} to be {@code null} if it does
+     *     not support this method at all.</li>
+     *     <li>Editor can ignore this request when the MIME type specified in
+     *     {@code inputContentInfo} does not match to any of {@link EditorInfo#contentMimeTypes}.
+     *     </li>
+     *     <li>Editor can ignore the cursor position when inserting the provided context.</li>
+     *     <li>Editor can return {@code true} asynchronously, even before it starts loading the
+     *     content.</li>
+     *     <li>Editor should provide a way to delete the content inserted by this method, or revert
+     *     the effect caused by this method.</li>
+     *     <li>IME should not call this method when there is any composing text, in case calling
+     *     this method causes focus change.</li>
+     *     <li>IME should grant a permission for the editor to read the content. See
+     *     {@link EditorInfo#packageName} about how to obtain the package name of the editor.</li>
+     * </ul>
+     *
+     * @param inputContentInfo Content to be inserted.
+     * @param opts optional bundle data. This can be {@code null}.
+     * @return {@code true} if this request is accepted by the application, no matter if the request
+     * is already handled or still being handled in background.
+     */
+    public boolean insertContent(@NonNull InputContentInfo inputContentInfo, @Nullable Bundle opts);
 }

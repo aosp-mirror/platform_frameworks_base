@@ -16,6 +16,7 @@
 
 package com.android.internal.view;
 
+import android.content.ClipData;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -29,6 +30,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
+import android.view.inputmethod.InputContentInfo;
 
 public class InputConnectionWrapper implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
@@ -46,7 +48,8 @@ public class InputConnectionWrapper implements InputConnection {
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
         public boolean mRequestUpdateCursorAnchorInfoResult;
-        
+        public boolean mInsertContentResult;
+
         // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
         // exclusive access to this object.
         private static InputContextCallback sInstance = new InputContextCallback();
@@ -168,6 +171,19 @@ public class InputConnectionWrapper implements InputConnection {
                 } else {
                     Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
                             + ") in setCursorAnchorInfoRequestResult, ignoring.");
+                }
+            }
+        }
+
+        public void setInsertContentResult(boolean result, int seq) {
+            synchronized (this) {
+                if (seq == mSeq) {
+                    mInsertContentResult = result;
+                    mHaveValue = true;
+                    notifyAll();
+                } else {
+                    Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
+                            + ") in setInsertContentResult, ignoring.");
                 }
             }
         }
@@ -489,6 +505,28 @@ public class InputConnectionWrapper implements InputConnection {
 
     public void closeConnection() {
         // Nothing should happen when called from input method.
+    }
+
+    public boolean insertContent(InputContentInfo inputContentInfo, Bundle opts) {
+        boolean result = false;
+        if (isMethodMissing(MissingMethodFlags.INSERT_CONTENT)) {
+            // This method is not implemented.
+            return false;
+        }
+        try {
+            InputContextCallback callback = InputContextCallback.getInstance();
+            mIInputContext.insertContent(inputContentInfo, opts, callback.mSeq, callback);
+            synchronized (callback) {
+                callback.waitForResultLocked();
+                if (callback.mHaveValue) {
+                    result = callback.mInsertContentResult;
+                }
+            }
+            callback.dispose();
+        } catch (RemoteException e) {
+            return false;
+        }
+        return result;
     }
 
     private boolean isMethodMissing(@MissingMethodFlags final int methodFlag) {

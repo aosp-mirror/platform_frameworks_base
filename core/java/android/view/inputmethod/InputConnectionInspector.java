@@ -19,6 +19,7 @@ package android.view.inputmethod;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 
 import java.lang.annotation.Retention;
 import java.lang.reflect.Method;
@@ -41,6 +42,8 @@ public final class InputConnectionInspector {
             MissingMethodFlags.REQUEST_CURSOR_UPDATES,
             MissingMethodFlags.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS,
             MissingMethodFlags.GET_HANDLER,
+            MissingMethodFlags.CLOSE_CONNECTION,
+            MissingMethodFlags.INSERT_CONTENT,
     })
     public @interface MissingMethodFlags {
         /**
@@ -78,6 +81,11 @@ public final class InputConnectionInspector {
          * {@link android.os.Build.VERSION_CODES#N} and later.
          */
         int CLOSE_CONNECTION = 1 << 6;
+        /**
+         * {@link InputConnection#insertContent(InputContentInfo, Bundle)} is available in
+         * {@link android.os.Build.VERSION_CODES#N} MR-1 and later.
+         */
+        int INSERT_CONTENT = 1 << 7;
     }
 
     private static final Map<Class, Integer> sMissingMethodsMap = Collections.synchronizedMap(
@@ -126,6 +134,9 @@ public final class InputConnectionInspector {
         }
         if (!hasCloseConnection(clazz)) {
             flags |= MissingMethodFlags.CLOSE_CONNECTION;
+        }
+        if (!hasInsertContent(clazz)) {
+            flags |= MissingMethodFlags.INSERT_CONTENT;
         }
         sMissingMethodsMap.put(clazz, flags);
         return flags;
@@ -195,6 +206,16 @@ public final class InputConnectionInspector {
         }
     }
 
+    private static boolean hasInsertContent(@NonNull final Class clazz) {
+        try {
+            final Method method = clazz.getMethod("insertContent", InputContentInfo.class,
+                    Bundle.class);
+            return !Modifier.isAbstract(method.getModifiers());
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
     public static String getMissingMethodFlagsAsString(@MissingMethodFlags final int flags) {
         final StringBuilder sb = new StringBuilder();
         boolean isEmpty = true;
@@ -241,6 +262,12 @@ public final class InputConnectionInspector {
                 sb.append(",");
             }
             sb.append("closeConnection()");
+        }
+        if ((flags & MissingMethodFlags.INSERT_CONTENT) != 0) {
+            if (!isEmpty) {
+                sb.append(",");
+            }
+            sb.append("InsertContent(InputContentInfo, Bundle)");
         }
         return sb.toString();
     }

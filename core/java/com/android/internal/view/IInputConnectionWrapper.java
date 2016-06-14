@@ -33,6 +33,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
+import android.view.inputmethod.InputContentInfo;
 
 public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     static final String TAG = "IInputConnectionWrapper";
@@ -61,6 +62,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_CLEAR_META_KEY_STATES = 130;
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
     private static final int DO_CLOSE_CONNECTION = 150;
+    private static final int DO_INSERT_CONTENT = 160;
 
     @GuardedBy("mLock")
     @Nullable
@@ -239,6 +241,11 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
 
     public void closeConnection() {
         dispatchMessage(obtainMessage(DO_CLOSE_CONNECTION));
+    }
+
+    public void insertContent(InputContentInfo inputContentInfo, Bundle opts,
+            int seq, IInputContextCallback callback) {
+        dispatchMessage(obtainMessageOOSC(DO_INSERT_CONTENT, inputContentInfo, opts, seq, callback));
     }
 
     void dispatchMessage(Message msg) {
@@ -552,6 +559,29 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 }
                 return;
             }
+            case DO_INSERT_CONTENT: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                try {
+                    InputConnection ic = getInputConnection();
+                    if (ic == null || !isActive()) {
+                        Log.w(TAG, "insertContent on inactive InputConnection");
+                        args.callback.setInsertContentResult(false, args.seq);
+                        return;
+                    }
+                    final InputContentInfo inputContentInfo = (InputContentInfo) args.arg1;
+                    if (inputContentInfo == null || !inputContentInfo.validate()) {
+                        Log.w(TAG, "insertContent with invalid inputContentInfo="
+                                + inputContentInfo);
+                        args.callback.setInsertContentResult(false, args.seq);
+                        return;
+                    }
+                    args.callback.setInsertContentResult(
+                            ic.insertContent(inputContentInfo, (Bundle) args.arg2), args.seq);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Got RemoteException calling insertContent", e);
+                }
+                return;
+            }
         }
         Log.w(TAG, "Unhandled message code: " + msg.what);
     }
@@ -582,9 +612,11 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         return mH.obtainMessage(what, arg1, arg2, args);
     }
 
-    Message obtainMessageOSC(int what, Object arg1, int seq, IInputContextCallback callback) {
+    Message obtainMessageOOSC(int what, Object arg1, Object arg2, int seq,
+            IInputContextCallback callback) {
         SomeArgs args = new SomeArgs();
         args.arg1 = arg1;
+        args.arg2 = arg2;
         args.callback = callback;
         args.seq = seq;
         return mH.obtainMessage(what, 0, 0, args);
