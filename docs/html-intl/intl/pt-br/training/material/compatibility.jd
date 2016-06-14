@@ -123,7 +123,7 @@ Biblioteca de Suporte v7 do Android com as seguintes limitações:</p>
 <h3>Dependências</h3>
 
 <p>Para usar esses recursos em versões anteriores ao Android 5.0 (API de nível 21), inclua a
-Biblioteca de Suporte v7 do Android no projeto como uma <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">dependência de Gradle</a>:</p>
+Biblioteca de Suporte v7 do Android no projeto como uma <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">dependência de Gradle</a>:</p>
 
 <pre>
 dependencies {

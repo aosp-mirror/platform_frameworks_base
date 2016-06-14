@@ -123,7 +123,7 @@ android.support.v7.widget.CardView} имеются в более ранних в
 <h3>Зависимости</h3>
 
 <p>Чтобы воспользоваться этими возможностями в версиях Android, предшествующих 5.0 (уровень API 21), включите в свой проект вспомогательную библиотеку
-Android v7 как <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">зависимость Gradle</a>:</p>
+Android v7 как <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">зависимость Gradle</a>:</p>
 
 <pre>
 dependencies {
