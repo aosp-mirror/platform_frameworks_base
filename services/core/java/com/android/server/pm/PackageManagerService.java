@@ -125,6 +125,7 @@ import android.content.pm.AppsQueryHelper;
 import android.content.pm.ComponentInfo;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.EphemeralResolveInfo;
+import android.content.pm.EphemeralResolveInfo.EphemeralDigest;
 import android.content.pm.EphemeralResolveInfo.EphemeralResolveIntentInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
@@ -197,6 +198,7 @@ import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
+import android.provider.Settings.Global;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.system.ErrnoException;
@@ -461,6 +463,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     private static final String PACKAGE_MIME_TYPE = "application/vnd.android.package-archive";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
+
+    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFFFFF;
+    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT = 5;
 
     /** Permission grant: not grant the permission. */
     private static final int GRANT_DENIED = 1;
@@ -4991,48 +4996,44 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private EphemeralResolveInfo getEphemeralResolveInfo(Intent intent, String resolvedType,
             int userId) {
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance(EphemeralResolveInfo.SHA_ALGORITHM);
-        } catch (NoSuchAlgorithmException e) {
-            // If we can't create a digest, ignore ephemeral apps.
-            return null;
-        }
-
-        final byte[] hostBytes = intent.getData().getHost().getBytes();
-        final byte[] digestBytes = digest.digest(hostBytes);
-        int shaPrefix =
-                (digestBytes[0] & 0xFF) << 24
-                | (digestBytes[1] & 0xFF) << 16
-                | (digestBytes[2] & 0xFF) << 8
-                | (digestBytes[3] & 0xFF) << 0;
+        final int ephemeralPrefixMask = Global.getInt(mContext.getContentResolver(),
+                Global.EPHEMERAL_HASH_PREFIX_MASK, DEFAULT_EPHEMERAL_HASH_PREFIX_MASK);
+        final int ephemeralPrefixCount = Global.getInt(mContext.getContentResolver(),
+                Global.EPHEMERAL_HASH_PREFIX_COUNT, DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT);
+        final EphemeralDigest digest = new EphemeralDigest(intent.getData(), ephemeralPrefixCount);
+        final int[] shaPrefix = digest.getDigestPrefix();
+        final byte[][] digestBytes = digest.getDigestBytes();
         final List<EphemeralResolveInfo> ephemeralResolveInfoList =
-                mEphemeralResolverConnection.getEphemeralResolveInfoList(shaPrefix);
+                mEphemeralResolverConnection.getEphemeralResolveInfoList(
+                        shaPrefix, ephemeralPrefixMask);
         if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
             // No hash prefix match; there are no ephemeral apps for this domain.
             return null;
         }
-        for (int i = ephemeralResolveInfoList.size() - 1; i >= 0; --i) {
-            EphemeralResolveInfo ephemeralApplication = ephemeralResolveInfoList.get(i);
-            if (!Arrays.equals(digestBytes, ephemeralApplication.getDigestBytes())) {
-                continue;
-            }
-            final List<IntentFilter> filters = ephemeralApplication.getFilters();
-            // No filters; this should never happen.
-            if (filters.isEmpty()) {
-                continue;
-            }
-            // We have a domain match; resolve the filters to see if anything matches.
-            final EphemeralIntentResolver ephemeralResolver = new EphemeralIntentResolver();
-            for (int j = filters.size() - 1; j >= 0; --j) {
-                final EphemeralResolveIntentInfo intentInfo =
-                        new EphemeralResolveIntentInfo(filters.get(j), ephemeralApplication);
-                ephemeralResolver.addFilter(intentInfo);
-            }
-            List<EphemeralResolveInfo> matchedResolveInfoList = ephemeralResolver.queryIntent(
-                    intent, resolvedType, false /*defaultOnly*/, userId);
-            if (!matchedResolveInfoList.isEmpty()) {
-                return matchedResolveInfoList.get(0);
+
+        // Go in reverse order so we match the narrowest scope first.
+        for (int i = shaPrefix.length; i >= 0 ; --i) {
+            for (EphemeralResolveInfo ephemeralApplication : ephemeralResolveInfoList) {
+                if (!Arrays.equals(digestBytes[i], ephemeralApplication.getDigestBytes())) {
+                    continue;
+                }
+                final List<IntentFilter> filters = ephemeralApplication.getFilters();
+                // No filters; this should never happen.
+                if (filters.isEmpty()) {
+                    continue;
+                }
+                // We have a domain match; resolve the filters to see if anything matches.
+                final EphemeralIntentResolver ephemeralResolver = new EphemeralIntentResolver();
+                for (int j = filters.size() - 1; j >= 0; --j) {
+                    final EphemeralResolveIntentInfo intentInfo =
+                            new EphemeralResolveIntentInfo(filters.get(j), ephemeralApplication);
+                    ephemeralResolver.addFilter(intentInfo);
+                }
+                List<EphemeralResolveInfo> matchedResolveInfoList = ephemeralResolver.queryIntent(
+                        intent, resolvedType, false /*defaultOnly*/, userId);
+                if (!matchedResolveInfoList.isEmpty()) {
+                    return matchedResolveInfoList.get(0);
+                }
             }
         }
         // Hash or filter mis-match; no ephemeral apps for this domain.
