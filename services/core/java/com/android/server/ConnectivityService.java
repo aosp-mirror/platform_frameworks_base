@@ -3569,14 +3569,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     .build();
 
             try {
-                notificationManager.notify(NOTIFICATION_ID, id, notification);
+                notificationManager.notifyAsUser(NOTIFICATION_ID, id, notification, UserHandle.ALL);
             } catch (NullPointerException npe) {
                 loge("setNotificationVisible: visible notificationManager npe=" + npe);
                 npe.printStackTrace();
             }
         } else {
             try {
-                notificationManager.cancel(NOTIFICATION_ID, id);
+                notificationManager.cancelAsUser(NOTIFICATION_ID, id, UserHandle.ALL);
             } catch (NullPointerException npe) {
                 loge("setNotificationVisible: cancel notificationManager npe=" + npe);
                 npe.printStackTrace();
