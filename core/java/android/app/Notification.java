@@ -1868,6 +1868,10 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
+        if (mLargeIcon == null && largeIcon != null) {
+            // you snuck an icon in here without using the builder; let's try to keep it
+            mLargeIcon = Icon.createWithBitmap(largeIcon);
+        }
         if (mLargeIcon != null) {
             parcel.writeInt(1);
             mLargeIcon.writeToParcel(parcel, 0);
@@ -3234,7 +3238,7 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(textId, View.VISIBLE);
             }
 
-            setContentMinHeight(contentView, showProgress || mN.mLargeIcon != null);
+            setContentMinHeight(contentView, showProgress || mN.hasLargeIcon());
 
             return contentView;
         }
@@ -3278,6 +3282,9 @@ public class Notification implements Parcelable
         }
 
         private void bindLargeIcon(RemoteViews contentView) {
+            if (mN.mLargeIcon == null && mN.largeIcon != null) {
+                mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
+            }
             if (mN.mLargeIcon != null) {
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
@@ -3384,6 +3391,9 @@ public class Notification implements Parcelable
         }
 
         private void bindSmallIcon(RemoteViews contentView) {
+            if (mN.mSmallIcon == null && mN.icon != 0) {
+                mN.mSmallIcon = Icon.createWithResource(mContext, mN.icon);
+            }
             contentView.setImageViewIcon(R.id.icon, mN.mSmallIcon);
             processSmallIconColor(mN.mSmallIcon, contentView);
         }
@@ -3583,6 +3593,8 @@ public class Notification implements Parcelable
             mStyle = null;
             Icon largeIcon = mN.mLargeIcon;
             mN.mLargeIcon = null;
+            Bitmap largeIconLegacy = mN.largeIcon;
+            mN.largeIcon = null;
             Bundle publicExtras = new Bundle();
             publicExtras.putBoolean(EXTRA_SHOW_WHEN,
                     savedBundle.getBoolean(EXTRA_SHOW_WHEN));
@@ -3596,6 +3608,7 @@ public class Notification implements Parcelable
             final RemoteViews publicView = applyStandardTemplate(getBaseLayoutResource());
             mN.extras = savedBundle;
             mN.mLargeIcon = largeIcon;
+            mN.largeIcon = largeIconLegacy;
             mStyle = style;
             return publicView;
         }
@@ -3890,6 +3903,10 @@ public class Notification implements Parcelable
         private int getActionTombstoneLayoutResource() {
             return R.layout.notification_material_action_tombstone;
         }
+    }
+
+    private boolean hasLargeIcon() {
+        return mLargeIcon != null || largeIcon != null;
     }
 
     /**
@@ -4198,7 +4215,7 @@ public class Notification implements Parcelable
                 contentView.setTextViewText(R.id.text, mBuilder.processLegacyText(mSummaryText));
                 contentView.setViewVisibility(R.id.text, View.VISIBLE);
             }
-            mBuilder.setContentMinHeight(contentView, mBuilder.mN.mLargeIcon != null);
+            mBuilder.setContentMinHeight(contentView, mBuilder.mN.hasLargeIcon());
 
             if (mBigLargeIconSet) {
                 mBuilder.mN.mLargeIcon = oldLargeIcon;
@@ -4353,7 +4370,7 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.big_text,
                     TextUtils.isEmpty(bigTextText) ? View.GONE : View.VISIBLE);
             contentView.setInt(R.id.big_text, "setMaxLines", calculateMaxLines(builder));
-            contentView.setBoolean(R.id.big_text, "setHasImage", builder.mN.mLargeIcon != null);
+            contentView.setBoolean(R.id.big_text, "setHasImage", builder.mN.hasLargeIcon());
         }
 
         private static int calculateMaxLines(Builder builder) {
@@ -4626,7 +4643,7 @@ public class Notification implements Parcelable
             contentView.setViewLayoutMarginBottomDimen(R.id.line1,
                     hasTitle ? R.dimen.notification_messaging_spacing : 0);
             contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
-                    mBuilder.mN.mLargeIcon == null ? 0 : (hasTitle ? 1 : 2));
+                    !mBuilder.mN.hasLargeIcon() ? 0 : (hasTitle ? 1 : 2));
 
             int contractedChildId = View.NO_ID;
             Message contractedMessage = findLatestIncomingMessage();
@@ -4999,7 +5016,7 @@ public class Notification implements Parcelable
                 final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
                 final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
                 boolean hasProgress = max != 0 || ind;
-                if (mBuilder.mN.mLargeIcon != null && !hasProgress) {
+                if (mBuilder.mN.hasLargeIcon() && !hasProgress) {
                     endMargin = R.dimen.notification_content_picture_margin;
                 }
             }
@@ -5189,7 +5206,7 @@ public class Notification implements Parcelable
             handleImage(view);
             // handle the content margin
             int endMargin = R.dimen.notification_content_margin_end;
-            if (mBuilder.mN.mLargeIcon != null) {
+            if (mBuilder.mN.hasLargeIcon()) {
                 endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
             view.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
@@ -5202,7 +5219,7 @@ public class Notification implements Parcelable
             int actionsInCompact = mActionsToShowInCompact == null
                     ? 0
                     : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
-            if (mBuilder.mN.mLargeIcon == null && actionCount <= actionsInCompact) {
+            if (!mBuilder.mN.hasLargeIcon() && actionCount <= actionsInCompact) {
                 return null;
             }
             RemoteViews big = mBuilder.applyStandardTemplate(
@@ -5222,7 +5239,7 @@ public class Notification implements Parcelable
         }
 
         private void handleImage(RemoteViews contentView) {
-            if (mBuilder.mN.mLargeIcon != null) {
+            if (mBuilder.mN.hasLargeIcon()) {
                 contentView.setViewLayoutMarginEndDimen(R.id.line1, 0);
                 contentView.setViewLayoutMarginEndDimen(R.id.text, 0);
             }
@@ -5340,7 +5357,7 @@ public class Notification implements Parcelable
             }
             // also update the end margin if there is an image
             int endMargin = R.dimen.notification_content_margin_end;
-            if (mBuilder.mN.mLargeIcon != null) {
+            if (mBuilder.mN.hasLargeIcon()) {
                 endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
             remoteViews.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
