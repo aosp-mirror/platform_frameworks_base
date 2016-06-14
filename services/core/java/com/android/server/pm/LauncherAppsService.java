@@ -380,7 +380,7 @@ public class LauncherAppsService extends SystemService {
                         "To query by shortcut ID, package name must also be set");
             }
 
-            return new ParceledListSlice<>(
+            return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
                             componentName, flags, user.getIdentifier()));
