@@ -551,4 +551,6 @@ easier.
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
     </style>
 
+    <!-- DeviceDefault theme for the default system theme.  -->
+    <style name="Theme.DeviceDefault.System" parent="Theme.Material.Light.DarkActionBar" />
 </resources>
