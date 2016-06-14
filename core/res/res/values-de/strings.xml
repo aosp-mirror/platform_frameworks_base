@@ -525,11 +525,11 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Displaysperre ändern"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Displaysperre ändern"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bildschirm sperren"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Lege fest, wie und wann der Bildschirm gesperrt wird."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Festlegen, wie und wann der Bildschirm gesperrt wird"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle Daten löschen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Tablet ohne Warnung löschen"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Fernseher ohne Warnung löschen"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Setze das Telefon auf die Werkseinstellungen zurück. Dabei werden alle Daten ohne Warnung gelöscht."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Auf Werkseinstellungen zurücksetzen und damit Daten auf dem Telefon ohne Warnung löschen"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Nutzerdaten löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Daten dieses Nutzers auf diesem Tablet ohne vorherige Warnung löschen"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Daten dieses Nutzers auf diesem Fernseher ohne vorherige Warnung löschen"</string>
@@ -543,7 +543,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameras deaktivieren"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Nutzung sämtlicher Gerätekameras unterbinden"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Einige Funktionen der Displaysperre deaktivieren"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Verhindert die Verwendung einiger Funktionen der Displaysperre"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Verwendung einiger Funktionen der Displaysperre verhindern"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Mobil"</item>
