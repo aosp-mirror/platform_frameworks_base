@@ -106,12 +106,18 @@ public class NotificationContentView extends FrameLayout {
     private boolean mExpandable;
     private boolean mClipToActualHeight = true;
     private ExpandableNotificationRow mContainingNotification;
+    /** The visible type at the start of a touch driven transformation */
     private int mTransformationStartVisibleType;
+    /** The visible type at the start of an animation driven transformation */
+    private int mAnimationStartVisibleType = UNDEFINED;
     private boolean mUserExpanding;
     private int mSingleLineWidthIndention;
     private boolean mForceSelectNextLayout = true;
     private PendingIntent mPreviousExpandedRemoteInputIntent;
     private PendingIntent mPreviousHeadsUpRemoteInputIntent;
+
+    private int mContentHeightAtAnimationStart = UNDEFINED;
+
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -258,7 +264,14 @@ public class NotificationContentView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int previousHeight = 0;
+        if (mExpandedChild != null) {
+            previousHeight = mExpandedChild.getHeight();
+        }
         super.onLayout(changed, left, top, right, bottom);
+        if (previousHeight != 0 && mExpandedChild.getHeight() != previousHeight) {
+            mContentHeightAtAnimationStart = previousHeight;
+        }
         updateClipping();
         invalidateOutline();
         selectLayout(false /* animate */, mForceSelectNextLayout /* force */);
@@ -408,22 +421,52 @@ public class NotificationContentView extends FrameLayout {
      *         height, the notification is clipped instead of being further shrunk.
      */
     private int getMinContentHeightHint() {
-        if (mIsChildInGroup && (mVisibleType == VISIBLE_TYPE_SINGLELINE
-                || mTransformationStartVisibleType == VISIBLE_TYPE_SINGLELINE)) {
+        if (mIsChildInGroup && isVisibleOrTransitioning(VISIBLE_TYPE_SINGLELINE)) {
             return mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.notification_action_list_height);
         }
+
+        // Transition between heads-up & expanded, or pinned.
+        if (mHeadsUpChild != null && mExpandedChild != null) {
+            boolean transitioningBetweenHunAndExpanded =
+                    isTransitioningFromTo(VISIBLE_TYPE_HEADSUP, VISIBLE_TYPE_EXPANDED) ||
+                    isTransitioningFromTo(VISIBLE_TYPE_EXPANDED, VISIBLE_TYPE_HEADSUP);
+            boolean pinned = !isVisibleOrTransitioning(VISIBLE_TYPE_CONTRACTED) && mIsHeadsUp;
+            if (transitioningBetweenHunAndExpanded || pinned) {
+                return Math.min(mHeadsUpChild.getHeight(), mExpandedChild.getHeight());
+            }
+        }
+
+        // Size change of the expanded version
+        if ((mVisibleType == VISIBLE_TYPE_EXPANDED) && mContentHeightAtAnimationStart >= 0
+                && mExpandedChild != null) {
+            return Math.min(mContentHeightAtAnimationStart, mExpandedChild.getHeight());
+        }
+
         int hint;
-        if (mHeadsUpChild != null) {
+        if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = mHeadsUpChild.getHeight();
+        } else if (mExpandedChild != null) {
+            hint = mExpandedChild.getHeight();
         } else {
             hint = mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.notification_action_list_height);
         }
-        if (mExpandedChild != null) {
+
+        if (mExpandedChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_EXPANDED)) {
             hint = Math.min(hint, mExpandedChild.getHeight());
         }
         return hint;
+    }
+
+    private boolean isTransitioningFromTo(int from, int to) {
+        return (mTransformationStartVisibleType == from || mAnimationStartVisibleType == from)
+                && mVisibleType == to;
+    }
+
+    private boolean isVisibleOrTransitioning(int type) {
+        return mVisibleType == type || mTransformationStartVisibleType == type
+                || mAnimationStartVisibleType == type;
     }
 
     private void updateContentTransformation() {
@@ -656,6 +699,7 @@ public class NotificationContentView extends FrameLayout {
             shownView.setVisible(true);
             return;
         }
+        mAnimationStartVisibleType = mVisibleType;
         shownView.transformFrom(hiddenView);
         getViewForVisibleType(visibleType).setVisibility(View.VISIBLE);
         hiddenView.transformTo(shownView, new Runnable() {
@@ -664,6 +708,7 @@ public class NotificationContentView extends FrameLayout {
                 if (hiddenView != getTransformableViewForVisibleType(mVisibleType)) {
                     hiddenView.setVisible(false);
                 }
+                mAnimationStartVisibleType = UNDEFINED;
             }
         });
     }
@@ -1080,6 +1125,12 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mHeadsUpRemoteInput != null) {
             mHeadsUpRemoteInput.setRemoved();
+        }
+    }
+
+    public void setContentHeightAnimating(boolean animating) {
+        if (!animating) {
+            mContentHeightAtAnimationStart = UNDEFINED;
         }
     }
 }
