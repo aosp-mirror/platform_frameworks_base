@@ -924,6 +924,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 startTransition(pending);
             }
         }
+
+        @Override
+        public void onTransitionEnd(Transition transition) {
+            transition.removeListener(this);
+        }
     }
 
     private static int scaleTypeToInt(ImageView.ScaleType scaleType) {
