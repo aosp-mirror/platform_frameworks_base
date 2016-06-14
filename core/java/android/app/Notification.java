@@ -3409,6 +3409,8 @@ public class Notification implements Parcelable
             big.setTextViewText(R.id.notification_material_reply_text_2, null);
             big.setViewVisibility(R.id.notification_material_reply_text_3, View.GONE);
             big.setTextViewText(R.id.notification_material_reply_text_3, null);
+
+            big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target, 0);
         }
 
         private RemoteViews applyStandardTemplateWithActions(int layoutId) {
@@ -3431,6 +3433,8 @@ public class Notification implements Parcelable
             if (N > 0) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
+                big.setViewLayoutMarginBottomDimen(R.id.notification_action_list_margin_target,
+                        R.dimen.notification_action_list_height);
                 if (N>MAX_ACTION_BUTTONS) N=MAX_ACTION_BUTTONS;
                 for (int i=0; i<N; i++) {
                     Action action = mActions.get(i);
