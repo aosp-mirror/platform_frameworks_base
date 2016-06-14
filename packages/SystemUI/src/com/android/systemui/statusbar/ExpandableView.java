@@ -432,6 +432,8 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public void setActualHeightAnimating(boolean animating) {}
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */
