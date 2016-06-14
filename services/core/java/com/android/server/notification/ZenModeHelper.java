@@ -139,13 +139,16 @@ public class ZenModeHelper {
             ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
         synchronized (mConfig) {
             return ZenModeFiltering.matchesCallFilter(mContext, mZenMode, mConfig, userHandle,
-                    extras,
-                    validator, contactsTimeoutMs, timeoutAffinity);
+                    extras, validator, contactsTimeoutMs, timeoutAffinity);
         }
     }
 
     public boolean isCall(NotificationRecord record) {
         return mFiltering.isCall(record);
+    }
+
+    public void recordCaller(NotificationRecord record) {
+        mFiltering.recordCall(record);
     }
 
     public boolean shouldIntercept(NotificationRecord record) {
