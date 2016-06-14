@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ઇન્ટરફેસ પર હાજર ડેટા ટ્રાફિકના પ્રમાણનાં આધારે Wi‑Fi રોમ સ્કૅન્સને મંજૂરી આપો/નામંજૂર કરો"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"લોગર બફર કદ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"લૉગ દીઠ લૉગર કદ બફર પસંદ કરો"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"લૉગર નિરંતર સ્ટોરેજ સાફ કરીએ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"જ્યારે અમે હવે નિરંતર લૉગર સાથે મોનીટર કરતાં નથી, તેથી તમારા ઉપકરણ પર રહેલો લૉગર ડેટા કાઢી નાખવાની જરૂર છે."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"તમારા ઉપકરણ પર લૉગર ડેટા નિરંતર સંગ્રહિત કરો"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"તમારા ઉપકરણ પર નિરંતર સંગ્રહવા માટે લૉગ બફર પસંદ કરો"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ગોઠવણી પસંદ કરો"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ગોઠવણી પસંદ કરો"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"મોક સ્થાનોની મંજૂરી આપો"</string>

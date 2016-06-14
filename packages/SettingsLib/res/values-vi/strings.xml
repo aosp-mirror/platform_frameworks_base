@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Cho phép/Không cho phép quét chuyển vùng Wi‑Fi dựa trên lưu lượng truy cập dữ liệu có tại giao diện"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Kích cỡ tải trình ghi"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chọn kích thước Trình ghi/lần tải nhật ký"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Xóa bộ nhớ ổn định trong trình ghi nhật ký?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Khi chúng tôi không còn theo dõi bằng trình ghi nhật ký ổn định nữa, chúng tôi sẽ được yêu cầu xóa dữ liệu trong trình ghi nhật ký nằm trên thiết bị của bạn."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Lưu dữ liệu trình ghi nhật ký ổn định"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Chọn lần tải nhật ký để lưu trữ ổn định trên thiết bị"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Chọn cấu hình USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Chọn cấu hình USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Cho phép vị trí mô phỏng"</string>

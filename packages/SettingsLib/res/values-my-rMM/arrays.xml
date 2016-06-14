@@ -80,6 +80,16 @@
     <item msgid="3606047780792894151">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 4M"</item>
     <item msgid="5431354956856655120">"မှတ်တမ်းယာယီကြားခံနယ်တစ်ခုလျှင် 16M"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"ပိတ်ပါ"</item>
+    <item msgid="3054662377365844197">"အားလုံး"</item>
+    <item msgid="688870735111627832">"ရေဒီယိုမှလွဲ၍ အားလုံး"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"ပိတ်ပါ"</item>
+    <item msgid="172978079776521897">"မှတ်တမ်းသိမ်းဆည်းရန် လျာထားချက်များ အားလုံး"</item>
+    <item msgid="3873873912383879240">"ရေဒီယို မှတ်တမ်းသိမ်းဆည်းရန်လျာထားချက်မှလွဲ၍ အားလုံး"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"လှုပ်ရှားသက်ဝင်မှုပုံများကိုပိတ်ပါ"</item>
     <item msgid="6624864048416710414">"လှုပ်ရှားသက်ဝင်မှုပုံ စကေး ၅ဆ"</item>

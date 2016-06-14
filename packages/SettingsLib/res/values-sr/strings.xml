@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дозволи/забрани скенирање Wi-Fi-ја у ромингу на основу присутног протока података на интерфејсу"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Величине бафера података у програму за евидентирање"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Изаберите величине по баферу евиденције"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Желите ли да обришете стални меморијски простор програма за евидентирање?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Када их више не надгледамо помоћу сталног програма за евидентирање, дужни смо да обришемо податке из програма за евидентирање који су трајно смештени на уређају."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Чувај евидентиране податке на уређају"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Изаберите међумеморије евиденције које ћете стално чувати на уређају."</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Изаберите конфигурацију USB-а"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Изаберите конфигурацију USB-а"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Дозволи лажне локације"</string>

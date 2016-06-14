@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Tillad/forbyd scanning i forbindelse med Wi-Fi-roaming afhængigt af mængden af datatrafik i grænsefladen"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Størrelser for Logger-buffer"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Vælg Logger-størrelser pr. logbuffer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vil du rydde det permanente lager for logger?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Når vi ikke længere overvåger via den permanente logger, er vi nødt til at slette de logdata, der er gemt på din enhed."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Gem logdata permanent på enheden"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Vælg logbuffere, der skal gemmes permanent på enheden"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Vælg USB-konfiguration"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Vælg USB-konfiguration"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Imiterede placeringer"</string>

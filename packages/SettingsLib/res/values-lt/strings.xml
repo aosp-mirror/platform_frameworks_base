@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Leisti / neleisti „Wi‑Fi“ tarptinklinio ryšio nuskaitymo, atsižvelgiant į sąsajos duomenų srauto kiekį"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Registruotuvo buferio dydžiai"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Pasir. registr. dydž. žurn. bufer."</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Išvalyti nuolatinę registruotuvo saugyklą?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Kai nebestebime naudodami nuolatinį registruotuvą, turime ištrinti įrenginyje esančius registruotuvo duomenis."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Nuol. saug. regist. duom. įreng."</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Pasirinkite žurnalų buferius, kurie bus nuolat saugomi įrenginyje"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Pasirinkite USB konfigūraciją"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Pasirinkite USB konfigūraciją"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Leisti imituoti vietas"</string>

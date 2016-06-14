@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Povolí nebo zakáže Wi-Fi roaming na základě množství datového provozu na rozhraní."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávací paměť protokol. nástroje"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Velikost vyrovnávací paměti protokol. nástroje"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vymazat trvalé úložiště protokolovacího nástroje?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Pokud již pomocí nástroje na trvalé protokolování nic nemonitorujeme, jsme povinni jeho data uložená v zařízení vymazat."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Ukládat data protokolovacích nástrojů trvale do zařízení"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Vyberte, které vyrovnávací paměti protokolů chcete trvale ukládat do zařízení"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Výběr konfigurace USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Výběr konfigurace USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Povolit simulované polohy"</string>

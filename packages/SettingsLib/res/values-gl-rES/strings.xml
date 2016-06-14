@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permitir/Non permitir buscas de itinerancia da wifi baseadas na cantidade de tráfico de datos presente na interface"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de rexistrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleccionar tamaños por búfer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Queres borrar o almacenamento continuo do rexistrador?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cando xa non se supervisa a actividade co rexistrador de forma continua, debemos borrar os datos do rexistrador almacenados no dispositivo."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Gardar datos de forma continua"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Seleccionar búfers de rexistro para gardalos de forma continua no dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Seleccionar configuración USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Seleccionar configuración USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Permitir localizacións falsas"</string>

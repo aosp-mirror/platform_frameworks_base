@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Ruhusu au Zuia Uchanganuzi wa Matumizi ya Mitandao mingine ya Wifi kulingana na kiasi cha trafiki ya data kilicho kwenye kiolesura"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Ukubwa wa kiweka bafa ya kumbukumbu"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chagua ukubwa wa kila Kumbukumbu"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ungependa kufuta data iliyo kwenye hifadhi ya kiweka kumbukumbu za mara kwa mara?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Tunapoacha kufuatilia kwa kutumia kiweka kumbukumbu za mara kwa mara, tunapaswa kufuta data yote ya kiweka kumbukumbu iliyo kwenye kifaa chako."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Hifadhi data ya kiweka kumbukumbu kwenye kifaa mara kwa mara"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Chagua akiba za kumbukumbu ili uhifadhi data kwenye kifaa mara kwa mara"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Chagua Usanidi wa USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Chagua Usanidi wa USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Ruhusu maeneo ya jaribio"</string>
