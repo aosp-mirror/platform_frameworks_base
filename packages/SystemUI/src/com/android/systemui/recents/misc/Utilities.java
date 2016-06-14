@@ -34,6 +34,7 @@ import android.util.IntProperty;
 import android.util.Property;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewStub;
 
@@ -282,6 +283,26 @@ public class Utilities {
     public static void addTraceEvent(String event) {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, event);
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+    }
+
+    /**
+     * Returns whether this view, or one of its descendants have accessibility focus.
+     */
+    public static boolean isDescendentAccessibilityFocused(View v) {
+        if (v.isAccessibilityFocused()) {
+            return true;
+        }
+
+        if (v instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) v;
+            int childCount = vg.getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (isDescendentAccessibilityFocused(vg.getChildAt(i))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

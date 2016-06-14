@@ -343,7 +343,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     }
 
                     // Reset the focused task after the user has scrolled
-                    mSv.resetFocusedTask(mSv.getFocusedTask());
+                    if (!mSv.mTouchExplorationEnabled) {
+                        mSv.resetFocusedTask(mSv.getFocusedTask());
+                    }
                 } else if (mActiveTaskView == null) {
                     // This tap didn't start on a task.
                     maybeHideRecentsFromBackgroundTap((int) ev.getX(), (int) ev.getY());

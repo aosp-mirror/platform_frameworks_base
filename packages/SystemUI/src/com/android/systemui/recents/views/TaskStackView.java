@@ -44,6 +44,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -170,7 +171,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mEnterAnimationComplete = false;
     @ViewDebug.ExportedProperty(category="recents")
-    private boolean mTouchExplorationEnabled;
+    boolean mTouchExplorationEnabled;
     @ViewDebug.ExportedProperty(category="recents")
     boolean mScreenPinningEnabled;
 
@@ -579,7 +580,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             if (task.isFreeformTask() || (transform != null && transform.visible)) {
                 mTmpTaskViewMap.put(task.key, tv);
             } else {
-                if (mTouchExplorationEnabled) {
+                if (mTouchExplorationEnabled && Utilities.isDescendentAccessibilityFocused(tv)) {
                     lastFocusedTaskIndex = taskIndex;
                     resetFocusedTask(task);
                 }
@@ -630,12 +631,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Update the focus if the previous focused task was returned to the view pool
         if (lastFocusedTaskIndex != -1) {
-            if (lastFocusedTaskIndex < visibleTaskRange[1]) {
-                setFocusedTask(visibleTaskRange[1], false /* scrollToTask */,
-                        true /* requestViewFocus */);
-            } else {
-                setFocusedTask(visibleTaskRange[0], false /* scrollToTask */,
-                        true /* requestViewFocus */);
+            int newFocusedTaskIndex = (lastFocusedTaskIndex < visibleTaskRange[1])
+                    ? visibleTaskRange[1]
+                    : visibleTaskRange[0];
+            setFocusedTask(newFocusedTaskIndex, false /* scrollToTask */,
+                    true /* requestViewFocus */);
+            TaskView focusedTaskView = getChildViewForTask(mFocusedTask);
+            if (focusedTaskView != null) {
+                focusedTaskView.requestAccessibilityFocus();
             }
         }
     }
@@ -938,24 +941,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      *                            focus.
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated) {
-        setRelativeFocusedTask(forward, stackTasksOnly, animated, false);
-    }
-
-    /**
-     * Sets the focused task relative to the currently focused task.
-     *
-     * @param forward whether to go to the next task in the stack (along the curve) or the previous
-     * @param stackTasksOnly if set, will ensure that the traversal only goes along stack tasks, and
-     *                       if the currently focused task is not a stack task, will set the focus
-     *                       to the first visible stack task
-     * @param animated determines whether to actually draw the highlight along with the change in
-     *                            focus.
-     * @param cancelWindowAnimations if set, will attempt to cancel window animations if a scroll
-     *                               happens.
-     */
-    public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
-                                       boolean cancelWindowAnimations) {
-        setRelativeFocusedTask(forward, stackTasksOnly, animated, cancelWindowAnimations, 0);
+        setRelativeFocusedTask(forward, stackTasksOnly, animated, false, 0);
     }
 
     /**
@@ -972,13 +958,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * @param timerIndicatorDuration the duration to initialize the auto-advance timer indicator
      */
     public void setRelativeFocusedTask(boolean forward, boolean stackTasksOnly, boolean animated,
-                                       boolean cancelWindowAnimations,
-                                       int timerIndicatorDuration) {
-        int newIndex = mStack.indexOfStackTask(mFocusedTask);
-        if (mFocusedTask != null) {
+                                       boolean cancelWindowAnimations, int timerIndicatorDuration) {
+        Task focusedTask = getFocusedTask();
+        int newIndex = mStack.indexOfStackTask(focusedTask);
+        if (focusedTask != null) {
             if (stackTasksOnly) {
                 List<Task> tasks =  mStack.getStackTasks();
-                if (mFocusedTask.isFreeformTask()) {
+                if (focusedTask.isFreeformTask()) {
                     // Try and focus the front most stack task
                     TaskView tv = getFrontMostTaskView(stackTasksOnly);
                     if (tv != null) {
@@ -1054,6 +1040,25 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         return mFocusedTask;
     }
 
+    /**
+     * Returns the accessibility focused task.
+     */
+    Task getAccessibilityFocusedTask() {
+        List<TaskView> taskViews = getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
+            if (Utilities.isDescendentAccessibilityFocused(tv)) {
+                return tv.getTask();
+            }
+        }
+        TaskView frontTv = getFrontMostTaskView(true /* stackTasksOnly */);
+        if (frontTv != null) {
+            return frontTv.getTask();
+        }
+        return null;
+    }
+
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
@@ -1078,21 +1083,23 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         super.onInitializeAccessibilityNodeInfo(info);
         List<TaskView> taskViews = getTaskViews();
         int taskViewCount = taskViews.size();
-        if (taskViewCount > 1 && mFocusedTask != null) {
+        if (taskViewCount > 1) {
+            // Find the accessibility focused task
+            Task focusedTask = getAccessibilityFocusedTask();
             info.setScrollable(true);
-            int focusedTaskIndex = mStack.indexOfStackTask(mFocusedTask);
+            int focusedTaskIndex = mStack.indexOfStackTask(focusedTask);
             if (focusedTaskIndex > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-            }
-            if (focusedTaskIndex < mStack.getTaskCount() - 1) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+            if (0 <= focusedTaskIndex && focusedTaskIndex < mStack.getTaskCount() - 1) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             }
         }
     }
 
     @Override
     public CharSequence getAccessibilityClassName() {
-        return TaskStackView.class.getName();
+        return ScrollView.class.getName();
     }
 
     @Override
@@ -1100,14 +1107,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (super.performAccessibilityAction(action, arguments)) {
             return true;
         }
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                setRelativeFocusedTask(true, false /* stackTasksOnly */, false /* animated */);
-                return true;
-            }
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                setRelativeFocusedTask(false, false /* stackTasksOnly */, false /* animated */);
-                return true;
+        Task focusedTask = getAccessibilityFocusedTask();
+        int taskIndex = mStack.indexOfStackTask(focusedTask);
+        if (0 <= taskIndex && taskIndex < mStack.getTaskCount()) {
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+                    setFocusedTask(taskIndex + 1, true /* scrollToTask */, true /* requestViewFocus */,
+                            0);
+                    return true;
+                }
+                case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+                    setFocusedTask(taskIndex - 1, true /* scrollToTask */, true /* requestViewFocus */,
+                            0);
+                    return true;
+                }
             }
         }
         return false;
@@ -1489,6 +1502,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         unbindTaskView(tv, task);
 
         // Reset the view properties and view state
+        tv.clearAccessibilityFocus();
         tv.resetViewProperties();
         tv.setFocusedState(false, false /* requestViewFocus */);
         tv.setClipViewInStack(false);
@@ -1949,6 +1963,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                         RecentsActivityLaunchState launchState = config.getLaunchState();
                         setFocusedTask(mStack.indexOfStackTask(mFocusedTask),
                                 false /* scrollToTask */, launchState.launchedWithAltTab);
+                        TaskView focusedTaskView = getChildViewForTask(mFocusedTask);
+                        if (mTouchExplorationEnabled && focusedTaskView != null) {
+                            focusedTaskView.requestAccessibilityFocus();
+                        }
                     }
 
                     EventBus.getDefault().send(new EnterRecentsTaskStackAnimationCompletedEvent());
