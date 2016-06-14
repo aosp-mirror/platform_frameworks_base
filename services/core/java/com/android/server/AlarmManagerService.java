@@ -3073,9 +3073,14 @@ class AlarmManagerService extends SystemService {
                 fs.numWakeup++;
                 if (alarm.workSource != null && alarm.workSource.size() > 0) {
                     for (int wi=0; wi<alarm.workSource.size(); wi++) {
+                        final String wsName = alarm.workSource.getName(wi);
+                        if (wsName == null) {
+                            Slog.w(TAG, "Null worksource name for alarm " + alarm);
+                        }
                         ActivityManagerNative.noteWakeupAlarm(
                                 alarm.operation, alarm.workSource.get(wi),
-                                alarm.workSource.getName(wi), alarm.statsTag);
+                                (wsName != null) ? wsName : alarm.packageName,
+                                alarm.statsTag);
                     }
                 } else {
                     ActivityManagerNative.noteWakeupAlarm(
