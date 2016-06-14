@@ -5230,8 +5230,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                throw new IllegalArgumentException("setTaskDockedResizing: taskId " + taskId
-                        + " not found.");
+                Slog.w(TAG, "setTaskDockedResizing: taskId " + taskId + " not found.");
+                return;
             }
             task.setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
         }
