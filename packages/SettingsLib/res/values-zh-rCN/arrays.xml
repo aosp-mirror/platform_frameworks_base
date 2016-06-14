@@ -80,6 +80,12 @@
     <item msgid="3606047780792894151">"每个日志缓冲区 4M"</item>
     <item msgid="5431354956856655120">"每个日志缓冲区 16M"</item>
   </string-array>
+    <!-- no translation found for select_logpersist_titles:0 (1744840221860799971) -->
+    <!-- no translation found for select_logpersist_titles:1 (3054662377365844197) -->
+    <!-- no translation found for select_logpersist_titles:2 (688870735111627832) -->
+    <!-- no translation found for select_logpersist_summaries:0 (2216470072500521830) -->
+    <!-- no translation found for select_logpersist_summaries:1 (172978079776521897) -->
+    <!-- no translation found for select_logpersist_summaries:2 (3873873912383879240) -->
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"关闭动画"</item>
     <item msgid="6624864048416710414">"动画缩放 0.5x"</item>

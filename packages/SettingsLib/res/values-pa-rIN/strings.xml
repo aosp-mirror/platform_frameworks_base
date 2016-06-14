@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ਇੰਟਰਫੇਸ ਤੇ ਮੌਜੂਦ ਡੈਟਾ ਟ੍ਰੈਫਿਕ ਦੀ ਮਾਤਰਾ ਦੇ ਆਧਾਰ ਤੇ Wi‑Fi ਰੋਮ ਸਕੈਨ ਦੀ ਆਗਿਆ ਦਿਓ/ਅਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ਲੌਗਰ ਬਫਰ ਆਕਾਰ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ਪ੍ਰਤੀ ਲੌਗ ਬਫਰ ਲੌਗਰ ਆਕਾਰ ਚੁਣੋ"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ਕੀ ਲੌਗਰ ਪ੍ਰਸਿੱਸਟੈਂਟ ਸਟੋਰੇਜ ਨੂੰ ਸਾਫ਼ ਕਰਨਾ ਹੈ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"ਜਦੋਂ ਅਸੀਂ ਪ੍ਰਸਿੱਸਟੈਂਟ ਲੌਗਰ ਨਾਲ ਨਿਗਰਾਨੀ ਨਹੀਂ ਕਰ ਰਹੇ ਹੁੰਦੇ ਹਾਂ, ਤਾਂ ਸਾਨੂੰ ਤੁਹਾਡੀ ਡੀਵਾਈਸ ਵਿੱਚ ਮੌਜੂਦ ਲੌਗਰ ਡੈਟੇ ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਲੋੜ ਪੈਂਦੀ ਹੈ।"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ਡੀਵਾਈਸ \'ਤੇ ਲੌਗ ਬਫ਼ਰਾਂ ਨੂੰ ਸਥਾਈ ਤੌਰ \'ਤੇ ਸਟੋਰ ਕਰੋ"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ਡੀਵਾਈਸ \'ਤੇ ਸਥਾਈ ਤੌਰ \'ਤੇ ਸਟੋਰ ਕਰਨ ਲਈ ਲੌਗ ਬਫ਼ਰਾਂ ਨੂੰ ਚੁਣੋ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB ਕੌਂਫਿਗਰੇਸ਼ਨ ਚੁਣੋ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB ਕੌਂਫਿਗਰੇਸ਼ਨ ਚੁਣੋ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ਨਕਲੀ ਨਿਰਧਾਰਿਤ ਸਥਾਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>

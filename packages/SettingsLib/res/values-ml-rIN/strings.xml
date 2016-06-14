@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ഇന്റർഫേസിലെ ഡാറ്റ ട്രാഫിക്ക് സാന്നിദ്ധ്യത്തിന്റെ കണക്ക് അടിസ്ഥാനമാക്കി വൈഫൈ റോം സ്‌കാനുകൾ അനുവദിക്കുക/അനുവദിക്കാതിരിക്കുക"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ലോഗർ സ്ഥിര സ്റ്റോറേജ് മായ്ക്കണോ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"സ്ഥിര ലോഗർ ഉപയോഗിച്ച് ഞങ്ങൾ തുടർന്നങ്ങോട്ട് നിരീക്ഷിക്കാത്ത സാഹചര്യത്തിൽ, നിങ്ങളുടെ ഉപകരണത്തിൽ നിലവിലുള്ള ലോഗർ വിവരങ്ങൾ ഞങ്ങൾ മായ്ക്കേണ്ടതുണ്ട്."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ഉപകരണത്തിൽ സ്ഥിരമായി ലോഗർ വിവരങ്ങൾ സംഭരിക്കുക"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ഉപകരണത്തിൽ സ്ഥിരമായി സംഭരിക്കുന്നതിനുള്ള ലോഗ് ബഫറുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB കോൺഫിഗറേഷൻ തിരഞ്ഞെടുക്കൂ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB കോൺഫിഗറേഷൻ തിരഞ്ഞെടുക്കൂ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"വ്യാജ ലൊക്കേഷനുകൾ അനുവദിക്കുക"</string>

@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дозволи/Забрани Wi‑Fi скенирање во роаминг според количината на постоечкиот податочен сообраќај на интерфејсот."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Величини на меѓумеморија на забележувач"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Величина/меѓумеморија на дневник"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Да се избрише постојаната меморија на дневникот?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Кога веќе не го следиме постојаниот дневник, мора да ги избришеме податоците на дневникот што се наоѓаат на вашиот уред."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Зачувувај податоци на дневникот"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Изберете привремена меморија на евиденција што ќе се користи постојано на уредот"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Изберете конфигурација за УСБ"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Изберете конфигурација за УСБ"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Овозможи лажни локации"</string>

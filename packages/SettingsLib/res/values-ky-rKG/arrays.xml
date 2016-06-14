@@ -80,6 +80,12 @@
     <item msgid="3606047780792894151">"Буфер: 4М ашпашы керек"</item>
     <item msgid="5431354956856655120">"Буфер: 16М ашпашы керек"</item>
   </string-array>
+    <!-- no translation found for select_logpersist_titles:0 (1744840221860799971) -->
+    <!-- no translation found for select_logpersist_titles:1 (3054662377365844197) -->
+    <!-- no translation found for select_logpersist_titles:2 (688870735111627832) -->
+    <!-- no translation found for select_logpersist_summaries:0 (2216470072500521830) -->
+    <!-- no translation found for select_logpersist_summaries:1 (172978079776521897) -->
+    <!-- no translation found for select_logpersist_summaries:2 (3873873912383879240) -->
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Анимацияны өчүрүү"</item>
     <item msgid="6624864048416710414">"Анимация масштабы .5x"</item>

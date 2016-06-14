@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"អនុញ្ញាត/មិន​អនុញ្ញាត​ការ​វិភាគ​រ៉ូម​​វ៉ាយហ្វាយ​ផ្អែក​លើ​​​ចំនួន​ការ​បង្ហាញ​ចរាចរណ៍​ទិន្នន័យ​​នៅ​ចំណុច​ប្រទាក់"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ទំហំ buffer របស់ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ជ្រើស​ទំហំ Logger per log buffer"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ជម្រះទំហំផ្ទុក logger ដែលប្រើបានយូរឬ?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"នៅពេលដែលយើងឈប់ធ្វើការត្រួតពិនិត្យតទៅទៀតដោយប្រើ logger ដែលប្រើបានយូរ យើងត្រូវបានតម្រូវឲ្យលុបទិន្នន័យ logger ដែលមាននៅលើឧបករណ៍របស់អ្នក"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ផ្ទុកទិន្នន័យ logger នៅលើឧបករណ៍ឲ្យបានយូរ"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ជ្រើសអង្គចងចាំកំណត់ហេតុបណ្តោះអាសន្នដើម្បីផ្ទុកនៅលើឧបករណ៍ឲ្យបានយូរ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"ជ្រើស​ការ​កំណត់​រចនាសម្ព័ន្ធ​យូអេសប៊ី"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ឲ្យ​ក្លែង​ទីតាំង"</string>

@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ইন্টারফেসে উপস্থিত ডেটা ট্রাফিকের পরিমাণের উপরে ভিত্তি করে ওয়াই-ফাই রোম স্ক্যানকে অনুমোদিত/অননুমোদিত করুন"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"লগার বাফারের আকারগুলি"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"লগ বাফার প্রতি অপেক্ষাকৃত বড় আকারগুলির নির্বাচন করুন"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"লগারের সঞ্চয়স্থান সাফ করবেন?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"যেহেতু আমারা সর্বদা লগার চালু রেখে আর নিরিক্ষণ করছি না, তাই আমাদের আপনার ডিভাইসে থাকা লগার ডেটা মুছে ফেলতে হবে৷"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"ডিভাইসে স্থায়ীভাবে লগার ডেটা সংরক্ষণ করুন"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"ডিভাইসে স্থায়ীভাবে সঞ্চয় করতে লগ বাফারগুলিকে নির্বাচন করুন"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB কনফিগারেশন নির্বাচন করুন"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB কনফিগারেশন নির্বাচন করুন"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"নকল অবস্থানের অনুমতি দিন"</string>

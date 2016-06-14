@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"မျက်နှာပြင်တွင် ဖော်ပြသည့် အချက်လက် အသွားအလာ ပမာဏပေါ်တွင် အခြေခံ၍ WIFI ရွမ်းရှာဖွေမှုအား ဖွင့်/ပိတ်မည်"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"လော့ဂါး ဘာဖား ဆိုက်များ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"လော့ ဘာဖားတွက် လော့ဂါးဆိုက် ရွေး"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"မှတ်တမ်းထိန်းသိမ်းပေးသည့် သိုလှောင်ခန်းကို ရှင်းလင်းမလား။"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"အမြဲတမ်းမှတ်တမ်းတင်ခြင်းစနစ်ဖြင့် ကျွန်ုပ်တို့ကစောင့်ကြည့်ခြင်းမရှိတော့သည့်အခါ သင့်စက်ပစ္စည်းပေါ်ရှိ ဒေတာမှတ်တမ်းစနစ်ကို ကျွန်ုပ်တို့က ဖျက်ရပါလိမ့်မည်။"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"စက်တွင် မှတ်တမ်းအြမဲသိမ်းရန်"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"စက်ပစ္စည်းပေါ်တွင် ထိန်းသိမ်းသိုမှီးရန် မှတ်တမ်းလျာထားချက်များကို ရွေးပါ"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB စီစဉ်ဖွဲ့စည်းမှု ရွေးရန်"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB စီစဉ်ဖွဲ့စည်းမှု ရွေးရန်"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"ပုံစံတုတည်နေရာများကို ခွင့်ပြုရန်"</string>

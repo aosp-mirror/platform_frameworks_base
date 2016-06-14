@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"อนุญาต/ไม่อนุญาตการสแกน Wi-Fi ข้ามเครือข่าย ตามปริมาณข้อมูลการเข้าชมที่ปรากฏในอินเทอร์เฟซ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"เลือกขนาด Logger ต่อบัฟเฟอร์ไฟล์บันทึก"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ล้างพื้นที่เก็บข้อมูลถาวรของตัวบันทึกไหม"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"เมื่อเราเลิกตรวจสอบด้วยตัวบันทึกถาวร เราต้องลบ Resident ของข้อมูลตัวบันทึกบนอุปกรณ์ของคุณ"</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"เก็บข้อมูลตัวบันทึกอย่างถาวรบนอุปกรณ์"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"เลือกบัฟเฟอร์บันทึกที่จะจัดเก็บอย่างถาวรบนอุปกรณ์"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"เลือกการกำหนดค่า USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"เลือกการกำหนดค่า USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"อนุญาตให้จำลองตำแหน่ง"</string>

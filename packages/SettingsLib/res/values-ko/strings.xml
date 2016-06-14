@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"인터페이스에 표시되는 데이터 트래픽의 양을 기반으로 Wi-Fi 로밍 스캔을 허용하거나 허용하지 않습니다."</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"영구 로거로 더 이상 모니터링하지 않는 경우 기기에 있는 로거 데이터를 삭제해야 합니다."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"로거 데이터를 기기에 영구 저장"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"기기에 영구 저장할 로그 버퍼 선택"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB 설정 선택"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB 설정 선택"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"모의 위치 허용"</string>

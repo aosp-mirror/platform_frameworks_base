@@ -175,6 +175,10 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Consenti/vieta scansioni roaming Wi-Fi basate sulla quantità di traffico dati presente a livello di interfaccia"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensioni buffer Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleziona dimensioni Logger per buffer log"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Cancellare i dati nello spazio di archiviazione permanente del logger?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quando il monitoraggio tramite logger permanente viene interrotto, siamo obbligati a eliminare i dati del logger memorizzati sul dispositivo."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Salva dati del logger sul dispositivo in modo permanente"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Seleziona i buffer log da memorizzare in modo permanente sul dispositivo"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Seleziona configurazione USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Seleziona configurazione USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Posizioni fittizie"</string>

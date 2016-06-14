@@ -175,6 +175,14 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根据接口中目前的数据流量允许/禁止WLAN漫游扫描"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"日志记录器缓冲区大小"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"选择每个日志缓冲区的日志记录器大小"</string>
+    <!-- no translation found for dev_logpersist_clear_warning_title (684806692440237967) -->
+    <skip />
+    <!-- no translation found for dev_logpersist_clear_warning_message (2256582531342994562) -->
+    <skip />
+    <!-- no translation found for select_logpersist_title (7530031344550073166) -->
+    <skip />
+    <!-- no translation found for select_logpersist_dialog_title (4003400579973269060) -->
+    <skip />
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"选择USB配置"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"选择USB配置"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"允许模拟位置"</string>
