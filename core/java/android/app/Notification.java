@@ -3183,8 +3183,8 @@ public class Notification implements Parcelable
         }
 
         private void resetContentMargins(RemoteViews contentView) {
-            contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-            contentView.setViewLayoutMarginEnd(R.id.text, 0);
+            contentView.setViewLayoutMarginEndDimen(R.id.line1, 0);
+            contentView.setViewLayoutMarginEndDimen(R.id.text, 0);
         }
 
         private RemoteViews applyStandardTemplate(int resId) {
@@ -3278,11 +3278,10 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 contentView.setImageViewIcon(R.id.right_icon, mN.mLargeIcon);
                 processLargeLegacyIcon(mN.mLargeIcon, contentView);
-                int endMargin = mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_picture_margin);
-                contentView.setViewLayoutMarginEnd(R.id.line1, endMargin);
-                contentView.setViewLayoutMarginEnd(R.id.text, endMargin);
-                contentView.setViewLayoutMarginEnd(R.id.progress, endMargin);
+                int endMargin = R.dimen.notification_content_picture_margin;
+                contentView.setViewLayoutMarginEndDimen(R.id.line1, endMargin);
+                contentView.setViewLayoutMarginEndDimen(R.id.text, endMargin);
+                contentView.setViewLayoutMarginEndDimen(R.id.progress, endMargin);
             }
         }
 
@@ -4616,9 +4615,8 @@ public class Notification implements Parcelable
             }
 
             int i=0;
-            int titlePadding = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_messaging_spacing);
-            contentView.setViewLayoutMarginBottom(R.id.line1, hasTitle ? titlePadding : 0);
+            contentView.setViewLayoutMarginBottomDimen(R.id.line1,
+                    hasTitle ? R.dimen.notification_messaging_spacing : 0);
             contentView.setInt(R.id.notification_messaging, "setNumIndentLines",
                     mBuilder.mN.mLargeIcon == null ? 0 : (hasTitle ? 1 : 2));
 
@@ -4994,11 +4992,10 @@ public class Notification implements Parcelable
                 final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
                 boolean hasProgress = max != 0 || ind;
                 if (mBuilder.mN.mLargeIcon != null && !hasProgress) {
-                    endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                            R.dimen.notification_content_picture_margin);
+                    endMargin = R.dimen.notification_content_picture_margin;
                 }
             }
-            contentView.setViewLayoutMarginEnd(id, endMargin);
+            contentView.setViewLayoutMarginEndDimen(id, endMargin);
         }
     }
 
@@ -5183,13 +5180,11 @@ public class Notification implements Parcelable
             }
             handleImage(view);
             // handle the content margin
-            int endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_content_margin_end);;
+            int endMargin = R.dimen.notification_content_margin_end;
             if (mBuilder.mN.mLargeIcon != null) {
-                endMargin += mBuilder.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_picture_margin);
+                endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
-            view.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
+            view.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             return view;
         }
 
@@ -5220,8 +5215,8 @@ public class Notification implements Parcelable
 
         private void handleImage(RemoteViews contentView) {
             if (mBuilder.mN.mLargeIcon != null) {
-                contentView.setViewLayoutMarginEnd(R.id.line1, 0);
-                contentView.setViewLayoutMarginEnd(R.id.text, 0);
+                contentView.setViewLayoutMarginEndDimen(R.id.line1, 0);
+                contentView.setViewLayoutMarginEndDimen(R.id.text, 0);
             }
         }
 
@@ -5336,13 +5331,11 @@ public class Notification implements Parcelable
                 remoteViews.addView(R.id.notification_main_column, customContent);
             }
             // also update the end margin if there is an image
-            int endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                    R.dimen.notification_content_margin_end);
+            int endMargin = R.dimen.notification_content_margin_end;
             if (mBuilder.mN.mLargeIcon != null) {
-                endMargin += mBuilder.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_picture_margin);
+                endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
-            remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
+            remoteViews.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
         }
     }
 
