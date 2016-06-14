@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
+import android.app.job.JobInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -512,6 +513,16 @@ public final class ContentService extends IContentService.Stub {
         syncAsUser(request, UserHandle.getCallingUserId());
     }
 
+    private long clampPeriod(long period) {
+        long minPeriod = JobInfo.getMinPeriodMillis() / 1000;
+        if (period < minPeriod) {
+            Slog.w(TAG, "Requested poll frequency of " + period
+                    + " seconds being rounded up to " + minPeriod + "s.");
+            period = minPeriod;
+        }
+        return period;
+    }
+
     /**
      * If the user id supplied is different to the calling user, the caller must hold the
      * INTERACT_ACROSS_USERS_FULL permission.
@@ -539,11 +550,8 @@ public final class ContentService extends IContentService.Stub {
                 SyncStorageEngine.EndPoint info;
                 info = new SyncStorageEngine.EndPoint(
                         request.getAccount(), request.getProvider(), userId);
-                if (runAtTime < 3600) {
-                    Slog.w(TAG, "Requested poll frequency of " + runAtTime
-                            + " seconds being rounded up to 1 hour.");
-                    runAtTime = 3600;
-                }
+
+                runAtTime = clampPeriod(runAtTime);
                 // Schedule periodic sync.
                 getSyncManager().updateOrAddPeriodicSync(info, runAtTime,
                         flextime, extras);
@@ -761,11 +769,8 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to write the sync settings");
 
         int userId = UserHandle.getCallingUserId();
-        if (pollFrequency < 3600) {
-            Slog.w(TAG, "Requested poll frequency of " + pollFrequency
-                    + " seconds being rounded up to 1 hour.");
-            pollFrequency = 3600;
-        }
+
+        pollFrequency = clampPeriod(pollFrequency);
         long defaultFlex = SyncStorageEngine.calculateDefaultFlexTime(pollFrequency);
 
         long identityToken = clearCallingIdentity();
