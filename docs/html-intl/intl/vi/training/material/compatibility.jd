@@ -123,7 +123,7 @@ Thư viện Hỗ trợ v7 của Android với những hạn chế sau:</p>
 <h3>Phụ thuộc</h3>
 
 <p>Để sử dụng những tính năng này trong các phiên bản Android trước 5.0 (API mức 21), hãy thêm
-Thư viện Hỗ trợ v7 của Android vào dự án của bạn như một <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Phần phụ thuộc Gradle</a>:</p>
+Thư viện Hỗ trợ v7 của Android vào dự án của bạn như một <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Phần phụ thuộc Gradle</a>:</p>
 
 <pre>
 dependencies {

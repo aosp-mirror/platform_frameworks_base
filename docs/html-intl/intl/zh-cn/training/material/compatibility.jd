@@ -123,7 +123,7 @@ android.support.v7.widget.CardView} 小组件可通过 Android v7 支持内容�
 <h3>依赖项</h3>
 
 <p>如果要在 Android 5.0（API 级别 21）之前的 Android 版本中使用这些功能，请将
-Android v7 支持内容库作为 <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle 依赖项</a>包括在您的项目中：</p>
+Android v7 支持内容库作为 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依赖项</a>包括在您的项目中：</p>
 
 <pre>
 dependencies {

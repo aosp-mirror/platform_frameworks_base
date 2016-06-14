@@ -122,7 +122,7 @@ android.support.v7.widget.CardView} 위젯은 Android v7 지원 라이브러리�
 
 <h3>종속 사항</h3>
 
-<p>Android 5.0(API 레벨 21) 이전 버전에서 이러한 기능을 사용하려면 프로젝트에 Android v7 지원 라이브러리를 <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle 종속 사항</a>으로 포함합니다.
+<p>Android 5.0(API 레벨 21) 이전 버전에서 이러한 기능을 사용하려면 프로젝트에 Android v7 지원 라이브러리를 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 종속 사항</a>으로 포함합니다.
 </p>
 
 <pre>
