@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -75,6 +76,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.OnClickHandler;
 
@@ -5981,6 +5983,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public void closeConnection() {
             getTarget().closeConnection();
+        }
+
+        @Override
+        public boolean insertContent(InputContentInfo inputContentInfo, Bundle opts) {
+            return getTarget().insertContent(inputContentInfo, opts);
         }
     }
 
