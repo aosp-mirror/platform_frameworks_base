@@ -193,6 +193,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mGroupExpansionChanging = changing;
     }
 
+    @Override
+    public void setActualHeightAnimating(boolean animating) {
+        if (mPrivateLayout != null) {
+            mPrivateLayout.setContentHeightAnimating(animating);
+        }
+    }
+
     public NotificationContentView getPrivateLayout() {
         return mPrivateLayout;
     }
