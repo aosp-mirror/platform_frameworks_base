@@ -86,7 +86,7 @@ final class DeleteJob extends Job {
             try {
                 deleteDocument(doc, mSrcParent);
             } catch (ResourceException e) {
-                Log.e(TAG, "Failed to delete document @ " + doc.derivedUri);
+                Log.e(TAG, "Failed to delete document @ " + doc.derivedUri, e);
                 onFileFailed(doc);
             }
         }
