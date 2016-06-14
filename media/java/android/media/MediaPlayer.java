@@ -709,6 +709,8 @@ public class MediaPlayer extends PlayerBase
      * played.
      *
      * @param sh the SurfaceHolder to use for video display
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized or has been released.
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
@@ -739,6 +741,8 @@ public class MediaPlayer extends PlayerBase
      *
      * @param surface The {@link Surface} to be used for the video portion of
      * the media.
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized or has been released.
      */
     public void setSurface(Surface surface) {
         if (mScreenOnWhilePlaying && surface != null) {
