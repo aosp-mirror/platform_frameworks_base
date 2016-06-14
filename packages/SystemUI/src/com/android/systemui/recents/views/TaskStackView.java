@@ -275,6 +275,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             }
         });
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        if (ssp.hasFreeformWorkspaceSupport()) {
+            setWillNotDraw(false);
+        }
 
         mFreeformWorkspaceBackground = (GradientDrawable) getContext().getDrawable(
                 R.drawable.recents_freeform_workspace_bg);

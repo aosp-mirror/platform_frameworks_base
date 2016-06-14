@@ -14,11 +14,29 @@ Copyright (C) 2015 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24.0dp"
-        android:height="24.0dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
-    <path
-        android:fillColor="@color/recents_task_bar_dark_icon_color"
-        android:pathData="M0.0,0.0l0.0,24.0l24.0,0.0L24.0,0.0L0.0,0.0zM4.0,4.0l10.0,0.0l0.0,10.0L4.0,14.0L4.0,4.0z"/>
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <group
+            android:translateX="-286.000000"
+            android:translateY="-602.000000">
+        <group
+                android:translateX="109.000000"
+                android:translateY="514.000000">
+            <group
+                    android:translateX="178.000000"
+                    android:translateY="89.000000">
+                <path
+                    android:strokeColor="@color/recents_task_bar_dark_icon_color"
+                    android:strokeWidth="2"
+                    android:pathData="M10,12 L10,3 L19,3 L19,5 L19,11 L19,12 L10,12 Z" />
+                <path
+                    android:strokeColor="@color/recents_task_bar_dark_icon_color"
+                    android:strokeWidth="2"
+                    android:pathData="M15,17 L5,17 L5,7 L5,17 Z" />
+            </group>
+        </group>
+    </group>
 </vector>

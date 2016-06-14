@@ -20,7 +20,9 @@ import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 
@@ -81,6 +83,7 @@ public class RecentsViewTouchHandler {
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mIsDragging;
     private float mDragSlop;
+    private int mDeviceId = -1;
 
     private DropTarget mLastDropTarget;
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
@@ -180,6 +183,9 @@ public class RecentsViewTouchHandler {
         // Request other drop targets to register themselves
         EventBus.getDefault().send(new DragStartInitializeDropTargetsEvent(event.task,
                 event.taskView, this));
+        if (mDeviceId != -1) {
+            InputDevice.getDevice(mDeviceId).setPointerType(PointerIcon.TYPE_GRABBING);
+        }
     }
 
     public final void onBusEvent(DragEndEvent event) {
@@ -206,6 +212,7 @@ public class RecentsViewTouchHandler {
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDownPos.set((int) ev.getX(), (int) ev.getY());
+                mDeviceId = ev.getDeviceId();
                 break;
             case MotionEvent.ACTION_MOVE: {
                 float evX = ev.getX();
@@ -265,6 +272,7 @@ public class RecentsViewTouchHandler {
                             !cancelled ? mLastDropTarget : null));
                     break;
                 }
+                mDeviceId = -1;
             }
         }
     }
