@@ -147,6 +147,9 @@ class ActivityStartInterceptor {
         }
         DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
                 DevicePolicyManagerInternal.class);
+        if (devicePolicyManager == null) {
+            return false;
+        }
         mIntent = devicePolicyManager.createPackageSuspendedDialogIntent(
                 mAInfo.packageName, mUserId);
         mCallingPid = mRealCallingPid;
