@@ -17,7 +17,12 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.printservice.recommendation">
+    package="com.android.printservice.recommendation"
+    android:versionCode="1"
+    android:versionName="1.0.0">
+
+    <uses-sdk android:minSdkVersion="24"
+        android:targetSdkVersion="24" />
 
     <uses-permission android:name="android.permission.INTERNET" />
 
