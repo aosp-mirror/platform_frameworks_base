@@ -63,6 +63,27 @@ LOCAL_FULL_MANIFEST_FILE := $(gen)
 include $(BUILD_PACKAGE)
 
 ###########################################################
+# Variant: Privileged app upgrade w/ the wrong SHA
+
+include $(CLEAR_VARS)
+# this needs to be a privileged application
+LOCAL_PRIVILEGED_MODULE := true
+
+LOCAL_MODULE_TAGS := optional
+LOCAL_SDK_VERSION := current
+LOCAL_PROGUARD_ENABLED := disabled
+LOCAL_DEX_PREOPT := false
+# anything to make this package's SHA different from CtsShimPrivUpgrade
+LOCAL_AAPT_FLAGS := --version-name WrongSHA
+
+LOCAL_PACKAGE_NAME := CtsShimPrivUpgradeWrongSHA
+
+LOCAL_MANIFEST_FILE := shim_priv_upgrade/AndroidManifest.xml
+
+include $(BUILD_PACKAGE)
+
+
+###########################################################
 # Variant: System app
 
 include $(CLEAR_VARS)
