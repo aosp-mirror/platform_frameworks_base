@@ -612,5 +612,15 @@ as the return status when they invoke
 {@link android.content.pm.PackageInstaller#uninstall PackageInstaller.uninstall()}.
 </li>
 
+  <li>The JCA provider called <em>Crypto</em> is deprecated, because its only
+  algorithm, SHA1PRNG, is cryptographically weak. Apps can no longer use
+  SHA1PRNG to (insecurely) derive keys, because this provider is no longer
+  available. For more information, see the blog
+  post <a href=
+  "http://android-developers.blogspot.com/2016/06/security-crypto-provider-deprecated-in.html"
+  class="external-link">Security "Crypto" provider deprecated in Android
+  N</a>.
+  </li>
+
 </ul>
 
