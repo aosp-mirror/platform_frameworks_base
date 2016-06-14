@@ -220,6 +220,8 @@ toc:
       value: TV 录制
     - name: zh-tw-lang
       value: 電視錄製
+  - title: Key Attestation
+    path: /preview/features/key-attestation.html
   - title: Network Security Configuration
     path: /preview/features/security-config.html
     path_attributes:
