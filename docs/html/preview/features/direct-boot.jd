@@ -108,18 +108,25 @@ Direct Boot mode, use credential encrypted storage.</p>
 
 <h2 id="notification">Getting Notified of User Unlock</h2>
 
-<p>Once the user unlocks the device after restart, your app can switch to
+<p>When the user unlocks the device after restart, your app can switch to
 accessing credential encrypted storage and use regular system services that
 depend on user credentials.</p>
 
 <p>To get notified when the user unlocks the device after a reboot,
 register a {@link android.content.BroadcastReceiver} from a running component
-to listen for the <code>ACTION_USER_UNLOCKED</code> message. Or, you can
-receive the existing {@link android.content.Intent#ACTION_BOOT_COMPLETED
-ACTION_BOOT_COMPLETED} message, which now indicates the device has booted and
-the user has unlocked the device.</p>
+to listen for unlock notification messages. When the user unlocks the device
+after boot:
+</p>
+<ul>
+<li>If your app has foreground processes that need immediate notification,
+listen for the {@code ACTION_USER_UNLOCKED} message.</li>
+<li>If your app only uses background processes that can act on a delayed
+notification, listen for the
+{@link android.content.Intent#ACTION_BOOT_COMPLETED ACTION_BOOT_COMPLETED}
+message.</li>
+</ul>
 
-<p>You can directly query if the user has unlocked the device by calling
+<p>If the user has unlocked the device, you can find out by calling
 <code>UserManager.isUserUnlocked()</code>.</p>
 
 <h2 id="migrating">Migrating Existing Data</h2>
