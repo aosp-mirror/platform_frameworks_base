@@ -57,7 +57,7 @@ public final class MediaMetadata implements Parcelable {
      * @hide
      */
     @StringDef({METADATA_KEY_DURATION, METADATA_KEY_YEAR, METADATA_KEY_TRACK_NUMBER,
-            METADATA_KEY_NUM_TRACKS, METADATA_KEY_DISC_NUMBER})
+            METADATA_KEY_NUM_TRACKS, METADATA_KEY_DISC_NUMBER, METADATA_KEY_BT_FOLDER_TYPE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface LongKey {}
 
@@ -269,6 +269,22 @@ public final class MediaMetadata implements Parcelable {
      */
     public static final String METADATA_KEY_MEDIA_ID = "android.media.metadata.MEDIA_ID";
 
+    /**
+     * The bluetooth folder type of the media specified in the section 6.10.2.2 of the Bluetooth
+     * AVRCP 1.5. It should be one of the following:
+     * <ul>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_MIXED}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_TITLES}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_ALBUMS}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_ARTISTS}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_GENRES}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_PLAYLISTS}</li>
+     * <li>{@link MediaDescription#BT_FOLDER_TYPE_YEARS}</li>
+     * </ul>
+     */
+    public static final String METADATA_KEY_BT_FOLDER_TYPE
+            = "android.media.metadata.BT_FOLDER_TYPE";
+
     private static final @TextKey String[] PREFERRED_DESCRIPTION_ORDER = {
             METADATA_KEY_TITLE,
             METADATA_KEY_ARTIST,
@@ -326,6 +342,7 @@ public final class MediaMetadata implements Parcelable {
         METADATA_KEYS_TYPE.put(METADATA_KEY_DISPLAY_DESCRIPTION, METADATA_TYPE_TEXT);
         METADATA_KEYS_TYPE.put(METADATA_KEY_DISPLAY_ICON, METADATA_TYPE_BITMAP);
         METADATA_KEYS_TYPE.put(METADATA_KEY_DISPLAY_ICON_URI, METADATA_TYPE_TEXT);
+        METADATA_KEYS_TYPE.put(METADATA_KEY_BT_FOLDER_TYPE, METADATA_TYPE_LONG);
     }
 
     private static final SparseArray<String> EDITOR_KEY_MAPPING;
@@ -544,6 +561,12 @@ public final class MediaMetadata implements Parcelable {
         bob.setDescription(text[2]);
         bob.setIconBitmap(icon);
         bob.setIconUri(iconUri);
+        if (mBundle.containsKey(METADATA_KEY_BT_FOLDER_TYPE)) {
+            Bundle bundle = new Bundle();
+            bundle.putLong(MediaDescription.EXTRA_BT_FOLDER_TYPE,
+                    getLong(METADATA_KEY_BT_FOLDER_TYPE));
+            bob.setExtras(bundle);
+        }
         mDescription = bob.build();
 
         return mDescription;
