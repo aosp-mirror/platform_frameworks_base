@@ -908,13 +908,24 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                     return;
                 }
-                try {
-                    String packageName = getContext().getOpPackageName();
-                    mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
-                            flags, packageName, TAG);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error adjusting default volume.", e);
-                }
+
+                // Execute mAudioService.adjustSuggestedStreamVolume() on
+                // handler thread of MediaSessionService.
+                // This will release the MediaSessionService.mLock sooner and avoid
+                // a potential deadlock between MediaSessionService.mLock and
+                // ActivityManagerService lock.
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String packageName = getContext().getOpPackageName();
+                            mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
+                                    flags, packageName, TAG);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error adjusting default volume.", e);
+                        }
+                    }
+                });
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
                         Process.SYSTEM_UID, true);
