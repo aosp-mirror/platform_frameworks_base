@@ -800,8 +800,8 @@
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Tillader, at appen kan indstille en alarm i en installeret alarmapp. Nogle alarmapps har muligvis ikke denne funktion."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tilføje telefonsvarer"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Tillader, at appen kan tilføje beskeder på din telefonsvarer."</string>
-    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"skifte tilladelser til geografisk placering i Browser"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillader, at appen kan ændre browserens tilladelser angående geografisk placering. Ondsindede apps kan benytte dette til at sende oplysninger om placering til vilkårlige websites."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"skifte tilladelser til geoplacering i Browser"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Tillader, at appen kan ændre browserens tilladelser angående geoplacering. Ondsindede apps kan benytte dette til at sende oplysninger om sted til vilkårlige websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
