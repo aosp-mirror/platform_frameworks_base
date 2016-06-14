@@ -291,6 +291,11 @@ public class ChangeText extends Transition {
                         view.setTextColor(mPausedColor);
                     }
                 }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
+                }
             };
             addListener(transitionListener);
             if (DBG) {

@@ -145,6 +145,7 @@ class TranslationAnimationCreator {
         public void onTransitionEnd(Transition transition) {
             mMovingView.setTranslationX(mTerminalX);
             mMovingView.setTranslationY(mTerminalY);
+            transition.removeListener(this);
         }
 
         @Override

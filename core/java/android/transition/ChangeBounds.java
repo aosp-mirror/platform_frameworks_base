@@ -416,6 +416,7 @@ public class ChangeBounds extends Transition {
                             if (!mCanceled) {
                                 parent.suppressLayout(false);
                             }
+                            transition.removeListener(this);
                         }
 
                         @Override

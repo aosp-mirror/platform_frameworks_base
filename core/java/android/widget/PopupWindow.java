@@ -2328,6 +2328,7 @@ public class PopupWindow {
 
                     // The listener was called. Our job here is done.
                     mPendingExitListener = null;
+                    transition.removeListener(this);
                 }
             };
 

@@ -327,7 +327,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             viewsTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    transition.removeListener(this);
                     viewsTransitionComplete();
                     if (mIsHidden && transitioningViews != null) {
                         showViews(transitioningViews, true);
@@ -354,11 +353,11 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
             sharedElementTransition.addListener(new ContinueTransitionListener() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
-                    transition.removeListener(this);
                     sharedElementTransitionComplete();
                     if (mIsHidden) {
                         showViews(mSharedElements, true);
                     }
+                    super.onTransitionEnd(transition);
                 }
             });
             mSharedElements.get(0).invalidate();
