@@ -6,6 +6,124 @@ page.metaDescription=This page provides details about the Support Library packag
 <p>This page provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
+  <p id="rev24-0-0">
+    <a href="#" onclick="return toggleContent(this)"><img src=
+    "{@docRoot}assets/images/styles/disclosure_up.png" class=
+    "toggle-content-img" alt="">Android Support Library, revision 24.0.0</a>
+    <em>(June 2016)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v4">v4 Support
+        Library</a>:
+      </dt>
+
+      <dd>
+          <ul>
+            <li>Added <code>Fragment.commitNow()</code>
+            for synchronous commit
+            </li>
+
+            <li>Added <code>NotificationCompat.MessagingStyle</code>
+            for multi-party conversations
+            </li>
+
+            <li>Added <code>NotificationManagerCompat.areNotificationsEnabled()</code>
+            and <code>getImportance()</code>
+            </li>
+
+            <li>{@link android.support.v4.media.session.MediaSessionCompat}
+            now mirrors the functionality of {@link
+            android.media.session.MediaSession} and no longer calls {@link
+            android.media.session.MediaSession#setMediaButtonReceiver
+            setMediaButtonReceiver()} automatically
+            </li>
+          </ul>
+          <p class="note">
+            <strong>Note:</strong> <a href=
+            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
+            ><code>MediaBrowserServiceCompat</code></a> is compatible with
+            devices running API Level 24 as of Support Library revision 24.0.0.
+            Older versions of <a href=
+            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
+            ><code>MediaBrowserServiceCompat</code></a>
+            are <em>not</em> compatible with API Level 24. If your app uses
+            <a href=
+            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
+            ><code>MediaBrowserServiceCompat</code></a> and
+            supports devices running API level 24, you must update to Support
+            Library version 24.0.0 or later.
+          </p>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+        appcompat library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added support for referencing themed {@link
+            android.content.res.ColorStateList} objects from XML
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}tools/support-library/features.html#design">Design Support
+        Library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Improvements to {@link android.support.design.widget.AppBarLayout}
+            handling of elevation using {@link
+            android.animation.StateListAnimator}
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}topic/libraries/support-library/features.html#v17-leanback"
+        >v17 Leanback library</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added <code>OnboardingFragment</code> to provide first-run welcome
+            and setup flow
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Changes for <a href=
+        "{@docRoot}topic/libraries/support-library/features.html#custom-tabs"
+        >custom tabs</a>:
+      </dt>
+
+      <dd>
+        <ul>
+          <li>Added support for providing a {@link android.widget.RemoteViews}
+            hierarchy for the secondary toolbar</li>
+          <li>Added <code>CustomTabsClient.connectAndInitialize()</code>
+            for one-line warm up</li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+<!-- end of collapsible section: 24.0.0 -->
+
+
+<div class="toggle-content closed">
   <p id="rev23-4-0">
     <a href="#" onclick="return toggleContent(this)"><img src=
     "{@docRoot}assets/images/styles/disclosure_up.png" class=
@@ -45,10 +163,9 @@ page.metaDescription=This page provides details about the Support Library packag
 
       <dd>
         <ul>
-          <li>Added <!-- TODO: Link to method -->
-             <code><a href=
-            "{@docRoot}reference/android/support/v7/app/AppCompatDelegate.html">
-            AppCompatDelegate</a>.setCompatVectorFromResourcesEnabled()</code>
+          <li>Added
+            {@link android.support.v7.app.AppCompatDelegate#setCompatVectorFromResourcesEnabled
+            AppCompatDelegate.setCompatVectorFromResourcesEnabled()}
             method to re-enable usage of vector drawables in {@link
             android.graphics.drawable.DrawableContainer} objects on devices
             running Android 4.4 (API level 19) and lower. See <a href=
@@ -118,8 +235,9 @@ page.metaDescription=This page provides details about the Support Library packag
 
       <dd>
         <ul>
-          <li>Fixed a bug where <!-- TODO: Javadoc link -->
-             <code>VectorDrawableCompat</code> does not render correctly in
+          <li>Fixed a bug where {@link
+            android.support.graphics.drawable.VectorDrawableCompat} does
+            not render correctly in
             {@link android.widget.TextView} on API level 23. (<a class=
             "external-link" href=
             "https://code.google.com/p/android/issues/detail?id=206227">Issue
