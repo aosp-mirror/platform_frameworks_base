@@ -977,6 +977,7 @@ public class VolumeDialog implements TunerService.Tunable {
             final int density = newConfig.densityDpi;
             if (density != mDensity) {
                 mDialog.dismiss();
+                mZenFooter.cleanup();
                 initDialog();
             }
             updateWindowWidthH();
