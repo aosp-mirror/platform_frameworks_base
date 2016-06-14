@@ -41,6 +41,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.TextServicesManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -82,6 +83,17 @@ public class InputMethodUtils {
         Locale.US, // "en_US"
         Locale.UK, // "en_GB"
     };
+
+    // A temporary workaround for the performance concerns in
+    // #getImplicitlyApplicableSubtypesLocked(Resources, InputMethodInfo).
+    // TODO: Optimize all the critical paths including this one.
+    private static final Object sCacheLock = new Object();
+    @GuardedBy("sCacheLock")
+    private static LocaleList sCachedSystemLocales;
+    @GuardedBy("sCacheLock")
+    private static InputMethodInfo sCachedInputMethodInfo;
+    @GuardedBy("sCacheLock")
+    private static ArrayList<InputMethodSubtype> sCachedResult;
 
     private InputMethodUtils() {
         // This utility class is not publicly instantiable.
@@ -497,6 +509,32 @@ public class InputMethodUtils {
 
     @VisibleForTesting
     public static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
+            Resources res, InputMethodInfo imi) {
+        final LocaleList systemLocales = res.getConfiguration().getLocales();
+
+        synchronized (sCacheLock) {
+            // We intentionally do not use InputMethodInfo#equals(InputMethodInfo) here because
+            // it does not check if subtypes are also identical.
+            if (systemLocales.equals(sCachedSystemLocales) && sCachedInputMethodInfo == imi) {
+                return new ArrayList<>(sCachedResult);
+            }
+        }
+
+        // Note: Only resource info in "res" is used in getImplicitlyApplicableSubtypesLockedImpl().
+        // TODO: Refactor getImplicitlyApplicableSubtypesLockedImpl() so that it can receive
+        // LocaleList rather than Resource.
+        final ArrayList<InputMethodSubtype> result =
+                getImplicitlyApplicableSubtypesLockedImpl(res, imi);
+        synchronized (sCacheLock) {
+            // Both LocaleList and InputMethodInfo are immutable. No need to copy them here.
+            sCachedSystemLocales = systemLocales;
+            sCachedInputMethodInfo = imi;
+            sCachedResult = new ArrayList<>(result);
+        }
+        return result;
+    }
+
+    private static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLockedImpl(
             Resources res, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = InputMethodUtils.getSubtypes(imi);
         final LocaleList systemLocales = res.getConfiguration().getLocales();
