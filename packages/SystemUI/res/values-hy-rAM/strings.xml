@@ -153,7 +153,7 @@
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Բջջային տվյալներն ակտիվ են"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Բջջային ցանցով տվյալների փոխանցումն անջատված է"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ը կապվում է:"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռային ռեժիմ"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռի ռեժիմ"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM քարտ չկա:"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Օպերատորի ցանցի փոփոխում:"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Բացել մարտկոցի տվյալները"</string>
@@ -189,10 +189,10 @@
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"Wifi-ը միացավ:"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Շարժական <xliff:g id="SIGNAL">%1$s</xliff:g>: <xliff:g id="TYPE">%2$s</xliff:g>: <xliff:g id="NETWORK">%3$s</xliff:g>:"</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Մարտկոցը <xliff:g id="STATE">%s</xliff:g> է:"</string>
-    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Ինքնաթիռային ռեժիմն անջատված է:"</string>
-    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ինքնաթիռային ռեժիմը միացված է:"</string>
-    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ինքնաթիռային ռեժիմն անջատվեց:"</string>
-    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ինքնաթիռային ռեժիմը միացավ:"</string>
+    <string name="accessibility_quick_settings_airplane_off" msgid="7786329360056634412">"Ինքնաթիռի ռեժիմն անջատված է:"</string>
+    <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ինքնաթիռի ռեժիմը միացված է:"</string>
+    <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ինքնաթիռի ռեժիմն անջատվեց:"</string>
+    <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ինքնաթիռի ռեժիմը միացավ:"</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Չխանգարելու ընտրանքը միացված է: Ընդհատել միայն կարևոր ծանուցումների դեպքում:"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Չանհանգստացնել՝ ընդհանուր լուռ վիճակը:"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Չանհանգստացնել՝ միայն զարթուցիչ"</string>
@@ -451,7 +451,7 @@
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Զարթուցիչ"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Android for Work-ի պրոֆիլ"</string>
-    <string name="status_bar_airplane" msgid="7057575501472249002">"Ինքնաթիռային ռեժիմ"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"Ինքնաթիռի ռեժիմ"</string>
     <string name="add_tile" msgid="2995389510240786221">"Սալիկի ավելացում"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Սալիկի հեռարձակում"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Ժամը <xliff:g id="WHEN">%1$s</xliff:g>-ի զարթուցիչը չի զանգի, եթե մինչ այդ չանջատեք այս կարգավորումը"</string>
