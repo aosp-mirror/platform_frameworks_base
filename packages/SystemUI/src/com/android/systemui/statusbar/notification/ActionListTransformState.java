@@ -44,6 +44,16 @@ public class ActionListTransformState extends TransformState {
     }
 
     @Override
+    public void transformViewFullyFrom(TransformState otherState, float transformationAmount) {
+        // Don't do Y transform - let the wrapper handle this based on the content height
+    }
+
+    @Override
+    public void transformViewFullyTo(TransformState otherState, float transformationAmount) {
+        // Don't do Y transform - let the wrapper handle this based on the content height
+    }
+
+    @Override
     protected void resetTransformedView() {
         // We need to keep the Y transformation, because this is used to keep the action list
         // aligned at the bottom, unrelated to transforms.
