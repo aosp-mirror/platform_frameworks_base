@@ -37,6 +37,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#apk_signature_v2">APK Signature Scheme v2</a></li>
         <li><a href="#scoped_directory_access">Scoped Directory Access</a></li>
         <li><a href="#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a></li>
+        <li><a href="#custom_pointer_api">Custom Pointer API</a></li>
         <li><a href="#sustained_performance_api">Sustained Performance API</a></li>
         <li><a href="#vr">VR Support</a></li>
         <li><a href="#print_svc">Print Service Enhancements</a></li>
@@ -863,6 +864,26 @@ Directory Access</a> developer documentation.</p>
 <p>
   To trigger Keyboard Shortcuts Helper from anywhere in your app, call
   {@code Activity.requestKeyboardShortcutsHelper()} for the relevant activity.
+</p>
+
+<h2 id="custom_pointer_api">
+  Custom Pointer API
+</h2>
+
+<p>
+  Android N introduces the Custom Pointer API, which lets you customize the
+  appearance, visibility, and behavior of the pointer. This capability is
+  especially useful when a user is using a mouse or touchpad to interact with
+  UI objects. The default pointer uses a standard icon. This API also includes
+  advanced functionality such as changing the pointer icon's appearance based
+  on specific mouse or touchpad movements.
+</p>
+
+<p>
+  To set a pointer icon, override the <code>onResolvePointerIcon()</code>
+  method of the <code>View</code> class. This method uses a
+  <code>PointerIcon</code> object to draw the icon that corresponds to a
+  specific motion event.
 </p>
 
 <h2 id="sustained_performance_api">Sustained Performance API</h2>
