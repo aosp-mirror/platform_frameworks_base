@@ -149,6 +149,8 @@ void CanvasContext::setStopped(bool stopped) {
             if (mEglManager.isCurrent(mEglSurface)) {
                 mEglManager.makeCurrent(EGL_NO_SURFACE);
             }
+        } else if (mIsDirty && hasSurface()) {
+            mRenderThread.postFrameCallback(this);
         }
     }
 }
@@ -230,6 +232,8 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
 
     freePrefetchedLayers(info.observer);
     GL_CHECKPOINT(MODERATE);
+
+    mIsDirty = true;
 
     if (CC_UNLIKELY(!mNativeSurface.get())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
@@ -504,6 +508,7 @@ void CanvasContext::draw() {
     // Even if we decided to cancel the frame, from the perspective of jank
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();
+    mIsDirty = false;
 
     if (drew || mEglManager.damageRequiresSwap()) {
         if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {
