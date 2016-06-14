@@ -2028,7 +2028,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         continueUpdateBounds(HOME_STACK_ID);
         for (int i = mResizingTasksDuringAnimation.size() - 1; i >= 0; i--) {
             final int taskId = mResizingTasksDuringAnimation.valueAt(i);
-            if (anyTaskForIdLocked(taskId) != null) {
+            if (anyTaskForIdLocked(taskId, !RESTORE_FROM_RECENTS, INVALID_STACK_ID) != null) {
                 mWindowManager.setTaskDockedResizing(taskId, false);
             }
         }
