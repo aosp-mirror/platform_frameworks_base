@@ -1988,6 +1988,10 @@ public class Notification implements Parcelable
                     new Throwable());
         }
 
+        if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+            extras.putBoolean(EXTRA_SHOW_WHEN, true);
+        }
+
         // ensure that any information already set directly is preserved
         final Notification.Builder builder = new Notification.Builder(context, this);
 
@@ -2269,6 +2273,14 @@ public class Notification implements Parcelable
 
                 if (mN.extras.containsKey(EXTRA_PEOPLE)) {
                     Collections.addAll(mPersonList, mN.extras.getStringArray(EXTRA_PEOPLE));
+                }
+
+                if (mN.getSmallIcon() == null && mN.icon != 0) {
+                    setSmallIcon(mN.icon);
+                }
+
+                if (mN.getLargeIcon() == null && mN.largeIcon != null) {
+                    setLargeIcon(mN.largeIcon);
                 }
 
                 String templateClass = mN.extras.getString(EXTRA_TEMPLATE);
