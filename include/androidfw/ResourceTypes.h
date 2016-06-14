@@ -1227,7 +1227,10 @@ struct ResTable_config
     // |RESTABLE_MAX_LOCALE_LEN| (including a terminating '\0').
     //
     // Example: en-US, en-Latn-US, en-POSIX.
-    void getBcp47Locale(char* out) const;
+    //
+    // If canonicalize is set, Tagalog (tl) locales get converted
+    // to Filipino (fil).
+    void getBcp47Locale(char* out, bool canonicalize=false) const;
 
     // Append to str the resource-qualifer string representation of the
     // locale component of this Config. If the locale is only country
@@ -1849,7 +1852,8 @@ public:
     void getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap=false,
             bool ignoreAndroidPackage=false, bool includeSystemConfigs=true) const;
 
-    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true) const;
+    void getLocales(Vector<String8>* locales, bool includeSystemLocales=true,
+            bool mergeEquivalentLangs=false) const;
 
     // Generate an idmap.
     //
