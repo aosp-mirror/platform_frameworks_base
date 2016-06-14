@@ -349,7 +349,11 @@ public class Main {
         obj = null;
         while(ref.get() != null) {
             System.gc();
+            System.runFinalization();
         }
+
+        System.gc();
+        System.runFinalization();
     }
 
     @AfterClass
