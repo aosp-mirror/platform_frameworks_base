@@ -122,7 +122,7 @@ android.support.v7.widget.CardView} ウィジェットは Android v7 サポー�
 
 <h3>依存関係</h3>
 
-<p>5.0（API レベル 21）より前のバージョンの Android でこれらの機能を使用するには、Android v7 サポート ライブラリを <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle 依存関係</a>としてプロジェクトに含めます。
+<p>5.0（API レベル 21）より前のバージョンの Android でこれらの機能を使用するには、Android v7 サポート ライブラリを <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 依存関係</a>としてプロジェクトに含めます。
 </p>
 
 <pre>
