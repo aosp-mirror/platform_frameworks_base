@@ -79,18 +79,11 @@ public class ZenFooter extends LinearLayout {
         mZen = controller.getZen();
         mConfig = controller.getConfig();
         mController = controller;
+        mController.addCallback(mZenCallback);
         update();
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mController.addCallback(mZenCallback);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
+    public void cleanup() {
         mController.removeCallback(mZenCallback);
     }
 
