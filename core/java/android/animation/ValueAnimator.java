@@ -1137,11 +1137,17 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
 
         mAnimationEndRequested = true;
         mPaused = false;
-        if ((mStarted || mRunning) && mListeners != null) {
-            if (!mRunning) {
-                // If it's not yet running, then start listeners weren't called. Call them now.
-                notifyStartListeners();
-             }
+        boolean notify = (mStarted || mRunning) && mListeners != null;
+        if (notify && !mRunning) {
+            // If it's not yet running, then start listeners weren't called. Call them now.
+            notifyStartListeners();
+        }
+        mRunning = false;
+        mStarted = false;
+        mStartListenersCalled = false;
+        mReversing = false;
+        mLastFrameTime = 0;
+        if (notify && mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
@@ -1149,11 +1155,6 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 tmpListeners.get(i).onAnimationEnd(this);
             }
         }
-        mRunning = false;
-        mStarted = false;
-        mStartListenersCalled = false;
-        mReversing = false;
-        mLastFrameTime = 0;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
