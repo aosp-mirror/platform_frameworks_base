@@ -25,7 +25,9 @@ import java.io.File;
  * @hide
  */
 public final class UserCertificateSource extends DirectoryCertificateSource {
-    private static final UserCertificateSource INSTANCE = new UserCertificateSource();
+    private static class NoPreloadHolder {
+        private static final UserCertificateSource INSTANCE = new UserCertificateSource();
+    }
 
     private UserCertificateSource() {
         super(new File(
@@ -33,7 +35,7 @@ public final class UserCertificateSource extends DirectoryCertificateSource {
     }
 
     public static UserCertificateSource getInstance() {
-        return INSTANCE;
+        return NoPreloadHolder.INSTANCE;
     }
 
     @Override
