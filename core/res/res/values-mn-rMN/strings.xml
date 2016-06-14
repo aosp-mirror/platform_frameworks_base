@@ -395,9 +395,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Апп-д телевизийн цагийн бүсийг өөрчлөхийг зөвшөөрдөг."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Апп нь утасны цагийн бүсийг өөрчлөх боломжтой."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"төхөөрөмж дээрх акаунтыг олох"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа акаунтын жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Телевизийн жагсаалтад байгаа акаунтуудын хаягийг апп-д авахыг зөвшөөрдөг. Энэ нь таны суулгасан бусад аппликэйшнүүдийн бий болгосон акаунтуудыг оруулж болно."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа акаунтын жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа бүртгэлийн жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"сүлжээний холболтыг үзэх"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Апп нь сүлжээ байгаа болон холбогдсон эсэх зэрэг сүлжээний холболтын талаарх мэдээллийг харах боломжтой."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"сүлжээнд бүрэн нэвтрэх"</string>
@@ -454,11 +454,11 @@
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Хурууны хээний дүрс"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синк тохиргоог унших"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Апп нь акаунтын синк тохиргоог унших боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийгдсэн эсэхийг тодорхойлох боломжтой."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Апп нь бүртгэлийн синк тохиргоог унших боломжтой. Жишээ нь энэ нь Хүмүүс апп бүртгэлтэй синк хийгдсэн эсэхийг тодорхойлох боломжтой."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синкийг унтрааж асаах тохиргоо"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Апп нь акаунтын синк тохиргоог өөрчлөх боломжтой. Жишээ нь энэ нь Хүмүүс апп акаунттай синк хийхийг идэвхжүүлэх боломжтой."</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Апп нь бүртгэлийн синк тохиргоог өөрчлөх боломжтой. Жишээ нь энэ нь Хүмүүс апп бүртгэлтэй синк хийхийг идэвхжүүлэх боломжтой."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"синк статистикийг унших"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Апп нь синк үйлдэлийн түүх болон хэр их дата синк хийгдсэн зэрэг акаунтын синк статусыг унших боломжтой."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Апп нь синк үйлдэлийн түүх болон хэр их дата синк хийгдсэн зэрэг бүртгэлийн синк статусыг унших боломжтой."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"таны USB сангийн агуулгыг унших боломжтой"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"таны SD картны агуулгыг унших боломжтой"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Апп нь таны USB сангийн агуулгыг унших боломжтой."</string>
@@ -1261,7 +1261,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Тийм"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Үгүй"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Устгах хязгаар хэтрэв"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>-р <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> акаунтын <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> зүйл устсан . Та юу хиймээр байна?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"<xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>-р <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> бүртгэлийн <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> зүйл устсан . Та юу хиймээр байна?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"Устгах"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Устгасныг буцаах"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Одоо юу ч хийхгүй"</string>
@@ -1412,7 +1412,7 @@
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл бүртгэл шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Та зурган түгжээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу оруулсан байна. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа буруу оруулсны дараагаар та телевизийнхээ түгжээг и-мэйл дансаа ашиглан тайлах хэрэгтэй болно.\n\n Та <xliff:g id="NUMBER_2">%3$d</xliff:g> секундийн дараа дахин оролдоно уу."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл акаунтаа ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%1$d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%2$d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл бүртгэлээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Устгах"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Дууг санал болгосноос чанга болгож өсгөх үү?\n\nУрт хугацаанд чанга хөгжим сонсох нь таны сонсголыг муутгаж болно."</string>
