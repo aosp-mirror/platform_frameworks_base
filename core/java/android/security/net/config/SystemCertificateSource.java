@@ -25,7 +25,10 @@ import java.io.File;
  * @hide
  */
 public final class SystemCertificateSource extends DirectoryCertificateSource {
-    private static final SystemCertificateSource INSTANCE = new SystemCertificateSource();
+    private static class NoPreloadHolder {
+        private static final SystemCertificateSource INSTANCE = new SystemCertificateSource();
+    }
+
     private final File mUserRemovedCaDir;
 
     private SystemCertificateSource() {
@@ -35,7 +38,7 @@ public final class SystemCertificateSource extends DirectoryCertificateSource {
     }
 
     public static SystemCertificateSource getInstance() {
-        return INSTANCE;
+        return NoPreloadHolder.INSTANCE;
     }
 
     @Override
