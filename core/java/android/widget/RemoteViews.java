@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.annotation.DimenRes;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -1850,13 +1851,13 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Helper action to set layout params on a View.
      */
-    private class LayoutParamAction extends Action {
+    private static class LayoutParamAction extends Action {
 
         /** Set marginEnd */
-        public static final int LAYOUT_MARGIN_END = 1;
+        public static final int LAYOUT_MARGIN_END_DIMEN = 1;
         /** Set width */
         public static final int LAYOUT_WIDTH = 2;
-        public static final int LAYOUT_MARGIN_BOTTOM = 3;
+        public static final int LAYOUT_MARGIN_BOTTOM_DIMEN = 3;
 
         /**
          * @param viewId ID of the view alter
@@ -1893,15 +1894,17 @@ public class RemoteViews implements Parcelable, Filter {
                 return;
             }
             switch (property) {
-                case LAYOUT_MARGIN_END:
+                case LAYOUT_MARGIN_END_DIMEN:
                     if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
+                        int resolved = resolveDimenPixelOffset(target, value);
+                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(resolved);
                         target.setLayoutParams(layoutParams);
                     }
                     break;
-                case LAYOUT_MARGIN_BOTTOM:
+                case LAYOUT_MARGIN_BOTTOM_DIMEN:
                     if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                        ((ViewGroup.MarginLayoutParams) layoutParams).bottomMargin = value;
+                        int resolved = resolveDimenPixelOffset(target, value);
+                        ((ViewGroup.MarginLayoutParams) layoutParams).bottomMargin = resolved;
                         target.setLayoutParams(layoutParams);
                     }
                     break;
@@ -1912,6 +1915,13 @@ public class RemoteViews implements Parcelable, Filter {
                 default:
                     throw new IllegalArgumentException("Unknown property " + property);
             }
+        }
+
+        private static int resolveDimenPixelOffset(View target, int value) {
+            if (value == 0) {
+                return 0;
+            }
+            return target.getContext().getResources().getDimensionPixelOffset(value);
         }
 
         public String getActionName() {
@@ -2870,27 +2880,36 @@ public class RemoteViews implements Parcelable, Filter {
      * Hidden for now since we don't want to support this for all different layout margins yet.
      *
      * @param viewId The id of the view to change
-     * @param endMargin the left padding in pixels
+     * @param endMarginDimen a dimen resource to read the margin from or 0 to clear the margin.
      */
-    public void setViewLayoutMarginEnd(int viewId, int endMargin) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END, endMargin));
+    public void setViewLayoutMarginEndDimen(int viewId, @DimenRes int endMarginDimen) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END_DIMEN,
+                endMarginDimen));
     }
 
     /**
      * Equivalent to setting {@link android.view.ViewGroup.MarginLayoutParams#bottomMargin}.
      *
+     * @param bottomMarginDimen a dimen resource to read the margin from or 0 to clear the margin.
      * @hide
      */
-    public void setViewLayoutMarginBottom(int viewId, int bottomMargin) {
-        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_BOTTOM,
-                bottomMargin));
+    public void setViewLayoutMarginBottomDimen(int viewId, @DimenRes int bottomMarginDimen) {
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_BOTTOM_DIMEN,
+                bottomMarginDimen));
     }
 
     /**
      * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width}.
+     *
+     * @param layoutWidth one of 0, MATCH_PARENT or WRAP_CONTENT. Other sizes are not allowed
+     *                    because they behave poorly when the density changes.
      * @hide
      */
     public void setViewLayoutWidth(int viewId, int layoutWidth) {
+        if (layoutWidth != 0 && layoutWidth != ViewGroup.LayoutParams.MATCH_PARENT
+                && layoutWidth != ViewGroup.LayoutParams.WRAP_CONTENT) {
+            throw new IllegalArgumentException("Only supports 0, WRAP_CONTENT and MATCH_PARENT");
+        }
         mActions.add(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, layoutWidth));
     }
 
