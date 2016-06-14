@@ -38,4 +38,6 @@ easier.
         <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
     </style>
 
+    <!-- Use a dark theme for watches. -->
+    <style name="Theme.DeviceDefault.System" parent="Theme.Material" />
 </resources>
