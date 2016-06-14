@@ -172,7 +172,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 String localName = localNames.get(i);
                 String acceptedName = accepted.get(i);
                 if (localName != null && !localName.equals(acceptedName)) {
-                    View view = sharedElements.remove(localName);
+                    View view = sharedElements.get(localName);
                     if (view != null) {
                         sharedElements.put(acceptedName, view);
                     }
