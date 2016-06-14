@@ -843,18 +843,26 @@ Directory Access</a> developer documentation.</p>
 <h2 id="keyboard_shortcuts_helper">Keyboard Shortcuts Helper</h2>
 
 <p>
-In Android N, the user can press "Alt + /" to trigger a <em>Keyboard Shortcuts</em>
-screen that displays all shortcuts available both from the system and from
-the app in focus. These are retrieved automatically from the app’s menu if
-available, but developers can provide their own fine-tuned shortcuts lists
-for the screen. You can do this by overriding the new
-<code>Activity.onProvideKeyboardShortcuts()</code> method, described in the downloadable
-<a href="{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+  In Android N, the user can press <strong>Meta + /</strong> to trigger a
+  <em>Keyboard Shortcuts</em> screen that displays all shortcuts available both
+  from the system and from the app in focus. The system retrieves these
+  shortcuts automatically from the app’s menu if the shortcuts exist. You can
+  also provide your own fine-tuned shortcuts lists for the screen. You can do
+  this by overriding the new <code>Activity.onProvideKeyboardShortcuts()</code>
+  method, described in the downloadable <a href=
+  "{@docRoot}preview/setup-sdk.html#docs-dl">API Reference</a>.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> The <strong>Meta</strong> key is not present on all
+  keyboards: on a Macintosh keyboard, it is the <strong>Command</strong> key,
+  on the Windows keyboard, it is the <strong>Windows</strong> key, and on the
+  Pixel C and the Chrome OS keyboards, it is the <strong>Search</strong> key.
 </p>
 
 <p>
-To trigger the Keyboard Shortcuts Helper from anywhere in your app,
-call {@code Activity.requestKeyboardShortcutsHelper()} for the relevant activity.
+  To trigger Keyboard Shortcuts Helper from anywhere in your app, call
+  {@code Activity.requestKeyboardShortcutsHelper()} for the relevant activity.
 </p>
 
 <h2 id="sustained_performance_api">Sustained Performance API</h2>
