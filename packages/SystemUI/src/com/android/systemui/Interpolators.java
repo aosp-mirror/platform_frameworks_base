@@ -36,6 +36,7 @@ public class Interpolators {
     public static final Interpolator ACCELERATE = new AccelerateInterpolator();
     public static final Interpolator ACCELERATE_DECELERATE = new AccelerateDecelerateInterpolator();
     public static final Interpolator DECELERATE_QUINT = new DecelerateInterpolator(2.5f);
+    public static final Interpolator CUSTOM_40_40 = new PathInterpolator(0.4f, 0f, 0.6f, 1f);
 
     /**
      * Interpolator to be used when animating a move based on a click. Pair with enough duration.
