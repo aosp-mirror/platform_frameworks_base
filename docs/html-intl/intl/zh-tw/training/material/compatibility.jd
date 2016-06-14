@@ -122,7 +122,7 @@ android.support.v7.widget.CardView} 小工具，但有下列限制：
 
 <h3>相依性</h3>
 
-<p>如果要在 Android 5.0 (API 級別 21) 以前的版本中使用這些功能，請在您的專案中包含 Android v7 支援程式庫做為 <a href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle 相依性</a>：
+<p>如果要在 Android 5.0 (API 級別 21) 以前的版本中使用這些功能，請在您的專案中包含 Android v7 支援程式庫做為 <a href="{@docRoot}sdk/installing/studio-build.html#dependencies">Gradle 相依性</a>：
 </p>
 
 <pre>
