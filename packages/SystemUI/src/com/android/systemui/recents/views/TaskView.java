@@ -133,8 +133,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
     private Task mTask;
     @ViewDebug.ExportedProperty(category="recents")
-    private boolean mTaskDataLoaded;
-    @ViewDebug.ExportedProperty(category="recents")
     private boolean mClipViewInStack = true;
     @ViewDebug.ExportedProperty(category="recents")
     private boolean mTouchExplorationEnabled;
@@ -451,16 +449,12 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Explicitly sets the focused state of this task.
      */
     public void setFocusedState(boolean isFocused, boolean requestViewFocus) {
-        SystemServicesProxy ssp = Recents.getSystemServices();
         if (isFocused) {
             if (requestViewFocus && !isFocused()) {
                 requestFocus();
             }
-            if (requestViewFocus && !isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
-                requestAccessibilityFocus();
-            }
         } else {
-            if (isAccessibilityFocused() && ssp.isTouchExplorationEnabled()) {
+            if (isAccessibilityFocused() && mTouchExplorationEnabled) {
                 clearAccessibilityFocus();
             }
         }
@@ -622,7 +616,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         // Update each of the views to the new task data
         mThumbnailView.onTaskDataLoaded(thumbnailInfo);
         mHeaderView.onTaskDataLoaded();
-        mTaskDataLoaded = true;
     }
 
     @Override
@@ -631,7 +624,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTask.removeCallback(this);
         mThumbnailView.unbindFromTask();
         mHeaderView.unbindFromTask(mTouchExplorationEnabled);
-        mTaskDataLoaded = false;
     }
 
     @Override
