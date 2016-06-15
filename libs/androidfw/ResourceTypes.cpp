@@ -6174,7 +6174,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     if (id >= 256) {
         LOG_ALWAYS_FATAL("Package id out of range");
         return NO_ERROR;
-    } else if (id == 0 || appAsLib || isSystemAsset) {
+    } else if (id == 0 || (id == 0x7f && appAsLib) || isSystemAsset) {
         // This is a library or a system asset, so assign an ID
         id = mNextPackageId++;
     }
