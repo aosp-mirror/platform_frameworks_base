@@ -43,19 +43,13 @@ page.metaDescription=This page provides details about the Support Library packag
             </li>
           </ul>
           <p class="note">
-            <strong>Note:</strong> <a href=
+            <strong>Note:</strong> Only <a href=
             "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
-            ><code>MediaBrowserServiceCompat</code></a> is compatible with
-            devices running API Level 24 as of Support Library revision 24.0.0.
-            Older versions of <a href=
-            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
-            ><code>MediaBrowserServiceCompat</code></a>
-            are <em>not</em> compatible with API Level 24. If your app uses
-            <a href=
-            "{@docRoot}reference/android/support/v4/media/MediaBrowserServiceCompat.html"
-            ><code>MediaBrowserServiceCompat</code></a> and
-            supports devices running API level 24, you must update to Support
-            Library version 24.0.0 or later.
+            ><code>MediaBrowserServiceCompat</code></a> in version 24.0.0 is
+            forward-compatible with future versions of Android beyond API 24.
+            If you are using previous versions, update to this version to
+            ensure compatibility.
+
           </p>
 
       <dt>
