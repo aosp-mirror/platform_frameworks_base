@@ -2262,6 +2262,67 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     SETTINGS_GESTURES = 459;
 
+    // ------ Begin Deletion Helper ------
+    // ACTION: Settings > Storage > Free Up Space > Photos & Videos > Toggle
+    //   SUBTYPE: false is off, true is on
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_SELECTION_PHOTOS = 460;
+
+    // ACTION: Settings > Storage > Free Up Space > Apps > Toggle
+    //   SUBTYPE: false is off, true is on
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_SELECTION_ALL_APPS = 461;
+
+    // ACTION: Settings > Storage > Free Up Space > Apps > Click an unchecked app
+    // CATEGORY: SETTINGS
+    //   PACKAGE: Unchecked app
+    ACTION_DELETION_SELECTION_APP_ON = 462;
+
+    // ACTION: Settings > Storage > Free Up Space > Apps > Click a checked app
+    // CATEGORY: SETTINGS
+    //   PACKAGE: Checked app
+    ACTION_DELETION_SELECTION_APP_OFF = 463;
+
+    // ACTION: Settings > Storage > Free Up Space > Apps > Click category
+    //   SUBTYPE: false is expanded, true is collapsed
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_APPS_COLLAPSED = 464;
+
+    // ACTION: Settings > Storage > Free Up Space > Downloads > Check On
+    //   SUBTYPE: false is off, true is on
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_SELECTION_DOWNLOADS = 465;
+
+    // ACTION: Settings > Storage > Free Up Space > Downloads > Click category
+    //   SUBTYPE: false is expanded, true is collapsed
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_DOWNLOADS_COLLAPSED = 466;
+
+    // ACTION: Settings > Storage > Free Up Space > Free up ... GB
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_HELPER_CLEAR = 467;
+
+    // ACTION: Settings > Storage > Free Up Space > Cancel
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_HELPER_CANCEL = 468;
+
+    // ACTION: Settings > Storage > Free Up Space > Free up ... GB > Remove
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_HELPER_REMOVE_CONFIRM = 469;
+
+    // ACTION: Settings > Storage > Free Up Space > Free up ... GB > Cancel
+    // CATEGORY: SETTINGS
+    ACTION_DELETION_HELPER_REMOVE_CANCEL = 470;
+
+    // Deletion helper encountered an error during package deletion.
+    ACTION_DELETION_HELPER_APPS_DELETION_FAIL = 471;
+
+    // Deletion helper encountered an error during downloads folder deletion.
+    ACTION_DELETION_HELPER_DOWNLOADS_DELETION_FAIL = 472;
+
+    // Deletion helper encountered an error during photo and video deletion.
+    ACTION_DELETION_HELPER_PHOTOS_VIDEOS_DELETION_FAIL = 473;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
 
     // ------- Begin N Keyboard Shortcuts Helper -----
