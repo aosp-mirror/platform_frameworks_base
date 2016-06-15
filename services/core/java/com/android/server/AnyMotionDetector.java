@@ -308,7 +308,7 @@ public class AnyMotionDetector {
     /**
      * A timestamped three dimensional vector and some vector operations.
      */
-    private static class Vector3 {
+    public static final class Vector3 {
         public long timeMillisSinceBoot;
         public float x;
         public float y;
@@ -321,11 +321,11 @@ public class AnyMotionDetector {
             this.z = z;
         }
 
-        private float norm() {
+        public float norm() {
             return (float) Math.sqrt(dotProduct(this));
         }
 
-        private Vector3 normalized() {
+        public Vector3 normalized() {
             float mag = norm();
             return new Vector3(timeMillisSinceBoot, x / mag, y / mag, z / mag);
         }
@@ -338,12 +338,20 @@ public class AnyMotionDetector {
          * @return angle between this vector and the other given one.
          */
         public float angleBetween(Vector3 other) {
-            double degrees = Math.toDegrees(Math.acos(this.dotProduct(other)));
-            float returnValue = (float) degrees;
+            Vector3 crossVector = cross(other);
+            float degrees = Math.abs((float)Math.toDegrees(
+                    Math.atan2(crossVector.norm(), dotProduct(other))));
             Slog.d(TAG, "angleBetween: this = " + this.toString() +
-                    ", other = " + other.toString());
-            Slog.d(TAG, "    degrees = " + degrees + ", returnValue = " + returnValue);
-            return returnValue;
+                ", other = " + other.toString() + ", degrees = " + degrees);
+            return degrees;
+        }
+
+        public Vector3 cross(Vector3 v) {
+            return new Vector3(
+                v.timeMillisSinceBoot,
+                y * v.z - z * v.y,
+                z * v.x - x * v.z,
+                x * v.y - y * v.x);
         }
 
         @Override
