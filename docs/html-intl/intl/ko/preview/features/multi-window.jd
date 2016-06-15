@@ -18,16 +18,17 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
     <h2>참고 항목</h2>
       <ol>
         <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">다중 창
-플레이그라운드 샘플 앱</a></li>
+ 플레이그라운드 샘플 앱</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Android N에서 다중 창을 준비하기 위한 5가지 팁</a></li>
       </ol>
   </div>
 </div>
 
 <p>
-  Android N에서는 동시에 둘 이상의 앱을 표시하도록
-지원합니다. 핸드헬드 기기에서 두 개의 앱을 <em>화면 분할</em> 모드에서
+  Android N은 둘 이상의 앱을 동시에 표시하기 위한 지원을
+추가합니다. 핸드헬드 기기에서 두 개의 앱을 <em>화면 분할</em> 모드에서
 나란히 또는 상하로 실행할 수 있습니다. TV 기기에서 앱이
-<em>PIP</em> 모드를 사용하는 경우 사용자가 다른 앱과 상호작용하는
+<em>PIP(Picture-In-Picture)</em> 모드를 사용하는 경우 사용자가 다른 앱과 상호작용하는
 동안에 계속 동영상을 재생할 수 있습니다.
 </p>
 
@@ -44,14 +45,14 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   Android N에서는 여러 앱이 동시에 화면을 공유할 수 있습니다. 예를 들어, 사용자가 화면을 분할하여 왼쪽에서는 웹페이지를
 보면서 오른쪽에서는 이메일을 작성할
-수 있습니다. 사용자 경험은 기기에 따라
+수 있습니다. 사용자 환경은 기기에 따라
 달라집니다.
 </p>
 
 <ul>
   <li>Android N에서 실행되는 핸드헬드 기기는 화면 분할
 모드를 제공합니다. 이 모드에서 시스템은 화면을 두 개의 앱으로 채우고, 이
-앱을 나란히 또는 상하로 표시합니다. 사용자가 두 앱을 구분하는 분할선을 끌어서 한 앱을 다른 앱보다
+앱을 나란히 또는 상하로 표시합니다. 사용자가 두 앱을 구분하는 분할선을 드래그하여 한 앱을 다른 앱보다
 더 크게 만들 수 있습니다.
   </li>
 
@@ -81,7 +82,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <ul>
   <li>사용자가 <a href="{@docRoot}guide/components/recents.html">Overview
 화면</a>을 열고 액티비티 제목을 길게 누르면,
-이 액티비티를 화면의 강조 표시된 부분으로 끌어서 
+이 액티비티를 화면의 강조 표시된 부분으로 드래그하여
 다중 창 모드에 둘 수 있습니다.
   </li>
 
@@ -93,9 +94,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   사용자는 여러 액티비티가 화면을 공유하는 동안 한 액티비티에서
-또 다른 액티비티로 데이터를 <a href="{@docRoot}guide/topics/ui/drag-drop.html">끌어서 놓을</a>
+또 다른 액티비티로 데이터를 <a href="{@docRoot}guide/topics/ui/drag-drop.html">드래그 앤 드롭</a>할
 수 있습니다. (이전에는, 사용자가 단일 액티비티 내에서만
-데이터를 끌어서 놓을 수 있었습니다.)
+데이터를 드래그 앤 드롭할 수 있었습니다.)
 </p>
 
 <h2 id="lifecycle">다중 창 수명 주기</h2>
@@ -128,12 +129,14 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <p>
-  사용자가 앱을 다중 창 모드에 놓으면,
-시스템은 <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리</a>에 지정된 대로, 구성 변경을 액티비티에게
-알려줍니다. 기본적으로, 이 변경의 액티비티-수명 주기 관계는 기기의 모드가
-세로 모드에서 가로 모드로 전환되었음을
-시스템이 앱에 알려줄 때와 동일합니다(단순 스왑 대신
-기기 치수가 변경되는 경우는 제외). <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리</a>에서 설명한
+  사용자가 앱을 다중 창 모드에 놓으면
+시스템은, <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리</a>에 지정된 대로, 구성 변경을 액티비티에
+알려줍니다. 이 동작은 사용자가 앱의 크기를 조정하거나 앱을
+ 전체 화면 모드로 다시 전환할 때도 발생합니다.
+  기본적으로, 이 변경에서 액티비티-수명 주기 관계는 기기 모드가
+ 세로 모드에서 가로 모드로 전환되었음을
+ 시스템이 앱에 알려줄 때와 동일합니다(단순 스왑 대신
+ 기기 치수가 변경되는 경우는 제외). <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경 처리</a>에서 설명한
 대로, 액티비티 스스로 구성 변경을 처리하거나, 시스템이 액티비티를 소멸시키고
 새 치수로 다시 액티비티를 생성하도록 할 수
 있습니다.
@@ -143,8 +146,8 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   사용자가 창의 크기를 조정하여 한쪽 치수를 더 크게 만드는
 경우, 시스템은 사용자 작업에 맞게 액티비티의 크기를 조정하고 필요한
 경우 <a href="{@docRoot}guide/topics/resources/runtime-changes.html">런타임 변경</a>을 수행합니다. 앱이 새로 노출되는 영역에 그릴 때 지연이 발생하는 경우, 시스템은 {@link
-  android.R.attr#windowBackground windowBackground} 특성 또는 기본
-<code>windowBackgroundFallback</code> 스타일 특성에 의해
+  android.R.attr#windowBackground windowBackground} 속성 또는 기본
+<code>windowBackgroundFallback</code> 스타일 속성에 의해
 지정된 색으로 이 영역을 임시로 채웁니다.
 </p>
 
@@ -152,14 +155,16 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   앱이 Android N을 대상으로 하는 경우, 앱의 액티비티가 다중
-창 표시를 지원하는지 여부와 지원 방법을 구성할 수 있습니다. 매니페스트에서 특성을 설정하여 크기와 레이아웃을 제어할
+창 표시를 지원하는지 여부와 지원 방법을 구성할 수 있습니다. 매니페스트에서 속성을 설정하여 크기와 레이아웃을 제어할
 수 있습니다.
-  루트 액티비티의 특성 설정은 작업 스택 내의 모든
-액티비티에 적용됩니다.
+  루트 액티비티의 속성 설정은 작업 스택 내의 모든
+ 액티비티에 적용됩니다. 예를 들어, 루트 액티비티의
+<code>android:resizeableActivity</code>가 true로 설정된 경우, 작업 스택에 있는 모든 액티비티의
+크기를 조정할 수 있습니다.
 </p>
 
 <p class="note">
-  <strong>참고:</strong> Android N보다 더 낮은 버전의 SDK로 다중 방향 앱을 작성하는 경우
+  <strong>참고:</strong> Android N보다 더 낮은 버전의 SDK로 다중 방향 앱을 빌드하는 경우
 사용자가 앱을 다중 창 모드에서 사용하면, 시스템이
 이 앱의 크기를 강제로 조정합니다. 앱이 예상치 못하게 동작할 수 있음을 사용자에게 경고하는
 대화 상자가 표시됩니다. 시스템은 고정
@@ -171,7 +176,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
   매니페스트의 <code>&lt;activity&gt;</code> 또는
-<code>&lt;application&gt;</code> 노드에서 이 특성을 설정하여 다중 창
+<code>&lt;application&gt;</code> 노드에서 이 속성을 설정하여 다중 창
 표시를 활성화하거나 비활성화합니다.
 </p>
 
@@ -180,23 +185,23 @@ android:resizeableActivity=["true" | "false"]
 </pre>
 
 <p>
-  이 특성을 true로 설정하면, 액티비티를 분할 화면 모드와 자유형식
-모드로 시작할 수 있습니다. 이 특성을 false로 설정하면, 액티비티가 다중 창 모드를 지원하지
+  이 속성을 true로 설정하면, 액티비티를 분할 화면 모드와 자유형식
+모드로 시작할 수 있습니다. 이 속성을 false로 설정하면, 액티비티가 다중 창 모드를 지원하지
 않습니다. 이 값이 false이고 사용자가
 다중 창 모드에서 액티비티를 시작하려고 시도하면, 액티비티가 전체 화면을
 차지합니다.
 </p>
 
 <p>
-  앱이 Android N을 대상으로 하지만 이 특성에 값을 지정하지
-않은 경우, 이 특성의 기본값은 true가 됩니다.
+  앱이 Android N을 대상으로 하지만 이 속성에 값을 지정하지
+않은 경우, 이 속성의 기본값은 true가 됩니다.
 </p>
 
 <h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
 
 <p>
-  이 특성을 매니페스트의 <code>&lt;activity&gt;</code> 노드에 설정하여
-액티비티가 PIP 표시를 지원하는지 여부를 나타냅니다. <code>android:resizeableActivity</code>가 false인 경우 이 특성이
+  이 속성을 매니페스트의 <code>&lt;activity&gt;</code> 노드에 설정하여
+액티비티가 PIP 표시를 지원하는지 여부를 나타냅니다. <code>android:resizeableActivity</code>가 false인 경우 이 속성이
 무시됩니다.
 </p>
 
@@ -204,12 +209,12 @@ android:resizeableActivity=["true" | "false"]
 android:supportsPictureInPicture=["true" | "false"]
 </pre>
 
-<h3 id="layout">레이아웃 특성</h3>
+<h3 id="layout">레이아웃 속성</h3>
 
 <p>
   Android N에서 <code>&lt;layout&gt;</code> 매니페스트 요소는
 다중 창 모드에서 액티비티가 동작하는 방식에 영향을 미치는
-여러 특성을 지원합니다.
+여러 속성을 지원합니다.
 </p>
 
 <dl>
@@ -234,17 +239,17 @@ android:supportsPictureInPicture=["true" | "false"]
   </dt>
 
   <dd>
-    자유형식 모드에서 시작될 때 액티비티의 초기 배치. 적합한 값은
-{@link android.view.Gravity} 참조를 참조하세요.
+    자유형식 모드에서 시작될 때 액티비티의 초기 배치. 적당한 값은
+{@link android.view.Gravity} 참조를 확인하세요.
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
   </dt>
 
   <dd>
     화면 분할
-및 자유형식 모드에서 액티비티의 최소 높이 및 최소 너비. 사용자가 화면 분할 모드에서 디바이더를 이동하여 액티비티를
+ 및 자유형식 모드에서 액티비티의 최소 높이 및 최소 너비. 사용자가 화면 분할 모드에서 디바이더를 이동하여 액티비티를
 지정된 최소값보다 더 작게 만드는 경우, 시스템은
 이 액티비티를 사용자가 요청한 크기로 자릅니다.
   </dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -287,7 +293,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <li>시스템이 <code><a href=
   "{@docRoot}guide/topics/manifest/activity-element.html#screen"
-  >android:screenOrientation</a></code> 특성의 변경을 무시합니다.
+  >android:screenOrientation</a></code> 속성의 변경을 무시합니다.
   </li>
 </ul>
 
@@ -295,68 +301,69 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   다중 창 표시를 지원하기 위해 다음과 같은 새 메서드가 {@link android.app.Activity}
-클래스에 추가되었습니다. 각 메서드에 대한 자세한 내용은,
-<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 참조</a>를 참조하세요.
+ 클래스에 추가되었습니다. 각 메서드에 대한 자세한 내용은
+<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+참조</a>를 확인하세요.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
-    액티비티가 다중 창 모드에 있는지를 알아내려면 호출합니다.
+    액티비티가 다중 창 모드에 있는지를 알아내려면 이 메서드를 호출하세요.
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
-    액티비티가 PIP 모드에 있는지를 알아내려면 호출합니다.
+    액티비티가 PIP 모드에 있는지를 알아내려면 이 메서드를 호출하세요.
 
     <p class="note">
       <strong>참고:</strong> PIP 모드는 다중 창 모드의 특별한
-케이스입니다. <code>myActivity.inPictureInPicture()</code>가
-true를 반환하면, <code>myActivity.inMultiWindow()</code>도 또한
-true를 반환합니다.
+ 케이스입니다. <code>myActivity.isInPictureInPictureMode()</code>가
+true를 반환하면 <code>myActivity.isInMultiWindowMode()</code>도
+역시 true를 반환합니다.
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
     시스템은 액티비티가 다중 창 모드로 들어가거나
-이 모드에서 나올 때마다 이 메서드를 호출합니다. 시스템은 액티비티가 다중 창 모드로
-들어갈 때는 true 값을 메서드에 전달하고, 액티비티가 다중 창 모드에서
-나올 때는 false를 전달합니다.
+ 이 모드에서 나올 때마다 이 메서드를 호출합니다. 시스템은 액티비티가 다중 창 모드로
+ 들어갈 때는 true 값을 메서드에 전달하고, 액티비티가 다중 창 모드에서
+ 나올 때는 false 값을 전달합니다.
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
     시스템은 액티비티가 PIP 모드로 들어가거나
-이 모드에서 나올 때마다 이 메서드를 호출합니다. 시스템은 액티비티가 PIP 모드로 들어갈 때는
-true 값을 메서드에 전달하고, 액티비티가 PIP에서 나올 때는
-false를 전달합니다.
+ 이 모드에서 나올 때마다 이 메서드를 호출합니다. 시스템은 액티비티가 PIP 모드로 들어갈 때는
+ true 값을 메서드에 전달하고, 액티비티가 PIP에서 나올 때는
+ false 값을 전달합니다.
   </dd>
 </dl>
 
 <p>
   또한 이들 각 메서드의 {@link android.app.Fragment} 버전이
-있습니다(예: <code>Fragment.inMultiWindow()</code>).
+있습니다(예: <code>Fragment.isInMultiWindowMode()</code>).
 </p>
 
 <h3 id="entering-pip">PIP 모드로 들어가기</h3>
 
 <p>
   액티비티를 PIP 모드에 두려면, 새로운 메서드인
-<code>Activity.enterPictureInPicture()</code>를 호출합니다. 기기가 PIP 모드를 지원하지 않으면 이 메서드는
-영향이 없습니다. 자세한 내용은
+<code>Activity.enterPictureInPictureMode()</code>를 호출합니다. 기기가 PIP 모드를 지원하지 않으면 이 메서드는
+ 영향이 없습니다. 자세한 내용은
 <a href="picture-in-picture.html">PIP</a> 문서를 참조하세요.
 </p>
 
@@ -395,18 +402,18 @@ false를 전달합니다.
 새 작업 스택에서 액티비티를 시작해야 합니다.
 </p>
 
-<h3 id="dnd">끌어서 놓기 지원</h3>
+<h3 id="dnd">드래그 앤 드롭 지원</h3>
 
 <p>
   사용자는 두
-액티비티가 화면을 공유하는 동안 한 액티비티에서 다른 액티비티로 데이터를 <a href="{@docRoot}guide/topics/ui/drag-drop.html">끌어서 놓을</a>
-수 있습니다. (이전에는, 사용자가 단일 액티비티 내에서만 데이터를 끌어서
-놓을 수 있었습니다.) 이러한 이유로, 앱이 현재 지원하지 않는 경우에는 끌어서 놓기
+액티비티가 화면을 공유하는 동안 한 액티비티에서 다른 액티비티로 데이터를 <a href="{@docRoot}guide/topics/ui/drag-drop.html">드래그 앤 드롭</a>할
+수 있습니다. (이전에는, 사용자가 단일 액티비티 내에서만 데이터를 드래그 앤 드롭할
+ 수 있었습니다.) 이러한 이유로, 앱이 현재 지원하지 않는 경우에는 드래그 앤 드롭
 기능을 앱에 추가하는 것이 좋습니다.
 </p>
 
 <p>
-  N Preview SDK는 앱 간의 끌어서 놓기를 지원하기 위해 <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
+  N Preview SDK는 앱 간의 드래그 앤 드롭을 지원하기 위해 <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
 패키지를 확장합니다. 다음과 같은 클래스와 메서드에 대한 자세한
 내용은, <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview
 SDK 참조</a>를 참조하세요.
@@ -427,7 +434,7 @@ SDK 참조</a>를 참조하세요.
   </dt>
 
   <dd>
-    {@link android.view.View#startDrag View.startDrag()}의 새 별칭. 액티비티 간의 끌어서 놓기를 활성화하려면, 새 플래그
+    {@link android.view.View#startDrag View.startDrag()}의 새 별칭. 액티비티 간의 드래그 앤 드롭을 활성화하려면, 새 플래그
 <code>View.DRAG_FLAG_GLOBAL</code>을
 전달합니다. 수신자 액티비티에게 URI 권한을
 부여해야 하는 경우, 새 플래그
@@ -440,7 +447,7 @@ SDK 참조</a>를 참조하세요.
   </dt>
 
   <dd>
-    현재 진행 중인 끌기 작업을 취소합니다. 끌기 작업을 발생시킨
+    현재 진행 중인 드래그 작업을 취소합니다. 드래그 작업을 발생시킨
 앱에 의해서만 호출될 수 있습니다.
   </dd>
 
@@ -449,7 +456,7 @@ SDK 참조</a>를 참조하세요.
   </dt>
 
   <dd>
-    현재 진행 중인 끌기 작업의 끌기 그림자를 대체합니다. 끌기 작업을 발생시킨
+    현재 진행 중인 드래그 작업의 드래그 그림자를 대체합니다. 드래그 작업을 발생시킨
 앱에 의해서만 호출될 수 있습니다.
   </dd>
 
@@ -481,7 +488,7 @@ Android N이 실행 중인 기기에서 사용자가 앱을 다중 창 모드로
 <h3 id="test-non-n">앱이 N Preview SDK로 작성되지 않은 경우</h3>
 
 <p>
-  앱을 N Preview SDK로 작성하지 않았는데 사용자가
+  앱을 N Preview SDK로 빌드하지 않았는데 사용자가
 앱을 다중 창 모드에서 사용하려고 시도하는 경우, 이 앱이 고정 방향을 선언하지
 않으면 시스템이 앱의 크기를 강제로 조정합니다.
 </p>
@@ -489,7 +496,7 @@ Android N이 실행 중인 기기에서 사용자가 앱을 다중 창 모드로
 <p>
   앱이 고정 방향을 선언하지 않은 경우, Android N이
 실행 중인 기기에서 앱을 시작해야 하며, 앱을 화면 분할 모드에
-두도록 시도해야 합니다. 앱의 크기를 강제로 조정하는 경우 사용자 경험이
+두도록 시도해야 합니다. 앱의 크기를 강제로 조정하는 경우 사용자 환경이
 적절한지 확인하세요.
 </p>
 
@@ -529,7 +536,7 @@ UI 요소가 표시되는지 확인합니다.
   </li>
 
   <li>모든 테스트를 통해 앱의 성능이 적절한지 확인합니다. 예를 들어,
-앱 크기를 조정한 후에, 업데이트하기에 지연이
+앱 크기를 조정한 후 UI를 업데이트하기에 지연이
 너무 길지 않은지 확인합니다.
   </li>
 </ul>

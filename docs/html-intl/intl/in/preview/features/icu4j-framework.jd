@@ -1,5 +1,4 @@
 page.title=ICU4J Android Framework API
-page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -41,7 +40,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>
-  Dokumen ini diawali dengan menyediakan beberapa informasi dasar tentang level API Android
+  Dokumen ini diawali dengan menyediakan beberapa informasi dasar tentang level Android API
   minimum yang diperlukan untuk mendukung pustaka-pustaka ini. Kemudian dijelaskan tentang apa
   yang perlu Anda ketahui tentang implementasi ICU4J spesifik Android. Terakhir,
   Anda akan diberi tahu cara menggunakan ICU4J API dalam kerangka kerja Android.
@@ -63,7 +62,7 @@ page.image=images/cards/card-nyc_2x.jpg
   di Android N.</p>
 <table>
 <tr>
-<th>Level API Android</th>
+<th>Level Android API</th>
 <th>Versi ICU</th>
 <th>Versi CLDR</th>
 </tr>
@@ -91,13 +90,13 @@ sumber daya</a>.</li>
   <code>android.icu</code> API memenuhi persyaratan Anda, maka migrasi ke
   API kerangka kerja mengharuskan Anda untuk mengubah impor Java
   dari <code>com.ibm.icu</code> ke <code>android.icu</code>. Kemudian Anda bisa
-  menghapus salinan file ICU4J dari APK.
+  membuang salinan file ICU4J dari APK.
 </p>
 
 <p class="note">
-  <b>Catatan</b>: API kerangka kerja ICU4J menggunakan namespace {@code android.icu}
+  <b>Catatan</b>: API kerangka kerja ICU4J menggunakan ruang nama {@code android.icu}
   sebagai ganti {@code com.ibm.icu}. Hal ini untuk menghindari konflik
-  namespace di APK yang berisi pustaka {@code com.ibm.icu} sendiri.
+  ruang nama di APK yang berisi pustaka {@code com.ibm.icu} sendiri.
 </p>
 
 <h3 id="migrate-from-android">

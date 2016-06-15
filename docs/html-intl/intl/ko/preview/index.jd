@@ -1,6 +1,6 @@
 page.title=Android N Developer Preview
 page.tags="preview","developer"
-meta.tags="프리뷰", "android"
+meta.tags="preview", "android"
 fullpage=true
 forcelocalnav=true
 header.hide=1
@@ -25,10 +25,10 @@ footer.hide=1
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
           Android N을 맞이할 준비를 하세요!
-          Nexus와 다른 기기에서 <strong>앱을 테스트</strong>하세요. 새로운 시스템
-          동작을 지원하여 <strong>전력과 메모리를 절약</strong>하세요.
+          Nexus와 다른 기기에서 <strong>앱을 테스트하세요</strong>. <strong>전력과 메모리를 절약</strong>하는 새로운 시스템
+동작을 지원하세요.
           <strong>다중 창 UI</strong>,
-          <strong>직접 회신 알림</strong> 등으로 앱을 확장하세요.
+<strong>직접 회신 알림</strong> 등으로 앱을 확장하세요.
         </p>
 
         <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
@@ -97,12 +97,23 @@ footer.hide=1
       <div><a href="{@docRoot}preview/dev-community">
         <span class="dac-sprite dac-auto-chevron-large"></span>
         개발자 커뮤니티 가입
-        </a></div>
+      </a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div>
 
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
+  <h2 class="norule">최신</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:androidn+tag:featured, type:youtube+tag:androidn+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
+</div></section>
+
+<section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">리소스</h1>
   <div class="dac-section-subtitle">
     앱을 Android N에서 사용할 수 있도록 준비하는 데 유용한 중요 정보입니다.

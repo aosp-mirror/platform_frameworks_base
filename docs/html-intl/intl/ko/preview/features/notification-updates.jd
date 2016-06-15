@@ -1,5 +1,5 @@
 page.title=알림
-page.tags=notifications
+page.tags=알림
 helpoutsWidget=true
 page.image=/preview/images/notifications-card.png
 
@@ -16,13 +16,14 @@ trainingnavtop=true
   <li><a href="#direct">직접 회신</a></li>
   <li><a href="#bundle">묶음 알림</a></li>
   <li><a href="#custom">사용자 지정 뷰</a></li>
+  <li><a href="#style">메시지 스타일</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>Android N에서는 앱이 가시성과 상호작용이 뛰어난 알림을
-게시할 수 있도록 여러 새로운 API를 소개합니다.</p>
+<p>Android N에서는 가시성과 상호 작용이 뛰어난 알림을
+앱이 게시할 수 있도록 여러 가지 새로운 API를 도입했습니다.</p>
 
 <p>Android N에서는 핸드셋에서 인라인 회신을 지원하기 위해 기존의 {@link android.support.v4.app.RemoteInput}
 알림 API를 확장합니다. 이 기능을 사용하면 앱을 방문하지 않고도 알림 창에서
@@ -50,17 +51,17 @@ trainingnavtop=true
 <p>Android N에 있는 직접 회신 기능을 사용하여, 사용자가 문자
 메시지에 신속하게 응답하거나 알림 인터페이스 내에서 직접
 작업 목록을 업데이트할 수 있습니다. 핸드헬드에서 인라인 회신 동작은 알림에 연결된 추가적인
-버튼으로 나타납니다. 사용자가 키보드를 통해 회신하면,
+버튼으로 나타납니다. 사용자가 키보드를 통해 회신하면
 시스템은 여러분이 알림 동작에 지정했던
 인텐트에 텍스트 응답을 첨부하고 이 인텐트를
-핸드헬드 앱으로 보냅니다.
+ 핸드헬드 앱으로 보냅니다.
 
 
 <img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
   {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
 <p class="img-caption">
-  <strong>그림 1.</strong> Android N이 <strong>회신</strong>
-동작 버튼을 추가합니다.
+  <strong>그림 1.</strong> Android N이 <strong>Reply</strong>
+ 동작 버튼을 추가합니다.
 </p>
 
 <h3>인라인 회신 동작 추가</h3>
@@ -71,12 +72,12 @@ trainingnavtop=true
 <ol>
 <li>알림 동작에 추가할 수 있는 {@link android.support.v4.app.RemoteInput.Builder}의
 인스턴스를
-만듭니다. 이 클래스의 생성자는 시스템이 문자 입력의 키로
-사용하는 문자열을 수락합니다. 나중에 핸드헬드 앱은 이 키를 사용하여 입력 텍스트를
+만듭니다. 이 클래스의 생성자는 시스템이 텍스트 입력의 키로
+ 사용하는 문자열을 수락합니다. 나중에 핸드헬드 앱은 이 키를 사용하여 입력 텍스트를
 검색합니다.
 
 <pre>
-// Key for the string that's delivered in the action's intent
+// Key for the string that's delivered in the action's intent.
 private static final String KEY_TEXT_REPLY = "key_text_reply";
 String replyLabel = getResources().getString(R.string.reply_label);
 RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
@@ -88,7 +89,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
 객체를 동작에 첨부합니다.
 
 <pre>
-// Create the reply action and add the remote input
+// Create the reply action and add the remote input.
 Notification.Action action =
         new Notification.Action.Builder(R.drawable.ic_reply_icon,
                 getString(R.string.label), replyPendingIntent)
@@ -100,8 +101,8 @@ Notification.Action action =
 <li>동작을 알림에 적용하고 알림을 발생합니다.
 
 <pre>
-// Build the notification and add the action
-Notification notification =
+// Build the notification and add the action.
+Notification newMessageNotification =
         new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_message)
                 .setContentTitle(getString(R.string.title))
@@ -109,10 +110,10 @@ Notification notification =
                 .addAction(action))
                 .build();
 
-// Issue the notification
+// Issue the notification.
 NotificationManager notificationManager =
         NotificationManager.from(mContext);
-notificationManager.notify(notificationId, notification);
+notificationManager.notify(notificationId, newMessageNotification);
 
 </pre>
 </li>
@@ -129,30 +130,32 @@ notificationManager.notify(notificationId, notification);
   <strong>그림 2.</strong> 사용자가 알림 창에서 텍스트를 입력합니다.
 </p>
 
-<h3>인라인 회신에서 사용자 입력 검색</h3>
+<h3>
+  인라인 회신에서 사용자 입력을 검색
+</h3>
 
-<p>회신 동작의 인텐트에 선언한 액티비티에 대해 알림
-인터페이스로부터 사용자 입력을 수신하려면:</p>
+<p>
+  회신 동작의 인텐트에 선언하셨던 액티비티에 대해 알림
+ 인터페이스로부터 사용자 입력을 수신하려면:
+</p>
+
 <ol>
-<li> 알림 동작의 인텐트를 입력 매개변수로서 전달하여 {@link android.support.v4.app.RemoteInput#getResultsFromIntent
-  getResultsFromIntent()}를
-호출합니다. 이 메서드는 텍스트 응답이 포함된 {@link android.os.Bundle}을
-반환합니다.
-</li>
+  <li>알림 동작의 인텐트를 입력 매개변수로서 전달하여 {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+ getResultsFromIntent()}를
+ 호출합니다. 이 메서드는 텍스트 응답이 포함된 {@link android.os.Bundle}을
+ 반환합니다.
 
-<pre>
+    <pre>
 Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 </pre>
+  </li>
 
-<li>({@link
-  android.support.v4.app.RemoteInput.Builder} 생성자에 제공된) 결과 키를 사용하여 번들을 쿼리합니다.
-</li>
-</ol>
+  <li>({@link
+ android.support.v4.app.RemoteInput.Builder} 생성자에 제공된) 결과 키를 사용하여 번들에 쿼리를 수행합니다. 다음 코드 조각에서처럼, 메서드를 만들어 이 프로세스를
+완료하고 입력 텍스트를
+검색할 수 있습니다.
 
-<p>다음 코드 조각에서는 메서드가 번들로부터 입력 텍스트를
-검색하는 방법을 보여줍니다.</p>
-
-<pre>
+    <pre>
 // Obtain the intent that started this activity by calling
 // Activity.getIntent() and pass it into this method to
 // get the associated string.
@@ -160,20 +163,53 @@ Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
     if (remoteInput != null) {
-            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
-            }
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
     return null;
  }
 </pre>
+  </li>
 
-<p>검색된 텍스트에 어떤 동작을 취할지를 결정하기 위해
-앱이 로직을 적용할 수 있습니다.
-채팅과 같은 대화형 앱은 알림 자체에서 더 많은 컨텍스트를
-제공하므로(예: 사용자 자신의 메시지를 포함한 여러 줄의 채팅 기록)
-사용자가 적절하게 응답할 수 있습니다.
-사용자가 {@link android.support.v4.app.RemoteInput}을 통해 응답하는 경우, {@code setRemoteInputHistory()}
-메서드로 텍스트를 회신 기록에
-포함시킵니다.</p>
+  <li>이전 알림에 대해 제공했던 것과 동일한 알림 ID를
+ 사용하여, 다른 알림을 작성하고 발급합니다. 사용자에게 성공적으로 회신했음을
+알려주기 위해 알림 인터페이스에서
+알림 표시기가 사라집니다. 이 새로운 알림으로 작업할 때, 수신기의
+{@code onReceive()} 메서드로 전달되는 컨텍스트를 사용하세요.
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  채팅과 같은 대화형 앱의 경우, 검색된 텍스트를 처리할 때
+ 추가 컨텍스트를 포함하는 것이 유용할 수 있습니다. 예를 들어, 이들 앱은 여러 줄의 채팅 기록을
+표시할 수 있습니다. 사용자가 {@link
+ android.support.v4.app.RemoteInput}을 통해 응답하는 경우,
+{@code setRemoteInputHistory()} 메서드를 사용하여 회신 기록을 업데이트할 수 있습니다.
+</p>
+
+<p>
+  앱이 원격 입력을 수신한 후에는 알림이 업데이트되거나
+ 취소되어야 합니다. 사용자가 Direct Reply를 사용하여 원격 업데이트에
+회신할 때는 알림을
+취소하지 마세요. 그 대신, 사용자의 회신을 표시하도록 알림을 업데이트하세요.
+{@code MessagingStyle}을 사용하는 알림의 경우, 회신을 최신 메시지로서
+추가해야 합니다. 다른 템플릿을 사용할 경우 사용자의
+회신을 원격 입력 기록에 추가할 수 있습니다.
+</p>
 
 <h2 id="bundle">묶음 알림</h2>
 
@@ -187,7 +223,7 @@ Android Wear의 <a href="{@docRoot}training/wearables/notifications/stacks.html"
 Builder.setGroup()} 메서드를 사용하여 유사한 알림을 묶을 수 있습니다.</p>
 
 <p>
-  알림 그룹은 이 그룹을 구성하는 알림을 계층 구조로 만듭니다 .
+  알림 그룹은 이 그룹을 구성하는 알림을 계층 구조로 만듭니다.
   계층 구조의 맨 위는 그룹의 요약 정보가 표시되는 상위
 알림입니다. 사용자는 알림 그룹을 점진적으로 확장할 수 있으며, 시스템은
 사용자가 더 깊이 파고들수록 더 많은 정보를
@@ -200,18 +236,24 @@ Builder.setGroup()} 메서드를 사용하여 유사한 알림을 묶을 수 있
           {@docRoot}preview/images/bundles_2x.png 2x" width="300">
 <p class="img-caption">
   <strong>그림 3.</strong> 사용자는 알림 그룹을 점진적으로 확장할 수
-있습니다.
+ 있습니다.
 </p>
 
-<p>알림을 그룹에 추가하는 방법을 알아보려면,
+<p class="note">
+  <strong>참고:</strong> 동일 앱이 4개 이상의 알림을 보내면서
+그룹화를 지정하지 않으면,
+시스템에서 이들 알림을 자동으로 그룹화합니다.
+</p>
+
+<p>알림을 그룹에 추가하는 방법을 알아보려면
 <a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">각
 알림을 그룹에 추가</a>를 참조하세요.</p>
 
 
 <h3 id="best-practices">묶음 알림의 모범 사례</h3>
 <p>이 섹션에서는 이전 버전의 Android 플랫폼에서
-사용되었던 {@link android.app.Notification.InboxStyle InboxStyle} 알림 대신에
-알림 그룹을 사용할 때의 지침을
+사용되었던 {@link android.app.Notification.InboxStyle InboxStyle}
+알림 대신에 알림 그룹을 사용할 때의 지침을
 제공합니다.</p>
 
 <h3>묶음 알림을 사용하는 경우</h3>
@@ -222,7 +264,7 @@ Builder.setGroup()} 메서드를 사용하여 유사한 알림을 묶을 수 있
 <ul>
   <li>하위 알림은 완전한 알림이며 그룹 요약이 필요 없이
 개별적으로 표시될 수 있습니다.</li>
-  <li>다음은 하위 알림을 개별적으로 표시할 때의 이점입니다. 예:
+  <li>하위 알림을 개별적으로 표시하는 경우 이점이 있습니다. 예를 들면 다음과 같습니다.
 
   </li>
   <ul>
@@ -273,7 +315,7 @@ Builder.setGroup()} 메서드를 사용하여 유사한 알림을 묶을 수 있
 <h3>이전 버전과의 호환성</h3>
 
 <p>
-  Android 5.0 (API 레벨 21) 이후로, 알림 그룹과
+  Android 5.0(API 레벨 21) 이후로, 알림 그룹과
 원격 입력은 Android Wear 기기를 지원하기 위한 {@link
   android.app.Notification} API의 일부였습니다. 이미 이들 API로 알림을 작성한 경우 수행할 조치는,
 앱 동작이 위에 설명된 지침과 일치하는지 확인하고 {@code
@@ -283,8 +325,8 @@ Builder.setGroup()} 메서드를 사용하여 유사한 알림을 묶을 수 있
 
 <p>
   이전 버전과의 호환성을 지원하기 위해,
-지원 라이브러리의 {@link android.support.v4.app.NotificationCompat} 클래스로 동일한
-API를 사용할 수 있으며, 이전 Android 버전에서 작동하는 알림을 작성할
+지원 라이브러리의 {@link android.support.v4.app.NotificationCompat}
+클래스로 동일한 API를 사용할 수 있으며, 이전 Android 버전에서 작동하는 알림을 작성할
 수 있습니다. 핸드헬드와 태블릿에서는 요약 알림만 사용자에게 보이므로,
 앱은 해당 그룹의 전체 정보 콘텐츠에 대해 받은편지함
 스타일이나 이와 동등한 알림 표시를 계속 가져야 합니다. Android
@@ -314,15 +356,38 @@ Wear 기기에서는 구형 플랫폼 레벨에서도
 <p>이 새로운 API를 사용하려면, {@code setStyle()} 메서드를 호출하여,
 원하는 사용자 지정 뷰 스타일에 전달합니다.</p>
 
-<p>이 코드 조각은
+<p>이 조각에서는
 {@code DecoratedCustomViewStyle()} 메서드로 사용자 지정 알림 객체를 구성하는 방법을 보여줍니다.</p>
 
 <pre>
-Notification noti = new Notification.Builder()
+Notification notification = new Notification.Builder()
            .setSmallIcon(R.drawable.ic_stat_player)
            .setLargeIcon(albumArtBitmap))
            .setCustomContentView(contentView);
            .setStyle(new Notification.DecoratedCustomViewStyle())
            .build();
 
+</pre>
+
+<h2 id="style">메시징 스타일</h2>
+<p>
+  Android N에서는 알림 메시지의 스타일을 사용자 지정하기 위한 새로운 API를 도입했습니다.
+  <code>MessageStyle</code> 클래스를 사용하면 대화 제목, 추가 메시지 및 알림에 대한 콘텐츠 뷰를 비롯하여
+알림 메시지에 표시되는 여러 가지 레이블을
+변경할 수 있습니다.
+</p>
+
+<p>
+  다음 코드 조각에서는
+ <code>MessageStyle</code> 클래스를 사용하여 알림 스타일을 사용자 지정하는 방법을 보여 줍니다.
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
 </pre>

@@ -1,5 +1,5 @@
 page.title=Gambar-dalam-gambar
-page.keywords=preview,sdk,PIP,Picture-in-picture
+page.keywords=pratinjau,sdk,PIP,Gambar-dalam-gambar
 page.tags=androidn
 
 @jd:body
@@ -17,6 +17,8 @@ Gambar-dalam-gambar</a></li>
 </li>
   <li><a href="#continuing_playback">Melanjutkan Pemutaran Video Saat dalam
 Gambar-dalam-gambar</a></li>
+  <li><a href="#single_playback">Menggunakan Aktivitas Pemutaran Tunggal untuk
+ Gambar-dalam-gambar</a></li>
   <li><a href="#best">Praktik Terbaik</a></li>
 </ol>
 
@@ -41,13 +43,13 @@ kapan memasuki mode PIP:</p>
 
 <ul>
 <li>Aplikasi Anda bisa memindahkan video ke dalam mode PIP bila pengguna mengarah
-mundur dari video untuk melihat-lihat konten lainnya.</li>
+mundur dari video untuk menjelajah materi lainnya.</li>
 <li>Aplikasi Anda bisa mengalihkan video ke dalam mode PIP selagi pengguna menonton akhir episode
-dari konten. Layar utama menampilkan informasi
+dari materi. Layar utama menampilkan informasi
 promosi atau rangkuman tentang episode berikutnya dalam seri tersebut.</li>
-<li>Aplikasi Anda bisa menyediakan suatu cara bagi pengguna untuk mengantre konten tambahan selagi
+<li>Aplikasi Anda bisa menyediakan suatu cara bagi pengguna untuk mengantre materi tambahan selagi
 mereka menonton video. Video terus dimainkan dalam mode PIP selagi layar
-utama menampilkan aktivitas pemilihan konten.</li>
+utama menampilkan aktivitas pemilihan materi.</li>
 </ul>
 
 <p>Jendela PIP memiliki luas 240x135 dp dan ditampilkan di layer paling atas pada salah satu
@@ -59,11 +61,11 @@ ditutup. Pengguna juga bisa menutup jendela PIP melalui Recents.</p>
 
 <img src="{@docRoot}preview/images/pip-active.png" />
 <p class="img-caption"><strong>Gambar 1.</strong> Video
-Gambar-dalam-gambar terlihat di sudut layar selagi pengguna melihat-lihat konten pada layar
+Gambar-dalam-gambar terlihat di sudut layar selagi pengguna menjelajahi materi pada layar
 utama.</p>
 
 <p>PIP memanfaatkan API multi-jendela yang tersedia di Android N untuk
-menyediakan jendela overlay video yang disematkan. Untuk menambahkan PIP ke aplikasi, Anda harus
+menyediakan jendela hamparan video yang disematkan. Untuk menambahkan PIP ke aplikasi, Anda harus
 mendaftarkan aktivitas yang mendukung PIP, mengalihkan aktivitas Anda ke mode PIP bila
 diperlukan, serta memastikan elemen UI disembunyikan dan pemutaran video berlanjut bila
 aktivitas dalam mode PIP.</p>
@@ -72,7 +74,7 @@ aktivitas dalam mode PIP.</p>
 
 <p>Secara default, sistem tidak secara otomatis mendukung PIP untuk aplikasi.
 Jika Anda ingin mendukung PIP dalam aplikasi, daftarkan aktivitas
-video Anda dalam manifes dengan mengatur
+video Anda dalam manifes dengan menyetel
 <code>android:supportsPictureInPicture</code> dan
 <code>android:resizeableActivity</code> ke <code>true</code>. Juga, tetapkan
 bahwa aktivitas Anda menangani perubahan konfigurasi layout sehingga aktivitas
@@ -88,16 +90,16 @@ Anda tidak diluncurkan ulang saat terjadi perubahan layout selama transisi mode 
 </pre>
 
 <p>Saat mendaftarkan aktivitas Anda, ingatlah bahwa dalam mode PIP aktivitas
-Anda akan ditampilkan pada jendela overlay kecil pada layar TV. Aktivitas
+Anda akan ditampilkan pada jendela hamparan kecil pada layar TV. Aktivitas
 pemutaran video dengan UI minimal akan memberikan pengalaman pengguna terbaik. Aktivitas yang
-berisi elemen UI kecil mungkin tidak memberikan pengalaman pengguna yang baik
-bila beralih ke mode PIP, karena pengguna tidak bisa melihat elemen UI secara detail
+mengandung elemen UI kecil mungkin tidak memberikan pengalaman pengguna yang baik
+ketika beralih ke mode PIP, karena pengguna tidak dapat melihat elemen UI secara jelas
 di jendela PIP.</p>
 
 <h2 id="pip_button">Mengalihkan Aktivitas Anda ke Gambar-dalam-gambar</h2>
 
-Bila Anda perlu untuk mengalihkan aktivitas Anda ke mode PIP, panggil
-<code>Activity.enterPictureInPicture()</code>. Contoh berikut mengalihkan
+Bila Anda perlu untuk mengalihkan aktivitas ke mode PIP, panggil
+<code>Activity.enterPictureInPictureMode()</code>. Contoh berikut mengalihkan
 ke mode PIP bila pengguna memilih tombol PIP khusus pada baris
 kontrol media:</p>
 
@@ -105,7 +107,7 @@ kontrol media:</p>
 &#64;Override
 public void onActionClicked(Action action) {
     if (action.getId() == R.id.lb_control_picture_in_picture) {
-        getActivity().enterPictureInPicture();
+        getActivity().enterPictureInPictureMode();
         return;
     }
     ...
@@ -124,17 +126,17 @@ tindakan PIP baris kontrol dan menggunakan ikon PIP.</p>
 
 <h2 id="handling_ui">Menangani UI Selama Gambar-dalam-gambar</h2>
 
-<p>Bila aktivitas Anda memasuki mode PIP, aktivitas Anda seharusnya hanya menampilkan pemutaran
-video. Hilangkan elemen UI sebelum aktivitas Anda memasuki PIP,
+<p>Bila aktivitas memasuki mode PIP, aktivitas Anda seharusnya hanya menampilkan pemutaran
+video. Buang elemen UI sebelum aktivitas Anda memasuki PIP,
 dan pulihkan elemen ini bila aktivitas Anda beralih ke layar penuh lagi.
-Kesampingkan <code>Activity.onPictureInPictureChanged()</code> atau
-<code>Fragment.onPictureInPictureChanged()</code> dan aktifkan atau
+Ganti <code>Activity.onPictureInPictureModeChanged()</code> atau
+<code>Fragment.onPictureInPictureModeChanged()</code> dan aktifkan atau
 nonaktifkan elemen UI saat diperlukan, misalnya:</p>
 
 <pre>
 &#64;Override
-public void onPictureInPictureChanged(boolean inPictureInPicture) {
-    if (inPictureInPicture) {
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
         // Hide the controls in picture-in-picture mode.
         ...
     } else {
@@ -157,8 +159,8 @@ misalnya:</p>
 <pre>
 &#64;Override
 public void onPause() {
-    // If called due to PIP, do not pause playback
-    if (inPictureInPicture()) {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
         // Continue playback
         ...
     }
@@ -167,13 +169,38 @@ public void onPause() {
 }
 </pre>
 
-<p>Bila aktivitas Anda meninggalkan mode PIP dan kembali ke mode layar penuh, sistem
-akan melanjutkan aktivitas Anda dan memanggil metode <code>onResume()</code> Anda.</p>
+<p>Bila aktivitas meninggalkan mode PIP dan kembali ke mode layar penuh, sistem
+akan melanjutkan aktivitas Anda dan memanggil metode <code>onResume()</code>.</p>
+
+<h2 id="single_playback">Menggunakan Aktivitas Pemutaran Tunggal untuk
+ Gambar-dalam-gambar</h2>
+
+<p>Di aplikasi Anda, seorang pengguna bisa memilih video baru saat menyusuri materi di
+layar utama, selagi aktivitas pemutaran video dalam mode PIP. Putar
+video baru di aktivitas pemutaran yang ada dalam mode layar penuh, sebagai ganti
+meluncurkan aktivitas baru yang dapat membingungkan pengguna.</p>
+
+<p>Guna memastikan aktivitas tunggal digunakan untuk permintaan pemutaran video dan
+beralih ke atau dari mode PIP bila dibutuhkan, setel
+<code>android:launchMode</code> aktivitas ke <code>singleTask</code> dalam manifes Anda:
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>Di aktivitas Anda, ganti {@link android.app.Activity#onNewIntent
+Activity.onNewIntent()} dan tangani video baru, yang akan menghentikan pemutaran video
+jika diperlukan.</p>
 
 <h2 id="best">Praktik Terbaik</h2>
 
 <p>PIP ditujukan untuk aktivitas yang memutar video layar penuh. Saat mengalihkan
-aktivitas Anda ke mode PIP, hindari menampilkan apa pun selain konten video.
+aktivitas Anda ke mode PIP, hindari menampilkan apa pun selain materi video.
 Pantau saat aktivitas Anda memasuki mode PIP dan sembunyikan elemen UI, seperti dijelaskan
 dalam <a href="#handling_ui">Menangani UI Selama Gambar-dalam-gambar</a>.</p>
 
@@ -181,6 +208,6 @@ dalam <a href="#handling_ui">Menangani UI Selama Gambar-dalam-gambar</a>.</p>
 layar, Anda harus menghindari menampilkan informasi penting di layar utama
 di area mana saja yang bisa terhalang oleh jendela PIP.</p>
 
-<p>Bila aktivitas ada berada dalam mode PIP, secara default aktivitas itu tidak mendapatkan fokus input. Untuk
-menerima kejadian input saat dalam mode PIP, gunakan
+<p>Bila aktivitas ada berada dalam mode PIP, secara default aktivitas itu tidak mendapatkan fokus masukan. Untuk
+menerima kejadian masukan saat dalam mode PIP, gunakan
 <code>MediaSession.setMediaButtonReceiver()</code>.</p>

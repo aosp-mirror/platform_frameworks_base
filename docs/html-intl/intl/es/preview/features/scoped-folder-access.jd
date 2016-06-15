@@ -6,7 +6,7 @@ page.tags=androidn
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>Contenido del documento</h2>
+  <h2>En este documento</h2>
   <ol>
     <li><a href="#accessing">Acceder a un directorio de almacenamiento externo</a></li>
     <li><a href="#removable">Acceder a un directorio de un medio extraíble</a></li>
@@ -38,11 +38,25 @@ directorio externo.</li>
 <h2 id="accessing">Acceder a un directorio de almacenamiento externo</h2>
 
 <p>Usa la clase <code>StorageManager</code> para obtener la instancia de
-<code>StorageVolume</code> correcta. Luego, crea una intención llamando al
+<code>StorageVolume</code> correcta. Luego, crea una intent llamando al
  método <code>StorageVolume.createAccessIntent()</code> de esa instancia.
 Usa esta intención para acceder a directorios de almacenamiento externo. Para obtener una lista de
 todos los volúmenes disponibles, incluidos los volúmenes de medios extraíbles, usa 
 <code>StorageManager.getVolumesList()</code>.</p>
+
+<p>Si tienes información sobre un archivo específico, usa 
+<code>StorageManager.getStorageVolume(File)</code> para obtener el 
+<code>StorageVolume</code> que contiene el archivo. Llama a 
+<code>createAccessIntent()</code> en este <code>StorageVolume</code> para acceder al 
+directorio de almacenamiento externo del archivo.</p>
+
+<p>
+En el caso de los volúmenes secundarios, como las tarjetas SD externas, pasa un valor nulo cuando llames a 
+<code>StorageVolume.createAccessIntent()</code> para solicitar acceso al volumen
+ completo, en lugar de un directorio específico.
+<code>StorageVolume.createAccessIntent()</code> regresa un valor nulo si pasas un
+ valor nulo para el volumen principal o si pasas un nombre de directorio no válido.
+</p>
 
 <p>El siguiente fragmento de código es un ejemplo de cómo abrir el
 directorio <code>Pictures</code> en el almacenamiento compartido principal:</p>
@@ -63,18 +77,18 @@ es necesario, confirma el acceso con el usuario usando una IU simplificada:</p>
 acceso al directorio Pictures.</p>
 
 <p>Si el usuario otorga el acceso, el sistema llama a tu
- invalidación de <code>onActivityResult()</code> con un código resultante de
-<code>Activity.RESULT_OK</code> y datos de intención que contienen el URI. Usa
+ anulación de <code>onActivityResult()</code> con un código resultante de
+<code>Activity.RESULT_OK</code> y datos de intents que contienen el URI. Usa
 el URI brindado para acceder a la información del directorio. Es similar a usar URI
 generados por el
 <a href="{@docRoot}guide/topics/providers/document-provider.html">framework
 de acceso al almacenamiento</a>.</p>
 
 <p>Si el usuario no otorga el acceso, el sistema llama a tu
-invalidación de <code>onActivityResult()</code> con un código resultante de
-<code>Activity.RESULT_CANCELED</code> y datos de intención nulos.</p>
+anulación de <code>onActivityResult()</code> con un código resultante de
+<code>Activity.RESULT_CANCELED</code> y datos de intents nulos.</p>
 
-<p class="note"><b>Nota</b>: obtener acceso a un directorio externo específico
+<p class="note"><b>Nota</b>: Obtener acceso a un directorio externo específico
 también otorga el acceso a los subdirectorios de ese directorio.</p>
 
 <h2 id="removable">Acceder a un directorio de un medio extraíble</h2>
@@ -97,7 +111,7 @@ notificación{@link android.os.Environment#MEDIA_MOUNTED}, por ejemplo:</p>
 
 <p>Cuando el usuario conecta un medio extraíble, como una tarjeta SD, el sistema envía una
 notificación{@link android.os.Environment#MEDIA_MOUNTED}. Esta notificación
-brinda un objeto <code>StorageVolume</code> en los datos de intención que puedes
+brinda un objeto <code>StorageVolume</code> en los datos de intents que puedes
 usar para acceder a directorios del medio extraíble. El siguiente ejemplo
 accede al directorio <code>Pictures</code> de medios extraíbles:</p>
 
@@ -121,4 +135,14 @@ usuario.</p>
 
 <p>Si el usuario deniega el acceso a un directorio externo, no vuelvas a solicitar el
 acceso inmediatamente. Hacer esto provocaría una mala experiencia
-de usuario.</p>
+de usuario. Si el usuario deniega una solicitud y la aplicación solicita acceso
+ nuevamente, aparece la casilla de verificación <b>Don't ask again</b> en la IU:</p>
+
+<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
+{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>Figura 1.</strong> Una aplicación que presenta una 
+segunda solicitud para obtener acceso a medios extraíbles.</p>
+
+<p>Si el usuario selecciona <b>Don't ask again</b> y deniega la solicitud, todas las
+solicitudes futuras que presente la aplicación para el directorio determinado se denegarán
+ automáticamente, y el usuario no recibirá ninguna IU de solicitud.</p>

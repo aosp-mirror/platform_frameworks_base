@@ -1,5 +1,4 @@
 page.title=ICU4J Android フレームワーク API
-page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -28,7 +27,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 
 <p>
-  ICU4J は幅広く使用されている、オープン ソースの Java ライブラリのセットで、Unicode のほか、ソフトウェア アプリケーションのグローバル化のサポートを提供しています。
+  ICU4J は幅広く使用されている、オープンソースの Java ライブラリのセットで、Unicode のほか、ソフトウェア アプリのグローバル化のサポートを提供しています。
 Android N では、アプリのデベロッパー向けの Android フレームワーク内で ICU4J API のサブセットを公開しており、{@code android.icu} パッケージ内で使用できます。
 
 これらの API は、端末上のローカライズ データを使用します。
@@ -95,7 +94,7 @@ ICU チームが今後 API を廃止した場合、Android でも廃止と見な
 </p>
 
 <p class="note">
-  <b>注:</b> ICU4J フレームワーク API では、名前空間に {@code com.ibm.icu} ではなく{@code android.icu} を使用します。
+  <b>注</b>:ICU4J フレームワーク API では、名前空間に {@code com.ibm.icu} ではなく{@code android.icu} を使用します。
 これは、独自の {@code com.ibm.icu} ライブラリを含む APK で名前空間が競合しないようにするためです。
 
 </p>
@@ -155,6 +154,6 @@ ICU チームが今後 API を廃止した場合、Android でも廃止と見な
 <h2 id="licence">ライセンス</h2>
 
 <p>
-  ICU4J は ICU ライセンスでリリースされています。詳細については、<a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU User Guide</a> をご覧ください。
+  ICU4J は ICU ライセンスでリリースされています。詳細については、<a class="external-link" href="http://userguide.icu-project.org/icufaq#TOC-How-is-the-ICU-licensed-">ICU ユーザーガイド</a>をご覧ください。
 
 </p>

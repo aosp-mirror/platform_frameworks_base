@@ -1,5 +1,5 @@
 page.title=画中画
-page.keywords=preview,sdk,PIP,Picture-in-picture
+page.keywords=Preview、SDK、画中画
 page.tags=androidn
 
 @jd:body
@@ -16,6 +16,8 @@ page.tags=androidn
   <li><a href="#handling_ui">处理画中画模式中的 UI</a>
 </li>
   <li><a href="#continuing_playback">在画中画模式中继续视频播放
+</a></li>
+  <li><a href="#single_playback">使用画中画的单次播放 Activity
 </a></li>
   <li><a href="#best">最佳做法</a></li>
 </ol>
@@ -72,7 +74,7 @@ PIP 窗口让用户可以在使用应用的时候进行多任务处理，从而�
 
 <p>默认情况下，系统并不自动为应用提供 PIP 支持。如果想要应用支持 PIP，请将
 <code>android:supportsPictureInPicture</code> 和
-<code>android:resizeableActivity</code> 设置为 <code>true</code>，在清单文件中注册视频 Activity。
+<code>android:resizeableActivity</code> 设置为 <code>true</code>，在清单中注册视频 Activity。
 
 此外，应明确指定 Activity 处理布局配置变更，这样，在 PIP 模式过渡期间发生布局变更时，Activity 不会重新启动。
 
@@ -97,7 +99,7 @@ PIP 窗口让用户可以在使用应用的时候进行多任务处理，从而�
 <h2 id="pip_button">将您的 Activity 切换到画中画模式</h2>
 
 在需要将 Activity 切换到 PIP 模式时，请调用
-<code>Activity.enterPictureInPicture()</code>。在下面的示例中，当用户选择媒体控制栏上的专用 PIP 按钮时，系统切换到 PIP 模式：
+<code>Activity.enterPictureInPictureMode()</code>。在下面的示例中，当用户选择媒体控制栏上的专用 PIP 按钮时，系统切换到 PIP 模式：
 
 </p>
 
@@ -105,7 +107,7 @@ PIP 窗口让用户可以在使用应用的时候进行多任务处理，从而�
 &#64;Override
 public void onActionClicked(Action action) {
     if (action.getId() == R.id.lb_control_picture_in_picture) {
-        getActivity().enterPictureInPicture();
+        getActivity().enterPictureInPictureMode();
         return;
     }
     ...
@@ -125,16 +127,16 @@ public void onActionClicked(Action action) {
 <h2 id="handling_ui">处理画中画模式中的 UI</h2>
 
 <p>在 Activity 进入 PIP 模式时，Activity 应仅显示视频播放。
-在 Activity 进入 PIP 模式前删除 UI 元素，当 Activity 再次全屏显示时恢复这些元素。重写 <code>Activity.onPictureInPictureChanged()</code> 或
-<code>Fragment.onPictureInPictureChanged()</code>，并根据需要启用或禁用 UI 元素，例如：
+在 Activity 进入 PIP 模式前删除 UI 元素，当 Activity 再次全屏显示时恢复这些元素。重写 <code>Activity.onPictureInPictureModeChanged()</code> 或
+<code>Fragment.onPictureInPictureModeChanged()</code>，并根据需要启用或禁用 UI 元素，例如：
 
 
 </p>
 
 <pre>
 &#64;Override
-public void onPictureInPictureChanged(boolean inPictureInPicture) {
-    if (inPictureInPicture) {
+public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+    if (isInPictureInPictureMode) {
         // Hide the controls in picture-in-picture mode.
         ...
     } else {
@@ -157,8 +159,8 @@ public void onPictureInPictureChanged(boolean inPictureInPicture) {
 <pre>
 &#64;Override
 public void onPause() {
-    // If called due to PIP, do not pause playback
-    if (inPictureInPicture()) {
+    // If called while in PIP mode, do not pause playback
+    if (isInPictureInPictureMode()) {
         // Continue playback
         ...
     }
@@ -168,6 +170,31 @@ public void onPause() {
 </pre>
 
 <p>当 Activity 退出 PIP 模式并回到全屏模式时，系统会恢复 Activity 并调用 <code>onResume()</code> 方法。
+</p>
+
+<h2 id="single_playback">使用画中画的单次播放 Activity
+</h2>
+
+<p>在您的应用中，用户可以在浏览主屏幕中的内容时选择一个新的视频，视频播放 Activity 处于 PIP 模式。
+在现有播放 Activity 中全屏模式下播放新视频，而不是启用可能使用户感到困惑的新 Activity。
+
+</p>
+
+<p>若要确保视频播放请求使用的是单个 Activity 并根据需要进入或退出 PIP 模式，在您的清单中将 Activity 的 <code>android:launchMode</code> 设置为 <code>singleTask</code>：
+
+
+</p>
+
+<pre>
+&lt;activity android:name="VideoActivity"
+    ...
+    android:supportsPictureInPicture="true"
+    android:launchMode="singleTask"
+    ...
+</pre>
+
+<p>在您的 Activity 中，替换 {@link android.app.Activity#onNewIntent
+Activity.onNewIntent()}，处理新视频，如果需要，停止任何现有视频播放。
 </p>
 
 <h2 id="best">最佳做法</h2>

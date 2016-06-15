@@ -1,0 +1,1188 @@
+page.title=지원 및 릴리스 노트
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-support_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 문서의 내용</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">일반 권고 사항</a></li>
+      <li><a href="#new">DP3의 새로운 기능</a></li>
+      <li><a href="#ki">알려진 문제</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  Android N Developer Preview를 사용하여 개발과 테스트를 수행할 때 두 가지 기본 지원 채널을 사용할 수 있습니다.
+ 기기별 버그, 시스템 버그 및 Google 앱 버그의 경우 <a href="https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a>에 버그를 제출하세요.
+ 기타 앱의 문제는 개발자에게 직접 문의하세요.
+
+</p>
+
+<p>Android N을 사용하는 다른 개발자들과 문제 또는 아이디어를 논의하려면 <a href="{@docRoot}preview/dev-community">Developer Preview Google+ 커뮤니티</a>에 가입하세요.
+</p>
+
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>날짜: 2016년 5월<br>
+        빌드: NPD35K<br>
+        에뮬레이터 지원: x86 및 ARM(32비트/64비트)<br>
+        Google Play 서비스: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">일반 권고 사항</h3>
+
+<p>
+  이 Developer Preview 릴리스는 <strong>앱 개발자 및 기타 얼리 어댑터</strong>를 위한 것이며, 일상적인 용도로 사용하거나, 개발 또는 호환성 테스트에 사용할 수 있습니다.
+
+ 이 릴리스에 대한 다음과 같은 일반적인 참고 사항을 숙지하시기 바랍니다.
+
+</p>
+
+<ul>
+  <li>이 릴리스에서는 지원되는 기기에서 다양한 <strong>안정성 문제</strong>가 있을 수 있습니다.
+ 사용자는 커널 패닉 및 작동 중단 등의 시스템 불안정 문제를 겪을 수 있습니다.
+
+  </li>
+
+  <li>일부 앱의 경우 새로운 플랫폼 버전에서 <strong>예상과 다르게 작동할 수 있습니다</strong>.
+ 여기에는 Google 앱뿐만 아니라 다른 앱도 포함됩니다.
+  </li>
+
+  <li>Developer Preview 3는 Nexus 5X, Nexus 6, Nexus 6P 및 Pixel C 기기에서 <strong>CTS(Compatibility Test Suite) 승인을 받았습니다</strong>.
+ CTS 승인 빌드를 사용하는 앱은 이들 기기에서 정상적으로 작동해야 합니다(예: Android Pay).
+
+
+  </li>
+
+  <li>Developer Preview 3는 <strong>지원되는 모든 기기에서 사용할 수 있습니다.</strong>
+ 이러한 기기로는 Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel C, General Mobile 4G(Android One) 뿐만 아니라 Sony Xperia Z3(D6603 및 D6653 모델)가 포함됩니다.
+
+
+
+  </li>
+</ul>
+
+
+<h3 id="new">DP3의 새로운 기능</h3>
+
+<h4 id="">Android용 VR 모드</h4>
+
+<p>
+  Android N에서는 개발자가 사용자를 위한 고품질 모바일 VR 환경을 만들 수 있도록 새로운 VR 모드에 대한 플랫폼 지원과 최적화 기능을 추가했습니다.
+ VR 앱 전용 CPU 코어에 대한 액세스를 비롯하여, 다수의 성능 개선 사항이 있습니다.
+
+ 지능적 머리 추적과 VR용으로 작동하는 스테레오 알림 기능을 앱 내에서 이용할 수 있습니다.
+ 가장 중요한 점은, 지연 시간이 매우 짧은 그래픽을 Android N이 제공한다는 사실입니다.
+
+</p>
+
+<p>
+  자세한 내용은 <a href="https://developers.google.com/vr/android/">Android용 Google VR SDK</a>를 참조하세요.
+</p>
+
+<h4 id="">지속적인 성능 모드</h4>
+
+<p>
+  Android N에는 <a href="{@docRoot}preview/api-overview.html#sustained_performance_api">지속적인 성능 모드</a>를 위한 지원 기능(선택 사항)이 포함되어 있으며, 이 모드를 통해 OEM들은 장시간 실행되는 애플리케이션의 기기 성능에 대한 힌트를 제공할 수 있습니다.
+
+ 앱 개발자는 이런 힌트를 사용하여 장기간에 걸쳐 기기 성능을 예측 가능하고 일관된 수준으로 유지하기 위해 애플리케이션을 적절히 조정할 수 있습니다.
+
+ 앱 개발자는 Developer Preview에 있는 이 새 API를 Nexus 6P 기기에서만 시험해 볼 수 있습니다.
+
+</p>
+
+<h4>Multiprocess WebView</h4>
+
+<p>
+  Android N의 버전 51부터는 개발자 옵션 "Multiprocess WebView"가 활성화된 경우, WebView는 별도의 샌드박싱된 프로세스에서 웹 콘텐츠를 실행합니다.
+
+ WebView 팀은 향후 Android 버전에서 Multiprocess WebView를 지원하기 전에 N에서의 호환성 및 런타임 성능에 대한 피드백을 기다리고 있습니다.
+
+ 이 버전에서는 시작 시간, 총 메모리 사용량 및 소프트웨어 렌더링 성능에 관련된 성능 저하가 예상됩니다.
+
+</p>
+
+<p>
+  다중 프로세스 모드에서 예상치 못한 문제를 발견할 경우 이에 대해 알려주시기 바랍니다.
+ <a href="https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">버그 제출</a>을 통해 WebView 팀에 연락하세요.
+
+</p>
+
+<h4 id="">Keyboard Shortcuts Helper</h4>
+
+<p>
+  Android N에서는 사용자가 <code>Meta+/</code> 키를 눌러 <strong>Keyboard Shortcuts</strong> 화면을 트리거할 수 있으며, 이 화면에는 시스템과 해당 앱에서 둘다 사용할 수 있는 모든 바로 가기가 표시됩니다.
+
+ 개발자는 자신의 바로 가기를 추가하거나 앱에서 Shortcuts 화면을 트리거할 수 있습니다.
+ 자세한 내용은 <a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Keyboard Shortcuts Helper</a>를 참조하세요.
+
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  DP3에서는 새로운 <a href="{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a>를 추가했으며, 이를 통해 앱은 애플리케이션의 현재 창에 대한 프레임 타이밍 정보를 전송하기 위해 스트리밍 PubSub API를 노출함으로써 앱의 UI 렌더링 성능을 모니터링할 수 있습니다. <code>FrameMetricsListener</code>를 사용하면 USB 연결 없이 프로덕션 환경에서 상호 작용 수준의 UI 성능을 더욱 정밀하게 측정할 수 있습니다.
+
+
+
+
+
+</p>
+
+<h4 id="api-changes">기능 및 API 변경 사항</h4>
+
+<dl>
+  <dt>
+    런처 바로 가기 및 런처 바로 가기 API
+  </dt>
+
+  <dd>
+    이 기능은 향후 Android 릴리스로 미루기로 결정되었습니다. 차기 Developer Preview부터는 런처 바로 가기 API(ShortcutManager 등)가 공개 Android N API에서 삭제될 계획입니다.
+
+
+  </dd>
+
+  <dt>
+    페이지 로드 전에 WebView Javascript 실행
+  </dt>
+
+  <dd>
+    Android N을 대상으로 하는 앱부터는 새 페이지가 로드될 때 Javascript 컨텍스트가 초기화됩니다.
+ 현재는 새 {@link android.webkit.WebView} 인스턴스에 로드된 첫 페이지에 대해 컨텍스트가 이월됩니다.
+
+    Javascript를 {@link android.webkit.WebView}에 삽입하려는 개발자는 페이지 로드가 시작된 후에 스크립트를 실행해야 합니다.
+
+
+  </dd>
+
+  <dt>
+    비보안 출발지에서의 WebView Geolocation
+  </dt>
+
+  <dd>
+    Android N을 대상으로 하는 앱부터는 보안 출발지(HTTPS를 통함)에서만 Geolocation API가 허용됩니다.
+ 이 정책은 사용자가 비보안 연결을 사용하는 경우 사용자의 개인 정보를 보호할 목적으로 설계되었습니다.
+
+  </dd>
+
+  <dt>
+    Data Saver
+  </dt>
+
+  <dd>
+    Developer Preview 3부터는 앱이 인텐트를 사용하여 시스템 대화 상자를 표시할 수 있습니다. 사용자는 이 대화 상자를 통해 Data Saver 면제 허용 목록에 앱을 직접 추가할 수 있습니다.
+
+ 자세한 내용은 <a href="{@docRoot}preview/api-overview.html#data_saver">Data Saver 문서</a>를 참조하세요.
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#number-blocking">번호 차단</a>
+  </dt>
+
+  <dd>
+    권한 없는 사용자가 번호를 차단하거나 차단 해제하려고 시도하면 이제 {@link java.lang.SecurityException}이 발생하고 작업이 실패합니다.
+ (이전에는 작업에서 {@link java.lang.UnsupportedOperationException}을 발생시켰습니다.)
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">Quick Settings 타일 API</a>
+
+  </dt>
+
+  <dd>
+    이제 시스템에서는 액티비티의 메타데이터를 사용하여 타일 모드를 결정합니다.
+    (이전에는 <code>TileService.onTileAdded()</code>의 반환 값으로 타일 모드가 결정되었습니다.)
+ 자세한 내용은 다운로드 가능한 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API 참조</a>에서 <code>TileService.META_DATA_ACTIVE_TILE</code>을 참조하세요.
+
+  </dd>
+</dl>
+
+<h4 id="dp3-fixes">개발자가 보고한 문제의 수정 사항</h4>
+
+<p>
+  다음을 비롯하여 개발자가 보고한 여러 문제가 수정되었습니다.
+</p>
+
+<ul>
+  <li>노래가 하나 끝난 후 블루투스 오디오 재생이 중단됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=206889">206889</a>)
+  </li>
+
+  <li>Pixel C가 지속적으로 작동 중단됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=206962">206962</a>)
+  </li>
+
+  <li>시계 및 알림 메시지의 알림 문제(버그 <a href="https://code.google.com/p/android/issues/detail?id=203094">203094</a>)
+  </li>
+
+  <li>USB C 케이블을 통해 MacBook Pro에 연결된 경우 Pixel C가 재부팅됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=205432">205432</a>)
+
+  </li>
+
+  <li>캘린더가 하루 오프셋됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=203002">203002</a>)
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo가 잘못된 데이터를 반환함(버그 <a href="https://code.google.com/p/android/issues/detail?id=203022">203022</a>)
+  </li>
+
+  <li>Nexus 6P, 블루투스의 연결이 계속 끊김(버그 <a href="https://code.google.com/p/android/issues/detail?id=208062">208062</a>)
+  </li>
+</ul>
+
+<p>수정된 문제의 전체 목록을 보려면 <a href="https://goo.gl/6uCKtf">Issue Tracker</a>를 참조하세요.
+</p>
+
+<h3 id="ki">알려진 문제</h3>
+
+<h4>접근성</h4>
+
+<ul>
+  <li>피치가 최대 수준에 가깝게 설정된 경우 TTS 출력을 들을 수 없습니다.
+  </li>
+
+  <li>확대 제스처 및 설정을 비롯한 접근성 기능 및 설정은 사용자가 작업 프로필을 추가하는 경우 중단될 수 있습니다.
+ 접근성 상태는 사용자가 관련 설정을 다음 번에 터치할 때 복구됩니다.
+
+  </li>
+</ul>
+
+<h4>카메라</h4>
+
+<ul>
+  <li>카메라 앱이 불안정한 작동을 보였습니다. 이 앱은 다양한 경우(예: 다중 창 모드에서 실행되는 경우) 작동이 중단될 수 있습니다.
+
+  </li>
+
+  <li>파노라마 모드에서 셔터를 계속해서 누르면 카메라 앱의 작동이 중단될 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>오디오</h4>
+<ul>
+  <li>플랫폼의 오디오 플레이어 문제로 인해 일부 앱이 정상적으로 작동하지 않습니다.
+ 예를 들어, Skype 및 기타 앱이 이 문제의 영향을 받습니다.
+  </li>
+</ul>
+
+<h4>연결</h4>
+
+
+<ul>
+  <li>블루투스 저전력(Bluetooth Low Energy, BLE) 주변 역할 기기가 서비스를 알리고 있는데 BLE 중앙 역할 기기가 연결되면, 주변 역할 기기가 즉각적으로 연결을 해제합니다.
+
+
+  </li>
+
+  <li>화면이 꺼지면 Wi-Fi 연결이 끊길 수 있습니다.
+  </li>
+
+  <li>RFCOMM 연결이 불안정하며, 이로 인해 데이터 손상 및 연결 자주 끊김이 발생할 수 있습니다.
+
+  </li>
+
+  <li>일부 제한된 백그라운드 시나리오 중에, 활성 네트워크 상태({@link android.net.NetworkInfo#getState NetworkInfo.getState()} 및 {@link android.net.NetworkInfo#getDetailedState NetworkInfo.getDetailedState()})가 잘못된 값을 반환할 수 있습니다.
+
+
+
+  </li>
+</ul>
+
+
+<h4>
+  런처
+</h4>
+
+<ul>
+  <li>화면이 꺼졌다가 켜진 후 기본 런처의 All Apps 트레이가 응답하지 않을 수 있습니다.
+ 홈 화면으로 돌아간 후 All Apps 트레이를 다시 실행하면 이 문제가 해결될 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>
+  키보드
+</h4>
+
+<ul>
+  <li>Android 6.0 이전 버전이 실행되는 기기를 N Developer Preview로 업데이트하는 경우, Google 키보드가 최신 그림 이모티콘 및 소리 설정과 같은 기본 설정 데이터를 유지하지 않습니다.
+
+
+  </li>
+
+  <li>Google Indic Managed Keyboard는 불안정할 수 있습니다.
+  </li>
+
+  <li>비밀번호 필드에 텍스트를 입력할 때 사용자가 러시아어를 입력 언어로 선택할 수 있지만 키보드는 계속 영어를 유지합니다.
+ 이로 인해 사용자가 러시아어 언어로 암호를 입력할 수 없습니다.
+
+  </li>
+</ul>
+
+<h4>
+  로케일 및 언어
+</h4>
+
+<ul>
+  <li>오른쪽에서 왼쪽으로 읽기(RTL) 로케일을 사용하는 경우, 기기를 재시작한 후 예기치 않게 왼쪽에서 오른쪽으로 읽기(LTR) 표시로 시스템이 전환될 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>미디어</h4>
+
+<ul>
+  <li>HD 비디오 재생 문제를 비롯하여, Nexus 9 및 Nexus Player에서 미디어 재생이 불안정할 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>
+  다중 창 모드
+</h4>
+
+<ul>
+  <li>다중 창 모드에서 방향을 변경하면 기기가 작동을 멈출 수 있습니다.
+  </li>
+
+  <li>현재 여러 앱에서 다중 창 모드와 관련하여 문제가 있습니다.
+    <ul>
+      <li>Settings &gt; Display &gt; Screen brightness를 다중 창에 도킹하면 시스템 UI의 작동이 중단될 수 있습니다.
+
+      </li>
+
+      <li>카메라 앱을 다중 창 모드에서 실행하면 작동이 중단될 수 있습니다.
+      </li>
+
+      <li>YouTube를 다중 창 모드에서 실행하면 작동이 중단될 수 있습니다. Storage &gt; Apps &gt; YouTube에서 YouTube 앱 데이터를 지워서 이 문제를 수정할 수 있습니다.
+
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play 서비스
+</h4>
+
+<ul>
+  <li>Google Play 서비스를 통해 Google Cast를 사용하는 앱의 경우, ASCII 범위에 속하지 않는 글자 및 숫자를 사용하는 시스템 로케일을 사용자가 선택하면 앱이 불안정해질 수 있습니다.
+
+
+  </li>
+</ul>
+
+<h4>
+  Android for Work 및 Google Apps Device Policy
+</h4>
+
+<ul>
+  <li>사용자가 "device policy status" 화면이 고정된 상태로 기기의 잠금을 해제할 경우, Device Policy 앱의 작동이 중단될 수 있습니다.
+
+  </li>
+
+  <li>파일 기반 암호화가 설정된 채로 작업 프로필을 설정하고, Work를 끈 후에 사용자가 다시 한 번 더 기본 프로필 화면 잠금을 해제하여 Work 앱에 액세스해야 합니다.
+
+
+  </li>
+
+  <li>보안 패턴 잠금을 제거하고 업무용 앱/개인 앱을 다중 창에서 열면 기기가 재부팅됩니다.
+
+  </li>
+
+  <li>DISALLOW_VPN_CONFIG를 설정하면 Device Policy Client에 의해 설정되는 상시 접속 VPN 모드에 동의 대화 상자가 나타납니다.
+
+  </li>
+
+  <li>VPN이 상시 접속 VPN 모드에서 연결될 때까지는 트래픽이 잠기지 않습니다.
+  </li>
+</ul>
+
+<h4>
+  외부 저장소
+</h4>
+
+<ul>
+  <li>사용자가 앱을 내부 저장소에서 채택 가능 외부 저장소(SD 카드 또는 USB를 통해 연결된 기기 포함)로 이동하면 앱이 불안정해질 수 있습니다.
+
+
+  </li>
+</ul>
+
+<h4>
+  Google Play에서의 화면 확대/축소 및 다중 APK
+</h4>
+
+<ul>
+  <li>Android N이 실행되는 기기에서 Google Play 서비스 9.0.83은 안정적인 화면 밀도 대신 현재 화면 밀도를 잘못 보고합니다.
+ 이러한 기기에서 화면 확대/축소가 활성화된 경우, 이로 인해 Google Play는 더 작은 화면용으로 설계된 다중 APK 앱의 버전을 선택할 수가 있습니다.
+
+ 이 문제는 차기 버전의 Google Play 서비스에서 수정되었으며, 나중에 Developer Preview 릴리스에 포함될 것입니다.
+
+
+  </li>
+
+  <li>Android N이 실행되는 기기에서 현재 Google Play 서비스 9.0.83은 Vulkan 버전이 아닌 Vulkan 지원을 보고합니다.
+ 이로 인해 Google Play는 더 높은 버전이 지원되는 기기에서 더 낮은 Vulkan 지원용으로 설계된 다중 APK 앱의 버전을 선택할 수가 있습니다.
+
+ 현재 Google Play Store에서는 Vulkan 버전 대상 지정을 사용하는 앱의 업로드를 허용하지 않습니다.
+ 이 지원은 향후에 Google Play Store에 추가될 예정이고 차기 버전의 Google Play 서비스에서 수정되어 나중에 Developer Preview 릴리스에 포함될 것입니다. Google Play 서비스 9.0.83 버전을 사용하는 모든 N 기기는 기본 Vulkan 지원을 대상으로 하는 앱의 버전을 계속해서 수신합니다.
+
+
+
+
+  </li>
+</ul>
+
+<h4 id="">알림</h4>
+
+<ul>
+  <li>MessagingStyle에서는 "null"(본인 자신) 발신자인 알림을 표시하지 않습니다.
+  </li>
+</ul>
+
+<h4 id="">개발자 도구</h4>
+
+<ul>
+  <li>
+    JDWP 디버깅을 사용하는 중에 <code>adb</code>의 연결이 가끔씩 끊길 수 있습니다.
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+
+
+<!-- DP2 Release Notes Archive -->
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>날짜: 2016년 4월<br>
+        빌드: NPC91K, NPC91O<br>
+        에뮬레이터 지원: x86 및 ARM(32비트/64비트)<br>
+        Google Play 서비스: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp2-new">DP2의 새로운 기능</h3>
+
+<ul>
+  <li>Vulkan에 대한 플랫폼 지원. Vulkan은 새로운 3D 렌더링 API이며, 낮은 오버헤드의 명시적 GPU(Graphics Processor Unit, 그래픽 처리 장치) 컨트롤을 제공하고 그리기 호출이 잦은 애플리케이션에 향상된 성능을 제공합니다.
+
+ 자세한 내용은 <a href="{@docRoot}ndk/guides/graphics/index.html">문서</a>를 참조하세요.
+
+  </li>
+
+  <li>피부 색조를 지원하는 새로운 사람 그림 이모티콘 및 새로운 유니코드 9 문자 모양.
+  피부 색조 및 새로운 그림 이모티콘은 키보드에 의해 이들 기능에 대한 지원이 색상표에 구축될 때까지는 표시되지 않습니다.
+ 시스템에서 제공하지 않는 글꼴을 사용하지 않는 한, 앱은 이러한 새로운 그림 이모티콘을 활용하기 위해 어떠한 작업도 수행할 필요가 없습니다.
+ IME 개발자는 새로운 그림 이모티콘에 대한 지원을 포함시켜야 합니다.
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">런처 바로 가기 API</a>:
+ 앱은 <code>ShortcutManager</code>를 사용하여 해당 앱 내부의 시작점에 대한 바로 가기를 런처로 전송할 수 있습니다.
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">다중 창</a>:
+    이제 액티비티에 대해 최소 높이와 최소 너비를 별도로 지정할 수 있습니다.
+ 또한, 여러 가지 API 이름이 약간 변경되었습니다.
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">개발자가 보고한 문제의 수정 사항</h4>
+
+<p>
+  다음을 비롯하여 개발자가 보고한 여러 문제가 수정되었습니다.
+</p>
+
+<ul>
+  <li>숨겨진 SSID 또는 비-브로드캐스트 Wi-Fi에 연결할 수 없음(버그 <a href="https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
+  </li>
+
+  <li>마이크 음소거 상태가 액티비티 간에 유지됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
+  </li>
+
+  <li>다중 창의 포커스를 변경하면 YouTube가 일시 중지됨(버그 <a href="https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
+  </li>
+
+  <li>열려 있는 액티비티를 직접 회신으로 닫을 수 있음(버그 <a href="https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
+  </li>
+
+  <li>다양한 안정성 문제 수정
+  </li>
+</ul>
+
+<h3 id="dp2-general">일반 권고 사항</h3>
+
+<p>
+  이 Developer Preview 릴리스는 <strong>앱 개발자 전용</strong>이며, 호환성 테스트 및 조기 개발 용도로만 사용하도록 설계되었습니다.
+
+  이 릴리스에 대한 다음과 같은 일반적인 참고 사항을 숙지하시기 바랍니다.
+</p>
+
+<ul>
+
+  <li>개발 도구 구성 요소 및 지원 라이브러리가 DP2 릴리스에 대해 업데이트되었습니다.
+ DP2용으로 개발하기 전에 Preview 개발 환경을 업데이트해야 합니다.
+ 개발 환경을 설정하는 방법에 대한 지침은 <a href="{@docRoot}preview/setup-sdk.html">Preview 설정</a>을 참조하세요.
+
+
+  </li>
+
+  <li>이 릴리스의 경우 모든 기기에서 다양한 안정성 및 성능 문제가 있으므로 <strong>전화 또는 태블릿에서 일상적으로 사용하는 데 적합하지 않으며</strong>, 특히 개발자가 아닌 일반 사용자가 사용하기에 적합치 않습니다.
+
+
+  </li>
+
+  <li>배터리 수명 및 성능은 이 릴리스에서 아직 최적화되지 않았습니다.
+
+
+    <ul>
+      <li>시스템 및 앱 <strong>성능이 주기적으로 느려지고 저하되는 것으로 확인되었으며</strong>, 기기가 가끔씩 응답을 멈출 수 있습니다.
+ 이러한 문제는 장기 사용 시 더 심해질 수 있습니다.
+
+      </li>
+
+      <li>이 릴리스에서 화면을 켜고 끄는 과정에서 배터리 수명이 감소할 수 있습니다.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>일부 앱의 경우 Developer Preview 2에서 <strong>정상적으로 작동하지 않을 수 있습니다</strong>. 여기에는 Google 앱뿐만 아니라 다른 앱도 포함됩니다.
+
+  </li>
+
+  <li>이 조기 빌드는 <strong>CTS(Compatibility Test Suite) 승인</strong>을 받지 않았습니다.
+ CTS 승인을 받은 빌드를 사용하는 앱은 작동하지 않습니다(예: Android Pay).
+
+  </li>
+
+  <li>이 프리뷰 릴리스에서는 Nexus 5X, Nexus 6, Nexus 6P, Nexus 9 및 Pixel C 뿐만 아니라 General Mobile 4G(Android One) 기기를 지원합니다.
+
+ Nexus Player 지원은 곧 추가될 것입니다.
+  </li>
+
+
+  <li><a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a>는 DP1 및 DP2 사이의 API 변경 사항을 처리하도록 업데이트되었습니다.
+
+  </li>
+</ul>
+
+<h3 id="dp2-ki">알려진 문제</h3>
+
+<h4>성능 및 배터리</h4>
+
+<ul>
+  <li>시스템 및 앱 성능이 <strong>주기적으로 느려지고 저하</strong>되는 것으로 확인되었으며, 기기가 가끔씩 응답을 멈출 수 있습니다.
+ 이러한 문제는 장기 사용 시 더 심해질 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>Google 계정</h4>
+
+<ul>
+  <li>경우에 따라 <code>AccountManagerService</code>와 관련된 문제가 있을 수 있으며, 이로 인해 Google 계정에 로그인하지 못할 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>시스템 업데이트</h4>
+
+<ul>
+  <li>DP2로 업데이트한 후 즉시 기기가 재시작될 수 있습니다.
+  </li>
+</ul>
+
+<h4>접근성</h4>
+
+<ul>
+  <li>피치가 최대 수준에 가깝게 설정된 경우 TTS(텍스트 음성 변환) 출력을 듣는 데 문제가 있습니다.
+
+  </li>
+</ul>
+
+<h4>블루투스</h4>
+
+<ul>
+  <li>블루투스 저전력(LE) GATT 특성이 잘못된 쓰기 유형을 사용하며 원격 기기로 전송되지 않습니다.
+ 이에 따라 예를 들면 일부 피트니스 기기가 작동하지 않습니다.
+
+  </li>
+</ul>
+
+<h4>설정 마법사</h4>
+
+<ul>
+  <li>"Your Google Account"에서 새 기기(또는 새롭게 초기화된 기기)의 데이터를 복원하는 옵션이 설정 마법사에서 작동하지 않습니다.
+ 설정 마법사에서 "다른 Android 기기"를 선택하여 기존 기기의 데이터를 복원하거나, 기존 기기를 새 기기로 설정해야 합니다.
+
+
+  </li>
+</ul>
+
+<h4>OEM 잠금 해제</h4>
+
+<ul>
+  <li>일부 기기에서, DP2를 실행하는 동안 "Developer Options"에서 <strong>Enable OEM unlock</strong>이 비활성화됩니다.
+<br>
+  <strong>해결 방법:</strong> <a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a>를 방문하여 Android 베타 프로그램에 옵트인합니다(아직 옵트인하지 않은 경우).
+
+ 그런 다음 옵트아웃하고 다운그레이드 OTA를 수락합니다.
+ 옵트아웃하면 기기가 Android 6.0으로 다운그레이드됩니다. 이제 "Developer Options"에서 <strong>Enable OEM unlock</strong>을 선택할 수 있을 것입니다.
+
+ 기기를 다운그레이드하면 개인 데이터가 삭제되지만, 부트로더의 잠금을 해제하는 경우에도 이 데이터가 삭제됩니다.
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>작업 보안 인증 질문
+    <ul>
+      <li>N으로 마이그레이션한 후나 사용자가 작업 프로필을 생성한 후에, 사용자가 자신의 패턴, PIN 또는 비밀번호를 변경하거나 작업 인증 질문을 설정할 때까지는 작업 프로필에서 키 저장소에 키를 생성할 수 없습니다.
+
+
+      </li>
+
+      <li>직접 부팅 모드에서 비밀번호 제한을 기기에 적용하면, 기기가 잠겨 있는 경우에도 작업 프로필의 잠금이 해제됩니다.
+
+      이로 인해 작업 프로필이 기기 잠금 화면으로 보호되어야 하는 경우에도 작업 프로필에 액세스할 수 있게 됩니다.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>상시 접속 VPN
+    <ul>
+      <li>상시 접속 VPN 모드가 설정되었는데도 VPN을 사용할 수 없는 경우, 앱이 일반 네트워크를 통해 연결합니다.
+ VPN 연결을 사용할 수 없는 경우 앱은 오프라인이어야 합니다.
+
+      </li>
+
+      <li>상시 접속 모드가 설정된 경우 사용자가 보안 잠금 화면의 잠금을 해제한 후에도, 기기가 직접 부팅 모드로 재부팅된 후 VPN 연결이 설정되지 않습니다.
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>패키지 일시 중단
+    <ul>
+      <li>기기 관리자는 예상치 못한 동작(예: "Telephone disabled" 대화 상자가 표시되어 있는데도 전화가 걸림)을 초래할 수 있는 중대한 시스템 패키지를 일시 중단시킬 수 있습니다.
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>기타
+    <ul>
+      <li>{@link android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA}가 true로 설정된 경우, 사용자가 SD 카드와 같은 물리적 미디어를 삽입하면 Settings 앱이 실행 시에 작동을 멈춥니다.
+
+
+      </li>
+
+      <li>작업 프로필의 첫 번째 체크인은 완료되는 데 몇 분 정도 걸립니다.
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>바인딩 번호와 0이 아닌 첫 번째 바인딩 번호 사이에 격차가 있는 경우 {@code vkCreateGraphicsPipeline()}이 실패합니다.
+</li>
+      <li>투영된 텍스처 좌표에서 Vulkan이 잘못된 샘플링 동작을 보입니다.</li>
+      <li>multithreadCmdBuffer 샘플에서 N-DP2 드라이버와 함께 실행되는 경우 {@code vkCmdClearColorImage()}가 작동을 중단합니다.
+</li>
+      <li>{@code vkGetPhysicalDeviceFormatProperties()}의 반환 값은 결과로 0 값을 취하는 {@code VkFormatProperties::linearTilingFeatures}의 값을 설정하지 않습니다.
+
+</li>
+      <li>Vulkan 부동 소수점 프레임 버퍼 첨부 파일이 올바르게 처리되지 않습니다.</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V 셰이더가 드라이버 어설션을 트리거할 수 있습니다.</li>
+      <li>일부 파이프라인 구성에서는 {@code vkCreateGraphicsPipeline()}이 작동을 중단할 수 있습니다.
+</li>
+  </ul>
+</ul>
+
+<h4>기기별 문제</h4>
+
+<dl>
+  <dt>
+    <strong>Android One</strong>
+  </dt>
+
+  <dd>
+    기기가 슬롯 1에서 슬롯 2 SIM으로 전환된 경우 데이터 연결이 실패합니다.
+  </dd>
+
+  <dt>
+    <strong>Pixel C</strong>
+  </dt>
+
+  <dd>
+    음성 검색 "Always On" 옵션을 전환할 수 없습니다.
+  </dd>
+
+  <dt>
+    <strong>Nexus 6</strong>
+  </dt>
+
+  <dd>
+    HDR+ 사진을 제외하고, 세로 방향의 카메라 사진이 손상됩니다.
+
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    Nexus Player에서 Netflix HD 콘텐츠의 재생이 실패할 수 있습니다.
+  </dd>
+
+  <dd>
+    동적 비디오 해상도 변경에 의존하는 모든 애플리케이션이 Nexus Player에서 실패할 수 있습니다.
+
+  </dd>
+
+  <dd>
+    VP9 비디오 코덱을 사용하는 모든 애플리케이션이 Nexus Player에서 실패할 수 있습니다.
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>날짜: 2016년 3월<br>
+        빌드: NPC56P, NPC56R, 업데이트됨: NPC56W, NPC56X<br>
+        에뮬레이터 지원: x86 및 ARM(32비트/64비트)<br>
+        Google Play 서비스: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp1-general">일반 권고 사항</h3>
+
+<p>
+  이 Developer Preview 릴리스는 앱 개발자 전용이며, 호환성 테스트 및 조기 개발 용도로만 사용하도록 설계되었습니다.
+ 이 릴리스에 대한
+  다음과 같은 일반적인 참고 사항을 숙지하시기 바랍니다.
+</p>
+<ul>
+  <li>이 릴리스의 경우 모든 기기에서 다양한 안정성 및 성능 문제가 있으므로 <em>전화 또는 태블릿에서 일상적으로 사용하는 데 적합하지 않으며</em>, 특히 개발자가 아닌 일반 사용자가 사용하기에 적합치 않습니다.
+
+
+  </li>
+
+  <li>시스템 및 앱 성능이 <strong>주기적으로 느려지고 저하</strong>되는 것으로 확인되었으며, 기기가 가끔씩 응답을 멈출 수 있습니다.
+ 이러한 문제는 장기 사용 시 더 심해질 수 있습니다.
+
+  </li>
+
+  <li>이 릴리스에서 화면을 켜고 끄는 과정에서 배터리 수명이 감소할 수 있습니다.
+
+  </li>
+
+  <li>일부 앱의 경우 Developer Preview 1에서 정상적으로 작동하지 않을 수 있습니다.
+여기에는 Google 앱뿐만 아니라 다른 앱도 포함됩니다.
+  </li>
+
+  <li>이 조기 빌드는 CTS(Compatibility Test Suite) 승인을 받지 않았습니다. CTS 승인을 받은 빌드를 사용하는 앱은 작동하지 않습니다(예: Android Pay).
+
+  </li>
+
+  <li>이 프리뷰 릴리스에서는 Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player 및 Pixel C 뿐만 아니라 General Mobile 4G(Android One) 기기를 지원합니다.
+
+
+  </li>
+</ul>
+
+<h3 id="dp1-platform">플랫폼 문제</h3>
+
+<h4>성능 및 배터리</h4>
+
+<ul>
+  <li>시스템 및 앱 성능이 <strong>주기적으로 느려지고 저하</strong>되는 것으로 확인되었으며, 기기가 가끔씩 응답을 멈출 수 있습니다.
+ 이러한 문제는 장기 사용 시 더 심해질 수 있습니다.
+
+  </li>
+
+  <li>이 릴리스에서 화면을 켜고 끄는 과정에서 배터리 수명이 감소할 수 있습니다.
+
+  </li>
+</ul>
+<h4 id="dialer">다이얼러</h4>
+
+<ul>
+  <li>Dialer 앱이 직접 부팅을 지원하지 않습니다. 이 문제는 N Developer Preview에서 나중에 해결될 것입니다.
+
+  </li>
+
+  <li>음성사서함 재생이 작동하지 않습니다.
+  </li>
+</ul>
+
+<h4>마이크</h4>
+
+<ul>
+   <li>앱 및 재부팅에 걸쳐 시스템이 마이크 음소거 상태를 잘못 유지할 수 있습니다. 앱에서 마이크를 음소거하고 그 상태가 유지되는 경우, 마이크 음소거 컨트롤이 있는 앱을 열고 마이크의 음소거를 해제하세요.</li>
+</ul>
+
+<h4 id="ui">시스템 UI</h4>
+
+<ul>
+  <li>시스템 UI에서 새로운 문자열이나 수정된 일부 문자열이 모든 언어로 번역되어 있지 않습니다.
+
+  </li>
+
+  <li>Overview UI는 여전히 개발 중에 있으므로 변경될 수 있습니다. 예를 들어, 사용자가 앱 사이를 전환할 때 나타나는 타이머를 저희가 삭제할 계획입니다.
+
+
+  </li>
+
+  <li>설정 컨트롤 및 토글이 느리거나 응답이 없는 것으로 나타날 수 있습니다.
+  </li>
+
+  <li>알림의 시각적 디자인이 변경될 수 있습니다.
+  </li>
+
+  <li>Gmail 앱에서, 알림 번들에 포함된 이메일의 직접 아카이빙 기능이 제대로 작동하지 않습니다.
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>작업 보안 인증 질문
+    <ul>
+      <li>N으로 마이그레이션한 후나 사용자가 작업 프로필을 생성한 후에, 사용자가 자신의 패턴, PIN 또는 비밀번호를 변경하거나 작업 인증 질문을 설정할 때까지는 작업 프로필에서 키 저장소에 키를 생성할 수 없습니다.
+
+
+      </li>
+
+      <li>직접 부팅 모드에서 비밀번호 제한을 기기에 적용하면, 기기가 잠겨 있는 경우에도 작업 프로필의 잠금이 해제됩니다.
+
+      이로 인해 작업 프로필이 기기 잠금 화면으로 보호되어야 하는 경우에도 작업 프로필에 액세스할 수 있게 됩니다.
+
+      </li>
+
+      <li>사용자가 잘못된 비밀번호와 PIN을 입력하면, 시스템이 정보 메시지를 표시하지 않고 그 대신 입력 필드의 내용을 지웁니다.
+
+ 이 문제는 패턴 또는 지문 입력에는 영향을 주지 않습니다.
+      </li>
+
+      <li>태블릿에서 작업 인증 질문에 표시되는 배경이 비정상적으로 작습니다.
+
+      </li>
+
+      <li>N Developer Preview에 번들로 제공되는 <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">Google Apps Device Policy</a>의 버전은 아직 작업 프로필 보안 인증 질문 기능을 지원하지 않습니다.
+
+
+        개발자는 그 대신 <a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a>를 사용하여 이 기능을 테스트해야 합니다.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>상시 접속 VPN
+    <ul>
+      <li>상시 접속 VPN 모드가 설정되었는데 VPN을 사용할 수 없는 경우, 상시 접속 정책에 대한 예외로 지정되지 않은 앱은 일반 네트워크를 통해 연결됩니다.
+
+ 상시 접속 VPN 정책에 대한 예외로 지정되지 않은 한, VPN 연결을 사용할 수 없는 경우 앱은 오프라인이어야 합니다.
+
+        <ul>
+          <li>상시 접속 모드가 설정된 경우 사용자가 보안 잠금 화면의 잠금을 해제한 후에도, 기기가 직접 부팅 모드로 재부팅된 후 VPN 연결이 설정되지 않습니다.
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>향상된 연락처
+    <ul>
+      <li>블루투스 PBAP/MAP 기기가 업무용 연락처에 대해 발신번호를 표시하지 않습니다.
+ Preview의 차기 릴리스에서 이 문제를 해결합니다.
+      </li>
+    </ul>
+  </li>
+
+  <li>작업 모드
+    <ul>
+      <li>Google Now 런처가 작업 모드의 켜짐 또는 꺼짐 여부를 표시하지 않습니다.
+ 이 런처는 또한 앱 일시 중단 상태도 표시하지 않습니다.
+      </li>
+
+      <li>사용자가 작업 모드를 껏다가 켠 후, 시스템이 더 이상 작업 프로필 앱 위젯(예: 캘린더)을 표시하지 않습니다.
+
+      </li>
+    </ul>
+  </li>
+
+  <li>패키지 일시 중단
+  </li>
+
+  <li>기기 관리자는 예상치 못한 동작(예: "Telephone disabled" 대화 상자가 표시되어 있는데도 전화가 걸림)을 초래할 수 있는 중대한 시스템 패키지를 일시 중단시킬 수 있습니다.
+
+
+  </li>
+
+  <li>기타
+    <ul>
+      <li>{@link android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA}가 true로 설정된 경우, 사용자가 SD 카드와 같은 물리적 미디어를 삽입하면 Settings 앱이 실행 시에 작동을 멈춥니다.
+
+
+      </li>
+
+      <li>사용자가 앱을 제거한 후 다시 설치하면 {@code DPM.setPackagesSuspended} 상태가 유지되지 않습니다.
+ 제거/재설치에 후 앱이 일시 중단 상태를 유지해야 하거나, 일시 중단된 앱이 제거가 불가능해야 합니다.
+
+
+      </li>
+
+      <li>작업 프로필의 첫 번째 체크인은 완료되는 데 몇 분 정도 걸립니다.
+ 이로 인해 기기가 Play EMM API에서 보일 때까지 보통 때보다 더 오래 걸릴 수 있습니다.
+
+      </li>
+
+      <li>작업 프로필 앱으로부터 전송되는 알림은 개인 프로필에 설치된 알림 수신자에게는 표시되지 않습니다.
+ 따라서 시스템에서 알림이 예상대로 표시되지 않습니다.
+
+      </li>
+
+    </ul>
+  </li>
+</ul>
+
+<h4 >키보드</h4>
+
+<ul>
+  <li>키보드 및 Android 기기 간의 블루투스 페어링이 불안정할 수 있습니다.
+  </li>
+</ul>
+
+<h4 >비디오</h4>
+
+<ul>
+<li>비디오 재생이 지연되고 끊김 현상이 나타날 수 있습니다.</li>
+</ul>
+
+<h4>Wi-Fi</h4>
+
+<ul>
+  <li>API 특수 사례 동작을 변경시킬 수도 있는 일부 리팩터링이 Wi-Fi에 발생했습니다.
+ 특히, 특정 네트워크에 연결하려고 시도하는 애플리케이션이나 네트워크에 재연결하려고 시도하는 애플리케이션은 테스트를 다시 거쳐야 합니다.
+
+  </li>
+
+  <li>레거시 DHCP 클라이언트가 플랫폼에서 제거되었습니다. 플랫폼이 지원하는 유일한 DHCP 클라이언트는 M에 추가된 DHCP 클라이언트뿐입니다.
+
+  </li>
+</ul>
+
+<h4>직접 부팅</h4>
+
+<ul>
+  <li>최초 잠금 해제가 수행될 때까지는 NFC가 작동하지 않습니다.
+    <ul>
+      <li>블루투스가 활성화된 전화가 재시작될 때, 블루투스가 자동으로 켜지지 않습니다.
+ 블루투스를 수동으로 다시 활성화해야 합니다.
+      </li>
+
+      <li>어떤 경우에는, 전화 및 메시지가 온 경우 기본 벨소리가 울리지 않을 수 있습니다.
+ 이 동작은 차기 N Preview 릴리스에서 수정되었습니다. 단, 한 가지 예외가 있으며 이에 대한 내용과 해결 방법은 다음과 같습니다.
+
+      </li>
+
+      <li>직접 부팅 모드로 설정된 이후 최소 한 번 이상 부팅되었지만 완전히 초기화되지 않은 기기에서는 기본 알림 벨소리가 울리지 않습니다.
+
+ 사용자가 Settings에서 벨소리를 수동으로 선택하여 이 문제를 해결할 수 있습니다.
+
+      </li>
+
+      <li>N Developer Preview 빌드가 실행되는 기기에서는 기본적으로 직접 부팅이 활성화되지 않습니다.
+ 테스트 및 개발에 직접 부팅을 활성화하려면 Developer Options로 이동하고 Convert to File Encryption을 탭하세요.
+
+      이 Developer Preview에서는 파일 기반 암호화를 위해 기기를 다시 파티셔닝하고 다시 포맷하려면 공장 초기화를 수행해야 합니다.
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>PIP for Android TV</h4>
+
+<ul>
+  <li>Recents UI에서의 PIP 통합은 완료되지 않았으며, 변경될 수 있습니다.
+
+    <ul>
+      <li>PIP 창의 애니메이션이 매끄럽지 않습니다. 향후 프리뷰 릴리스에서 이 문제가 개선될 것입니다.
+
+      </li>
+    </ul>
+  </li>
+
+  <li style="list-style: none">향후 프리뷰 릴리스에서 PIP의 시각적 디자인과 레이아웃 맞춤이 개선될 것입니다.
+
+  </li>
+</ul>
+
+<h4>버그 보고서</h4>
+
+<ul>
+  <li>버그 보고서가 항상 성공적으로 완료되는 것은 아닙니다. 그 해결 방법으로, 내부 저장소에 있는 버그 보고서 문서 제공자를 통해 버그 보고서에 액세스할 수 있는 경우도 있습니다.
+
+
+  </li>
+</ul>
+
+<h4>분할 화면 다중 창</h4>
+
+<ul>
+  <li>분할 화면 모드로 전환하면 앱이 작동을 중단하고 예기치 않은 UI 동작이 발생할 수 있습니다.
+ 이는 앱 개발자가 수정해야 하는 앱 문제입니다.
+
+  </li>
+
+  <li>앱이 N 이전 버전의 Android 플랫폼을 대상으로 하는 경우, 이 앱이 분할 화면에서 작동하지 않을 수 있으며, 알림 메시지가 여러 번 나타날 수 있습니다.
+
+  </li>
+
+  <li>방향이 고정된 상태로 앱을 사용하는 중에 Overview 버튼을 길게 누르면 예기치 않은 앱 동작이 발생할 수 있습니다.
+
+  </li>
+
+  <li>크기를 조정하는 중에 앱이 깜박일 수 있습니다.
+  </li>
+
+  <li>애니메이션은 아직 최종 버전이 아닙니다.
+  </li>
+</ul>
+
+<h4>입력 방법</h4>
+
+<ul>
+  <li><b>Use system language</b>가 설정된 경우 예기치 않게 Google 키보드가 일반 Google 키보드로 다시 돌아가지만, 시스템 언어 기본 설정에 선택된 언어를 Google 키보드가 지원하지 않습니다.
+
+ Google 키보드는 미국식 영어로 돌아가야 합니다.
+
+    <p>
+      Google 키보드에서 지원하는 언어를 최소 하나 이상 추가하여 이 문제를 해결할 수 있습니다.
+
+    </p>
+  </li>
+</ul>
+
+<h4>접근성</h4>
+
+<ul>
+  <li>알림, Quick Settings 타일 및 다중 창 표시를 비롯한 여러 기능에 대한 문제가 음성 안내 지원(TalkBack)에서 발생합니다. 이러한 문제로 인해 시스템 작동이 중단되거나 음성 안내 지원에서 음성 피드백이 제공되지 않을 수 있습니다.
+
+ 향후 프리뷰 릴리스에서 이러한 문제가 해결될 것입니다.
+
+  </li>
+</ul>
+
+<h3 id="dp1-device-sp">기기별 참고 사항 및 문제</h3>
+
+<h4>Nexus Player</h4>
+<ul>
+  <li>이 프리뷰 릴리스에서는 비디오 재생, 앱 호환성 및 안정성 문제가 Nexus Player에 있을 수 있습니다.
+
+  </li>
+</ul>
+
+<h4>Pixel C</h4>
+<ul>
+<li>다중 창 크기를 조정하면 작동이 중단될 수 있습니다.</li>
+</ul>
+
+<h4>Nexus 9</h4>
+<ul>
+<li>Android 베타 프로그램을 통해 OTA(Over-The-Air) 업데이트를 받은 후에 Nexus 9 기기가 시작되지 않을 수 있습니다.
+ 이 문제로부터 복구하기 위해 OTA 이미지를 수동으로 설치해 보실 수 있습니다.
+ 자세한 내용은 <a href="{@docRoot}preview/download-ota.html">기기 OTA 이미지 적용</a>을 참조하세요.
+
+</li>
+</ul>
+
