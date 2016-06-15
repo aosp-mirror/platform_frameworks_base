@@ -3420,7 +3420,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             Rect taskBounds, Configuration config, int taskResizeMode, boolean alwaysFocusable,
-            boolean homeTask) {
+            boolean homeTask, int targetSdkVersion) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3450,6 +3450,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
             atoken.appFullscreen = fullscreen;
             atoken.showForAllUsers = showForAllUsers;
+            atoken.targetSdk = targetSdkVersion;
             atoken.requestedOrientation = requestedOrientation;
             atoken.layoutConfigChanges = (configChanges &
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
