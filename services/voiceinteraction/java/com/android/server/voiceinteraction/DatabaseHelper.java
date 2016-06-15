@@ -105,7 +105,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(SoundModelContract.KEY_MODEL_UUID, soundModel.uuid.toString());
-            values.put(SoundModelContract.KEY_VENDOR_UUID, soundModel.vendorUuid.toString());
+            if (soundModel.vendorUuid != null) {
+                values.put(SoundModelContract.KEY_VENDOR_UUID, soundModel.vendorUuid.toString());
+            }
             values.put(SoundModelContract.KEY_TYPE, SoundTrigger.SoundModel.TYPE_KEYPHRASE);
             values.put(SoundModelContract.KEY_DATA, soundModel.data);
 
