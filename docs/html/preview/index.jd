@@ -24,6 +24,7 @@ footer.hide=1
       <div class="col-7of16 col-push-9of16" style="padding-left:2em">
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
+          <strong>Android N final SDK is now available!</strong>
           Get ready for Android N!
           <strong>Test your apps</strong> on Nexus and other devices. Support new system
           behaviors to <strong>save power and memory</strong>.
