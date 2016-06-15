@@ -18,6 +18,7 @@ page.image=images/cards/card-n-apis_2x.png
         <li><a href="#quick_path_to_app_install">Quick Path to App Install</a></li>
         <li><a href="#doze_on_the_go">Doze on the Go</a></li>
         <li><a href="#background_optimizations">Background Optimizations</a></li>
+        <li><a href="#surfaceview">SurfaceView</a></li>
         <li><a href="#data_saver">Data Saver</a></li>
         <li><a href="#vulkan">Vulkan API</a></li>
         <li><a href="#tile_api">Quick Settings Tile API</a></li>
@@ -286,6 +287,32 @@ your app is receiving these, take advantage of the N Developer Preview to
   Optimizations</a> documentation for details.
 </p>
 
+<h2 id="surfaceview">SurfaceView</h2>
+<p>
+Android N brings synchronous movement to the {@link android.view.SurfaceView}
+class, which provides better battery performance
+than {@link android.view.TextureView} in certain cases: When rendering video or
+3D content, apps with scrolling and animated video position use less power with
+{@link android.view.SurfaceView} than with {@link android.view.TextureView}.
+</p>
+
+The {@link android.view.SurfaceView} class enables more battery-efficient compositing on
+screen, because it is composited in dedicated hardware, separately from app
+window content. As a result, it makes fewer intermediate
+copies than {@link android.view.TextureView}.
+</p>
+
+<p>
+A {@link android.view.SurfaceView} object's content position is now updated synchronously
+with the containing app content. One result of this change is that simple
+translations or scales of a video playing in a {@link android.view.SurfaceView}
+no longer produce black bars alongside the view as it moves.
+</p>
+
+<p>
+Starting with Android N, we strongly recommend that you save power by using
+{@link android.view.SurfaceView} instead of {@link android.view.TextureView}.
+</p>
 
 <h2 id="data_saver">Data Saver</h2>
 
