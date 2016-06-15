@@ -93,24 +93,20 @@ it provides project setup, library inclusion, and packaging conveniences.</p>
 
 <h3 id="Permissions">Declare Permissions</h3>
 
-<p>Watch faces require the <code>PROVIDE_BACKGROUND</code> and <code>WAKE_LOCK</code> permissions.
-Add the following permissions to the manifest files of both the wearable app and the mobile
-app under the <code>manifest</code> element:</p>
+<p>A watch face requires the <code>WAKE_LOCK</code> permission.
+Add the following permission to the manifest files of both the wearable app
+and the mobile app under the <code>manifest</code> element:</p>
 
 <pre>
 &lt;manifest ...>
-    &lt;uses-permission
-        android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     &lt;uses-permission
         android:name="android.permission.WAKE_LOCK" />
     ...
 &lt;/manifest>
 </pre>
 
-<p class="caution"><strong>Caution:</strong> The handheld app must include all the permissions
-declared in the wearable app.</p>
-
-
+<p class="caution"><strong>Caution:</strong> The handheld app must include all
+of the permissions declared in the wearable app.</p>
 
 <h2 id="CallbackMethods">Implement the Service and Callback Methods</h2>
 
