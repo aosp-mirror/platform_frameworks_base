@@ -329,6 +329,13 @@ public class SettingsDrawerActivity extends Activity {
         }
 
         @Override
+        protected void onPreExecute() {
+            if (sConfigTracker == null || sTileCache == null) {
+                getDashboardCategories();
+            }
+        }
+
+        @Override
         protected void onPostExecute(List<DashboardCategory> dashboardCategories) {
             for (int i = 0; i < dashboardCategories.size(); i++) {
                 DashboardCategory category = dashboardCategories.get(i);
