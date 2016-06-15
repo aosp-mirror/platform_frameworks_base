@@ -5209,7 +5209,7 @@ final class ActivityStack {
                 (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, r.userId, r.info.configChanges,
                 task.voiceSession != null, r.mLaunchTaskBehind, bounds, task.mOverrideConfig,
                 task.mResizeMode, r.isAlwaysFocusable(), task.isHomeTask(),
-                r.appInfo.targetSdkVersion, r.mRotationAnimationHint);
+                r.appInfo.targetSdkVersion, r.mRotationAnimationHint, task.isOnTopLauncher());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 
@@ -5262,7 +5262,7 @@ final class ActivityStack {
     private void setAppTask(ActivityRecord r, TaskRecord task) {
         final Rect bounds = task.updateOverrideConfigurationFromLaunchBounds();
         mWindowManager.setAppTask(r.appToken, task.taskId, mStackId, bounds, task.mOverrideConfig,
-                task.mResizeMode, task.isHomeTask());
+                task.mResizeMode, task.isHomeTask(), task.isOnTopLauncher());
         r.taskConfigOverride = task.mOverrideConfig;
     }
 

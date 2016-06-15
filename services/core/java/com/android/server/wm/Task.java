@@ -92,12 +92,16 @@ class Task implements DimLayer.DimLayerUser {
 
     private boolean mHomeTask;
 
+    // Whether this task is an on-top launcher task, which is determined by the root activity.
+    private boolean mIsOnTopLauncher;
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, Rect bounds,
-            Configuration config) {
+            Configuration config, boolean isOnTopLauncher) {
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
+        mIsOnTopLauncher = isOnTopLauncher;
         setBounds(bounds, config);
     }
 
@@ -280,6 +284,10 @@ class Task implements DimLayer.DimLayerUser {
     boolean isResizeable() {
         return !mHomeTask
                 && (ActivityInfo.isResizeableMode(mResizeMode) || mService.mForceResizableTasks);
+    }
+
+    boolean isOnTopLauncher() {
+        return mIsOnTopLauncher;
     }
 
     boolean cropWindowsToStackBounds() {
