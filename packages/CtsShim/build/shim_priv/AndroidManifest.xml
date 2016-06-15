@@ -22,7 +22,7 @@
     <uses-sdk android:minSdkVersion="24"
         android:targetSdkVersion="24" />
 
-    <restrict-upgrade
+    <restrict-update
         android:hash="__HASH__" />
 
     <application
