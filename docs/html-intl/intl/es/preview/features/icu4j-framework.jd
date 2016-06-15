@@ -1,11 +1,11 @@
-page.title=API de ICU4J del framework de Android
+page.title=API de ICU4J en el framework de Android
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Contenido del documento:</h2>
+<h2>En este documento:</h2>
 <ol>
     <li><a href="#relation">Relación con ICU4J</a></li>
     <li><a href="#migration">Migración hacia API de android.icu desde ICU4J</a></li>

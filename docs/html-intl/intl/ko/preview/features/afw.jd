@@ -1,0 +1,552 @@
+page.title=Android for Work 업데이트
+page.metaDescription=Android N의 새로운 Android for Work API와 기능.
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>이 문서의 내용</h2>
+      <ol>
+        <li><a href="#qr">QR 코드 프로비저닝
+                </a></li>
+
+        <li><a href="#sec-challenge">작업 프로필 보안 인증 질문
+                </a></li>
+
+        <li><a href="#suspend">앱에 대한 액세스 비활성화
+                </a></li>
+
+        <li><a href="#toggle-work">작업 모드 전환
+                </a></li>
+
+        <li><a href="#always-on-vpn">상시 접속 VPN
+                </a></li>
+
+        <li><a href="#contacts">연락처와 작업 프로필 통합
+                </a></li>
+
+        <li><a href="#remote-reboot">원격 재부팅
+                </a></li>
+
+        <li><a href="#disable-roaming">데이터 로밍 비활성화
+                </a></li>
+
+        <li><a href="#process-logging">엔터프라이즈 프로세스 로깅
+                </a></li>
+
+        <li><a href="#bug-reports">원격 버그 보고서
+                </a></li>
+
+        <li><a href="#remove-cert">클라이언트 인증서 제거
+                </a></li>
+
+        <li><a href="#grant-cert-on-install">설치 시 클라이언트 인증서에 대한
+                액세스 권한 부여</a></li>
+
+        <li><a href="#ui-policy">시스템 UI 정책 투명성
+                </a></li>
+
+        <li><a href="#restrictions-mgmt">앱 제한 관리 향상
+                </a></li>
+
+        <li><a href="#location-off">위치 해제 스위치
+                </a></li>
+
+        <li><a href="#custom-provisioning">사용자 지정 프로비저닝
+                </a></li>
+
+        <li><a href="#multi-wifi-ca">다중 Wi-Fi CA 인증서
+                </a></li>
+
+        <li><a href="#custom-lock">사용자 지정 잠금 화면 메시지
+                </a></li>
+
+        <li><a href="#work-connectionservice">작업 프로필 연결 서비스
+                </a></li>
+
+        <li><a href="#lock-wp">배경 화면 잠금
+                </a></li>
+
+        <li><a href="#lock-user-icon">사용자 아이콘 잠금
+                </a></li>
+
+        <li><a href="#health-monitoring">기기 상태 모니터링
+                </a></li>
+
+      </ol>
+
+    <h2>참고 항목</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+            참조</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>이 문서에서는 Android N에서 제공되는 새로운 Android for Work 기능을
+설명합니다.</p>
+
+<h2 id="qr">QR 코드 프로비저닝</h2>
+
+<p>
+  이제 Android for Work는 기업에서 업무용으로 지급하는 기기를 프로비저닝할 때 QR 코드 사용을
+ 지원합니다. 이제는 설치 마법사를 통해 QR 코드를 스캔하여 기기를
+ 프로비저닝할 수 있습니다.
+</p>
+
+<h2 id="sec-challenge">작업 프로필 보안 인증 질문</h2>
+
+<p>
+  프로필 소유자는 작업 프로필에서 작동하는 앱에 대한 보안 인증 질문을
+ 지정하도록 사용자에게 요구할 수 있습니다. 시스템에서는 사용자가 업무용 앱을 열려고 할 때
+ 보안 인증 질문을 표시합니다. 사용자가 보안 인증 질문에 올바로
+ 답하면 작업 프로필의 잠금이 해제되고 필요하다면 작업 프로필의 암호가
+ 해독됩니다.
+</p>
+
+<p>
+  프로필 소유자가 {@link
+  android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD} 인텐트를 보내면
+, 보안 인증 질문을 설정하라는 메시지가 사용자에게 표시됩니다. 또한, 프로필 소유자는
+ 사용자에게 기기 잠금을 설정하도록 하는 <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> 인텐트를
+  보낼 수 있습니다.
+</p>
+
+<p>
+  프로필 소유자는 작업 프로필 보안 인증 질문의 비밀번호 정책을 다른 기기
+ 비밀번호의 정책과는 다르게 설정하도록 선택할 수 있습니다. 예를 들어, 기기 보안 질문 응답의 최소 길이는 다른 암호에 요구되는
+길이와
+다를 수 있습니다. 프로필 소유자는 {@link
+ android.app.admin.DevicePolicyManager#setPasswordQuality
+ setPasswordQuality()} 및 {@link
+ android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+ setPasswordMinimumLength()}와 같은
+ 일반적인 {@link android.app.admin.DevicePolicyManager}
+ 메서드를 사용하여 보안 질문 정책을 설정합니다. 프로필 소유자는 새 <code>DevicePolicyManager.getParentProfileInstance()</code>
+ 메서드에 의해 반환되는 {@link android.app.admin.DevicePolicyManager} 인스턴스를
+ 사용하여 기기 잠금을
+ 설정할 수도 있습니다. 그 밖에도, 프로필 소유자는 {@link android.app.admin.DevicePolicyManager}
+ 클래스의 새로운 <code>setOrganizationColor()</code> 및
+ <code>setOrganizationName()</code> 메서드를 사용하여 작업 프로필 보안 인증 질문에 대한 자격 증명 화면을
+ 사용자 지정할 수 있습니다.
+</p>
+
+<p>
+  새로운 메서드와 상수에 대한 자세한 내용은
+ <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 참조</a>의 <code>DevicePolicyManager</code> 참조 페이지를 참조하십시오.
+</p>
+
+<h2 id="suspend">앱에 대한 액세스 비활성화</h2>
+
+<p>
+  기기 소유자 및 프로필 소유자는 새 <code>DevicePolicyManager.setPackagesSuspended()</code>
+ 메서드를 호출하여 패키지에 대한 액세스를 일시적으로 중단할 수
+ 있습니다. 소유자는 이 메서드를 똑같이 사용하여 해당 패키지를 다시 활성화할 수 있습니다.
+</p>
+
+<p>
+  패키지가 일시 중단된 동안에는 액티비티를 시작할 수 없고, 패키지에 대한
+ 알림이 억제되고, <a href="{@docRoot}guide/components/recents.html">개요 화면</a>에서 앱 항목이 숨겨집니다.
+  일시 중단된 패키지는 <a href="{@docRoot}guide/components/recents.html">개요 화면</a>에 표시되지 않고
+ (toast와 snackbar를 포함한) 대화 상자를 표시할 수 없습니다. 이들 패키지는 또한 오디오를
+ 재생하거나 기기를 진동시킬 수도 없습니다.
+</p>
+
+<p>
+  현재 사용할 수 없는 앱임을 표시하기 위해
+, 런처는 뚜렷이 구별되는 UI를 일시 중단된 앱에 적용해야 합니다. 예를 들어, 앱 아이콘이 회색으로 표시되도록 할 수
+ 있습니다. 런처는 앱이 일시 중단된 상태인지
+ 확인하기 위해 새 <code>DevicePolicyManager.getPackageSuspended()</code> 메서드를 호출할 수 있습니다.
+</p>
+
+<h2 id="toggle-work">작업 모드 전환</h2>
+
+<p>
+  듀얼 프로필 기기에서는 사용자가 작업 모드를 설정하거나 해제할 수 있습니다. 작업 모드가
+ 해제된 중에는 관리된 프로필이 일시적으로 종료됩니다. 프로필
+ 소유자 앱을 포함하여 작업 프로필 앱, 백그라운드 동기화 및 알림이 모두
+ 비활성화됩니다. 작업 프로필이 비활성화된 중에는 사용자가
+ 업무용 앱을 실행할 수 없음을 미리 알려주기 위한 영구적인 상태 아이콘이
+ 표시됩니다. 시스템 런처는 업무용 앱과 위젯에 액세스할 수 없음을
+ 나타냅니다.
+</p>
+
+<h2 id="always-on-vpn">상시 접속 VPN</h2>
+
+<p>
+  기기 소유자 및 프로필 소유자는 항상 지정된 VPN을 통해 업무용 앱을
+ 네트워크에 연결하도록 요구할 수 있습니다. 소유자가 이 요구 사항을 설정하면
+ 기기는 부팅 시 해당 VPN을 자동으로 시작합니다.
+</p>
+
+<p>
+  소유자는 새 <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code> 메서드를 호출하여 VPN을 사용하도록 요구할 수
+ 있습니다. 소유자가
+ VPN 요구 사항을 설정했는지 확인하려면 새
+ <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code> 메서드를 호출하십시오.
+</p>
+
+<p>
+  시스템에서 앱 상호 작용 없이 VPN 서비스를 직접 바인딩할 수 있으므로,
+ VPN 클라이언트는 상시 접속 VPN에 대해 새로운 진입점을 처리해야 합니다. 이전과 마찬가지로,
+ {@link android.net.VpnService android.net.VpnService} 작업과 일치하는 인텐트 필터를 사용하여 활성 서비스를
+ 찾을 수 있습니다.
+</p>
+
+<p>
+  사용자는 <strong>Settings &gt; More &gt;
+ VPN</strong> 화면을 사용하여 {@link
+ android.net.VpnService}를 구현하는 상시 접속 VPN 클라이언트를 수동으로 설정할 수 있습니다.
+</p>
+
+<h2 id="contacts">연락처와 작업 프로필 통합</h2>
+
+<p>
+  프로필 소유자는 기본 사용자의 업무용 연락처에 대한 로컬 검색 및 디렉터리 조회를
+ 허용할 수 있습니다. 예를 들어, 사용자는 개인 다이얼러 또는 연락처 애플리케이션에서
+ 개인용 및 업무용 디렉터리 연락처에 모두 액세스할 수 있습니다(프로필
+ 관리자가 허용한 경우).
+</p>
+
+<p>
+  Contact Provider를 활용하는 개발자는, 정책에 따라 허용되는 경우
+, Enterprise Contacts API를 사용하여 기본 사용자의 작업 프로필 디렉터리 항목에 액세스할 수
+ 있습니다.
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  프로필 소유자는 다음과 같은 새로운 메서드를 사용하여 기본 사용자의 업무용 연락처를 표시할지
+여부를 제어할 수 있습니다.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">원격 재부팅</h2>
+
+<p>
+  기기 소유자는 기기를 원격으로 재부팅할 수 있습니다. 경우에 따라, 구내의 공공 장소에 배치되어 있는
+ 기기는 전원 버튼에 액세스하지 못하게 되어 있습니다. 기기를
+ 재부팅해야 하는 경우 관리자가 새
+ <code>DevicePolicyManager.reboot()</code> 메서드를 사용하여 재부팅할 수 있습니다.
+</p>
+
+<h2 id="disable-roaming">데이터 로밍 비활성화</h2>
+
+<p>
+  기기 소유자는 새로운 {@link
+ android.os.UserManager} 사용자 제한 <code>DISALLOW_DATA_ROAMING</code>을 사용하여 데이터 로밍을 비활성화할 수 있습니다.
+</p>
+
+<h2 id="process-logging">엔터프라이즈 프로세스 로깅</h2>
+
+<p>
+  기기 소유자는 앱 실행, adb 액티비티 및 화면 잠금 해제를 비롯한 기기 액티비티를
+ 원격으로 추적하여 의심스러운 액티비티를 식별할 수 있습니다. 프로세스
+ 로그는 사용자 동의를 받을 필요가 없습니다. 로그를 검색하기 위해, 기기 소유자는 <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>를 사용하여
+ 기기 로깅을 활성화할 수 있습니다.
+</p>
+
+<p>
+  API 변경 사항에는 다음이 포함됩니다.
+</p>
+
+<ul>
+
+  <li>
+    새로운 클래스 <code>android.app.admin.SecurityLog</code>와 이 클래스의
+ 메서드
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">원격 버그 보고서</h2>
+
+<p>
+  기기 소유자는 기기 상태 덤프 파일이 포함된 버그 보고서를
+ 원격으로 트리거하고 검색할 수 있으며, 이를 통해 알려진 문제나 손상된 기기에 대한
+ 포렌식 조사를 수행할 수 있습니다. 버그 보고서는 그 본질상 세세한 내용까지 담고 있으므로,
+ 사용자 동의를 받아야 합니다.
+</p>
+
+<p>
+  Android N에서는 이 기능을 지원하기 위해 다음과 같은 API를 포함합니다. 자세한
+ 내용은 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK
+ 참조</a>를 확인하세요.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">클라이언트 인증서 제거</h2>
+
+<p>
+  프로필 소유자와 기기 소유자는 이제 새 <code>DevicePolicyManager.removeKeyPair()</code>
+ 메서드를 호출하여, {@link android.app.admin.DevicePolicyManager#installKeyPair
+ installKeyPair()}를 통해 설치된 클라이언트 인증서를
+ 제거할 수 있습니다.
+</p>
+
+<h2 id="grant-cert-on-install">설치 시 클라이언트 인증서에 대한
+ 액세스 권한 부여</h2>
+
+<p>
+  프로필 소유자나 기기 소유자가 인증서 관리 권한을
+ 타사 앱에 부여할 경우, 해당 앱은 소유자의 간섭을 전혀 받지 않고도 인증서에
+ 액세스 권한을 부여할 수 있습니다.
+</p>
+
+<p>
+  인증서 관리를 위한 기존 API가 확장되었으며 다음을 포함합니다.
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">시스템 UI 정책 투명성</h2>
+
+<p>
+  사용자 환경에 영향을 미치는 정책이나 사용자 Settings를 제한하는 정책은
+ 사용자에게 완전히 공개되며, 프로필 소유자와 기기 소유자는 해당 정책에 대한 책임을
+ 회사의 IT 부서로 돌릴 수 있습니다. Settings에 일관되게 표시되는 “Action
+ not allowed” 메시지 외에도, IT 관리자는
+ 다음과 같은 새로운 {@link android.app.admin.DevicePolicyManager} 메서드를 사용하여 기기 설정에서 조직별 지원 메시지를
+ 설정할 수 있습니다.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="restrictions-mgmt">앱 제한 관리 향상</h2>
+
+<p>
+  기기 소유자나 프로필 소유자는 새 <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
+ 메서드를 통해 다른 애플리케이션이 앱 제한을
+ 관리하도록 할 수
+ 있습니다. 지정된 애플리케이션은 이 권한이 부여되었는지
+여부를 확인하기 위해 <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>를 호출할
+수 있습니다.
+</p>
+
+<p>
+  앱 제한을 관리하도록 지정된 애플리케이션은 해당 사용자 또는 프로필 내에 있는 어떤 패키지에 대해서도 {@link
+ android.app.admin.DevicePolicyManager#setApplicationRestrictions
+ setApplicationRestrictions()} 및 {@link
+ android.app.admin.DevicePolicyManager#getApplicationRestrictions
+ getApplicationRestrictions()}를 호출할 수 있습니다.
+</p>
+
+<h2 id="location-off">위치 해제 스위치</h2>
+
+<p>
+  사용자는 개인용 앱에서 위치 정보에 계속 액세스하는 동안에도
+ 업무용 앱의 위치 권한을 비활성화할 수 있습니다. 사용자는
+ Location Settings에 있는 별개의 위치 액세스 스위치를 사용하여 작업 프로필에서 실행 중인
+ 앱의 위치 업데이트 또는 마지막 위치 쿼리를 거부할 수 있습니다.
+</p>
+
+<p>
+  최상위 수준 위치 해제 스위치를 사용하면 기본 프로필과 관리된 프로필에
+ 대해 모두 위치 액세스를 비활성화할 수 있습니다.
+</p>
+
+<h2 id="custom-provisioning">사용자 지정 프로비저닝</h2>
+
+<p>
+  애플리케이션은 기업 색상과 로고를 사용하여 프로필 소유자 및 기기 소유자 프로비저닝
+ 흐름을 사용자 지정할 수 있습니다.
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    흐름 색상을 사용자 지정합니다.
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    기업 로고를 사용하여 흐름을 사용자 지정합니다.
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">다중 Wi-Fi CA 인증서</h2>
+
+<p>
+  프로필 소유자와 기기 소유자는 주어진 Wi-Fi 구성에 대해 다중 CA 인증서를 설정할 수
+ 있습니다. SSID가 동일한 별개의 액세스 지점에 대해
+ 별개의 CA가 기업 Wi-Fi 네트워크에 있는 경우, IT 관리자가 새 메서드 <code>setCaCertificates()</code>를 사용하여
+ 모든 관련 CA를 Wi-Fi 구성에 포함시킬 수
+ 있습니다.
+</p>
+
+<p>
+  추가되는 API는 다음과 같습니다.
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">사용자 지정 잠금 화면 메시지</h2>
+
+<p>
+  기기 소유자는 잠금 화면에 표시될 소유자 정보를 제공할 수 있습니다.
+  이 정보는 사용자 잠금 화면 메시지(설정되어 있는 경우)보다
+ 우선합니다. 새 {@link android.app.admin.DevicePolicyManager} 메서드는 다음과 같습니다.
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">작업 프로필 연결 서비스</h2>
+
+<p>
+  프로필 소유자는 호출 백엔드(호출 계정)용으로
+ 작업별 {@link android.telecom.ConnectionService}를 사용하는 업무용 다이얼러 애플리케이션을
+ 지정할 수 있습니다. 업무용 다이얼러는 업무 전용 통화 기록을
+ 유지 관리하고 업무용 연락처에만 의존합니다. 사용자는 전화 걸기 애플리케이션에 상관없이 일관된 통화 UI
+ 환경을 사용합니다. 업무 통화 계정으로 수신되는 업무 통화는
+ 개인 통화 계정으로 수신되는 개인용 통화와
+ 구분됩니다.
+</p>
+
+<p>
+  다이얼러는 새 플래그
+ <code>android.telecom.Call.PROPERTY_WORK_CALL</code>을 검사하여 통화가
+업무 통화인지 결정합니다. 통화가 업무 통화인 경우, 다이얼러는 작업 배지를 추가하는 등의 방법으로
+ 이를 표시해야 합니다.
+</p>
+
+<h2 id="lock-wp">배경 화면 잠금</h2>
+
+<p>
+  새 사용자 제한(<code>DISALLOW_SET_WALLPAPER</code>)에 따라 사용자는
+ 배경 화면을 변경할 수 없습니다. 그래도 기기 소유자나 프로필 소유자는
+ 배경 화면을 변경할 수 있지만, 자신이 관리하는 사용자나 프로필의
+ 배경 화면만 변경할 수 있을 뿐입니다. 예를 들어, 프로필 소유자는 상위 사용자의 배경 화면은
+ 변경할 수 없지만, 기본 프로필에 있는 프로필 소유자나 기기 소유자는
+ 변경할 수 있습니다. 배경 화면을 변경하고 싶은 프로필 소유자나 기기 소유자는
+ 자신이 관리하는 사용자 또는 프로필에
+ 배경 화면이 있는지({@link android.app.WallpaperManager#isWallpaperSupported
+  isWallpaperSupported()}), 그리고 이를 변경하도록 허용되는지 여부를 확인해야 합니다(새 메서드
+ <code>WallpaperManager.isWallpaperSettingAllowed()</code> 사용).
+</p>
+
+<h2 id="lock-user-icon">사용자 아이콘 잠금</h2>
+
+<p>
+  새 사용자 제한(<code>DISALLOW_SET_USER_ICON</code>)에 따라 사용자는
+ 사용자 아이콘을 변경할 수 없습니다. 그래도 사용자의 기기 소유자나 프로필 소유자는
+ 아이콘을 변경할 수 있습니다. 하지만, 프로필 소유자는 자신이 관리하는 프로필에 대한 사용자 아이콘만
+ 변경할 수 있을 뿐입니다.
+</p>
+
+<h2 id="health-monitoring">기기 상태 모니터링</h2>
+
+<p>
+  기기 소유자나 프로필 소유자는 새
+ <code>HardwarePropertiesManager</code> 인터페이스를 사용하여 CPU나 GPU의 온도, CPU 사용량 등, 기기 상태에 대한
+ 정보를 검색할 수 있습니다. 새
+ 모니터링 인터페이스는 원격 위치에서 지켜보는 사람이 없이 작동하는 기기를
+ 모니터링하는 데 특히 유용합니다.
+</p>

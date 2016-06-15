@@ -1,6 +1,6 @@
 page.title=Android N Developer Preview
 page.tags="preview","developer"
-meta.tags=“preview”, “android”
+meta.tags="preview", "android"
 fullpage=true
 forcelocalnav=true
 header.hide=1
@@ -25,10 +25,10 @@ footer.hide=1
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
           ¡Prepárate para Android N!
-          <strong>Prueba tus aplicaciones</strong> en Nexus y en otros dispositivos. Admite comportamientos del sistema nuevo
-          para <strong>ahorrar energía y memoria</strong>.
+          <strong>Prueba tus aplicaciones</strong> en Nexus y en otros dispositivos. Admite comportamientos del sistema
+ nuevo para <strong>ahorrar energía y memoria</strong>.
           Amplía la funcionalidad de tus aplicaciones gracias a una <strong>IU con ventanas múltiples</strong>,
-          <strong>notificaciones de respuestas directas</strong> y más.
+ <strong>notificaciones de respuestas directas</strong> y más.
         </p>
 
         <a class="dac-hero-cta" href="{@docRoot}preview/overview.html">
@@ -102,7 +102,18 @@ footer.hide=1
   </div><!-- end .wrap -->
 </div>
 
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
+  <h2 class="norule">Lo último</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:androidn+tag:featured, type:youtube+tag:androidn+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
+</div></section>
+
+<section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">Recursos</h1>
   <div class="dac-section-subtitle">
     Información esencial para ayudarte a preparar tus aplicaciones para Android N.

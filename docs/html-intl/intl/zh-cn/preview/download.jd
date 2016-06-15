@@ -1,5 +1,5 @@
 page.title=在设备上测试
-meta.tags="Preview", "nexus", "系统映像"
+meta.tags="preview", "nexus","system image"
 page.tags="preview", "androidn"
 page.image=images/cards/card-n-downloads_2x.png
 
@@ -20,13 +20,13 @@ page.image=images/cards/card-n-downloads_2x.png
 
 1. 简介
 
-1.1 Android SDK Preview（在本许可协议中简称为“Preview”，具体包括 Android 系统文件、封装 API 以及Preview 库文件（若可用））依据本许可协议的条款授权您使用。本许可协议在您与 Google 之间就您对“Preview”的使用形成具有法律约束力的合约。
+1.1 Android SDK Preview（在本许可协议中简称为“Preview”，具体包括 Android 系统文件、封装 API 以及 Preview 库文件（若可用））依据本许可协议的条款授权您使用。本许可协议在您与 Google 之间就您对“Preview”的使用构成具有法律约束力的合约。
 
-1.2 “Android”是指面向设备的 Android 软件栈，以 Android 开源项目名义提供，项目网址为 http://source.android.com/，其内容会不时更新。
+1.2 “Android”是指以 Android 开源项目（项目网址为 http://source.android.com/，其内容会不时更新）名义提供、面向设备的 Android 软件栈。
 
 1.3 “Android 兼容”是指 (i) 符合与 Android 兼容性定义文档（可在 Android 兼容性网站 http://source.android.com/compatibility 上找到，并可能会不时更新）标准的任何 Android 实现；并 (ii) 成功通过 Android 兼容性测试套件 (CTS) 的测试。
 
-1.4 “Google”是指 Google Inc.，是一家特拉华州公司，主要营业地位于：1600 Amphitheatre Parkway, Mountain View, CA 94043, United States。
+1.4“Google”是指 Google Inc.，是一家特拉华州公司，主要营业地位于：1600 Amphitheatre Parkway, Mountain View, CA 94043, United States。
 
 2. 接受许可协议
 
@@ -38,7 +38,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 2.4 如果您将在贵公司或组织内部使用“Preview”，则您同意代表您的雇主或其他实体接受本许可协议的约束，并且您表示并保证您拥有完全的合法授权令您的雇主或上述实体受本许可协议的约束。如果您不具备必要的授权，则不得代表您的雇主或其他实体接受本许可协议或使用“Preview”。
 
-3. Google 的 Preview 许可
+3. Google “Preview”许可
 
 3.1 Google 依据本许可协议的条款授予您有限的、全球性、免版税、不可转让、非独占性且不可次级许可的“Preview”使用许可，其用途仅限针对 Android 的兼容实现来开发应用。
 
@@ -64,7 +64,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 4.3 您同意，如果您使用“Preview”开发应用，您将会保护用户的隐私权和合法权利。如果用户向您提供用户名、密码或其他登录信息或个人信息，您必须确保用户知晓这些信息将供您的应用使用，并且您必须为这些用户提供足以满足法律要求的隐私声明和保护。如果您的应用存储由用户提供的个人信息或敏感信息，其存储方式必须安全。如果用户向您提供 Google 帐户信息，您的应用只能在用户允许时出于用户所许可的有限目的使用该信息访问用户的 Google 帐户。
 
-4.4 您同意您不会利用“Preview”从事任何干扰、中断、损坏或以未经授权方式访问 Google 或任何第三方的服务器、网络或其他财产或服务的Activity（包括应用的开发或分发）。
+4.4 您同意您不会利用“Preview”从事任何干扰、中断、损坏或以未经授权方式访问 Google 或任何第三方的服务器、网络或其他财产或服务的 Activity（包括应用的开发或分发）。
 
 4.5 您同意您对通过 Android 和/或 Android 应用创建、传输或显示的任何数据、内容或资源以及您的行为所导致的后果（包括 Google 可能遭受的任何损失或损害）负全责（Google 在上述方面对您或任何第三方不承担任何责任）。
 
@@ -86,9 +86,9 @@ page.image=images/cards/card-n-downloads_2x.png
 
 7.1 如果您使用“Preview”运行由第三方开发或访问由第三方提供的数据、内容或资源的应用，您同意 Google 对这些应用、数据、内容或资源不承担任何责任。您理解，您通过上述第三方应用可能访问到的所有数据、内容或资源由其提供者负全责，Google 对您因使用或访问其中任何第三方应用、数据、内容或资源而遭受的任何损失或损害不承担任何责任。
 
-7.2 您应知晓，通过此类第三方应用提供给您的数据、内容和资源可能受提供商（或代表他们的其他人员或公司）拥有的知识产权的保护。除非相关所有者明确给予许可，否则您不得修改、出租、租赁、借出、出售、分发这些数据、内容或资源（全部或部分），或以其为基础创建衍生品。
+7.2 您应知晓，通过此类第三方应用提供给您的数据、内容和资源可能受提供商（或代表他们的其他人员或公司）拥有的知识产权的保护。除非相关所有者明确给予许可，否则您不得修改、出租、租赁、借出、出售、分发这些数据、内容或资源（的全部或部分），或以其为基础创建衍生品。
 
-7.3 您确认您对上述第三方应用、数据、内容或资源的使用可能受到您与相关第三方之间单独订立的条款的制约。
+7.3 您承认您对上述第三方应用、数据、内容或资源的使用可能受到您与相关第三方之间单独订立的条款的制约。
 
 8. 使用 Google API
 
@@ -112,7 +112,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 9.5 在本许可协议终止时，本许可协议中向您授予的许可将终止，您应立即完全停止使用“Preview”，并且第 10、11、12 和 14 节的条款将无限期继续存在。
 
-10. 免责声明
+10.免责声明
 
 10.1 您明确理解并同意，您使用“Preview”的风险将由您自行承担，并且“Preview”是按“原样”和“现状”提供，Google 不提供任何类型的担保。
 
@@ -214,14 +214,14 @@ page.image=images/cards/card-n-downloads_2x.png
 </p>
 
 <p>
-  如果您可以访问受支持的设备，则可通过以下方式之一将其更新到 Developer  Preview 里程碑构建版本：
+  如果您可以访问受支持的设备，则可通过以下方式之一将其更新到 Developer Preview 里程碑构建版本：
 
 </p>
 
 <ul>
-  <li>通过
-<a href="https://g.co/androidbeta">Android Beta 计划</a><strong>注册设备以获取自动 OTA 系统更新</strong>。注册后，您的设备即会收到 N Developer Preview 中所有里程碑构建版本的定期无线 (OTA) 更新。建议采用此方法，因为它允许您通过各种版本的 N Developer Preview 从您当前的环境实现无缝转换。
-
+  <li><strong>通过Android Beta 计划</strong>注册设备以获取自动<a href="https://g.co/androidbeta"> OTA 系统更新</a>。
+注册后，您的设备即会收到 N Developer Preview 中所有里程碑构建版本的定期 OTA 更新。
+建议采用此方法，因为它允许您通过各种版本的 N Developer Preview 从您当前的环境实现无缝转换。
 
 </li>
   <li><strong>下载 Developer Preview 系统映像并刷写设备</strong>。系统不会为手动刷写的设备自动提供 OTA 更新，不过您可以将这些设备注册参加 Android Beta 计划以获取 OTA 更新。
@@ -232,18 +232,18 @@ page.image=images/cards/card-n-downloads_2x.png
 <h3 id="ota">注册设备以获取自动 OTA 更新</h3>
 
 <p>
-  如果您可以访问受支持的设备（参见“下载”表格中的列表），则可以通过将该设备注册参加
-<a href="https://g.co/androidbeta">Android Beta 计划</a>，获取 Android Preview 的无线更新。系统将自动下载这些更新并如正式系统更新一样更新您的设备。
+  如果您可以访问受支持的设备（参见“下载”表格中的列表），则可以通过将该设备注册参加 <a href="https://g.co/androidbeta">Android Beta 计划</a>，获取 Android Preview 的无线更新。系统将自动下载这些更新并如正式系统更新一样更新您的设备。
+
 
 
 
 </p>
 
 <p>
-  您可以随时取消注册设备。取消注册后，设备将收到其可用的最新生产版本的 Android 系统（例如 Android 6.0 Marshmallow）的 OTA 更新。该更新要求完全重置设备，因此设备上的用户数据将被删除。在取消注册设备之前，务必先<strong>备份重要数据</strong>。
+  您可以随时取消注册设备。取消注册后，设备将收到其可用的最新生产版本的 Android 系统（例如 Android 6.0 Marshmallow）的 OTA 更新。
 
-
-
+该更新要求完全重置设备，因此设备上的用户数据将被删除。
+在取消注册设备之前，务必先<strong>备份重要数据</strong>。
 
 </p>
 
@@ -252,19 +252,19 @@ page.image=images/cards/card-n-downloads_2x.png
 <a href="https://g.co/androidbeta">Android Beta 计划</a>网站。
 </p>
 
-<p class="note"><strong>注：</strong>取消注册要求完全重置设备。务必先备份重要数据。
-
+<p class="note"><strong>注：</strong>
+  取消注册要求完全重置设备。务必先备份重要数据。
 
 </p>
 
 <h3 id="flash">手动刷写设备</h3>
 
 <p>
-  您可以随时下载最新的 Developer Preview 系统映像并将其手动刷入设备。请参阅下表下载适合您的测试设备的系统映像。如果您需要精确控制测试环境，或者需要经常重新安装系统，比如为了进行自动测试而重新安装，则手动刷写设备比较有用。
+  您可以随时下载最新的 Developer Preview 系统映像并将其手动刷入设备。
+请参阅下表下载适合您的测试设备的系统映像。
+如果您需要精确控制测试环境，或者需要经常重新安装系统，比如为了进行自动测试而重新安装，则手动刷写设备比较有用。
 
 
-
- 
 </p>
 
 <!-- You can flash by ota or system image --><p>
@@ -289,7 +289,7 @@ page.image=images/cards/card-n-downloads_2x.png
   如果在手动刷写设备后您确定需要获取 OTA 更新，则只需将设备注册参加
 <a href="https://g.co/androidbeta">Android Beta 计划</a>即可。您可以随时注册设备以通过无线下载方式接收下一次的 Preview 更新。
 
- 
+
 </p>
 
 <table>
@@ -300,64 +300,72 @@ page.image=images/cards/card-n-downloads_2x.png
 
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">bullhead-npc56p-preview-6c877a3d.tgz</a><br>
-      MD5: b5cf874021023b398f5b983b24913f5d<br>
-      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+    <td><a href="#top" onclick="onDownload(this)">bullhead-npd35k-factory-5ba40535.tgz</a><br>
+      MD5: b6c5d79a21815ee21db41822dcf61e9f<br>
+      SHA-1:5ba4053577007d15c96472206e3a79bc80ab194c
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-npc56p-preview-54b13c67.tgz</a><br>
-      MD5: af183638cf34e0eb944a1957d7696f60<br>
-      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
+    <td><a href="#top" onclick="onDownload(this)">shamu-npd35k-factory-a33bf20c.tgz</a><br>
+      MD5: e1cf9c57cfb11bebe7f1f5bfbf05d7ab<br>
+      SHA-1: a33bf20c719206bcf08d1edd8da6c0ff9d50f69c
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
-    <td><a href="#top" onclick="onDownload(this)">angler-npc56p-preview-85ffc1b1.tgz</a><br>
-      MD5: bc4934ea7bd325753eee1606d3725a24<br>
-      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+    <td><a href="#top" onclick="onDownload(this)">angler-npd35k-factory-81c341d5.tgz</a><br>
+      MD5: e93de7949433339856124c3729c15ebb<br>
+      SHA-1:81c341d57ef2cd139569b055d5d59e9e592a7abd
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
-      MD5: c901334c6158351e945f188167ae56f4<br>
-      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    <td><a href="#top" onclick="onDownload(this)">volantis-npd35k-factory-2b50e19d.tgz</a><br>
+      MD5:565be87ebb2d5937e2abe1a42645864b<br>
+      SHA-1:2b50e19dae2667b27f911e3c61ed64860caf43e1
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
-      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
-      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+    <td><a href="#top" onclick="onDownload(this)">volantisg-npd35k-factory-2e89ebe6.tgz</a><br>
+      MD5: a8464e15c6683fe2afa378a63e205fda<br>
+      SHA-1:2e89ebe67a46b2f3beb050746c13341cd11fa678
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-npc56r-preview-7027d5b6.tgz</a><br>
-      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
-      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    <td><a href="#top" onclick="onDownload(this)">fugu-npd35k-factory-1de74874.tgz</a><br>
+      MD5: c0dbb7db671f61b2785da5001cedefcb<br>
+      SHA-1:1de74874f8d83e14d642f13b5a2130fc2aa55873
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
-    <td><a href="#top" onclick="onDownload(this)">ryu-npc56p-preview-335a86a4.tgz</a><br>
-      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
-      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    <td><a href="#top" onclick="onDownload(this)">ryu-npd35k-factory-b4eed85d.tgz</a><br>
+      MD5: bdcb6f770e753668b5fadff2a6678e0d<br>
+      SHA-1: b4eed85de0d42c200348a8629084f78e24f72ac2
     </td>
   </tr>
+
   <tr id="seed">
     <td>General Mobile 4G (Android One) <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
-      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
-      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npd35k-factory-5ab1212b.tgz</a><br>
+      MD5:7d34a9774fdd6e025d485ce6cfc23c4c<br>
+      SHA-1:5ab1212bc9417269d391aacf1e672fff24b4ecc5
+    </td>
+  </tr>
+
+  <tr id="xperia">
+    <td>Sony Xperia Z3 <br> （D6603 和 D6653）</td>
+    <td>下载：<a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
+      如需了解详细信息，请参阅<a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">为 Xperia Z3 尝试 Android N Developer Preview</a>。
     </td>
   </tr>
 
@@ -385,17 +393,17 @@ page.image=images/cards/card-n-downloads_2x.png
  计划</a>，则只需从计划中取消注册该设备即可，与是何种设备无关。
 
   <p>
-    取消注册后，设备将收到其可用的最新生产版本的 Android 系统（例如 Android 6.0 Marshmallow）的 OTA 更新。该更新要求完全重置设备，因此设备上的用户数据将被删除。在取消注册设备之前，务必先<strong>备份重要数据</strong>。
+    取消注册后，设备将收到其可用的最新生产版本的 Android 系统（例如 Android 6.0 Marshmallow）的 OTA 更新。
 
-
-
+    该更新要求完全重置设备，因此设备上的用户数据将被删除。
+在取消注册设备之前，务必先<strong>备份重要数据</strong>。
 
   </p>
   </li>
 </ul>
 
-<p class="note"><strong>注：</strong>如果要在计划结束之前卸载 Developer Preview 系统映像，则需要完全重置设备并删除设备上的所有用户数据。
-
+<p class="note"><strong>注：</strong>
+  如果要在计划结束之前卸载 Developer Preview 系统映像，则需要完全重置设备并删除设备上的所有用户数据。
 
 
 </p>
@@ -413,13 +421,13 @@ Android N Preview SDK，并为模拟器创建一个虚拟设备。
 
 <ol>
   <li>在 Android Studio 中，打开“Settings”对话框
-（Windows/Linux：<strong>File &gt; Settings</strong>；Mac：<strong>Android Studio &gt; Preferences</strong>）。在左侧面板中，选择 <strong>Appearance &amp; Behavior &gt;
-  System Settings &gt; Android SDK</strong>。
+（Windows/Linux：<strong>File &gt; Settings</strong>；或 Mac：<strong>Android Studio &gt; Preferences</strong>）。
+在左侧面板中，选择 <strong>Appearance &amp; Behavior &gt; System Settings &gt; Android SDK</strong>。
 
 
 
-  <li>点击 <strong>SDK Platforms</strong> 选项卡，然后选中
- <strong>Android N Preview</strong> 复选框。</li>
+  <li>点击 <strong>SDK Platforms</strong> 选项卡，然后选中 <strong>Android N Preview</strong> 复选框。
+</li>
 
   <li>点击 <strong>SDK Tools</strong> 选项卡，然后选中
  <strong>Android SDK Build Tools</strong>、<strong>Android SDK
@@ -457,14 +465,8 @@ Android N Preview SDK，并为模拟器创建一个虚拟设备。
 <p>现在，您可以使用 Android N Preview AVD 启动 Android 模拟器。</p>
 
 <p>
-要获得 Android 模拟器最佳运行体验，请安装 Android Studio 2.1 Preview，该版本支持 <a href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>，与
+要获得 Android 模拟器最佳运行体验，请确保您使用的是 Android Studio 2.1 或更高版本，该版本支持 <a href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0</a>，与
 Android Studio 1.5 中的模拟器相比，其运行速度快得多。
-
-</p>
-
-<p class="note"><strong>注：</strong>如果您当前使用的是 Android Studio 2.0 Beta，则有一个已知问题会阻止您使用 N Preview 系统映像创建 AVD，此时您需要使用 Android Studio 2.1 Preview 创建 AVD。
-
-
 
 </p>
 

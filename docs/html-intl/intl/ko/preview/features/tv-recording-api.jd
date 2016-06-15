@@ -1,5 +1,5 @@
 page.title=TV 녹화
-page.keywords=preview,sdk,tv,recording
+page.keywords=preview, sdk, tv, 녹화
 page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 </div>
 
-<p>TV 입력 서비스를 이용하면 
+<p>TV 입력 서비스를 이용하면
 타임 시프팅 API를 통해 채널 재생을 일시 정지했다가 다시 시작할 수 있습니다. Android N에서는 사용자가 여러 개의 녹화된 세션을 저장할 수 있도록 함으로써
 타임 시프팅을 확장합니다.</p>
 
@@ -26,25 +26,46 @@ page.image=images/cards/card-nyc_2x.jpg
 시작할 수 있습니다. 시스템이 녹화물을 저장하면 사용자는 시스템 TV 앱을 사용하여
 녹화물을 탐색, 관리, 재생할 수 있습니다.</p>
 
-<p>TV 입력 서비스에 녹화 기능을 제공하고 싶다면
-앱이 녹화를 지원한다는 것을 시스템에 나타내고
-프로그램을 녹화하는 기능을 구현하고, 녹화 중 발생하는 오류를 처리 및 전달하고,
+<p>TV 입력 서비스에 녹화 기능을 제공하고 싶다면,
+앱이 녹화를 지원함을 시스템에 나타내야 하고,
+프로그램 녹화 기능을 구현해야 하고, 녹화 중 발생하는 오류를 처리 및 전달해야 하고,
 녹화된 세션을 관리해야 합니다.</p>
+
+<p class="note"><strong>참고:</strong> Live Channels 앱에서는
+사용자가 녹화물을 만들거나 이에 액세스하는 방법을 아직 제공하지 않습니다. Live Channels 앱에
+대한 변경이 이루어질 때까지는, TV 입력 서비스에 대한 녹화
+환경을 완전히 테스트하기 어려울 수 있습니다.</p>
 
 <h2 id="supporting">녹화 지원 나타내기</h2>
 
-<p>TV 입력 서비스가 녹화를 지원한다는 것을 시스템에 알리려면
-다음 절차를 따르세요.</p>
+<p>TV 입력 서비스가 녹화를 지원함을 시스템에 알리려면
+서비스 메타데이터 XML 파일에서
+<code>android:canRecord</code> 속성을 <code>true</code>로 설정하세요.
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>서비스 메타데이터 파일에 대한 자세한 내용은
+<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">매니페스트에서 TV 입력
+서비스 선언</a>을 참조하세요.
+</p>
+
+<p>또는 다음 단계에 따라 녹화 지원 사실을 코드에
+표시할 수 있습니다.</p>
 
 <ol>
 <li><code>TvInputService.onCreate()</code> 메서드에서 <code>TvInputInfo.Builder</code>
-클래스를 사용하여 
+클래스를 사용하여 새로운
 <code>TvInputInfo</code> 객체를 생성합니다.</li>
-<li>새로운 <code>TvInputInfo</code> 객체를 생성할 때 <code>build()</code> 를 호출하기 전에
+<li>새로운 <code>TvInputInfo</code> 객체를 생성할 때, <code>build()</code>를 호출하기 전에
 <code>setCanRecord(true)</code>를 호출하여
-서비스가 녹화를 지원한다는 것을 나타냅니다.</li>
+서비스가 녹화를 지원함을 나타냅니다.</li>
 <li>
-<code>TvInputService.updateTvInputInfo()</code>를 호출하여 시스템에 <code>TvInputInfo</code> 객체를 등록합니다.</li>
+<code>TvInputManager.updateTvInputInfo()</code>를 호출하여 시스템에 <code>TvInputInfo</code> 객체를 등록합니다.</li>
 </ol>
 
 <h2 id="recording">세션 녹화</h2>
@@ -52,7 +73,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <p>TV 입력 서비스가 녹화 기능을 지원하도록 등록한 후,
 시스템은 앱의 녹화 구현에 액세스해야 할 때
 <code>TvInputService.onCreateRecordingSession()</code>을 호출합니다.
- 자체적인 
+ 자체적인
 <code>TvInputService.RecordingSession</code> 서브클래스를 구현하고
 <code>onCreateRecordingSession()</code> 콜백이
 실행되면 이를 반환합니다. 이 서브클래스는 정확한 채널 데이터로 전환하고,
@@ -75,7 +96,7 @@ page.image=images/cards/card-nyc_2x.jpg
 이 시점에서 앱이 즉시 녹화를 중단해야 합니다. 또한,
 <code>RecordedPrograms</code> 테이블에서 항목을 생성해야 합니다. 이 항목에는
 <code>RecordedPrograms.COLUMN_RECORDING_DATA_URI</code> 열의 녹화된 세션 데이터 URI,
-최초 
+최초
 <code>onStartRecording()</code> 호출에서 시스템이 제공한 프로그램 정보가 포함됩니다.
 </p>
 

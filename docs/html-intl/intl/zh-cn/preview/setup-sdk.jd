@@ -1,7 +1,7 @@
-page.image=images/cards/card-n-sdk_2x.pngpage.title=设置预览版
-meta.keywords="预览版", "android"
+page.title=设置 Preview
+meta.keywords="preview", "android"
 page.tags="preview", "developer preview"
-
+page.image=images/cards/card-n-sdk_2x.png
 
 @jd:body
 
@@ -15,7 +15,7 @@ page.tags="preview", "developer preview"
       <li><a href="#docs-dl">参考文档</a>
     </ol>
   </li>
-  <li><a href="#java8">获取 Java 8 JDK 和 JRE</a></li>
+  <li><a href="#java8">获取 Java 8 JDK</a></li>
   <li><a href="#create-update">更新或创建一个项目</a></li>
   <li><a href="#next">后续步骤</a></li>
 </ol>
@@ -31,50 +31,22 @@ page.tags="preview", "developer preview"
 <img src="{@docRoot}preview/images/n-preview-setup.png" width="700" alt="" />
 
 
-<h2 id="get-as13">获取 Android Studio 2.1（预览版）</h2>
+<h2 id="get-as13">获取 Android Studio 2.1</h2>
 
-<p>Android N 平台为 <a href="{@docRoot}preview/j8-jack.html">Java 8 语言功能</a>添加支持，该功能需要一个名为 Jack 的新编译器。当前仅在 Android Studio 2.1 中支持最新的 Jack 版本。因此，如果您想要使用 Java 8 语言功能，则必须使用 Android Studio 2.1 构建应用。或者，您不需要使用 Jack 编译器，但仍需要更新至 JDK 8 以便使用 Android N 平台进行编译，如下所述。
-
-
-
+<p>Android N 平台为 <a href="{@docRoot}preview/j8-jack.html">Java 8 语言功能</a>添加支持，该功能需要一个名为 Jack 的新编译。
+当前仅在 Android Studio 2.1 中支持最新的 Jack 版本。因此，如果您想要使用 Java 8 语言功能，则必须使用 Android Studio 2.1 构建应用。
 
 
-
-</p>
-
-<p>在 Canary 发布渠道中，Android Studio 2.1 当前可以预览版的形式提供。如果您已拥有 Android Studio 且不需要更新到 Canary 发布渠道，您可通过单独安装的形式下载 Android Studio 2.1，并使用它在 Android N 中进行开发，从而使您的主要 Android Studio 环境不受影响。
-
-
-
+或者，您不需要使用 Jack 编译器，但仍需要更新至 JDK 8 以便使用 Android N 平台进行编译，如下所述。
 
 </p>
 
-<p>若要以单独安装的形式下载 Android Studio 2.1，则按照以下步骤进行操作（或者如果想要收到 Android Studio 2.1 作为现有安装的更新，则跳过第 4 步）：
+<p>如果您已经安装了 Android Studio，请通过点击 <strong>Help &gt; Check for Update</strong>（在 Mac 上，点击 <strong>Android Studio &gt; Check for Updates</strong>）来确保您安装的是 Android Studio 2.1 或更高版本。
 
 </p>
 
-<ol>
-  <li>编辑现有 Android Studio 安装的名称并追加版本号。通过此方式，当您安装新版本时，新版本不会重写现有的版本。
-
-</li>
-  <li>从 <a href="http://tools.android.com/download/studio/canary/latest">Canary 发布渠道下载页面</a>为您的操作系统下载适当的 ZIP 文件。
-
-  </li>
-  <li>将软件包解压缩，并将 Android Studio 2.1 内容移到您系统上相应的应用位置，然后启动它。
-</li>
-  <li>打开 Settings 对话框（在 Windows/Linux 上打开 <strong>File &gt; Settings</strong>，或在 Mac 上打开 <strong>Android Studio &gt; Preferences</strong>）。在左侧面板中，选择 <strong>Appearance &amp; Behavior &gt; System Settings &gt; Updates</strong>。
-
-
-
-
-  </li>
-  <li>在 Updates 面板上，选中 <strong>Automatically check updates for</strong>复选框，并从下拉列表中选择 <strong>Canary Channel</strong>。
-
-
-  </li>
-</ol>
-
-<p>保持此设置窗口处于打开状态，以执行下一步。</p>
+<p>如果您尚未安装，请在此处<a href="{@docRoot}studio/">下载 Android Studio 2.1</a>。
+</p>
 
 
 <h2 id="get-sdk">获取 N Preview SDK</h2>
@@ -83,22 +55,15 @@ page.tags="preview", "developer preview"
 </p>
 
 <ol>
-  <li>同时还查看 Updates 面板（来自上面的第 4 步），选中 <strong>Automatically check updates for Android SDK</strong> 复选框，然后从下拉列表中选择 <strong>Preview Channel</strong>。
+  <li>点击 <strong>Tools &gt;Android &gt; 
+SDK Manager</strong> 来打开 SDK 管理器。</li>
 
-
-
-  </li>
-  <li>点击 <strong>Check Now</strong>。</li>
-
-  <li>在左侧面板中，选择 <strong>Appearance &amp; Behavior &gt; System Settings &gt; Android SDK</strong>。
-
-
-  <li>点击 <strong>SDK Platforms</strong> 选项卡，然后选中 <strong>Android N Preview</strong> 复选框。
+  <li>在 <strong>SDK Platforms</strong> 选项卡中选中 <strong>Android N Preview</strong> 复选框。
 </li>
 
-  <li>点击 <strong>SDK Tools</strong> 选项卡，然后选中 <strong>Android SDK Build Tools</strong>、<strong>Android SDK Platform-Tools</strong> 和 <strong>Android SDK Tools</strong> 复选框。
-
-
+  <li>点击 <strong>SDK Tools</strong> 选项卡，然后选中
+ <strong>Android SDK Build Tools</strong>、<strong>Android SDK
+ Platform-Tools</strong> 和 <strong>Android SDK Tools</strong> 复选框。
 
   </li>
 
@@ -124,22 +89,20 @@ page.tags="preview", "developer preview"
   </tr>
   <tr>
     <td style="white-space: nowrap">
-    <a href="{@docRoot}shareables/preview/n-preview-1-docs.zip">n-preview-1-docs.zip</a></td>
+    <a href="{@docRoot}shareables/preview/n-preview-3-docs.zip">n-preview-3-docs.zip</a></td>
     <td width="100%">
-      MD5：4ab33ccbe698f46f125cc5b807cf9c2f<br>
-      SHA-1：6a3880b3ccd19614daae5a4d0698ea6ae11c20a5
+      MD5:19bcfd057a1f9dd01ffbb3d8ff7b8d81<br>
+      SHA-1:9224bd4445cd7f653c4c294d362ccb195a2101e7 
     </td>
   </tr>
-</table>
+<table>
 
 
 
-<h2 id="java8">获取 Java 8 JDK 和 JRE</h2>
+<h2 id="java8">获取 Java 8 JDK</h2>
 
-<p>若要使用 Android N 平台编译您的应用，您需要使用 Java 8 Developer Kit (JDK 8)，同时为了在 Android Studio 2.1 中使用一些工具，您需要安装 Java 8 Runtime Environment (JRE 8)。因此，如果您还没有每个软件的最新版本，请立即下载 JDK 8 和 JRE 8。
-
-
-
+<p>若要使用 Android N 平台编译您的应用，并在 Android Studio 2.1 中使用一些工具，您需要安装 Java 8 Developer Kit (JDK 8)。
+因此，如果您还没有最新版本，请立即下载 JDK 8 。
 </p>
 
 <p>然后，按如下所示在 Android Studio 中设置 JDK 版本：</p>
@@ -184,7 +147,7 @@ page.tags="preview", "developer preview"
 <pre>
 android {
   compileSdkVersion <strong>'android-N'</strong>
-  buildToolsVersion <strong>'24.0.0-rc1'</strong>
+  buildToolsVersion <strong>'24.0.0-rc3'</strong>
   ...
 
   defaultConfig {
@@ -199,7 +162,7 @@ android {
 <h3 id="create">创建新项目</h3>
 
 
-<p>若要使用 Android N  Preview SDK 创建新的开发项目：</p>
+<p>若要使用 Android N Preview SDK 创建新的开发项目：</p>
 
 <ol>
   <li>点击 <strong>File &gt; New Project</strong>。按照步骤进行操作，直到您到达“Target Android Devices”页面。
@@ -221,3 +184,4 @@ android {
 
 </li>
 </ul>
+

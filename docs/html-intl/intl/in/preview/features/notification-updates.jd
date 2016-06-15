@@ -1,5 +1,5 @@
 page.title=Pemberitahuan
-page.tags=notifications
+page.tags=pemberitahuan
 helpoutsWidget=true
 page.image=/preview/images/notifications-card.png
 
@@ -15,14 +15,15 @@ trainingnavtop=true
 <ol>
   <li><a href="#direct">Balasan Langsung</a></li>
   <li><a href="#bundle">Bundel Pemberitahuan</a></li>
-  <li><a href="#custom">Tampilan Custom</a></li>
+  <li><a href="#custom">Tampilan Khusus</a></li>
+  <li><a href="#style">Gaya Pesan</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>Android N memperkenalkan beberapa API baru yang memungkinkan aplikasi memposting
-pemberitahuan yang sangat terlihat dan interaktif.</p>
+<p>Android N memperkenalkan beberapa API baru yang memungkinkan aplikasi untuk mengeposkan
+pemberitahuan yang sangat mudah terlihat dan interaktif.</p>
 
 <p>Android N menambahkan API pemberitahuan{@link android.support.v4.app.RemoteInput}
 yang ada untuk mendukung balasan inline pada handset. Fitur ini memungkinkan pengguna
@@ -59,8 +60,8 @@ pemberitahuan. Pada perangkat genggam, tindakan balasan inline muncul sebagai to
 <img id="fig-reply-button" src="{@docRoot}preview/images/inline-reply.png" srcset="{@docRoot}preview/images/inline-reply.png 1x,
   {@docRoot}preview/images/inline-reply_2x.png 2x" width="400">
 <p class="img-caption">
-  <strong>Gambar 1.</strong> Android N menambahkan tombol tindakan <strong>Reply</strong>
-.
+  <strong>Gambar 1.</strong> Android N menambahkan tombol tindakan <strong>Reply</strong>.
+
 </p>
 
 <h3>Menambahkan tindakan balasan inline</h3>
@@ -72,11 +73,11 @@ pemberitahuan. Pada perangkat genggam, tindakan balasan inline muncul sebagai to
 <li>Buat instance {@link android.support.v4.app.RemoteInput.Builder}
  yang bisa Anda tambahkan ke tindakan
 pemberitahuan. Konstruktor kelas ini akan menerima string bahwa sistem menggunakannya sebagai kunci
- untuk input teks. Kemudian, aplikasi perangkat genggam Anda akan menggunakan kunci itu untuk mengambil teks
-  input tersebut.
+ untuk masukan teks. Kemudian, aplikasi perangkat genggam Anda akan menggunakan kunci itu untuk mengambil teks
+  masukan tersebut.
 
 <pre>
-// Key for the string that's delivered in the action's intent
+// Key for the string that's delivered in the action's intent.
 private static final String KEY_TEXT_REPLY = "key_text_reply";
 String replyLabel = getResources().getString(R.string.reply_label);
 RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
@@ -88,7 +89,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
  pada tindakan dengan menggunakan <code>addRemoteInput()</code>.
 
 <pre>
-// Create the reply action and add the remote input
+// Create the reply action and add the remote input.
 Notification.Action action =
         new Notification.Action.Builder(R.drawable.ic_reply_icon,
                 getString(R.string.label), replyPendingIntent)
@@ -100,8 +101,8 @@ Notification.Action action =
 <li>Terapkan tindakan pada pemberitahuan dan keluarkan pemberitahuan.
 
 <pre>
-// Build the notification and add the action
-Notification notification =
+// Build the notification and add the action.
+Notification newMessageNotification =
         new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_message)
                 .setContentTitle(getString(R.string.title))
@@ -109,10 +110,10 @@ Notification notification =
                 .addAction(action))
                 .build();
 
-// Issue the notification
+// Issue the notification.
 NotificationManager notificationManager =
         NotificationManager.from(mContext);
-notificationManager.notify(notificationId, notification);
+notificationManager.notify(notificationId, newMessageNotification);
 
 </pre>
 </li>
@@ -129,30 +130,32 @@ tindakan pemberitahuan. </p>
   <strong>Gambar 2.</strong> Pengguna memasukkan teks dari bayangan pemberitahuan.
 </p>
 
-<h3>Mengambil input pengguna dari balasan inline</h3>
+<h3>
+  Mengambil masukan pengguna dari balasan inline
+</h3>
 
-<p>Untuk menerima input pengguna dari antarmuka pemberitahuan untuk aktivitas yang Anda
-deklarasikan dalam intent tindakan balasan:</p>
+<p>
+  Untuk menerima masukan pengguna dari antarmuka pemberitahuan ke aktivitas yang Anda
+deklarasikan dalam intent tindakan balasan:
+</p>
+
 <ol>
-<li> Panggil {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+  <li>Panggil {@link android.support.v4.app.RemoteInput#getResultsFromIntent
   getResultsFromIntent()} dengan meneruskan intent tindakan pemberitahuan sebagai
- parameter input. Metode ini mengembalikan {@link android.os.Bundle} yang
- berisi respons teks.
-</li>
+  parameter masukan. Metode ini mengembalikan {@link android.os.Bundle} yang
+  berisi respons teks.
 
-<pre>
+    <pre>
 Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 </pre>
+  </li>
 
-<li>Lakukan query pada bundel menggunakan kunci hasil (diberikan ke konstruktor {@link
-  android.support.v4.app.RemoteInput.Builder}).
-</li>
-</ol>
+  <li>Lakukan kueri pada bundel menggunakan kunci hasil (diberikan ke konstruktor {@link
+  android.support.v4.app.RemoteInput.Builder}). Anda bisa menyelesaikan
+  proses ini dan mengambil teks masukan dengan membuat sebuah metode, seperti dalam
+  cuplikan kode berikut:
 
-<p>Cuplikan kode berikut mengilustrasikan cara metode mengambil teks input
-dari bundel:</p>
-
-<pre>
+    <pre>
 // Obtain the intent that started this activity by calling
 // Activity.getIntent() and pass it into this method to
 // get the associated string.
@@ -160,20 +163,53 @@ dari bundel:</p>
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
     if (remoteInput != null) {
-            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
-            }
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
     return null;
  }
 </pre>
+  </li>
 
-<p>Aplikasi bisa menerapkan logika untuk memutuskan tindakan apa yang harus diambil pada teks
-yang telah diambil.
-Untuk aplikasi interaktif (seperti chat), memberikan lebih banyak konteks dalam pemberitahuan itu sendiri
- (misalnya, beberapa baris riwayat obrolan, termasuk pesan pengguna pribadi)
-  sehingga pengguna bisa merespons dengan tepat.
-Bila pengguna merespons melalui{@link android.support.v4.app.RemoteInput},
- sertakan teks dalam riwayat balasan dengan metode {@code setRemoteInputHistory()}
-.</p>
+  <li>Kompilasilah dan keluarkan pemberitahuan lain, menggunakan ID pemberitahuan yang sama dengan
+  yang Anda berikan untuk pemberitahuan sebelumnya. Indikator kemajuan
+    menghilang dari antarmuka pemberitahuan untuk memberi tahu pengguna mengenai balasan
+    yang berhasil. Saat menangani pemberitahuan baru ini, gunakan konteks yang
+    diteruskan ke metode {@code onReceive()} penerima.
+
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
+
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
+
+<p>
+  Untuk aplikasi interaktif, seperti chat, akan berguna bila menyertakan
+  konteks tambahan saat menangani teks yang diambil. Misalnya, aplikasi ini bisa menampilkan
+  beberapa baris riwayat chat sekaligus. Bila pengguna merespons melalui {@link
+  android.support.v4.app.RemoteInput}, Anda bisa memperbarui riwayat balasan
+  menggunakan metode {@code setRemoteInputHistory()}.
+</p>
+
+<p>
+  Pemberitahuan harus diperbarui atau dibatalkan setelah aplikasi
+ menerima masukan jarak jauh. Bila pengguna membalas ke pembaruan jarak jauh
+  menggunakan Balasan Langsung,
+  jangan batalkan pemberitahuan. Melainkan, perbarui pemberitahuan untuk menampilkan balasan pengguna.
+Untuk pemberitahuan yang menggunakan {@code MessagingStyle}, Anda harus menambahkan
+balasannya sebagai pesan terbaru. Saat menggunakan template lain, Anda bisa
+menambahkan balasan pengguna ke riwayat masukan jarak jauh.
+</p>
 
 <h2 id="bundle">Bundel Pemberitahuan</h2>
 
@@ -203,6 +239,12 @@ Builder.setGroup()} yang ada untuk membundel pemberitahuan yang sama.</p>
   pemberitahuan.
 </p>
 
+<p class="note">
+  <strong>Catatan:</strong> Jika aplikasi yang sama mengirim empat atau beberapa pemberitahuan
+  dan tidak menetapkan pengelompokan,
+  sistem secara otomatis akan mengelompokannya.
+</p>
+
 <p>Untuk mengetahui cara menambahkan pemberitahuan ke grup, lihat
 <a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">Menambahkan
 Setiap Pemberitahuan ke Grup</a>.</p>
@@ -226,19 +268,19 @@ bernilai benar untuk kasus penggunaan Anda:</p>
 
   </li>
   <ul>
-    <li>Bisa diaplikasikan, dengan tindakan yang spesifik untuk setiap anak.</li>
+    <li>Mereka dapat diaplikasikan, dengan tindakan khusus untuk masing-masing anak.</li>
     <li>Ada lebih banyak informasi pada anak yang ingin dibaca oleh pengguna.</li>
   </ul>
 </ul>
 
-<p>Contoh kasus penggunaan yang baik untuk grup pemberitahuan antara lain: aplikasi pertukaran pesan
+<p>Contoh kasus penggunaan yang baik untuk grup pemberitahuan antara lain: aplikasi perpesanan
 yang menampilkan daftar pesan yang masuk, atau aplikasi email yang menampilkan daftar email
 yang diterima.</p>
 
 <p>
-Contoh kasus di mana pemberitahuan tunggal lebih disukai
- antara lain pesan individual dari satu orang, atau representasi daftar
- item teks satu-baris. Anda bisa menggunakan
+Contoh kasus penggunaan saat pemberitahuan tunggal lebih disukai
+ meliputi pesan pribadi dari satu orang, atau representasi daftar dari
+ item teks baris tunggal. Anda bisa menggunakan
 ({@link android.app.Notification.InboxStyle InboxStyle} atau
 {@link android.app.Notification.BigTextStyle BigTextStyle}) untuk mencapai
 hal ini.
@@ -247,7 +289,7 @@ hal ini.
 <h3 id ="post">Menampilkan bundel pemberitahuan</h3>
 
 <p>
-  Aplikasi ini harus selalu memposting rangkuman grup, sekalipun grup hanya berisi
+  Aplikasi ini harus selalu mengeposkan rangkuman grup, sekalipun grup hanya berisi
   satu anak. Sistem akan menyembunyikan rangkuman dan langsung menampilkan
   pemberitahuan anak jika hanya berisi pemberitahuan tunggal. Hal ini akan memastikan
   sistem bisa memberikan pengalaman yang konsisten saat pengguna menggeser
@@ -262,7 +304,7 @@ hal ini.
 
 <h3>Mengintip pemberitahuan</h3>
 
-<p>Walaupun sistem biasanya menampilkan pemberitahuan anak sebagai sebuah grup, Anda bisa mengaturnya
+<p>Walaupun sistem biasanya menampilkan pemberitahuan anak sebagai sebuah grup, Anda bisa menyetelnya
  agar muncul untuk sementara muncul sebagai
  <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Heads-up">
  pemberitahuan pendahuluan</a>. Fitur ini khususnya berguna karena memungkinkan
@@ -273,10 +315,10 @@ hal ini.
 <h3>Kompatibilitas mundur</h3>
 
 <p>
-  Baik grup pemberitahuan maupun input jauh telah menjadi bagian dari {@link
+  Baik grup pemberitahuan maupun masukan jauh telah menjadi bagian dari {@link
   android.app.Notification} API sejak Android 5.0 (API level 21) untuk mendukung
   perangkat Android Wear. Jika Anda sudah membuat pemberitahuan dengan API ini,
-  satu-satunya tindakan yang harus Anda ambil adalah memeriksa apakah perilaku aplikasi sesuai dengan panduan yang
+  satu-satunya tindakan yang harus Anda ambil adalah memverifikasi apakah perilaku aplikasi sesuai dengan panduan yang
   dijelaskan di atas, dan mempertimbangkan implementasi {@code
   setRemoteInputHistory()}.
 </p>
@@ -286,20 +328,20 @@ hal ini.
   kelas {@link android.support.v4.app.NotificationCompat}
   pustaka dukungan, yang memungkinkan Anda untuk membuat pemberitahuan yang bekerja pada versi Android
   sebelumnya. Pada perangkat genggam dan tablet, pengguna hanya melihat pemberitahuan rangkuman,
-  sehingga aplikasi tetap memiliki gaya kotak masuk atau representasi pemberitahuan yang sama
-  untuk seluruh konten informasi grup. Karena perangkat Android
+  sehingga aplikasi masih memiliki model inbox atau pemberitahuan sama yang
+  mewakili seluruh materi informasi grup. Karena perangkat Android
   Wear memungkinkan pengguna melihat semua pemberitahuan anak bahkan pada level platform
-  yang lebih lama, maka Anda harus membuat pemberitahuan anak dengan mengabaikan level
+  yang lebih lama, maka Anda harus membangun pemberitahuan anak dengan mengabaikan level
   API.
 </p>
 
-<h2 id="custom"> Tampilan Custom</h2>
+<h2 id="custom"> Tampilan Khusus</h2>
 <p>Mulai dari Android N, Anda bisa menyesuaikan tampilan pemberitahuan dan
 tetap mendapatkan dekorasi sistem seperti header pemberitahuan, tindakan, dan
 layout yang bisa diperluas.</p>
 
 <p>Untuk mengaktifkan kemampuan ini, Android N menambahkan API berikut untuk menata gaya
-  tampilan custom Anda:</p>
+  tampilan khusus Anda:</p>
 
 <dl>
 <dt>
@@ -312,17 +354,40 @@ media.</dd>
 </dl>
 
 <p>Untuk menggunakan API baru ini, panggil metode {@code setStyle()}, dengan meneruskan
-gaya tampilan custom yang diinginkan padanya.</p>
+gaya tampilan khusus yang diinginkan padanya.</p>
 
-<p>Cuplikan ini menampilkan cara membuat objek pemberitahuan custom dengan metode
+<p>Cuplikan ini menampilkan cara membuat objek pemberitahuan khusus dengan metode
 {@code DecoratedCustomViewStyle()}.</p>
 
 <pre>
-Notification noti = new Notification.Builder()
+Notification notification = new Notification.Builder()
            .setSmallIcon(R.drawable.ic_stat_player)
            .setLargeIcon(albumArtBitmap))
            .setCustomContentView(contentView);
            .setStyle(new Notification.DecoratedCustomViewStyle())
            .build();
 
+</pre>
+
+<h2 id="style">Gaya Perpesanan</h2>
+<p>
+  Android N memperkenalkan API baru untuk menyesuaikan gaya pemberitahuan.
+  Dengan menggunakan kelas <code>MessageStyle</code>, Anda bisa mengubah beberapa
+  label yang ditampilkan pada pemberitahuan, termasuk judul percakapan,
+  pesan tambahan, dan tampilan materi untuk pemberitahuannya.
+</p>
+
+<p>
+  Cuplikan kode berikut memperagakan cara menyesuaikan sebuah
+  gaya pemberitahuan menggunakan kelas <code>MessageStyle</code>.
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
 </pre>

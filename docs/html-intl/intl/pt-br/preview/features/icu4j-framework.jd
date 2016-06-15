@@ -1,5 +1,4 @@
-page.title=APIs de estrutura do Android para ICU4J
-page.tags=androidn
+page.title=ICU4J Android Framework APIs
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -54,7 +53,7 @@ page.image=images/cards/card-nyc_2x.jpg
  <code>android.icu</code>, não do <code>com.ibm.icu</code>. A
  estrutura do Android pode optar por não
  expor as APIs do ICU4J por diversos motivos. Por exemplo, o Android N não expõe
- algumas APIs obsoletas ou APIs que a equipe do ICU ainda não declarou como
+ algumas APIs obsoletas ou que a equipe do ICU ainda não declarou como
  estáveis. Conforme a equipe do ICU torna APIs obsoletas, o Android também as marcará
  como obsoletas, mas continuará incluindo-as.
 </p>
@@ -95,9 +94,9 @@ recursos</a>.</li>
 </p>
 
 <p class="note">
-  <b>Observação</b>: As APIs de estrutura do ICU4J usam o espaço de nome {@code android.icu}
+  <b>Observação</b>: As APIs de estrutura do ICU4J usam o namespace {@code android.icu}
  em vez de {@code com.ibm.icu}. Isso ocorre para evitar conflitos
- de espaço de nome em APKs que contêm as próprias bibliotecas {@code com.ibm.icu}.
+ de namespace em APKs que contêm as próprias bibliotecas {@code com.ibm.icu}.
 </p>
 
 <h3 id="migrate-from-android">
