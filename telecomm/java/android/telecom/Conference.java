@@ -82,6 +82,7 @@ public abstract class Conference extends Conferenceable {
     private StatusHints mStatusHints;
     private Bundle mExtras;
     private Set<String> mPreviousExtraKeys;
+    private final Object mExtrasLock = new Object();
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -686,32 +687,35 @@ public abstract class Conference extends Conferenceable {
      * @param extras The extras associated with this {@code Conference}.
      */
     public final void setExtras(@Nullable Bundle extras) {
-        // Add/replace any new or changed extras values.
-        putExtras(extras);
+        // Keeping putExtras and removeExtras in the same lock so that this operation happens as a
+        // block instead of letting other threads put/remove while this method is running.
+        synchronized (mExtrasLock) {
+            // Add/replace any new or changed extras values.
+            putExtras(extras);
+            // If we have used "setExtras" in the past, compare the key set from the last invocation
+            // to the current one and remove any keys that went away.
+            if (mPreviousExtraKeys != null) {
+                List<String> toRemove = new ArrayList<String>();
+                for (String oldKey : mPreviousExtraKeys) {
+                    if (extras == null || !extras.containsKey(oldKey)) {
+                        toRemove.add(oldKey);
+                    }
+                }
 
-        // If we have used "setExtras" in the past, compare the key set from the last invocation to
-        // the current one and remove any keys that went away.
-        if (mPreviousExtraKeys != null) {
-            List<String> toRemove = new ArrayList<String>();
-            for (String oldKey : mPreviousExtraKeys) {
-                if (extras == null || !extras.containsKey(oldKey)) {
-                    toRemove.add(oldKey);
+                if (!toRemove.isEmpty()) {
+                    removeExtras(toRemove);
                 }
             }
 
-            if (!toRemove.isEmpty()) {
-                removeExtras(toRemove);
+            // Track the keys the last time set called setExtras.  This way, the next time setExtras
+            // is called we can see if the caller has removed any extras values.
+            if (mPreviousExtraKeys == null) {
+                mPreviousExtraKeys = new ArraySet<String>();
             }
-        }
-
-        // Track the keys the last time set called setExtras.  This way, the next time setExtras is
-        // called we can see if the caller has removed any extras values.
-        if (mPreviousExtraKeys == null) {
-            mPreviousExtraKeys = new ArraySet<String>();
-        }
-        mPreviousExtraKeys.clear();
-        if (extras != null) {
-            mPreviousExtraKeys.addAll(extras.keySet());
+            mPreviousExtraKeys.clear();
+            if (extras != null) {
+                mPreviousExtraKeys.addAll(extras.keySet());
+            }
         }
     }
 
@@ -730,13 +734,19 @@ public abstract class Conference extends Conferenceable {
             return;
         }
 
-        if (mExtras == null) {
-            mExtras = new Bundle();
+        // Creating a Bundle clone so we don't have to synchronize on mExtrasLock while calling
+        // onExtrasChanged.
+        Bundle listenersBundle;
+        synchronized (mExtrasLock) {
+            if (mExtras == null) {
+                mExtras = new Bundle();
+            }
+            mExtras.putAll(extras);
+            listenersBundle = new Bundle(mExtras);
         }
-        mExtras.putAll(extras);
 
         for (Listener l : mListeners) {
-            l.onExtrasChanged(this, extras);
+            l.onExtrasChanged(this, new Bundle(listenersBundle));
         }
     }
 
@@ -790,17 +800,17 @@ public abstract class Conference extends Conferenceable {
             return;
         }
 
-        if (mExtras != null) {
-            for (String key : keys) {
-                mExtras.remove(key);
-            }
-            if (mExtras.size() == 0) {
-                mExtras = null;
+        synchronized (mExtrasLock) {
+            if (mExtras != null) {
+                for (String key : keys) {
+                    mExtras.remove(key);
+                }
             }
         }
 
+        List<String> unmodifiableKeys = Collections.unmodifiableList(keys);
         for (Listener l : mListeners) {
-            l.onExtrasRemoved(this, keys);
+            l.onExtrasRemoved(this, unmodifiableKeys);
         }
     }
 
@@ -833,7 +843,13 @@ public abstract class Conference extends Conferenceable {
      * @hide
      */
     final void handleExtrasChanged(Bundle extras) {
-        mExtras = extras;
-        onExtrasChanged(mExtras);
+        Bundle b = null;
+        synchronized (mExtrasLock) {
+            mExtras = extras;
+            if (mExtras != null) {
+                b = new Bundle(mExtras);
+            }
+        }
+        onExtrasChanged(b);
     }
 }
