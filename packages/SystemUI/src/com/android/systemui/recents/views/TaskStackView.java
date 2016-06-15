@@ -1955,7 +1955,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 @Override
                 public void run() {
                     // Start the dozer to trigger to trigger any UI that shows after a timeout
-                    mUIDozeTrigger.startDozing();
+                    if (!Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
+                        mUIDozeTrigger.startDozing();
+                    }
 
                     // Update the focused state here -- since we only set the focused task without
                     // requesting view focus in onFirstLayout(), actually request view focus and
