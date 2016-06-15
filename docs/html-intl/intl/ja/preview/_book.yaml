@@ -1,0 +1,342 @@
+toc:
+- title: プログラム概要
+  path: /preview/overview.html
+  path_attributes:
+  - name: es-lang
+    value: Información general del programa
+  - name: in-lang
+    value: Ikhtisar Program
+  - name: ja-lang
+    value: プログラム概要
+  - name: ko-lang
+    value: 프로그램 개요
+  - name: pt-br-lang
+    value: Visão geral do programa
+  - name: ru-lang
+    value: Обзор программы
+  - name: vi-lang
+    value: Tổng quan về Chương trình
+  - name: zh-cn-lang
+    value: 计划概览
+  - name: zh-tw-lang
+    value: 程式總覽
+
+- title: サポートとリリースノート
+  path: /preview/support.html
+
+- title: Preview のセットアップ
+  path: /preview/setup-sdk.html
+  path_attributes:
+  - name: es-lang
+    value: Configurar el SDK de la versión preliminar
+  - name: in-lang
+    value: Menyiapkan Preview
+  - name: ja-lang
+    value: Preview SDK のセットアップ
+  - name: ko-lang
+    value: 미리 보기 SDK 설정하기
+  - name: pt-br-lang
+    value: Configuração do Preview SDK
+  - name: ru-lang
+    value: Настройка пакета SDK Preview
+  - name: vi-lang
+    value: Kiểm thử trên Thiết bị
+  - name: zh-cn-lang
+    value: 设置预览版 SDK
+  - name: zh-tw-lang
+    value: 設定預覽版 SDK
+
+- title: 端末上でのテスト
+  path: /preview/download.html
+  path_attributes:
+  - name: es-lang
+    value: Pruebe en un dispositivo
+  - name: in-lang
+    value: Menguji pada Perangkat
+  - name: ja-lang
+    value: デバイス上でテストする
+  - name: ko-lang
+    value: 기기에서 테스트
+  - name: pt-br-lang
+    value: Testar em um dispositivo
+  - name: ru-lang
+    value: Тестирование на устройстве
+  - name: vi-lang
+    value: Kiểm thử trên Thiết bị
+  - name: zh-cn-lang
+    value: 在设备上测试
+  - name: zh-tw-lang
+    value: 在裝置上測試
+
+- title: 動作の変更点
+  path: /preview/behavior-changes.html
+  path_attributes:
+  - name: es-lang
+    value: Cambios en los comportamientos
+  - name: in-lang
+    value: Perubahan Perilaku
+  - name: ja-lang
+    value: 動作の変更点
+  - name: ko-lang
+    value: 동작 변경
+  - name: pt-br-lang
+    value: Mudanças de comportamento
+  - name: ru-lang
+    value: Изменения в работе
+  - name: vi-lang
+    value: Các thay đổi Hành vi
+  - name: zh-cn-lang
+    value: 行为变更
+  - name: zh-tw-lang
+    value: 行為變更
+  section:
+  - title: バックグラウンド処理の最適化
+    path: /preview/features/background-optimization.html
+    path_attributes:
+    - name: es-lang
+      value: Optimizaciones en segundo plano
+    - name: in-lang
+      value: Optimisasi Latar Belakang
+    - name: ja-lang
+      value: バックグラウンド処理の最適化
+    - name: ko-lang
+      value: 백그라운드 최적화
+    - name: pt-br-lang
+      value: Otimizações em segundo plano
+    - name: ru-lang
+      value: Оптимизация фоновых процессов
+    - name: vi-lang
+      value: Tối ưu hóa Chạy ngầm
+    - name: zh-cn-lang
+      value: 后台优化
+    - name: zh-tw-lang
+      value: 背景最佳化
+  - title: 言語とロケール
+    path: /preview/features/multilingual-support.html
+    path_attributes:
+    - name: es-lang
+      value: Idioma y configuración regional
+    - name: in-lang
+      value: Bahasa dan Lokal
+    - name: ja-lang
+      value: 言語とロケール
+    - name: ko-lang
+      value: 언어 및 로케일
+    - name: pt-br-lang
+      value: Idioma e localidade
+    - name: ru-lang
+      value: Язык и языковой стандарт
+    - name: vi-lang
+      value: Ngôn ngữ và Bản địa
+    - name: zh-cn-lang
+      value: 语言和区域设置
+    - name: zh-tw-lang
+      value: 語言和地區設定
+
+- title: Android N for Developers
+  path: /preview/api-overview.html
+  path_attributes:
+  - name: es-lang
+    value: Información general de la API
+  - name: in-lang
+    value: Android N untuk Pengembang
+  - name: ja-lang
+    value: API の概要
+  - name: ko-lang
+    value: API 개요
+  - name: pt-br-lang
+    value: Visão geral da API
+  - name: ru-lang
+    value: Обзор API-интерфейсов
+  - name: vi-lang
+    value: Android N cho Nhà phát triển
+  - name: zh-cn-lang
+    value: API 概览
+  - name: zh-tw-lang
+    value: API 總覽
+  section:
+  - title: マルチ ウィンドウのサポート
+    path: /preview/features/multi-window.html
+    path_attributes:
+    - name: es-lang
+      value: Compatibilidad con ventanas múltiples
+    - name: in-lang
+      value: Dukungan Multi-Jendela
+    - name: ja-lang
+      value: マルチ ウィンドウのサポート
+    - name: ko-lang
+      value: 다중 창 지원
+    - name: pt-br-lang
+      value: Suporte a várias janelas
+    - name: ru-lang
+      value: Поддержка многооконного режима
+    - name: vi-lang
+      value: Hỗ trợ đa cửa sổ
+    - name: zh-cn-lang
+      value: 多窗口支持
+    - name: zh-tw-lang
+      value: 多視窗支援
+  - title: 通知
+    path: /preview/features/notification-updates.html
+    path_attributes:
+    - name: es-lang
+      value: Notificaciones
+    - name: in-lang
+      value: Pemberitahuan
+    - name: ja-lang
+      value: 通知
+    - name: ko-lang
+      value: 알림
+    - name: pt-br-lang
+      value: Notificações
+    - name: ru-lang
+      value: Уведомления
+    - name: vi-lang
+      value: Thông báo
+    - name: zh-cn-lang
+      value: 通知
+    - name: zh-tw-lang
+      value: 通知
+  - title: データセーバー
+    path: /preview/features/data-saver.html
+  - title: TV の録画機能
+    path: /preview/features/tv-recording-api.html
+    path_attributes:
+    - name: es-lang
+      value: Grabación de TV
+    - name: in-lang
+      value: Perekaman TV
+    - name: ja-lang
+      value: TV の録画
+    - name: ko-lang
+      value: TV 녹화
+    - name: pt-br-lang
+      value: Gravação para TV
+    - name: ru-lang
+      value: Запись ТВ
+    - name: vi-lang
+      value: Ghi lại TV
+    - name: zh-cn-lang
+      value: TV 录制
+    - name: zh-tw-lang
+      value: 電視錄製
+  - title: ネットワーク セキュリティ構成
+    path: /preview/features/security-config.html
+    path_attributes:
+    - name: es-lang
+      value: Configuración de seguridad de la red
+    - name: ja-lang
+      value: ネットワーク セキュリティ構成
+    - name: ko-lang
+      value: 네트워크 보안 구성
+    - name: pt-br-lang
+      value: Configurações de segurança de rede
+    - name: ru-lang
+      value: Конфигурация сетевой безопасности
+    - name: vi-lang
+      value: Cấu hình Bảo mật mạng
+    - name: zh-cn-lang
+      value: 网络安全配置
+    - name: zh-tw-lang
+      value: 網路安全性設定
+  - title: ICU4J のサポート
+    path: /preview/features/icu4j-framework.html
+    path_attributes:
+    - name: es-lang
+      value: API de ICU4J del framework de Android
+    - name: in-lang
+      value: ICU4J Android Framework API
+    - name: ja-lang
+      value: ICU4J Android フレームワーク API
+    - name: ko-lang
+      value: ICU4J Android 프레임워크 API
+    - name: pt-br-lang
+      value: APIs de estrutura do Android para ICU4J
+    - name: ru-lang
+      value: API-интерфейсы ICU4J в платформе Android
+    - name: vi-lang
+      value: API Khuôn khổ Android ICU4J
+    - name: zh-cn-lang
+      value: ICU4J Android 框架 API
+    - name: zh-tw-lang
+      value: ICU4J Android 架構 API
+  - title: Java 8 の言語機能
+    path: /preview/j8-jack.html
+    path_attributes:
+    - name: es-lang
+      value: Funciones del lenguaje Java 8
+    - name: in-lang
+      value: Fitur Bahasa Java 8
+    - name: ja-lang
+      value: Java 8 の機能
+    - name: ko-lang
+      value: Java 8 언어 기능
+    - name: pt-br-lang
+      value: Recursos de linguagem do Java 8
+    - name: ru-lang
+      value: Возможности языка Java 8
+    - name: vi-lang
+      value: Tính năng của Ngôn ngữ Java 8
+    - name: zh-cn-lang
+      value: Java 8 语言功能
+    - name: zh-tw-lang
+      value: Java 8 語言功能
+  - title: Android for Work のアップデート
+    path: /preview/features/afw.html
+  - title: 特定のディレクトリへのアクセス
+    path: /preview/features/scoped-folder-access.html
+    path_attributes:
+    - name: es-lang
+      value: Acceso a directorios determinados
+    - name: ja-lang
+      value: 特定のディレクトリへのアクセス
+    - name: ko-lang
+      value: 범위가 지정된 디렉터리 액세스
+    - name: pt-br-lang
+      value: Acesso a diretórios com escopo
+    - name: ru-lang
+      value: Доступ к выделенным каталогам
+    - name: vi-lang
+      value: Truy cập Thư mục theo Phạm vi
+    - name: zh-cn-lang
+      value: 作用域目录访问
+    - name: zh-tw-lang
+      value: 限定範圍目錄存取
+
+- title: サンプル
+  path: /preview/samples.html
+  path_attributes:
+  - name: es-lang
+    value: Ejemplos
+  - name: in-lang
+    value: Contoh
+  - name: ja-lang
+    value: サンプル
+  - name: ko-lang
+    value: 샘플
+  - name: pt-br-lang
+    value: Exemplos
+  - name: ru-lang
+    value: Примеры
+  - name: zh-cn-lang
+    value: 示例
+  - name: zh-tw-lang
+    value: 範例
+
+- title: 使用許諾契約
+  path: /preview/license.html
+  path_attributes:
+  - name: es-lang
+    value: Contrato de licencia
+  - name: ja-lang
+    value: 使用許諾契約
+  - name: ko-lang
+    value: 라이선스 계약
+  - name: pt-br-lang
+    value: Contrato de licença
+  - name: ru-lang
+    value: Лицензионное соглашение
+  - name: zh-cn-lang
+    value: 许可协议
+  - name: zh-tw-lang
+    value: 授權協議

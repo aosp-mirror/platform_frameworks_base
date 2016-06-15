@@ -1,5 +1,5 @@
 page.title=通知
-page.tags=notifications
+page.tags=通知
 helpoutsWidget=true
 page.image=/preview/images/notifications-card.png
 
@@ -11,11 +11,12 @@ trainingnavtop=true
 <div id="qv">
 
 <!-- table of contents -->
-<h2>本文内容</h2>
+<h2>本文内容包括</h2>
 <ol>
   <li><a href="#direct">直接回复</a></li>
   <li><a href="#bundle">捆绑通知</a></li>
   <li><a href="#custom">自定义视图</a></li>
+  <li><a href="#style">消息样式</a></li>
 </ol>
 
 </div>
@@ -76,7 +77,7 @@ trainingnavtop=true
 
 
 <pre>
-// Key for the string that's delivered in the action's intent
+// Key for the string that's delivered in the action's intent.
 private static final String KEY_TEXT_REPLY = "key_text_reply";
 String replyLabel = getResources().getString(R.string.reply_label);
 RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
@@ -88,7 +89,7 @@ RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
 
 
 <pre>
-// Create the reply action and add the remote input
+// Create the reply action and add the remote input.
 Notification.Action action =
         new Notification.Action.Builder(R.drawable.ic_reply_icon,
                 getString(R.string.label), replyPendingIntent)
@@ -100,8 +101,8 @@ Notification.Action action =
 <li>对通知应用操作并发出通知。
 
 <pre>
-// Build the notification and add the action
-Notification notification =
+// Build the notification and add the action.
+Notification newMessageNotification =
         new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_message)
                 .setContentTitle(getString(R.string.title))
@@ -109,10 +110,10 @@ Notification notification =
                 .addAction(action))
                 .build();
 
-// Issue the notification
+// Issue the notification.
 NotificationManager notificationManager =
         NotificationManager.from(mContext);
-notificationManager.notify(notificationId, notification);
+notificationManager.notify(notificationId, newMessageNotification);
 
 </pre>
 </li>
@@ -129,30 +130,32 @@ notificationManager.notify(notificationId, notification);
   <strong>图 2.</strong>用户从通知栏输入文本。
 </p>
 
-<h3>从内联回复检索用户输入</h3>
+<h3>
+  从内联回复检索用户输入
+</h3>
 
-<p>要从通知界面接收用户输入并发送到在回复操作的 Intent 中声明的 Activity：
+<p>
+  要从通知界面接收用户输入并发送到在回复操作的 Intent 中声明的 Activity：
+
 </p>
+
 <ol>
-<li> 通过传递通知操作的 Intent 作为输入参数，调用 {@link android.support.v4.app.RemoteInput#getResultsFromIntent
-  getResultsFromIntent()}。
+  <li>通过传递通知操作的 Intent 作为输入参数来调用 {@link android.support.v4.app.RemoteInput#getResultsFromIntent
+ getResultsFromIntent()}。
 该方法返回含有文本回复的 {@link android.os.Bundle}。
 
-</li>
 
-<pre>
+    <pre>
 Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 </pre>
+  </li>
 
-<li>使用产生的密钥查询捆绑包（提供给 {@link
-  android.support.v4.app.RemoteInput.Builder} 构造函数）。
-</li>
-</ol>
+  <li>使用产生的密钥查询捆绑包（提供给 {@link
+ android.support.v4.app.RemoteInput.Builder} 构造函数）。以下代码段说明了方法如何从捆绑包检索输入文本：
 
-<p>以下代码段说明了方法如何从捆绑包检索输入文本：
-</p>
 
-<pre>
+
+    <pre>
 // Obtain the intent that started this activity by calling
 // Activity.getIntent() and pass it into this method to
 // get the associated string.
@@ -160,18 +163,51 @@ Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
     if (remoteInput != null) {
-            return remoteInput.getCharSequence(KEY_TEXT_REPLY);
-            }
+        return remoteInput.getCharSequence(KEY_TEXT_REPLY);
+    }
     return null;
  }
 </pre>
+  </li>
 
-<p>应用可以通过应用逻辑来决定对检索的文本采取哪些操作。对于交互式应用（例如聊天应用），在通知中提供更多上下文（例如多行聊天记录，包括用户自己的消息），以便用户作出相应回复。当用户通过 {@link android.support.v4.app.RemoteInput} 回复时，使用 {@code setRemoteInputHistory()} 方法在回复记录中加入文本。
+  <li>使用您为上一项通知提供的相同的通知 ID 来建立和发布另一项通知。
+进度指示器从通知界面消失，以告知用户已回复成功。
+
+在处理这项新通知时，使用被传递到接收器 {@code onReceive()} 方法的上下文。
 
 
+    <pre>
+// Build a new notification, which informs the user that the system
+// handled their interaction with the previous notification.
+Notification repliedNotification =
+        new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_message)
+                .setContentText(getString(R.string.replied))
+                .build();
 
+// Issue the new notification.
+NotificationManager notificationManager =
+        NotificationManager.from(context);
+notificationManager.notify(notificationId, repliedNotification);
+</pre>
+  </li>
+</ol>
 
+<p>
+  对于交互式应用（例如聊天），这可以用来在处理检索到的文本时添加其他上下文。
+例如，这些应用可以显示多行聊天记录。
+当用户通过 {@link
+  android.support.v4.app.RemoteInput} 回复时，您可以使用 {@code setRemoteInputHistory()} 方法更新回复历史。
 
+</p>
+
+<p>
+  在应用收到远程输入后，必须更新或取消通知。
+如果用户使用直接回复来对远程更新进行回复，则不可取消通知。
+
+否则，更新通知以显示用户的回复。对于使用 {@code MessagingStyle} 的通知，您应该添加回复来作为最新消息。
+
+当使用其它模板时，您可以将用户的回复追加到远程输入历史。
 
 </p>
 
@@ -203,7 +239,13 @@ Builder.setGroup()} 方法捆绑类似的通知。
 
 </p>
 
-<p>要了解如何将通知添加到组，请参阅<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">将各通知添加到组</a>。
+<p class="note">
+  <strong>注：</strong>如果同一应用发送了四条或以上通知，并且未指定分组，系统会自动将它们分到一组。
+
+
+</p>
+
+<p>如需了解如何将通知添加到组，请参阅<a href="{@docRoot}training/wearables/notifications/stacks.html#AddGroup">将各通知添加到组</a>。
 
 </p>
 
@@ -255,7 +297,7 @@ Builder.setGroup()} 方法捆绑类似的通知。
 </p>
 
 <p class="note">
-  <strong>注</strong>：本版本 Android N 目前还无法在仅含一则子通知时取消通知组的摘要。
+  <strong>注：</strong>本版本 Android N 目前还无法在仅含一则子通知时取消通知组的摘要。
 我们将在之后版本的 Android N 中添加此功能。
 
 </p>
@@ -318,11 +360,34 @@ Builder.setGroup()} 方法捆绑类似的通知。
 </p>
 
 <pre>
-Notification noti = new Notification.Builder()
+Notification notification = new Notification.Builder()
            .setSmallIcon(R.drawable.ic_stat_player)
            .setLargeIcon(albumArtBitmap))
            .setCustomContentView(contentView);
            .setStyle(new Notification.DecoratedCustomViewStyle())
            .build();
 
+</pre>
+
+<h2 id="style">消息传递样式</h2>
+<p>
+  Android N 引入了一项新的 API 来自定义通知样式。
+  使用 <code>MessageStyle</code> 类，您可以更改在通知中显示的多个标签，包括会话标题、其他消息和通知的内容视图。
+
+
+</p>
+
+<p>
+  以下代码段演示了如何使用 <code>MessageStyle</code> 类来自定义通知样式。
+
+</p>
+
+<pre>
+  Notification notification = new Notification.Builder()
+             .setStyle(new Notification.MessagingStyle("Me")
+                 .setConversationTitle("Team lunch")
+                 .addMessage("Hi", timestamp1, null) // Pass in null for user.
+                 .addMessage("What's up?", timestamp2, "Coworker")
+                 .addMessage("Not much", timestamp3, null)
+                 .addMessage("How about lunch?", timestamp4, "Coworker"));
 </pre>

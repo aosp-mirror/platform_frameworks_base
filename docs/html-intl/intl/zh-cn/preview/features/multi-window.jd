@@ -19,16 +19,17 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       <ol>
         <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">多窗口 Playground 示例应用
 </a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">在 Android N 为多窗口做准备的五条建议</a></li>
       </ol>
   </div>
 </div>
 
 <p>
   Android N 添加了对同时显示多个应用窗口的支持。
-在手持设备上，两个应用可以在<em>分屏</em>模式中左右并排或上下并排显示。
-在电视设备上，应用可以使用<em>画中画</em>模式，在用户与另一个应用交互的同时继续播放视频。
+在手持设备上，两个应用可以在“分屏”模式中左右并排或上下并排显示。
+<em></em>在电视设备上，应用可以使用“画中画”模式，在用户与另一个应用交互的同时继续播放视频。
 
-
+<em></em>
 </p>
 
 <p>
@@ -107,7 +108,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   在多窗口模式中，在指定时间只有最近与用户交互过的 Activity 为活动状态。
-该 Activity 将被视为<em>顶级</em> Activity。
+该 Activity 将被视为顶级 Activity。<em></em>
   所有其他 Activity 虽然可见，但均处于暂停状态。
   但是，这些已暂停但可见的 Activity 在系统中享有比不可见 Activity 更高的优先级。
 如果用户与其中一个暂停的 Activity 交互，该 Activity 将恢复，而之前的顶级 Activity 将暂停。
@@ -116,12 +117,12 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 </p>
 
 <p class="note">
-  <strong>注</strong>：在多窗口模式中，用户仍可以看到处于暂停状态的应用。
+  <strong>注：</strong>在多窗口模式中，用户仍可以看到处于暂停状态的应用。
 应用在暂停状态下可能仍需要继续其操作。
 例如，处于暂停模式但可见的视频播放应用应继续显示视频。
-因此，我们建议播放视频的 Activity <em>不要</em>暂停其 {@link android.app.Activity#onPause onPause()} 处理程序中的视频。
+因此，我们建议播放视频的 Activity 不要暂停其 {@link android.app.Activity#onPause onPause()} 处理程序中的视频。
 
-
+<em></em>
   应暂停 {@link android.app.Activity#onStop
   onStop()} 中的视频，并恢复 {@link android.app.Activity#onStart
   onStart()} 中的视频播放。
@@ -130,7 +131,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时变更</a>中所述，用户使用多窗口模式显示应用时，系统将通知 Activity 发生配置变更。
 
-该变更与系统通知应用设备从纵向模式切换到横向模式时的 Activity 生命周期影响基本相同，但设备不仅仅是交换尺寸，而是会变更尺寸。
+这也会发生在当用户调整应用大小，或将应用恢复到全屏模式时。
+
+  该变更与系统通知应用设备从纵向模式切换到横向模式时的 Activity 生命周期影响基本相同，但设备不仅仅是交换尺寸，而是会变更尺寸。
 
 
 如<a href="{@docRoot}guide/topics/resources/runtime-changes.html">处理运行时变更</a>中所述，您的 Activity 可以自行处理配置变更，或允许系统销毁 Activity，并以新的尺寸重新创建该 Activity。
@@ -155,22 +158,24 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 您可以在清单文件中设置属性，以控制大小和布局。
 
   根 Activity 的属性设置适用于其任务栈中的所有 Activity。
+例如，如果根 Activity 已 <code>android:resizeableActivity</code> 设定为 true，则任务栈中的所有 Activity 都将可以调整大小。
+
 
 </p>
 
 <p class="note">
-  <strong>注</strong>：如果您使用低于 Android N 版本的 SDK 构建多向应用，则用户在多窗口模式中使用应用时，系统将强制调整应用大小。
+  <strong>注：</strong>如果您使用低于 Android N 版本的 SDK 构建多向应用，则用户在多窗口模式中使用应用时，系统将强制调整应用大小。
 
 系统将显示对话框，提醒用户应用可能会发生异常。
-系统<em>不会</em>调整定向应用的大小；如果用户尝试在多窗口模式下打开定向应用，应用将全屏显示。
+系统不会调整定向应用的大小；如果用户尝试在多窗口模式下打开定向应用，应用将全屏显示。
 
 
-
+<em></em>
 </p>
 
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
-  在清单文件的 <code>&lt;activity&gt;</code> 或
+  在清单的 <code>&lt;activity&gt;</code> 或
  <code>&lt;application&gt;</code> 节点中设置该属性，启用或禁用多窗口显示：
 
 </p>
@@ -207,7 +212,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="layout">布局属性</h3>
 
 <p>
-  对于 Android N，<code>&lt;layout&gt;</code> 清单文件元素支持以下几种属性，这些属性影响 Activity 在多窗口模式中的行为：
+  对于 Android N，<code>&lt;layout&gt;</code> 清单元素支持以下几种属性，这些属性影响 Activity 在多窗口模式中的行为：
 
 
 </p>
@@ -239,7 +244,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>、<code>android:minimalWidth</code>
   </dt>
 
   <dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -297,11 +303,12 @@ android:supportsPictureInPicture=["true" | "false"]
   {@link android.app.Activity} 类中添加了以下新方法，以支持多窗口显示。
 有关各方法的详细信息，请参阅 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 参考</a>。
 
+
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -309,22 +316,22 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
     调用该方法以确认 Activity 是否处于画中画模式。
 
     <p class="note">
-      <strong>注</strong>：画中画模式是多窗口模式的特例。
-如果 <code>myActivity.inPictureInPicture()</code> 返回 true，则 <code>myActivity.inMultiWindow()</code> 也返回 true。
+      <strong>注：</strong>画中画模式是多窗口模式的特例。
+如果 <code>myActivity.isInPictureInPictureMode()</code> 返回 true，则 <code>myActivity.isInMultiWindowMode()</code> 也返回 true。
 
 
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
@@ -335,7 +342,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
@@ -347,14 +354,14 @@ android:supportsPictureInPicture=["true" | "false"]
 </dl>
 
 <p>
-  每个方法还有 {@link android.app.Fragment} 版本，例如 <code>Fragment.inMultiWindow()</code>。
+  每个方法还有 {@link android.app.Fragment} 版本，例如 <code>Fragment.isInMultiWindowMode()</code>。
 
 </p>
 
 <h3 id="entering-pip">进入画中画模式</h3>
 
 <p>
-  如需在画中画模式中启动 Activity，请调用新方法 <code>Activity.enterPictureInPicture()</code>。
+  如需在画中画模式中启动 Activity，请调用新方法 <code>Activity.enterPictureInPictureMode()</code>。
 如果设备不支持画中画模式，则此方法无效。
 如需了解详细信息，请参阅<a href="picture-in-picture.html">画中画</a>文档。
 
@@ -389,7 +396,7 @@ android:supportsPictureInPicture=["true" | "false"]
 </p>
 
 <p class="note">
-  <strong>注</strong>：如果您在任务栈中启动 Activity，该 Activity 将替换屏幕上的 Activity，并继承其所有的多窗口属性。
+  <strong>注：</strong>如果您在任务栈中启动 Activity，该 Activity 将替换屏幕上的 Activity，并继承其所有的多窗口属性。
 
 如果要在多窗口模式中以单独的窗口启动新 Activity，则必须在新的任务栈中启动此 Activity。
 

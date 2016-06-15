@@ -1,0 +1,1188 @@
+page.title=Dukungan dan Catatan Rilis
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-support_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Dalam dokumen ini</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">Saran umum</a></li>
+      <li><a href="#new">Yang baru di DP3</a></li>
+      <li><a href="#ki">Masalah yang diketahui</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  Dua saluran dukungan utama tersedia untuk Anda saat mengembangkan dan menguji
+  dengan Android N Developer Preview: Laporkan bug di <a href="https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> untuk
+  bug perangkat tertentu, sistem, dan Google App. Untuk masalah di aplikasi lain,
+  hubungi pengembang secara langsung.
+</p>
+
+<p>Untuk mendiskusikan masalah atau gagasan dengan pengembang lain yang menangani Android N, bergabunglah dengan
+<a href="{@docRoot}preview/dev-community">komunitas Google+ untuk Developer Preview</a>.</p>
+
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Tanggal: Mei 2016<br>
+        Build: NPD35K<br>
+        Dukungan emulator: x86 &amp; ARM (32/64-bit)<br>
+        Google Play Services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">Saran umum</h3>
+
+<p>
+  Rilis Developer Preview ini adalah untuk <strong>pengembang aplikasi dan pengguna
+  awal lainnya</strong> serta tersedia untuk penggunaan sehari-hari, pengembangan, atau
+  pengujian kompatibilitas. Harap perhatikan catatan umum tentang
+  rilis ini:
+</p>
+
+<ul>
+  <li>Rilis ini mungkin memiliki berbagai <strong>masalah stabilitas</strong> pada
+    perangkat yang didukung. Pengguna mungkin mengalami ketidakstabilan sistem, seperti  kernel
+    yang panik dan mogok.
+  </li>
+
+  <li>Beberapa aplikasi <strong>mungkin tidak berfungsi seperti yang diharapkan</strong> pada versi
+  platform baru. Hal ini termasuk aplikasi Google serta aplikasi lainnya.
+  </li>
+
+  <li>Developer Preview 3 adalah <strong>Compatibility Test Suite (CTS)
+ yang disetujui</strong> pada perangkat ini: Nexus 5X, Nexus 6, Nexus 6P, dan Pixel
+  C. Aplikasi yang bergantung pada build yang disetujui CTS seharusnya
+  berfungsi secara normal pada perangkat ini (Android Pay misalnya).
+  </li>
+
+  <li>Developer Preview 3 <strong>tersedia pada semua perangkat
+  yang didukung:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
+  C, General Mobile 4G (Android One), serta Sony Xperia Z3 (model D6603 dan
+  D6653).
+
+  </li>
+</ul>
+
+
+<h3 id="new">Yang baru di DP3</h3>
+
+<h4 id="">VR Mode untuk Android</h4>
+
+<p>
+  Android N menambahkan dukungan platform dan optimalisasi untuk VR Mode baru yang memungkinkan
+  pengembang membuat pengalaman VR berkualitas tinggi di seluler bagi para pengguna. Ada
+  banyak penyempurnaan kinerja, termasuk akses ke inti CPU yang eksklusif
+  untuk aplikasi VR. Dalam aplikasi, Anda bisa memanfaatkan pemantauan kepala
+ yang cerdas, dan pemberitahuan stereo yang bekerja untuk VR. Yang terpenting,
+  Android N memberikan grafis latensi sangat rendah.
+</p>
+
+<p>
+  Untuk informasi selengkapnya, lihat <a href="https://developers.google.com/vr/android/">Google VR SDK untuk Android</a>.
+</p>
+
+<h4 id="">Mode kinerja kontinu</h4>
+
+<p>
+  Android N menyertakan dukungan opsional untuk <a href="{@docRoot}preview/api-overview.html#sustained_performance_api">mode
+  kinerja kontinu</a>, yang memungkinkan OEM memberikan petunjuk mengenai kapabilitas kinerja
+  perangkat untuk aplikasi yang berjalan dalam waktu lama. Pengembang aplikasi nanti bisa menggunakan
+  petunjuk ini untuk menyesuaikan aplikasi agar kinerja
+  perangkat bisa diprediksi pada level yang konsisten dalam jangka waktu lama. Pengembang aplikasi bisa mencoba API
+  baru ini dalam Developer Preview pada perangkat Nexus 6P saja.
+</p>
+
+<h4>Multiprocess WebView</h4>
+
+<p>
+  Mulai versi 51 di Android N, WebView akan menjalankan materi web dalam
+  proses sandbox terpisah bila opsi pengembang "Multiprocess Webview"
+  diaktifkan. Tim WebView menunggu masukan mengenai kompatibilitas dan
+ kinerja waktu proses di N sebelum mengaktifkan Multiprocess WebView di versi Android
+  yang akan datang. Dalam versi ini, diharapkan adanya regresi waktu startup, penggunaan
+  memori total dan kinerja render perangkat lunak.
+</p>
+
+<p>
+  Jika Anda menemukan masalah yang tidak diharapkan dalam mode multiproses, kami ingin
+  mengetahuinya. Hubungi tim WebView dengan <a href="https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">
+  melaporkan bug</a>.
+</p>
+
+<h4 id="">Keyboard Shortcuts Helper</h4>
+
+<p>
+  Android N memungkinkan pengguna menekan <code>Meta+/</code> untuk memunculkan layar <strong>Keyboard
+  Shortcuts</strong> yang menampilkan semua pintasan yang tersedia baik dari
+  sistem maupun dari aplikasi yang sedang mendapatkan fokus. Pengembang bisa menambahkan pintasan sendiri atau
+  memunculkan layar Shortcuts dari aplikasi mereka. Lihat <a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Keyboard
+  Shortcuts Helper</a> untuk detailnya.
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  DP3 memperkenalkan <a href="{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a>
+  baru yang memungkinkan aplikasi memantau kinerja render UI dengan mengekspos
+  streaming pubsub API untuk mentransfer informasi frame-timing jendela aplikasi
+  saat ini. <code>FrameMetricsListener</code> bisa digunakan untuk mengukur
+  kinerja UI level interaksi di produksi dengan tingkat kejelasan yang lebih tinggi dan
+  tidak memerlukan koneksi USB.
+</p>
+
+<h4 id="api-changes">Fitur dan perubahan API</h4>
+
+<dl>
+  <dt>
+    Pintasan Peluncur dan Launcher Shortcuts API
+  </dt>
+
+  <dd>
+    Kami memutuskan untuk menunda fitur ini pada rilis Android yang akan datang. Kami berencana
+    membuang Launcher Shortcuts API (ShortcutManager dan lainnya) dari
+   Android N API publik mulai dalam Developer Preview berikutnya.
+  </dd>
+
+  <dt>
+    WebView Javascript berjalan sebelum halaman dimuat
+  </dt>
+
+  <dd>
+    Mulai dengan aplikasi yang menargetkan Android N, konteks Javascript disetel ulang
+  saat halaman baru telah dimuat. Saat ini, konteks tersebut dibawa untuk
+  halaman pertama yang dimuat di instance {@link android.webkit.WebView} yang baru.
+    Pengembang yang ingin menginjeksikan Javascript ke dalam {@link
+android.webkit.WebView} harus mengeksekusi skrip setelah halaman
+ mulai dimuat.
+  </dd>
+
+  <dt>
+    WebView Geolocation pada sumber yang tidak aman
+  </dt>
+
+  <dd>
+    Mulai dengan aplikasi yang menargetkan Android N, API geolokasi hanya akan
+  diizinkan pada sumber yang aman (melalui HTTPS). Kebijakan ini didesain untuk melindungi
+    informasi privat pengguna saat mereka menggunakan koneksi yang tidak aman.
+  </dd>
+
+  <dt>
+    Data Saver
+  </dt>
+
+  <dd>
+    Mulai di Developer Preview 3, aplikasi bisa menggunakan intent untuk menampilkan
+  dialog sistem yang memungkinkan pengguna menambahkan aplikasi secara langsung ke daftar putih pengecualian
+  Data Saver. Lihat <a href="{@docRoot}preview/api-overview.html#data_saver">dokumentasi
+    Data Saver</a> untuk detailnya.
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#number-blocking">Pemblokiran nomor</a>
+  </dt>
+
+  <dd>
+    Jika pengguna yang tidak diizinkan berusaha memblokir atau membuka blokir suatu nomor, operasi
+   tersebut kini akan gagal dengan {@link java.lang.SecurityException}. (Sebelumnya,
+    operasi tersebut akan melontarkan {@link java.lang.UnsupportedOperationException}.)
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">Quick Settings Tile
+ API</a>
+  </dt>
+
+  <dd>
+    Sistem kini menggunakan metadata aktivitas untuk memutuskan mode petak.
+    (Sebelumnya, mode petak ditentukan oleh nilai hasil
+    <code>TileService.onTileAdded()</code>.) Untuk informasi selengkapnya, lihat
+    <code>TileService.META_DATA_ACTIVE_TILE</code> dalam <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi API</a> yang bisa diunduh.
+  </dd>
+</dl>
+
+<h4 id="dp3-fixes">Perbaikan untuk masalah yang dilaporkan oleh pengembang</h4>
+
+<p>
+  Banyak masalah yang dilaporkan oleh pengembang telah diperbaiki, termasuk:
+</p>
+
+<ul>
+  <li>Pemutaran Bluetooth Audio yang terputus setelah 1 lagu (bug <a href="https://code.google.com/p/android/issues/detail?id=206889">206889</a>)
+  </li>
+
+  <li>Pixel C Terus Mengalami Mogok (bug <a href="https://code.google.com/p/android/issues/detail?id=206962">206962</a>)
+  </li>
+
+  <li>Masalah pemberitahuan Jam dan Toast (bug <a href="https://code.google.com/p/android/issues/detail?id=203094">203094</a>)
+  </li>
+
+  <li>Pixel C melakukan boot ulang saat dihubungkan ke MacBook Pro lewat Kabel USB C (bug
+  <a href="https://code.google.com/p/android/issues/detail?id=205432">205432</a>)
+  </li>
+
+  <li>Kalender selisih satu hari (bug <a href="https://code.google.com/p/android/issues/detail?id=203002">203002</a>)
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo menghasilkan data tidak valid (bug <a href="https://code.google.com/p/android/issues/detail?id=203022">203022</a>)
+  </li>
+
+  <li>Nexus 6p, Bluetooth terputus terus-menerus (bug <a href="https://code.google.com/p/android/issues/detail?id=208062">208062</a>)
+  </li>
+</ul>
+
+<p>Untuk daftar lengkap masalah yang telah diperbaiki, lihat <a href="https://goo.gl/6uCKtf">Issue
+Tracker</a>.</p>
+
+<h3 id="ki">Masalah yang Diketahui</h3>
+
+<h4>Aksesibilitas</h4>
+
+<ul>
+  <li>Tidak bisa memantau output TTS saat pitch disetel mendekati level maksimum.
+  </li>
+
+  <li>Fitur dan setelan aksesibilitas bisa terganggu bila pengguna menambahkan
+  sebuah profil kerja, termasuk isyarat perbesaran dan setelan. Kondisi
+  aksesibilitas dipulihkan bila pengguna menyentuh setelan terkait.
+  </li>
+</ul>
+
+<h4>Kamera</h4>
+
+<ul>
+  <li>Aplikasi Kamera telah menunjukkan ketidakstabilan; aplikasi ini bisa mogok dalam berbagai
+  keadaan, seperti saat diluncurkan dalam mode multi-jendela.
+  </li>
+
+  <li>Menekan rana terus-menerus dalam mode panorama dapat menyebabkan aplikasi
+  Kamera mogok.
+  </li>
+</ul>
+
+<h4>Audio</h4>
+<ul>
+  <li>Masalah pemutar audio platform mencegah beberapa aplikasi berfungsi
+  secara normal. Misalnya, Skype dan aplikasi lain terpengaruh oleh masalah ini.
+  </li>
+</ul>
+
+<h4>Konektivitas</h4>
+
+
+<ul>
+  <li>Bila perangkat peran periferal Bluetooth Low Energy (BLE) mengiklankan suatu
+  layanan dan perangkat peran sentral BLE menghubungkan, perangkat peran periferal
+  akan terputus dengan sangat cepat.
+  </li>
+
+  <li>Koneksi Wi-Fi dapat melemah bila layar mati.
+  </li>
+
+  <li>Koneksi RFCOMM tidak stabil serta dapat mengakibatkan kerusakan data dan
+  koneksi yang menggantung.
+  </li>
+
+  <li>Kondisi jaringan aktif ({@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} dan {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}) mungkin mengembalikan nilai yang tidak benar selama beberapa
+  skenario latar belakang terbatas.
+  </li>
+</ul>
+
+
+<h4>
+  Peluncur
+</h4>
+
+<ul>
+  <li>Baki All Apps peluncur default mungkin menjadi tidak responsif setelah
+  layar dimatikan/dihidupkan berulang-ulang. Kembali ke layar beranda dan meluncurkan kembali
+  baki All Apps mungkin akan mengatasi masalah ini.
+  </li>
+</ul>
+
+<h4>
+  Keyboard
+</h4>
+
+<ul>
+  <li>Saat memperbarui perangkat yang menjalankan Android 6.0 atau yang sebelum versi N Developer
+  Preview, Keyboard Google tidak menyimpan data preferensi seperti emoji
+  terbaru dan setelan suara.
+  </li>
+
+  <li>Google Indic Managed Keyboard mungkin menjadi tidak stabil.
+  </li>
+
+  <li>Saat memasukkan teks dalam bidang sandi, pengguna bisa memilih bahasa Rusia sebagai
+  bahasa masukan, namun keyboard tetap dalam bahasa Inggris. Hal ini mencegah
+  pengguna memasukkan sandi berbahasa Rusia.
+  </li>
+</ul>
+
+<h4>
+  Lokal dan bahasa
+</h4>
+
+<ul>
+  <li>Saat menggunakan lokal kanan-ke-kiri (RTL), sistem mungkin secara tidak diharapkan
+  beralih ke presentasi kiri-ke-kanan (LTR) setelah menghidupkan ulang perangkat.
+  </li>
+</ul>
+
+<h4>Media</h4>
+
+<ul>
+  <li>Pemutaran media mungkin tidak bisa diandalkan pada Nexus 9 dan Nexus Player, termasuk
+  masalah pemutaran video HD.
+  </li>
+</ul>
+
+<h4>
+  Mode multi-jendela
+</h4>
+
+<ul>
+  <li>Perangkat mungkin macet saat mengubah orientasi dalam mode multi-jendela.
+  </li>
+
+  <li>Beberapa aplikasi saat ini memiliki masalah dengan mode multi-jendela:
+    <ul>
+      <li>UI sistem bisa mogok saat mengubah Settings &gt; Display &gt;
+      Screen brightness ke multi-jendela.
+      </li>
+
+      <li>Aplikasi Kamera mungkin mogok bila diluncurkan dalam mode multi-jendela.
+      </li>
+
+      <li>YouTube mungkin mogok bila diluncurkan dalam mode multi-jendela. Untuk memperbaiki
+      masalah ini, Anda bisa mengosongkan data aplikasi YouTube di Storage &gt; Apps &gt;
+      YouTube.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play Services
+</h4>
+
+<ul>
+  <li>Aplikasi yang menggunakan Google Cast melalui Google Play Services mungkin menjadi tidak stabil bila
+  pengguna memilih lokal sistem yang menggunakan huruf serta angka di luar
+  rentang ASCII.
+  </li>
+</ul>
+
+<h4>
+  Kebijakan Perangkat Android for Work dan Google Apps
+</h4>
+
+<ul>
+  <li>Aplikasi Device Policy mungkin mogok bila pengguna membuka kunci perangkat dengan
+  layar "status kebijakan perangkat" disematkan.
+  </li>
+
+  <li>Setelah menyiapkan profil kerja dengan enkripsi berbasis file diaktifkan
+  kemudian menonaktifkan Work, pengguna harus membuka kunci layar profil utama untuk sekali
+  lagi mengakses aplikasi Work.
+  </li>
+
+  <li>Perangkat dihidupkan ulang saat membuang kunci pola keamanan dan membuka aplikasi
+  kerja/aplikasi pribadi di multi-jendela.
+  </li>
+
+  <li>Menyetel DISALLOW_VPN_CONFIG menyebabkan dialog persetujuan muncul di
+  always-on-vpn yang disetel oleh Device Policy Client.
+  </li>
+
+  <li>Lalu lintas tidak dikunci hingga VPN terhubung dalam mode always-on-vpn.
+  </li>
+</ul>
+
+<h4>
+  Penyimpanan eksternal
+</h4>
+
+<ul>
+  <li>Aplikasi mungkin menjadi tidak stabil bila pengguna memindahkannya dari penyimpanan internal
+  ke penyimpanan eksternal lepas-pasang (ini termasuk kartu SD atau perangkat yang dihubungkan
+  melalui USB).
+  </li>
+</ul>
+
+<h4>
+  Perbesaran layar dan multi-APK dalam Google Play
+</h4>
+
+<ul>
+  <li>Pada perangkat yang menjalankan Android N, Google Play Services 9.0.83 salah melaporkan
+  kepadatan layar saat ini dibandingkan dengan kepadatan layar stabil. Saat perbesaran
+  layar diaktifkan pada perangkat, hal ini bisa menyebabkan Google Play memilih
+  versi aplikasi multi-APK yang didesain untuk layar yang lebih kecil. Masalah ini
+  telah diperbaiki dalam Google Play Services versi berikutnya dan akan disertakan dalam
+  rilis Developer Preview mendatang.
+  </li>
+
+  <li>Pada perangkat yang menjalankan Android N, Google Play Services 9.0.83 saat ini melaporkan
+  dukungan Vulkan, namun bukan versi Vulkan. Hal ini bisa mengakibatkan Google Play memilih
+  versi aplikasi multi-APK yang didesain untuk mendukung Vulkan yang lebih rendah pada
+  perangkat dengan dukungan versi yang lebih tinggi. Saat ini, Google Play Store tidak
+  menerima unggahan aplikasi yang menggunakan penargetan versi Vulkan. Dukungan ini
+  akan ditambahkan pada Google Play Store di masa mendatang dan diperbaiki dalam 
+  Google Play Services versi berikutnya (akan disertakan dalam rilis Developer Preview
+  mendatang). Perangkat N yang menggunakan Google Play Services 9.0.83 akan
+  tetap menerima versi Aplikasi yang menargetkan dukungan Vulkan dasar.
+  </li>
+</ul>
+
+<h4 id="">Pemberitahuan</h4>
+
+<ul>
+  <li>MessagingStyle tidak menampilkan pemberitahuan dengan pengirim "null" (sendiri).
+  </li>
+</ul>
+
+<h4 id="">Alat Pengembang</h4>
+
+<ul>
+  <li>
+    <code>adb</code> mungkin kadang-kadang terputus saat menggunakan debug JDWP.
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+
+
+<!-- DP2 Release Notes Archive -->
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Tanggal: April 2016<br>
+        Build: NPC91K, NPC91O<br>
+        Dukungan emulator: x86 &amp; ARM (32/64-bit)<br>
+        Google Play Services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp2-new">Yang baru di DP2</h3>
+
+<ul>
+  <li>Dukungan platform untuk Vulkan, API rendering 3D baru yang menyediakan
+  kontrol GPU (Graphics Processor Unit) eksplisit dan overhead yang rendah serta menawarkan
+  peningkatan kinerja untuk aplikasi draw-call yang berat. Untuk detailnya, lihat
+  <a href="{@docRoot}ndk/guides/graphics/index.html">dokumentasi</a>.
+  </li>
+
+  <li>Emoji orang yang baru dengan dukungan untuk warna kulit, dan glyph Unicode 9 baru.
+  Warna kulit dan emoji baru tidak akan muncul hingga keyboard membangun dukungan untuknya
+  di palet. Aplikasi tidak perlu melakukan tindakan apa pun untuk memanfaatkan
+  emoji baru ini, kecuali jika aplikasi menggunakan font nonsistem. Pengembang
+  IME perlu menyertakan dukungan untuk emoji baru.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">Launcher
+    Shortcuts API</a>: Aplikasi bisa menggunakan <code>ShortcutManager</code> untuk mengirim
+    pintasan ke titik awal dalam aplikasi itu sendiri ke peluncur.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">Multi-Jendela</a>:
+    Anda kini bisa menetapkan tinggi minimum dan lebar minimum secara terpisah untuk suatu
+    aktivitas. Selain itu, beberapa nama API sedikit berubah.
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">Perbaikan untuk masalah yang dilaporkan oleh pengembang</h4>
+
+<p>
+  Banyak masalah yang dilaporkan oleh pengembang telah diperbaiki, termasuk:
+</p>
+
+<ul>
+  <li>Tidak bisa menghubungkan ke SSID tersembunyi atau Wi-Fi yang tidak disiarkan. (bug <a href="https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
+  </li>
+
+  <li>Keadaan mikrofon nonaktif terjadi selama aktivitas. (bug <a href="https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
+  </li>
+
+  <li>Mengubah fokus multi-jendela akan menghentikan YouTube untuk sementara. (bug <a href="https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
+  </li>
+
+  <li>Balasan Langsung mungkin menutup aktivitas yang telah dibuka. (bug <a href="https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
+  </li>
+
+  <li>Berbagai perbaikan stabilitas.
+  </li>
+</ul>
+
+<h3 id="dp2-general">Saran umum</h3>
+
+<p>
+  Rilis Developer Preview ini adalah untuk <strong>pengembang aplikasi saja</strong>
+  dan didesain untuk digunakan dalam pengujian kompatibilitas serta pengembangan awal saja.
+  Harap perhatikan catatan umum tentang rilis ini:
+</p>
+
+<ul>
+
+  <li>Komponen alat pengembangan dan pustaka dukungan telah diperbarui
+  untuk rilis DP2. Pastikan memperbarui lingkungan pengembangan pratinjau Anda
+  sebelum mengembangkan untuk DP2. Untuk petunjuk mengenai persiapan lingkungan
+  pengembangan Anda, lihat
+  <a href="{@docRoot}preview/setup-sdk.html">Menyiapkan Pratinjau</a>.
+  </li>
+
+  <li>Rilis ini memiliki berbagai masalah stabilitas dan kinerja pada semua perangkat
+  yang membuatnya <strong>tidak cocok untuk penggunaan sehari-hari pada ponsel atau tablet</strong>,
+  terutama untuk selain pengembang.
+  </li>
+
+  <li>Daya tahan dan kinerja baterai belum dioptimalkan pada rilis
+  ini:
+
+    <ul>
+      <li>Kinerja <strong>sistem dan aplikasi diketahui lambat/
+      melempem pada waktu-waktu tertentu</strong>, dan perangkat kadang-kadang tidak responsif. Masalah-masalah
+      ini bisa menjadi lebih akut pada penggunaan yang lama.
+      </li>
+
+      <li>Daya tahan baterai mungkin melemah dalam rilis ini untuk kasus penggunaan layar hidup dan
+      layar mati.
+      </li>
+    </ul>
+  </li>
+
+  <li>Beberapa <strong>aplikasi mungkin tidak berfungsi dengan normal</strong> pada Developer Preview
+  2. Termasuk aplikasi Google serta aplikasi lainnya.
+  </li>
+
+  <li>Build awal ini bukan <strong>Compatibility Test Suite (CTS)
+  yang disetujui</strong>. Aplikasi yang bergantung pada build yang disetujui CTS tidak akan berfungsi
+  (Android Pay misalnya).
+  </li>
+
+  <li>Rilis pratinjau ini mendukung perangkat berikut: Nexus 5X, Nexus 6,
+  Nexus 6P, Nexus 9, dan Pixel C, serta General Mobile 4G
+  (Android One). Dukungan untuk Nexus Player segera hadir.
+  </li>
+
+
+  <li><a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> telah
+  diperbarui untuk menangani perubahan API antara DP1 dan DP2.
+  </li>
+</ul>
+
+<h3 id="dp2-ki">Masalah yang Diketahui</h3>
+
+<h4>Kinerja dan baterai</h4>
+
+<ul>
+  <li>Kinerja sistem dan aplikasi diketahui <strong>lambat/
+  melempem pada waktu-waktu tertentu</strong>, dan perangkat kadang-kadang tidak responsif. Masalah-masalah
+   ini bisa menjadi lebih akut pada penggunaan yang lama.
+  </li>
+</ul>
+
+<h4>Akun Google</h4>
+
+<ul>
+  <li>Dalam beberapa situasi, bisa jadi ada masalah dengan
+  <code>AccountManagerService</code> yang mencegah masuk ke akun Google
+  </li>
+</ul>
+
+<h4>Pemutakhiran sistem</h4>
+
+<ul>
+  <li>Perangkat mungkin langsung dihidupkan ulang setelah memperbarui ke DP2.
+  </li>
+</ul>
+
+<h4>Aksesibilitas</h4>
+
+<ul>
+  <li>Ada masalah dalam mendengarkan keluaran teks-ke-suara (TTS) bila pitch disetel
+  mendekati level maksimum.
+  </li>
+</ul>
+
+<h4>Bluetooth</h4>
+
+<ul>
+  <li>Karakteristik Bluetooth Low Energy (LE) GATT menggunakan tipe tulisan
+  yang salah dan tidak akan dikirim ke perangkat jauh. Karena itu, misalnya, beberapa perangkat
+  kebugaran tidak akan berfungsi.
+  </li>
+</ul>
+
+<h4>Wizard persiapan</h4>
+
+<ul>
+  <li>Opsi untuk memulihkan data pada perangkat baru (atau perangkat yang baru disetel ulang) dari
+  "Your Google Account" tidak dapat digunakan dari wizard persiapan. Anda harus memulihkan
+  data dari perangkat yang ada dengan memilih "another Android device" dalam
+  wizard persiapan, atau siapkan sebagai perangkat baru.
+  </li>
+</ul>
+
+<h4>Buka kunci OEM</h4>
+
+<ul>
+  <li>Pada beberapa perangkat, <strong>Enable OEM unlock</strong> dalam "Developer Options", berwarna abu-abu
+  saat menjalankan DP2.<br>
+  <strong>Solusi:</strong> Ikuti
+  Android Beta Program (jika Anda belum mengikuti) dengan mengunjungi
+  <a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a>. Kemudian, keluar dan terima
+  OTA turunkan versi. Keluar dari program akan menyebabkan perangkat turun versi ke Android 6.0. Anda
+  seharusnya sekarang bisa memilih <strong>Enable OEM unlock</strong> dalam
+  "Developer Options". Data pribadi akan dihapus bila Anda turunkan versi
+  perangkat; akan tetapi, membuka kunci bootloader akan menghapus data ini.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Work Security Challenge
+    <ul>
+      <li>Setelah migrasi ke N, atau setelah pengguna membuat profil kerja, profil
+      kerja tidak bisa membuat kunci-kunci dalam keystore hingga pengguna mengubah pola,
+      PIN, atau sandi mereka, atau menyiapkan Work Challenge.
+      </li>
+
+      <li>Dalam mode Direct Boot, menerapkan batasan kode sandi pada perangkat
+      menyebabkan profil kerja tidak terkunci, meskipun perangkat terkunci.
+      Hal ini membuat profil kerja bisa diakses meskipun seharusnya dilindungi
+      oleh layar kunci perangkat.
+      </li>
+    </ul>
+  </li>
+
+  <li>Always-On VPN
+    <ul>
+      <li>Jika mode Always-On VPN diaktifkan, namun VPN tidak tersedia, aplikasi
+      akan menghubungkan melalui jaringan biasa. Aplikasi seharusnya offline jika tidak
+      tersedia koneksi VPN.
+      </li>
+
+      <li>Bila mode Always-On aktif, koneksi VPN tidak akan dibuat setelah
+      perangkat dihidupkan ulang ke dalam mode Direct Boot, bahkan setelah pengguna membuka kunci
+      layar kunci aman.
+      </li>
+    </ul>
+  </li>
+
+  <li>Paket Ditangguhkan
+    <ul>
+      <li>Admin perangkat bisa menangguhkan paket sistem penting, yang dapat menyebabkan
+      perilaku yang tidak diharapkan, seperti melakukan panggilan meskipun dialog "Telephone
+      disabled" sedang ditampilkan.
+      </li>
+    </ul>
+  </li>
+
+  <li>Lainnya
+    <ul>
+      <li>Aplikasi Settings akan mogok saat dibuka jika {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} disetel ke true bila
+      pengguna memasukkan media fisik seperti kartu SD.
+      </li>
+
+      <li>Proses masuk pertama ke Profil Kerja membutuhkan waktu
+      beberapa menit.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>Selisih antara angka-angka yang mengikat dan selain nol
+      sebagai angka pengikat pertama menyebabkan {@code vkCreateGraphicsPipeline()} gagal.</li>
+      <li>Vulkan menunjukkan perilaku sampling yang salah pada koordinat tekstur yang diproyeksikan.</li>
+      <li>dalam contoh multithreadCmdBuffer, {@code vkCmdClearColorImage()} mengalami mogok bila
+      dijalankan dengan driver N-DP2.</li>
+      <li>Nilai kembalian dari {@code vkGetPhysicalDeviceFormatProperties()} tidak menyetel nilai
+      untuk {@code VkFormatProperties::linearTilingFeatures}, yang mengambil nilai 0 sebagai
+      hasil.</li>
+      <li>Lampiran buffer bingkai titik ambang Vulkan tidak ditangani dengan benar.</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V shader mungkin memicu pernyataan driver.</li>
+      <li>Beberapa konfigurasi pipeline mungkin menyebabkan {@code vkCreateGraphicsPipeline()}
+      mogok.</li>
+  </ul>
+</ul>
+
+<h4>Masalah perangkat tertentu</h4>
+
+<dl>
+  <dt>
+    <strong>Android One</strong>
+  </dt>
+
+  <dd>
+    Koneksi data gagal bila perangkat dipindah dari slot 1 SIM ke slot 2 SIM.
+  </dd>
+
+  <dt>
+    <strong>Pixel C</strong>
+  </dt>
+
+  <dd>
+    Tidak bisa mengubah opsi "Always On" untuk Voice Search.
+  </dd>
+
+  <dt>
+    <strong>Nexus 6</strong>
+  </dt>
+
+  <dd>
+    Gambar kamera dalam orientasi potret rusak, kecuali untuk foto
+   HDR+.
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    Pemutaran materi HD Netflix mungkin gagal pada Nexus Player.
+  </dd>
+
+  <dd>
+    Aplikasi yang bergantung pada perubahan resolusi video dinamis mungkin gagal pada
+   Nexus Player.
+  </dd>
+
+  <dd>
+    Aplikasi yang menggunakan codec video VP9 mungkin gagal pada Nexus Player.
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Tanggal: Maret 2016<br>
+        Build: NPC56P, NPC56R, diperbarui: NPC56W, NPC56X<br>
+        Dukungan emulator: x86 &amp; ARM (32/64-bit)<br>
+        Google Play Services: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp1-general">Saran umum</h3>
+
+<p>
+  Rilis Developer Preview ini adalah untuk pengembang aplikasi saja dan didesain untuk
+  digunakan dalam pengujian kompatibilitas serta pengembangan awal saja. Harap perhatikan
+  catatan umum tentang rilis ini:
+</p>
+<ul>
+  <li>Rilis ini memiliki berbagai masalah stabilitas dan kinerja pada semua perangkat
+  yang membuatnya <em>tidak cocok untuk penggunaan sehari-hari pada ponsel atau tablet</em>,
+  terutama untuk selain pengembang.
+  </li>
+
+  <li>Kinerja sistem dan aplikasi diketahui <strong>lambat/
+  melempem pada waktu-waktu tertentu</strong>, dan perangkat kadang-kadang tidak responsif. Masalah-masalah
+   ini bisa menjadi lebih akut pada penggunaan yang lama.
+  </li>
+
+  <li>Daya tahan baterai mungkin melemah dalam rilis ini untuk kasus penggunaan layar hidup dan
+  layar mati.
+  </li>
+
+  <li>Beberapa aplikasi mungkin tidak berfungsi dengan normal pada Developer Preview 1.
+  Termasuk aplikasi Google serta aplikasi lainnya.
+  </li>
+
+  <li>Build awal ini bukan Compatibility Test Suite (CTS) yang disetujui. Aplikasi
+  yang bergantung pada build yang disetujui CTS tidak akan berfungsi (Android Pay misalnya).
+  </li>
+
+  <li>Rilis pratinjau ini mendukung perangkat berikut: Nexus 5X, Nexus 6,
+  Nexus 6P, Nexus 9, Nexus Player, dan Pixel C, serta General Mobile 4G
+  (Android One).
+  </li>
+</ul>
+
+<h3 id="dp1-platform">Masalah Platform</h3>
+
+<h4>Kinerja dan baterai</h4>
+
+<ul>
+  <li>Kinerja sistem dan aplikasi diketahui <strong>lambat/
+  melempem pada waktu-waktu tertentu</strong>, dan perangkat kadang-kadang tidak responsif. Masalah-masalah
+   ini bisa menjadi lebih akut pada penggunaan yang lama.
+  </li>
+
+  <li>Daya tahan baterai mungkin melemah dalam rilis ini untuk kasus penggunaan layar hidup dan
+  layar mati.
+  </li>
+</ul>
+<h4 id="dialer">Telepon</h4>
+
+<ul>
+  <li>Aplikasi telepon tidak mendukung Direct Boot. Hal ini nanti akan ditangani dalam
+  N Developer Preview.
+  </li>
+
+  <li>Pemutaran pesan suara tidak berfungsi.
+  </li>
+</ul>
+
+<h4>Mikrofon</h4>
+
+<ul>
+   <li>Sistem mungkin keliru mempertahankan mikrofon dalam keadaan nonaktif di semua aplikasi dan saat menghidupkan ulang. Jika Anda menonaktifkan mikrofon di aplikasi dan kondisi ini terus bertahan, buka aplikasi apa saja yang memiliki kontrol untuk menonaktifkan mikrofon dan aktifkan mikrofon.</li>
+</ul>
+
+<h4 id="ui">UI sistem</h4>
+
+<ul>
+  <li>Beberapa string baru atau yang dimodifikasi dalam UI sistem tidak diterjemahkan ke semua
+   bahasa.
+  </li>
+
+  <li>UI ringkasan masih dalam pengembangan, dan masih mungkin berubah. Misalnya,
+  kami bermaksud membuang timer yang muncul bila pengguna beralih
+  aplikasi.
+  </li>
+
+  <li>Kontrol setelan dan peralihannya mungkin menjadi lambat atau tampak tidak responsif.
+  </li>
+
+  <li>Desain visual pemberitahuan masih bisa berubah.
+  </li>
+
+  <li>Dalam aplikasi Gmail, pengarsipan email secara langsung yang disertakan dalam bundel
+   pemberitahuan tidak berfungsi dengan benar.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Work Security Challenge
+    <ul>
+      <li>Setelah migrasi ke N, atau setelah pengguna membuat profil kerja, profil
+      kerja tidak bisa membuat kunci-kunci dalam keystore hingga pengguna mengubah pola,
+      PIN, atau sandi mereka, atau menyiapkan Work Challenge.
+      </li>
+
+      <li>Dalam mode Direct Boot, menerapkan batasan kode sandi pada perangkat
+      menyebabkan profil kerja tidak terkunci, meskipun perangkat terkunci.
+      Hal ini membuat profil kerja bisa diakses meskipun seharusnya dilindungi
+      oleh layar kunci perangkat.
+      </li>
+
+      <li>Bila pengguna memasukkan sandi dan pin yang salah, sistem tidak akan
+   menampilkan pesan informasi; sistem hanya mengosongkan bidang
+   masukan. Masalah ini tidak memengaruhi masukan pola atau sidik jari.
+      </li>
+
+      <li>Pada tablet, latar belakang yang ditampilkan bersama pertanyaan kerja
+  berukuran kecil dan tidak proporsional.
+      </li>
+
+      <li>Versi <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">
+        Google Apps Device Policy</a> yang dibundel bersama N Developer Preview
+        belum mendukung fitur Pertanyaan Keamanan Profil Kerja.
+        Pengembang seharusnya menggunakan <a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a>
+        untuk menguji fitur ini.
+      </li>
+    </ul>
+  </li>
+
+  <li>Always-On VPN
+    <ul>
+      <li>Jika mode Always-On VPN diaktifkan, namun VPN tidak tersedia, aplikasi
+      yang tidak dinyatakan sebagai pengecualian pada kebijakan Always On akan menghubungkan melalui
+      jaringan biasa. Kecuali jika ditetapkan sebagai pengecualian pada kebijakan Always-On VPN,
+      aplikasi seharusnya offline jika tidak tersedia koneksi VPN.
+        <ul>
+          <li>Bila mode Always On aktif, koneksi VPN tidak akan dibuat
+          setelah perangkat dihidupkan ulang ke dalam mode Direct Boot, bahkan
+          setelah pengguna membuka kunci layar kunci aman.
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>Kontak yang Ditingkatkan
+    <ul>
+      <li>Perangkat Bluetooth PBAP/MAP tidak menampilkan nomor penelepon untuk kontak
+      kerja. Rilis Pratinjau berikutnya akan mengatasi masalah ini.
+      </li>
+    </ul>
+  </li>
+
+  <li>Mode Kerja
+    <ul>
+      <li>Peluncur Google Now tidak menampilkan apakah Mode Kerja aktif atau
+      nonaktif. Peluncur juga tidak menunjukkan kondisi penangguhan aplikasi.
+      </li>
+
+      <li>Setelah pengguna menonaktifkan lalu mengaktifkan Mode Kerja, sistem tidak lagi menampilkan
+   widget aplikasi Profil Kerja, seperti Kalender.
+      </li>
+    </ul>
+  </li>
+
+  <li>Paket Ditangguhkan
+  </li>
+
+  <li>Admin perangkat bisa menangguhkan paket sistem penting, yang dapat menyebabkan
+  perilaku yang tidak diharapkan, seperti melakukan panggilan meskipun dialog Telephone
+  disabled sedang ditampilkan.
+  </li>
+
+  <li>Lainnya
+    <ul>
+      <li>Aplikasi Settings akan mogok saat dibuka jika {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} disetel ke true bila
+      pengguna memasukkan media fisik seperti kartu SD.
+      </li>
+
+      <li>Keadaan {@code DPM.setPackagesSuspended} tidak akan bertahan bila
+  pengguna mencopot pemasangan kemudian memasang kembali aplikasi tersebut. Aplikasi harus tetap
+      ditangguhkan setelah mencopot pemasangan/pemasangan ulang, atau aplikasi tidak boleh
+      dicopot pemasangannya
+      </li>
+
+      <li>Proses masuk pertama ke Profil Kerja membutuhkan waktu
+      beberapa menit. Hal ini dapat menyebabkan perangkat membutuhkan waktu lebih lama dari biasanya untuk
+      terlihat di Play EMM API.
+      </li>
+
+      <li>Pemberitahuan dari aplikasi Profil Kerja tidak tampak bagi listener
+  pemberitahuan yang terpasang di profil pribadi. Akibatnya, sistem tidak
+      menampilkan Pemberitahuan seperti yang diharapkan.
+      </li>
+
+    </ul>
+  </li>
+</ul>
+
+<h4 >Keyboard</h4>
+
+<ul>
+  <li>Penyandingan Bluetooth antara keyboard dan perangkat Android mungkin menjadi tidak stabil.
+  </li>
+</ul>
+
+<h4 >Video</h4>
+
+<ul>
+<li>Pemutaran video mungkin mengalami selisih waktu dan menunjukkan interupsi.</li>
+</ul>
+
+<h4>Wi-Fi</h4>
+
+<ul>
+  <li>Wi-Fi telah menjalani beberapa optimalisasi yang mungkin mengubah perilaku kasus patologis
+  API. Khususnya, aplikasi yang berusaha menghubungkan ke jaringan
+  tertentu, atau berusaha menghubungkan kembali ke jaringan harus mengulang pengujian.
+  </li>
+
+  <li>Klien DHCP lawas telah dibuang dari platform. Satu-satunya klien DHCP
+   yang didukung platform adalah klien DHCP yang diperkenalkan di M.
+  </li>
+</ul>
+
+<h4>Direct Boot</h4>
+
+<ul>
+  <li>NFC tidak berfungsi hingga pembukaan kunci pertama.
+    <ul>
+      <li>Bila telepon berkemampuan Bluetooth dihidupkan ulang, Bluetooth tidak akan
+      aktif secara otomatis. Anda harus mengaktifkan kembali Bluetooth secara manual.
+      </li>
+
+      <li>Dalam beberapa situasi, nada dering default mungkin tidak terdengar untuk
+      panggilan telepon dan pesan. Perilaku ini telah diperbaiki dalam rilis N Preview berikutnya,
+      dengan satu pengecualian (dan solusi):
+      </li>
+
+      <li>Pada perangkat yang bukan baru dikosongkan--perangkat yang telah booting setidaknya
+      sekali sejak disetel ke mode Direct Boot--nada dering pemberitahuan
+      default tidak berbunyi. Pengguna bisa mengatasi masalah ini dengan
+      memilih nada dering dari Settings secara manual.
+      </li>
+
+      <li>Direct Boot tidak diaktifkan secara default pada perangkat yang menjalankan build N
+      Developer Preview. Untuk mengaktifkan Direct Boot untuk pengujian dan
+      pengembangan, masuklah ke Developer Option dan ketuk Convert to File Encryption.
+      Dalam Developer Preview ini perlu penyetelan ulang pabrik untuk membagi ulang dan
+      memformat ulang perangkat Anda bagi File-based Encryption.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Gambar-dalam-gambar untuk Android TV</h4>
+
+<ul>
+  <li>Integrasi PIP dalam Recents UI belum final, dan masih bisa
+  berubah.
+    <ul>
+      <li>Animasi jendela PIP belum halus. Rilis Pratinjau
+      mendatang akan memperbaiki hal ini.
+      </li>
+    </ul>
+  </li>
+
+  <li style="list-style: none">Rilis Pratinjau mendatang akan memperbaiki
+  desain visual dan perapian layout PIP.
+  </li>
+</ul>
+
+<h4>Laporan bug</h4>
+
+<ul>
+  <li>Laporan bug tidak selalu berhasil diselesaikan (seperti solusi,
+  kadang-kadang masih bisa diakses melalui penyedia dokumen laporan bug
+  di penyimpanan internal).
+  </li>
+</ul>
+
+<h4>Layar terbagi Multi-jendela</h4>
+
+<ul>
+  <li>Aplikasi bisa mengalami mogok dan perilaku UI yang tidak diharapkan bila ditempatkan dalam
+  mode layar terbagi. Ini adalah masalah aplikasi yang harus diperbaiki oleh pengembang
+  aplikasi.
+  </li>
+
+  <li>Bila aplikasi menargetkan versi platform Android sebelum N, maka
+  aplikasi mungkin tidak berfungsi pada layar terbagi dan toast mungkin muncul berkali-kali.
+  </li>
+
+  <li>Menekan lama tombol Ringkasan saat menggunakan aplikasi dengan orientasi
+  tetap mungkin menghasilkan perilaku aplikasi yang tidak diharapkan.
+  </li>
+
+  <li>Aplikasi mungkin berkedip saat mengubah ukurannya.
+  </li>
+
+  <li>Animasi belum final.
+  </li>
+</ul>
+
+<h4>Metode masukan</h4>
+
+<ul>
+  <li>Google Keyboard secara tidak diharapkan kembali ke keyboard Google generik
+  bila <b>menggunakan bahasa sistem</b>, namun Google Keyboard tidak mendukung
+  bahasa yang dipilih dalam preferensi bahasa sistem. Ia akan kembali
+  ke American English.
+    <p>
+      Anda bisa mengatasi masalah ini dengan menambahkan setidaknya satu bahasa yang didukung
+  Keyboard Google.
+    </p>
+  </li>
+</ul>
+
+<h4>Aksesibilitas</h4>
+
+<ul>
+  <li>TalkBack menunjukkan masalah pada beberapa fitur termasuk Pemberitahuan, petak
+  Quick Settings dan tampilan Multi-jendela yang mungkin menyebabkan sistem mogok atau
+  tidak ada masukan lisan dari TalkBack. Rilis pratinjau mendatang akan
+  menangani masalah ini.
+  </li>
+</ul>
+
+<h3 id="dp1-device-sp">Masalah dan Catatan untuk Perangkat Tertentu</h3>
+
+<h4>Nexus Player</h4>
+<ul>
+  <li>Pemutaran video, kompatibilitas aplikasi, dan masalah stabilitas telah antisipasi pada
+  Nexus Player dalam rilis Pratinjau ini.
+  </li>
+</ul>
+
+<h4>Pixel C</h4>
+<ul>
+<li>Mengubah ukuran multi-jendela bisa menyebabkan mogok.</li>
+</ul>
+
+<h4>Nexus 9</h4>
+<ul>
+<li>Perangkat Nexus 9 mungkin tidak jalan setelah menerima pembaruan lewat jaringan seluler (OTA)
+  via Android Beta Program. Untuk memulihkan dari masalah ini, Anda bisa mencoba
+  pasang citra OTA secara manual. Untuk informasi selengkapnya, lihat
+  <a href="{@docRoot}preview/download-ota.html">Menerapkan Citra OTA Perangkat</a>.
+</li>
+</ul>
+

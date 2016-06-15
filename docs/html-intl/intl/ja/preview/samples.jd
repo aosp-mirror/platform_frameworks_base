@@ -10,7 +10,7 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 <p class="note">
-  <strong>注:</strong> 以下のダウンロード可能なプロジェクトは、Gradle と Android Studio でご利用いただくために提供しています。
+  <strong>注:</strong>以下のダウンロード可能なプロジェクトは、Gradle と Android Studio でご利用いただくために提供しています。
 
 </p>
 
@@ -30,8 +30,8 @@ page.image=images/cards/card-n-samples_2x.png
 <h3 id="an">アクティブ通知</h3>
 <img src="{@docRoot}preview/images/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
-  NotificationCompat を用いて通知を送信するシンプルなサービスをご確認いただる既存のサンプルです。ユーザからの未読メッセージは、それぞれ別の通知として送信されます。
-
+  NotificationCompat を使用して通知を送信するシンプルなサービスをご確認いただける既存のサンプルです。
+ユーザーからの未読メッセージは、それぞれ別の通知として送信されます。
 
 </p>
 <p>
@@ -64,7 +64,7 @@ page.image=images/cards/card-n-samples_2x.png
 <h3 id="fbe">ダイレクト ブート</h3>
 <img src="{@docRoot}preview/images/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
-  このサンプルでは、デバイスの暗号化ストレージ内のデータにアクセスしたり、データを保存したりする方法をご確認いただけます。この機能はデバイスが起動している間は常に有効です。
+  このサンプルでは、端末の暗号化ストレージ内のデータにアクセスしたり、データを保存したりする方法をご確認いただけます。この機能は端末が起動している間は常に有効です。
 
 </p>
 <p>

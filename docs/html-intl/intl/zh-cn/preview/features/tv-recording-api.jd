@@ -1,5 +1,5 @@
 page.title=TV 录制
-page.keywords=preview,sdk,tv,recording
+page.keywords=Preview、SDK、TV 录制
 page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
@@ -31,9 +31,30 @@ Android N 通过允许用户保存多个录制的会话，扩展了时移。
 
 </p>
 
+<p class="note"><strong>注：</strong>Live Channels 应用尚不提供可让用户创建或访问录制的方式。
+在变更 Live Channels 应用之前，可能无法充分测试您的 TV 输入服务的录制体验。
+
+</p>
+
 <h2 id="supporting">指示支持录制</h2>
 
-<p>为了通知系统您的 TV 输入服务支持录制，请执行以下步骤：
+<p>为了通知系统您的 TV 输入服务支持录制，请将您的服务元数据 XML 文件中的 <code>android:canRecord</code> 属性设置为 <code>true</code>：
+
+
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>如需了解有关服务元数据文件的详细信息，请参阅<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">在清单中声明您的 TV 输入</a>。
+
+
+</p>
+
+<p>或者，您可以使用以下步骤在您的代码中表明录制支持：
 </p>
 
 <ol>
@@ -44,7 +65,7 @@ Android N 通过允许用户保存多个录制的会话，扩展了时移。
 <code>setCanRecord(true)</code>，以表明您的服务支持录制。
 </li>
 <li>通过调用
-<code>TvInputService.updateTvInputInfo()</code> 在系统中注册 <code>TvInputInfo</code> 对象。</li>
+<code>TvInputManager.updateTvInputInfo()</code> 在系统中注册 <code>TvInputInfo</code> 对象。</li>
 </ol>
 
 <h2 id="recording">录制会话</h2>

@@ -1,4 +1,4 @@
-page.title=Configurações de segurança de rede
+page.title=Configuração de segurança de rede
 page.keywords=androidn,security,network
 page.image=images/cards/card-nyc_2x.jpg
 
@@ -44,7 +44,7 @@ page.image=images/cards/card-nyc_2x.jpg
   </li>
 
   <li>
-    <b>Substituições somente depuração:</b> depure conexões seguras do aplicativo com segurança,
+    <b>Substituições somente de depuração:</b> depure conexões seguras do aplicativo com segurança,
  sem adicionar riscos à base instalada.
   </li>
 
@@ -71,12 +71,13 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-...
-&lt;app ...&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <h2 id="CustomTrust">Personalizar CAs confiáveis</h2>
@@ -310,6 +311,7 @@ android:debuggable</a>
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
@@ -362,7 +364,7 @@ android:debuggable</a>
 <h2 id="FileFormat">Formato do arquivo de configurações</h2>
 
 <p>
-  O recurso de configurações de segurança de rede usa um arquivo no formato XML.
+  O recurso de configurações de segurança de rede usa um formato do arquivo XML.
   A estrutura geral desse arquivo é mostrada no seguinte exemplo de código:
 </p>
 
@@ -571,8 +573,8 @@ mais específica (mais longa) será usada.</p></dd>
  for {@code "true"}, o que normalmente ocorre em compilações de não lançamento
  geradas por IDEs e ferramentas de compilação. Âncoras de confiança especificadas em {@code
     debug-overrides} são adicionadas a todas as demais configurações e a fixação
- de certificados não é realizada quando a cadeia de certificados do servidor usar uma
- dessas âncoras de confiança de somente depuração. Se <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+ de certificados não é realizada quando a cadeia de certificados do servidor usa uma
+ dessas âncoras de confiança somente de depuração. Se <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
  for {@code "false"}, esta seção será ignorada por completo.
   </dd>
 </dl>
