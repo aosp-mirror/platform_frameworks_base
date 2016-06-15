@@ -1145,7 +1145,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void fixateNewestUserKeyAuth(int userId)
             throws RemoteException {
-        getMountService().fixateNewestUserKeyAuth(userId);
+        final IMountService mountService = getMountService();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            mountService.fixateNewestUserKeyAuth(userId);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
     }
 
     @Override
