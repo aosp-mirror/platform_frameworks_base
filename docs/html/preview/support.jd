@@ -56,7 +56,7 @@ page.image=images/cards/card-n-support_2x.png
     <div class="col-6of12">
       <p>
         <em>Date: June 2016<br>
-        Build: TODO<br>
+        Build: NPD56N<br>
         Emulator support: x86 &amp; ARM (32/64-bit)<br>
         Google Play services: 8.4</em>
       </p>
@@ -75,8 +75,7 @@ page.image=images/cards/card-n-support_2x.png
 
 <ul>
   <li>This release may have various <strong>stability issues</strong> on
-  supported devices. Users may encounter system instability, such as kernel
-  panics and crashes.
+  supported devices.
   </li>
 
   <li>Some apps <strong>may not function as expected</strong> on the new
@@ -84,65 +83,181 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 
   <li>Developer Preview 4 is <strong>Compatibility Test Suite (CTS)
-  approved</strong> on these devices: <strong>TODO: Need list.</strong>. Apps
-  that depend on CTS approved builds should work normally on these devices
-  (Android Pay for example).
+  approved</strong> on these devices: Nexus 5X, Nexus 6, Nexus 6P, and
+  Pixel C. Apps that depend on CTS approved builds should work normally
+  on these devices (Android Pay for example).
   </li>
 
   <li>Developer Preview 4 is <strong>available on all supported
-  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
-  C, General Mobile 4G (Android One), as well as Sony Xperia Z3 (D6603 and
-  D6653 models). <strong>TODO: Confirm this list.</strong>
+  devices:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player,
+  Pixel C, General Mobile 4G (Android One), as well as Sony Xperia Z3
+  (D6603 and D6653 models).
   </li>
 </ul>
 
 
 <h3 id="new">New in DP4</h3>
-<!-- TODO -->
 
-<h4 id="">New feature</h4>
+<h4>Android N final APIs</h4>
 
-<p>Description of new feature.</p>
+<p>
+  Developer Preview 4 includes the <strong>final APIs</strong> for the upcoming
+  Android N platform. The new API level is 24.
+</p>
+
+<h4>Play publishing</h4>
+
+<p>
+  You can now publish apps that use <strong>API level 24</strong> to Google
+  Play, in alpha, beta, and production release channels.
+</p>
+
+<h4>Android Studio and tools updates</h4>
+
+<p>
+  Along with Developer Preview 4 we’re providing the <strong>final API 24
+  SDK</strong> to be used with Android Studio 2.1.2 and higher. In addition,
+  we’re releasing updated Developer Preview 4 system images for the emulator to
+  help test your apps.
+</p>
+
+<p>
+  As new updates roll out for Android Studio, you should see minor improvements in
+  the new project wizards and AVD manager as we add enhanced support for API 24.
+  These are primarily cosmetic changes and should not stop you from getting
+  your app ready for an update in the Play store.
+</p>
 
 <h4 id="api-changes">Feature and API changes</h4>
 
-<dl>
-  <dt>
-    <a href="{@docRoot}preview/features/multi-window.html">Multi-Window</a>
-  </dt>
-
-  <dd>
-    The <code>android:minimalHeight</code> and <code>android:minimalWidth</code>
-    attributes have been renamed to <code>android:minHeight</code> and
-    <code>android:minWidth</code>.
-  </dd>
-</dl>
-
-<h4 id="dp4-fixes">Fixes for issues reported by developers</h4>
-
-<p>
-  A number of issues reported by developers have been fixed, including:
-</p>
-
 <ul>
-  <li><strong>TODO</strong>
-</ul>
+  <li>In previous versions of Android, an app activates with all of its locale
+  resources loaded before locale negotiation begins. Starting in Android N DP4,
+  the system negotiates resource locales individually for each resource object
+  before the app activates.
+  </li>
 
-<p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
-issue tracker</a>.</p>
+  <li>As announced at Developer Preview 3, we’ve deferred the Launcher
+  Shortcuts feature to a later release of Android. In Developer Preview 4,
+  we’ve removed the Launcher Shortcuts APIs.
+  </li>
+
+  <li>We’ve changed the BLE Scanning behavior starting in DP4. We’ll prevent
+  applications from starting and stopping scans more than 5 times in 30
+  seconds. For long running scans, we’ll convert them into opportunistic scans.
+  </li>
+
+  <li>The <a href=
+  "{@docRoot}preview/features/multi-window.html">Multi-Window</a>
+  <code>android:minimalHeight</code> and <code>android:minimalWidth</code>
+  attributes have been renamed to <code>android:minHeight</code> and
+  <code>android:minWidth</code>.
+  </li>
+</ul>
 
 <h3 id="ki">Known Issues</h3>
 
-<!--
-
-<h4>Product area</h4>
+<h4>Stability</h4>
 
 <ul>
-  <li>Description of bug</li>
+  <li>Users may encounter system instability (such as kernel panics and
+  crashes).
+  </li>
 </ul>
 
--->
+<h4>Launcher</h4>
 
+<ul>
+  <li>The default launcher’s <strong>All Apps</strong> tray may become
+  unresponsive after cycling the screen off and on. Returning to the
+  homescreen and relaunching the <strong>All Apps</strong> tray may resolve
+  this issue.
+  </li>
+</ul>
+
+<h4>Setup Wizard</h4>
+
+<ul>
+  <li>Crash on selecting "Not now" in "Set up email" screen.
+  </li>
+</ul>
+
+<h4>Media</h4>
+
+<ul>
+  <li>Media playback may be unreliable on Nexus 9 and Nexus Player, including
+  issues playing HD video.
+  </li>
+
+  <li>Occasional freeze when running the YouTube app with other apps in
+  multi-window mode on Pixel C devices. In some cases hard reboot is required.
+  </li>
+
+  <li>Apps may have issues playing some Widevine DRM-protected content on Nexus
+  9 devices.
+  </li>
+
+  <li>Issues handling VP8 video on Nexus 9 devices.
+  </li>
+</ul>
+
+<h4>External storage</h4>
+
+<ul>
+  <li>Apps may become unstable when the user moves them from internal storage
+  to adoptable external storage (this can include SD card or devices attached
+  over USB).
+  </li>
+</ul>
+
+<h4>Screen zoom and multiple APKs in Google Play</h4>
+
+<ul>
+  <li>On devices running Android N, Google Play services 9.0.83 incorrectly
+  reports the current screen density rather than the stable screen density.
+  When screen zoom is enabled on these devices, this can cause Google Play to
+  select a version of a multi-APK app that’s designed for smaller screens. This
+  issue is fixed in the next version of Google Play services and will be
+  included in a later Developer Preview release.
+  </li>
+</ul>
+
+<h4>Vulkan support and multiple APKs in Google Play</h4>
+
+<ul>
+  <li>On devices running Android N, Google Play services 9.0.83 currently
+  reports Vulkan support but not Vulkan version. This can cause Google Play to
+  select a version of a multi-APK app that’s designed for lower Vulkan support
+  on devices with higher version support. Currently, the Google Play Store does
+  not accept uploads of apps which use Vulkan version targeting. This support
+  will be added to the Google Play Store in the future and fixed in the next
+  version of Google Play services (to be included in a later Developer Preview
+  release). Any N devices using the version of Google Play services 9.0.83 will
+  continue to receive versions of apps targeting basic Vulkan support.
+  </li>
+</ul>
+
+<h4>Accessibility</h4>
+<ul>
+  <li>Switch access doesn't allow user to navigate web pages in Chrome.
+  </li>
+
+  <li>Accessibility issues for talkback users with notification dismissal, and
+  wifi selection screen.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Currently, CA certificates provisioned through {@link
+  android.app.admin.DevicePolicyManager} are not
+  available to profiles other than the primary user/profile due to a preload
+  issue. For example, this could prevent a user from connecting to a trusted
+  server when in a Work profile. This issue will be resolved in the next
+  Developer Preview.
+  </li>
+</ul>
 
 <!-- TBA, if any
 <h4>Device-specific issues</h4>
@@ -163,6 +278,40 @@ issue tracker</a>.</p>
 
 -->
 
+
+<h4 id="dp4-fixes">Fixes for issues reported by developers</h4>
+
+<p>
+  A number of issues reported by developers have been fixed, including:
+</p>
+
+<ul>
+  <li>The active network state ({@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} and {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}) might return incorrect values during some
+  restricted background scenarios
+  </li>
+
+  <li>Data Saver restricts the foreground MMS mobile network request
+    (<a href="https://code.google.com/p/android/issues/detail?id=208478">bug
+    208478</a>)
+  </li>
+
+  <li>Quick settings tiles and notifications sometimes unresponsive
+  </li>
+
+  <li>Unable to dismiss Clock notifications
+  </li>
+
+  <li>Duplication of bluetooth icon and other status icons
+  </li>
+
+  <li>Additional bluetooth connectivity fixes
+  </li>
+</ul>
+
+<p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
+issue tracker</a>.</p>
 
 
 
@@ -220,7 +369,7 @@ issue tracker</a>.</p>
 
 <h3 id="dp3-new">New in DP3</h3>
 
-<h4 id="">VR Mode for Android</h4>
+<h4>VR Mode for Android</h4>
 
 <p>
   Android N adds platform support and optimizations for a new VR Mode to let
@@ -236,7 +385,7 @@ issue tracker</a>.</p>
   "https://developers.google.com/vr/android/">Google VR SDK for Android</a>.
 </p>
 
-<h4 id="">Sustained performance mode</h4>
+<h4>Sustained performance mode</h4>
 
 <p>
   Android N includes optional support for <a href=
@@ -266,7 +415,7 @@ issue tracker</a>.</p>
   filing a bug</a>.
 </p>
 
-<h4 id="">Keyboard Shortcuts helper</h4>
+<h4>Keyboard Shortcuts helper</h4>
 
 <p>
   Android N lets users press <code>Meta+/</code> to trigger a <strong>Keyboard
@@ -277,7 +426,7 @@ issue tracker</a>.</p>
   Shortcuts helper</a> for details.
 </p>
 
-<h4 id="">FrameMetrics API</h4>
+<h4>FrameMetrics API</h4>
 
 <p>
   DP3 introduces a new <a href=
@@ -605,14 +754,14 @@ issue tracker</a>.</p>
   </li>
 </ul>
 
-<h4 id="">Notifications</h4>
+<h4>Notifications</h4>
 
 <ul>
   <li>MessagingStyle does not show notifications with "null" (self) sender.
   </li>
 </ul>
 
-<h4 id="">Developer Tools</h4>
+<h4>Developer Tools</h4>
 
 <ul>
   <li>
