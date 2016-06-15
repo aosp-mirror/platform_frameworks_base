@@ -19,10 +19,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.os.PersistableBundle;
@@ -51,8 +49,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import sun.misc.Resource;
-
 /**
  * Package information used by {@link ShortcutService}.
  * User information used by {@link ShortcutService}.
@@ -63,6 +59,7 @@ import sun.misc.Resource;
  */
 class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
+    private static final String TAG_VERIFY = ShortcutService.TAG + ".verify";
 
     static final String TAG_ROOT = "package";
     private static final String TAG_INTENT_EXTRAS = "intent-extras";
@@ -303,12 +300,17 @@ class ShortcutPackage extends ShortcutPackageItem {
      * Remove all dynamic shortcuts.
      */
     public void deleteAllDynamicShortcuts() {
+        final long now = mShortcutUser.mService.injectCurrentTimeMillis();
+
         boolean changed = false;
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
             if (si.isDynamic()) {
                 changed = true;
+
+                si.setTimestamp(now);
                 si.clearFlags(ShortcutInfo.FLAG_DYNAMIC);
+                si.setRank(0); // It may still be pinned, so clear the rank.
             }
         }
         if (changed) {
@@ -356,10 +358,14 @@ class ShortcutPackage extends ShortcutPackageItem {
             ensureNotImmutable(oldShortcut);
         }
         if (oldShortcut.isPinned()) {
+
+            oldShortcut.setRank(0);
             oldShortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_MANIFEST);
             if (disable) {
                 oldShortcut.addFlags(ShortcutInfo.FLAG_DISABLED);
             }
+            oldShortcut.setTimestamp(mShortcutUser.mService.injectCurrentTimeMillis());
+
             return oldShortcut;
         } else {
             deleteShortcutInner(shortcutId);
@@ -829,7 +835,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (!a.isManifestShortcut() && b.isManifestShortcut()) {
             return 1;
         }
-        return a.getRank() - b.getRank();
+        return Integer.compare(a.getRank(), b.getRank());
     };
 
     /**
@@ -837,8 +843,6 @@ class ShortcutPackage extends ShortcutPackageItem {
      * contain "floating" shortcuts because they don't belong on any activities.
      */
     private ArrayMap<ComponentName, ArrayList<ShortcutInfo>> sortShortcutsToActivities() {
-        final int maxShortcuts = mShortcutUser.mService.getMaxActivityShortcuts();
-
         final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> activitiesToShortcuts
                 = new ArrayMap<>();
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
@@ -851,7 +855,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
             ArrayList<ShortcutInfo> list = activitiesToShortcuts.get(activity);
             if (list == null) {
-                list = new ArrayList<>(maxShortcuts * 2);
+                list = new ArrayList<>();
                 activitiesToShortcuts.put(activity, list);
             }
             list.add(si);
@@ -976,6 +980,96 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
     }
 
+    /** Clears the implicit ranks for all shortcuts. */
+    public void clearAllImplicitRanks() {
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            si.clearImplicitRankAndRankChangedFlag();
+        }
+    }
+
+    /**
+     * Used to sort shortcuts for rank auto-adjusting.
+     */
+    final Comparator<ShortcutInfo> mShortcutRankComparator = (ShortcutInfo a, ShortcutInfo b) -> {
+        // First, sort by rank.
+        int ret = Integer.compare(a.getRank(), b.getRank());
+        if (ret != 0) {
+            return ret;
+        }
+        // When ranks are tie, then prioritize the ones that have just been assigned new ranks.
+        // e.g. when there are 3 shortcuts, "s1" "s2" and "s3" with rank 0, 1, 2 respectively,
+        // adding a shortcut "s4" with rank 1 will "insert" it between "s1" and "s2", because
+        // "s2" and "s4" have the same rank 1 but s4 has isRankChanged() set.
+        // Similarly, updating s3's rank to 1 will insert it between s1 and s2.
+        if (a.isRankChanged() != b.isRankChanged()) {
+            return a.isRankChanged() ? -1 : 1;
+        }
+        // If they're still tie, sort by implicit rank -- i.e. preserve the order in which
+        // they're passed to the API.
+        ret = Integer.compare(a.getImplicitRank(), b.getImplicitRank());
+        if (ret != 0) {
+            return ret;
+        }
+        // If they're stil tie, just sort by their IDs.
+        // This may happen with updateShortcuts() -- see
+        // the testUpdateShortcuts_noManifestShortcuts() test.
+        return a.getId().compareTo(b.getId());
+    };
+
+    /**
+     * Re-calculate the ranks for all shortcuts.
+     */
+    public void adjustRanks() {
+        final ShortcutService s = mShortcutUser.mService;
+        final long now = s.injectCurrentTimeMillis();
+
+        // First, clear ranks for floating shortcuts.
+        for (int i = mShortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = mShortcuts.valueAt(i);
+            if (si.isFloating()) {
+                if (si.getRank() != 0) {
+                    si.setTimestamp(now);
+                    si.setRank(0);
+                }
+            }
+        }
+
+        // Then adjust ranks.  Ranks are unique for each activity, so we first need to sort
+        // shortcuts to each activity.
+        // Then sort the shortcuts within each activity with mShortcutRankComparator, and
+        // assign ranks from 0.
+        final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> all =
+                sortShortcutsToActivities();
+        for (int outer = all.size() - 1; outer >= 0; outer--) { // For each activity.
+            final ArrayList<ShortcutInfo> list = all.valueAt(outer);
+
+            // Sort by ranks and other signals.
+            Collections.sort(list, mShortcutRankComparator);
+
+            int rank = 0;
+
+            final int size = list.size();
+            for (int i = 0; i < size; i++) {
+                final ShortcutInfo si = list.get(i);
+                if (si.isManifestShortcut()) {
+                    // Don't adjust ranks for manifest shortcuts.
+                    continue;
+                }
+                // At this point, it must be dynamic.
+                if (!si.isDynamic()) {
+                    s.wtf("Non-dynamic shortcut found.");
+                    continue;
+                }
+                final int thisRank = rank++;
+                if (si.getRank() != thisRank) {
+                    si.setTimestamp(now);
+                    si.setRank(thisRank);
+                }
+            }
+        }
+    }
+
     public void dump(@NonNull PrintWriter pw, @NonNull String prefix) {
         pw.println();
 
@@ -1087,7 +1181,6 @@ class ShortcutPackage extends ShortcutPackageItem {
         ShortcutService.writeAttr(out, ATTR_DISABLED_MESSAGE_RES_NAME,
                 si.getDisabledMessageResName());
         ShortcutService.writeAttr(out, ATTR_INTENT, si.getIntentNoExtras());
-        ShortcutService.writeAttr(out, ATTR_RANK, si.getRank());
         ShortcutService.writeAttr(out, ATTR_TIMESTAMP,
                 si.getLastChangedTimestamp());
         if (forBackup) {
@@ -1097,6 +1190,10 @@ class ShortcutPackage extends ShortcutPackageItem {
                             ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
                             | ShortcutInfo.FLAG_DYNAMIC));
         } else {
+            // When writing for backup, ranks shouldn't be saved, since shortcuts won't be restored
+            // as dynamic.
+            ShortcutService.writeAttr(out, ATTR_RANK, si.getRank());
+
             ShortcutService.writeAttr(out, ATTR_FLAGS, si.getFlags());
             ShortcutService.writeAttr(out, ATTR_ICON_RES_ID, si.getIconResourceId());
             ShortcutService.writeAttr(out, ATTR_ICON_RES_NAME, si.getIconResName());
@@ -1272,35 +1369,74 @@ class ShortcutPackage extends ShortcutPackageItem {
                 sortShortcutsToActivities();
 
         // Make sure each activity won't have more than max shortcuts.
-        for (int i = all.size() - 1; i >= 0; i--) {
-            if (all.valueAt(i).size() > mShortcutUser.mService.getMaxActivityShortcuts()) {
+        for (int outer = all.size() - 1; outer >= 0; outer--) {
+            final ArrayList<ShortcutInfo> list = all.valueAt(outer);
+            if (list.size() > mShortcutUser.mService.getMaxActivityShortcuts()) {
                 failed = true;
-                Log.e(TAG, "Package " + getPackageName() + ": activity " + all.keyAt(i)
-                        + " has " + all.valueAt(i).size() + " shortcuts.");
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": activity " + all.keyAt(outer)
+                        + " has " + all.valueAt(outer).size() + " shortcuts.");
             }
+
+            // Sort by rank.
+            Collections.sort(list, (a, b) -> Integer.compare(a.getRank(), b.getRank()));
+
+            // Split into two arrays for each kind.
+            final ArrayList<ShortcutInfo> dynamicList = new ArrayList<>(list);
+            dynamicList.removeIf((si) -> !si.isDynamic());
+
+            final ArrayList<ShortcutInfo> manifestList = new ArrayList<>(list);
+            dynamicList.removeIf((si) -> !si.isManifestShortcut());
+
+            verifyRanksSequential(dynamicList);
+            verifyRanksSequential(manifestList);
         }
 
+        // Verify each shortcut's status.
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
             if (!(si.isManifestShortcut() || si.isDynamic() || si.isPinned())) {
                 failed = true;
-                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not manifest, dynamic or pinned.");
+            }
+            if (si.isManifestShortcut() && si.isDynamic()) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " is both dynamic and manifest at the same time.");
             }
             if (si.getActivity() == null) {
                 failed = true;
-                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has null activity.");
             }
             if ((si.isDynamic() || si.isManifestShortcut()) && !si.isEnabled()) {
                 failed = true;
-                Log.e(TAG, "Package " + getPackageName() + ": shortcut " + si.getId()
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " is not floating, but is disabled.");
+            }
+            if (si.isFloating() && si.getRank() != 0) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " is floating, but has rank=" + si.getRank());
             }
         }
 
         if (failed) {
             throw new IllegalStateException("See logcat for errors");
         }
+    }
+
+    private boolean verifyRanksSequential(List<ShortcutInfo> list) {
+        boolean failed = false;
+
+        for (int i = 0; i < list.size(); i++) {
+            final ShortcutInfo si = list.get(i);
+            if (si.getRank() != i) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " rank=" + si.getRank() + " but expected to be "+ i);
+            }
+        }
+        return failed;
     }
 }

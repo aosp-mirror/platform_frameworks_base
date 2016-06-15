@@ -742,6 +742,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (mService != null) {
             // Flush all the unsaved data from the previous instance.
             mService.saveDirtyInfo();
+
+            // Make sure everything is consistent.
+            mService.verifyStates();
         }
         LocalServices.removeServiceForTest(ShortcutServiceInternal.class);
 

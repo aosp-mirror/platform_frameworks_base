@@ -45,6 +45,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertEmpty;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertShortcutIds;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertWith;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.filterByActivity;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.findShortcut;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.hashSet;
@@ -71,7 +72,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -79,7 +79,6 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Process;
 import android.os.UserHandle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -969,22 +968,33 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Set up shortcuts.
 
         setCaller(CALLING_PACKAGE_1);
-        final ShortcutInfo s1_1 = makeShortcutWithTimestamp("s1", 5000);
-        final ShortcutInfo s1_2 = makeShortcutWithTimestamp("s2", 1000);
+        final ShortcutInfo s1_1 = makeShortcut("s1");
+        final ShortcutInfo s1_2 = makeShortcut("s2");
 
         assertTrue(mManager.setDynamicShortcuts(list(s1_1, s1_2)));
 
+        // Because setDynamicShortcuts will update the timestamps when ranks are changing,
+        // we explicitly set timestamps here.
+        getCallerShortcut("s1").setTimestamp(5000);
+        getCallerShortcut("s2").setTimestamp(1000);
+
         setCaller(CALLING_PACKAGE_2);
-        final ShortcutInfo s2_2 = makeShortcutWithTimestamp("s2", 1500);
-        final ShortcutInfo s2_3 = makeShortcutWithTimestampWithActivity("s3", 3000,
+        final ShortcutInfo s2_2 = makeShortcut("s2");
+        final ShortcutInfo s2_3 = makeShortcutWithActivity("s3",
                 makeComponent(ShortcutActivity2.class));
-        final ShortcutInfo s2_4 = makeShortcutWithTimestampWithActivity("s4", 500,
+        final ShortcutInfo s2_4 = makeShortcutWithActivity("s4",
                 makeComponent(ShortcutActivity.class));
         assertTrue(mManager.setDynamicShortcuts(list(s2_2, s2_3, s2_4)));
 
+        getCallerShortcut("s2").setTimestamp(1500);
+        getCallerShortcut("s3").setTimestamp(3000);
+        getCallerShortcut("s4").setTimestamp(500);
+
         setCaller(CALLING_PACKAGE_3);
-        final ShortcutInfo s3_2 = makeShortcutWithTimestamp("s3", START_TIME + 5000);
+        final ShortcutInfo s3_2 = makeShortcut("s3");
         assertTrue(mManager.setDynamicShortcuts(list(s3_2)));
+
+        getCallerShortcut("s3").setTimestamp(START_TIME + 5000);
 
         setCaller(LAUNCHER_1);
 
@@ -4606,7 +4616,6 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(mService.getPackageShortcutForTest(LAUNCHER_1, USER_0));
     }
 
-
     public void testManifestShortcut_publishOnBroadcast() {
         // First, no packages are installed.
         uninstallPackage(USER_0, CALLING_PACKAGE_1);
@@ -4677,6 +4686,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
                     "ms1", "ms2", "ms3", "ms4", "ms5");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1", "ms2", "ms3", "ms4", "ms5");
             assertEmpty(mManager.getPinnedShortcuts());
         });
 
@@ -4710,6 +4723,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
                     "ms1", "ms2");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1", "ms2");
             assertShortcutIds(assertAllImmutable(assertAllPinned(
                     mManager.getPinnedShortcuts())),
                     "ms2", "ms3");
@@ -4733,6 +4750,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
                     "ms1", "ms2");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1", "ms2");
             assertEmpty(mManager.getPinnedShortcuts());
         });
 
@@ -4741,6 +4762,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
                     "ms1", "ms2");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1", "ms2");
             assertShortcutIds(assertAllImmutable(assertAllPinned(
                     mManager.getPinnedShortcuts())),
                     "ms2", "ms3");
@@ -4749,9 +4774,42 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertAllDisabled(list(getCallerShortcut("ms3")));
         });
 
+        // Multiple activities.
+        // Add shortcuts on activity 2 for package 2.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
+                R.xml.shortcut_5_alt);
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_2, ShortcutActivity2.class.getName()),
+                R.xml.shortcut_5_reverse);
+
+        updatePackageLastUpdateTime(CALLING_PACKAGE_2, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_2, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
+                    mManager.getManifestShortcuts()))),
+                    "ms1", "ms2", "ms3", "ms4", "ms5",
+                    "ms1_alt", "ms2_alt", "ms3_alt", "ms4_alt", "ms5_alt");
+
+            // Make sure they have the correct ranks, regardless of their ID's alphabetical order.
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1_alt", "ms2_alt", "ms3_alt", "ms4_alt", "ms5_alt");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_2, ShortcutActivity2.class.getName()))
+                    .haveRanksInOrder("ms5", "ms4", "ms3", "ms2", "ms1");
+        });
+
         // Package 2 now has no manifest shortcuts.
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_2, ShortcutActivity.class.getName()),
+                R.xml.shortcut_0);
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_2, ShortcutActivity2.class.getName()),
                 R.xml.shortcut_0);
         updatePackageLastUpdateTime(CALLING_PACKAGE_2, 1);
         mService.mPackageMonitor.onReceive(getTestContext(),
@@ -5128,7 +5186,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // ShortcutActivity2 has two shortcuts, ms1 and ms2.
         addManifestShortcutResource(
                 new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
-                R.xml.shortcut_2);
+                R.xml.shortcut_5);
         updatePackageVersion(CALLING_PACKAGE_1, 1);
         mService.mPackageMonitor.onReceive(getTestContext(),
                 genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
@@ -5136,13 +5194,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
                     mManager.getManifestShortcuts()))),
-                    "ms1", "ms2");
+                    "ms1", "ms2", "ms3", "ms4", "ms5");
 
             // ms1 should belong to ShortcutActivity.
             ShortcutInfo si = getCallerShortcut("ms1");
             assertEquals(R.string.shortcut_title1, si.getTitleResId());
             assertEquals(new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
                     si.getActivity());
+            assertEquals(0, si.getRank());
 
             // ms2 should belong to ShortcutActivity*2*.
             si = getCallerShortcut("ms2");
@@ -5150,8 +5209,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             assertEquals(new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()),
                     si.getActivity());
 
+            // Also check the ranks
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()))
+                    .haveRanksInOrder("ms1");
+            assertWith(getCallerShortcuts()).selectManifest()
+                    .selectByActivity(
+                            new ComponentName(CALLING_PACKAGE_1, ShortcutActivity2.class.getName()))
+                    .haveRanksInOrder("ms2", "ms3", "ms4", "ms5");
+
             // Make sure there's no other dangling shortcuts.
-            assertShortcutIds(getCallerShortcuts(), "ms1", "ms2");
+            assertShortcutIds(getCallerShortcuts(), "ms1", "ms2", "ms3", "ms4", "ms5");
         });
     }
 
