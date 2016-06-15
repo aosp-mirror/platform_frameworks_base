@@ -72,7 +72,12 @@ public class ScreenPinningRequest implements View.OnClickListener {
     }
 
     public void showPrompt(int taskId, boolean allowCancel) {
-        clearPrompt();
+        try {
+            clearPrompt();
+        } catch (IllegalArgumentException e) {
+            // If the call to show the prompt fails due to the request window not already being
+            // attached, then just ignore the error since we will be re-adding it below.
+        }
 
         this.taskId = taskId;
 
