@@ -712,6 +712,25 @@ final class ActivityStack {
         }
     }
 
+    /**
+     * @param task If non-null, the task will be moved to the back of the stack.
+     * */
+    void moveToBack(TaskRecord task) {
+        if (!isAttached()) {
+            return;
+        }
+
+        mStacks.remove(this);
+        mStacks.add(0, this);
+
+        if (task != null) {
+            mTaskHistory.remove(task);
+            mTaskHistory.add(0, task);
+            updateTaskMovement(task, false);
+            mWindowManager.moveTaskToBottom(task.taskId);
+        }
+    }
+
     boolean isFocusable() {
         if (StackId.canReceiveKeys(mStackId)) {
             return true;
@@ -2617,7 +2636,15 @@ final class ActivityStack {
         if (isOnHomeDisplay()) {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
-            if (!isHomeStack() && (fromHome || topTask() != task)) {
+            final boolean fromOnTopLauncher = lastStack.topTask() != null &&
+                    lastStack.topTask().isOnTopLauncher();
+            if (fromOnTopLauncher) {
+                // Since an on-top launcher will is moved to back when tasks are launched from it,
+                // those tasks should first try to return to a non-home activity.
+                // This also makes sure that non-home activities are visible under a transparent
+                // non-home activity.
+                task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
+            } else if (!isHomeStack() && (fromHome || topTask() != task)) {
                 // If it's a last task over home - we default to keep its return to type not to
                 // make underlying task focused when this one will be finished.
                 int returnToType = isLastTaskOverHome
@@ -4369,6 +4396,23 @@ final class ActivityStack {
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
 
         if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
+            if (topTask().isOnTopLauncher()) {
+                // An on-top launcher doesn't affect the visibility of activities on other stacks
+                // behind it. So if we're moving an on-top launcher to the back, we want to move the
+                // focus to the next focusable stack and resume an activity there.
+                // Besides, when the docked stack is visible, we should also move the home stack to
+                // the back to avoid the recents pops up on top of a fullscreen or freeform
+                // activity.
+
+                // Move the home stack to back.
+                moveToBack(topTask());
+
+                // Resume an activity in the next focusable stack.
+                adjustFocusToNextFocusableStackLocked(APPLICATION_ACTIVITY_TYPE, "moveTaskToBack");
+                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                return true;
+            }
+
             // For the case where we are moving the home task back and there is an activity visible
             // behind it on the fullscreen stack, we want to move the focus to the visible behind
             // activity to maintain order with what the user is seeing.
