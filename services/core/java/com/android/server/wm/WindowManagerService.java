@@ -177,6 +177,7 @@ import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -8622,12 +8623,18 @@ public class WindowManagerService extends IWindowManager.Stub
                 case WINDOW_REMOVE_TIMEOUT: {
                     final WindowState window = (WindowState) msg.obj;
                     synchronized(mWindowMap) {
-                        // It's counterintuitive that we check that "mWindowRemovalAllowed"
-                        // is false. But in fact if it's true, it means a remove has already
-                        // been requested and we better just not do anything.
-                        if (!window.mRemoved && !window.mWindowRemovalAllowed) {
-                            removeWindowLocked(window);
-                        }
+                        // TODO: This is all about fixing b/21693547
+                        // where partially initialized Toasts get stuck
+                        // around and keep the screen on. We'd like
+                        // to just remove the toast...but this can cause clients
+                        // who miss the timeout due to normal circumstances (e.g.
+                        // running under debugger) to crash (b/29105388). The windows will
+                        // eventually be removed when the client process finishes.
+                        // The best we can do for now is remove the FLAG_KEEP_SCREEN_ON
+                        // and prevent the symptoms of b/21693547.
+                        window.mAttrs.flags &= ~FLAG_KEEP_SCREEN_ON;
+                        window.setDisplayLayoutNeeded();
+                        mWindowPlacerLocked.performSurfacePlacement();
                     }
                 }
                 break;
