@@ -737,7 +737,17 @@ JavaVM::AttachCurrentThread from &lt;jni.h&gt;.
 
   <li>The Work Mode setting controls access to work apps. When work mode is off the
   system launcher indicates work apps are unavailable by greying them out. Enabling
-  work mode again restores normal behavior.
+  work mode again restores normal behavior.</li>
+
+  <li>When installing a PKCS #12 file containing a client certificate chain and
+  the corresponding private key from Settings UI, the CA certificate in the
+  chain is no longer installed to the trusted credentials storage. This does
+  not affect the result of {@link android.security.KeyChain#getCertificateChain
+  KeyChain.getCertificateChain()} when apps attempt to retrieve the client
+  certificate chain later. If required, the CA certificate should be installed
+  to the trusted credentials storage via Settings UI separately, with a
+  DER-encoded format under a .crt or .cer file extension.
+  </li>
 </ul>
 
 <p>
