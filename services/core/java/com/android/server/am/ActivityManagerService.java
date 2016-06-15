@@ -63,6 +63,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -21648,6 +21649,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
             ((PendingIntentRecord) target).setWhitelistDuration(duration);
+        }
+
+        @Override
+        public void updatePersistentConfigurationForUser(@NonNull Configuration values,
+                int userId) {
+            Preconditions.checkNotNull(values, "Configuration must not be null");
+            Preconditions.checkArgumentNonnegative(userId, "userId " + userId + " not supported");
+            synchronized (ActivityManagerService.this) {
+                updateConfigurationLocked(values, null, false, true, userId);
+            }
         }
     }
 

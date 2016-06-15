@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.am;
+package com.android.server.retaildemo;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -35,7 +35,7 @@ public class UserInactivityCountdownDialog extends AlertDialog {
     private long mCountDownDuration;
     private long mRefreshInterval;
 
-    protected UserInactivityCountdownDialog(Context context, long duration, long refreshInterval) {
+    UserInactivityCountdownDialog(Context context, long duration, long refreshInterval) {
         super(context);
 
         mCountDownDuration = duration;
