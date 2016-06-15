@@ -128,6 +128,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKSCREEN;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -140,6 +141,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
@@ -180,6 +182,7 @@ import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS
 public final class ActivityStackSupervisor implements DisplayListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
     private static final String TAG_CONTAINERS = TAG + POSTFIX_CONTAINERS;
+    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
@@ -613,12 +616,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord r = topRunningActivityLocked();
-        if (!mService.mDoingSetFocusedActivity && mService.mFocusedActivity != r) {
-            // The focus activity should always be the top activity in the focused stack.
-            // There will be chaos and anarchy if it isn't...
-            mService.setFocusedActivityLocked(r, reason + " setFocusStack");
-        }
-
         if (mService.mBooting || !mService.mBooted) {
             if (r != null && r.idle) {
                 checkFinishBootingLocked();
@@ -643,7 +640,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         if (top == null) {
             return false;
         }
-        mService.setFocusedActivityLocked(top, reason);
+        moveFocusableActivityStackToFrontLocked(top, reason);
         return true;
     }
 
@@ -668,7 +665,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
-            mService.setFocusedActivityLocked(r, myReason);
+            moveFocusableActivityStackToFrontLocked(r, myReason);
             return resumeFocusedStackTopActivityLocked(mHomeStack, prev, null);
         }
         return mService.startHomeActivityLocked(mCurrentUser, myReason);
@@ -807,7 +804,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return candidateTaskId;
     }
 
-    ActivityRecord resumedAppLocked() {
+    ActivityRecord getResumedActivityLocked() {
         ActivityStack stack = mFocusedStack;
         if (stack == null) {
             return null;
@@ -1537,20 +1534,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         return ACTIVITY_RESTRICTION_NONE;
-    }
-
-    boolean moveActivityStackToFront(ActivityRecord r, String reason) {
-        if (r == null) {
-            // Not sure what you are trying to do, but it is not going to work...
-            return false;
-        }
-        final TaskRecord task = r.task;
-        if (task == null || task.stack == null) {
-            Slog.w(TAG, "Can't move stack to front for r=" + r + " task=" + task);
-            return false;
-        }
-        task.stack.moveToFront(reason, task);
-        return true;
     }
 
     void setLaunchSource(int uid) {
@@ -2589,6 +2572,34 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         mWindowManager.animateResizePinnedStack(bounds, -1);
         mService.notifyActivityPinnedLocked();
+    }
+
+    boolean moveFocusableActivityStackToFrontLocked(ActivityRecord r, String reason) {
+        if (r == null || !r.isFocusable()) {
+            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
+                    "moveActivityStackToFront: unfocusable r=" + r);
+            return false;
+        }
+
+        final TaskRecord task = r.task;
+        if (task == null || task.stack == null) {
+            Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: r="
+                    + r + " task=" + task);
+            return false;
+        }
+
+        final ActivityStack stack = task.stack;
+        if (stack == mFocusedStack && stack.topRunningActivityLocked() == r) {
+            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
+                    "moveActivityStackToFront: already on top, r=" + r);
+            return false;
+        }
+
+        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
+                "moveActivityStackToFront: r=" + r);
+
+        stack.moveToFront(reason, task);
+        return true;
     }
 
     void positionTaskInStackLocked(int taskId, int stackId, int position) {

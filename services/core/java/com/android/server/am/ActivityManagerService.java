@@ -591,14 +591,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
-     * Activity we have told the window manager to have key focus.
+     * The last resumed activity. This is identical to the current resumed activity most
+     * of the time but could be different when we're pausing one activity before we resume
+     * another activity.
      */
-    ActivityRecord mFocusedActivity = null;
-
-    /**
-     * User id of the last activity mFocusedActivity was set to.
-     */
-    private int mLastFocusedUserId;
+    private ActivityRecord mLastResumedActivity;
 
     /**
      * If non-null, we are tracking the time the user spends in the currently focused app.
@@ -638,8 +635,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     final UserController mUserController;
 
     final AppErrors mAppErrors;
-
-    boolean mDoingSetFocusedActivity;
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown;
@@ -2952,25 +2947,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mAppBindArgs;
     }
 
-    boolean setFocusedActivityLocked(ActivityRecord r, String reason) {
-        if (r == null || mFocusedActivity == r) {
-            return false;
-        }
+    /**
+     * Update AMS states when an activity is resumed. This should only be called by
+     * {@link ActivityStack#setResumedActivityLocked} when an activity is resumed.
+     */
+    void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
+        r.state = ActivityState.RESUMED;
 
-        if (!r.isFocusable()) {
-            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: unfocusable r=" + r);
-            return false;
-        }
-
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
-
-        final boolean wasDoingSetFocusedActivity = mDoingSetFocusedActivity;
-        if (wasDoingSetFocusedActivity) Slog.w(TAG,
-                "setFocusedActivityLocked: called recursively, r=" + r + ", reason=" + reason);
-        mDoingSetFocusedActivity = true;
-
-        final ActivityRecord last = mFocusedActivity;
-        mFocusedActivity = r;
         if (r.task.isApplicationTask()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
@@ -2999,8 +2982,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             finishRunningVoiceLocked();
             IVoiceInteractionSession session;
-            if (last != null && ((session = last.task.voiceSession) != null
-                    || (session = last.voiceSession) != null)) {
+            if (mLastResumedActivity != null
+                    && ((session = mLastResumedActivity.task.voiceSession) != null
+                    || (session = mLastResumedActivity.voiceSession) != null)) {
                 // We had been in a voice interaction session, but now focused has
                 // move to something different.  Just finish the session, we can't
                 // return to it and retain the proper state and synchronization with
@@ -3008,57 +2992,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                 finishVoiceTask(session);
             }
         }
-        if (mStackSupervisor.moveActivityStackToFront(r, reason + " setFocusedActivity")) {
-            mWindowManager.setFocusedApp(r.appToken, true);
-        }
+
+        mWindowManager.setFocusedApp(r.appToken, true);
+
         applyUpdateLockStateLocked(r);
         applyUpdateVrModeLocked(r);
-        if (mFocusedActivity.userId != mLastFocusedUserId) {
+        if (mLastResumedActivity != null && r.userId != mLastResumedActivity.userId) {
             mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
             mHandler.obtainMessage(
-                    FOREGROUND_PROFILE_CHANGED_MSG, mFocusedActivity.userId, 0).sendToTarget();
-            mLastFocusedUserId = mFocusedActivity.userId;
+                    FOREGROUND_PROFILE_CHANGED_MSG, r.userId, 0).sendToTarget();
         }
 
-        // Log a warning if the focused app is changed during the process. This could
-        // indicate a problem of the focus setting logic!
-        if (mFocusedActivity != r) Slog.w(TAG,
-                "setFocusedActivityLocked: r=" + r + " but focused to " + mFocusedActivity);
-        mDoingSetFocusedActivity = wasDoingSetFocusedActivity;
+        mLastResumedActivity = r;
 
-        EventLogTags.writeAmFocusedActivity(
-                mFocusedActivity == null ? -1 : mFocusedActivity.userId,
-                mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName,
+        EventLogTags.writeAmSetResumedActivity(
+                r == null ? -1 : r.userId,
+                r == null ? "NULL" : r.shortComponentName,
                 reason);
-        return true;
-    }
-
-    final void resetFocusedActivityIfNeededLocked(ActivityRecord goingAway) {
-        if (mFocusedActivity != goingAway) {
-            return;
-        }
-
-        final ActivityStack focusedStack = mStackSupervisor.getFocusedStack();
-        if (focusedStack != null) {
-            final ActivityRecord top = focusedStack.topActivity();
-            if (top != null && top.userId != mLastFocusedUserId) {
-                mHandler.removeMessages(FOREGROUND_PROFILE_CHANGED_MSG);
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(FOREGROUND_PROFILE_CHANGED_MSG, top.userId, 0));
-                mLastFocusedUserId = top.userId;
-            }
-        }
-
-        // Try to move focus to another activity if possible.
-        if (setFocusedActivityLocked(
-                focusedStack.topRunningActivityLocked(), "resetFocusedActivityIfNeeded")) {
-            return;
-        }
-
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "resetFocusedActivityIfNeeded: Setting focus to NULL "
-                + "prev mFocusedActivity=" + mFocusedActivity + " goingAway=" + goingAway);
-        mFocusedActivity = null;
-        EventLogTags.writeAmFocusedActivity(-1, "NULL", "resetFocusedActivityIfNeeded");
     }
 
     @Override
@@ -3073,7 +3023,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 final ActivityRecord r = stack.topRunningActivityLocked();
-                if (setFocusedActivityLocked(r, "setFocusedStack")) {
+                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(r, "setFocusedStack")) {
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
@@ -3094,7 +3044,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 final ActivityRecord r = task.topRunningActivityLocked();
-                if (setFocusedActivityLocked(r, "setFocusedTask")) {
+                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(r, "setFocusedTask")) {
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
@@ -6722,7 +6672,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     // Some stack visibility might change (e.g. docked stack)
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-                    applyVrModeIfNeededLocked(mFocusedActivity, true);
+                    applyVrModeIfNeededLocked(mStackSupervisor.getResumedActivityLocked(), true);
                 }
             }
         } finally {
@@ -11585,8 +11535,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void startTimeTrackingFocusedActivityLocked() {
-        if (!mSleeping && mCurAppTimeTracker != null && mFocusedActivity != null) {
-            mCurAppTimeTracker.start(mFocusedActivity.packageName);
+        final ActivityRecord resumedActivity = mStackSupervisor.getResumedActivityLocked();
+        if (!mSleeping && mCurAppTimeTracker != null && resumedActivity != null) {
+            mCurAppTimeTracker.start(resumedActivity.packageName);
         }
     }
 
@@ -12527,7 +12478,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             r.immersive = immersive;
 
             // update associated state if we're frontmost
-            if (r == mFocusedActivity) {
+            if (r == mStackSupervisor.getResumedActivityLocked()) {
                 if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE, "Frontmost changed immersion: "+ r);
                 applyUpdateLockStateLocked(r);
             }
@@ -12638,7 +12589,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             r.requestedVrComponent = (enabled) ? packageName : null;
 
             // Update associated state if this activity is currently focused
-            if (r == mFocusedActivity) {
+            if (r == mStackSupervisor.getResumedActivityLocked()) {
                 applyUpdateVrModeLocked(r);
             }
             return 0;
@@ -14316,8 +14267,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpPackage);
         boolean needSep = printedAnything;
 
-        boolean printed = ActivityStackSupervisor.printThisActivity(pw, mFocusedActivity,
-                dumpPackage, needSep, "  mFocusedActivity: ");
+        boolean printed = ActivityStackSupervisor.printThisActivity(pw,
+                mStackSupervisor.getResumedActivityLocked(),
+                dumpPackage, needSep, "  ResumedActivity: ");
         if (printed) {
             printedAnything = true;
             needSep = false;
@@ -20596,7 +20548,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final ActivityRecord resumedAppLocked() {
-        ActivityRecord act = mStackSupervisor.resumedAppLocked();
+        ActivityRecord act = mStackSupervisor.getResumedActivityLocked();
         String pkg;
         int uid;
         if (act != null) {
@@ -21680,10 +21632,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             ComponentName callingVrActivity = null;
             int userId = -1;
             synchronized (ActivityManagerService.this) {
-                if (mFocusedActivity != null) {
-                    requestedVrService = mFocusedActivity.requestedVrComponent;
-                    callingVrActivity = mFocusedActivity.info.getComponentName();
-                    userId = mFocusedActivity.userId;
+                final ActivityRecord resumedActivity = mStackSupervisor.getResumedActivityLocked();
+                if (resumedActivity != null) {
+                    requestedVrService = resumedActivity.requestedVrComponent;
+                    callingVrActivity = resumedActivity.info.getComponentName();
+                    userId = resumedActivity.userId;
                 }
             }
 
