@@ -1093,14 +1093,14 @@
     <!-- Toast shown when user unlocks screen and managed profile activity is in the foreground -->
     <string name="managed_profile_foreground_toast">You\'re using your work profile</string>
 
-    <string-array name="volume_stream_titles" translatable="false">
-        <item>Voice calls</item> <!-- STREAM_VOICE_CALL -->
+    <string-array name="volume_stream_titles">
+        <item>Call</item> <!-- STREAM_VOICE_CALL -->
         <item>System</item> <!-- STREAM_SYSTEM -->
-        <item>Notifications</item> <!-- STREAM_RING -->
+        <item>Ring</item> <!-- STREAM_RING -->
         <item>Media</item> <!-- STREAM_MUSIC -->
-        <item>Alarms</item> <!-- STREAM_ALARM -->
+        <item>Alarm</item> <!-- STREAM_ALARM -->
         <item></item> <!-- STREAM_NOTIFICATION -->
-        <item>Bluetooth calls</item> <!-- STREAM_BLUETOOTH_SCO -->
+        <item>Bluetooth</item> <!-- STREAM_BLUETOOTH_SCO -->
         <item></item> <!-- STREAM_SYSTEM_ENFORCED -->
         <item></item> <!-- STREAM_DTMF -->
         <item></item> <!-- STREAM_TTS -->
