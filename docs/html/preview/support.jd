@@ -257,6 +257,26 @@ page.image=images/cards/card-n-support_2x.png
   server when in a Work profile. This issue will be resolved in the next
   Developer Preview.
   </li>
+
+  <li>After reboot with work mode off, solving work challenge does not switch
+  on work mode.
+  </li>
+
+  <li>Users receiving a video call in Hangouts have to unlock work challenge
+    first.
+  </li>
+
+  <li>Accessing Settings &gt; Security &gt; Device Security crash observed when
+  separating primary and work challenge.
+  </li>
+
+  <li>If {@link android.os.UserManager#DISALLOW_CONFIG_VPN} is set before
+  calling {@link android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage
+  DevicePolicyManager.setAlwaysOnVpnPackage()}, then setting always on VPN does
+  not work. That is, after rebooting the device with the {@link
+  android.os.UserManager#DISALLOW_CONFIG_VPN} restriction set, VPN is not
+  autostarted.
+  </li>
 </ul>
 
 <!-- TBA, if any
