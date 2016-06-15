@@ -1451,7 +1451,7 @@ public class PopupWindow {
         if (mOutsideTouchable) {
             curFlags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
         }
-        if (!mClippingEnabled) {
+        if (!mClippingEnabled || mClipToScreen) {
             curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
         }
         if (isSplitTouchEnabled()) {
@@ -1513,14 +1513,6 @@ public class PopupWindow {
         outParams.x = drawingLocation[0] + xOffset;
         outParams.y = drawingLocation[1] + anchorHeight + yOffset;
 
-        // Let the window manager know to align the top to y.
-        outParams.gravity = Gravity.LEFT | Gravity.TOP;
-        outParams.width = width;
-        outParams.height = height;
-
-        // If width or height is unspecified. We can leave it to the window manager to match
-        // to the parent size, but for our local purposes of calculating positioning, we need
-        // to fill in real width and height values.
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
         if (width == MATCH_PARENT) {
@@ -1533,6 +1525,11 @@ public class PopupWindow {
         } else if (height == WRAP_CONTENT) {
             height = mContentView.getMeasuredHeight();
         }
+
+        // Let the window manager know to align the top to y.
+        outParams.gravity = Gravity.LEFT | Gravity.TOP;
+        outParams.width = width;
+        outParams.height = height;
 
         // If we need to adjust for gravity RIGHT, align to the bottom-right
         // corner of the anchor (still accounting for offsets).
@@ -2143,7 +2140,10 @@ public class PopupWindow {
 
         final boolean paramsChanged = oldGravity != p.gravity || oldX != p.x || oldY != p.y
                 || oldWidth != p.width || oldHeight != p.height;
-        update(p.x, p.y, p.width, p.height, paramsChanged);
+        // If width and mWidth were both < 0 then we have a MATCH_PARENT/WRAP_CONTENT case.
+        // findDropDownPosition will have resolved this to absolute values,
+        // but we don't want to update mWidth/mHeight to these absolute values.
+        update(p.x, p.y, width < 0 ? width : p.width, height < 0 ? height : p.height, paramsChanged);
     }
 
     /**
