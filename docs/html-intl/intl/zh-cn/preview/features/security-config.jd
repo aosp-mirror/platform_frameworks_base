@@ -1,5 +1,5 @@
 page.title=网络安全配置
-page.keywords=androidn,security,network
+page.keywords=Android N、安全、网络
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
       </ol>
   </li>
   <li><a href="#TrustingDebugCa">仅调试 CA</a></li>
-  <li><a href="#UsesCleartextTraffic">退出 Cleartext Traffic</a></li>
+  <li><a href="#UsesCleartextTraffic">选择退出 Cleartext Traffic</a></li>
   <li><a href="#CertificatePinning">固定证书</a></li>
   <li><a href="#ConfigInheritance">配置继承行为</a></li>
   <li><a href="#FileFormat">配置文件格式</a></li>
@@ -49,7 +49,7 @@ page.image=images/cards/card-nyc_2x.jpg
   </li>
 
   <li>
-    <b>Cleartext traffic 退出：</b>防止应用意外使用 cleartext traffic。
+    <b>Cleartext traffic 选择退出：</b>防止应用意外使用 cleartext traffic。
 
   </li>
 
@@ -64,19 +64,20 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <p>
   网络安全配置特性使用一个 XML 文件，您可以在该文件中指定应用的设置。
-您必须在应用的清单文件中包含一个条目来指向该文件。
-以下代码摘自一份清单文件，演示了如何创建此条目：
+您必须在应用的清单中包含一个条目来指向该文件。
+以下代码摘自一份清单，演示了如何创建此条目：
 
 </p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-...
-&lt;app ...&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <h2 id="CustomTrust">自定义信任的 CA</h2>
@@ -208,11 +209,11 @@ page.image=images/cards/card-nyc_2x.jpg
 <p>
   调试通过 HTTPS 连接的应用时，您可能需要连接到没有用于生产服务器的 SSL 证书的本地开发服务器。
 
-为了支持此操作，而又不对应用的代码进行任何修改，
-
- <i>您可以</i> 通过使用 {@code debug-overrides} 指定仅在<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
+为了支持此操作，而又不对应用的代码进行任何修改，您可以通过使用 {@code debug-overrides} 指定仅在<a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
 android:debuggable</a>
-为 {@code true} 时才信任的仅调试 CA。通常，IDE 和构建工具会自动为非发布版本设置此标志。
+为 {@code true} 时才信任的仅调试 CA。<i></i>
+
+通常，IDE 和构建工具会自动为非发布版本设置此标志。
 
 </p>
 
@@ -237,7 +238,7 @@ android:debuggable</a>
 </p>
 
 
-<h2 id="UsesCleartextTraffic">退出 Cleartext Traffic</h2>
+<h2 id="UsesCleartextTraffic">选择退出 Cleartext Traffic</h2>
 
 <p>
   旨在连接到仅使用安全连接的目标的应用可以选择不再对这些目标提供 cleartext（使用解密的 HTTP 协议而非 HTTPS）支持。
@@ -310,6 +311,7 @@ secure.example.com} 的连接始终是通过 HTTPS 完成，以防止来自恶�
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
@@ -704,7 +706,7 @@ CA 证书的来源，可以是
 如果未设置该属性，则固定不会过期。
 
         <p>
-          设置到期时间有助于防止不更新到其 PKP 集（例如，由于用户禁用应用更新）的应用出现连接问题。
+          设置到期时间有助于防止未更新到其 PKP 集（例如，由于用户禁用应用更新）的应用出现连接问题。
 
 
         </p>

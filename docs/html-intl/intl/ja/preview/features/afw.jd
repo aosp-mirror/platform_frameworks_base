@@ -1,0 +1,552 @@
+page.title=Android for Work のアップデート
+page.metaDescription=Android N の新しい Android for Work の API と機能。
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>このドキュメントの内容</h2>
+      <ol>
+        <li><a href="#qr">QR コードのプロビジョニング</a>
+</li>
+
+        <li><a href="#sec-challenge">仕事用プロファイルによるセキュリティ確認</a>
+</li>
+
+        <li><a href="#suspend">アプリへのアクセスを無効にする</a>
+</li>
+
+        <li><a href="#toggle-work">ワークモードの切り替え</a>
+</li>
+
+        <li><a href="#always-on-vpn">Always On VPN</a>
+</li>
+
+        <li><a href="#contacts">仕事用プロファイルと連絡先の統合</a>
+</li>
+
+        <li><a href="#remote-reboot">リモートでの再起動</a>
+</li>
+
+        <li><a href="#disable-roaming">データローミングを無効にする</a>
+</li>
+
+        <li><a href="#process-logging">企業によるプロセスのログ記録</a>
+</li>
+
+        <li><a href="#bug-reports">リモートでのバグレポート</a>
+</li>
+
+        <li><a href="#remove-cert">クライアント証明書を削除する</a>
+</li>
+
+        <li><a href="#grant-cert-on-install">インストール時にクライアント証明書へのアクセス権を付与する</a>
+</li>
+
+        <li><a href="#ui-policy">システムの UI ポリシーの透明性</a>
+</li>
+
+        <li><a href="#restrictions-mgmt">アプリ制限の管理の強化</a>
+</li>
+
+        <li><a href="#location-off">位置情報のオフへの切り替え</a>
+</li>
+
+        <li><a href="#custom-provisioning">カスタマイズされたプロビジョニング</a>
+</li>
+
+        <li><a href="#multi-wifi-ca">複数の Wi-Fi 用の CA 証明書
+</a></li>
+
+        <li><a href="#custom-lock">カスタマイズされたロック画面のメッセージ</a>
+</li>
+
+        <li><a href="#work-connectionservice">仕事用プロファイルの ConnectionService</a>
+</li>
+
+        <li><a href="#lock-wp">壁紙をロックダウンする</a>
+</li>
+
+        <li><a href="#lock-user-icon">ユーザー アイコンをロックダウンする</a>
+</li>
+
+        <li><a href="#health-monitoring">端末の状態の監視</a>
+</li>
+
+      </ol>
+
+    <h2>関連ドキュメント</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK リファレンス</a>
+</li>
+    </ul>
+  </div>
+</div>
+
+<p>このドキュメントでは、Android N で提供されている新しい Android for Work の機能について説明します。
+</p>
+
+<h2 id="qr">QR コードのプロビジョニング</h2>
+
+<p>
+  Android for Work では、企業が責任を負う端末のプロビジョニングに QR コードを使用できるようになりました。
+セットアップ ウィザードを使用すると、QR コードをスキャンして端末をプロビジョニングできます。
+
+</p>
+
+<h2 id="sec-challenge">仕事用プロファイルによるセキュリティ確認</h2>
+
+<p>
+  プロファイル オーナーは、仕事用プロファイルで実行しているアプリに対してセキュリティ確認を指定するようユーザーに要求できます。
+ユーザーが仕事用アプリを開こうとすると、セキュリティ確認画面が表示されます。
+ユーザーがセキュリティの確認に成功すると、仕事用プロファイルのロックが解除され、必要に応じて暗号化も解除されます。
+
+
+</p>
+
+<p>
+  プロファイル オーナーが {@link
+  android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD} インテントを送信すると、ユーザーはセキュリティ確認をセットアップするよう求められます。
+また、プロファイル オーナーは、<code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> インテントを送信して、ユーザーに端末のロックを設定するよう求めることもできます。
+
+
+</p>
+
+<p>
+  プロファイル オーナーは仕事用プロファイル用のセキュリティ確認に、他の端末のパスワード ポリシーとは異なるパスワード ポリシーを設定できます。
+たとえば、端末の確認応答の最小長は、他のパスワードに必要な長さと異なっていてもかまいません。
+
+プロファイル オーナーがこの確認のポリシーを設定する場合は、通常 {@link
+  android.app.admin.DevicePolicyManager#setPasswordQuality
+  setPasswordQuality()} や {@link
+  android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+  setPasswordMinimumLength()} など、{@link android.app.admin.DevicePolicyManager} メソッドを使用して設定します。
+
+また、新しい <code>DevicePolicyManager.getParentProfileInstance()</code> メソッドが返す {@link android.app.admin.DevicePolicyManager} インスタンスを使用して端末のロックを設定することもできます。
+
+
+さらに、{@link android.app.admin.DevicePolicyManager} クラスの新しい <code>setOrganizationColor()</code> メソッドおよび <code>setOrganizationName()</code> メソッドを使用して仕事用プロファイル用のセキュリティ確認画面をカスタマイズすることができます。
+
+
+
+</p>
+
+<p>
+  新しいメソッドと定数の詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK リファレンス</a>の<code>DevicePolicyManager</code> リファレンス ページをご覧ください。
+
+</p>
+
+<h2 id="suspend">アプリへのアクセスを無効にする</h2>
+
+<p>
+  デバイス オーナーとプロファイル オーナーは、新しい <code>DevicePolicyManager.setPackagesSuspended()</code> メソッドを呼び出して、パッケージへのアクセスを一時的に停止することができます。
+
+オーナーがパッケージを再度有効にする場合は、同じメソッドを使用できます。
+</p>
+
+<p>
+  パッケージが停止されている場合は、アクティビティを開始できないため、パッケージへの通知は行われず、<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>のアプリのエントリは非表示になります。
+
+  停止されているパッケージは<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>に表示されず、ダイアログ（トーストや Snackbar を含む）を表示することはできません。
+また、音声を再生したり、端末を振動させたりすることもできません。
+
+</p>
+
+<p>
+  ランチャーは、アプリが現在利用できないことを示すために、アプリのアイコンをグレーでレンダリングするなど、停止されているアプリにひと目でわかる UI を適用する必要があります。
+
+ランチャーは、新しい <code>DevicePolicyManager.getPackageSuspended()</code> メソッドを呼び出してアプリが停止されているかどうかを確認できます。
+
+</p>
+
+<h2 id="toggle-work">ワークモードの切り替え</h2>
+
+<p>
+  デュアル プロファイル端末では、ユーザーはワークモードのオンとオフを切り替えることができます。ワークモードがオフの場合は、管理されているプロファイルが一時的にシャットダウンされます。
+仕事用プロファイルのアプリ、バックグラウンドでの同期、通知がすべて無効になります。これにはプロファイル オーナーのアプリも含まれます。
+
+また、仕事用プロファイルが無効にされている場合は、仕事用アプリを起動できないことをユーザーに示すステータス アイコンが表示されたままになります。
+
+システム ランチャーは、仕事用アプリとウィジェットにアクセスできないことを示します。
+
+</p>
+
+<h2 id="always-on-vpn">Always On VPN</h2>
+
+<p>
+  デバイス オーナーとプロファイル オーナーは、指定した VPN を介して仕事用アプリが常時ネットワークに接続することを要求できます。
+オーナーがこの要件を設定すると、端末は起動時に対象の VPN を自動的に開始します。
+
+</p>
+
+<p>
+  オーナーは、新しい <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code> メソッドを呼び出して VPN を使用することを要求できます。
+オーナーが VPN 要件を設定しているかどうかを確認するには、新しい <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code> メソッドを呼び出します。
+
+
+</p>
+
+<p>
+  システムがアプリの介入なしに VPN サービスを直接バインドできるため、常時接続 VPN の新しいエントリ ポイントは VPN クライアント側で処理する必要があります。
+以前と同様に、アクティブなサービスを見つけるには、アクション {@link android.net.VpnService android.net.VpnService} に一致するインテント フィルタを使用します。
+
+
+</p>
+
+<p>
+  ユーザーは {@link
+  android.net.VpnService} を実装する常時接続 VPN クライアントを、<strong>[Settings] &gt; [More] &gt; [VPN]</strong> 画面を使用して手動で設定できます。
+
+</p>
+
+<h2 id="contacts">仕事用プロファイルと連絡先の統合</h2>
+
+<p>
+  プロファイル オーナーは、プライマリ ユーザーの仕事用連絡先のローカル検索やディレクトリ検索を許可することができます。
+たとえば、ユーザーは個人用電話アプリや連絡先アプリから個人用と仕事用の両方のディレクトリの連絡先にアクセスできます（プロファイル管理者によって許可されている場合）。
+
+
+</p>
+
+<p>
+  連絡先プロバイダを活用するデベロッパーは、ポリシーで許可されている場合、Enterprise Contacts API を使用してプライマリ ユーザーの仕事用プロファイルのディレクトリのエントリにアクセスできます。
+
+
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  プロファイル オーナーは、以下の新しいメソッドを使用して、プライマリ ユーザーの仕事用連絡先の表示を制御できます。
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">リモートでの再起動</h2>
+
+<p>
+  デバイス オーナーは、端末をリモートで再起動できます。エンクロージャ内のパブリックな場所にデプロイされている端末は、電源ボタンにアクセスできないようにすることができる場合があります。
+端末を再起動する必要がある場合、管理者は新しい <code>DevicePolicyManager.reboot()</code> メソッドを使用して実行することができます。
+
+
+</p>
+
+<h2 id="disable-roaming">データローミングを無効にする</h2>
+
+<p>
+  デバイス オーナーがデータローミングを無効にするには、新しい {@link
+  android.os.UserManager} のユーザー制限 <code>DISALLOW_DATA_ROAMING</code> を使用します。
+</p>
+
+<h2 id="process-logging">企業によるプロセスのログ記録</h2>
+
+<p>
+  デバイス オーナーは、リモートで端末のアクティビティ（アプリの起動、adb アクティビティ、画面のロック解除など）を追跡することにより、疑わしいアクティビティを特定できます。
+プロセス ログはユーザーの同意は必要ありません。
+ログを取得するには、デバイス オーナーは <code>DevicePolicyManager.setSecurityLoggingEnabled()</code> を使用して端末のログ記録を有効にします。
+
+</p>
+
+<p>
+  API の変更点は以下のとおりです。
+</p>
+
+<ul>
+
+  <li>
+    新しいクラス <code>android.app.admin.SecurityLog</code> とそのメソッド
+
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">リモートでのバグレポート</h2>
+
+<p>
+  デバイス オーナーは、端末の状態のダンプファイルを含むバグレポートをリモートでトリガーして取得できます。これにより、既知のインシデントや障害が発生した端末の徹底的な調査が可能になります。
+
+バグレポートの内容は詳細にわたるため、ユーザーの同意が必要になります。
+
+</p>
+
+<p>
+  Android N では、この機能をサポートするために以下の API が追加されています。詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK リファレンス</a>をご覧ください。
+
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">クライアント証明書を削除する</h2>
+
+<p>
+  プロファイル オーナーとデバイス オーナーは、{@link android.app.admin.DevicePolicyManager#installKeyPair
+  installKeyPair()} によってインストールされたクライアント証明書を、新しい <code>DevicePolicyManager.removeKeyPair()</code> メソッドを呼び出して削除できるようになりました。
+
+
+</p>
+
+<h2 id="grant-cert-on-install">インストール時にクライアント証明書へのアクセス権を付与する
+</h2>
+
+<p>
+  プロファイル オーナーやデバイス オーナーが、サードパーティ アプリに証明書を管理する権限を付与する場合、アプリはオーナーの介入なしに、インストールされる証明書へのアクセス権をアプリ自体に付与できます。
+
+
+</p>
+
+<p>
+  証明書を管理するための既存の API は、以下を含むように拡張されています。
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">システムの UI ポリシーの透明性</h2>
+
+<p>
+  ユーザー エクスペリエンスに影響を及ぼしたり、ユーザー設定を制限したりするポリシーはユーザーに完全に公表されます。プロファイル オーナーとデバイス オーナーは、このポリシーと会社の IT 部門を関連付けることができます。
+
+IT 管理者は [Settings] の「Action not allowed」という通常のメッセージに加え、端末設定に組織固有のサポート メッセージを設定できます。これには以下の新しい {@link android.app.admin.DevicePolicyManager} メソッドを使用します。
+
+
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="restrictions-mgmt">アプリ制限の管理の強化</h2>
+
+<p>
+  デバイス オーナーやプロファイル オーナーは、別のアプリケーションでアプリ制限を管理できるようにすることができます。これには新しい <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code> メソッドを使用します。
+
+
+指定されたアプリケーションは、このパーミッションが付与されているかどうかを、<code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code> を呼び出して確認できます。
+
+
+</p>
+
+<p>
+  アプリ制限を管理するように指定されたアプリケーションは、対象となるユーザーやプロファイル内のパッケージに対して {@link
+  android.app.admin.DevicePolicyManager#setApplicationRestrictions
+  setApplicationRestrictions()} と {@link
+  android.app.admin.DevicePolicyManager#getApplicationRestrictions
+  getApplicationRestrictions()} を呼び出すことができます。
+</p>
+
+<h2 id="location-off">位置情報のオフへの切り替え</h2>
+
+<p>
+  個人用アプリの位置情報に継続的にアクセスしている場合、ユーザーは仕事用アプリの位置パーミッションを無効にできます。
+[Location Settings] で別の位置情報へのアクセスに切り替えると、ユーザーは位置情報の更新や、仕事用プロファイルで実行されているアプリの最新位置情報の問い合わせを拒否できます。
+
+
+</p>
+
+<p>
+  トップレベルの位置情報をオフに切り替えると、プライマリ プロファイルと管理されているプロファイルの両方の位置情報へのアクセスが無効になります。
+
+</p>
+
+<h2 id="custom-provisioning">カスタマイズされたプロビジョニング</h2>
+
+<p>
+  アプリでは、コーポレート・カラーやロゴを含むプロファイル オーナーとデバイス オーナーのプロビジョニング フローをカスタマイズできます。
+
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    フローカラーをカスタマイズします。
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    コーポレート ロゴを含むフローをカスタマイズします。
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">複数の Wi-Fi 用の CA 証明書</h2>
+
+<p>
+  プロファイル オーナーとデバイス オーナーは、特定の Wi-Fi 設定に複数の CA 証明書を設定できます。
+企業の Wi-Fi ネットワークで、同じ SSID を持つ別のアクセス ポイントに別の CA を使用する場合、IT 管理者は新しい <code>setCaCertificates()</code> メソッドを使用して、関連するすべての CA を Wi-Fi 設定に含めることができます。
+
+
+
+</p>
+
+<p>
+  以下の API が追加されました。
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">カスタマイズされたロック画面のメッセージ</h2>
+
+<p>
+  デバイス オーナーは、ロック画面に表示されるオーナー情報を提供できます。
+  この情報は、ユーザーのロック画面のメッセージよりも優先されます（設定されている場合）。
+新しい {@link android.app.admin.DevicePolicyManager} メソッドは以下のとおりです。
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">仕事用プロファイルの ConnectionService</h2>
+
+<p>
+  プロファイル オーナーは、バックエンドの呼び出し（アカウントの呼び出し）に仕事固有の {@link android.telecom.ConnectionService} を使用する仕事用電話アプリを指定できます。
+
+仕事用電話は、仕事のみの通話履歴を保持し、仕事用連絡先のみを利用します。
+電話アプリに関係なく、ユーザーには統一された着信 UI が表示されます。
+仕事用通話アカウントへの仕事用の着信は、個人用通話アカウントへの個人用の着信とは区別されます。
+
+
+</p>
+
+<p>
+  通話が仕事用の通話かどうかを確認するには、電話は新しいフラグ <code>android.telecom.Call.PROPERTY_WORK_CALL</code> を確認する必要があります。
+
+通話が仕事用の通話の場合、電話はワーク バッジを追加するなどして、これを示す必要があります。
+
+</p>
+
+<h2 id="lock-wp">壁紙をロックダウンする</h2>
+
+<p>
+  新しいユーザー制限（<code>DISALLOW_SET_WALLPAPER</code>）により、ユーザーは壁紙を変更することができません。
+デバイス オーナーやプロファイル オーナーは壁紙を変更できますが、制御するユーザーやプロファイルの壁紙のみ変更できます。
+
+たとえば、プロファイル オーナーは、親ユーザーの壁紙は変更できませんが、プライマリ プロファイルのプロファイル オーナーやデバイス オーナーは変更できます。
+
+壁紙を変更する必要があるプロファイル オーナーやデバイス オーナーは、管理するユーザーやプロファイルに壁紙があるかどうか（{@link android.app.WallpaperManager#isWallpaperSupported
+  isWallpaperSupported()}）、壁紙の変更が許可されているかどうかを（新しい <code>WallpaperManager.isWallpaperSettingAllowed()</code> メソッドを使用して）確認する必要があります。
+
+
+
+</p>
+
+<h2 id="lock-user-icon">ユーザー アイコンをロックダウンする</h2>
+
+<p>
+  新しいユーザー制限（<code>DISALLOW_SET_USER_ICON</code>）により、ユーザーはユーザー アイコンを変更することができません。
+ユーザーのデバイス オーナーやプロファイル オーナーは、このアイコンを変更できます。
+ただし、プロファイル オーナーが変更できるのは、制御するプロファイルのユーザー アイコンのみです。
+
+</p>
+
+<h2 id="health-monitoring">端末の状態の監視</h2>
+
+<p>
+  デバイス オーナーやプロファイル オーナーは、新しい <code>HardwarePropertiesManager</code> インターフェースを使用して、CPU や GPU の温度、CPU 使用率などの端末の状態に関する情報を取得できます。
+
+新しい監視インターフェースは、遠隔地で実行されている使用されていない端末の監視に特に役立ちます。
+
+
+</p>

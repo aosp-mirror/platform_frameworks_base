@@ -37,22 +37,26 @@ Android N 通过大幅扩展受支持的区域设置数量并更改系统解析�
 <h2 id="preN">解析语言资源所面临的挑战</h2>
 
 <p>在 Android N 之前，Android 并非始终能够成功匹配应用和系统区域设置。
-例如，假设应用的默认语言为“US English”，但它也在 {@code es_ES}
-资源文件中对西班牙字符串进行了本地化。
 </p>
-<p>如果您的 Java 代码引用字符串，那么它将按如下所示解析字符串语言：
-</p>
-<ul>
-<li>如果将设备设为 {@code es_MX} (Spanish-Mexico)，Android 将从 {@code es_ES} 资源文件加载字符串。
+
+ <p>例如，假设您遇到了以下情况：</p>
+ <ul>
+ <li>您的应用的默认语言为{@code en_US}“US English”，但它也在 {@code es_ES}资源文件中对西班牙字符串进行了本地化。
+
 </li>
-<li>如果将设备设为 {@code en_AU}，Android 则会转而使用 {@code
-en_US}。如果用户选择应用根本不支持的语言（如法语），则系统也会默认显示 {@code en_US}。
-</li>
-</ul>
+ <li> 将设备设置为 {@code es_MX} </li>
+
+<p>当您的 Java 代码引用字符串时，系统会从默认 ({@code en_US}) 资源文件加载字符串，即使应用在 {@code es_ES} 下有本地化的西班牙语资源。
+
+这是因为当系统无法找到精确匹配时，它会继续通过将国家/地区代码从区域设置中剥离来查找资源。
+
+最后，如果未找到匹配，系统会恢复为默认模式，即 {@code en_US}。
+ </p>
 
 
-<p>之所以会产生上述解析问题，是因为系统在无法找到精确匹配项时会将国家/地区代码从区域设置中去掉。
+<p>如果用户选择应用根本不支持的语言（如法语），则系统也会默认显示 {@code en_US}。
 例如：</p>
+
 <p class="table-caption" id="t-resource-res">
 <strong>表 1.</strong> 没有精确区域设置匹配项的资源解析。
 </p>
@@ -187,7 +191,7 @@ it_IT<br>
 <h2 id="design">设计您的应用以支持附加区域设置</h2>
 <h3>LocaleList API</h3>
 
-<p>Android N 添加了新的 API {@code LocaleList.GetDefault()}，从而让应用可以直接查询用户已指定的语言列表。
+<p>Android N 添加了新的 API {@code LocaleList.getDefault()}，从而让应用可以直接查询用户已指定的语言列表。
 您可以使用此 API 创建更成熟的应用行为和更优化的内容显示。
 
 例如，搜索可以基于用户的设置以多种语言显示结果。

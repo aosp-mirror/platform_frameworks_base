@@ -1,5 +1,5 @@
 page.title=범위가 지정된 디렉터리 액세스
-page.keywords=preview,sdk,scoped directory access
+page.keywords=preview, sdk, 범위가 지정된 디렉터리 액세스
 page.tags=androidn
 
 @jd:body
@@ -18,7 +18,7 @@ page.tags=androidn
 <p>일반적으로 사진 앱과 같은 앱은
 <code>Pictures</code> 디렉터리 등 외부 저장소의 특정 디렉터리에만 액세스하면 됩니다. 기존 외부 저장소 액세스 방식은
 이런 유형의 앱에 대상화된 디렉터리 액세스를 쉽게
-제공하지 못합니다. 예:</p>
+제공하지 못합니다. 예를 들면 다음과 같습니다.</p>
 
 <ul>
 <li>매니페스트에서 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
@@ -40,11 +40,25 @@ page.tags=androidn
 <p><code>StorageManager</code> 클래스를 사용하여 적절한
 <code>StorageVolume</code> 인스턴스를 가져옵니다. 그 후, 해당 인스턴스의
 <code>StorageVolume.createAccessIntent()</code> 메서드를 호출하여 인텐트를 생성합니다.
-이 인텐트로 외부 저장소 디렉터리에 액세스합니다. 이동식 미디어 볼륨을 포함한
-모든 이용 가능한 볼륨 목록을 가져오려면
+이 인텐트로 외부 저장소 디렉터리에 액세스합니다. 이동식 미디어 볼륨을 비롯한
+모든 사용 가능한 볼륨의 목록을 가져오려면
 <code>StorageManager.getVolumesList()</code>를 사용합니다.</p>
 
-<p>다음 코드 조각은 기본 공유 저장소의
+<p>특정 파일에 대한 정보가 있으면
+<code>StorageManager.getStorageVolume(File)</code>을 사용하여 해당 파일이 들어 있는
+<code>StorageVolume</code>을 가져옵니다. 이 <code>StorageVolume</code>에서
+<code>createAccessIntent()</code>를 호출하여 파일의 외부 저장소 디렉터리에
+액세스합니다.</p>
+
+<p>
+외부 SD 카드와 같은 보조 볼륨에서는 특정 디렉터리 대신 전체 볼륨에 대한 액세스를 요청하려면
+<code>StorageVolume.createAccessIntent()</code>를 호출할 때
+null을 전달합니다. 기본 볼륨에 null을 전달하거나 잘못된 디렉터리 이름을 전달하는 경우
+<code>StorageVolume.createAccessIntent()</code>는 null을
+반환합니다.
+</p>
+
+<p>다음 코드 조각은 기본 공유 저장소에서
 <code>Pictures</code> 디렉터리를 여는 방법에 대한 예시입니다.</p>
 
 <pre>
@@ -98,7 +112,7 @@ URI를 사용하여 디렉터리 정보에 액세스합니다.
 <p>사용자가 SD 카드 등의 이동식 미디어를 장착하면 시스템이
 {@link android.os.Environment#MEDIA_MOUNTED} 알림을 보냅니다. 이 알림은
 이동식 미디어 디렉터리에 액세스하는 데 사용할 수 있는 인텐트 데이터의 <code>StorageVolume</code> 객체를
-제공합니다. 다음은 
+제공합니다. 다음은
 이동식 미디어의 <code>Pictures</code> 디렉터리에 액세스하는 예시입니다.</p>
 
 <pre>
@@ -120,5 +134,15 @@ startActivityForResult(intent, request_code);
 표시하지 않습니다.</p>
 
 <p>사용자가 외부 디렉터리 액세스를 거부하면
-다시 즉시 액세스를 요청하지 마세요. 액세스를 반복적으로 요청하는 것은
-나쁜 사용자 경험을 제공하게 됩니다.</p>
+다시 즉시 액세스를 요청하지 마세요. 액세스를 반복적으로 요청하면
+사용자 환경을 저해하는 결과를 낳습니다. 사용자가 요청을 거부하는데 앱이 다시 액세스를
+요청하면, UI에 <b>Don't ask again</b> 체크박스가 표시됩니다.</p>
+
+<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
+{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>그림 1.</strong> 이동식 미디어에 대해
+다시 액세스 요청을 하는 애플리케이션.</p>
+
+<p>사용자가 <b>Don't ask again</b>을 선택하여 요청을 거부하면 앱에서 해당 디렉터리에 대한 이후의 모든
+요청이 자동으로 거부되고,
+사용자에게는 어떤 요청 UI도 표시되지 않습니다.</p>

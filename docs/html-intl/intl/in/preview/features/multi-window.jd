@@ -8,7 +8,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   <div id="qv">
     <h2>Dalam dokumen ini</h2>
       <ol>
-        <li><a href="#overview">Ikhtisar</a></li>
+        <li><a href="#overview">Ringkasan</a></li>
         <li><a href="#lifecycle">Daur Hidup Multi-Jendela</a></li>
         <li><a href="#configuring">Mengonfigurasi Aplikasi Anda untuk Mode
               Multi-Jendela</a></li>
@@ -17,8 +17,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       </ol>
     <h2>Lihat Juga</h2>
       <ol>
-        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Aplikasi contoh Multi-Window
-          Playground</a></li>
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Aplikasi contoh Playground
+          Multi-Jendela</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Lima Tip untuk Mempersiapkan Multi-Jendela di Android N</a></li>
       </ol>
   </div>
 </div>
@@ -39,7 +40,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   layar penuh.
 </p>
 
-<h2 id="overview">Ikhtisar</h2>
+<h2 id="overview">Ringkasan</h2>
 
 <p>
   Android N memungkinkan beberapa aplikasi berbagi layar sekaligus. Misalnya,
@@ -57,7 +58,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
   <li>Pada Nexus Player yang menjalankan Android N, aplikasi bisa menempatkan diri
   dalam <a href="picture-in-picture.html">mode gambar-dalam-gambar</a>, yang memungkinkannya
-  untuk terus menampilkan konten selagi pengguna melihat-lihat atau berinteraksi dengan
+  untuk terus menampilkan materi selagi pengguna menjelajahi atau berinteraksi dengan
    aplikasi lain.
   </li>
 
@@ -80,21 +81,21 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <ul>
   <li>Jika pengguna membuka <a href="{@docRoot}guide/components/recents.html">layar
-  Overview</a> dan menekan lama pada
+  Ringkasan</a> dan menekan lama pada
   judul aktivitas, mereka bisa menyeret aktivitas itu ke bagian yang disorot pada layar
   untuk menempatkan aktivitas dalam mode multi-jendela.
   </li>
 
-  <li>Jika pengguna menekan lama pada tombol Overview, perangkat akan menempatkan
-   aktivitas saat ini dalam mode multi-jendela, dan membuka layar Overview guna
+  <li>Jika pengguna menekan lama pada tombol Ringkasan, perangkat akan menempatkan
+   aktivitas saat ini dalam mode multi-jendela, dan membuka layar Ringkasan guna
   memungkinkan pengguna memilih aktivitas lain untuk berbagi layar.
   </li>
 </ul>
 
 <p>
-  Pengguna bisa <a href="{@docRoot}guide/topics/ui/drag-drop.html">menyeret dan
-  meletakkan</a> data dari aktivitas satu ke aktivitas lain sewaktu aktivitas berbagi
-  layar. (Sebelumnya, pengguna hanya bisa menyeret dan meletakkan data dalam aktivitas
+  Pengguna bisa <a href="{@docRoot}guide/topics/ui/drag-drop.html">seret dan
+  lepas</a> data dari aktivitas satu ke aktivitas lain sewaktu aktivitas berbagi
+  layar. (Sebelumnya, pengguna hanya bisa menyeret dan melepas data dalam aktivitas
   tunggal.)
 </p>
 
@@ -120,7 +121,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   dan masih terlihat oleh pengguna. Sebuah aplikasi mungkin perlu melanjutkan aktivitasnya
    bahkan saat berhenti sementara. Misalnya, aplikasi pemutar video yang ada dalam
    mode berhenti sementara namun terlihat harus tetap menampilkan videonya. Karena alasan
-  ini, kami menyarankan aktivitas yang memutar video<em>tidak</em> menghentikan sementara video
+  ini, kami menyarankan aktivitas yang memutar video <em>tidak</em> menghentikan sementara video
    dalam handler {@link android.app.Activity#onPause onPause()} mereka.
   Sebagai gantinya, aktivitas itu harus menghentikan sementara video di {@link android.app.Activity#onStop
   onStop()}, dan melanjutkan pemutaran di {@link android.app.Activity#onStart
@@ -130,20 +131,22 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   Bila pengguna menempatkan aplikasi dalam mode multi-jendela, sistem akan memberi tahu
    aktivitas tersebut mengenai perubahan konfigurasi, sebagaimana ditetapkan dalam <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
-  Runtime</a>. Pada dasarnya, perubahan ini memiliki implikasi siklus hidup aktivitas yang sama
-   seperti saat sistem memberi tahu aplikasi bahwa perangkat telah beralih
-   dari mode potret ke mode lanskap, kecuali dimensi perangkat
-   telah berubah sebagai ganti bertukar posisi. Seperti yang dibahas di <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
-  Runtime</a>, aktivitas Anda bisa menangani perubahan konfigurasi itu sendiri, atau
+  Waktu Proses</a>. Hal ini juga terjadi ketika pengguna mengubah skala aplikasi, atau menempatkan kembali aplikasi
+  ke mode layar penuh.
+  Pada dasarnya, perubahan ini memiliki implikasi daur hidup aktivitas yang sama
+  seperti saat sistem memberi tahu aplikasi bahwa perangkat telah beralih
+  dari mode potret ke mode lanskap, kecuali dimensi perangkat
+  telah berubah sebagai ganti bertukar posisi. Seperti yang dibahas di <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Menangani Perubahan
+  Waktu Proses</a>, aktivitas Anda bisa menangani perubahan konfigurasi itu sendiri, atau
    mengizinkan sistem memusnahkan aktivitas dan membuatnya kembali dengan dimensi
   baru.
 </p>
 
 <p>
-  Jika pengguna mengubah ukuran jendela dan membuat dimensinya jadi lebih besar, sistem
-   akan mengubah ukuran aktivitas untuk menyesuaikan dengan tindakan pengguna dan mengeluarkan <a href="{@docRoot}guide/topics/resources/runtime-changes.html">perubahan runtime</a>
-  sebagaimana diperlukan. Jika aplikasi tertinggal dari gambar di bidang yang baru saja diekspos,
-  sistem untuk sementara akan mengisi bidang tersebut dengan warna yang ditetapkan oleh atribut {@link
+  Jika pengguna mengubah ukuran jendela dan membuat dimensinya lebih besar, sistem
+   akan mengubah ukuran aktivitas untuk menyesuaikan dengan tindakan pengguna dan mengeluarkan <a href="{@docRoot}guide/topics/resources/runtime-changes.html">perubahan waktu proses</a>
+  bila diperlukan. Jika aplikasi tertinggal dibandingkan gambar di area yang baru diekspos,
+  sistem untuk sementara mengisi area tersebut dengan warna yang ditetapkan oleh atribut {@link
   android.R.attr#windowBackground windowBackground} atau dengan atribut gaya
   <code>windowBackgroundFallback</code> secara default.
 </p>
@@ -152,10 +155,12 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   Jika aplikasi Anda menargetkan Android N, Anda bisa mengonfigurasi bagaimana dan
-  apakah aktivitas aplikasi Anda mendukung tampilan multi-jendela. Anda bisa mengatur
+  apakah aktivitas aplikasi Anda mendukung tampilan multi-jendela. Anda bisa menyetel
   atribut dalam manifes untuk mengontrol ukuran dan layoutnya.
-  Pengaturan atribut aktivitas root berlaku untuk semua aktivitas
-   dalam tumpukan tugasnya.
+  Setelan atribut aktivitas root berlaku pada semua aktivitas
+   dalam tumpukan tugasnya. Misalnya, jika aktivitas root memiliki
+  <code>android:resizeableActivity</code> yang disetel ke true, maka semua aktivitas
+  dalam tumpukan tugas bisa diubah ukurannya.
 </p>
 
 <p class="note">
@@ -170,7 +175,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
-  Atur atribut ini dalam manifes <code>&lt;activity&gt;</code> Anda atau simpul
+  Setel atribut ini dalam manifes <code>&lt;activity&gt;</code> Anda atau simpul
   <code>&lt;application&gt;</code> untuk mengaktifkan atau menonaktifkan tampilan
    multi-jendela:
 </p>
@@ -180,8 +185,8 @@ android:resizeableActivity=["true" | "false"]
 </pre>
 
 <p>
-  Jika atribut ini diatur ke true, aktivitas bisa dijalankan di
-  mode layar terbagi dan mode bentuk bebas. Jika atribut ini diatur ke false, aktivitas
+  Jika atribut ini disetel ke true, aktivitas bisa dijalankan di
+  mode layar terbagi dan mode bentuk bebas. Jika atribut ini disetel ke false, aktivitas
   tidak akan mendukung mode multi-jendela. Jika nilai ini false, dan pengguna
   berusaha memulai aktivitas dalam mode multi-jendela, aktivitas akan menggunakan
    layar penuh.
@@ -195,7 +200,7 @@ android:resizeableActivity=["true" | "false"]
 <h4 id="supportsPictureInPicture">android:supportsPictureInPicture</h4>
 
 <p>
-  Atur atribut ini dalam simpul <code>&lt;activity&gt;</code> manifes Anda untuk
+  Setel atribut ini dalam simpul <code>&lt;activity&gt;</code> manifes Anda untuk
   menunjukkan apakah aktivitas mendukung tampilan gambar-dalam-gambar. Atribut ini
   diabaikan jika <code>android:resizeableActivity</code> bernilai false.
 </p>
@@ -239,7 +244,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
   </dt>
 
   <dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -281,7 +287,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <ul>
   <li>Beberapa opsi penyesuaian di <a href="{@docRoot}training/system-ui/index.html">System UI</a>
-  dinonaktifkan; misalnya, aplikasi tidak bisa menyembunyikan baris status
+  dinonaktifkan; misalnya, aplikasi tidak bisa menyembunyikan bilah status
   jika tidak berjalan dalam mode layar penuh.
   </li>
 
@@ -291,17 +297,18 @@ android:supportsPictureInPicture=["true" | "false"]
   </li>
 </ul>
 
-<h3 id="change-notification">Pemberitahuan perubahan multi-jendela dan melakukan query</h3>
+<h3 id="change-notification">Pemberitahuan perubahan multi-jendela dan melakukan kueri</h3>
 
 <p>
   Metode baru berikut telah ditambahkan ke kelas {@link android.app.Activity}
-  untuk mendukung tampilan multi-jendela. Untuk mengetahui detail tentang setiap metode, lihat
-  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi N Preview SDK</a>.
+  untuk mendukung tampilan multi-jendela. Untuk mengetahui detail tentang setiap
+  metode, lihat <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi N
+ Preview SDK</a>.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -309,7 +316,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
@@ -317,30 +324,30 @@ android:supportsPictureInPicture=["true" | "false"]
 
     <p class="note">
       <strong>Catatan:</strong> Mode gambar-dalam-gambar adalah kasus khusus pada
-      mode multi-jendela. Jika <code>myActivity.inPictureInPicture()</code>
-     mengembalikan nilai true, maka <code>myActivity.inMultiWindow()</code> juga mengembalikan nilai
-      true.
+      mode multi-jendela. Jika <code>myActivity.isInPictureInPictureMode()</code>
+     mengembalikan nilai true, maka <code>myActivity.isInMultiWindowMode()</code> juga 
+      mengembalikan nilai true.
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
     Sistem akan memanggil metode ini bila aktivitas masuk atau keluar dari
-    mode multi-jendela. Sistem akan meneruskan metode sebuah nilai true jika
+    mode multi-jendela. Sistem akan meneruskan ke metode sebuah nilai true jika
    aktivitas tersebut memasuki mode multi-jendela, dan nilai false jika aktivitas
      tersebut meninggalkan mode multi-jendela.
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
     Sistem akan memanggil metode ini bila aktivitas masuk atau keluar dari
-    mode gambar-dalam-gambar. Sistem akan meneruskan metode sebuah nilai true jika
+    mode gambar-dalam-gambar. Sistem akan meneruskan ke metode sebuah nilai true jika
    aktivitas tersebut memasuki mode gambar-dalam-gambar, dan nilai false jika aktivitas
      tersebut meninggalkan mode gambar-dalam-gambar.
   </dd>
@@ -348,14 +355,14 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   Ada juga versi {@link android.app.Fragment} untuk setiap
-  metode ini, misalnya <code>Fragment.inMultiWindow()</code>.
+  metode ini, misalnya <code>Fragment.isInMultiWindowMode()</code>.
 </p>
 
 <h3 id="entering-pip">Memasuki mode gambar-dalam-gambar</h3>
 
 <p>
   Untuk menempatkan aktivitas dalam mode gambar-dalam-gambar, panggil metode baru
-  <code>Activity.enterPictureInPicture()</code>. Metode ini tidak berpengaruh jika
+  <code>Activity.enterPictureInPictureMode()</code>. Metode ini tidak berpengaruh jika
    perangkat tidak mendukung mode gambar-dalam-gambar. Untuk informasi selengkapnya,
    lihat dokumentasi <a href="picture-in-picture.html">Gambar-dalam-Gambar</a>.
 </p>
@@ -382,8 +389,8 @@ android:supportsPictureInPicture=["true" | "false"]
 </ul>
 
 <p>
-  Jika perangkat berada dalam mode bentuk bebas dan Anda meluncurkan aktivitas baru, Anda bisa
-  menetapkan dimensi dan lokasi layar aktivitas baru dengan memanggil
+  Jika perangkat dalam mode bentuk bebas dan Anda menjalankan aktivitas baru, Anda bisa
+  menetapkan dimensi aktivitas baru dan lokasi layar dengan memanggil
   <code>ActivityOptions.setLaunchBounds()</code>. Metode ini tidak berpengaruh jika
   perangkat tidak berada dalam mode multi-jendela.
 </p>
@@ -395,19 +402,19 @@ android:supportsPictureInPicture=["true" | "false"]
   terpisah dalam mode multi-jendela, Anda harus meluncurkannya dalam tumpukan tugas baru.
 </p>
 
-<h3 id="dnd">Mendukung seret dan letakkan</h3>
+<h3 id="dnd">Mendukung seret dan lepas</h3>
 
 <p>
   Pengguna bisa <a href="{@docRoot}guide/topics/ui/drag-drop.html">menyeret dan
-  meletakkan</a> data dari satu aktivitas ke aktivitas yang lain selagi kedua aktivitas
-  berbagi layar. (Sebelumnya, pengguna hanya bisa menyeret dan meletakkan data dalam
+  melepas</a> data dari satu aktivitas ke aktivitas yang lain selagi kedua aktivitas
+  berbagi layar. (Sebelumnya, pengguna hanya bisa menyeret dan melepas data dalam
    aktivitas tunggal.) Karena alasan ini, Anda mungkin perlu menambahkan fungsionalitas
-  seret dan letakkan ke aplikasi Anda jika aplikasi Anda saat ini belum mendukungnya.
+  seret dan lepas ke aplikasi jika aplikasi saat ini belum mendukungnya.
 </p>
 
 <p>
   N Preview SDK menambahkan paket <a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a>
-  untuk mendukung seret dan letakkan lintas-aplikasi. Untuk mengetahui detail tentang kelas dan metode
+  untuk mendukung seret dan lepas lintas-aplikasi. Untuk mengetahui detail tentang kelas dan metode
   berikut, lihat <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi N
   Preview SDK</a>.
 </p>
@@ -419,7 +426,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <dd>
     Objek token bertanggung jawab menetapkan izin yang diberikan kepada aplikasi
-    yang menerima peletakan tersebut.
+    yang menerima pelepasan tersebut.
   </dd>
 
   <dt>
@@ -428,7 +435,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <dd>
     Alias baru untuk {@link android.view.View#startDrag View.startDrag()}. Untuk
-    mengaktifkan seret dan letakkan lintas-aktivitas, teruskan flag baru
+    mengaktifkan seret dan lepas lintas-aktivitas, teruskan flag baru
     <code>View.DRAG_FLAG_GLOBAL</code>. Jika Anda perlu memberikan izin URI ke
     aktivitas penerima, teruskan flag baru,
     <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> atau
@@ -458,7 +465,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dt>
 
   <dd>
-    Meminta izin untuk URI konten yang diteruskan dengan {@link
+    Meminta izin untuk URI materi yang diteruskan dengan {@link
     android.content.ClipData} yang terdapat dalam {@link android.view.DragEvent}.
   </dd>
 </dl>
@@ -466,15 +473,15 @@ android:supportsPictureInPicture=["true" | "false"]
 <h2 id="testing">Menguji Dukungan Multi-Jendela Aplikasi Anda</h2>
 
 <p>
-  Baik Anda memperbarui aplikasi untuk Android N maupun tidak, Anda harus
-  memverifikasi caranya bertindak dalam mode multi-jendela jika pengguna mencoba meluncurkannya
+  Apakah Anda memperbarui aplikasi untuk Android N atau tidak, Anda harus
+  verifikasi bagaimana perilakunya di mode multi-jendela saat pengguna mencoba untuk menjalankannya
   dalam mode multi-jendela pada perangkat yang menjalankan Android N.
 </p>
 
 <h3 id="configuring">Mengonfigurasi Perangkat Pengujian</h3>
 
 <p>
-  Jika Anda menginstal Android N pada perangkat, mode
+  Jika Anda pasang Android N pada perangkat, mode
   layar terbagi secara otomatis didukung.
 </p>
 
@@ -489,13 +496,13 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   Jika aplikasi Anda tidak mendeklarasikan orientasi tetap, Anda harus meluncurkan aplikasi
   pada perangkat yang menjalankan Android N dan berupaya menempatkan aplikasi tersebut dalam
-  mode layar terbagi. Pastikan pengalaman pengguna
+  mode layar terbagi. Verifikasi pengalaman pengguna
   bisa diterima bila aplikasi secara paksa diubah ukurannya.
 </p>
 
 <p>
   Jika aplikasi mendeklarasikan orientasi tetap, Anda harus berupaya menempatkan aplikasi dalam
-  mode multi-jendela. Periksa apakah Anda melakukannya, aplikasi tetap berada dalam
+  mode multi-jendela. Verifikasi apakah saat Anda melakukannya, aplikasi tetap berada dalam
   mode layar penuh.
 </p>
 
@@ -503,33 +510,33 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   Jika Anda membuat aplikasi Anda dengan N Preview SDK dan belum menonaktifkan
-  dukungan multi-jendela, periksa perilaku berikut dalam mode layar terbagi
+  dukungan multi-jendela, verifikasi perilaku berikut dalam mode layar terbagi
    dan mode bentuk bebas.
 </p>
 
 <ul>
   <li>Luncurkan aplikasi dalam mode layar penuh, kemudian beralih ke mode multi-jendela dengan
-   menekan lama pada tombol Overview. Periksa apakah aplikasi berpindah dengan benar.
+   menekan lama pada tombol Ringkasan. Verifikasi apakah aplikasi beralih dengan benar.
   </li>
 
-  <li>Jalankan aplikasi secara langsung dalam mode multi-jendela, dan pastikan aplikasi
+  <li>Jalankan aplikasi secara langsung dalam mode multi-jendela, dan verifikasi aplikasi
   diluncurkan dengan benar. Anda bisa meluncurkan aplikasi dalam mode multi-jendela dengan menekan
-  tombol Overview, kemudian menekan lama baris judul pada aplikasi Anda dan menyeretnya
+  tombol Ringkasan, kemudian menekan lama baris judul pada aplikasi Anda dan menyeretnya
   ke salah satu area yang disorot di layar.
   </li>
 
   <li>Ubah ukuran aplikasi Anda dalam mode layar terbagi dengan menyeret garis pembagi.
-  Periksa apakah aplikasi mengubah ukuran tanpa crash, dan apakah elemen UI yang diperlukan
+  Verifikasi apakah aplikasi mengubah ukuran tanpa mogok, dan apakah elemen UI yang diperlukan
   terlihat.
   </li>
 
   <li>Jika Anda telah menetapkan dimensi minimum aplikasi, cobalah untuk mengubah ukuran
-  aplikasi di bawah dimensi tersebut. Periksa apakah Anda tidak bisa mengubah ukuran aplikasi menjadi
+  aplikasi di bawah dimensi tersebut. Verifikasi apakah Anda tidak bisa mengubah ukuran aplikasi menjadi
   lebih kecil dari minimum yang ditetapkan.
   </li>
 
-  <li>Melalui semua tes, periksa apakah kinerja aplikasi Anda bisa diterima. Misalnya,
-  periksa apakah tidak ada jeda yang terlalu lama untuk memperbarui UI setelah
+  <li>Melalui semua pengujian, verifikasi apakah kinerja aplikasi Anda bisa diterima. Misalnya,
+  verifikasi apakah tidak ada jeda yang terlalu lama untuk memperbarui UI setelah
   aplikasi diubah ukurannya.
   </li>
 </ul>
@@ -537,7 +544,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <h4 id="test-checklist">Daftar periksa pengujian</h4>
 
 <p>
-  Untuk memeriksa kinerja aplikasi Anda dalam mode multi-jendela, cobalah operasi
+  Untuk verifikasi kinerja aplikasi Anda dalam mode multi-jendela, cobalah operasi
   berikut. Anda harus mencoba semua operasi ini dalam mode layar terbagi dan
    dan mode multi-jendela, kecuali jika dinyatakan berbeda.
 </p>
@@ -546,27 +553,27 @@ android:supportsPictureInPicture=["true" | "false"]
   <li>Masuki dan tinggalkan mode multi-jendela.
   </li>
 
-  <li>Beralih dari aplikasi Anda ke aplikasi lain, dan periksa apakah aplikasi berperilaku
+  <li>Beralih dari aplikasi Anda ke aplikasi lain, dan verifikasi apakah aplikasi berperilaku
    sebagaimana mestinya saat terlihat namun tidak aktif. Misalnya, jika aplikasi Anda
-   sedang memutar video, periksa apakah video terus diputar selagi pengguna
+   sedang memutar video, verifikasi apakah video terus diputar selagi pengguna
   berinteraksi dengan aplikasi lain.
   </li>
 
   <li>Dalam mode layar terbagi, cobalah menggeser garis pembagi untuk membuat aplikasi
   Anda menjadi lebih besar dan lebih kecil. Coba operasi ini dalam konfigurasi berdampingan dan
-  atas-bawah. Periksa apakah aplikasi tidak crash,
+  atas-bawah. Verifikasi apakah aplikasi tidak mogok,
   fungsionalitas penting bisa terlihat, dan operasi mengubah ukuran tidak memakan waktu terlalu
   lama.
   </li>
 
-  <li>Lakukan beberapa operasi ubah ukuran berturut-turut dalam waktu cepat. Periksa apakah
-  aplikasi Anda tidak crash atau mengalami kebocoran memori. Untuk informasi tentang memeriksa penggunaan memori
+  <li>Lakukan beberapa operasi ubah ukuran berturut-turut dalam waktu cepat. Verifikasi apakah
+  aplikasi Anda tidak mogok atau mengalami kebocoran memori. Untuk informasi tentang memeriksa penggunaan memori
   aplikasi Anda, lihat <a href="{@docRoot}tools/debugging/debugging-memory.html">
   Menyelidiki Penggunaan RAM Anda</a>.
   </li>
 
   <li>Gunakan aplikasi secara normal di sejumlah konfigurasi jendela yang berbeda, dan
-  periksa apakah aplikasi berperilaku sebagaimana mestinya. Periksa apakah teks terbaca, dan apakah
+  verifikasi apakah aplikasi berperilaku sebagaimana mestinya. Verifikasi apakah teks terbaca, dan apakah
   elemen UI tidak terlalu kecil untuk interaksi.
   </li>
 </ul>
@@ -574,9 +581,9 @@ android:supportsPictureInPicture=["true" | "false"]
 <h3 id="test-disabled-mw">Jika Anda telah menonaktifkan dukungan multi-jendela</h3>
 
 <p>
-  Jika Anda menonaktifkan dukungan multi-jendela dengan mengatur
+  Jika Anda menonaktifkan dukungan multi-jendela dengan menyetel
   <code>android:resizableActivity="false"</code>, Anda harus menjalankan aplikasi pada
   perangkat yang menjalankan Android N dan berusaha menempatkan aplikasi dalam
-  mode bentuk bebas dan mode layar terbagi. Periksa apakah Anda melakukannya, aplikasi tetap berada dalam
+  mode bentuk bebas dan mode layar terbagi. Verifikasi apakah saat Anda melakukannya, aplikasi tetap berada dalam
   mode layar penuh.
 </p>

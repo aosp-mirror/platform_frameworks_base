@@ -17,8 +17,9 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       </ol>
     <h2>Veja também</h2>
       <ol>
-        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Playground - aplicativo de exemplo
+        <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Playground — aplicativo de exemplo
  do modo de várias janelas</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Cinco dicas para preparar o modo de várias janelas no Android N</a></li>
       </ol>
   </div>
 </div>
@@ -130,7 +131,9 @@ em modo de tela inteira.
 <p>
   Quando o usuário coloca um aplicativo no modo de várias janelas, o sistema notifica a
  atividade sobre a mudança de configuração, como especificado em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento de alterações
- no tempo de execução</a>. Essencialmente, essa alteração afeta
+ no tempo de execução</a>. Isso também acontece quando o usuário redimensiona o aplicativo ou
+ coloca-o novamente no modo de tela cheia.
+  Essencialmente, essa alteração afeta
  o ciclo de vida da atividade da mesma forma que quando o sistema notifica o aplicativo de que o dispositivo mudou
  do modo de retrato para paisagem, exceto que as dimensões do dispositivo são
  alteradas, em vez de simplesmente permutadas. Como discutido em <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Processamento de alterações
@@ -154,8 +157,10 @@ em modo de tela inteira.
   Se o seu aplicativo for direcionado ao Android N, você poderá configurar como
  e se as atividades do aplicativo suportam a exibição em várias janelas. Você pode definir
  atributos no manifesto para controlar o tamanho e o layout.
-  As definições de atributos de uma atividade raiz se aplicam a todas as atividades
- em sua pilha de tarefas.
+  As configurações de atributos de uma atividade raiz se aplicam a todas as atividades
+ em sua pilha de tarefas. Por exemplo, se a atividade raiz tiver
+ <code>android:resizeableActivity</code> definido como true, todas as atividades
+ na pilha de tarefas serão redimensionáveis.
 </p>
 
 <p class="note">
@@ -239,7 +244,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
   </dt>
 
   <dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -296,12 +302,13 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   Os novos métodos a seguir foram adicionados à classe {@link android.app.Activity}
  para oferecer suporte à exibição em várias janelas. Para obter detalhes sobre cada método, consulte a
- <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência do N Preview SDK</a>.
+ <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência
+ do N Preview SDK</a>.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -309,7 +316,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
@@ -317,45 +324,45 @@ android:supportsPictureInPicture=["true" | "false"]
 
     <p class="note">
       <strong>Observação:</strong> o modo de imagem em imagem é um caso especial do
- modo de várias janelas. Se <code>myActivity.inPictureInPicture()</code>
- retornar verdadeiro, <code>myActivity.inMultiWindow()</code> também retornará
- verdadeiro.
+ modo de várias janelas. Se <code>myActivity.isInPictureInPictureMode()</code>
+ retornar true, <code>myActivity.isInMultiWindowMode()</code> também
+ retornará true.
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
     O sistema chama esse método sempre que a atividade entra ou sai do
- modo de várias janelas. O sistema passará ao método o valor verdadeiro se a
- atividade entrar no modo de várias janelas e falso se a atividade
+ modo de várias janelas. O sistema passará ao método o valor true se a
+ atividade entrar no modo de várias janelas e false se a atividade
  sair do modo de várias janelas.
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
     O sistema chama esse método sempre que a atividade entra ou sai do
- modo de imagem em imagem. O sistema passará ao método o valor verdadeiro se
- a atividade entrar no modo de várias janelas e falso se a atividade
+ modo de imagem em imagem. O sistema passará ao método o valor true se
+ a atividade entrar no modo de várias janelas e false se a atividade
  sair do modo de várias janelas.
   </dd>
 </dl>
 
 <p>
   Existem também versões de {@link android.app.Fragment} para cada um desses
- métodos como, por exemplo, <code>Fragment.inMultiWindow()</code>.
+ métodos como, por exemplo, <code>Fragment.isInMultiWindowMode()</code>.
 </p>
 
 <h3 id="entering-pip">Entrar no modo de imagem em imagem</h3>
 
 <p>
   Para colocar uma atividade no modo de imagem em imagem, chame o novo método
- <code>Activity.enterPictureInPicture()</code>. Esse método não terá efeito se
+ <code>Activity.enterPictureInPictureMode()</code>. Esse método não terá efeito se
  o dispositivo não oferecer suporte ao modo de imagem em imagem. Para obter mais informações,
  consulte a documentação do modo <a href="picture-in-picture.html">imagem em imagem</a>.
 </p>
@@ -489,7 +496,7 @@ android:supportsPictureInPicture=["true" | "false"]
 <p>
   Se o aplicativo não declarar uma orientação fixa, inicie o aplicativo
  em um dispositivo executando Android N e tente colocar o aplicativo no modo
- de tela dividida. Verifique se a experiência de usuário é
+ de tela dividida. Verifique se a experiência do usuário é
  aceitável quando o aplicativo é redimensionado obrigatoriamente.
 </p>
 

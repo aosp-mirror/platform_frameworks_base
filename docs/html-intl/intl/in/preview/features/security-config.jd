@@ -1,5 +1,5 @@
-page.title=Network Security Configuration
-page.keywords=androidn,security,network
+page.title=Konfigurasi Keamanan Jaringan
+page.keywords=androidn,keamanan,jaringan
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -12,12 +12,12 @@ page.image=images/cards/card-nyc_2x.jpg
   <li><a href="#manifest">Menambahkan File Konfigurasi Keamanan</a></li>
   <li><a href="#CustomTrust">Menyesuaikan CA Tepercaya</a>
       <ol>
-      <li><a href="#ConfigCustom">Mengonfigurasi CA Tepercaya Custom</a></li>
+      <li><a href="#ConfigCustom">Mengonfigurasi CA Tepercaya Khusus</a></li>
       <li><a href="#LimitingCas">Membatasi Set CA Tepercaya</a></li>
       <li><a href="#TrustingAdditionalCas">Mempercayai CA Tambahan</a></li>
       </ol>
   </li>
-  <li><a href="#TrustingDebugCa">Merunut CA Saja</a></li>
+  <li><a href="#TrustingDebugCa">CA Debug Saja</a></li>
   <li><a href="#UsesCleartextTraffic">Berhenti dari Lalu Lintas Cleartext</a></li>
   <li><a href="#CertificatePinning">Menyematkan Sertifikat</a></li>
   <li><a href="#ConfigInheritance">Perilaku Pewarisan Konfigurasi</a></li>
@@ -29,23 +29,23 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <p>
   Android N menyertakan fitur
-  Network Security Configuration yang memungkinkan aplikasi menyesuaikan pengaturan keamanan jaringan mereka dalam
-  file konfigurasi deklaratif yang aman tanpa memodifikasi kode aplikasi. Pengaturan ini bisa
+  Network Security Configuration yang memungkinkan aplikasi menyesuaikan setelan keamanan jaringan mereka dalam
+  file konfigurasi deklaratif yang aman tanpa memodifikasi kode aplikasi. Setelan ini bisa
   dikonfigurasi untuk domain dan aplikasi tertentu. Kemampuan
   utama fitur ini adalah sebagai berikut:
 </p>
 
 <ul>
   <li>
-    <b>Trust-anchor custom:</b> Menyesuaikan Certificate Authorities (CA) mana
+    <b>Trust-anchor khusus:</b> Menyesuaikan Certificate Authorities (CA) mana
     yang dipercaya untuk koneksi aman aplikasi. Misalnya,
     mempercayai sertifikat tertentu yang ditandatangani sendiri atau membatasi
     set CA umum yang dipercaya aplikasi.
   </li>
 
   <li>
-    <b>Pengesampingan hanya-runut:</b> Merunut secara aman koneksi aman dalam aplikasi
-    tanpa menambahkan risiko pada basis yang telah diinstal.
+    <b>Penggantian hanya-debug:</b> Men-debug secara aman koneksi aman dalam aplikasi
+    tanpa menambahkan risiko pada basis yang telah dipasang.
   </li>
 
   <li>
@@ -64,35 +64,36 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <p>
   Fitur Network Security Configuration menggunakan file XML tempat Anda menetapkan
-  pengaturan untuk aplikasi. Anda harus menyertakan sebuah entri dalam manifes aplikasi
+  setelan untuk aplikasi. Anda harus menyertakan sebuah entri dalam manifes aplikasi
   untuk menunjuk ke file ini. Kutipan kode berikut dari sebuah manifes
   yang memperagakan cara membuat entri ini:
 </p>
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-...
-&lt;app ...&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <h2 id="CustomTrust">Menyesuaikan CA Tepercaya</h2>
 
 <p>
-  Aplikasi mungkin perlu mempercayai set CA custom sebagai ganti default
+  Aplikasi mungkin perlu mempercayai set CA khusus sebagai ganti default
   platform. Alasannya yang paling umum adalah:
 </p>
 
 <ul>
-  <li>Menghubungkan ke host dengan otoritas sertifikat custom (ditandatangani sendiri,
+  <li>Menghubungkan ke host dengan otoritas sertifikat khusus (ditandatangani sendiri,
   dikeluarkan oleh CA internal, dll).
   </li>
 
   <li>Membatasi set CA hanya untuk CA yang Anda percaya sebagai ganti setiap CA
-  yang sudah terinstal.
+  yang sudah terpasang.
   </li>
 
   <li>Mempercayai CA tambahan yang tidak disertakan dalam sistem.
@@ -100,16 +101,16 @@ page.image=images/cards/card-nyc_2x.jpg
 </ul>
 
 <p>
-  Secara default koneksi (misalnya TLS, HTTPS) aman dari semua aplikasi mempercayai
-  CA yang telah diinstal oleh sistem, dan aplikasi yang menargetkan API level 23
+  Secara default koneksi (mis. TLS, HTTPS) aman dari semua aplikasi mempercayai
+  CA yang telah dipasang oleh sistem, dan aplikasi yang menargetkan API level 23
   (Android M) ke bawah, juga mempercayai penyimpanan CA yang ditambahkan pengguna secara default. Aplikasi
-  bisa menyesuaikan koneksinya sendiri menggunakan {@code base-config} (untuk
-  penyesuaian di tingkat aplikasi) atau {@code domain-config} (untuk penyesuaian
+  bisa menyesuaikan koneksinya menggunakan {@code base-config} (untuk
+  penyesuaian lebar-aplikasi) atau {@code domain-config} (untuk penyesuaian
   per-domain).
 </p>
 
 
-<h3 id="ConfigCustom">Mengonfigurasi CA Custom</h3>
+<h3 id="ConfigCustom">Mengonfigurasi CA Khusus</h3>
 
 <p>
   Anggaplah Anda ingin menghubungkan ke host Anda yang menggunakan sertifikat
@@ -147,7 +148,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>
-  Konfigurasi untuk membatasi set CA tepercaya mirip dengan <a href="#TrustingACustomCa">mempercayai CA custom</a> untuk domain tertentu selain
+  Konfigurasi untuk membatasi set CA tepercaya mirip dengan <a href="#TrustingACustomCa">mempercayai CA khusus</a> untuk domain tertentu selain
   beberapa CA disediakan dalam sumber daya.
 </p>
 
@@ -203,23 +204,23 @@ sebagai ganti satu elemen.
 </p>
 
 
-<h2 id="TrustingDebugCa">Mengonfigurasi CA untuk Perunutan</h2>
+<h2 id="TrustingDebugCa">Mengonfigurasi CA untuk Debug</h2>
 
 <p>
-  Saat merunut aplikasi yang terhubung melalui HTTPS, Anda mungkin perlu
+  Saat men-debug aplikasi yang terhubung melalui HTTPS, Anda mungkin perlu
   menghubungkan ke server pengembangan lokal, yang tidak memiliki sertifikat
   SSL untuk server produksi Anda. Untuk mendukungnya tanpa
-  memodifikasi kode aplikasi, Anda bisa menetapkan CA hanya-runut
+  memodifikasi kode aplikasi, Anda bisa menetapkan CA hanya-debug
   yang <i>hanya</i> dipercaya bila <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
 android:debuggable</a>
   adalah {@code true} dengan menggunakan {@code debug-overrides}. Biasanya IDE dan alat
-  build mengatur flag ini secara otomatis untuk build non-rilis.
+  build menyetel flag ini secara otomatis untuk build non-rilis.
 </p>
 
 <p>
   Ini lebih aman daripada kode kondisional biasa karena, sebagai tindakan
   pencegahan keamanan, toko aplikasi tidak menerima aplikasi yang ditandai
-  bisa-dirunut.
+  bisa-di-debug.
 </p>
 
 <p>
@@ -240,9 +241,9 @@ android:debuggable</a>
 <h2 id="UsesCleartextTraffic">Berhenti dari Lalu Lintas Cleartext</h2>
 
 <p>
-  Aplikasi yang bermaksud menghubungkan ke tujuan dengan hanya menggunakan koneksi
-  aman bisa berhenti mendukung cleartext (menggunakan protokol
-  HTTP yang tidak dienkripsi sebagai ganti HTTPS) ke tujuan tersebut. Opsi ini akan membantu mencegah
+  Aplikasi bermaksud menyambung ke tujuan hanya menggunakan koneksi
+ aman dapat memilih keluar dari dukungan cleartext (menggunakan protokol
+ HTTP yang tidak terenkripsi sebagai ganti HTTPS) ke tujuan tersebut. Opsi ini akan membantu mencegah
   regresi tidak disengaja dalam aplikasi karena perubahan dalam URL yang disediakan oleh sumber-sumber
   eksternal seperti server backend.
   Lihat {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
@@ -271,7 +272,7 @@ android:debuggable</a>
 <h2 id="CertificatePinning">Menyematkan Sertifikat</h2>
 
 <p>
-  Biasanya aplikasi mempercayai semua CA yang telah terinstal. Jika salah satu dari CA ini
+  Biasanya aplikasi mempercayai semua CA yang telah terpasang. Jika salah satu dari CA ini
   mengeluarkan sertifikat palsu, aplikasi akan berisiko terkena serangan
   MiTM. Beberapa aplikasi memilih untuk membatasi set sertifikat yang mereka terima
   baik dengan membatasi set CA yang mereka percaya atau dengan menyematkan sertifikat.
@@ -293,9 +294,9 @@ android:debuggable</a>
 </p>
 
 <p>
-  Selain itu bisa juga mengatur waktu kedaluwarsa untuk pin yang setelah
-  itu penyematan tidak dilakukan. Hal ini membantu mencegah masalah konektivitas dalam
-  aplikasi yang belum diperbarui. Akan tetapi, mengatur waktu kedaluwarsa
+  Selain itu dimungkinkan juga menyetel waktu habis masa berlaku untuk pin setelah
+  penyematan tidak dilakukan. Hal ini membantu mencegah masalah konektivitas dalam
+  aplikasi yang belum diperbarui. Akan tetapi, menyetel waktu kedaluwarsa
   pada pin mungkin akan membuat penyematan bisa diabaikan.
 </p>
 
@@ -310,6 +311,7 @@ android:debuggable</a>
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
@@ -319,21 +321,21 @@ android:debuggable</a>
 <h2 id="ConfigInheritance">Perilaku Pewarisan Konfigurasi</h2>
 
 <p>
-  Nilai yang tidak diatur dalam konfigurasi tertentu akan diwariskan. Perilaku ini memungkinkan konfigurasi
+  Nilai yang tidak disetel dalam konfigurasi tertentu akan diwariskan. Perilaku ini memungkinkan konfigurasi
   yang lebih kompleks sambil menjaga file konfigurasi tetap terbaca.
 </p>
 
 <p>
-  Jika nilai tidak diatur dalam entri tertentu maka nilai dari entri berikutnya yang lebih
-  umum akan digunakan. Nilai yang tidak diatur dalam {@code domain-config} akan
+  Jika nilai tidak disetel dalam entri tertentu maka nilai dari entri berikutnya yang lebih
+  umum akan digunakan. Nilai yang tidak disetel dalam {@code domain-config} akan
   diambil dari {@code domain-config} induk, jika tersarang, atau dari {@code
-  base-config} jika tidak. Nilai yang tidak diatur dalam {@code base-config} akan menggunakan
+  base-config} jika tidak. Nilai yang tidak disetel dalam {@code base-config} akan menggunakan
   nilai default platform.
 </p>
 
 <p>
   Misalnya pertimbangkan, bila semua koneksi ke subdomain {@code
-  example.com} harus menggunakan set CA custom. Selain itu, lalu lintas cleartext ke
+  example.com} harus menggunakan set CA khusus. Selain itu, lalu lintas cleartext ke
   domain ini diizinkan <em>kecuali</em> saat menghubungkan ke {@code
   secure.example.com}. Dengan menyarangkan konfigurasi untuk {@code
   secure.example.com} dalam konfigurasi untuk {@code example.com},
@@ -454,7 +456,7 @@ android:debuggable</a>
     tercakup oleh <a href="#domain-config"><code>domain-config</code></a>.
 
 <p>
-  Nilai yang tidak diatur akan menggunakan nilai default platform. Konfigurasi
+  Nilai yang tidak disetel akan menggunakan nilai default platform. Konfigurasi
   default untuk aplikasi yang menargetkan API level 24 ke atas:
 </p>
 
@@ -572,7 +574,7 @@ akan digunakan.</p></dd>
     yang dihasilkan oleh alat IDE dan build. Trust-anchor yang ditetapkan dalam {@code
     debug-overrides} akan ditambahkan ke semua konfigurasi lainnya dan penyematan
     sertifikat tidak dilakukan bila rantai sertifikat server menggunakan satu dari
-    trust-anchor hanya-runut ini. Jika <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
+    trust-anchor hanya-debug ini. Jika <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
     adalah {@code "false"} maka bagian ini akan diabaikan sepenuhnya.
   </dd>
 </dl>
@@ -630,7 +632,7 @@ Sumber sertifikat CA, bisa salah satu dari
   komentar.
   </li>
 
-  <li>{@code "system"} untuk sertifikat CA sistem yang telah terinstal.
+  <li>{@code "system"} untuk sertifikat CA sistem yang telah terpasang.
   </li>
 
   <li>{@code "user"} untuk sertifikat CA yang ditambahkan pengguna.
@@ -642,9 +644,9 @@ Sumber sertifikat CA, bisa salah satu dari
 <dd>
   <p>
     Menetapkan apakah CA dari sumber akan mengabaikan penyematan sertifikat. Jika {@code
-    "true"} maka rantai sertifikat yang rantainya melalui salah satu CA dari
-    sumber ini tidak akan disematkan. Hal ini bisa berguna untuk CA
-    perunutan atau untuk mendukung dengan memungkinkan pengguna melakukan MiTM atas lalu lintas aman aplikasi Anda.
+    "true"} kemudian rangkaian sertifikat melalui salah satu CA dari
+    sumber ini maka tidak dilakukan penyematan. Hal ini bisa berguna untuk debug CA
+    atau untuk mendukung dengan memungkinkan pengguna melakukan MiTM atas lalu lintas aman aplikasi Anda.
   </p>
 
   <p>
@@ -701,11 +703,11 @@ Sumber sertifikat CA, bisa salah satu dari
 
       <dd>
         Tanggal, dalam format {@code yyyy-MM-dd}, pada saat dan setelah pin
-        kedaluwarsa, sehingga menonaktifkan penyematan. Jika atribut tidak diatur maka
+        kedaluwarsa, sehingga menonaktifkan penyematan. Jika atribut tidak disetel maka
         pin tidak kedaluwarsa.
         <p>
           Tanggal kedaluwarsa membantu mencegah masalah konektivitas di aplikasi yang
-          tidak mendapatkan pembaruan untuk set pin mereka, misalnya karena pengguna
+          tidak mengambil pembaruan untuk set pin mereka, misalnya karena pengguna
           menonaktifkan pembaruan aplikasi.
         </p>
       </dd>
@@ -737,7 +739,7 @@ Sumber sertifikat CA, bisa salah satu dari
       </dt>
 
       <dd>
-        Algoritma intisari yang digunakan untuk menghasilkan pin. Saat ini, hanya 
+        Algoritme intisari yang digunakan untuk menghasilkan pin. Saat ini, hanya 
         {@code "SHA-256"} yang didukung.
       </dd>
     </dl>

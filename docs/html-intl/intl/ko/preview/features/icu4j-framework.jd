@@ -1,5 +1,4 @@
 page.title=ICU4J Android 프레임워크 API
-page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -30,7 +29,7 @@ ICU4J가 지원하는 최신 표준</a>
 <p>
   ICU4J는 오픈 소스이며 널리 사용되는 Java 라이브러리 세트로, 소프트웨어 애플리케이션에 유니코드와
 세계화 지원을 제공합니다. Android N은
-Android 프레임워크에서 앱 개발자가 
+Android 프레임워크에서 앱 개발자가
 {@code android.icu} 패키지에서 사용할 수 있는 ICU4J API의 하위 세트를 노출합니다. 이 API는
 기기의 현지화 데이터를 사용합니다. 따라서 ICU4J 라이브러리를 APK로 컴파일하지 않고
 프레임워크에서 호출하여APK
@@ -54,8 +53,8 @@ Android 프레임워크에서 ICU4J API를 사용하는 방법을 설명합니�
 <code>com.ibm.icu</code>가 아니라 <code>android.icu</code> 패키지를 통해 ICU4J API의 하위 세트를 노출합니다. 
 Android 프레임워크는 여러 가지 이유로
 ICU4J API를 노출하지 않을 수 있습니다. 예컨대 Android N은
-일부 사용 중단된 API나 ICU팀에서 안정적이라고 선언하지 않은 API를
-노출하지 않습니다. ICU팀이 이후 API의 사용을 중단하면, Android도
+일부 사용 중단된 API나 ICU 팀에서 안정적이라고 선언하지 않은 API를
+노출하지 않습니다. ICU 팀이 이후 API의 사용을 중단하면, Android도
 이를 사용 중단됨으로 표시하지만 계속 포함합니다.
 </p>
 
@@ -109,7 +108,7 @@ ICU4J 파일 사본을 삭제할 수 있습니다.
 ICU4J의 클래스와 같습니다. 그러나 ICU4J는 종종 더욱 폭넓은
 표준과 언어를 지원합니다.
 </p>
-<p>시작하기 위한 몇 가지 예시:</p>
+<p>시작하기 위한 몇 가지 예시는 다음과 같습니다.</p>
 <table>
 <tr>
 <th>클래스</th>
