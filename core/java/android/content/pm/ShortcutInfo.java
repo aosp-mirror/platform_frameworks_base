@@ -62,6 +62,13 @@ public final class ShortcutInfo implements Parcelable {
 
     private static final String ANDROID_PACKAGE_NAME = "android";
 
+    private static final int IMPLICIT_RANK_MASK = 0x7fffffff;
+
+    private static final int RANK_CHANGED_BIT = ~IMPLICIT_RANK_MASK;
+
+    /** @hide */
+    public static final int RANK_NOT_SET = Integer.MAX_VALUE;
+
     /** @hide */
     public static final int FLAG_DYNAMIC = 1 << 0;
 
@@ -192,6 +199,15 @@ public final class ShortcutInfo implements Parcelable {
     private PersistableBundle mIntentPersistableExtras;
 
     private int mRank;
+
+    /**
+     * Internally used for auto-rank-adjustment.
+     *
+     * RANK_CHANGED_BIT is used to denote that the rank of a shortcut is changing.
+     * The rest of the bits are used to denote the order in which shortcuts are passed to
+     * APIs, which is used to preserve the argument order when ranks are tie.
+     */
+    private int mImplicitRank;
 
     @Nullable
     private PersistableBundle mExtras;
@@ -544,7 +560,8 @@ public final class ShortcutInfo implements Parcelable {
 
     /**
      * Copy non-null/zero fields from another {@link ShortcutInfo}.  Only "public" information
-     * will be overwritten.  The timestamp will be updated.
+     * will be overwritten.  The timestamp will *not* be updated to be consistent with other
+     * setters (and also the clock is not injectable in this file).
      *
      * - Flags will not change
      * - mBitmapPath will not change
@@ -603,14 +620,12 @@ public final class ShortcutInfo implements Parcelable {
             mIntent = source.mIntent;
             mIntentPersistableExtras = source.mIntentPersistableExtras;
         }
-        if (source.mRank != 0) {
+        if (source.mRank != RANK_NOT_SET) {
             mRank = source.mRank;
         }
         if (source.mExtras != null) {
             mExtras = source.mExtras;
         }
-
-        updateTimestamp();
     }
 
     /**
@@ -665,7 +680,7 @@ public final class ShortcutInfo implements Parcelable {
 
         private Intent mIntent;
 
-        private int mRank;
+        private int mRank = RANK_NOT_SET;
 
         private PersistableBundle mExtras;
 
@@ -825,15 +840,18 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setIntent(@NonNull Intent intent) {
             mIntent = Preconditions.checkNotNull(intent, "intent");
-            Preconditions.checkNotNull(mIntent.getAction(), "Intent action must be set.");
+            Preconditions.checkNotNull(mIntent.getAction(), "Intent action must be set");
             return this;
         }
 
         /**
-         * TODO javadoc.
+         * "Rank" of a shortcut, which is a non-negative value that's used by the launcher app
+         * to sort shortcuts.
          */
         @NonNull
         public Builder setRank(int rank) {
+            Preconditions.checkArgument((0 <= rank),
+                    "Rank cannot be negative or bigger than MAX_RANK");
             mRank = rank;
             return this;
         }
@@ -1014,10 +1032,55 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * TODO Javadoc
+     * "Rank" of a shortcut, which is a non-negative, sequential value that's unique for each
+     * {@link #getActivity} for each of the two kinds, dynamic shortcuts and manifest shortcuts.
+     *
+     * <p>Because manifest shortcuts and dynamic shortcuts have overlapping ranks,
+     * when a launcher application shows shortcuts for an activity, it should first show
+     * the manifest shortcuts followed by the dynamic shortcuts.  Within each of those categories,
+     * shortcuts should be sorted by rank in ascending order.
+     *
+     * <p>"Floating" shortcuts (i.e. shortcuts that are neither dynamic nor manifest) will all
+     * have rank 0, because there's no sorting for them.
      */
     public int getRank() {
         return mRank;
+    }
+
+    /** @hide */
+    public boolean hasRank() {
+        return mRank != RANK_NOT_SET;
+    }
+
+    /** @hide */
+    public void setRank(int rank) {
+        mRank = rank;
+    }
+
+    /** @hide */
+    public void clearImplicitRankAndRankChangedFlag() {
+        mImplicitRank = 0;
+    }
+
+    /** @hide */
+    public void setImplicitRank(int rank) {
+        // Make sure to keep RANK_CHANGED_BIT.
+        mImplicitRank = (mImplicitRank & RANK_CHANGED_BIT) | (rank & IMPLICIT_RANK_MASK);
+    }
+
+    /** @hide */
+    public int getImplicitRank() {
+        return mImplicitRank & IMPLICIT_RANK_MASK;
+    }
+
+    /** @hide */
+    public void setRankChanged() {
+        mImplicitRank |= RANK_CHANGED_BIT;
+    }
+
+    /** @hide */
+    public boolean isRankChanged() {
+        return (mImplicitRank & RANK_CHANGED_BIT) != 0;
     }
 
     /**
