@@ -1443,9 +1443,9 @@ public class TelecomManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.DUMP)
-    public List<ParcelableCallAnalytics> dumpAnalytics() {
+    public TelecomAnalytics dumpAnalytics() {
         ITelecomService service = getTelecomService();
-        List<ParcelableCallAnalytics> result = null;
+        TelecomAnalytics result = null;
         if (service != null) {
             try {
                 result = service.dumpCallAnalytics();
