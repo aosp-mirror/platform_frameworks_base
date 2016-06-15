@@ -285,10 +285,10 @@ public class KeyInfo implements KeySpec {
     }
 
     /**
-     * Returns {@code true} if this key will remain usable after its specified validity duration
-     * for as long as the device remains on the user's body.  This is possible only for keys with
-     * a specified validity duration.  Always returns {@code false} on devices that lack a secure
-     * on-body sensor.
+     * Returns {@code true} if this key will become unusable when the device is removed from the
+     * user's body.  This is possible only for keys with a specified validity duration, and only on
+     * devices with an on-body sensor.  Always returns {@code false} on devices that lack an on-body
+     * sensor.
      */
     public boolean isUserAuthenticationValidWhileOnBody() {
         return mUserAuthenticationValidWhileOnBody;
