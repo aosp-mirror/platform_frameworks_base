@@ -582,11 +582,6 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      *
      * @see Builder#setAttestationChallenge(byte[])
      */
-    /*
-     * TODO(swillden): Update this documentation to describe the hardware and software root keys,
-     * including information about CRL/OCSP services for discovering revocations, and to link to
-     * documentation of the extension format and content.
-     */
     public byte[] getAttestationChallenge() {
         return Utils.cloneIfNotNull(mAttestationChallenge);
     }
