@@ -5,25 +5,26 @@ meta.tags="preview", "developer", "android"
 page.tags="preview", "developer", "android"
 
 @jd:body
+
 <!--
 <div class="cols" style=
-"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+"background-color:#B2DFDB; padding: 5px 0;margin-bottom:1em; text-align:center;">
 <h3>
-    Developer Preview 3 is now available
+    Developer Preview X is now available
   </h3>
-  <p>Includes final SDK and near-final system images</p>
+  <p>This release includes the ...</p>
    <div style="margin:auto 1em">
  <ul class="dac-section-links">
     <li class="dac-section-link">
-      <a href="{@docRoot}preview/support.html#preview3-notes">
+      <a href="{@docRoot}preview/support.html#dp4">
       <span class="dac-sprite dac-auto-chevron"></span>
       Read the Notes</a>
     </li>
 
     <li class="dac-section-link">
-      <a href="{@docRoot}preview/support.html#preview3-get">
+      <a href="{@docRoot}preview/download.html">
       <span class="dac-sprite dac-auto-chevron"></span>
-      Get the Update</a>
+      Test the Update</a>
     </li>
 
     <li class="dac-section-link">
@@ -137,12 +138,13 @@ page.tags="preview", "developer", "android"
 -->
 
 <h2 id="timeline">Timeline and updates</h2>
-<img src="{@docRoot}images/n-preview-updates_2x.png">
 
 <p>
   The N Developer Preview runs from 9 March 2016 until the final Android N
   public release to AOSP and OEMs, planned for Q3 2016.
 </p>
+
+<img src="{@docRoot}images/n-preview-updates_2x.png">
 
 <p>
   At key development milestones, we’ll deliver updates for your development and
@@ -154,7 +156,7 @@ page.tags="preview", "developer", "android"
   <li><strong><a href="{@docRoot}preview/support.html#dp1">Preview 1</a></strong> (initial release, alpha)</li>
   <li><strong><a href="{@docRoot}preview/support.html#dp2">Preview 2</a></strong> (incremental update, alpha)</li>
   <li><strong><a href="{@docRoot}preview/support.html#dp3">Preview 3</a></strong> (incremental update, beta)</li>
-  <li><strong>Preview 4</strong> (final APIs and official SDK, Play publishing)</li>
+  <li><strong><a href="{@docRoot}preview/support.html#dp4">Preview 4</a></strong> (final APIs and official SDK, Play publishing)</li>
   <li><strong>Preview 5</strong> (near-final system images for final testing)</li>
   <li><strong>Final release</strong> to AOSP and ecosystem</li>
 </ul>
