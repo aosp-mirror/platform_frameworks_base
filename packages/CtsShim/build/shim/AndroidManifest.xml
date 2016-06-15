@@ -22,6 +22,9 @@
     <uses-sdk android:minSdkVersion="24"
         android:targetSdkVersion="24" />
 
+    <restrict-update
+        android:hash="__CAN_NOT_BE_UPDATED__" />
+
     <application
         android:hasCode="false"
         tools:ignore="AllowBackup,MissingApplicationIcon" >
