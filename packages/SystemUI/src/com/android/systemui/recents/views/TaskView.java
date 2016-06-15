@@ -194,7 +194,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Called from RecentsActivity when it is relaunched.
      */
     void onReload(boolean isResumingFromVisible) {
-        resetNoUserInteractionState();
+        if (!Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
+            resetNoUserInteractionState();
+        }
         if (!isResumingFromVisible) {
             resetViewProperties();
         }
@@ -214,6 +216,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     protected void onFinishInflate() {
         // Bind the views
         mHeaderView = (TaskViewHeader) findViewById(R.id.task_view_bar);
+        if (Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
+            mHeaderView.setNoUserInteractionState();
+        }
         mThumbnailView = (TaskViewThumbnail) findViewById(R.id.task_view_thumbnail);
         mThumbnailView.updateClipToTaskBar(mHeaderView);
         mActionButtonView = findViewById(R.id.lock_to_app_fab);
