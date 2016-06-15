@@ -19,7 +19,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 
 <p>Android N memberikan dukungan yang disempurnakan untuk pengguna multibahasa,
-yang memungkinkan mereka memilih beberapa lokal dalam pengaturan. Android N
+yang memungkinkan mereka memilih beberapa lokal dalam setelan. Android N
 menyediakan kemampuan ini dengan memperbanyak jumlah lokal yang didukung
 dan mengubah cara sistem mengatasi masalah sumber daya. Metode baru mengatasi
 masalah sumber daya ini lebih tangguh dan didesain agar kompatibel dengan APK yang ada, namun
@@ -37,29 +37,33 @@ jumlah lokal yang telah diperbanyak untuk mendukung lebih banyak pengguna multib
 <h2 id="preN">Tantangan dalam Mengatasi Masalah Sumber Daya Bahasa</h2>
 
 <p>Sebelum Android N, Android tidak selalu
- berhasil mencocokkan lokal aplikasi dan lokal sistem. Misalnya, anggaplah bahasa default aplikasi Anda
-  adalah US English, namun aplikasi itu juga berisi string bahasa Spanyol yang dilokalkan di file sumber daya {@code es_ES}.
-.</p>
-<p>Bila kode Java Anda mengacu ke string, itu akan mengatasi masalah bahasa string sebagai
-berikut:</p>
-<ul>
-<li>Jika perangkat diatur ke {@code es_MX} (Spanish-Mexico), Android akan memuat
-string dari file sumber daya {@code es_ES}.</li>
-<li>Jika perangkat diatur ke {@code en_AU}, Android akan kembali pada {@code
-en_US}. Sistem juga akan default ke {@code en_US} jika pengguna memilih
-bahasa yang sama sekali tidak didukung oleh aplikasi, seperti bahasa Prancis.</li>
-</ul>
+ berhasil mencocokkan lokal aplikasi dan lokal sistem.</p>
+
+ <p>Misalnya, anggaplah Anda menghadapi situasi berikut:</p>
+ <ul>
+ <li>Bahasa default aplikasi Anda adalah {@code en_US} (US English), dan aplikasi juga
+  berisi string bahasa Spanyol yang telah dilokalkan di file sumber daya {@code es_ES}.
+</li>
+ <li> Perangkat telah disetel ke {@code es_MX} </li>
+
+<p>Bila kode Java Anda merujuk ke string, sistem akan memuat
+string dari file sumber daya default ({@code en_US}), sekalipun aplikasi memiliki
+sumber daya bahasa Spanyol yang dilokalkan pada {@code es_ES}. Hal ini karena bila sistem
+  tidak bisa menemukan hasil yang persis, sistem akan terus mencari sumber daya dengan menghilangkan
+  kode negara dari lokal tersebut. Akhirnya, jika tidak ada hasil yang ditemukan, sistem akan mengembalikan
+ ke default, yakni {@code en_US}. </p>
 
 
-<p>Masalah resolusi ini muncul karena sistem menghilangkan kode negara
-dari lokal jika tidak bisa menemukan yang sama persis.  Misalnya:</p>
+<p>Sistem juga akan default ke {@code en_US} jika pengguna memilih
+bahasa yang sama sekali tidak didukung oleh aplikasi, seperti bahasa Prancis. Misalnya:</p>
+
 <p class="table-caption" id="t-resource-res">
 <strong>Tabel 1.</strong> Resolusi sumber daya tanpa lokal yang persis sama.
 </p>
 <table>
 <tbody>
 <tr>
-<th>Pengaturan Pengguna</th>
+<th>Setelan Pengguna</th>
 <th>Sumber Daya Aplikasi</th>
 <th>Resolusi Sumber Daya</th>
 </tr>
@@ -109,7 +113,7 @@ secara berbeda:</p>
 lokal yang sama persis.</p>
 <table>
 <tr>
-<th>Pengaturan Pengguna</th>
+<th>Setelan Pengguna</th>
 <th>Sumber Daya Aplikasi</th>
 <th>Resolusi Sumber Daya</th>
 </tr>
@@ -137,9 +141,9 @@ Gunakan fr_FR
 
 
 <p>Sekarang pengguna mendapatkan sumber daya bahasa Prancis sebagai ganti bahasa Inggris. Contoh ini juga menunjukkan
- mengapa Anda harus menyimpan string bahasa Prancis dalam {@code fr} bukan dalam {@code fr_FR}
- untuk Android N. Tindakan di sini adalah untuk mencocokkan dengan induk dialek terdekat,
- yang membuat resolusi menjadi lebih cepat dan lebih bisa diprediksi.</p>
+ mengapa Anda harus menyimpan string bahasa Prancis di {@code fr} bukan pada {@code fr_FR}
+ untuk Android N. Arah aksi di sini adalah untuk mencocokkan dengan induk dialek terdekat,
+ membuat resolusi lebih cepat dan lebih dapat diprediksi.</p>
 
 <p>Selain logika resolusi yang diperbaiki ini, Android sekarang menawarkan lebih banyak
 pilihan bahasa untuk pengguna. Mari kita coba lagi contoh di atas dengan menetapkan bahasa Italia
@@ -147,10 +151,10 @@ pilihan bahasa untuk pengguna. Mari kita coba lagi contoh di atas dengan menetap
 
 <p class="table-caption" id="t-2d-choice">
 <strong>Tabel 3.</strong> Resolusi sumber daya bila aplikasi hanya mencocokkan
-pengaturan lokal yang disukai kedua oleh pengguna.</p>
+setelan lokal yang disukai kedua oleh pengguna.</p>
 <table>
 <tr>
-<th>Pengaturan Pengguna</th>
+<th>Setelan Pengguna</th>
 <th>Sumber Daya Aplikasi</th>
 <th>Resolusi Sumber Daya</th>
 
@@ -187,11 +191,11 @@ mendukung bahasa Prancis.</p>
 <h2 id="design">Mendesain Aplikasi Anda untuk Mendukung Lokal Tambahan</h2>
 <h3>LocaleList API</h3>
 
-<p>Android N menambahkan API baru {@code LocaleList.GetDefault()}
-yang memungkinkan aplikasi langsung melakukan query daftar bahasa yang telah ditetapkan pengguna. API ini
-memungkinkan Anda untuk membuat
- perilaku aplikasi yang lebih canggih dan tampilan konten yang lebih optimal. Misalnya, Pencarian
-  bisa menampilkan hasil dalam beberapa bahasa berdasarkan pengaturan pengguna.  Aplikasi browser
+<p>Android N menambahkan API baru {@code LocaleList.getDefault()}
+yang memungkinkan aplikasi langsung kueri daftar bahasa yang telah ditetapkan pengguna. API ini
+memungkinkan Anda membuat
+ perilaku aplikasi yang lebih canggih dan tampilan materi yang lebih optimal. Misalnya, Telusur
+  bisa menampilkan hasil dalam beberapa bahasa berdasarkan setelan pengguna.  Aplikasi browser
   bisa menghindari penawaran menerjemahkan halaman dalam bahasa yang sudah diketahui pengguna,
   dan aplikasi keyboard bisa mengaktifkan otomatis semua layout yang sesuai. </p>
 

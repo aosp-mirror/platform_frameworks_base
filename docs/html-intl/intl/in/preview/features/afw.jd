@@ -1,0 +1,552 @@
+page.title=Pembaruan Android for Work
+page.metaDescription=API dan fitur baru Android for Work di Android N.
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>Dalam dokumen ini</h2>
+      <ol>
+        <li><a href="#qr">Penyediaan Kode QR
+                </a></li>
+
+        <li><a href="#sec-challenge">Pertanyaan Keamanan Profil Kerja
+                </a></li>
+
+        <li><a href="#suspend">Menonaktifkan Akses ke Aplikasi
+                </a></li>
+
+        <li><a href="#toggle-work">Beralih Mode Kerja
+                </a></li>
+
+        <li><a href="#always-on-vpn">Always-On VPN
+                </a></li>
+
+        <li><a href="#contacts">Integrasi Kontak dengan Profil Kerja
+                </a></li>
+
+        <li><a href="#remote-reboot">Boot Ulang Jarak Jauh
+                </a></li>
+
+        <li><a href="#disable-roaming">Menonaktifkan Roaming Data
+                </a></li>
+
+        <li><a href="#process-logging">Pencatatan Proses Enterprise
+                </a></li>
+
+        <li><a href="#bug-reports">Laporan Bug Jarak Jauh
+                </a></li>
+
+        <li><a href="#remove-cert">Membuang Sertifikat Klien
+                </a></li>
+
+        <li><a href="#grant-cert-on-install">Memberi Akses ke Sertifikat Klien
+                saat Pemasangan</a></li>
+
+        <li><a href="#ui-policy">Transparansi Kebijakan UI Sistem
+                </a></li>
+
+        <li><a href="#restrictions-mgmt">Penyempurnaan Manajemen Pembatasan Aplikasi
+                </a></li>
+
+        <li><a href="#location-off">Tombol Lokasi Nonaktif
+                </a></li>
+
+        <li><a href="#custom-provisioning">Penyediaan yang Disesuaikan
+                </a></li>
+
+        <li><a href="#multi-wifi-ca">Multi-Sertifikat CA Wi-Fi
+                </a></li>
+
+        <li><a href="#custom-lock">Pesan Layar Kunci yang Disesuaikan
+                </a></li>
+
+        <li><a href="#work-connectionservice">ConnectionService Profil Kerja
+                </a></li>
+
+        <li><a href="#lock-wp">Mengunci Wallpaper
+                </a></li>
+
+        <li><a href="#lock-user-icon">Mengunci Ikon Pengguna
+                </a></li>
+
+        <li><a href="#health-monitoring">Pemantauan Kesehatan Perangkat
+                </a></li>
+
+      </ol>
+
+    <h2>Lihat Juga</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi
+            N Preview SDK</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>Dokumen ini menjelaskan fitur baru Android for Work yang disediakan di
+Android N.</p>
+
+<h2 id="qr">Penyediaan Kode QR</h2>
+
+<p>
+  Android for Work kini mendukung penggunaan kode QR untuk penyediaan perangkat
+  milik perusahaan. Wizard persiapan kini memungkinkan Anda memindai kode QR untuk penyediaan
+  perangkat.
+</p>
+
+<h2 id="sec-challenge">Pertanyaan Keamanan Profil Kerja</h2>
+
+<p>
+  Pemilik profil bisa mengharuskan pengguna menetapkan pertanyaan keamanan untuk aplikasi
+  yang berjalan dalam profil kerja. Sistem akan menampilkan pertanyaan keamanan bila
+  pengguna mencoba membuka aplikasi kerja apa pun. Jika pengguna berhasil menyelesaikan
+  pertanyaan keamanan, sistem akan membuat profil kerja dan mendekripsinya
+  jika diperlukan.
+</p>
+
+<p>
+  Jika pemilik profil mengirim intent {@link
+  android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD} , sistem
+  akan menampilkan pertanyaan keamanan kepada pengguna. Pemilik profil juga dapat
+  mengirim intent <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> untuk
+  meminta pengguna menyetel kunci perangkat.
+</p>
+
+<p>
+  Pemilik profil dapat memilih untuk menyetel kebijakan sandi untuk pertanyaan pekerjaan
+  yang berbeda dari kebijakan sandi perangkat lainnya. Misalnya, panjang minimum
+  jawaban pertanyaan perangkat bisa berbeda dari panjang
+  yang diperlukan untuk sandi lainnya. Pemilik profil menyetel kebijakan pertanyaan
+  menggunakan metode{@link android.app.admin.DevicePolicyManager}
+  biasa, seperti {@link
+  android.app.admin.DevicePolicyManager#setPasswordQuality
+  setPasswordQuality()} dan {@link
+  android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+  setPasswordMinimumLength()}. Pemilik profil juga bisa menyetel penguncian perangkat,
+  dengan menggunakan instance {@link android.app.admin.DevicePolicyManager} yang dikembalikan secara langsung
+  oleh metode <code>DevicePolicyManager.getParentProfileInstance()</code>
+  baru. Selain itu, pemilik profil dapat menyesuaikan layar kredensial untuk
+  pertanyaan kerja menggunakan kelas {@link android.app.admin.DevicePolicyManager}
+  dengan metode <code>setOrganizationColor()</code> dan
+  <code>setOrganizationName()</code> baru.
+</p>
+
+<p>
+  Untuk mengetahui detail tentang kelas dan metode berikut, lihat halaman referensi
+  <code>DevicePolicyManager</code> di <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi N Preview SDK</a>.
+</p>
+
+<h2 id="suspend">Menonaktifkan Akses ke Aplikasi</h2>
+
+<p>
+  Pemilik perangkat dan pemilik profil bisa menangguhkan akses untuk sementara ke paket
+  dengan memanggil metode <code>DevicePolicyManager.setPackagesSuspended()</code>
+  baru. Pemilik bisa menggunakan metode yang sama untuk mengaktifkan kembali paket tersebut.
+</p>
+
+<p>
+  Selagi paket ditangguhkan, maka tidak bisa memulai aktivitas, pemberitahuan ke
+  paket akan disembunyikan, dan entri aplikasi dalam <a href="{@docRoot}guide/components/recents.html">layar ringkasan</a> akan disembunyikan.
+  Paket yang ditangguhkan tidak muncul di <a href="{@docRoot}guide/components/recents.html">layar ringkasan</a>, dan
+  tidak bisa menampilkan dialog (termasuk toast dan snackbar). Juga tidak bisa memutar
+  audio atau menggetarkan perangkat.
+</p>
+
+<p>
+  Launcher harus menerapkan UI berbeda pada aplikasi yang ditangguhkan untuk menunjukkan
+  aplikasi saat ini tidak tersedia; misalnya, bisa merender ikon aplikasi
+  dalam warna abu-abu. Launcher bisa mengetahui apakah aplikasi ditangguhkan dengan memanggil metode
+  <code>DevicePolicyManager.getPackageSuspended()</code> baru.
+</p>
+
+<h2 id="toggle-work">Beralih Mode Kerja</h2>
+
+<p>
+  Pada perangkat dua-profil, pengguna bisa mengaktifkan dan menonaktifkan mode kerja. Selagi mode
+  kerja dinonaktifkan, profil yang dikelola akan dinonaktifkan untuk sementara. Aplikasi Profil Kerja,
+  sinkronisasi latar belakang, dan pemberitahuan semuanya dinonaktifkan, termasuk
+  aplikasi pemilik profil. Selagi profil kerja dinonaktifkan, sistem
+  akan menampilkan ikon status tetap untuk mengingatkan pengguna bahwa mereka tidak bisa meluncurkan aplikasi
+  kerja. Peluncur sistem menunjukkan bahwa aplikasi kerja dan widget tidak bisa
+  diakses.
+</p>
+
+<h2 id="always-on-vpn">Always-On VPN</h2>
+
+<p>
+  Pemilik perangkat dan pemilik profil bisa mengharuskan aplikasi kerja selalu terhubung
+  ke jaringan melalui VPN yang ditetapkan. Jika pemilik menyetel persyaratan ini,
+  perangkat secara otomatis akan memulai VPN itu saat booting.
+</p>
+
+<p>
+  Pemilik bisa menggunakan VPN dengan memanggil metode
+  <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code> baru. Untuk mengetahui
+  apakah pemilik telah menyetel persyaratan VPN, panggil metode
+  <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code> baru.
+</p>
+
+<p>
+  Karena sistem bisa secara langsung mengikat layanan VPN tanpa interaksi aplikasi,
+  klien VPN perlu menangani titik masuk baru untuk Always-On VPN. Seperti sebelumnya,
+  Anda bisa menemukan layanan aktif dengan menggunakan filter intent yang cocok dengan tindakan
+  {@link android.net.VpnService android.net.VpnService}.
+</p>
+
+<p>
+  Pengguna bisa secara manual menyetel klien Always-On VPN yang mengimplementasikan {@link
+  android.net.VpnService} dengan menggunakan layar <strong>Settings &gt; More &gt;
+  VPN</strong>.
+</p>
+
+<h2 id="contacts">Integrasi Kontak dengan Profil Kerja</h2>
+
+<p>
+  Pemilik profil bisa mengizinkan penelusuran lokal dan pencarian direktori kontak kerja
+  dari pengguna utama. Misalnya, seorang pengguna bisa mengakses kontak direktori pribadi dan pekerjaan
+  dari telepon pribadi atau aplikasi kontak mereka (jika
+  diizinkan oleh administrator profil mereka).
+</p>
+
+<p>
+  Pengembang yang memanfaatkan Contact Provider bisa menggunakan Enterprise Contacts
+  API untuk mengakses entri direktori profil kerja dari pengguna utama jika diizinkan
+  oleh kebijakan:
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  Pemilik profil bisa mengendalikan visibilitas kontak kerja di
+  pengguna utama menggunakan metode baru berikut:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">Boot Ulang Jarak Jauh</h2>
+
+<p>
+  Pemilik perangkat bisa mem-boot ulang perangkat dari jarak jauh. Di beberapa kasus, perangkat yang diluncurkan di
+  tempat umum dalam pembatas bisa mencegah akses ke tombol daya. Jika
+  perangkat perlu di-boot ulang, administrator bisa melakukannya dengan metode
+  <code>DevicePolicyManager.reboot()</code> baru.
+</p>
+
+<h2 id="disable-roaming">Menonaktifkan Roaming Data</h2>
+
+<p>
+  Pemilik perangkat bisa menonaktifkan roaming data menggunakan pembatasan pengguna {@link
+  android.os.UserManager} <code>DISALLOW_DATA_ROAMING</code> baru.
+</p>
+
+<h2 id="process-logging">Pencatatan Proses Enterprise</h2>
+
+<p>
+  Pemilik perangkat bisa mengenali aktivitas mencurigakan dengan melacak perangkat dari jarak jauh,
+  termasuk peluncuran aplikasi, aktivitas adb, dan pembukaan kunci layar. Log proses
+  tidak memerlukan persetujuan pengguna. Untuk mengambil log, pemilik perangkat mengaktifkan
+  pencatatan perangkat menggunakan <code>DevicePolicyManager.setSecurityLoggingEnabled()</code>.
+</p>
+
+<p>
+  Perubahan API meliputi:
+</p>
+
+<ul>
+
+  <li>
+    Kelas <code>android.app.admin.SecurityLog</code> baru dan
+    metodenya
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">Laporan Bug Jarak Jauh</h2>
+
+<p>
+  Pemilik perangkat bisa memicu dari jarak jauh dan mengambil laporan bug yang berisi
+  file dump status perangkat, yang memungkinkan penyelidikan forensik atas
+  kesalahan yang diketahui atau perangkat yang telah diutak-atik. Dikarenakan sifat detail laporan bug,
+  maka diperlukan persetujuan pengguna.
+</p>
+
+<p>
+  Android N menyertakan tambahan API berikut untuk mendukung fitur ini. Untuk detailnya, lihat
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referensi
+  N Preview SDK</a>.
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">Membuang Sertifikat Klien</h2>
+
+<p>
+  Pemilik profil dan pemilik perangkat kini bisa membuang sertifikat klien yang telah dipasang melalui
+  {@link android.app.admin.DevicePolicyManager#installKeyPair
+  installKeyPair()} dengan memanggil metode baru
+  <code>DevicePolicyManager.removeKeyPair()</code>.
+</p>
+
+<h2 id="grant-cert-on-install">Memberi Akses ke Sertifikat Klien
+  saat Pemasangan</h2>
+
+<p>
+  Jika pemilik profil dan pemilik perangkat memberikan kemampuan kepada aplikasi pihak ketiga untuk
+  mengelola sertifikat, aplikasi bisa memberikan akses pada dirinya sendiri ke sertifikat
+  yang dipasangnya tanpa intervensi dari pemilik.
+</p>
+
+<p>
+  API yang sudah ada untuk mengelola sertifikat diperluas untuk mencakup:
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">Transparansi Kebijakan UI Sistem</h2>
+
+<p>
+  Kebijakan yang memengaruhi pengalaman pengguna atau membatasi Settings pengguna sepenuhnya
+  diungkapkan kepada pengguna, serta pemilik profil dan pemilik perangkat bisa memberlakukan
+  kebijakannya kepada departemen TI perusahaan mereka. Selain pesan “Action
+  not allowed” yang konsisten di Settings, administrator TI bisa menyetel
+  pesan dukungan khusus-organisasi di setelan perangkat dengan metode
+  {@link android.app.admin.DevicePolicyManager} baru berikut:
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="restrictions-mgmt">Penyempurnaan Manajemen Pembatasan Aplikasi</h2>
+
+<p>
+  Pemilik perangkat atau profil bisa mengaktifkan aplikasi lain untuk mengelola
+  pembatasan aplikasi melalui metode
+  <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code>
+  baru. Aplikasi yang dipilih bisa memeriksa apakah izin ini telah
+  diberikan dengan memanggil
+  <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code>.
+</p>
+
+<p>
+  Aplikasi yang dipilih untuk mengelola pembatasan aplikasi bisa memanggil {@link
+  android.app.admin.DevicePolicyManager#setApplicationRestrictions
+  setApplicationRestrictions()} dan {@link
+  android.app.admin.DevicePolicyManager#getApplicationRestrictions
+  getApplicationRestrictions()} untuk paket apa pun di pengguna atau profil itu.
+</p>
+
+<h2 id="location-off">Tombol Lokasi Nonaktif</h2>
+
+<p>
+  Pengguna bisa menonaktifkan izin lokasi untuk aplikasi kerja sambil melanjutkan
+  akses informasi lokasi di aplikasi pribadi mereka. Tombol akses
+  lokasi yang terpisah di Location Settings memungkinkan pengguna untuk menolak pembaruan lokasi atau
+  kueri lokasi terakhir untuk aplikasi yang berjalan di profil kerja.
+</p>
+
+<p>
+  Tombol lokasi nonaktif level teratas menonaktifkan akses lokasi untuk
+  profil utama dan profil yang dikelola.
+</p>
+
+<h2 id="custom-provisioning">Penyediaan yang Disesuaikan</h2>
+
+<p>
+  Aplikasi bisa menyesuaikan alur penyediaan pemilik profil dan pemilik perangkat
+  dengan warna dan logo perusahaan.
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    Menyesuaikan warna alur.
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    Menyesuaikan alur dengan logo perusahaan.
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">Multi-Sertifikat CA Wi-Fi</h2>
+
+<p>
+  Pemilik profil dan pemilik perangkat bisa menyetel beberapa sertifikat CA sekaligus untuk
+  konfigurasi Wi-Fi yang diberikan. Bila jaringan Wi-Fi perusahaan memiliki CA terpisah untuk
+  titik akses yang terpisah dengan SSID yang sama, administrator TI bisa menyertakan semua
+  CA yang relevan dalam konfigurasi Wi-Fi menggunakan metode
+  <code>setCaCertificates()</code> baru.
+</p>
+
+<p>
+  API yang ditambah adalah:
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">Pesan Layar Terkunci yang Disesuaikan</h2>
+
+<p>
+  Pemilik perangkat bisa menyediakan informasi pemilik agar ditampilkan di layar kunci.
+  Informasi ini lebih diprioritaskan dari pesan layar kunci pengguna (jika sudah ada
+  yang disetel). Metode {@link android.app.admin.DevicePolicyManager} baru adalah:
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">ConnectionService Profil Kerja</h2>
+
+<p>
+  Pemilik profil bisa menetapkan aplikasi telepon kerja yang menggunakan
+  {@link android.telecom.ConnectionService} khusus-kerja untuk
+  backend panggilan (akun panggilan). Telepon kerja hanya menyimpan log panggilan kerja
+  dan hanya mengandalkan kontak kerja. Pengguna memiliki pengalaman UI
+  saat-panggilan yang konsisten, apa pun aplikasi panggilannya. Panggilan telepon kerja yang masuk ke akun panggilan kerja
+  dibedakan dari telepon pribadi yang masuk
+  ke akun panggilan pribadi.
+</p>
+
+<p>
+  Penelepon harus memeriksa tanda baru
+  <code>android.telecom.Call.PROPERTY_WORK_CALL</code> untuk menentukan apakah telepon tersebut merupakan
+  telepon kerja. Jika merupakan telepon kerja, penelepon harus menunjukkannya,
+  misalnya dengan menambahkan lencana kerja.
+</p>
+
+<h2 id="lock-wp">Mengunci Wallpaper</h2>
+
+<p>
+  Pembatasan pengguna baru (<code>DISALLOW_SET_WALLPAPER</code>) mencegah
+  pengguna mengubah wallpaper mereka. Pemilik perangkat atau pemilik profil tetap bisa
+  mengubah wallpaper, namun mereka hanya bisa mengubah wallpaper
+  untuk pengguna atau profil yang mereka kontrol. Misalnya, pemilik profil tidak bisa mengubah
+  wallpaper pengguna induk, namun pemilik profil utama di profil utama atau
+  pemilik perangkat bisa melakukannya. Pemilik profil atau pemilik perangkat yang ingin mengubah
+  wallpapernya harus memeriksa apakah pengguna atau profil
+  yang mereka kelola memiliki wallpaper ({@link android.app.WallpaperManager#isWallpaperSupported
+  isWallpaperSupported()}) dan apakah mereka diperbolehkan untuk mengubahnya (dengan metode
+  baru<code>WallpaperManager.isWallpaperSettingAllowed()</code>)
+</p>
+
+<h2 id="lock-user-icon">Mengunci Ikon Pengguna</h2>
+
+<p>
+  Pembatasan pengguna baru (<code>DISALLOW_SET_USER_ICON</code>) mencegah
+  pengguna mengubah ikon pengguna mereka. Pemilik perangkat atau pemilik profil pengguna
+  tetap bisa mengubah ikon. Akan tetapi, pemilik profil hanya bisa mengubah ikon
+  pengguna untuk profil yang dikontrolnya.
+</p>
+
+<h2 id="health-monitoring">Pemantauan Kesehatan Perangkat</h2>
+
+<p>
+  Pemilik perangkat atau pemilik profil bisa menggunakan antarmuka
+  <code>HardwarePropertiesManager</code> baru untuk mengambil informasi
+  tentang kesehatan perangkat, seperti suhu CPU atau GPU dan penggunaan CPU. Antarmuka pemantauan
+  baru ini khususnya berguna untuk memantau berjalannya perangkat yang tidak diawasi
+  di lokasi yang jauh.
+</p>

@@ -1,11 +1,12 @@
 page.title=Idioma y configuración regional
+page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
 
 <div id="qv-wrapper">
 <div id="qv">
-<h2>Contenido del documento:</h2>
+<h2>En este documento:</h2>
 <ol>
 	  <li><a href="#preN">Desafíos para la resolución de recursos de idioma</a></li>
     <li><a href="#postN">Mejoras de la estrategia de resolución de recursos</a></li>
@@ -36,22 +37,26 @@ la cantidad expandida de configuraciones regionales para permitir acceso a más 
 <h2 id="preN">Desafíos para la resolución de recursos de idioma</h2>
 
 <p>Antes de Android N, Android no siempre podía
-hacer coincidir correctamente las configuraciones regionales de la aplicación y del sistema. Por ejemplo, supongamos que el idioma predeterminado
- de tu aplicación es inglés de EE. UU., pero que también tiene cadenas en español localizadas en archivos de recursos {@code es_ES}.
-</p>
-<p>Cuando el código Java se refería a las cadenas, resolvía el idioma de las cadenas como
-se muestra a continuación:</p>
-<ul>
-<li>Si un dispositivo estaba configurado en {@code es_MX} (español de México), Android cargaba
-las cadenas de los archivos de recursos {@code es_ES}.</li>
-<li>Si el dispositivo estaba configurado en {@code en_AU}, Android recurría a {@code
-en_US}. El sistema también usaba {@code en_US} de forma predeterminada si el usuario elegía un
-idioma que no era compatible con la aplicación, como el francés.</li>
-</ul>
+ hacer coincidir correctamente las configuraciones regionales de la aplicación y del sistema.</p>
+
+ <p>Por ejemplo, imagina que tienes la siguiente situación:</p>
+ <ul>
+ <li>El idioma predeterminado de la aplicación es {@code en_US} (inglés de EE. UU.), y también tiene
+ cadenas en español localizadas en archivos de recursos {@code es_ES}
+.</li>
+ <li> Se configura un dispositivo en {@code es_MX}. </li>
+
+<p>Cuando el código Java hace referencia a cadenas, el sistema carga
+ las cadenas del archivo de recursos ({@code en_US}) predeterminado, incluso si la aplicación tiene
+ recursos en español localizados en {@code es_ES}. Esto se debe a que, cuando el sistema
+ no puede encontrar una coincidencia exacta, continúa buscando recursos y se quita el
+ código del país de la configuración regional. Finalmente, si no se encuentra una coincidencia, el sistema regresa
+ a la configuración predeterminada, que es {@code en_US}. </p>
 
 
-<p>Estos problemas de resolución surgieron debido a que el sistema quitaba el código de país
-de la configuración regional si no podía encontrar una coincidencia exacta.  Por ejemplo:</p>
+<p>El sistema también usaba {@code en_US} de forma predeterminada si el usuario elegía un idioma que
+ no era compatible con la aplicación, como el francés. Por ejemplo:</p>
+
 <p class="table-caption" id="t-resource-res">
 <strong>Tabla 1.</strong> Resolución de recursos sin una coincidencia de configuración regional exacta.
 </p>
@@ -186,7 +191,7 @@ es compatible con el idioma francés.</p>
 <h2 id="design">Diseño de la aplicación para permitir configuraciones regionales adicionales</h2>
 <h3>API LocaleList</h3>
 
-<p>Android N incorpora una nueva API, {@code LocaleList.GetDefault()},
+<p>Android N incorpora una nueva API, {@code LocaleList.getDefault()},
 que les permite a las aplicaciones consultar directamente la lista de idiomas que ha especificado el usuario. Esta API
  te permite crear un comportamiento de la aplicación
  más sofisticado y una presentación de contenido más optimizada. Por ejemplo, las búsquedas

@@ -1,6 +1,6 @@
 page.title=Android N Developer Preview
 page.tags="preview","developer"
-meta.tags="Preview", "android"
+meta.tags="preview", "android"
 fullpage=true
 forcelocalnav=true
 header.hide=1
@@ -24,10 +24,10 @@ footer.hide=1
       <div class="col-7of16 col-push-9of16" style="padding-left:2em">
         <h1 class="dac-hero-title">Android N Developer Preview</h1>
         <p class="dac-hero-description">
-          为 Android N 做好准备！
+          为 Android N 进行准备！
           在 Nexus 和其他设备上<strong>测试您的应用</strong>。支持新系统行为以<strong>节省电量和内存</strong>。
-          使用<strong>多窗口 UI</strong> 扩展您的应用，以便能够<strong>直接答复通知</strong>及执行其他操作。
 
+          使用<strong>多窗口 UI</strong> 扩展您的应用，以便能够<strong>直接答复通知</strong>及执行其他操作。
 
         </p>
 
@@ -56,7 +56,7 @@ footer.hide=1
 
 <div id="useUpdatedTemplates" style="display:none" class="dac-section dac-slim dac-gray dac-expand">
   <div class="wrap dac-offset-parent">
-    <a class="dac-fab dac-scroll-button" data-scroll-button="" href="#build-apps">
+    <a class="dac-fab dac-scroll-button" data-scroll-button href="#build-apps">
       <i class="dac-sprite dac-arrow-down-gray"></i>
     </a>
     <ul class="dac-actions">
@@ -69,7 +69,7 @@ footer.hide=1
       <li class="dac-action">
         <a class="dac-action-link" href="{@docRoot}preview/support.html">
           <i class="dac-action-sprite dac-sprite dac-auto-chevron-large"></i>
-          查阅发行说明
+          查阅版本说明
         </a>
       </li>
       <li class="dac-action">
@@ -92,17 +92,28 @@ footer.hide=1
       </a></div>
       <div><a href="{@docRoot}preview/support.html">
         <span class="dac-sprite dac-auto-chevron-large"></span>
-        查阅发行说明
+        查阅版本说明
       </a></div>
       <div><a href="{@docRoot}preview/dev-community">
         <span class="dac-sprite dac-auto-chevron-large"></span>
-        加入开发者社区
-      </a></div>
+        加入开发者社区</a>
+</div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div>
 
-<section class="dac-section dac-light"><div class="wrap">
+<section class="dac-section dac-light dac-small" id="latest"><div class="wrap">
+  <h2 class="norule">最新</h2>
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:androidn+tag:featured, type:youtube+tag:androidn+tag:featured"
+    data-sortOrder="-timestamp"
+    data-cardSizes="6x6"
+    data-items-per-page="6"
+    data-maxResults="15"
+    data-initial-results="3"></div>
+</div></section>
+
+<section class="dac-section dac-gray"><div class="wrap">
   <h1 class="dac-section-title">资源</h1>
   <div class="dac-section-subtitle">
     这些必备信息可帮助您的应用为Android N做好准备。

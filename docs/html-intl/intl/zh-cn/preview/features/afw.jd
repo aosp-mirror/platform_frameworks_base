@@ -1,0 +1,556 @@
+page.title=Android for Work 更新
+page.metaDescription=Android N 中的新 Android for Work API 和功能
+page.keywords="android for work", "android N", "enterprise", "QR code"
+
+@jd:body
+
+
+
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+      <ol>
+        <li><a href="#qr">QR 码配置</a>
+</li>
+
+        <li><a href="#sec-challenge">工作资料安全性挑战</a>
+</li>
+
+        <li><a href="#suspend">停用应用访问</a>
+</li>
+
+        <li><a href="#toggle-work">切换工作模式</a>
+</li>
+
+        <li><a href="#always-on-vpn">Always-On VPN</a>
+</li>
+
+        <li><a href="#contacts">联系人与工作资料集成</a>
+</li>
+
+        <li><a href="#remote-reboot">远程重新启动</a>
+</li>
+
+        <li><a href="#disable-roaming">停用数据网络漫游</a>
+</li>
+
+        <li><a href="#process-logging">企业进程记录</a>
+</li>
+
+        <li><a href="#bug-reports">远程错误报告</a>
+</li>
+
+        <li><a href="#remove-cert">移除客户端证书</a>
+</li>
+
+        <li><a href="#grant-cert-on-install">允许访问安装设备上的客户端证书</a>
+</li>
+
+        <li><a href="#ui-policy">系统 UI 策略透明度</a>
+</li>
+
+        <li><a href="#restrictions-mgmt">应用限制管理增强</a>
+</li>
+
+        <li><a href="#location-off">位置关闭开关</a>
+</li>
+
+        <li><a href="#custom-provisioning">自定义配置</a>
+</li>
+
+        <li><a href="#multi-wifi-ca">多 Wi-Fi CA 证书</a>
+</li>
+
+        <li><a href="#custom-lock">自定义锁屏消息</a>
+</li>
+
+        <li><a href="#work-connectionservice">工作资料 ConnectionService</a>
+</li>
+
+        <li><a href="#lock-wp">锁定壁纸</a>
+</li>
+
+        <li><a href="#lock-user-icon">锁定壁纸</a>
+</li>
+
+        <li><a href="#health-monitoring">设备运行状况监测</a>
+</li>
+
+      </ol>
+
+    <h2>另请参阅</h2>
+    <ul>
+      <li><a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 参考</a>
+</li>
+    </ul>
+  </div>
+</div>
+
+<p>本文介绍了 Android N 中提供的新 Android for Work 功能。
+</p>
+
+<h2 id="qr">QR 码配置</h2>
+
+<p>
+  Android for Work 现在支持使用 QR 码来配置企业负责的设备。
+安装向导现在允许您通过扫描 QR 码来配置设备。
+
+</p>
+
+<h2 id="sec-challenge">工作资料安全性挑战</h2>
+
+<p>
+  个人资料所有者可以要求用户为在工作资料中运行的应用指定安全性挑战。
+系统会在用户尝试打开任何工作应用时显示安全性挑战。
+如果用户成功完成安全性挑战，系统可解锁工作资料并将其解密（如果需要）。
+
+
+</p>
+
+<p>
+  如果个人资料所有者发送一项 {@link
+  android.app.admin.DevicePolicyManager#ACTION_SET_NEW_PASSWORD} Intent，系统会提示用户设置一项安全性挑战。
+个人资料所有者也可以发送一项 <code>ACTION_SET_NEW_PARENT_PROFILE_PASSWORD</code> Intent 来提示用户设置设备锁定。
+
+
+</p>
+
+<p>
+  个人资料所有者可以选择为工作挑战设置不同于其他设备密码策略的密码策略。
+例如，设备挑战响应的最小长度可以与其它密码要求的长度不同。
+
+个人资料所有者使用常见的 {@link android.app.admin.DevicePolicyManager} 方法来设置挑战策略，如 {@link
+  android.app.admin.DevicePolicyManager#setPasswordQuality
+  setPasswordQuality()} 和 {@link
+  android.app.admin.DevicePolicyManager#setPasswordMinimumLength
+  setPasswordMinimumLength()}。
+
+个人资料所有者还能通过使用由新的 <code>DevicePolicyManager.getParentProfileInstance()</code> 方法返回的 {@link android.app.admin.DevicePolicyManager} 实例来设置设备锁定， 
+
+
+此外，个人资料所有者可以使用 {@link android.app.admin.DevicePolicyManager} 类的新 <code>setOrganizationColor()</code> 和 <code>setOrganizationName()</code> 方法来自定义工作挑战的凭据屏幕。
+
+
+
+</p>
+
+<p>
+  有关新方法和常量的详细信息，请参阅 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 参考</a> 中的 <code>DevicePolicyManager</code> 参考页面。
+
+</p>
+
+<h2 id="suspend">停用应用访问</h2>
+
+<p>
+  设备所有者和个人资料所有者可以通过调用新 <code>DevicePolicyManager.setPackagesSuspended()</code> 方法来临时暂停软件包访问。
+
+所有者可以用同样的方法来重新启用这些软件包。
+</p>
+
+<p>
+  在软件包被暂停期间，它不能启动 Activity ，到软件包的通知会被阻止，而<a href="{@docRoot}guide/components/recents.html">概览屏幕</a>中的应用条目会被隐藏。
+
+  暂停的软件包不会显示在<a href="{@docRoot}guide/components/recents.html">概览屏幕</a>中，并且它们不能显示对话（包括提醒和 Snackbar），
+也不能播放音频或振动设备。
+
+</p>
+
+<p>
+  启动器应对暂停的应用应用一个独特的 UI，以指示应用目前不可用；例如它们可以将应用图标显示为灰色。
+
+启动器可以通过调用新 <code>DevicePolicyManager.getPackageSuspended()</code> 方法来确定应用是否被暂停。
+
+</p>
+
+<h2 id="toggle-work">切换工作模式</h2>
+
+<p>
+  在双个人资料设备上，用户可以打开或关闭工作模式。在工作模式关闭时，托管个人资料会被暂时关闭。
+工作资料应用、后台同步和通知都会被停用，包括个人资料所有者应用。
+
+在工作资料被停用时，系统会显示一个持久的状态图标，以提醒用户他们将无法启动工作应用。
+
+系统启动器会指示工作应用和小工具都将无法访问。
+
+</p>
+
+<h2 id="always-on-vpn">Always-On VPN</h2>
+
+<p>
+  设备所有者和个人资料所有者可以要求工作应用始终通过指定的 VPN 连接到网络。
+如果所有者设置了此要求，设备会在启动时自动开始 VPN。
+
+</p>
+
+<p>
+  所有者可以通过调用新 <code>DevicePolicyManager.setAlwaysOnVpnPackage()</code> 方法来要求使用 VPN。
+通过调用新 <code>DevicePolicyManager.GetAlwaysOnVpnPackage()</code> 方法来确定所有者是否设置了 VPN 要求。
+
+
+</p>
+
+<p>
+  由于 VPN 服务无需应用交互即可由系统直接绑定，因此，VPN 客户端必须针对 Always on VPN 处理新的入口点。
+像以前一样，您可以通过使用与操作 {@link android.net.VpnService android.net.VpnService} 匹配的 Intent 过滤器查找活动的服务。
+
+
+</p>
+
+<p>
+  用户可以使用 <strong>Settings &gt; More &gt; VPN</strong> 屏幕来手动设置实现 {@link
+  android.net.VpnService} 的 Always on VPN 客户端。
+
+</p>
+
+<h2 id="contacts">联系人与工作资料集成</h2>
+
+<p>
+  个人资料所有者可以允许主用户对工作联系人进行本地搜索和目录查找。
+例如，用户可以从他们的个人拨号器或联系人应用访问个人和工作目录联系人（如果他们的个人资料管理员允许）。
+
+
+</p>
+
+<p>
+  利用联系人提供程序的开发者可以使用企业联系人 API 从主用户访问工作资料目录条目（如果策略允许）：
+
+
+</p>
+
+<ul>
+  <li><code>ContactsContract.Contacts.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Phone.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Email.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Callable.ENTERPRISE_CONTENT_FILTER_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.ENTERPRISE_CONTENT_URI</code>
+  </li>
+
+  <li><code>ContactsContract.Directory.isEntepriseDirectoryId()</code>
+  </li>
+</ul>
+
+<p>
+  个人资料所有者可以使用以下新方法来控制主用户的工作联系人可见性：
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setCrossProfileContactsSearchDisabled()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.getCrossProfileContactsSearchDisabled()</code>
+  </li>
+</ul>
+
+<h2 id="remote-reboot">远程重新启动</h2>
+
+<p>
+  设备所有者可以远程重新启动设备。有些情况下，部署在公共场所的封装内设备会阻止访问电源按钮。
+如果设备需要重新启动，管理员可以使用新 <code>DevicePolicyManager.reboot()</code> 方法来进行此操作。
+
+
+</p>
+
+<h2 id="disable-roaming">停用数据网络漫游</h2>
+
+<p>
+  设备所有者可以使用新的 {@link
+  android.os.UserManager} 用户限制 <code>DISALLOW_DATA_ROAMING</code> 来停用数据网络漫游。
+</p>
+
+<h2 id="process-logging">企业进程记录</h2>
+
+<p>
+  设备所有者可以通过远程跟踪设备活动来识别可疑活动 ，包括应用启动、ADB Activity 和屏幕解锁。
+进程记录不要求用户同意。
+若要检索记录，设备所有者可以使用 <code>DevicePolicyManager.setSecurityLoggingEnabled()</code> 来启用设备记录。
+
+</p>
+
+<p>
+  API 更改包括：
+</p>
+
+<ul>
+
+  <li>
+    新类 <code>android.app.admin.SecurityLog</code> 和它的方法 
+
+  </li>
+
+  <li>
+    <code>void DevicePolicyManager.setSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>boolean DevicePolicyManager.isSecurityLoggingEnabled()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrieveSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>List&lt;SecurityEvent&gt;
+      DevicePolicyManager.retrievePreRebootSecurityLogs()</code>
+  </li>
+
+  <li>
+    <code>void DeviceAdminReceiver.onSecurityLogsAvailable()</code>
+  </li>
+</ul>
+
+<h2 id="bug-reports">远程错误报告</h2>
+
+<p>
+  设备所有者可以远程触发和检索包含设备状态转储文件的错误报告，这允许对已知事故或受损害的设备进行取证调查。
+
+鉴于错误报告的详细性质，需要经过用户同意。
+
+</p>
+
+<p>
+  Android N 包括以下 API 添加来支持此功能。如需详细信息，请参阅 <a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK 参考</a>。
+
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.requestBugreport()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportFailed()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportShared()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.onBugreportSharingDeclined()</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING</code>
+  </li>
+
+  <li>
+    <code>DeviceAdminReceiver.BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE</code>
+  </li>
+</ul>
+
+<h2 id="remove-cert">移除客户端证书</h2>
+
+<p>
+  个人资料所有者和设备所有者现在可以通过调用新方法 <code>DevicePolicyManager.removeKeyPair()</code> 来移除通过 {@link android.app.admin.DevicePolicyManager#installKeyPair
+  installKeyPair()} 安装的客户端证书。
+
+
+</p>
+
+<h2 id="grant-cert-on-install">允许访问安装设备上的客户端证书
+</h2>
+
+<p>
+  如果个人资料所有者或设备所有者授予第三方应用管理证书的权限，应用便可授予自身访问其所安装证书的权限，无需所有者进行任何干预。
+
+
+</p>
+
+<p>
+  用于管理证书的现有 API 经过扩展，现包括：
+</p>
+
+<ul>
+  <li><code>DevicePolicyManager.installKeyPair()</code>
+  </li>
+</ul>
+
+<h2 id="ui-policy">系统 UI 策略透明度</h2>
+
+<p>
+  影响用户体验或限制用户设置的策略是向用户完全公开的，个人资料所有者和设备所有者可以将策略归于他们公司的 IT 部门。
+
+除了“Settings”中一贯的“Action not allowed”消息之外，IT 管理员可以通过以下新 {@link android.app.admin.DevicePolicyManager} 方法在设备设置中设置组织特定的支持消息：
+
+
+
+</p>
+
+<ul>
+  <li>
+    <code>DevicePolicyManager.setShortSupportMessage()</code>
+  </li>
+
+  <li>
+    <code>DevicePolicyManager.setLongSupportMessage()</code>
+  </li>
+</ul>
+
+<h2 id="restrictions-mgmt">应用限制管理增强</h2>
+
+<p>
+  设备或个人资料所有者可以通过新 <code>DevicePolicyManager.setApplicationRestrictionsManagingPackage()</code> 方法启用另一项应用，以管理应用限制。
+
+
+提名的应用可以通过调用 <code>DevicePolicyManager.isCallerApplicationRestrictionsManagingPackage()</code> 来检查是否已被授予此权限。
+
+
+</p>
+
+<p>
+  提名管理应用限制的应用可以为该用户或个人资料内的任何软件包调用 {@link
+  android.app.admin.DevicePolicyManager#setApplicationRestrictions
+  setApplicationRestrictions()} 和 {@link
+  android.app.admin.DevicePolicyManager#getApplicationRestrictions
+  getApplicationRestrictions()}。
+</p>
+
+<h2 id="location-off">位置关闭开关</h2>
+
+<p>
+  用户可以停用工作应用的位置权限，同时仍可继续在个人应用中访问位置信息。
+Location Settings 中的一个单独的位置访问开关允许用户拒绝对工作资料内运行的应用的位置更新或最后位置查询。
+
+
+</p>
+
+<p>
+  顶层位置关闭开关停用对主个人资料和托管个人资料的位置访问权限。
+
+</p>
+
+<h2 id="custom-provisioning">自定义配置</h2>
+
+<p>
+  应用可以用企业颜色和徽标来自定义个人资料所有者和设备所有者配置流程。
+
+</p>
+
+<dl>
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_MAIN_COLOR</code>
+  </dt>
+
+  <dd>
+    自定义流程颜色。
+  </dd>
+
+  <dt>
+    <code>DevicePolicyManager.EXTRA_PROVISIONING_LOGO_URI</code>
+  </dt>
+
+  <dd>
+    用企业徽标来自定义流程。
+  </dd>
+</dl>
+
+<h2 id="multi-wifi-ca">多 Wi-Fi CA 证书</h2>
+
+<p>
+  个人资料所有者和设备所有者可以为一项指定的 Wi-Fi 配置设置多个 CA 证书。
+如果企业 Wi-Fi 网络针对有相同 SSID 的独立接入点设置了独立 CA，IT 管理员可以使用新 <code>setCaCertificates()</code> 方法将所有相关 CA 包括在 Wi-Fi 配置中。
+
+
+
+</p>
+
+<p>
+  添加的 API 有：
+</p>
+
+<ul>
+  <li>
+    <code>WifiEnterpriseConfig.setCaCertificates()</code>
+  </li>
+
+  <li>
+    <code>WifiEnterpriseConfig.getCaCertificates()</code>
+  </li>
+</ul>
+
+<h2 id="custom-lock">自定义锁屏消息</h2>
+
+<p>
+  设备所有者可以提供将显示在锁屏上的所有者信息。
+  该信息的优先级高于用户锁屏消息（如果已设置）。
+新 {@link android.app.admin.DevicePolicyManager} 方法有：
+</p>
+
+<ul>
+  <li>
+    <code>setDeviceOwnerLockScreenInfo()</code>
+  </li>
+
+  <li>
+    <code>getDeviceOwnerLockScreenInfo()</code>
+  </li>
+</ul>
+
+<h2 id="work-connectionservice">工作资料 ConnectionService</h2>
+
+<p>
+  个人资料所有者可以为调用后端（调用帐户）指定一项使用工作特定 {@link android.telecom.ConnectionService} 的工作拨号器应用。
+
+工作拨号器会保持仅限工作的调用记录，并仅依赖于工作联系人。
+无论拨号应用是什么，用户都将获得一致的调用内 UI 体验。
+传入到工作调用帐户的工作调用会与传入到个人调用帐户的个人调用相区别。
+
+
+</p>
+
+<p>
+  拨号器应检查新标记 <code>android.telecom.Call.PROPERTY_WORK_CALL</code>，以确定一项调用是否是工作调用。
+
+如果一项调用是工作调用，拨号器应通过添加工作徽章等方式做如此指示。
+
+</p>
+
+<h2 id="lock-wp">锁定壁纸</h2>
+
+<p>
+  新的用户限制 (<code>DISALLOW_SET_WALLPAPER</code>) 可以阻止用户更改他们的壁纸。
+设备所有者或个人资料所有者仍可以改变壁纸，但只能更改他们控制的用户或个人资料的壁纸。
+
+例如，个人资料所有者不能更改父用户的壁纸，但主个人资料的个人资料所有者或设备所有者却可以。
+
+想要更改壁纸的个人资料所有者或设备所有者应检查他们管理的用户或个人资料是否有壁纸 ({@link android.app.WallpaperManager#isWallpaperSupported
+  isWallpaperSupported()}) 以及他们是否被允许更改这个壁纸（通过新方法 <code>WallpaperManager.isWallpaperSettingAllowed()</code>）。
+
+
+
+</p>
+
+<h2 id="lock-user-icon">锁定用户图标</h2>
+
+<p>
+  新的用户限制 (<code>DISALLOW_SET_USER_ICON</code>) 阻止用户更改其用户图标。 
+用户的设备所有者或个人资料所有者仍可以更改图标。
+但是个人资料所有者只能更改其控制的个人资料的用户图标。
+
+</p>
+
+<h2 id="health-monitoring">设备运行状况监测</h2>
+
+<p>
+  设备所有者或个人资料所有者可以使用新的 <code>HardwarePropertiesManager</code> 界面来检索有关设备运行状况的信息，如 CPU 或 GPU 温度和 CPU 使用率。
+
+新的监测界面特别适合监测在远程位置运行的无人值守设备。
+
+
+</p>

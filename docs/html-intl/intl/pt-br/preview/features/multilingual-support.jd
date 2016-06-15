@@ -1,4 +1,4 @@
-page.title=Idioma e localidade
+page.title=Idioma e localidades
 page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
@@ -37,22 +37,26 @@ do maior número de localidades para oferecer suporte a usuários multilíngues.
 <h2 id="preN">Desafios ao resolver recursos de idioma</h2>
 
 <p>Antes do Android N, o Android nem sempre conseguia
- corresponder aplicativos e localidades de sistema corretamente. Por exemplo, supondo que o idioma padrão do seu aplicativo
- seja o inglês americano, mas que ele também tenha strings em espanhol em arquivos de recurso {@code es_ES}
-.</p>
-<p>Quando seu código Java fizesse referência a strings, ele resolveria os idiomas das strings da
-seguinte maneira:</p>
-<ul>
-<li>Se um dispositivo fosse definido como {@code es_MX} (espanhol do México), o Android carregaria
-strings dos arquivos de recurso {@code es_ES}.</li>
-<li>Se um dispositivo fosse definido como {@code en_AU}, o Android assumiria {@code
-en_US}. O sistema também assumiria {@code en_US} como padrão se um usuário escolhesse um
-idioma não suportado pelo aplicativo, como o francês.</li>
-</ul>
+ fazer a correspondência correta entre aplicativos e localidades do sistema.</p>
+
+ <p>Considere, por exemplo, que temos a seguinte situação:</p>
+ <ul>
+ <li>o idioma padrão do seu aplicativo é {@code en_US} (inglês - EUA), mas ele também tem
+ strings em espanhol localizadas em arquivos de recursos {@code es_ES}
+.</li>
+ <li> Um dispositivo está definido para {@code es_MX}. </li>
+
+<p>Quando seu código Java usa strings como referência, o sistema carrega
+strings do arquivo de recursos padrão ({@code en_US}), mesmo que o aplicativo tenha recursos em
+espanhol localizados em {@code es_ES}. Isso acontece porque, quando
+ não consegue encontrar uma correspondência exata, o sistema continua procurando recursos após extrair o
+ código do país da localidade. Por fim, se não há correspondência, o sistema volta
+ ao padrão, que é {@code en_US}. </p>
 
 
-<p>Esses problemas de resolução surgiram porque o sistema removia o código de país
- da localidade se não encontrasse uma correspondência exata.  Por exemplo:</p>
+<p>O sistema também usaria {@code en_US} como padrão se o usuário escolhesse um idioma
+ não suportado pelo aplicativo, como o francês. Por exemplo:</p>
+
 <p class="table-caption" id="t-resource-res">
 <strong>Tabela 1.</strong> Resolução de recurso sem uma correspondência exata de localidade.
 </p>
@@ -187,7 +191,7 @@ o francês.</p>
 <h2 id="design">Projetar seu aplicativo para oferecer suporte a localidades adicionais</h2>
 <h3>LocaleList API</h3>
 
-<p>O Android N adiciona uma nova API {@code LocaleList.GetDefault()}
+<p>O Android N adiciona uma nova API {@code LocaleList.getDefault()}
 que permite que os aplicativos façam uma consulta direta na lista de idiomas especificados por um usuário. Essa API
 permite que você crie um comportamento mais sofisticado
  para o aplicativo e uma exibição de conteúdo mais otimizada. Por exemplo, uma pesquisa
@@ -204,7 +208,7 @@ os aplicativos podiam armazenar alguns números e datas como strings no código
 nos arquivos de recurso.  No entanto, com o conjunto mais amplo de localidades suportadas do Android,
 podem existir
 diferenças significativas nos formatos de data, hora, moeda e informações
-similares dentro da mesma localidade. Colocar formatos no código podem produzir uma
+similares dentro da mesma localidade. Colocar formatos no código pode produzir uma
 experiência confusa para os usuários.  Portanto, ao desenvolver para o Android N,
 não deixe de usar formatadores em vez de strings no código para números e datas.</p>
 

@@ -6,7 +6,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <div id="qv-wrapper">
   <div id="qv">
-    <h2>Contenido del documento</h2>
+    <h2>En este documento</h2>
       <ol>
         <li><a href="#overview">Información general</a></li>
         <li><a href="#lifecycle">Ciclo de vida en modo de ventanas múltiples</a></li>
@@ -19,15 +19,16 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       <ol>
         <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">Aplicación de ejemplo para la
           prueba de ventanas múltiples</a></li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Cinco tips para prepararse para ventanas múltiples en Android N</a></li>
       </ol>
   </div>
 </div>
 
 <p>
   Android N agrega compatibilidad con la visualización de más de una aplicación
-   a la vez. En dispositivos portátiles, se pueden ejecutar dos aplicaciones una al lado de la otra o
+ a la vez. En dispositivos portátiles, se pueden ejecutar dos aplicaciones una al lado de la otra o
   una por encima de la otra en modo de <em>pantalla dividida</em>. En dispositivos de TV, las aplicaciones pueden
-  usar el modo <em>imagen en imagen</em> para continuar la reproducción de video mientras los usuarios
+  usar el modo <em>picture-in-picture</em> para continuar la reproducción de video mientras los usuarios
   interactúan con otra aplicación.
 </p>
 
@@ -56,7 +57,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   </li>
 
   <li>En dispositivos Nexus Player con Android N, las aplicaciones pueden ubicarse automáticamente
-  en <a href="picture-in-picture.html">modo de imagen en imagen</a>, lo que les permite
+  en <a href="picture-in-picture.html">modo Picture-in-picture</a>, lo que les permite
   continuar mostrando contenido mientras el usuario explora o interactúa con
   otras aplicaciones.
   </li>
@@ -129,11 +130,13 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 
 <p>
   Cuando el usuario coloca una aplicación en modo de ventanas múltiples, el sistema le notifica a la
-  actividad acerca de un cambio de configuración, tal como se especifica en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
-  tiempo de ejecución</a>. Básicamente, este cambio tiene las mismas consecuencias en el ciclo de vida
-  de la actividad que cuando el sistema notifica a la aplicación que el dispositivo cambió de
-  modo vertical a modo horizontal, excepto porque se modifican las dimensiones del dispositivo
-  en lugar de intercambiarse solamente. Como se aborda en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
+ actividad de un cambio de configuración, tal como se especifica en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
+ tiempo de ejecución</a>. Esto también sucede cuando el usuario modifica el tamaño de la aplicación o coloca la aplicación
+ nuevamente en el modo de pantalla completa.
+  Básicamente, este cambio tiene las mismas consecuencias en el ciclo de vida
+ de la actividad que cuando el sistema notifica a la aplicación que el dispositivo cambió de
+ modo vertical a modo de paisaje, excepto porque se modifican las dimensiones del dispositivo
+ en lugar de intercambiarse solamente. Como se aborda en <a href="{@docRoot}guide/topics/resources/runtime-changes.html">Control de cambios en
   tiempo de ejecución</a>, tu actividad puede administrar el cambio de configuración por sí misma, o
   puede permitir que el sistema destruya la actividad y la vuelva a crear con las nuevas
   dimensiones.
@@ -154,8 +157,10 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
   Si tu aplicación está orientada a Android N, puedes configurar cómo y
   si quieres que las actividades de tu aplicación admitan la visualización de ventanas múltiples. Puedes establecer
   atributos en tu manifiesto para controlar el tamaño y el diseño.
-  La configuración de atributos de una actividad raíz aplica a todas las actividades
-  de su pila de tareas.
+  La configuración de atributos de una actividad raíz se aplica a todas las actividades
+ de su pila de tareas. Por ejemplo, si 
+  <code>android:resizeableActivity</code> está configurado en true para la actividad raíz, se puede modificar el tamaño de todas las actividades
+ de la pila de tareas.
 </p>
 
 <p class="note">
@@ -171,7 +176,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <h4 id="resizeableActivity">android:resizeableActivity</h4>
 <p>
   Establece este atributo en el nodo <code>&lt;activity&gt;</code> o
-  <code>&lt;application&gt;</code> de tu manifiesto para habilitar o deshabilitar la visualización
+  <code>&lt;application&gt;</code> de tu manifiesto para habilitar o inhabilitar la visualización
   en modo de ventanas múltiples:
 </p>
 
@@ -196,7 +201,7 @@ android:resizeableActivity=["true" | "false"]
 
 <p>
   Establece este atributo en el nodo <code>&lt;activity&gt;</code> de tu manifiesto
- para indicar si la actividad admite la visualización de imagen en imagen. Este
+ para indicar si la actividad admite la visualización de Picture-in-picture. Este
   atributo se ignora si <code>android:resizeableActivity</code> es false.
 </p>
 
@@ -235,16 +240,16 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <dd>
     Ubicación inicial de la actividad cuando se inicia en modo de forma libre. Consulta la referencia
-    {@link android.view.Gravity} para obtener valores adecuados.
+ {@link android.view.Gravity} para obtener valores adecuados.
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>, <code>android:minimalWidth</code>
   </dt>
 
   <dd>
     Altura y ancho mínimos para la actividad tanto en el modo de pantalla dividida como en el
-    modo de forma libre. Si el usuario mueve la línea divisoria en el modo de pantalla dividida
+ modo de forma libre. Si el usuario mueve la línea divisoria en el modo de pantalla dividida
     para reducir el tamaño respecto del tamaño mínimo especificado, el sistema recorta
     la actividad para ajustarla a los requisitos del usuario.
   </dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -295,13 +301,14 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   Se agregaron los siguientes métodos nuevos a la clase {@link android.app.Activity}
-  para admitir la visualización de ventanas múltiples. Para obtener información detallada sobre cada método, consulta la
-  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia del N Preview SDK</a>.
+ para admitir la visualización de ventanas múltiples. Para obtener información detallada sobre cada método, consulta la
+  <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referencia sobre N Preview SDK
+</a>.
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -309,54 +316,54 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
-    Realiza una llamada para averiguar si la actividad está en modo de imagen en imagen.
+    Realiza una llamada para averiguar si la actividad está en modo Picture-in-picture.
 
     <p class="note">
-      <strong>Nota:</strong> El modo de Picture-in-Picture es un caso especial del
-      modo de ventanas múltiples. Si <code>myActivity.inPictureInPicture()</code>
-      devuelve true, <code>myActivity.inMultiWindow()</code> también devuelve
-      true.
+      <strong>Nota:</strong> El modo Picture-in-picture es un caso especial del
+ modo de ventanas múltiples. Si <code>myActivity.isInPictureInPictureMode()</code>
+ devuelve un valor true, <code>myActivity.isInMultiWindowMode()</code> también
+ devuelve un valor true.
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
     El sistema llama a este método siempre que la actividad entra en modo de ventanas
-    múltiples o sale de él. El sistema le pasa al método un valor de true si la
-    actividad entra en modo de ventanas múltiples, y false si la actividad
-    sale del modo de ventanas múltiples.
+ múltiples o sale de él. El sistema le pasa al método un valor de true si la
+ actividad entra en modo de ventanas múltiples y false si la actividad
+ sale del modo de ventanas múltiples.
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
-    El sistema llama a este método siempre que la actividad entre en modo de imagen en imagen
-    o sale de él. El sistema le pasa al método un valor de true si
-    la actividad entra en modo de imagen en imagen, y false si la actividad
-    sale del modo de imagen en imagen.
+    El sistema llama a este método siempre que la actividad entra en modo Picture-in-picture
+ o sale de él. El sistema le pasa al método un valor de true si
+ la actividad entra en modo Picture-in-picture y false si la actividad
+ sale de dicho modo.
   </dd>
 </dl>
 
 <p>
   También hay versiones {@link android.app.Fragment} de cada uno de esos
-  métodos; por ejemplo, <code>Fragment.inMultiWindow()</code>.
+  métodos; por ejemplo, <code>Fragment.isInMultiWindowMode()</code>.
 </p>
 
-<h3 id="entering-pip">Cómo entrar en modo de imagen en imagen</h3>
+<h3 id="entering-pip">Cómo entrar en modo Picture-in-picture</h3>
 
 <p>
-  Para que una actividad entre en modo de imagen en imagen, debes llamar al nuevo método
-  <code>Activity.enterPictureInPicture()</code>. Este método no tiene efecto si
-  el dispositivo no admite el modo de imagen en imagen. Para obtener más información,
+  Para que una actividad entre en modo de Picture-in-picture, debes llamar al nuevo método
+  <code>Activity.enterPictureInPictureMode()</code>. Este método no tiene efecto si
+ el dispositivo no admite el modo de imagen en imagen. Para obtener más información,
   consulta la documentación de <a href="picture-in-picture.html">Picture-in-Picture</a>.
 </p>
 
@@ -490,7 +497,7 @@ android:supportsPictureInPicture=["true" | "false"]
   Si tu aplicación no declara una orientación fija, debes iniciar tu aplicación
   en un dispositivo con Android N e intentar colocar la aplicación en
   modo de pantalla dividida. Cuando se modifique el tamaño de la aplicación de forma forzada,
- comprueba que la experiencia de usuario sea aceptable.
+ verifica que la experiencia de usuario sea aceptable.
 </p>
 
 <p>
@@ -512,19 +519,19 @@ android:supportsPictureInPicture=["true" | "false"]
   durante un momento el botón Overview. Verifica que la aplicación pase de un modo a otro correctamente.
   </li>
 
-  <li>Inicia la aplicación directamente en modo de ventanas múltiples y comprueba que se
+  <li>Inicia la aplicación directamente en modo de ventanas múltiples y verifica que se
   inicie correctamente. Puedes iniciar una aplicación en modo de ventanas múltiples al presionar el
   botón Overview, luego presionar durante un momento la barra de título de la aplicación y arrastrarla
   a una de las áreas resaltadas de la pantalla.
   </li>
 
   <li>Cambia el tamaño de tu aplicación en modo de pantalla dividida al arrastrar la línea divisoria.
-  Comprueba que la aplicación cambie de tamaño sin fallar y que estén visibles los elementos 
+  Verifica que la aplicación cambie de tamaño sin fallar y que estén visibles los elementos 
  necesarios de la IU.
   </li>
 
   <li>Si especificaste dimensiones mínimas para tu aplicación, intenta cambiar el tamaño
-  de la aplicación a dimensiones más bajas que las especificadas. Comprueba que no puedas modificar el tamaño de la aplicación
+  de la aplicación a dimensiones más bajas que las especificadas. Verifica que no puedas modificar el tamaño de la aplicación
   para que sea más pequeña que la dimensión mínima especificada.
   </li>
 
@@ -554,19 +561,19 @@ android:supportsPictureInPicture=["true" | "false"]
 
   <li>En modo de pantalla dividida, prueba mover la barra divisora para agrandar y
   achicar la aplicación. Realiza estas operaciones en las configuraciones una al lado de la otra y
-  una encima de la otra. Comprueba que la aplicación no falle,
+  una encima de la otra. Verifica que la aplicación no falle,
   que las funcionalidades necesarias estén visibles y que la operación de cambio de tamaño no demore
   mucho.
   </li>
 
-  <li>Realiza varias operaciones de cambio de tamaño en una sucesión rápida. Comprueba que tu
+  <li>Realiza varias operaciones de cambio de tamaño en una sucesión rápida. Verifica que tu
   aplicación no falle ni pierda memoria. Para obtener información acerca de cómo comprobar el uso de memoria
   de tu aplicación, consulta <a href="{@docRoot}tools/debugging/debugging-memory.html">
   Averiguación del uso de RAM</a>.
   </li>
 
   <li>Usa tu aplicación normalmente en diferentes configuraciones de ventanas y
-  verifica que la aplicación se comporte correctamente. Comprueba que el texto sea legible y que
+  verifica que la aplicación se comporte correctamente. Verifica que el texto sea legible y que
   los elementos de la IU sean lo suficientemente grandes para interactuar con ellos.
   </li>
 </ul>

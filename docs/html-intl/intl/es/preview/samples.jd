@@ -10,8 +10,8 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 <p class="note">
-  <strong>Nota:</strong> Estos proyectos descargables están diseñados
-   para usarse con Gradle y Android Studio.
+  <strong>Nota:</strong> Estos proyectos que se pueden descargar están diseñados
+  para su uso con Gradle y Android Studio.
 </p>
 
 
@@ -64,7 +64,7 @@ Obtener en GitHub</a>
 <h3 id="fbe">Inicio directo</h3>
 <img src="{@docRoot}preview/images/sample-directboot.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
-  En este ejemplo se demuestra la manera de almacenar datos, y de acceder a ellos, en un medio de almacenamiento cifrado por
+  En este ejemplo se demuestra la manera de almacenar datos, y de acceder a ellos, en un medio de almacenamiento encriptado por
   dispositivo que esté siempre disponible mientras el dispositivo se haya iniciado.
 </p>
 <p>

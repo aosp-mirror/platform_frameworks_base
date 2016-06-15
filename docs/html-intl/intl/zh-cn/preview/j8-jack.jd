@@ -15,23 +15,23 @@ page.keywords="android N", "Java 8", "Jack"
   </div>
 </div>
 
-<p>Android N 支持 Java 8 语言功能，您可以在开发面向 Android N 的应用时使用这些功能。本页面介绍了 Android N Preview中支持的新语言功能、如何正确设置项目以使用这些功能，以及您可能遇到的任何已知问题。
+<p>Android N 支持 Java 8 语言功能，您可以在开发面向 Android N 的应用时使用这些功能。本页面介绍了 Android N Preview 中支持的新语言功能、如何正确设置项目以使用这些功能，以及您可能遇到的任何已知问题。
 
 
 
 
 </p>
 
-<p>要开始使用这些功能，您需要下载并设置 Android Studio 2.1（预览版）和 Android N Preview SDK，包括所需的 Jack 工具链和更新的 Android Plugin for Gradle。如果您尚未安装 Android N Preview SDK，请参阅 <a href="{@docRoot}preview/setup-sdk.html">Android N 开发设置</a>。
+<p>要开始使用这些功能，您需要下载并设置 Android Studio 2.1 和 Android N Preview SDK，包括所需的 Jack 工具链和更新的 Android Plugin for Gradle。
 
-
+如果您尚未安装 Android N Preview SDK，请参阅 <a href="{@docRoot}preview/setup-sdk.html">Develop for Android N 设置</a>。
 </p>
 
 
 
 <p class="note">
-  <strong>注</strong>：开发面向 Android N 平台的应用并不要求必须使用新的 Java 8 语言功能。如果您不想使用 Java 8 语言功能编写代码，您可以将项目的源和目标兼容性值保留为 Java 7，但您仍必须使用 JDK 8 进行编译，以便针对 Android N 平台进行构建。
-
+  <strong>注：</strong>开发面向 Android N 平台的应用并不要求必须使用新的 Java 8 语言功能。
+如果您不想使用 Java 8 语言功能编写代码，您可以将项目的源和目标兼容性值保留为 Java 7，但您仍必须使用 JDK 8 进行编译，以便针对 Android N 平台进行构建。
 
 
 
@@ -54,60 +54,72 @@ page.keywords="android N", "Java 8", "Jack"
   </li>
 
   <li>
-    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">Lambda 表达式</a>
- 
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">Lambda 表达式</a>（也在 API 级别 23 及更低版本中使用）
+
   </li>
 
   <li>
     <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">重复注解</a>
 
   </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">方法引用</a>（也在 API 级别 23 及更低版本中使用）
+
+  </li>
 </ul>
 
+<p class="note">
+  <strong>注：</strong>在 Android 的较早版本中测试 Lambda 表达式和方法引用，前往您的 {@code build.gradle} 文件，将 {@code compileSdkVersion} 和 {@code targetSdkVersion} 设置为 23 或更低版本。
+
+
+您仍需要<a href="#configuration">启用 Jack 工具链</a>以使用这些 Java 8 功能。
+
+</p>
 
 <p>
   此外，现已可使用以下 Java 8 语言功能 API：
 </p>
 
 <ul>
-  <li>Reflection 和语言相关 API：
-  </li>
-
-  <li style="list-style: none; display: inline">
+  <li>反映和语言相关 API：
     <ul>
-      <li>{@code java.lang.FunctionalInterface}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html">{@code java.lang.FunctionalInterface}</a>
+
       </li>
 
-      <li>{@code java.lang.annotation.Repeatable}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Repeatable.html">{@code java.lang.annotation.Repeatable}</a>
+
       </li>
 
-      <li>{@code java.lang.reflect.Method.isDefault()}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html#isDefault--">{@code java.lang.reflect.Method.isDefault()}</a>
+
       </li>
 
-      <li>以及与重复注解关联的 Reflection API，例如
-      {@code AnnotatedElement.getAnnotationsByType(Class)}
+      <li>和与重复注解关联的反映 API，例如<a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">{@code AnnotatedElement.getAnnotationsByType(Class)}</a>
+
+
       </li>
     </ul>
   </li>
-  <li>Utility API：
-  </li>
 
-  <li style="list-style: none; display: inline">
+  <li>实用程序 API：
     <ul>
-      <li>{@code java.util.function}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">{@code java.util.function}</a>
+
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html">{@code java.util.stream}</a>
+
       </li>
     </ul>
   </li>
 </ul>
-
-<p class="note">
-  <strong>注</strong>：Android N 的 Lambda 表达式的实现基于匿名类。这种方法使表达式可以向后兼容，并可以在早期版本的 Android 上执行。如需在早期版本上测试 Lambda 表达式，请进入 {@code
-  build.gradle} 文件，并将 {@code compileSdkVersion} 和 {@code
-  targetSdkVersion} 设为 23 或更小的值。
-
-
-
-</p>
 
 <h2 id="configuration">
   启用 Java 8 功能和 Jack 工具链
@@ -139,7 +151,7 @@ page.keywords="android N", "Java 8", "Jack"
 </h3>
 
 <p>
-  如需为您的项目启用 Java 8 语言功能和 Jack，请在模块特定的 {@code build.gradle} 文件中输入以下内容：
+  如需为您的项目启用 Java 8 语言功能和 Jack，请在模块层级的 {@code build.gradle} 文件中输入以下内容：
 
 </p>
 
@@ -159,12 +171,13 @@ android {
 }
 </pre>
 
-<h3>
+<h3 id="known-issues">
   已知问题
 </h3>
 
 <p>
-  Android Studio 2.0 (Beta) 中引入的 Instant Run 目前不能用于 Jack，在使用新的工具链时将被禁用。
+  <a href="{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a> 目前不能用于 Jack，在使用新的工具链时将被禁用。
+
 
 </p>
 
@@ -176,8 +189,9 @@ android {
   <li>对类文件进行操作的 Lint 检测工具
   </li>
 
-  <li>需要应用类文件的工具和库（例如 JaCoCo
- 和 Mockito）</li>
+  <li>需要应用类文件的工具和库（例如使用 JaCoCo 进行仪器测试中）
+
+  </li>
 </ul>
 
-<p>如果您在使用 Jack 的过程中发现其他问题，<a href="http://tools.android.com/filing-bugs">请报告错误</a>。</p>
+<p>如果您在使用 Jack 的过程中发现其他问题，<a href="http://tools.android.com/filing-bugs">请提交错误</a>。</p>

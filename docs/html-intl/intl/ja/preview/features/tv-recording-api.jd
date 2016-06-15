@@ -1,4 +1,4 @@
-page.title=TV の録画
+page.title=TV の録画機能
 page.keywords=preview,sdk,tv,recording
 page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
@@ -23,7 +23,7 @@ Android N では、録画したセッションを複数保存できるように�
 </p>
 
 <p>ユーザーはあらかじめ録画をスケジュールできます。また、プログラムを視聴しながら録画を開始することもできます。
-システムが録画を保存すると、システムの TV アプリで録画を視聴、管理、再生できます。
+システムが録画を保存すると、システムの TV アプリで録画をブラウジング、管理、再生できます。
 </p>
 
 <p>TV 入力サービスで録画機能を提供する場合は、アプリが録画をサポートしていることをシステムに示し、プログラムの録画機能を実装し、録画中に発生したエラーを処理および通知し、録画したセッションを管理する必要があります。
@@ -31,9 +31,30 @@ Android N では、録画したセッションを複数保存できるように�
 
 </p>
 
+<p class="note"><strong>注:</strong>ライブチャンネル アプリでは、録画を作成したり録画にアクセスするための機能はまだ提供されていません。
+ライブチャンネル アプリに変更が行われるまで、TV 入力サービスの録画機能を完全にテストすることは難しい場合があります。
+
+</p>
+
 <h2 id="supporting">録画のサポートを示す</h2>
 
-<p>TV 入力サービスで録画をサポートしていることをシステムに示すには、次の手順を実行します。
+<p>TV 入力サービスで録画をサポートしていることをシステムに示すには、サービス メタデータ XML ファイル内の <code>android:canRecord</code> 属性を <code>true</code> に設定します。
+
+
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>サービス メタデータ ファイルの詳細については、<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">マニフェストで TV 入力サービスを宣言する</a>をご覧ください。
+
+
+</p>
+
+<p>また、以下のステップを使用して、コードで録画機能のサポートを示すことができます。
 </p>
 
 <ol>
@@ -44,7 +65,7 @@ Android N では、録画したセッションを複数保存できるように�
 <code>setCanRecord(true)</code> を呼び出してから、<code>build()</code> を呼び出して、サービスが録画をサポートしていることを示します。
 </li>
 <li>
-<code>TvInputService.updateTvInputInfo()</code> を呼び出してシステムに <code>TvInputInfo</code> オブジェクトを登録します。</li>
+<code>TvInputManager.updateTvInputInfo()</code> を呼び出してシステムに <code>TvInputInfo</code> オブジェクトを登録します。</li>
 </ol>
 
 <h2 id="recording">セッションを録画する</h2>

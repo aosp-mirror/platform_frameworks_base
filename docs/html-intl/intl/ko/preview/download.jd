@@ -1,5 +1,5 @@
 page.title=기기에서 테스트
-meta.tags="프리뷰", "nexus","시스템 이미지"
+meta.tags="preview", "nexus","system image"
 page.tags="preview", "androidn"
 page.image=images/cards/card-n-downloads_2x.png
 
@@ -18,21 +18,21 @@ page.image=images/cards/card-n-downloads_2x.png
     <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
 이것은 Android SDK Preview 라이선스 계약서입니다(이하 "라이선스 계약").
 
-1. 개요 
+1. 개요
 
 1.1 Android SDK Preview(본 라이선스 계약에서는 "Preview"라고 칭하며, 구체적으로 Android 시스템 파일, 패키지 API 및 Preview 라이브러리 파일이 이용 가능한 경우 및 이용 가능하게 전환된 경우 이를 포함한 것을 가리킴)는 본 라이선스 계약 조건에 따라 계약자에게 사용을 허여합니다. 본 라이선스 계약은 Preview 사용과 관련하여 계약자와 Google 간에 법적 구속력이 있는 계약을 체결합니다.
 
 1.2 "Android"는 기기를 위한 Android 소프트웨어 스택을 의미합니다. 이는 http://source.android.com/ URL에 위치하며 수시로 업데이트되는 Android 오픈 소스 프로젝트에서 제공됩니다.
 
-1.3 “Android 호환”은 (i) Android 호환성 웹사이트(http://source.android.com/compatibility)에서 찾을 수 있고 간혹 업데이트되는 Android 호환성 정의 문서를 준수하며; (ii) Android CTS(Compatibility Test Suite)를 성공적으로 통과한 모든 Android 구현을 의미합니다.
+1.3 "Android 호환"은 (i) Android 호환성 웹사이트(http://source.android.com/compatibility)에서 찾을 수 있고 간혹 업데이트되는 Android 호환성 정의 문서를 준수하며; (ii) Android CTS(Compatibility Test Suite)를 성공적으로 통과한 모든 Android 구현을 의미합니다.
 
 1.4 "Google"은 미국 1600 Amphitheatre Parkway, Mountain View, CA 94043에 본사를 두고 있는 델라웨어주 법인인 Google Inc.를 의미합니다.
 
-2. 라이선스 계약에 동의 
+2. 라이선스 계약에 동의
 
-2.1 이 Preview를 사용하려면, 먼저 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 Preview를 사용해서는 안 됩니다. 
+2.1 이 Preview를 사용하려면, 먼저 라이선스 계약에 동의해야 합니다. 이 라이선스 계약에 동의하지 않고 Preview를 사용해서는 안 됩니다.
 
-2.2 수락을 클릭하고/거나 Preview를 사용하면 본 라이선스 계약 조건에 동의하는 것으로 간주됩니다.
+2.2 수락을 클릭하거나 Preview를 사용, 또는 이 두 행위를 모두 수행하면 본 라이선스 계약 조건에 동의하는 것으로 간주됩니다.
 
 2.3 미국법 또는 현재 거주 중이거나 Preview를 사용하는 국가를 포함하여 다른 국가의 법에 따라 Preview를 받는 것이 금지된 경우, Preview를 사용할 수 없으며 본 라이선스 계약을 수락할 수 없습니다.
 
@@ -48,15 +48,15 @@ page.image=images/cards/card-n-downloads_2x.png
 
 3.4 본 라이선스 계약에 명시적으로 허용된 용도 외에는 Preview를 사용할 수 없습니다. 해당 제3자 라이선스 요건이 허용하는 범위를 제외하고 계약자는 Preview의 파생 제품이나 Preview의 일부분을 (a) 복사(백업 목적 제외), 수정, 개작, 재배포, 역컴파일, 리버스 엔지니어링, 분해하거나 이를 통해 파생물을 생성하거나 (b) 개인 컴퓨터를 제외한 모바일 단말기 또는 기타 모든 하드웨어 기기에 Preview의 일부를 로드하거나, Preview의 일부를 다른 소프트웨어와 결합하거나 Preview의 일부가 통합된 일체의 소프트웨어나 기기를 배포해서는 안 됩니다.
 
-3.5 오픈 소스 소프트웨어 라이선스에 의거한 Preview 구성요소의 사용, 재생산, 배포에는 본 라이선스 계약이 아닌, 해당 오픈 소스 소프트웨어 라이선스의 조건이 적용됩니다. 계약자는 허용된 모든 권한 하에서 그러한 오픈 소스 소프트웨어 라이선스에 관해 충실한 피허가자로서의 자세를 견지할 것이며 그러한 권한을 종료, 일시 중단 또는 침해하는 행위를 삼갈 것을 동의합니다. 
+3.5 오픈 소스 소프트웨어 라이선스에 의거한 Preview 구성요소의 사용, 재생산, 배포에는 본 라이선스 계약이 아닌, 해당 오픈 소스 소프트웨어 라이선스의 조건이 적용됩니다. 계약자는 허용된 모든 권한 하에서 그러한 오픈 소스 소프트웨어 라이선스에 관해 충실한 피허가자로서의 자세를 견지할 것이며 그러한 권한을 종료, 일시 중단 또는 침해하는 행위를 삼갈 것을 동의합니다.
 
-3.6 계약자는 Google이 제공하는 SDK의 형태 및 특성이 사전 통지 없이 변경될 수 있음에 동의하며, 이전 버전의 Preview에서 개발된 애플리케이션이 이후 버전의 SDK와 호환되지 않을 수 있음에 동의합니다. 계약자는 계약자 또는 사용자에게 사전 통지 없이 SDK(또는 SDK에 포함된 기능) 제공을(영구적 또는 일시적으로) 중단할 수 있는 권한이 Google에게 있음에 동의합니다.
+3.6 계약자는 Google이 제공하는 Preview의 형태 및 특성이 사전 통지 없이 변경될 수 있음에 동의하며, 이전 버전의 Preview에서 개발된 애플리케이션이 이후 버전의 Preview와 호환되지 않을 수 있음에 동의합니다. 계약자는 계약자 또는 사용자에게 사전 통지 없이 Preview(또는 Preview에 포함된 기능) 제공을 (영구적 또는 일시적으로) 중단할 수 있는 권한이 Google에게 있음에 동의합니다.
 
 3.7 본 라이선스 계약은 계약자에게 Google의 상표명, 상표, 서비스 표시, 로고, 도메인 이름, 기타 독특한 브랜드 특징에 대한 사용 권한을 부여하지 않습니다.
 
-3.8 계약자는 SDK에 부착되어 있거나 포함되어 있는 모든 소유권 고지 사항(저작권 및 상표 고지 사항 포함)을 제거, 변경 또는 불분명하게 만들지 않을 것에 동의합니다.
+3.8 계약자는 Preview에 부착되어 있거나 포함되어 있는 모든 소유권 고지 사항(저작권 및 상표 고지 사항 포함)을 제거, 변경 또는 불분명하게 만들지 않을 것에 동의합니다.
 
-4. 계약자의 Preview 사용 
+4. 계약자의 Preview 사용
 
 4.1 Google은 본 라이선스 계약의 어떤 조항도 계약자(또는 계약자의 사용 허가자)가 Preview를 사용하여 개발한 소프트웨어 애플리케이션에 대한 권리, 소유권 또는 이익, 그리고 해당 애플리케이션에 존재하는 모든 지적 재산권을 부여하지 않는다는 점에 동의합니다.
 
@@ -92,7 +92,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 8. Google API 사용
 
-8.1 Google Data API
+8.1 Google API
 
 8.1.1 Google에서 데이터를 검색하기 위해 API를 사용하는 경우, 그러한 데이터가 Google 또는 데이터를 제공하는 당사자(또는 당사자를 대신하는 기타 개인 또는 기업)가 소유한 지적 재산권에 의해 보호될 수 있음을 인정합니다. 그러한 API를 사용하는 경우, 추가적인 서비스 약관의 적용을 받을 수 있습니다. 관련 서비스 약관에 허용되지 않은 한, 그러한 데이터(전부 또는 일부)를 변경, 임대, 리스, 대여, 판매, 배포하거나 이를 기반으로 파생물을 생성해서는 안 됩니다.
 
@@ -116,7 +116,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 10.1 계약자는 Preview 이용에 대한 위험 부담이 전적으로 본인에게 있으며, Google이 일체의 보증 없이 Preview를 "있는 그대로" 그리고 "이용 가능한" 상태로 제공한다는 것을 분명히 이해하고 동의합니다.
 
-10.2 Preview 이용 및 이용 과정에서 다운로드하거나 얻게 되는 모든 자료를 사용하는 것은 본인의 재량에 따르며 이에 대한 위험 부담이 전적으로 본인에게 있으며, 그러한 사용으로 인해 발생하는 컴퓨터 시스템 또는 다른 기기의 손상 또는 데이터 손실에 대한 책임은 전적으로 본인에게 있습니다. 전술한 조항을 제한하지 않는 범위 내에서 계약자는 Preview가 안정된 릴리스가 아니며 오류, 결함 및 보안 취약성이 포함되어 있을 수 있어 그 결과로 중대한 손상을 유발할 수 있다는 점을 이해하는 것으로 간주합니다. 여기에는 계약자의 컴퓨터 시스템 또는 기타 기기의 완전하고 돌이킬 수 없는 손실도 포함됩니다.
+10.2 Preview 이용 및 이용 과정에서 다운로드하거나 얻게 되는 모든 자료를 사용하는 것은 본인의 재량에 따르며 이에 대한 위험 부담이 전적으로 본인에게 있으며, 그러한 사용으로 인해 발생하는 컴퓨터 시스템 또는 다른 기기의 손상 또는 데이터 손실에 대한 책임은 전적으로 본인에게 있습니다. 전술한 조항을 제한하지 않는 범위 내에서 계약자는 미리 보기가 안정된 릴리스가 아니며 오류, 결함 및 보안 취약성이 포함되어 있을 수 있어 그 결과로 중대한 손상을 유발할 수 있다는 점을 이해하는 것으로 간주합니다. 여기에는 계약자의 컴퓨터 시스템 또는 기타 기기의 완전하고 돌이킬 수 없는 손실도 포함됩니다.
 
 10.3 더 나아가, Google은 상품성, 특정 목적에 대한 적합성 및 비침해의 묵시적 보증 등을 포함하되 이에 국한되지 않고 명시적이든 묵시적이든 모든 종류의 보증 및 조건을 명시적으로 부인합니다.
 
@@ -126,15 +126,15 @@ page.image=images/cards/card-n-downloads_2x.png
 
 12. 면책
 
-12.1 법률에 의해 허용되는 최대한의 범위 안에서 계약자는 (a) Preview 사용, (b) 계약자가 Preview에서 개발한 일체의 애플리케이션에서 초래된 모든 사람의 저작권, 상표, 영업비밀, 트레이드 드레스, 특허 또는 기타 지적 재산권의 침해, 또는 어떤 사람의 명예를 훼손하거나 초상권 또는 개인정보 보호정책을 침해함 또는 (C)계약자 본인이 본 라이선스 계약을 위반함으로써 발생하거나 생기는 모든 청구, 조치, 소송 또는 절차, 그리고 모든 손실, 책임, 손해, 경비(합리적인 변호사 비용 포함)로부터 Google을 옹호하고, 면책시키고, Google이 손해를 입지 않도록 하는 데 동의합니다.
+12.1 법률에 의해 허용되는 최대한의 범위 안에서 계약자는 (a) 미리 보기 사용, (b) 계약자가 미리 보기에서 개발한 일체의 애플리케이션에서 초래된 모든 사람의 저작권, 상표, 영업비밀, 트레이드 드레스, 특허 또는 기타 지적 재산권의 침해, 또는 어떤 사람의 명예를 훼손하거나 초상권 또는 개인정보 보호정책을 침해함 또는 (C)계약자 본인이 본 라이선스 계약을 위반함으로써 발생하거나 생기는 모든 청구, 조치, 소송 또는 절차, 그리고 모든 손실, 책임, 손해, 경비(합리적인 변호사 비용 포함)로부터 Google을 옹호하고, 면책시키고, Google이 손해를 입지 않도록 하는 데 동의합니다.
 
 13. 라이선스 계약 변경
 
-13.1 Preview의 새로운 버전을 배포할 때, Google은 본 라이선스 계약의 내용을 변경할 수 있습니다. 그러한 변경이 이뤄진 경우, Google은 Preview가 제공되는 웹사이트에 새로운 라이선스 계약 버전을 게재할 것입니다.
+13.1 미리 보기의 새로운 버전을 배포할 때, Google은 본 라이선스 계약의 내용을 변경할 수 있습니다. 그러한 변경이 이뤄진 경우, Google은 미리 보기가 제공되는 웹사이트에 새로운 라이선스 계약 버전을 게재할 것입니다.
 
 14. 일반 법적 조건
 
-14.1 본 라이선스 계약은 계약자와 Google 간의 모든 법적 계약을 구성하며, 계약자의 Preview 사용을 규제하고(별도의 서면 계약을 통해 Google이 계약자에게 제공하는 모든 서비스는 제외), Preview와 관련하여 이전에 계약자와 Google이 맺은 모든 계약을 완전히 대체합니다.
+14.1 본 라이선스 계약은 계약자와 Google 간의 모든 법적 계약을 구성하며, 계약자의 미리 보기 사용을 규제하고(별도의 서면 계약을 통해 Google이 계약자에게 제공하는 모든 서비스는 제외), 미리 보기와 관련하여 이전에 계약자와 Google이 맺은 모든 계약을 완전히 대체합니다.
 
 14.2 계약자는 Google이 라이선스 계약에 포함된(또는 관련 법률에 의해 Google이 향유하는) 법적 권리 또는 구제수단을 행사하거나 집행하지 않더라도, Google이 권리를 공식적으로 포기한 것으로 간주하지 않으며, Google이 계속해서 그러한 권리 또는 구제수단을 이용할 수 있음에 동의합니다.
 
@@ -144,7 +144,7 @@ page.image=images/cards/card-n-downloads_2x.png
 
 14.5 수출 규제. Preview는 미국의 수출법과 규정의 적용을 받습니다. 계약자는 Preview에 적용되는 모든 국내 및 국제 수출법과 규정을 준수해야 합니다. 그러한 법에는 수출 대상국, 최종 사용자 및 최종 용도에 대한 제한이 포함됩니다.
 
-14.6 계약자 또는 Google은 상대 당사자의 사전 서면 승인 없이 본 라이선스 계약에서 부여된 권리를 제3자에게 양도하거나 이전할 수 없으며, 그러한 승인 없이 이루어진 양도 시도는 모두 무효입니다. 계약자는 Google의 사전 승인 없이 본 라이선스 계약 상의 책임 또는 의무를 위임할 수 없습니다. 
+14.6 계약자 또는 Google은 상대 당사자의 사전 서면 승인 없이 본 라이선스 계약에서 부여된 권리를 제3자에게 양도하거나 이전할 수 없으며, 그러한 승인 없이 이루어진 양도 시도는 모두 무효입니다. 계약자는 Google의 사전 승인 없이 본 라이선스 계약 상의 책임 또는 의무를 위임할 수 없습니다.
 
 14.7 본 라이선스 계약, 그리고 본 라이선스 계약 상의 계약자와 Google의 관계는 법률 조항 간의 충돌과는 무관하게 캘리포니아주법에 의한 규제를 받습니다. 계약자와 Google은 본 라이선스 계약으로부터 발생하는 모든 법적 문제 해결을 캘리포니아주 산타 클라라(Santa Clara) 카운티 내에 소재한 전속 관할 법원에 의뢰하는 것에 동의합니다. 위 규정에도 불구하고, 계약자는 Google이 여전히 모든 관할권에서 강제 구제책(또는 동등한 유형의 긴급 법적 구제)을 신청할 수 있음에 동의합니다.
   </div><!-- sdk terms -->
@@ -182,18 +182,18 @@ page.image=images/cards/card-n-downloads_2x.png
 </div>
 
 <p>
-  새로운 플랫폼에서 앱을 테스트하려면 Android N
+  새로운 플랫폼에서 앱을 실행하고 테스트하려면 Android N
 런타임 환경을 설정해야 합니다. 다음 두 가지 방법 중 하나를 사용할 수 있습니다.
 </p>
 
 <ul>
   <li>지원되는 하드웨어 기기에서 Android N 설치</li>
-  <li>Android N을 실행하는 Android 에뮬레이터 설정</li>
+  <li>Android N이 실행되는 Android 에뮬레이터 설정</li>
 </ul>
 
 <p>
-  새로운 플래폼에서 앱의 기본적 호환성을 테스트할 환경을 원할 경우
-현재 APK와 하드웨어 기기 또는
+  새로운 플랫폼에서 앱에 대한 기본적인 호환성 테스트를 수행할 환경이 필요한 경우,
+최신 APK와 하드웨어 기기 또는
 에뮬레이터만 있으면 됩니다. 기본 테스트를 위해 전체 개발 환경을
 업데이트할 필요가 없습니다.
 </p>
@@ -214,18 +214,18 @@ Android N을 지원하도록
 </p>
 
 <p>
-  지원되는 기기에 액세스할 수 있다면 다음 방법 중 하나를 사용하여 Developer Preview 마일스톤 빌드로
+  지원되는 기기에 액세스할 수 있다면, 다음 방법 중 하나를 사용하여 Developer Preview 마일스톤 빌드로
 업데이트할 수 있습니다.
 </p>
 
 <ul>
-  <li>
-<a href="https://g.co/androidbeta">Android 베타 프로그램</a>을 통해 <strong>자동 OTA 시스템 업데이트에 기기를 등록</strong>합니다. 기기를 등록하면 N Developer Preview에서 
-모든 마일스톤 빌드에 대해 정기적으로 OTA 업데이트를 받을 수 있습니다.
-현재 환경을 다양한 N Developer Preview 릴리스로 매끄럽게 전환할 수 있으므로
+  <li><a href="https://g.co/androidbeta">Android 베타 프로그램</a>을 통해
+<strong>자동 OTA 시스템 업데이트에 기기를 등록합니다</strong>. 기기를 등록하면 N Developer Preview에서
+모든 마일스톤 빌드에 대해 정기적으로 OTA 업데이트를 받을 수 있습니다. 다양한 N Developer Preview 릴리스를 통해 현재
+환경을 매끄럽게 전환할 수 있으므로
 이 방법을 권장합니다.</li>
   <li><strong>Developer Preview 시스템 이미지를 다운로드하고 기기를 플래시합니다</strong>.
-수동으로 플래시하는 기기에는 OTA 업데이트가 자동으로 제공되지 않지만
+  수동으로 플래시하는 기기에는 OTA 업데이트가 자동으로 제공되지 않지만,
 Android 베타 프로그램에 기기를 등록하면 OTA 업데이트를 받을 수 있습니다. </li>
 </ul>
 
@@ -234,17 +234,17 @@ Android 베타 프로그램에 기기를 등록하면 OTA 업데이트를 받을
 <p>
   지원되는 기기에 액세스할 수 있다면(아래 다운로드 표
 참조),
-<a href="https://g.co/androidbeta">Android 베타 프로그램</a>에 등록해서 Android 프리뷰 버전에 대해 OTA 업데이트를 받을 수 있습니다. 이 업데이트는
+해당 기기를 <a href="https://g.co/androidbeta">Android 베타 프로그램</a>에 등록해서 Android 프리뷰 버전에 대해 OTA 업데이트를 받을 수 있습니다. 이 업데이트는
 자동으로 다운로드되고 공식 시스템 업데이트처럼
 기기를 업데이트합니다.
 </p>
 
 <p>
-  기기는 언제든 등록을 해제할 수 있습니다. 기기는
-해당 기기에 제공되는 가장 최신 Android 프로덕션 버전으로 OTA 업데이트를 받게 됩니다
-(예: Android 6.0 Marshmallow). 업데이트 시 기기가 완전히 초기화되므로
-기기의 사용자 데이터는 삭제됩니다. 기기 등록을 해제하기 전에 <strong>
-중요한 데이터는 백업</strong>하세요.
+  언제든 기기의 등록을 해제할 수 있습니다. 기기는
+해당 기기에 사용 가능한 가장 최신의 Android 프로덕션 버전에 대한 OTA 업데이트를 받게 됩니다(예: Android 6.0 Marshmallow).
+ 업데이트 시 기기가 완전히 초기화되므로
+기기의 사용자 데이터는 삭제됩니다. 따라서 기기 등록을 해제하기 전에 반드시 <strong>중요한
+데이터를 백업</strong>해야 합니다.
 </p>
 
 <p>
@@ -253,18 +253,18 @@ Android 베타 프로그램에 기기를 등록하면 OTA 업데이트를 받을
 </p>
 
 <p class="note"><strong>참고:</strong>
-등록을 해제하면 기기가 완전히 초기화됩니다. 중요한 데이터를
+  등록을 해제하면 기기가 완전히 초기화됩니다. 중요한 데이터를
 먼저 백업하세요.
 </p>
 
-<h3 id="flash">기기 수동 플래시</h3>
+<h3 id="flash">수동 기기 플래시</h3>
 
 <p>
   언제든 최신 Developer Preview 시스템 이미지를 다운로드하고
 기기에 수동으로 플래시할 수 있습니다. 아래 표를 참조하여 기기 테스트용 시스템 이미지를
 다운로드하세요. 기기 수동 플래시는
-테스트 환경을 정확히 제어해야 하거나 자동 테스트 등을 위해 자주 플래시해야 할 경우
-유용합니다. 
+테스트 환경을 정확히 제어해야 하거나 자동 테스트 등을 위해 자주 재설치해야 하는 경우
+유용합니다.
 </p>
 
 <!-- You can flash by ota or system image --><p>
@@ -273,23 +273,23 @@ Android 베타 프로그램에 기기를 등록하면 OTA 업데이트를 받을
 </p>
 
 <p>
-  기기 데이터를 백업하고 기기에 맞는 아래의 시스템 이미지를 다운로드한 뒤,
-<a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>
-의 지침에 따라 기기에 이미지를 플래시합니다.
+  기기 데이터를 백업하고 아래에서 기기에 맞는 시스템 이미지를 다운로드한 뒤,
+<a href="https://developers.google.com/android/nexus/images#instructions">developers.google.com/android</a>의
+지침에 따라 기기에 이미지를 플래시합니다.
 </p>
 
 <p>
-  수동으로 플래시한 시스템 이미지는 최신 Developer Preview 마일스톤 빌드에 대한 <strong>
-OTA 업데이트를 자동으로 수신하지 않습니다</strong>.
-각 Developer Preview 마일스톤에서 환경을 최신으로 유지하고 새 시스템 이미지를
+  수동으로 플래시한 시스템 이미지는 최신
+Developer Preview 마일스톤 빌드에 대한 <strong>OTA 업데이트를 자동으로
+수신하지는 않습니다</strong>. 각 Developer Preview 마일스톤에서 환경을 최신으로 유지하고 새 시스템 이미지를
 플래시하세요.
 </p>
 
 <p>
-  기기를 수동으로 플래시한 후 OTA 업데이트를 받으려면
+  기기를 수동으로 플래시한 후 OTA 업데이트를 받으시려면
 <a href="https://g.co/androidbeta">Android
 베타 프로그램</a>에 기기를 등록하기만 하면 됩니다. 언제든 기기를 등록하고 다음 Preview
-업데이트를 무선으로 받을 수 있습니다. 
+업데이트를 무선으로 받을 수 있습니다.
 </p>
 
 <table>
@@ -300,64 +300,72 @@ OTA 업데이트를 자동으로 수신하지 않습니다</strong>.
 
   <tr id="bullhead">
     <td>Nexus 5X <br>"bullhead"</td>
-    <td><a href="#top" onclick="onDownload(this)">bullhead-npc56p-preview-6c877a3d.tgz</a><br>
-      MD5: b5cf874021023b398f5b983b24913f5d<br>
-      SHA-1: 6c877a3d9fae7ec8a1678448e325b77b7a7b143a
+    <td><a href="#top" onclick="onDownload(this)">bullhead-npd35k-factory-5ba40535.tgz</a><br>
+      MD5: b6c5d79a21815ee21db41822dcf61e9f<br>
+      SHA-1: 5ba4053577007d15c96472206e3a79bc80ab194c
     </td>
   </tr>
 
   <tr id="shamu">
     <td>Nexus 6 <br>"shamu"</td>
-    <td><a href="#top" onclick="onDownload(this)">shamu-npc56p-preview-54b13c67.tgz</a><br>
-      MD5: af183638cf34e0eb944a1957d7696f60<br>
-      SHA-1: 54b13c6703d369cc79a8fd8728fe4103c6343973
+    <td><a href="#top" onclick="onDownload(this)">shamu-npd35k-factory-a33bf20c.tgz</a><br>
+      MD5: e1cf9c57cfb11bebe7f1f5bfbf05d7ab<br>
+      SHA-1: a33bf20c719206bcf08d1edd8da6c0ff9d50f69c
     </td>
   </tr>
 
   <tr id="angler">
     <td>Nexus 6P <br>"angler"</td>
-    <td><a href="#top" onclick="onDownload(this)">angler-npc56p-preview-85ffc1b1.tgz</a><br>
-      MD5: bc4934ea7bd325753eee1606d3725a24<br>
-      SHA-1: 85ffc1b1be402b1b96f9ba10929e86bba6c6c588
+    <td><a href="#top" onclick="onDownload(this)">angler-npd35k-factory-81c341d5.tgz</a><br>
+      MD5: e93de7949433339856124c3729c15ebb<br>
+      SHA-1: 81c341d57ef2cd139569b055d5d59e9e592a7abd
     </td>
   </tr>
 
   <tr id="volantis">
     <td>Nexus 9 <br>"volantis"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantis-npc56p-preview-0e8ec8ef.tgz</a><br>
-      MD5: c901334c6158351e945f188167ae56f4<br>
-      SHA-1: 0e8ec8ef98c7a8d4f58d15f90afc5176303efca4
+    <td><a href="#top" onclick="onDownload(this)">volantis-npd35k-factory-2b50e19d.tgz</a><br>
+      MD5: 565be87ebb2d5937e2abe1a42645864b<br>
+      SHA-1: 2b50e19dae2667b27f911e3c61ed64860caf43e1
     </td>
   </tr>
 
   <tr id="volantisg">
     <td>Nexus 9G <br>"volantisg"</td>
-    <td><a href="#top" onclick="onDownload(this)">volantisg-npc56p-preview-1bafdbfb.tgz</a><br>
-      MD5: 7bb95bebc478d7257cccb4652899d1b4<br>
-      SHA-1: 1bafdbfb502e979a9fe4c257a379c4c7af8a3ae6
+    <td><a href="#top" onclick="onDownload(this)">volantisg-npd35k-factory-2e89ebe6.tgz</a><br>
+      MD5: a8464e15c6683fe2afa378a63e205fda<br>
+      SHA-1: 2e89ebe67a46b2f3beb050746c13341cd11fa678
     </td>
   </tr>
 
   <tr id="fugu">
     <td>Nexus Player <br>"fugu"</td>
-    <td><a href="#top" onclick="onDownload(this)">fugu-npc56r-preview-7027d5b6.tgz</a><br>
-      MD5: f5d3d8f75836ccfe4c70e8162e498be4<br>
-      SHA-1: 7027d5b662bceda4c80a91a0a14ef0e5a7ba795b
+    <td><a href="#top" onclick="onDownload(this)">fugu-npd35k-factory-1de74874.tgz</a><br>
+      MD5: c0dbb7db671f61b2785da5001cedefcb<br>
+      SHA-1: 1de74874f8d83e14d642f13b5a2130fc2aa55873
     </td>
   </tr>
 
   <tr id="ryu">
     <td>Pixel C <br>"ryu"</td>
-    <td><a href="#top" onclick="onDownload(this)">ryu-npc56p-preview-335a86a4.tgz</a><br>
-      MD5: 4e21fb183bbbf467bee91598d587fd2e<br>
-      SHA-1: 335a86a435ee51f18464de343ad2e071c38f0e92
+    <td><a href="#top" onclick="onDownload(this)">ryu-npd35k-factory-b4eed85d.tgz</a><br>
+      MD5: bdcb6f770e753668b5fadff2a6678e0d<br>
+      SHA-1: b4eed85de0d42c200348a8629084f78e24f72ac2
     </td>
   </tr>
+
   <tr id="seed">
-    <td>General Mobile 4G (Android One) <br>"seed"</td>
-    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npc56p-preview-82472ebc.tgz</a><br>
-      MD5: 983e083bc7cd0c4a2d39d6ebaa20202a<br>
-      SHA-1: 82472ebc9a6054a103f53cb400a1351913c95127
+    <td>General Mobile 4G(Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-npd35k-factory-5ab1212b.tgz</a><br>
+      MD5: 7d34a9774fdd6e025d485ce6cfc23c4c<br>
+      SHA-1: 5ab1212bc9417269d391aacf1e672fff24b4ecc5
+    </td>
+  </tr>
+
+  <tr id="xperia">
+    <td>Sony Xperia Z3 <br> (D6603 및 D6653)</td>
+    <td>다운로드: <a class="external-link" href="http://support.sonymobile.com/xperiaz3/tools/xperia-companion/">Xperia Companion</a><br>
+      자세한 내용은 <a class="external-link" href="https://developer.sony.com/develop/smartphones-and-tablets/android-n-developer-preview/">Xperia Z3용 Android N Developer Preview 체험</a>을 참조하세요.
     </td>
   </tr>
 
@@ -372,31 +380,31 @@ OTA 업데이트를 자동으로 수신하지 않습니다</strong>.
     <li><strong>공장 사양 시스템 이미지</strong>를 획득한 다음 기기에 수동으로
 플래시합니다.
       <ul>
-          <li><strong>Nexus 기기와 Pixel C 기기</strong>의 경우, 
+          <li><strong>Nexus 기기와 Pixel C 기기</strong>의 경우,
 <a href="http://developers.google.com/android/nexus/images">Nexus 기기용
 공장 이미지</a> 페이지에서 다운로드하세요. </li>
         <li><strong>다른 기기</strong>의 경우, 기기 제조업체에 직접
 문의하세요. 또는, Android 베타 프로그램에서 지원되는
 기기라면
-프로그램에 기기를 등록한 다음 등록을 해제할 수 있습니다(아래 참조).</li>
+이 프로그램에 기기를 등록한 다음 등록을 해제할 수 있습니다(아래 참조).</li>
       </ul>
     </li>
-    <li><strong>Android 베타 프로그램에서 기기 등록을 해제합니다</strong>.
-기기가 <a href="https://g.co/androidbeta">Android 베타
-프로그램</a>에 등록되었다면 기기와 관계없이 프로그램에서 등록을 해제하기만 하면 됩니다.
+    <li><strong>Android 베타 프로그램에서 기기 등록을 해제합니다</strong>. 기기가
+<a href="https://g.co/androidbeta">Android 베타
+프로그램</a>에 등록되었다면 기기와 관계없이 프로그램에서 기기를 해제하기만 하면 됩니다.
   <p>
-    기기는해당 기기에 제공되는 가장 최신 Android 프로덕션 버전으로
-OTA 업데이트를 받게 됩니다(예: Android 6.0 Marshmallow).
-업데이트 시 기기가 완전히 초기화되므로 기기의 사용자 데이터는 삭제됩니다
- 기기 등록을 해제하기
-전에 <strong>중요한 데이터는 백업</strong>하세요.
+    기기는 해당 기기에 사용 가능한 가장 최신의 Android 프로덕션 버전에
+대한 OTA 업데이트를 받게 됩니다(예: Android 6.0 Marshmallow).
+    업데이트 시 기기가 완전히 초기화되므로 기기의 사용자 데이터는
+삭제됩니다. 따라서 기기 등록을 해제하기 전에 반드시 <strong>중요한 데이터를
+백업</strong>해야 합니다.
   </p>
   </li>
 </ul>
 
 <p class="note"><strong>참고:</strong>
-프로그램이 끝나기 전에 Developer Preview 시스템 이미지를 삭제하려면
-기기를 완전히 초기화하고 기기에서 모든 사용자 데이터를
+  프로그램이 끝나기 전에 Developer Preview 시스템 이미지를 제거하는 경우,
+기기를 완전히 초기화해야 하고 기기에서 모든 사용자 데이터를
 삭제해야 합니다.
 </p>
 
@@ -407,23 +415,23 @@ OTA 업데이트를 받게 됩니다(예: Android 6.0 Marshmallow).
 Android N Preview SDK를 다운로드하고 에뮬레이터용 가상 기기를
 생성해야 합니다.</p>
 
-<p>먼저 다음과 같이 Android N Preview SDK를 다운로드합니다(
-<a href="{@docRoot}preview/setup-sdk.html">Android N용 개발 설정
-</a> 시 이미 다운로드했다면 이 부분은 건너뛸 수 있습니다).
+<p>먼저 다음과 같이 Android N Preview SDK를 다운로드합니다. <a href="{@docRoot}preview/setup-sdk.html">Android
+N용 개발 설정</a>
+시 이미 다운로드했다면 이 부분은 건너뛸 수 있습니다.
 
 <ol>
-  <li>Android Studio에서 Settings 대화 상자를 엽니다
-(Windows/Linux에서 <strong>File &gt; Settings</strong>, Mac에서는 
+  <li>Android Studio에서 Settings 대화 상자를
+엽니다(Windows/Linux의 경우 <strong>File &gt; Settings</strong>, Mac의 경우
 <strong>Android Studio &gt; Preferences</strong>). 왼쪽 창에서
 <strong>Appearance &amp; Behavior &gt;
 System Settings &gt; Android SDK</strong>를 선택합니다.
 
   <li><strong>SDK Platforms</strong> 탭을 클릭한 다음,
-<strong>Android N Preview</strong> 확인란을 선택합니다.</li>
+<strong>Android N Preview</strong> 체크박스를 선택합니다.</li>
 
   <li><strong>SDK Tools</strong> 탭을 클릭한 다음,
 <strong>Android SDK Build Tools</strong>, <strong>Android SDK
-Platform-Tools</strong>, <strong>Android SDK Tools</strong> 확인란을
+Platform-Tools</strong>, <strong>Android SDK Tools</strong> 체크박스를
 선택합니다.
   </li>
 
@@ -438,7 +446,7 @@ Platform-Tools</strong>, <strong>Android SDK Tools</strong> 확인란을
 Android N에서 x86_64 시스템 이미지를 실행할 수 없습니다.</p>
 
 
-<p>Android N 시스템 이미지로 가상 기기 생성:</p>
+<p>이제 Android N 시스템 이미지로 가상 기기를 생성합니다.</p>
 
 <ol>
   <li><strong>Tools &gt; Android &gt;
@@ -446,27 +454,21 @@ AVD Manager</strong>를 선택하여 AVD Manager를 엽니다.</li>
   <li><strong>Create Virtual Device</strong>를 클릭합니다.</li>
   <li>Nexus 5X, Nexus 6P, Nexus 9, Android TV 등의 기기를 선택하고
 <strong>Next</strong>를 클릭합니다.</li>
-  <li><strong>N</strong> 시스템 이미지(
-<strong>x86</strong> ABI)를 선택하고 <strong>Next</strong>를 클릭합니다.
-(현재 x86 시스템 이미지만 Android N Preview용 Android 에뮬레이터에서
+  <li><strong>N</strong> 시스템 이미지(<strong>x86</strong>
+ABI)를 선택하고 <strong>Next</strong>를 클릭합니다.
+    (현재는 x86 시스템 이미지만 Android N Preview용 Android 에뮬레이터에서
 지원됩니다.)
   <li>나머지 AVD 구성을 완료하고
 <strong>Finish</strong>를 클릭합니다.</li>
 </ol>
 
-<p>이제 Android N Preview AVD로 Android 에뮬레이터를 시작할 수 있습니다.</p>
+<p>이제 Android N Preview AVD에서 Android 에뮬레이터를 시작할 수 있습니다.</p>
 
 <p>
 Android 에뮬레이터에서 최상의 경험을 얻으려면
-Android Studio 2.1 Preview를 설치하세요. Android Studio 1.5의 에뮬레이터에 비해 더욱 빠른 성능을 제공하는 <a href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0 Beta</a>가
-지원됩니다.
-</p>
-
-<p class="note"><strong>참고:</strong>
-현재 Android Studio 2.0 Beta를 사용하는 경우
-N Preview 시스템 이미지로 AVD를 생성할 수 없는 문제가 보고되었습니다.
-따라서 지금은 Android Studio 2.1 Preview를 사용하여 AVD를 생성해야 합니다.
-</p>
+Android Studio 2.1 이상의 버전을 사용해야 합니다. 이러한 버전에서는 Android Studio 1.5의 에뮬레이터에 비해
+더욱 빠른 성능을 제공하는 <a href="http://tools.android.com/tech-docs/emulator">Android Emulator 2.0</a>이
+지원됩니다.</p>
 
 <p>가상 기기 생성에 대한 자세한 내용은 <a href="{@docRoot}tools/devices/index.html">가상 기기 관리</a>를 참조하세요.
 </p>

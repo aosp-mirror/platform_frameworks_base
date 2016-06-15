@@ -15,26 +15,26 @@ page.keywords="android N", "Java 8", "Jack"
   </div>
 </div>
 
-<p>En Android N se ofrece compatibilidad con funciones del idioma Java 8
-  que puedes usar al desarrollar aplicaciones orientadas a Android N.
+<p>En Android N se ofrece compatibilidad con funciones
+ del idioma Java 8 que puedes usar al desarrollar aplicaciones orientadas a Android N.
   En esta página se describen las funciones de idioma compatibles con la Android N
   Preview, también la manera adecuada de configurar tu proyecto para usarlas y muchos problemas
   conocidos que puedes experimentar.
 </p>
 
 <p>Para comenzar a usar estas funciones, debes descargar y configurar Android
-Studio 2.1 (muestra) y el Android N Preview SDK, en el que se incluyen el conjunto de herramientas
-Jack y el complemento de Android para Gradle. Si aún no instalaste
-el Android N Preview SDK, consulta <a href="{@docRoot}preview/setup-sdk.html">Configuración para desarrollar con Android N</a>.</p>
+Studio 2.1 y el Android N Preview SDK, en el que se incluyen el conjunto de herramientas
+Jack y el complemento de Android para Gradle. Si aún no
+instalaste el Android N Preview SDK, consulta <a href="{@docRoot}preview/setup-sdk.html">Configuración para desarrollar con Android N</a>.</p>
 
 
 
 <p class="note">
   <strong>Nota:</strong> No es obligatorio usar las nuevas funciones del lenguaje Java 8
-  para desarrollar aplicaciones orientadas a la plataforma de Android N. Si no
-  deseas escribir código con funciones del lenguaje Java 8, puedes mantener los valores de compatibilidad
-  de origen y destino de tu proyecto en Java 7, pero
-  debes usar JDK 8 para crear la compilación en función de la plataforma de Android N.
+  para desarrollar aplicaciones orientadas a la plataforma de Android N. Si
+  no deseas escribir código con funciones del lenguaje Java 8, puedes mantener los
+  valores de compatibilidad de origen y destino de tu proyecto en Java 7, pero debes
+  usar JDK 8 para crear la compilación en función de la plataforma de Android N.
 </p>
 
 <h2 id="supported-features">
@@ -55,59 +55,71 @@ el Android N Preview SDK, consulta <a href="{@docRoot}preview/setup-sdk.html">Co
 
   <li>
     <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html">
-    expresiones Lambda;</a>
+    expresiones Lambda</a> (también disponible en API nivel 23 e inferiores);
   </li>
 
   <li>
     <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/annotations/repeating.html">anotaciones
-    reiterables.</a>
+    reiterables;</a>
+  </li>
+
+  <li>
+    <a class="external-link" href="https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html">
+    referencias de métodos</a> (también disponible en API nivel 23 e inferiores).
   </li>
 </ul>
 
+<p class="note">
+  <strong>Nota:</strong> Para probar expresiones Lambda y métodos de referencia en
+  versiones anteriores de Android, accede al archivo {@code build.gradle}
+ y fija {@code compileSdkVersion} y {@code targetSdkVersion} en 23 o
+  un valor inferior. Tendrás que <a href="#configuration">habilitar la cadena de herramientas
+  Jack</a> para usar estas funciones de Java 8.
+</p>
 
 <p>
   A su vez, las siguientes API de funciones del lenguaje Java 8 ahora se encuentran disponibles:
 </p>
 
 <ul>
-  <li>Las API de Reflection y las relacionadas con el lenguaje:
-  </li>
-
-  <li style="list-style: none; display: inline">
+  <li>Las API Reflection y las relacionadas con el lenguaje:
     <ul>
-      <li>{@code java.lang.FunctionalInterface}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/FunctionalInterface.html">
+        {@code java.lang.FunctionalInterface}</a>
       </li>
 
-      <li>{@code java.lang.annotation.Repeatable}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Repeatable.html">
+        {@code java.lang.annotation.Repeatable}</a>
       </li>
 
-      <li>{@code java.lang.reflect.Method.isDefault()}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html#isDefault--">
+        {@code java.lang.reflect.Method.isDefault()}</a>
       </li>
 
-      <li>También API Reflection asociadas con anotaciones reiterables, como
-      {@code AnnotatedElement.getAnnotationsByType(Class)}:
+      <li>También las API Reflection asociadas con anotaciones reiterables, como
+      <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-">
+        {@code AnnotatedElement.getAnnotationsByType(Class)}</a>
       </li>
     </ul>
   </li>
-  <li>API de utilidades:
-  </li>
 
-  <li style="list-style: none; display: inline">
+  <li>API de utilidades:
     <ul>
-      <li>{@code java.util.function}
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html">
+        {@code java.util.function}</a>
+      </li>
+
+      <li>
+        <a class="external-link" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html">
+        {@code java.util.stream}</a>
       </li>
     </ul>
   </li>
 </ul>
-
-<p class="note">
-  <strong>Nota:</strong> la implementación de expresiones Lambda
-  de Android N se basa en clases anónimas. Este enfoque permite que
-  tengan compatibilidad con versiones anteriores y puedan ejecutarse en versiones anteriores de Android. Para probar
-  expresiones Lambda en versiones anteriores, recuerda acceder a tu archivo {@code
-  build.gradle} y fijar {@code compileSdkVersion} y {@code
-  targetSdkVersion} en 23 o un valor inferior.
-</p>
 
 <h2 id="configuration">
   Habilitar funciones de Java 8 y del conjunto de herramientas Jack
@@ -118,18 +130,18 @@ el Android N Preview SDK, consulta <a href="{@docRoot}preview/setup-sdk.html">Co
   nueva <a class="external-link" href="https://source.android.com/source/jack.html">conjunto de herramientas Jack</a>. Este nueva
   conjunto de herramientas de Android permite compilar fuentes del lenguaje Java en código de bytes dex legible a través de
   Android, también tiene su propio formato de biblioteca {@code .jack} y proporciona la mayoría de las funciones de conjunto de
-  herramientas como parte de una única herramienta: reempaquetado, reducción, alteración y 
-  MultiDex.
+  herramientas como parte de una única herramienta: reempaquetado, reducción, alteración y
+ MultiDex.
 </p>
 
-<p>A continuación, se muestra una comparación de los conjuntos de herramientas empleadas para generar archivos DEX de Android:</p>
+<p>A continuación, se muestra una comparación de los conjuntos de herramientas empleados para generar archivos DEX de Android:</p>
 <ul>
   <li>Conjunto de herramientas javac heredada:<br>
   <b>javac</b> ({@code .java} --&gt; {@code .class}) --&gt; <b>dx</b> ({@code
   .class} --&gt; {@code .dex})
   </li>
 
-  <li>Nueva conjunto de herramientas Jack:<br>
+  <li>Nueva cadena de herramientas Jack:<br>
   <b>Jack</b> ({@code .java} --&gt; {@code .jack} --&gt; {@code .dex})
   </li>
 </ul>
@@ -140,7 +152,7 @@ el Android N Preview SDK, consulta <a href="{@docRoot}preview/setup-sdk.html">Co
 
 <p>
   Si deseas habilitar las funciones del lenguaje Java 8 y de Jack para tu proyecto, escribe lo
-  siguiente en tu archivo específico de módulo {@code build.gradle}:
+ siguiente en tu archivo de nivel de módulo {@code build.gradle}:
 </p>
 
 <pre>
@@ -159,13 +171,14 @@ android {
 }
 </pre>
 
-<h3>
+<h3 id="known-issues">
   Problemas conocidos
 </h3>
 
 <p>
-  Instant Run, presentado en Android Studio 2.0 (beta), actualmente no funciona
-  con Jack y permanecerá deshabilitado cuando se use el nuevo conjunto de herramientas.
+  Actualmente, <a href="{@docRoot}tools/building/building-studio.html#instant-run">Instant
+  Run</a> no funciona  con Jack y permanecerá deshabilitado cuando se use
+  el nuevo conjunto de herramientas.
 </p>
 
 <p>Debido a que Jack no genera archivos de clase intermedia al compilar una
@@ -173,11 +186,12 @@ aplicación, las herramientas que dependen de estos archivos actualmente no func
 ejemplos de estas herramientas:</p>
 
 <ul>
-  <li>detectores Lint que funcionan en archivos de clases;
+  <li>Detectores Lint que funcionan en archivos de clases;
   </li>
 
-  <li>Herramientas y bibliotecas que requieren los archivos de clase de la aplicación (como JaCoCo
-  y Mockito).</li>
+  <li>Herramientas y bibliotecas que requieren los archivos de clase de la aplicación (como
+  pruebas de instrumentación con JaCoCo).
+  </li>
 </ul>
 
-<p>Si experimentas otros problemas al usar Jack, <a href="http://tools.android.com/filing-bugs">informa los errores</a>.</p>
+<p>Si experimentas otros problemas al usar Jack, <a href="http://tools.android.com/filing-bugs">envía un error</a>.</p>

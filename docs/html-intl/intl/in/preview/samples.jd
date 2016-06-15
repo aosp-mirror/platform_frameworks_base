@@ -11,15 +11,15 @@ page.image=images/cards/card-n-samples_2x.png
 
 <p class="note">
   <strong>Catatan:</strong> Proyek yang bisa diunduh ini didesain
-  untuk digunakan bersama Gradle dan Android Studio.
+   untuk digunakan bersama Gradle dan Android Studio.
 </p>
 
 
-<h3 id="mw">Multi-Window Playground</h3>
+<h3 id="mw">Playground Multi-Jendela</h3>
 <img src="{@docRoot}preview/images/sample-multiwindow.png" style="float: left; padding-right: 0.5em" height="250" width="156" />
 <p>
   Contoh ini memperagakan cara memanfaatkan antarmuka pengguna
-  multijendela bersama aplikasi Anda.
+  multi-jendela bersama aplikasi Anda.
 </p>
 <p>
   <a href="https://github.com/googlesamples/android-MultiWindowPlayground">
@@ -27,12 +27,12 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 <div style="clear: both;"></div>
-<h3 id="an">Active Notifications</h3>
+<h3 id="an">Pemberitahuan Aktif</h3>
 <img src="{@docRoot}preview/images/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
-  Ini adalah contoh yang telah ada sebelumnya yang menampilkan layanan sederhana yang mengirimkan
-  pemberitahuan menggunakan NotificationCompat. Setiap percakapan yang belum dibaca dari pengguna
-  akan dikirim sebagai pemberitahuan tersendiri.
+  Ini adalah contoh yang sudah ada sebelumnya, menampilkan layanan sederhana yang mengirimkan
+   pemberitahuan menggunakan NotificationCompat. Setiap percakapan yang belum dibaca dari pengguna
+  dikirimkan sebagai pemberitahuan berbeda.
 </p>
 <p>
   Contoh ini telah diperbarui untuk memanfaatkan fitur pemberitahuan baru
@@ -44,7 +44,7 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 <div style="clear: both;"></div>
-<h3 id="ms">Messaging Service</h3>
+<h3 id="ms">Layanan Perpesanan</h3>
 <img src="{@docRoot}preview/images/sample-messagingservice.png" style="float: left; padding-right: 0.5em" height="250" width="150" />
 <p>
   Ini adalah contoh yang telah ada sebelumnya yang memperagakan cara menggunakan

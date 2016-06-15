@@ -19,6 +19,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
       <ol>
         <li><a class="external-link" href="https://github.com/googlesamples/android-MultiWindowPlayground">マルチ ウィンドウ Playground のサンプルアプリ</a>
 </li>
+        <li><a class="external-link" href="https://medium.com/google-developers/5-tips-for-preparing-for-multi-window-in-android-n-7bed803dda64">Android N でマルチ ウィンドウを準備するための 5 つのヒント</a></li>
       </ol>
   </div>
 </div>
@@ -26,7 +27,7 @@ page.keywords="multi-window", "android N", "split screen", "free-form"
 <p>
   Android N には、複数のアプリを同時に表示するためのサポートが追加されています。
 ハンドヘルド端末で、分割画面モードにして、2 つのアプリを並べて実行したり、重ねて表示したりできます。<em></em>
-TV デバイスで、アプリがピクチャ イン ピクチャ モードでビデオを再生しているときに、ユーザーは別のアプリを操作できます。<em></em>
+TV 端末で、アプリがピクチャ イン ピクチャ モードで動画を再生しているときに、ユーザーは別のアプリを操作できます。<em></em>
 
 
 </p>
@@ -79,22 +80,22 @@ TV デバイスで、アプリがピクチャ イン ピクチャ モードで�
 </p>
 
 <ul>
-  <li>ユーザーは<a href="{@docRoot}guide/components/recents.html">オーバービュー画面</a>を開いているときに、アクティビティのタイトルを長押ししてから、そのアクティビティを画面の強調表示された部分にドラッグすることにより、アクティビティをマルチ ウィンドウ モードにすることができます。
+  <li>ユーザーは <a href="{@docRoot}guide/components/recents.html">[Overview] 画面</a>を開いているときに、アクティビティのタイトルを長押ししてから、そのアクティビティを画面の強調表示された部分にドラッグすることにより、アクティビティをマルチ ウィンドウ モードにすることができます。
 
 
 
   </li>
 
-  <li>ユーザーがオーバービュー ボタンを長押しすると、現在のアクティビティがマルチ ウィンドウ モードになり、オーバービュー画面が開くので、ユーザーは、画面で共有する別のアクティビティを選択できるようになります。
+  <li>ユーザーが [Overview] ボタンを長押しすると、現在のアクティビティがマルチ ウィンドウ モードになり、[Overview] 画面が開くので、ユーザーは、画面で共有する別のアクティビティを選択できるようになります。
 
 
   </li>
 </ul>
 
 <p>
-  ユーザーは、複数のアクティビティが画面を共有しているときに、データを 1 つのアクティビティから別のアクティビティに<a href="{@docRoot}guide/topics/ui/drag-drop.html">ドラッグ アンド ドロップ</a>できます
+  ユーザーは、複数のアクティビティが画面を共有しているときに、データを 1 つのアクティビティから別のアクティビティに<a href="{@docRoot}guide/topics/ui/drag-drop.html">ドラッグ＆ドロップ</a>できます
 
-（以前は、単一のアクティビティ内でのみデータをドラッグ アンド ドロップできました）。
+（以前は、単一のアクティビティ内でのみデータをドラッグ＆ドロップできました）。
 
 </p>
 
@@ -116,21 +117,23 @@ TV デバイスで、アプリがピクチャ イン ピクチャ モードで�
 </p>
 
 <p class="note">
-  <strong>注:</strong> マルチ ウィンドウ モードでは、アプリが一時停止状態になっても、そのアプリを表示したままにすることができます。
+  <strong>注:</strong>マルチ ウィンドウ モードでは、アプリが一時停止状態になっても、そのアプリを表示したままにすることができます。
 アプリは、一時停止していても、アクティビティを続行する必用がある場合があります。
-たとえば、一時停止モードになっているが、表示されているビデオ再生アプリは、ビデオの表示を継続する必要があります。
-そのため、ビデオを再生するアクティビティが {@link android.app.Activity#onPause onPause()} ハンドラでビデオを一時停止しないようにすることをお勧めします。
+たとえば、一時停止モードになっているが、表示されている動画再生アプリは、動画の表示を継続する必要があります。
+そのため、動画を再生するアクティビティが {@link android.app.Activity#onPause onPause()} ハンドラで動画を一時停止しないようにすることをお勧めします。
 
 <em></em>
   その代わり、これらのアクティビティは {@link android.app.Activity#onStop
-  onStop()} でビデオを一時停止し、{@link android.app.Activity#onStart
-  onStart()} でビデオの再生を再開する必要があります。
+  onStop()} で動画を一時停止し、{@link android.app.Activity#onStart
+  onStart()} で動画の再生を再開する必要があります。
 </p>
 
 <p>
   <a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更の処理</a>で指定したように、ユーザーがアプリをマルチ ウィンドウ モードにすると、アクティビティに構成の変更が通知されます。
 
-基本的に、この構成の変更は、端末が縦表示から横表示に切り替えられたことをアプリに通知する場合と同じ影響（端末のディメンションが変更された場合を除いて）をアクティビティのライフサイクルに及ぼします。
+これは、ユーザーがアプリのサイズを変更するか、アプリを全画面モードに戻した場合にも行われます。
+
+  基本的に、この構成の変更は、端末が縦表示から横表示に切り替えられたことをアプリに通知する場合と同じ影響（端末のディメンションが変更された場合を除いて）をアクティビティのライフサイクルに及ぼします。
 
 
 <a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更の処理</a>で説明したように、アクティビティは構成の変更を処理することができます。または、システムによってアクティビティを破棄し、新しいディメンションでアクティビティを再作成することもできます。
@@ -140,7 +143,7 @@ TV デバイスで、アプリがピクチャ イン ピクチャ モードで�
 </p>
 
 <p>
-  ユーザーがウィンドウのサイズを変更して、高さや幅を拡大した場合、ユーザー アクションに一致するようにアクティビティのサイズが変更され、必要に応じて、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更</a>が発行されます。
+  ユーザーがウィンドウのサイズを変更して、高さや幅を拡大した場合、ユーザー操作に一致するようにアクティビティのサイズが変更され、必要に応じて、<a href="{@docRoot}guide/topics/resources/runtime-changes.html">実行時の変更</a>が発行されます。
 
 アプリで新しく表示された領域を描画するまでに時間がかかる場合、{@link
   android.R.attr#windowBackground windowBackground} 属性またはデフォルトの 
@@ -155,14 +158,16 @@ TV デバイスで、アプリがピクチャ イン ピクチャ モードで�
 サイズとレイアウトを制御するための属性をマニフェストに設定できます。
 
   ルート アクティビティ属性の設定は、タスクスタック内のすべてのアクティビティに適用されます。
+たとえば、ルート アクティビティにより 
+<code>android:resizeableActivity</code> が true に設定されると、タスク スタック内のすべてのアクティビティのサイズを変更できるようになります。
 
 </p>
 
 <p class="note">
-  <strong>注</strong>: Android N より前の SDK バージョンでマルチ オリエンテーション アプリをビルドして、そのアプリをマルチ ウィンドウ モードで使用する場合は、アプリのサイズが強制的に変更されます。
+  <strong>注:</strong>Android N より前の SDK バージョンでマルチ オリエンテーション アプリをビルドして、そのアプリをマルチ ウィンドウ モードで使用する場合は、アプリのサイズが強制的に変更されます。
 
 アプリに予想外の動作が発生する場合があることをユーザーに警告するダイアログ ボックスが表示されます。
-システムは、向きが固定されたアプリのサイズを変更しません。ユーザーがマルチ ウィンドウ モードで向きが固定されたアプリを開こうとすると、そのアプリが全画面で表示されます。<em></em>
+システムは、画面の向きが固定されたアプリのサイズを変更しません。ユーザーがマルチ ウィンドウ モードで画面の向きが固定されたアプリを開こうとすると、そのアプリが全画面で表示されます。<em></em>
 
 
 
@@ -239,7 +244,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>android:minimalSize</code>
+    <code>android:minimalHeight</code>、<code>android:minimalWidth</code>
   </dt>
 
   <dd>
@@ -261,7 +266,8 @@ android:supportsPictureInPicture=["true" | "false"]
     &lt;layout android:defaultHeight="500dp"
           android:defaultWidth="600dp"
           android:gravity="top|end"
-          android:minimalSize="450dp" /&gt;
+          android:minimalHeight="450dp"
+          android:minimalWidth="300dp" /&gt;
 &lt;/activity&gt;
 </pre>
 
@@ -295,13 +301,14 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   マルチ ウィンドウ ディスプレイをサポートするために、次の新しいメソッドが {@link android.app.Activity} クラスに追加されています。
-各メソッドの詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N プレビュー SDK リファレンス</a>をご覧ください。
+各メソッドの詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK リファレンス</a>をご覧ください。
+
 
 </p>
 
 <dl>
   <dt>
-    <code>Activity.inMultiWindow()</code>
+    <code>Activity.isInMultiWindowMode()</code>
   </dt>
 
   <dd>
@@ -309,22 +316,22 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.inPictureInPicture()</code>
+    <code>Activity.isInPictureInPictureMode()</code>
   </dt>
 
   <dd>
     アクティビティがピクチャ イン ピクチャ モードで実行されているかどうかを判別するために呼び出します。
 
     <p class="note">
-      <strong>注</strong>: ピクチャ イン ピクチャ モードは、マルチ ウィンドウ モードの特別な形態です。
-<code>myActivity.inPictureInPicture()</code> が true を返す場合は、<code>myActivity.inMultiWindow()</code> も true を返します。
+      <strong>注:</strong>ピクチャ イン ピクチャ モードは、マルチ ウィンドウ モードの特別な形態です。
+<code>myActivity.isInPictureInPictureMode()</code> が true を返す場合は、<code>myActivity.isInMultiWindowMode()</code> も true を返します。
 
 
     </p>
   </dd>
 
   <dt>
-    <code>Activity.onMultiWindowChanged()</code>
+    <code>Activity.onMultiWindowModeChanged()</code>
   </dt>
 
   <dd>
@@ -335,7 +342,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dd>
 
   <dt>
-    <code>Activity.onPictureInPictureChanged()</code>
+    <code>Activity.onPictureInPictureModeChanged()</code>
   </dt>
 
   <dd>
@@ -347,7 +354,7 @@ android:supportsPictureInPicture=["true" | "false"]
 </dl>
 
 <p>
-  また、これらの各メソッドの {@link android.app.Fragment} バージョンがあります。たとえば、<code>Fragment.inMultiWindow()</code> です。
+  また、これらの各メソッドの {@link android.app.Fragment} バージョンがあります。たとえば、<code>Fragment.isInMultiWindowMode()</code> です。
 
 </p>
 
@@ -355,7 +362,7 @@ android:supportsPictureInPicture=["true" | "false"]
 
 <p>
   アクティビティをピクチャ イン ピクチャ モードにするには、新しいメソッド 
-<code>Activity.enterPictureInPicture()</code> を呼び出します。端末がピクチャ イン ピクチャ モードをサポートしない場合、このメソッドの効果はありません。
+<code>Activity.enterPictureInPictureMode()</code> を呼び出します。端末がピクチャ イン ピクチャ モードをサポートしない場合、このメソッドの効果はありません。
 詳細については、<a href="picture-in-picture.html">ピクチャ イン ピクチャ</a>に関するドキュメントをご覧ください。
 
 </p>
@@ -389,25 +396,25 @@ android:supportsPictureInPicture=["true" | "false"]
 </p>
 
 <p class="note">
-  <strong>注</strong>: タスクスタック内でアクティビティを起動すると、画面上のアクティビティが起動したアクティビティに置き換えられ、すべてのマルチ ウィンドウ プロパティが継承されます。
+  <strong>注:</strong>タスクスタック内でアクティビティを起動すると、画面上のアクティビティが起動したアクティビティに置き換えられ、すべてのマルチ ウィンドウ プロパティが継承されます。
 
 マルチ ウィンドウ モードで新しいアクティビティを別個の画面として起動する場合は、新しいアクティビティを新しいタスクスタックで起動する必要があります。
 
 </p>
 
-<h3 id="dnd">ドラッグ アンド ドロップのサポート</h3>
+<h3 id="dnd">ドラッグ＆ドロップのサポート</h3>
 
 <p>
-  ユーザーは、2 つのアクティビティが画面を共有しているときに、データを 1 つのアクティビティから別のアクティビティに<a href="{@docRoot}guide/topics/ui/drag-drop.html">ドラッグ アンド ドロップ</a>できます
+  ユーザーは、2 つのアクティビティが画面を共有しているときに、データを 1 つのアクティビティから別のアクティビティに<a href="{@docRoot}guide/topics/ui/drag-drop.html">ドラッグ＆ドロップ</a>できます
 
-（以前は、単一のアクティビティ内でのみデータをドラッグ アンド ドロップできました）。
-そのため、アプリがドラッグ アンド ドロップをサポートしていない場合は、ドラッグ アンド ドロップ機能をアプリに追加する必要があります。
+（以前は、単一のアクティビティ内でのみデータをドラッグ＆ドロップできました）。
+そのため、アプリがドラッグ＆ドロップをサポートしていない場合は、ドラッグ＆ドロップ機能をアプリに追加する必要があります。
 
 </p>
 
 <p>
-  N プレビュー SDK では、異なるアプリ間のドラッグ アンド ドロップをサポートするために、<a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a> パッケージが拡張されています。
-次のクラスとメソッドの詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N プレビュー SDK リファレンス</a>をご覧ください。
+  N Preview SDK では、異なるアプリ間のドラッグ＆ドロップをサポートするために、<a href="{@docRoot}reference/android/view/package-summary.html"><code>android.view</code></a> パッケージが拡張されています。
+次のクラスとメソッドの詳細については、<a href="{@docRoot}preview/setup-sdk.html#docs-dl">N Preview SDK リファレンス</a>をご覧ください。
 
 
 </p>
@@ -427,7 +434,7 @@ android:supportsPictureInPicture=["true" | "false"]
   </dt>
 
   <dd>
-    {@link android.view.View#startDrag View.startDrag()} の新しいエイリアスです。異なるアクティビティ間のドラッグ アンド ドロップを有効にするには、新しいフラグ 
+    {@link android.view.View#startDrag View.startDrag()} の新しいエイリアスです。異なるアクティビティ間のドラッグ＆ドロップを有効にするには、新しいフラグ 
 <code>View.DRAG_FLAG_GLOBAL</code> を渡します。
 URI パーミッションを受け取る側のアクティビティに付与する必要がある場合、必要に応じて、新しいフラグ 
 <code>View.DRAG_FLAG_GLOBAL_URI_READ</code> または 
@@ -478,23 +485,23 @@ URI パーミッションを受け取る側のアクティビティに付与す�
 
 </p>
 
-<h3 id="test-non-n">アプリが N プレビュー SDK でビルドされていない場合</h3>
+<h3 id="test-non-n">アプリが N Preview SDK でビルドされていない場合</h3>
 
 <p>
-  アプリが N プレビュー SDK でビルドされていないときに、ユーザーがマルチ ウィンドウ モードでそのアプリを使用しようとすると、アプリが向きの固定を宣言しない限り、アプリのサイズが強制的に変更されます。
+  アプリが N Preview SDK でビルドされていないときに、ユーザーがマルチ ウィンドウ モードでそのアプリを使用しようとすると、アプリが画面の向きの固定を宣言しない限り、アプリのサイズが強制的に変更されます。
 
 
 </p>
 
 <p>
-  アプリが向きの固定を宣言しない場合、Android N を実行している端末でアプリを起動し、アプリを分割画面モードにすることを試みる必要があります。
+  アプリが画面の向きの固定を宣言しない場合、Android N を実行している端末でアプリを起動し、アプリを分割画面モードにすることを試みる必要があります。
 
 アプリのサイズが強制的に変更されたときに、ユーザー エクスペリエンスが許容範囲内にあることを確認してください。
 
 </p>
 
 <p>
-  アプリが向きの固定を宣言する場合、アプリをマルチ ウィンドウ モードにすることを試みる必要があります。
+  アプリが画面の向きの固定を宣言する場合、アプリをマルチ ウィンドウ モードにすることを試みる必要があります。
 アプリをマルチ ウィンドウ モードにすることを試みたとき、アプリが全画面モードのままであることを確認してください。
 
 </p>
@@ -502,18 +509,18 @@ URI パーミッションを受け取る側のアクティビティに付与す�
 <h3 id="test-mw">マルチ ウィンドウ モードをサポートする場合</h3>
 
 <p>
-  アプリが N プレビュー SDK でビルドされていて、マルチ ウィンドウ モードが無効になっていない場合、分割画面モードとフリーフォーム モードの両方で次の動作を確認してください。
+  アプリが N Preview SDK でビルドされていて、マルチ ウィンドウ モードが無効になっていない場合、分割画面モードとフリーフォーム モードの両方で次の動作を確認してください。
 
 
 </p>
 
 <ul>
-  <li>アプリを全画面モードで起動してから、オーバービュー ボタンを長押しして、マルチ ウィンドウ モードに切り替えます。
+  <li>アプリを全画面モードで起動してから、[Overview] ボタンを長押しして、マルチ ウィンドウ モードに切り替えます。
 モードが適切に切り替わることを確認します。
   </li>
 
   <li>アプリをマルチ ウィンドウ モードで直接起動し、アプリが適切に起動することを確認します。
-オーバービュー ボタンを押すと、アプリをマルチ ウィンドウ モードで起動できます。次に、アプリのタイトルバーを長押しし、アプリを画面上の強調表示された領域のいずれかにドラッグします。
+[Overview] ボタンを押すと、アプリをマルチ ウィンドウ モードで起動できます。次に、アプリのタイトルバーを長押しし、アプリを画面上の強調表示された領域のいずれかにドラッグします。
 
 
   </li>
@@ -547,7 +554,7 @@ URI パーミッションを受け取る側のアクティビティに付与す�
   </li>
 
   <li>1 つのアプリから別のアプリに切り替えたとき、最初のアプリの動作が適切であり、表示されているが、アクティブになっていないことを確認します。
-たとえば、アプリがビデオを再生している場合、ユーザーが別のアプリを操作しているときに、アプリでビデオの再生が継続していることを確認します。
+たとえば、アプリが動画を再生している場合、ユーザーが別のアプリを操作しているときに、アプリで動画の再生が継続していることを確認します。
 
 
   </li>

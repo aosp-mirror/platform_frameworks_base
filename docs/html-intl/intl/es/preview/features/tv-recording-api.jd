@@ -7,7 +7,7 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <div id="qv-wrapper">
 <div id="qv">
-  <h2>Contenido del documento</h2>
+  <h2>En este documento</h2>
   <ol>
     <li><a href="#supporting">Indicar la compatibilidad para la grabación</a></li>
     <li><a href="#recording">Grabar una sesión</a></li>
@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 </div>
 
-<p>Los servicios de entrada de TV le permiten al usuario pausar y reiniciar la reproducción de canales
+<p>Los servicios de entrada de TV le permiten al usuario pausar y reanudar la reproducción de canales
 mediante API de time-shifting. Android N expande la función de time-shifting
  permitiéndoles a los usuarios guardar múltiples sesiones grabadas.</p>
 
@@ -31,20 +31,41 @@ debes indicarle al sistema que tu aplicación permite la grabación, implementar
 la habilidad para grabar programas, gestionar y comunicar los errores que ocurren
 durante la grabación y gestionar las sesiones grabadas.</p>
 
+<p class="note"><strong>Nota:</strong> La aplicación Live Channels todavía no
+ permite que los usuarios creen grabaciones ni accedan a estas. Hasta que se realicen
+ cambios en la aplicación Live Channels, es posible que sea difícil probar completamente la 
+experiencia de grabación para tu servicio de entrada de TV.</p>
+
 <h2 id="supporting">Indicar la compatibilidad para la grabación</h2>
 
-<p>Para comunicarle al sistema que tu servicio de entrada de TV permite la grabación, debes seguir
-estos pasos:</p>
+<p>Para comunicarle al sistema que tu servicio de entrada de TV permite la grabación, configura el 
+atributo <code>android:canRecord</code> de tu archivo XML de metadatos de servicio 
+en <code>true</code>:
+</p>
+
+<pre>
+&lt;tv-input xmlns:android="http://schemas.android.com/apk/res/android"
+  <b>android:canRecord="true"</b>
+  android:setupActivity="com.example.sampletvinput.SampleTvInputSetupActivity" /&gt;
+</pre>
+
+<p>Para obtener más información sobre el archivo de metadatos de servicio, consulta 
+<a href="{@docRoot}training/tv/tif/tvinput.html#manifest">Declarar el servicio de entrada
+ de TV en el manifiesto</a>.
+</p>
+
+<p>De forma alternativa, puedes indicar la compatibilidad para la grabación en tu código; para ello, sigue
+ estos pasos:</p>
 
 <ol>
 <li>En el método <code>TvInputService.onCreate()</code>, crea un nuevo
 objeto <code>TvInputInfo</code> usando la clase <code>TvInputInfo.Builder</code>.
 </li>
-<li>Cuando creer el nuevo objeto <code>TvInputInfo</code>, llama a
+<li>Cuando crees el nuevo objeto <code>TvInputInfo</code>, llama a
 <code>setCanRecord(true)</code> antes de llamar a <code>build()</code> para
 indicar que tu servicio permite la grabación.</li>
 <li>Registra tu objeto <code>TvInputInfo</code> con el sistema llamando a
-<code>TvInputService.updateTvInputInfo()</code>.</li>
+<code>TvInputManager.updateTvInputInfo()</code>.</li>
 </ol>
 
 <h2 id="recording">Grabar una sesión</h2>
@@ -100,7 +121,7 @@ use la sesión parcial.</p>
 las aplicaciones de canal con funcionalidad de grabación en la tabla de proveedor de contenido <code>TvContract.RecordedPrograms</code>
 . Esta información se accede mediante el URI de contenido
 <code>RecordedPrograms.Uri</code>. Usa API de proveedor de contenido para
-leer, agregar y eliminar entradas de esta tabla.</p>
+leer, agregar y borrar entradas de esta tabla.</p>
 
 <p>Para obtener más información sobre cómo trabajar con datos del proveedor de contenido, consulta 
 <a href="{@docRoot}guide/topics/providers/content-provider-basics.html">
