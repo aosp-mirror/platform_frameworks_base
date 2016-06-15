@@ -411,21 +411,6 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences = parse_unicode_datafile(
         path.join(ucd_path, 'emoji-zwj-sequences.txt'))
 
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    # also filter rifle
-    def is_excluded(n):
-        return n in [0x1f93b, 0x1f946]
-
-    def contains_excluded(t):
-        if type(t) == int:
-            return is_excluded(t)
-        return any(is_excluded(cp) for cp in t)
-
-    # filter modern pentathlon, as it seems likely to be removed from final spec
-    _emoji_properties['Emoji'] = set(
-        t for t in _emoji_properties['Emoji'] if not contains_excluded(t))
-    _emoji_sequences = dict(
-        (t, v) for (t, v) in _emoji_sequences.items() if not contains_excluded(t))
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
