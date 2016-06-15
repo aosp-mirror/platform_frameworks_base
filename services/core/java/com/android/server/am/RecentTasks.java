@@ -621,7 +621,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = get(i);
             if (task != tr) {
-                if (task.stack != tr.stack) {
+                if (task.stack != null && tr.stack != null && task.stack != tr.stack) {
                     continue;
                 }
                 if (task.userId != tr.userId) {
