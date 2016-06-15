@@ -759,7 +759,7 @@ public class RecoverySystem {
 
                 if (line.startsWith("time")) {
                     timeTotal = scaled;
-                } else if (line.startsWith("source_version")) {
+                } else if (line.startsWith("source_build")) {
                     sourceVersion = scaled;
                 } else if (line.startsWith("bytes_written")) {
                     bytesWrittenInMiB = (bytesWrittenInMiB == -1) ? scaled :
