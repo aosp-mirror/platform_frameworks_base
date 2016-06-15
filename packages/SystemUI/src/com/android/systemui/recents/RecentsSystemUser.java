@@ -30,6 +30,7 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
+import com.android.systemui.recents.misc.ForegroundThread;
 
 /**
  * An implementation of the system user's Recents interface to be called remotely by secondary
@@ -78,12 +79,16 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
 
     @Override
     public void updateRecentsVisibility(boolean visible) {
-        mImpl.onVisibilityChanged(mContext, visible);
+        ForegroundThread.getHandler().post(() -> {
+            mImpl.onVisibilityChanged(mContext, visible);
+        });
     }
 
     @Override
     public void startScreenPinning(int taskId) {
-        mImpl.onStartScreenPinning(mContext, taskId);
+        ForegroundThread.getHandler().post(() -> {
+            mImpl.onStartScreenPinning(mContext, taskId);
+        });
     }
 
     @Override
