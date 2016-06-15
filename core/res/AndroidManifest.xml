@@ -469,13 +469,6 @@
     <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
     <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
 
-    <protected-broadcast android:name="com.android.ims.IMS_SERVICE_UP" />
-    <protected-broadcast android:name="com.android.ims.IMS_INCOMING_CALL" />
-    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_UP" />
-    <protected-broadcast android:name="com.android.ims.internal.uce.UCE_SERVICE_DOWN" />
-    <protected-broadcast android:name="com.android.intent.action.IMS_FEATURE_CHANGED" />
-    <protected-broadcast android:name="com.android.intent.action.IMS_CONFIG_CHANGED" />
-
     <protected-broadcast android:name="com.android.internal.location.ALARM_WAKEUP" />
     <protected-broadcast android:name="com.android.internal.location.ALARM_TIMEOUT" />
     <protected-broadcast android:name="android.intent.action.GLOBAL_BUTTON" />
