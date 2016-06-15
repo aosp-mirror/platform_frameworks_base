@@ -114,7 +114,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -223,7 +222,7 @@ public class ShortcutService extends IShortcutService.Stub {
         String KEY_MAX_ICON_DIMENSION_DP_LOWRAM = "max_icon_dimension_dp_lowram";
 
         /**
-         * Key name for the max dynamic shortcuts per app. (int)
+         * Key name for the max dynamic shortcuts per activity. (int)
          */
         String KEY_MAX_SHORTCUTS = "max_shortcuts";
 
@@ -1479,6 +1478,12 @@ public class ShortcutService extends IShortcutService.Stub {
         return (c >= 0x20 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd);
     }
 
+    private void assignImplicitRanks(List<ShortcutInfo> shortcuts) {
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            shortcuts.get(i).setImplicitRank(i);
+        }
+    }
+
     // === APIs ===
 
     @Override
@@ -1501,10 +1506,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 return false;
             }
 
-            // Validate the shortcuts.
-            for (int i = 0; i < size; i++) {
-                fixUpIncomingShortcutInfo(newShortcuts.get(i), /* forUpdate= */ false);
-            }
+            // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
+            ps.clearAllImplicitRanks();
+            assignImplicitRanks(newShortcuts);
 
             // First, remove all un-pinned; dynamic shortcuts
             ps.deleteAllDynamicShortcuts();
@@ -1514,6 +1518,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 final ShortcutInfo newShortcut = newShortcuts.get(i);
                 ps.addOrUpdateDynamicShortcut(newShortcut);
             }
+
+            // Lastly, adjust the ranks.
+            ps.adjustRanks();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -1542,41 +1549,58 @@ public class ShortcutService extends IShortcutService.Stub {
                 return false;
             }
 
+            // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
+            ps.clearAllImplicitRanks();
+            assignImplicitRanks(newShortcuts);
+
             for (int i = 0; i < size; i++) {
                 final ShortcutInfo source = newShortcuts.get(i);
                 fixUpIncomingShortcutInfo(source, /* forUpdate= */ true);
 
                 final ShortcutInfo target = ps.findShortcutById(source.getId());
-                if (target != null) {
-                    if (target.isEnabled() != source.isEnabled()) {
-                        Slog.w(TAG,
-                                "ShortcutInfo.enabled cannot be changed with updateShortcuts()");
-                    }
+                if (target == null) {
+                    continue;
+                }
 
-                    final boolean replacingIcon = (source.getIcon() != null);
-                    if (replacingIcon) {
-                        removeIcon(userId, target);
-                    }
+                if (target.isEnabled() != source.isEnabled()) {
+                    Slog.w(TAG,
+                            "ShortcutInfo.enabled cannot be changed with updateShortcuts()");
+                }
 
-                    if (source.getActivity() != null &&
-                            !source.getActivity().equals(target.getActivity())) {
-                        // TODO When activity is changing, check the dynamic count.
-                    }
+                // When updating the rank, we need to insert between existing ranks, so set
+                // this setRankChanged, and also copy the implicit rank fo adjustRanks().
+                if (source.hasRank()) {
+                    target.setRankChanged();
+                    target.setImplicitRank(source.getImplicitRank());
+                }
 
-                    // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
-                    target.copyNonNullFieldsFrom(source);
+                final boolean replacingIcon = (source.getIcon() != null);
+                if (replacingIcon) {
+                    removeIcon(userId, target);
+                }
 
-                    if (replacingIcon) {
-                        saveIconAndFixUpShortcut(userId, target);
-                    }
+                if (source.getActivity() != null &&
+                        !source.getActivity().equals(target.getActivity())) {
+                    // TODO When activity is changing, check the dynamic count.
+                }
 
-                    // When we're updating any resource related fields, re-extract the res names and
-                    // the values.
-                    if (replacingIcon || source.hasStringResources()) {
-                        fixUpShortcutResourceNamesAndValues(target);
-                    }
+                // Note copyNonNullFieldsFrom() does the "updatable with?" check too.
+                target.copyNonNullFieldsFrom(source);
+                target.setTimestamp(injectCurrentTimeMillis());
+
+                if (replacingIcon) {
+                    saveIconAndFixUpShortcut(userId, target);
+                }
+
+                // When we're updating any resource related fields, re-extract the res names and
+                // the values.
+                if (replacingIcon || source.hasStringResources()) {
+                    fixUpShortcutResourceNamesAndValues(target);
                 }
             }
+
+            // Lastly, adjust the ranks.
+            ps.adjustRanks();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -1600,6 +1624,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
             ps.enforceShortcutCountsBeforeOperation(newShortcuts, OPERATION_ADD);
 
+            // Initialize the implicit ranks for ShortcutPackage.adjustRanks().
+            ps.clearAllImplicitRanks();
+            assignImplicitRanks(newShortcuts);
+
             // Throttling.
             if (!ps.tryApiCall()) {
                 return false;
@@ -1610,9 +1638,16 @@ public class ShortcutService extends IShortcutService.Stub {
                 // Validate the shortcut.
                 fixUpIncomingShortcutInfo(newShortcut, /* forUpdate= */ false);
 
+                // When ranks are changing, we need to insert between ranks, so set the
+                // "rank changed" flag.
+                newShortcut.setRankChanged();
+
                 // Add it.
                 ps.addOrUpdateDynamicShortcut(newShortcut);
             }
+
+            // Lastly, adjust the ranks.
+            ps.adjustRanks();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -1637,6 +1672,9 @@ public class ShortcutService extends IShortcutService.Stub {
                         disabledMessage, disabledMessageResId,
                         /* overrideImmutable=*/ false);
             }
+
+            // We may have removed dynamic shortcuts which may have left a gap, so adjust the ranks.
+            ps.adjustRanks();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -1677,6 +1715,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 ps.deleteDynamicWithId(
                         Preconditions.checkStringNotEmpty((String) shortcutIds.get(i)));
             }
+
+            // We may have removed dynamic shortcuts which may have left a gap, so adjust the ranks.
+            ps.adjustRanks();
         }
         packageShortcutsChanged(packageName, userId);
 
@@ -2328,6 +2369,7 @@ public class ShortcutService extends IShortcutService.Stub {
         } finally {
             logDurationStat(Stats.CHECK_PACKAGE_CHANGES, start);
         }
+        verifyStates();
     }
 
     private void handlePackageAdded(String packageName, @UserIdInt int userId) {
@@ -2339,6 +2381,7 @@ public class ShortcutService extends IShortcutService.Stub {
             user.attemptToRestoreIfNeededAndSave(this, packageName, userId);
             user.handlePackageAddedOrUpdated(packageName);
         }
+        verifyStates();
     }
 
     private void handlePackageUpdateFinished(String packageName, @UserIdInt int userId) {
@@ -2354,6 +2397,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 user.handlePackageAddedOrUpdated(packageName);
             }
         }
+        verifyStates();
     }
 
     private void handlePackageRemoved(String packageName, @UserIdInt int packageUserId) {
@@ -2362,6 +2406,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     packageUserId));
         }
         cleanUpPackageForAllLoadedUsers(packageName, packageUserId);
+
+        verifyStates();
     }
 
     private void handlePackageDataCleared(String packageName, int packageUserId) {
@@ -2370,6 +2416,8 @@ public class ShortcutService extends IShortcutService.Stub {
                     packageUserId));
         }
         cleanUpPackageForAllLoadedUsers(packageName, packageUserId);
+
+        verifyStates();
     }
 
     // === PackageManager interaction ===

@@ -58,9 +58,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -72,9 +76,11 @@ import java.util.function.Predicate;
 public class ShortcutManagerTestUtils {
     private static final String TAG = "ShortcutManagerUtils";
 
-    private static final boolean ENABLE_DUMPSYS = true; // DO NOT SUBMIT WITH true
+    private static final boolean ENABLE_DUMPSYS = false; // DO NOT SUBMIT WITH true
 
     private static final int STANDARD_TIMEOUT_SEC = 5;
+
+    private static final String[] EMPTY_STRINGS = new String[0];
 
     private ShortcutManagerTestUtils() {
     }
@@ -228,7 +234,7 @@ public class ShortcutManagerTestUtils {
     }
 
     public static <T> Set<T> hashSet(Set<T> in) {
-        return new HashSet<T>(in);
+        return new LinkedHashSet<>(in);
     }
 
     public static <T> Set<T> set(T... values) {
@@ -240,7 +246,7 @@ public class ShortcutManagerTestUtils {
     }
 
     public static <T, V> Set<T> set(Function<V, T> converter, List<V> values) {
-        final HashSet<T> ret = new HashSet<>();
+        final LinkedHashSet<T> ret = new LinkedHashSet<>();
         for (V v : values) {
             ret.add(converter.apply(v));
         }
@@ -258,15 +264,21 @@ public class ShortcutManagerTestUtils {
         return list;
     }
 
+    public static List<ShortcutInfo> filter(List<ShortcutInfo> list, Predicate<ShortcutInfo> p) {
+        final ArrayList<ShortcutInfo> ret = new ArrayList<>(list);
+        ret.removeIf(si -> !p.test(si));
+        return ret;
+    }
+
     public static List<ShortcutInfo> filterByActivity(List<ShortcutInfo> list,
             ComponentName activity) {
-        final ArrayList<ShortcutInfo> ret = new ArrayList<>();
-        for (ShortcutInfo si : list) {
-            if (si.getActivity().equals(activity) && (si.isManifestShortcut() || si.isDynamic())) {
-                ret.add(si);
-            }
-        }
-        return ret;
+        return filter(list, si ->
+                (si.getActivity().equals(activity)
+                        && (si.isManifestShortcut() || si.isDynamic())));
+    }
+
+    public static List<ShortcutInfo> changedSince(List<ShortcutInfo> list, long time) {
+        return filter(list, si -> si.getLastChangedTimestamp() >= time);
     }
 
     public static void assertExpectException(Class<? extends Throwable> expectedExceptionType,
@@ -305,13 +317,24 @@ public class ShortcutManagerTestUtils {
 
     public static List<ShortcutInfo> assertShortcutIds(List<ShortcutInfo> actualShortcuts,
             String... expectedIds) {
-        final HashSet<String> expected = new HashSet<>(list(expectedIds));
-        final HashSet<String> actual = new HashSet<>();
+        final SortedSet<String> expected = new TreeSet<>(list(expectedIds));
+        final SortedSet<String> actual = new TreeSet<>();
         for (ShortcutInfo s : actualShortcuts) {
             actual.add(s.getId());
         }
 
         // Compare the sets.
+        assertEquals(expected, actual);
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertShortcutIdsOrdered(List<ShortcutInfo> actualShortcuts,
+            String... expectedIds) {
+        final ArrayList<String> expected = new ArrayList<>(list(expectedIds));
+        final ArrayList<String> actual = new ArrayList<>();
+        for (ShortcutInfo s : actualShortcuts) {
+            actual.add(s.getId());
+        }
         assertEquals(expected, actual);
         return actualShortcuts;
     }
@@ -482,7 +505,7 @@ public class ShortcutManagerTestUtils {
     }
 
     public static <T> void assertAllUnique(Collection<T> list) {
-        final Set<Object> set = new HashSet<>();
+        final Set<Object> set = new LinkedHashSet<>();
         for (T item : list) {
             if (set.contains(item)) {
                 fail("Duplicate item found: " + item + " (in the list: " + list + ")");
@@ -594,6 +617,15 @@ public class ShortcutManagerTestUtils {
         return ret;
     }
 
+    private static final Comparator<ShortcutInfo> sRankComparator =
+            (ShortcutInfo a, ShortcutInfo b) -> Integer.compare(a.getRank(), b.getRank());
+
+    public static List<ShortcutInfo> sortedByRank(List<ShortcutInfo> shortcuts) {
+        final ArrayList<ShortcutInfo> ret = new ArrayList<>(shortcuts);
+        Collections.sort(ret, sRankComparator);
+        return ret;
+    }
+
     public static void waitUntil(String message, BooleanSupplier condition) {
         waitUntil(message, condition, STANDARD_TIMEOUT_SEC);
     }
@@ -611,5 +643,79 @@ public class ShortcutManagerTestUtils {
             }
         }
         fail("Timed out for: " + message);
+    }
+
+    public static ShortcutListAsserter assertWith(List<ShortcutInfo> list) {
+        return new ShortcutListAsserter(list);
+    }
+
+    /**
+     * New style assertion that allows chained calls.
+     */
+    public static class ShortcutListAsserter {
+        private final List<ShortcutInfo> mList;
+
+        ShortcutListAsserter(List<ShortcutInfo> list) {
+            mList = new ArrayList<>(list);
+        }
+
+        public ShortcutListAsserter selectDynamic() {
+            return new ShortcutListAsserter(
+                    filter(mList, ShortcutInfo::isDynamic));
+        }
+
+        public ShortcutListAsserter selectManifest() {
+            return new ShortcutListAsserter(
+                    filter(mList, ShortcutInfo::isManifestShortcut));
+        }
+
+        public ShortcutListAsserter selectPinned() {
+            return new ShortcutListAsserter(
+                    filter(mList, ShortcutInfo::isPinned));
+        }
+
+        public ShortcutListAsserter selectByActivity(ComponentName activity) {
+            return new ShortcutListAsserter(
+                    ShortcutManagerTestUtils.filterByActivity(mList, activity));
+        }
+
+        public ShortcutListAsserter selectByChangedSince(long time) {
+            return new ShortcutListAsserter(
+                    ShortcutManagerTestUtils.changedSince(mList, time));
+        }
+
+        public ShortcutListAsserter toSortByRank() {
+            return new ShortcutListAsserter(
+                    ShortcutManagerTestUtils.sortedByRank(mList));
+        }
+
+        public ShortcutListAsserter haveIds(String... expectedIds) {
+            assertShortcutIds(mList, expectedIds);
+            return this;
+        }
+
+        public ShortcutListAsserter haveIdsOrdered(String... expectedIds) {
+            assertShortcutIdsOrdered(mList, expectedIds);
+            return this;
+        }
+
+        private ShortcutListAsserter haveSequentialRanks() {
+            for (int i = 0; i < mList.size(); i++) {
+                assertEquals("Rank not sequential", i, mList.get(i).getRank());
+            }
+            return this;
+        }
+
+        public ShortcutListAsserter haveRanksInOrder(String... expectedIds) {
+            toSortByRank()
+                    .haveSequentialRanks()
+                    .haveIdsOrdered(expectedIds);
+            return this;
+        }
+
+        public ShortcutListAsserter isEmpty() {
+            assertEquals(0, mList.size());
+            return this;
+        }
     }
 }

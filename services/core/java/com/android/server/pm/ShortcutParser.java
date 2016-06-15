@@ -103,7 +103,7 @@ public class ShortcutParser {
                 }
                 if (depth == 2 && TAG_SHORTCUT.equals(tag)) {
                     final ShortcutInfo si = parseShortcutAttributes(
-                            service, attrs, packageName, activity, userId, rank++);
+                            service, attrs, packageName, activity, userId, rank);
                     if (ShortcutService.DEBUG) {
                         Slog.d(TAG, "Shortcut=" + si);
                     }
@@ -128,6 +128,7 @@ public class ShortcutParser {
                         }
                         result.add(si);
                         numShortcuts++;
+                        rank++;
                     }
                     continue;
                 }
