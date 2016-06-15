@@ -102,7 +102,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
         if (!mFlashlightController.isAvailable()) {
-            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable);
+            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable)
+                    .mutate();
             final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
             icon.setTint(disabledColor);
             state.icon = new DrawableIcon(icon);
