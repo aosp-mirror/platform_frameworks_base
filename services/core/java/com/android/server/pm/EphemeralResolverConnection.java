@@ -64,11 +64,12 @@ final class EphemeralResolverConnection {
         mIntent = new Intent().setComponent(componentName);
     }
 
-    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(int hashPrefix) {
+    public final List<EphemeralResolveInfo> getEphemeralResolveInfoList(
+            int hashPrefix[], int prefixMask) {
         throwIfCalledOnMainThread();
         try {
             return mGetEphemeralResolveInfoCaller.getEphemeralResolveInfoList(
-                    getRemoteInstanceLazy(), hashPrefix);
+                    getRemoteInstanceLazy(), hashPrefix, prefixMask);
         } catch (RemoteException re) {
         } catch (TimeoutException te) {
         } finally {
@@ -177,10 +178,10 @@ final class EphemeralResolverConnection {
         }
 
         public List<EphemeralResolveInfo> getEphemeralResolveInfoList(
-                IEphemeralResolver target, int hashPrefix)
+                IEphemeralResolver target, int hashPrefix[], int prefixMask)
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getEphemeralResolveInfoList(mCallback, hashPrefix, sequence);
+            target.getEphemeralResolveInfoList(mCallback, hashPrefix, prefixMask, sequence);
             return getResultTimed(sequence);
         }
     }
