@@ -21,12 +21,15 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @hide
@@ -57,14 +60,29 @@ public class ContextHubService extends IContextHubService.Stub {
 
     private static final int OS_APP_INSTANCE = -1;
 
+    private static final long APP_ID_ACTIVITY_RECOGNITION = 0x476f6f676c001000L;
+
     private final Context mContext;
-    private final HashMap<Integer, NanoAppInstanceInfo> mNanoAppHash = new HashMap<>();
+    private final ConcurrentHashMap<Integer, NanoAppInstanceInfo> mNanoAppHash =
+            new ConcurrentHashMap<>();
     private final ContextHubInfo[] mContextHubInfo;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
     private native int nativeSendMessage(int[] header, byte[] data);
     private native ContextHubInfo[] nativeInitialize();
+
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            for (NanoAppInstanceInfo app : mNanoAppHash.values()) {
+                if (app.getAppId() == APP_ID_ACTIVITY_RECOGNITION) {
+                    sendVrStateChangeMessageToApp(app, enabled);
+                    break;
+                }
+            }
+        }
+    };
 
     public ContextHubService(Context context) {
         mContext = context;
@@ -73,6 +91,18 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int i = 0; i < mContextHubInfo.length; i++) {
             Log.d(TAG, "ContextHub[" + i + "] id: " + mContextHubInfo[i].getId()
                   + ", name:  " + mContextHubInfo[i].getName());
+        }
+
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+            IVrManager vrManager =
+                    IVrManager.Stub.asInterface(ServiceManager.getService("vrmanager"));
+            if (vrManager != null) {
+                try {
+                    vrManager.registerListener(mVrStateCallbacks);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "VR state listener registration failed", e);
+                }
+            }
         }
     }
 
@@ -276,5 +306,20 @@ public class ContextHubService extends IContextHubService.Stub {
               + " version " + appVersion);
 
         return 0;
+    }
+
+    private void sendVrStateChangeMessageToApp(NanoAppInstanceInfo app, boolean vrModeEnabled) {
+        int[] msgHeader = new int[MSG_HEADER_SIZE];
+        msgHeader[MSG_FIELD_TYPE] = 0;
+        msgHeader[MSG_FIELD_VERSION] = 0;
+        msgHeader[MSG_FIELD_HUB_HANDLE] = ANY_HUB;
+        msgHeader[MSG_FIELD_APP_INSTANCE] = app.getHandle();
+
+        byte[] data = new byte[1];
+        data[0] = (byte) ((vrModeEnabled) ? 1 : 0);
+        int ret = nativeSendMessage(msgHeader, data);
+        if (ret != 0) {
+            Log.e(TAG, "Couldn't send VR state change notification (" + ret + ")!");
+        }
     }
 }
