@@ -393,18 +393,9 @@ public final class ContentService extends IContentService.Stub {
             for (int i=0; i<numCalls; i++) {
                 ObserverCall oc = calls.get(i);
                 try {
-                    // If the uri does not belong to the same user as the observer: we must add
-                    // the userId to the uri. Otherewise the observer would think the uri belongs
-                    // to his user.
-                    final Uri tempUri;
-                    if (oc.mObserverUserId != userHandle) {
-                        tempUri = ContentProvider.maybeAddUserId(uri, userHandle);
-                    } else {
-                        tempUri = uri;
-                    }
-                    oc.mObserver.onChange(oc.mSelfChange, tempUri, userHandle);
+                    oc.mObserver.onChange(oc.mSelfChange, uri, userHandle);
                     if (DEBUG) Slog.d(TAG, "Notified " + oc.mObserver + " of " + "update at "
-                            + tempUri);
+                            + uri);
                 } catch (RemoteException ex) {
                     synchronized (mRootNode) {
                         Log.w(TAG, "Found dead observer, removing");
