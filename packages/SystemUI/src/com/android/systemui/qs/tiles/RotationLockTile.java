@@ -77,7 +77,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         if (mController == null) return;
         MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         final boolean newState = !mState.value;
-        mController.setRotationLocked(newState);
+        mController.setRotationLocked(!newState);
         refreshState(newState);
     }
 
@@ -89,15 +89,10 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         if (mController == null) return;
-        final boolean rotationLocked = arg != null ? (Boolean) arg
-                : mController.isRotationLocked();
+        final boolean rotationLocked = mController.isRotationLocked();
         // TODO: Handle accessibility rotation lock and whatnot.
-//        state.visible = mController.isRotationLockAffordanceVisible();
-        if (state.value == rotationLocked && state.contentDescription != null) {
-            // No change and initialized, no need to update all the values.
-            return;
-        }
-        state.value = rotationLocked;
+
+        state.value = !rotationLocked;
         final boolean portrait = isCurrentOrientationLockPortrait(mController, mContext);
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
