@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DREAM_SERVICE;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import android.Manifest;
@@ -32,6 +33,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
+import android.database.ContentObserver;
+import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -111,11 +114,16 @@ public final class DreamManagerService extends SystemService {
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    writePulseGestureEnabled();
                     synchronized (mLock) {
                         stopDreamLocked(false /*immediate*/);
                     }
                 }
             }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.DOZE_ENABLED), false,
+                    mDozeEnabledObserver, UserHandle.USER_ALL);
+            writePulseGestureEnabled();
         }
     }
 
@@ -414,6 +422,12 @@ public final class DreamManagerService extends SystemService {
         }
     }
 
+    private void writePulseGestureEnabled() {
+        ComponentName name = getDozeComponent();
+        boolean dozeEnabled = validateDream(name);
+        LocalServices.getService(InputManagerInternal.class).setPulseGestureEnabled(dozeEnabled);
+    }
+
     private static String componentsToString(ComponentName[] componentNames) {
         StringBuilder names = new StringBuilder();
         if (componentNames != null) {
@@ -447,6 +461,13 @@ public final class DreamManagerService extends SystemService {
                     cleanupDreamLocked();
                 }
             }
+        }
+    };
+
+    private final ContentObserver mDozeEnabledObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            writePulseGestureEnabled();
         }
     };
 

@@ -59,4 +59,9 @@ public abstract class InputManagerInternal {
      * @param deviceId The id of input device.
      */
     public abstract void toggleCapsLock(int deviceId);
+
+    /**
+     * Set whether the input stack should deliver pulse gesture events when the device is asleep.
+     */
+    public abstract void setPulseGestureEnabled(boolean enabled);
 }

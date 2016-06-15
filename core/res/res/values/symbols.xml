@@ -2614,6 +2614,8 @@
   <!-- Pinner Service -->
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
 
+  <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
+
   <java-symbol type="string" name="suspended_widget_accessibility" />
 
   <!-- Used internally for assistant to launch activity transitions -->
