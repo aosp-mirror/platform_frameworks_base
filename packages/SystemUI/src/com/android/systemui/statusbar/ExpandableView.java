@@ -305,6 +305,10 @@ public abstract class ExpandableView extends FrameLayout {
     @Override
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         super.getBoundsOnScreen(outRect, clipToParent);
+        if (getTop() + getTranslationY() < 0) {
+            // We got clipped to the parent here - make sure we undo that.
+            outRect.top += getTop() + getTranslationY();
+        }
         outRect.bottom = outRect.top + getActualHeight();
         outRect.top += getClipTopAmount();
     }
