@@ -1,0 +1,1188 @@
+page.title=サポートとリリースノート
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-support_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>このドキュメントの内容</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">一般的な注意事項</a></li>
+      <li><a href="#new">DP3 の新機能</a></li>
+      <li><a href="#ki">既知の問題</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  Android N Developer Preview で開発およびテストするときは、2 つの主なサポート チャンネルを使用できます。
+端末固有、システム、Google アプリのバグについては、<a href="https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> で報告してください。
+他のアプリの問題については、デベロッパーに直接お問い合わせください。
+
+</p>
+
+<p>Android N に携わっている他のデベロッパーと問題やアイデアについて議論するには、<a href="{@docRoot}preview/dev-community">Developer Preview Google+ コミュニティ</a>にご参加ください。
+</p>
+
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日付:2016 年 5 月<br>
+        ビルド:NPD35K<br>
+        エミュレータ サポート: x86 と ARM（32 / 64 ビット）<br>
+        Google Play services:8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">一般的な注意事項</h3>
+
+<p>
+  この Developer Preview リリースは、<strong>アプリのデベロッパーやその他の初期導入者</strong>を対象とし、日常的な使用、開発、互換性テストに使用できます。
+
+このリリースに関する次の一般的な事項に注意してください。
+
+</p>
+
+<ul>
+  <li>このリリースでは、サポート対象端末でさまざまな<strong>安定性に関する問題</strong>が発生する可能性があります。
+カーネルパニックやクラッシュなど、システムが不安定になる可能性があります。
+
+  </li>
+
+  <li>一部のアプリは、新しいプラットフォーム バージョンで<strong>期待どおりに動作しない可能性があります</strong>。
+これには、Google のアプリやその他のアプリが含まれます。
+  </li>
+
+  <li>Developer Preview 3 は、次の端末で <strong>互換性テストスイート（CTS）の承認</strong>を得ています。
+Nexus 5X、Nexus 6、Nexus 6P、Pixel C。CTS 承認済みビルドに依存するアプリは、これらの端末で正常に動作します（Android Pay など）。
+
+
+  </li>
+
+  <li>Developer Preview 3 は、<strong>次のすべてのサポート対象端末で利用できます</strong>。
+Nexus 5X、Nexus 6、Nexus 6P、Nexus 9、Nexus Player、Pixel C、General Mobile 4G（Android One）、Sony Xperia Z3（D6603 と D6653 モデル）。
+
+
+
+  </li>
+</ul>
+
+
+<h3 id="new">DP3 の新機能</h3>
+
+<h4 id="">Android 用 VR モード</h4>
+
+<p>
+  Android N には、新しい VR モードのためのプラットフォーム サポートと最適化が追加され、デベロッパーは高品質のモバイル端末 VR エクスペリエンスをユーザーのために生み出すことができます。
+多数のパフォーマンス強化があり、VR アプリ用の CPU コアへの排他アクセスが含まれます。
+
+アプリでは、VR 用に動作するインテリジェントなヘッド トラッキングやステレオ方式の通知を利用できます。
+最も重要な点は、Android N によって大幅に遅延の少ないグラフィックが実現されることです。
+
+</p>
+
+<p>
+  詳細については、<a href="https://developers.google.com/vr/android/">Google VR SDK for Android</a> をご覧ください。
+</p>
+
+<h4 id="">パフォーマンス維持モード</h4>
+
+<p>
+  Android N には、<a href="{@docRoot}preview/api-overview.html#sustained_performance_api">パフォーマンス維持モード</a>のオプション サポートが含まれており、OEM は長時間実行されているアプリの端末パフォーマンス機能に関するヒントを示すことができます。
+
+アプリのデベロッパーは、これらのヒントを使用して、長時間にわたって予測可能で一貫性のあるレベルの端末のパフォーマンスを維持できるようにアプリを調整できます。
+
+アプリのデベロッパーが Developer Preview でこの新しい API を試すことができるのは、Nexus 6P 端末上でのみです。
+
+</p>
+
+<h4>Multiprocess WebView</h4>
+
+<p>
+  Android N のバージョン 51 以降は、デベロッパー オプションの [Multiprocess WebView] が有効になっている場合、WebView は別のサンドボックス プロセスでウェブ コンテンツを実行します。
+
+WebView チームは、将来のバージョンの Android で Multiprocess WebView を有効にする前に、N での互換性やランタイム パフォーマンスに関するフィードバックを求めています。
+
+このバージョンでは、スタートアップ時間、メモリ使用量の合計、ソフトウェア レンダリング パフォーマンスの低下が予想されます。
+
+</p>
+
+<p>
+  マルチプロセス モードで予想外の問題が見つかった場合は、ご報告ください。
+<a href="https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">バグを報告</a>して WebView チームにご連絡ください。
+
+</p>
+
+<h4 id="">キーボード ショートカット ヘルパー</h4>
+
+<p>
+  Android N では、ユーザーは <code>Meta+/</code> キーを押して<strong>キーボード ショートカット</strong>画面をトリガーできます。この画面には、システムとアプリから使用できるすべてのショートカットが表示されます。
+
+デベロッパーは、独自のショートカットを追加したり、アプリからショートカット画面をトリガーしたりできます。
+詳細については、<a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">キーボード ショートカット ヘルパー</a>をご覧ください。
+
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  DP3 で導入された新しい <a href="{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a> により、アプリでその UI レンダリング パフォーマンスを監視できます。この機能は、アプリの現在のウィンドウのフレーム タイミング情報を転送するストリーミング pubsub API を公開することによって実現されます。<code>FrameMetricsListener</code> を使用して、より高い粒度で、USB 接続の必要なく、本番環境のインタラクション レベルの UI パフォーマンスを計測できます。
+
+
+
+
+
+</p>
+
+<h4 id="api-changes">機能と API の変更</h4>
+
+<dl>
+  <dt>
+    ランチャー ショートカットとランチャー ショートカットの API
+  </dt>
+
+  <dd>
+    この機能は、Android の将来のリリースまで延期することを決定しました。次の Developer Preview 以降、公開 Android N API から、ランチャー ショートカットの API（ShortcutManager など）を削除することを計画しています。
+
+
+  </dd>
+
+  <dt>
+    ページを読み込む前に WebView Javascript が実行される
+  </dt>
+
+  <dd>
+    Android N 向けのアプリ以降、新しいページが読み込まれるときに、Javascript コンテキストがリセットされます。
+現在、コンテキストは、新しい {@link android.webkit.WebView} インスタンスで、最初に読み込まれるページに持ち越されます。
+
+    Javascript を {@link
+    android.webkit.WebView} に注入する予定のデベロッパーの方は、ページの読み込みが開始した後にスクリプトが実行されるようにしてください。
+
+  </dd>
+
+  <dt>
+    安全でないオリジンでの WebView の位置情報
+  </dt>
+
+  <dd>
+    Android N 向けのアプリ以降、位置情報 API は安全なオリジン（HTTPS 経由）でのみ許可されます。
+このポリシーは、ユーザーが安全でない接続を使用しているときにユーザーの個人情報を保護するために設計されています。
+
+  </dd>
+
+  <dt>
+    データセーバー
+  </dt>
+
+  <dd>
+    Developer Preview 3 以降、アプリで、システム ダイアログを表示するためのインテントを使用できます。これにより、ユーザーはデータセーバーの免除ホワイトリストに直接アプリを追加できます。
+
+詳細については、<a href="{@docRoot}preview/api-overview.html#data_saver">データセーバーのドキュメント</a>をご覧ください。
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#number-blocking">迷惑電話のブロック</a>
+  </dt>
+
+  <dd>
+    許可されていないユーザーが番号をブロックまたはブロック解除しようとした場合、現在は {@link java.lang.SecurityException} が発生してエラーになります。
+以前は、{@link java.lang.UnsupportedOperationException} がスローされていました。
+
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">クイック設定タイル API</a>
+
+  </dt>
+
+  <dd>
+    現在は、タイルモードの決定に、アクティビティのメタデータが使用されます。
+    以前は、タイルモードは <code>TileService.onTileAdded()</code> の戻り値によって決定されていました。
+詳細については、ダウンロード可能な <a href="{@docRoot}preview/setup-sdk.html#docs-dl">API リファレンス</a>の <code>TileService.META_DATA_ACTIVE_TILE</code> をご覧ください。
+
+  </dd>
+</dl>
+
+<h4 id="dp3-fixes">デベロッパーから報告された問題の修正</h4>
+
+<p>
+  次のものを含めて、デベロッパーから報告された問題が修正されました。
+</p>
+
+<ul>
+  <li>Bluetooth 音声の再生が、1 曲の後で中断される（バグ <a href="https://code.google.com/p/android/issues/detail?id=206889">206889</a>）
+  </li>
+
+  <li>Pixel C が一貫してクラッシュする（バグ <a href="https://code.google.com/p/android/issues/detail?id=206962">206962</a>）
+  </li>
+
+  <li>時計とトーストの通知の問題（バグ <a href="https://code.google.com/p/android/issues/detail?id=203094">203094</a>）
+  </li>
+
+  <li>Pixel C を USB C ケーブル経由で MacBook Pro に接続すると、再起動します。（バグ <a href="https://code.google.com/p/android/issues/detail?id=205432">205432</a>）
+
+  </li>
+
+  <li>カレンダーの設定が 1 日オフセットされる（バグ <a href="https://code.google.com/p/android/issues/detail?id=203002">203002</a>）
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo から無効なデータが戻される（バグ <a href="https://code.google.com/p/android/issues/detail?id=203022">203022</a>）
+  </li>
+
+  <li>Nexus 6p、Bluetooth が頻繁に接続しなくなる（バグ <a href="https://code.google.com/p/android/issues/detail?id=208062">208062</a>）
+  </li>
+</ul>
+
+<p>修正された問題の一覧は、<a href="https://goo.gl/6uCKtf">Issue Tracker</a> をご覧ください。
+</p>
+
+<h3 id="ki">既知の問題</h3>
+
+<h4>ユーザー補助機能</h4>
+
+<ul>
+  <li>ピッチを最大レベルに近く設定すると、TTS 出力が聞こえません。
+  </li>
+
+  <li>ユーザーがズーム操作や設定などの仕事用プロファイルを追加すると、ユーザー補助機能と設定が妨げられます。
+ユーザー補助機能に関連する設定を、ユーザーが後で操作すると、ユーザー補助機能の状態が復元されます。
+
+  </li>
+</ul>
+
+<h4>カメラ</h4>
+
+<ul>
+  <li>カメラアプリの動作が不安定で、マルチ ウィンドウ モードで起動したときなど、さまざまな状況でクラッシュします。
+
+  </li>
+
+  <li>パノラマモードでシャッターを続けて押すと、カメラアプリがクラッシュすることがあります。
+
+  </li>
+</ul>
+
+<h4>音声</h4>
+<ul>
+  <li>プラットフォームの音楽プレーヤーの問題により、一部のアプリが正常に動作しません。
+たとえば、Skype その他のアプリがこの問題の影響を受けます。
+  </li>
+</ul>
+
+<h4>接続</h4>
+
+
+<ul>
+  <li>Bluetooth Low Energy（BLE）周辺ロール端末がサービスをアドバタイズし、BLE セントラル ロール端末が接続すると、周辺ロール端末の接続が即座に切断されます。
+
+
+  </li>
+
+  <li>画面がオフになっているときに、Wi-Fi 接続が切れることがあります。
+  </li>
+
+  <li>RFCOMM 接続が不安定で、データが破損したり、接続が混乱することがあります。
+
+  </li>
+
+  <li>一部の制限された背景シナリオにおいて、アクティブ ネットワーク状態（{@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} と {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}）によって、誤った値が戻されることがあります。
+
+  </li>
+</ul>
+
+
+<h4>
+  ランチャー
+</h4>
+
+<ul>
+  <li>画面のオンとオフを切り替えた後、既定のランチャーの [All Apps] トレイが応答しなくなることがあります。
+この問題は、ホーム画面に戻り、[All Apps] トレイを再起動することで解決する場合があります。
+
+  </li>
+</ul>
+
+<h4>
+  キーボード
+</h4>
+
+<ul>
+  <li>Android 6.0 以前を実行する端末を N Developer Preview にアップデートすると、Google キーボードで、絵文字やサウンド設定などの設定が保持されません。
+
+
+  </li>
+
+  <li>Google Indic Managed キーボードが不安定になることがあります。
+  </li>
+
+  <li>パスワード項目にテキストを入力するとき、ユーザーは入力言語としてロシア語を選択できるにもかかわらず、キーボードは英語のままになります。
+このため、ユーザーはロシア語のパスワードを入力できません。
+
+  </li>
+</ul>
+
+<h4>
+  ロケールと言語
+</h4>
+
+<ul>
+  <li>右から左（RTL）のロケールを使用しているとき、端末を再起動した後に、システムが予期せず左から右（LTR）の表示に切り替わることがあります。
+
+  </li>
+</ul>
+
+<h4>メディア</h4>
+
+<ul>
+  <li>Nexus 9 と Nexus Player のメディア再生の信頼性が低くなり、HD 動画の再生の問題も発生します。
+
+  </li>
+</ul>
+
+<h4>
+  マルチ ウィンドウ モード
+</h4>
+
+<ul>
+  <li>マルチ ウィンドウ モードで画面の向きを変えているときに端末がフリーズすることがあります。
+  </li>
+
+  <li>現在、複数のアプリにマルチ ウィンドウ モードの問題があります。
+    <ul>
+      <li>マルチ ウィンドウで [Settings] &gt; [Display] &gt; [Screen brightness] をドッキングしているときに、システム UI がクラッシュすることがあります。
+
+      </li>
+
+      <li>カメラアプリをマルチ ウィンドウ モードで起動すると、クラッシュすることがあります。
+      </li>
+
+      <li>YouTube をマルチ ウィンドウ モードで起動すると、クラッシュすることがあります。[Storage] &gt; [Apps] &gt; [YouTube] で YouTube アプリのデータをクリアすると、この問題を修正できることがあります。
+
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play services
+</h4>
+
+<ul>
+  <li>ユーザーが ASCII 範囲外の文字や数字を使用するシステム ロケールを選択した場合に、Google Play services 経由で Google Cast を使用するアプリが不安定になることがあります。
+
+
+  </li>
+</ul>
+
+<h4>
+  Android for Work と Google Apps のデバイス ポリシー
+</h4>
+
+<ul>
+  <li>[device policy status] 画面を固定した状態で、ユーザーが端末のロックを解除すると、デバイス ポリシー アプリがクラッシュすることがあります。
+
+  </li>
+
+  <li>ファイルベースの暗号化を有効にして仕事用プロファイルをセットアップした後で Work をオフにした場合、再度 Work アプリにアクセスするには、ユーザーはプライマリ プロファイル画面ロックを解除する必要があります。
+
+
+  </li>
+
+  <li>セキュリティ パターン ロックを削除し、仕事用または個人用のアプリをマルチ ウィンドウで開くと、端末が再起動します。
+
+  </li>
+
+  <li>DISALLOW_VPN_CONFIG を設定すると、デバイス ポリシー クライアントによって always-on-vpn に設定され、同意を求めるダイアログが表示されます。
+
+  </li>
+
+  <li>VPN が always-on-vpn モードで接続されるまで、トラフィックがロックダウンされません。
+  </li>
+</ul>
+
+<h4>
+  外部ストレージ
+</h4>
+
+<ul>
+  <li>ユーザーがアプリを内部ストレージから適用可能な外部ストレージ（SD カードや USB 接続された端末など）に移動した場合に、そのアプリが不安定になることがあります。
+
+
+  </li>
+</ul>
+
+<h4>
+  Google Play での画面ズームと複数の APK
+</h4>
+
+<ul>
+  <li>Android N を実行する端末で、Google Play services 9.0.83 によって、安定した画面密度ではなく、現在の画面密度が誤って報告されます。
+これらの端末で画面ズームが有効になっていると、このことによって、より小さい画面向けに設計されたマルチ APK アプリのバージョンが Google Play によって選択されることがあります。
+
+この問題は、Google Play services の次のバージョンで修正され、その後の Developer Preview リリースに含められます。
+
+
+  </li>
+
+  <li>Android N を実行する端末で、現在、Google Play services 9.0.83 によって、Vulkan バージョンではなく、Vulkan サポートが報告されます。
+このことによって、より高いバージョンがサポートされた端末で、より低いバージョンの Vulkan サポート向けに設計されたマルチ APK アプリのバージョンが Google Play によって選択されることがあります。
+
+現在、Google Play ストアでは、Vulkan バージョンのターゲットを使用するアプリのアップロードは受け入れていません。
+このサポートは将来 Google Play Store に追加され、次のバージョンの Google Play services で修正されます（その後の Developer Preview リリースに含められます）。Google Play services 9.0.83 のバージョンを使用するすべての N 端末は、基本的な Vulkan サポートをターゲットとするアプリのバージョンを引き続き受信します。
+
+
+
+
+  </li>
+</ul>
+
+<h4 id="">通知</h4>
+
+<ul>
+  <li>MessagingStyle に、送信者が null（自分）の通知が表示されません。
+  </li>
+</ul>
+
+<h4 id="">デベロッパー ツール</h4>
+
+<ul>
+  <li>
+    JDWP デバッグを使用している間に、<code>adb</code> の接続が切断されることがあります。
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+
+
+<!-- DP2 Release Notes Archive -->
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日付:2016 年 4 月<br>
+        ビルド:NPC91K、NPC91O<br>
+        エミュレータ サポート: x86 と ARM（32 / 64 ビット）<br>
+        Google Play services:8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp2-new">DP2 の新機能</h3>
+
+<ul>
+  <li>Vulkan のプラットフォーム サポートである、新しい 3D レンダリング API により、GPU（Graphics Processor Unit）を明示的に、かつ少ないオーバーヘッドで制御でき、ドローコールの多いアプリのパフォーマンスが向上しています。
+
+詳細については、<a href="{@docRoot}ndk/guides/graphics/index.html">ドキュメント</a>をご覧ください。
+
+  </li>
+
+  <li>新しい連絡帳アプリの絵文字では、肌色と、新しい Unicode 9 のグリフがサポートされます。
+  肌色と新しい絵文字は、キーボードのビルドにパレット内でのこれらに対するサポートが備えられるまで、表示されません。
+非システム フォントを使用するアプリを除き、アプリでこれらの新しい絵文字を利用するための操作は必要ありません。
+IME のデベロッパーは新しい絵文字のサポートを組み込む必要があります。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">ランチャー ショートカットの API</a>:
+アプリでは <code>ShortcutManager</code> を使用して、それ自体の中の開始点へのショートカットを、ランチャーに送信できます。
+
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">マルチ ウィンドウ</a>:
+    アクティビティに対して個別に最小の高さと幅を指定できるようになりました。
+さらに、複数の API の名前が少し変更されました。
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">デベロッパーから報告された問題の修正</h4>
+
+<p>
+  次のものを含めて、デベロッパーから報告された問題が修正されました。
+</p>
+
+<ul>
+  <li>隠された SSID や、非ブロードキャスト Wi-Fi に接続できません。（バグ <a href="https://code.google.com/p/android/issues/detail?id=203116">203116</a>）
+  </li>
+
+  <li>マイクのミュート状態がアクティビティをまたいで保持されます。（バグ <a href="https://code.google.com/p/android/issues/detail?id=205922">205922</a>）
+  </li>
+
+  <li>マルチ ウィンドウのフォーカスを変更すると、YouTube が停止します。（バグ <a href="https://code.google.com/p/android/issues/detail?id=203424">203424</a>）
+  </li>
+
+  <li>ダイレクト リプライによって、開かれているアクティビティが閉じられることがあります。（バグ <a href="https://code.google.com/p/android/issues/detail?id=204411">204411</a>）
+  </li>
+
+  <li>安定性に関するさまざまな修正。
+  </li>
+</ul>
+
+<h3 id="dp2-general">一般的な注意事項</h3>
+
+<p>
+  この Developer Preview リリースは、<strong>アプリのデベロッパーのみ</strong>を対象とし、互換性テストと初期の開発のみで使用するために開発されています。
+
+  このリリースに関する次の一般的な事項に注意してください。
+</p>
+
+<ul>
+
+  <li>DP2 リリースで、開発ツールのコンポーネントとサポート ライブラリがアップデートされました。
+DP2 のための開発を行う前に、Preview 開発環境をアップデートしてください。
+開発環境のセットアップの手順については、<a href="{@docRoot}preview/setup-sdk.html">Preview のセットアップ</a>をご覧ください。
+
+
+  </li>
+
+  <li>このリリースには、すべての端末における安定性とパフォーマンスに関するさまざまな問題があるため、特に、デベロッパー以外の方が、<strong>スマートフォンやタブレットで日常的に使用することには適していません。</strong>
+
+
+  </li>
+
+  <li>このリリースでは、電池寿命とパフォーマンスがまだ最適化されていません。
+
+
+    <ul>
+      <li>システムとアプリの<strong>パフォーマンスが、定期的に遅くなるか、不自然になることがわかっており</strong>、端末が応答しなくなることがあります。
+これらの問題は、使用時間が長くなると、より深刻化します。
+
+      </li>
+
+      <li>このリリースでは、画面のオンとオフのユースケースで電池寿命が短くなることがあります。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>Developer Preview 2 で、一部の<strong>アプリが正常に機能しないことがあります</strong>。これには Google のアプリと、その他のアプリが含まれます。
+
+  </li>
+
+  <li>この早期のビルドは、<strong>互換性テストスイート（CTS）で承認されていません</strong>。
+CTS 承認済みビルドに依存するアプリは動作しません（Android Pay など）。
+
+  </li>
+
+  <li>このプレビュー リリースでは、次の端末をサポートしています。Nexus 5X、Nexus 6、Nexus 6P、Nexus 9、Pixel C、および General Mobile 4G（Android One）
+
+Nexus Player は近い将来サポートされます。
+  </li>
+
+
+  <li>DP1 と DP2 の間の API の変更に対処するために、<a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> がアップデートされました。
+
+  </li>
+</ul>
+
+<h3 id="dp2-ki">既知の問題</h3>
+
+<h4>パフォーマンスと電池</h4>
+
+<ul>
+  <li>システムとアプリのパフォーマンスが、<strong>定期的に遅くなるか、不自然になる</strong>ことがわかっており、端末が応答しなくなることがあります。
+これらの問題は、使用時間が長くなると、より深刻化します。
+
+  </li>
+</ul>
+
+<h4>Google アカウント</h4>
+
+<ul>
+  <li>一部の状況において、<code>AccountManagerService</code> によって Google アカウントにログインできなくなる問題が発生することがあります。
+
+  </li>
+</ul>
+
+<h4>システムアップデート</h4>
+
+<ul>
+  <li>DP2 にアップデートすると、即座に端末が再起動します。
+  </li>
+</ul>
+
+<h4>ユーザー補助機能</h4>
+
+<ul>
+  <li>ピッチを最大レベルに近く設定したときの、テキスト読み上げ（TTS）出力が聞こえない問題。
+
+  </li>
+</ul>
+
+<h4>Bluetooth</h4>
+
+<ul>
+  <li>Bluetooth Low Energy（LE）GATT 特性によって、誤った書き込みタイプが使用され、リモート端末に送信されません。
+これにより、一部のフィットネス端末が機能しません。
+
+  </li>
+</ul>
+
+<h4>セットアップ ウィザード</h4>
+
+<ul>
+  <li>セットアップ ウィザードで、[Your Google Account] から、新しい端末（または新しくリセットされた端末）にデータを復元するオプションが動作しません。
+セットアップ ウィザードで [another Android device] を選択して既存の端末からデータを復元するか、新しい端末としてセットアップする必要があります。
+
+
+  </li>
+</ul>
+
+<h4>OEM ロック解除</h4>
+
+<ul>
+  <li>一部の端末では、DP2 の実行中、[Developer Options] の [<strong>Enable OEM unlock</strong>] がグレー表示されます。
+<br>
+  <strong>回避策:</strong><a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a> にアクセスし、Android ベータ版プログラムを導入します（まだ導入していない場合）。
+
+その後削除して、ダウングレード OTA を受け入れます。
+削除の結果、端末は Android 6.0 にダウングレードされます。これで、[Developer Options] の [<strong>Enable OEM unlock</strong>] を選択できるようになります。
+
+端末をダウングレードすると、個人データは消去されます。ただし、ブートローダーをロック解除したとしても、やはりこのデータは消去されます。
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>仕事用のセキュリティ確認
+    <ul>
+      <li>N に移行した後、またはユーザーが仕事用プロファイルを作成した後、ユーザーが自分のパターン、PIN またはパスワードを変更するか、仕事用のセキュリティ確認をセットアップするまで、プロファイルでキーストアにキーを作成できません。
+
+
+      </li>
+
+      <li>ダイレクト ブート モードで、端末にパスコード制限を適用すると、端末がロックされている場合でも、仕事用プロファイルがロック解除されます。
+
+      これにより、端末ロック画面によって保護される必要がある場合にも、仕事用プロファイルにアクセスできるようになります。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>Always On VPN
+    <ul>
+      <li>Always On VPN モードがオンで、VPN が使用できない場合、アプリが通常のネットワークで接続します。
+VPN 接続を使用できない場合、アプリはオフラインである必要があります。
+
+      </li>
+
+      <li>Always On モードがオンになっているとき、端末が再起動してダイレクト ブート モードになった後は、ユーザーがセキュリティ保護されたロック画面をロック解除した後でも、VPN 接続が確立されません。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>パッケージの停止
+    <ul>
+      <li>[Telephone disabled] ダイアログが表示されているにもかかわらず電話をかけるなど、予期しない動作が発生する可能性がある場合、端末管理者は、重要なシステム パッケージを停止できます。
+
+
+      </li>
+    </ul>
+  </li>
+
+  <li>その他
+    <ul>
+      <li>{@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} が true に設定されていると、ユーザーが SD カードなどの物理メディアを挿入したときに、Settings アプリが起動時にクラッシュします。
+
+      </li>
+
+      <li>仕事用プロファイルでの最初のチェックが完了するまで数分かかります。
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="vulkan">Vulkan</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>バインド番号と、ゼロでない最初のバインド番号のギャップにより、{@code vkCreateGraphicsPipeline()} が失敗します。
+</li>
+      <li>Vulkan によって、投影されたテクスチャ座標に関する誤ったサンプリング動作が示されます。</li>
+      <li>multithreadCmdBuffer サンプルで、N-DP2 ドライバを使用して {@code vkCmdClearColorImage()} を実行すると、クラッシュします。
+</li>
+      <li>{@code vkGetPhysicalDeviceFormatProperties()} からの戻り値で、{@code VkFormatProperties::linearTilingFeatures} の値が設定されず、結果として 0 の値が取得されます。
+
+</li>
+      <li>Vulkan 浮動小数点フレーム バッファの添付ファイルが正しく処理されません。</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>SPIR-V シェーダーによって、ドライバ アサートがトリガーされることがあります。</li>
+      <li>一部のパイプライン構成によって {@code vkCreateGraphicsPipeline()} がクラッシュすることがあります。
+</li>
+  </ul>
+</ul>
+
+<h4>端末固有の問題</h4>
+
+<dl>
+  <dt>
+    <strong>Android One</strong>
+  </dt>
+
+  <dd>
+    端末がスロット 1 からスロット 2 SIM に切り替わったときに、データ接続が失敗します。
+  </dd>
+
+  <dt>
+    <strong>Pixel C</strong>
+  </dt>
+
+  <dd>
+    音声検索の [Always On] オプションを切り替えることができません。
+  </dd>
+
+  <dt>
+    <strong>Nexus 6</strong>
+  </dt>
+
+  <dd>
+    HDR+ フォトを除き、カメラの縦向きの写真が破損します。
+
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    Nexus Player で、Netflix HD コンテンツの再生が失敗することがあります。
+  </dd>
+
+  <dd>
+    動的な動画の解像度変更に依存するすべてのアプリが、Nexus Player で失敗することがあります。
+
+  </dd>
+
+  <dd>
+    VP9 動画コーデックを使用するすべてのアプリが、Nexus Player で失敗することがあります。
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>日付:2016 年 3 月<br>
+        ビルド:NPC56P、NPC56R、アップデート:NPC56W、NPC56X<br>
+        エミュレータ サポート: x86 と ARM（32 / 64 ビット）<br>
+        Google Play services:8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp1-general">一般的な注意事項</h3>
+
+<p>
+  この Developer Preview リリースは、アプリのデベロッパーのみを対象とし、互換性テストと初期の開発のみで使用するために開発されています。
+このリリースに関する次の一般的な事項に注意してください。
+
+</p>
+<ul>
+  <li>このリリースには、すべての端末における安定性とパフォーマンスに関するさまざまな問題があるため、特に、デベロッパー以外の方が、<em>スマートフォンやタブレットで日常的に使用することには適していません。</em>
+
+
+  </li>
+
+  <li>システムとアプリのパフォーマンスが、<strong>定期的に遅くなるか、不自然になる</strong>ことがわかっており、端末が応答しなくなることがあります。
+これらの問題は、使用時間が長くなると、より深刻化します。
+
+  </li>
+
+  <li>このリリースでは、画面のオンとオフのユースケースで電池寿命が短くなることがあります。
+
+  </li>
+
+  <li>Developer Preview 1 で、一部のアプリが正常に機能しないことがあります。これには Google のアプリと、その他のアプリが含まれます。
+
+  </li>
+
+  <li>この早期のビルドは、互換性テストスイート（CTS）で承認されていません。CTS 承認済みビルドに依存するアプリは動作しません（Android Pay など）。
+
+  </li>
+
+  <li>このプレビュー リリースでは、次の端末をサポートしています。Nexus 5X、Nexus 6、Nexus 6P、Nexus 9、Nexus Player、Pixel C、および General Mobile 4G（Android One）
+
+
+  </li>
+</ul>
+
+<h3 id="dp1-platform">プラットフォームの問題</h3>
+
+<h4>パフォーマンスと電池</h4>
+
+<ul>
+  <li>システムとアプリのパフォーマンスが、<strong>定期的に遅くなるか、不自然になる</strong>ことがわかっており、端末が応答しなくなることがあります。
+これらの問題は、使用時間が長くなると、より深刻化します。
+
+  </li>
+
+  <li>このリリースでは、画面のオンとオフのユースケースで電池寿命が短くなることがあります。
+
+  </li>
+</ul>
+<h4 id="dialer">電話</h4>
+
+<ul>
+  <li>電話アプリではダイレクト ブートがサポートされていません。このことは、将来、N Developer Preview で対応されます。
+
+  </li>
+
+  <li>ボイスメールの再生が動作しません。
+  </li>
+</ul>
+
+<h4>マイク</h4>
+
+<ul>
+   <li>アプリの再起動をまたいで、マイクのミュート状態が誤って保持されることがあります。あるアプリでマイクをミュートし、その状態が保持されている場合は、マイクのミュート制御機能のある任意のアプリを開き、マイクのミュートを解除してください。</li>
+</ul>
+
+<h4 id="ui">システム UI</h4>
+
+<ul>
+  <li>システム UI の、一部の新しいまたは変更された文字列の中に、すべての言語には翻訳されていないものがあります。
+
+  </li>
+
+  <li>[Overview] の UI は現在開発中であり、変更されることがあります。たとえば、ユーザーがアプリを切り替えたときに表示されるタイマーを削除する予定です。
+
+
+  </li>
+
+  <li>設定のコントロールとトグルが遅いか、応答しないように見えます。
+  </li>
+
+  <li>通知の視覚的デザインは変更されることがあります。
+  </li>
+
+  <li>Gmail アプリで、通知バンドルに含まれるメールの直接アーカイブが正常に動作しません。
+
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>仕事用のセキュリティ確認
+    <ul>
+      <li>N に移行した後、またはユーザーが仕事用プロファイルを作成した後、ユーザーが自分のパターン、PIN またはパスワードを変更するか、仕事用のセキュリティ確認をセットアップするまで、プロファイルでキーストアにキーを作成できません。
+
+
+      </li>
+
+      <li>ダイレクト ブート モードで、端末にパスコード制限を適用すると、端末がロックされている場合でも、仕事用プロファイルがロック解除されます。
+
+      これにより、端末ロック画面によって保護される必要がある場合にも、仕事用プロファイルにアクセスできるようになります。
+
+      </li>
+
+      <li>ユーザーが誤ったパスワードと PIN を入力したときに、情報メッセージが表示されず、入力項目が消去されるのみです。
+
+この問題は指紋入力のパターンには影響しません。
+      </li>
+
+      <li>タブレットで、仕事用のセキュリティ確認で表示される背景が不相応に小さくなります。
+
+      </li>
+
+      <li>N Developer Preview にバンドルされている <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">Google Apps のデバイス ポリシー</a>のバージョン では、仕事用プロファイルのセキュリティ確認機能がまだサポートされていません。
+
+
+        デベロッパーは、この機能をテストする場合は、代わりに <a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> を使用する必要があります。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>Always On VPN
+    <ul>
+      <li>Always On VPN モードがオンで、VPN が使用できない場合、Always On ポリシーの例外として指定されていないアプリが通常のネットワークで接続します。
+
+Always On VPN ポリシーの例外として指定されていない限り、VPN 接続を使用できない場合、アプリはオフラインである必要があります。
+
+        <ul>
+          <li>Always On モードがオンになっているとき、端末が再起動してダイレクト ブート モードになった後は、ユーザーがセキュリティ保護されたロック画面をロック解除した後でも、VPN 接続が確立されません。
+
+
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>連絡先の改善
+    <ul>
+      <li>Bluetooth PBAP / MAP 端末で、仕事用連絡先の発信者番号が表示されません。
+この問題は Preview の次のリリースで解決されます。
+      </li>
+    </ul>
+  </li>
+
+  <li>ワークモード
+    <ul>
+      <li>Google Now ランチャーで、ワークモードがオンかオフかが表示されません。
+また、ランチャーにはアプリの保留状態も表示されません。
+      </li>
+
+      <li>ユーザーがワークモードのオンとオフを切り替えた後、カレンダーなどの仕事用プロファイルのアプリ ウィジェットが表示されなくなります。
+
+      </li>
+    </ul>
+  </li>
+
+  <li>パッケージの停止
+  </li>
+
+  <li>[Telephone disabled] ダイアログが表示されているにもかかわらず電話をかけるなど、予期しない動作が発生する可能性がある場合、端末管理者は、重要なシステム パッケージを停止できます。
+
+
+  </li>
+
+  <li>その他
+    <ul>
+      <li>{@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} が true に設定されていると、ユーザーが SD カードなどの物理メディアを挿入したときに、Settings アプリが起動時にクラッシュします。
+
+      </li>
+
+      <li>ユーザーがアプリをアンインストールした後で再インストールしたときに、{@code DPM.setPackagesSuspended} 状態が保持されません。
+アンインストールと再インストールの後、アプリが停止されたままになるか、停止されたアプリはアンインストール可能にならないかのいずれかである必要があります。
+
+
+      </li>
+
+      <li>仕事用プロファイルでの最初のチェックが完了するまで数分かかります。
+これにより、端末が Play EMM API によって認識されるまでに、通常よりも長い時間がかかる場合があります。
+
+      </li>
+
+      <li>仕事用プロファイル アプリからの通知が、個人プロファイルにインストールされた通知リスナによって認識されません。
+その結果、通知が期待どおりに表示されません。
+
+      </li>
+
+    </ul>
+  </li>
+</ul>
+
+<h4 >キーボード</h4>
+
+<ul>
+  <li>キーボードと Android 端末の間の Bluetooth ペア設定が不安定になることがあります。
+  </li>
+</ul>
+
+<h4 >動画</h4>
+
+<ul>
+<li>動画の再生が遅延したり中断されたりします。</li>
+</ul>
+
+<h4>Wi-Fi</h4>
+
+<ul>
+  <li>Wi-Fi に対して行われたリファクタリングにより、API のコーナーケースの動作が変化する場合があります。
+特に、特定のネットワークへの接続や、ネットワークへの再接続を試みるアプリについては、再テストの必要があります。
+
+  </li>
+
+  <li>以前の DHCP クライアントがプラットフォームから削除されました。プラットフォームでサポートされる DHCP は、M で導入された DHCP クライアントのみとなります。
+
+  </li>
+</ul>
+
+<h4>ダイレクト ブート</h4>
+
+<ul>
+  <li>NFC は最初にロック解除するまで機能しません。
+    <ul>
+      <li>Bluetooth が有効なスマートフォンを再起動したときに、Bluetooth が自動的にオンになりません。
+手動で Bluetooth を再度有効にする必要があります。
+      </li>
+
+      <li>一部の状況において、電話やメッセージに対して既定の着信音が鳴りません。
+この動作は、1 つの例外（と回避策）を除き、次の N Preview リリースで修正されます。
+
+      </li>
+
+      <li>ワイプされた直後でない端末、つまり、ダイレクト ブート モードに設定された後で少なくとも 1 回起動された端末では、既定の通知着信音が鳴りません。
+
+ユーザーは、[Settings] から手動で着信音を選択することで、この問題を回避できます。
+
+      </li>
+
+      <li>ダイレクト ブートは、N Developer Preview ビルドが実行される端末では、既定で有効になっていません。
+テストや開発のためにダイレクト ブートを有効にするには、[Developer Options] に移動して [Convert to File Encryption] をタップします。
+
+      この Developer Preview では、このことを行うには、ファクトリ リセットによって再パーティション化し、端末をファイルベースの暗号化向けにリフォーマットする必要があります。
+
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Android TV のピクチャ イン ピクチャ</h4>
+
+<ul>
+  <li>[Recents] の UI における PIP 統合は最終版ではなく、変更されることがあります。
+
+    <ul>
+      <li>PIP ウィンドウのアニメーションが滑らかではありません。Preview の将来のリリースで、このことが改善されます。
+
+      </li>
+    </ul>
+  </li>
+
+  <li style="list-style: none">Preview の将来のリリースで、PIP の視覚的デザインとレイアウトの整列が改善されます。
+
+  </li>
+</ul>
+
+<h4>バグ報告</h4>
+
+<ul>
+  <li>バグ報告は必ずしも正常に完了しません（回避策として、内部ストレージのバグ報告ドキュメント プロバイダからアクセスできるようになっている場合があります）。
+
+
+  </li>
+</ul>
+
+<h4>マルチ ウィンドウでの分割画面</h4>
+
+<ul>
+  <li>分割画面モードにすると、アプリがクラッシュし、予期しない UI 動作が発生することがあります。
+これらはアプリの問題であり、アプリのデベロッパーが修正する必要があります。
+
+  </li>
+
+  <li>Android プラットフォームの N より前のバージョンをターゲットとするアプリは、複数回表示される分割画面トーストが動作しません。
+
+  </li>
+
+  <li>画面の向きが固定されたアプリを使用しているときに [Overview] ボタンを長押しすると、アプリに予期しない動作が発生します。
+
+  </li>
+
+  <li>サイズ変更中にアプリの表示がちらつくことがあります。
+  </li>
+
+  <li>アニメーションはまだ完成していません。
+  </li>
+</ul>
+
+<h4>入力方法</h4>
+
+<ul>
+  <li><b>システム言語を使用している</b>ときに、Google キーボードが予期せず汎用的な Google キーボードにフォールバックしますが、Google キーボードではシステム言語設定で選択されている言語がいずれもサポートされていません。
+
+米国英語にフォールバックする必要があります。
+
+    <p>
+      Google キーボードでサポートされる、少なくとも 1 つの言語を追加することで、この問題を回避できます。
+
+    </p>
+  </li>
+</ul>
+
+<h4>ユーザー補助機能</h4>
+
+<ul>
+  <li>TalkBack で通知、クイック設定タイル、マルチ ウィンドウ表示などの機能に問題が発生し、システムがクラッシュするか、TalkBack からの音声フィードバックがなくなります。
+
+Preview の将来のリリースで、この問題に対処します。
+
+  </li>
+</ul>
+
+<h3 id="dp1-device-sp">端末固有のノートと問題</h3>
+
+<h4>Nexus Player</h4>
+<ul>
+  <li>このリリースの Preview の Nexus Player では、動画再生、アプリの互換性と安定性の問題が発生することがあります。
+
+  </li>
+</ul>
+
+<h4>Pixel C</h4>
+<ul>
+<li>マルチ ウィンドウのサイズ変更によってクラッシュが発生することがあります。</li>
+</ul>
+
+<h4>Nexus 9</h4>
+<ul>
+<li>Nexus 9 の端末が、Android ベータ版プログラムを経由して over-the-air（OTA）アップデートを受信した後、起動しません。
+OTA イメージを手動でインストールすると、この問題が解決することがあります。
+詳細については、<a href="{@docRoot}preview/download-ota.html">端末の OTA イメージの適用</a> をご覧ください。
+
+</li>
+</ul>
+

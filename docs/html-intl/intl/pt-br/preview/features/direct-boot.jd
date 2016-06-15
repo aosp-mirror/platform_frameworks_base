@@ -10,7 +10,7 @@ page.image=images/cards/card-nyc_2x.jpg
   <h2>Neste documento</h2>
   <ol>
     <li><a href="#run">Solicitar acesso para executar durante a inicialização direta</a></li>
-    <li><a href="#access">Acessar armazenamento criptografado do dispositivo</a></li>
+    <li><a href="#access">Acesso ao armazenamento criptografado do dispositivo</a></li>
     <li><a href="#notification">Receber notificação quando o usuário desbloquear</a></li>
     <li><a href="#migrating">Migrar dados existentes</a></li>
     <li><a href="#testing">Testar seu aplicativo com reconhecimento de criptografia</a></li>
@@ -36,7 +36,7 @@ para aplicativos que precisam ser executados no modo de inicialização direta:<
 
 <ul>
 <li>Aplicativos com notificações programadas, como aplicativos de
-relógio.</li>
+despertador.</li>
 <li>Aplicativos que fornecem notificações importantes ao usuário, como aplicativos de SMS.</li>
 <li>Aplicativos que fornecem serviços de acessibilidade, como o Talkback.</li>
 </ul>
@@ -47,7 +47,7 @@ criptografados com uma chave que só é disponibilizada depois que o dispositivo
 uma inicialização verificada com sucesso.</p>
 
 <p>Para dados que devem ser criptografados com uma chave associada às credenciais
-do usuário, como um PIN ou uma chave, use o armazenamento criptografado de credenciais.
+do usuário, como um PIN ou uma senha, use o armazenamento criptografado de credenciais.
 Esse armazenamento só é disponibilizado depois que o usuário
 desbloquear o dispositivo com sucesso e até que ele reinicie o dispositivo novamente. Se o
 usuário ativar a tela de bloqueio após desbloquear o dispositivo, isso não bloqueará
@@ -59,21 +59,21 @@ o armazenamento criptografado de credenciais.</p>
 poderem ser executados no modo de inicialização direta ou acessar o armazenamento criptografado
 do dispositivo. Os aplicativos são registrados com o sistema ao marcar os componentes como
 <i>tendo reconhecimento de criptografia</i>. Para marcar seu componente como tendo reconhecimento de criptografia, defina o atributo
-<code>android:encryptionAware</code> como true no manifesto.<p>
+<code>android:directBootAware</code> como true no manifesto.<p>
 
 <p>Componentes com reconhecimento de criptografia podem se registrar para receber uma mensagem de transmissão
 <code>LOCKED_BOOT_COMPLETED</code> do
-sistema quando o dispositivo for reiniciado. Nesse momento, o armazenamento criptografado do
+sistema quando o dispositivo é reiniciado. Nesse momento, o armazenamento criptografado do
 dispositivo é disponibilizado e pode executar tarefas
 necessárias durante o modo de inicialização, como o acionamento de um alarme programado.</p>
 
-<p>O fragmento de código a seguir é um exemplo de como registrar um
+<p>O snippet de código a seguir é um exemplo de como registrar um
 {@link android.content.BroadcastReceiver} como tendo reconhecimento de criptografia e adicionar um
 filtro de intenção para <code>LOCKED_BOOT_COMPLETED</code> no manifesto do aplicativo:</p>
 
 <pre>
-&lt;receiever
-  android:encryptionAware="true" &gt;
+&lt;receiver
+  android:directBootAware="true" &gt;
   ...
   &lt;intent-filter&gt;
     &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
@@ -84,17 +84,17 @@ filtro de intenção para <code>LOCKED_BOOT_COMPLETED</code> no manifesto do apl
 <p>Quando o usuário desbloquear o dispositivo, todos os componentes poderão acessar o armazenamento
 criptografado do dispositivo e o armazenamento criptografado de credenciais.</p>
 
-<h2 id="access">Acessar armazenamento criptografado do dispositivo</h2>
+<h2 id="access">Acesso ao armazenamento criptografado do dispositivo</h2>
 
 <p>Para acessar o armazenamento criptografado do dispositivo, crie uma segunda instância de
 {@link android.content.Context} chamando
-<code>Context.createDeviceEncryptedStorageContext()</code>. Todas as chamadas da API
+<code>Context.createDeviceProtectedStorageContext()</code>. Todas as chamadas da API
 de armazenamento que usam esse contexto acessam o armazenamento criptografado do dispositivo. O
 exemplo a seguir acessa o armazenamento criptografado do dispositivo e abre um
 arquivo de dados existente do aplicativo:</p>
 
 <pre>
-Context directBootContext = Context.createDeviceEncryptedStorageContext();
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
 // Access appDataFilename that lives in device encrypted storage
 FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
 // Use inStream to read content...
@@ -126,8 +126,8 @@ o usuário o desbloqueou.</p>
 
 <p>Se um usuário atualizar o dispositivo para usar o modo de inicialização direta, você poderá ter dados
 existentes que precisem ser migrados para o armazenamento criptografado do dispositivo. Use
-<code>Context.migrateSharedPreferencesFrom()</code> e
-<code>Context.migrateDatabaseFrom()</code> para migrar dados de preferências e do banco de
+<code>Context.moveSharedPreferencesFrom()</code> e
+<code>Context.moveDatabaseFrom()</code> para migrar dados de preferências e do banco de
 dados entre o armazenamento criptografado de credenciais e o armazenamento criptografado do dispositivo.</p>
 
 <p>Tenha bom senso ao decidir quais dados migrar do armazenamento

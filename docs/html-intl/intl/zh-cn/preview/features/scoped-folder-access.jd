@@ -1,8 +1,12 @@
 page.title=作用域目录访问
-page.keywords=preview,sdk,scoped directory access
-page.tags=androidn
+page.keywords=Preview、SDK、作用域目录访问
+page.tags=Android N
 
 @jd:body
+
+
+
+
 
 <div id="qv-wrapper">
 <div id="qv">
@@ -21,7 +25,7 @@ page.tags=androidn
 例如：</p>
 
 <ul>
-<li>在您的清单文件中请求 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
+<li>在您的清单中请求 {@link android.Manifest.permission#READ_EXTERNAL_STORAGE}
 或 {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} 将允许访问外部存储上的所有公共目录，这可能导致访问的内容超出应用需要的内容。
 
 </li>
@@ -44,8 +48,22 @@ page.tags=androidn
 <code>StorageManager.getVolumesList()</code>。
 </p>
 
-<p>以下代码段展示如何在主要共享存储中打开
-<code>Pictures</code> 目录：</p>
+<p>如果您有关于特定文件的信息，使用 <code>StorageManager.getStorageVolume(File)</code> 来获得包含该文件的 <code>StorageVolume</code>。
+
+调用在 <code>StorageVolume</code> 上的 <code>createAccessIntent()</code> 以访问文件的外部存储目录。
+
+</p>
+
+<p>
+在二级卷（例如外部 SD 卡）上，当调用 <code>StorageVolume.createAccessIntent()</code> 以请求访问整个卷，而不是特定目录时，传入“null”。如果您向主要卷传入“null”，或者如果您传入无效的目录名，<code>StorageVolume.createAccessIntent()</code> 将返回“null”。
+
+
+
+
+</p>
+
+<p>以下代码段展示如何在主要共享存储中打开<code>Pictures</code> 目录：
+</p>
 
 <pre>
 StorageManager sm = (StorageManager)getSystemService(Context.STORAGE_SERVICE);
@@ -121,4 +139,14 @@ startActivityForResult(intent, request_code);
 
 <p>如果用户拒绝授予外部目录访问权限，请勿立即再次请求访问权限。
 一再不停地请求访问权限会导致非常差的用户体验。
+如果用户拒绝了一项请求，而应用再次请求访问，UI 会显示一个 <b>Don't ask again</b> 复选框：
+</p>
+
+<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
+{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>图 1.</strong> 应用第二次请求访问可移动介质。
+</p>
+
+<p>如果用户选择 <b>Don't ask again</b> 并拒绝请求，您的应用向指定目录提出的所有未来请求都将被自动拒绝，并且将不会有请求 UI 呈现给用户。
+
 </p>

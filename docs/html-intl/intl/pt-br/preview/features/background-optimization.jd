@@ -50,31 +50,33 @@ page.image=images/cards/card-nyc_2x.jpg
   Os processos em segundo plano podem fazer uso intensivo de memória e bateria. Por exemplo, uma
  transmissão implícita poderá iniciar diversos processos em segundo plano registrados
  para escutá-la, mesmo se esses processos não forem muito usados. Isso pode afetar
- substancialmente o desempenho do dispositivo e a experiência de usuário.
+ substancialmente o desempenho do dispositivo e a experiência do usuário.
 </p>
 
 <p>
-  Para aliviar esse problema, o N Developer Preview aplica as seguintes
- restrições:
+  Para aliviar esse problema, o Android N aplica as seguintes
+restrições:
 </p>
 
 <ul>
   <li>Os aplicativos direcionados ao Preview não receberão transmissões {@link
-  android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
- registrados para recebê-las no seu manifesto. Aplicativos executados em primeiro plano
- ainda poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal
- registrando um {@link android.content.BroadcastReceiver} em {@link
-  android.content.Context#registerReceiver Context.registerReceiver()}.
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
+ registrados para recebê-las no seu manifesto. Os aplicativos em execução ainda
+poderão escutar {@code CONNECTIVITY_CHANGE} no encadeamento principal registrando um 
+{@link android.content.BroadcastReceiver} em {@link
+ android.content.Context#registerReceiver Context.registerReceiver()}.
   </li>
 
   <li>Os aplicativos não podem enviar nem receber transmissões {@link
-  android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
-  android.hardware.Camera#ACTION_NEW_VIDEO}. Essa otimização
+ android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}. Essa otimização
  afeta todos os aplicativos e não apenas os direcionados ao Preview.
   </li>
 </ul>
 
 <p>
+  Se o seu aplicativo usar qualquer uma dessas intenções, remova as dependências delas
+ assim que possível para direcionar corretamente os dispositivos Android N.
   A estrutura do Android oferece diversas soluções para reduzir a necessidade dessas
  transmissões implícitas. Por exemplo, {@link android.app.job.JobScheduler}
  e <a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
@@ -98,8 +100,8 @@ page.image=images/cards/card-nyc_2x.jpg
 </h2>
 
 <p>
-  Os aplicativos direcionados ao N Developer Preview não receberão transmissões {@link
-  android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
+  Os aplicativos direcionados ao Android N não receberão transmissões {@link
+ android.net.ConnectivityManager#CONNECTIVITY_ACTION} se estiverem
  registrados para recebê-las no seu manifesto e os processos que dependerem dessas
  transmissões não serão iniciados. Isso pode ser um problema para aplicativos que quiserem
  escutar mudanças de rede ou executar atividades de rede em massa quando o
@@ -109,9 +111,9 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p class="note">
-  <strong>Observação:</strong> um {@link android.content.BroadcastReceiver} registrado em 
-  {@link android.content.Context#registerReceiver Context.registerReceiver()}
- continuará a receber essas transmissões enquanto o aplicativo estiver em primeiro plano.
+  <strong>Observação:</strong> Um {@link android.content.BroadcastReceiver} registrado em 
+ {@link android.content.Context#registerReceiver Context.registerReceiver()}
+ continuará a receber essas transmissões enquanto o aplicativo estiver em execução.
 </p>
 
 <h3 id="sched-jobs">
@@ -162,10 +164,9 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  Aplicativos executados em primeiro plano ainda poderão escutar {@code
-  CONNECTIVITY_CHANGE} com um {@link
-  android.content.BroadcastReceiver} registrado. No entanto, a API {@link
-  android.net.ConnectivityManager} oferece um método mais robusto para solicitar
+  Os aplicativos em execução ainda poderão escutar {@code CONNECTIVITY_CHANGE} com um
+ {@link android.content.BroadcastReceiver} registrado. No entanto, a API {@link
+ android.net.ConnectivityManager} oferece um método mais robusto para solicitar
  um retorno de chamada apenas quando condições de rede especificadas são atendidas.
 </p>
 
@@ -194,13 +195,13 @@ public static void scheduleJob(Context context) {
 </h2>
 
 <p>
-  No N Developer Preview, os aplicativos não conseguem enviar nem receber transmissões {@link
-  android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
-  android.hardware.Camera#ACTION_NEW_VIDEO}. Essa restrição ajuda a
+  No Android N, os aplicativos não conseguem enviar nem receber transmissões {@link
+ android.hardware.Camera#ACTION_NEW_PICTURE} ou {@link
+ android.hardware.Camera#ACTION_NEW_VIDEO}. Essa restrição ajuda a
  aliviar os impactos no desempenho e na experiência de usuário quando vários aplicativos devem
- despertar para processar uma nova imagem ou vídeo. O N Developer Preview
+ despertar para processar uma nova imagem ou vídeo. O Android N
  estende {@link android.app.job.JobInfo} e {@link
-  android.app.job.JobParameters} para oferecer uma solução alternativa.
+ android.app.job.JobParameters} para oferecer uma solução alternativa.
 </p>
 
 <h3 id="new-jobinfo">
@@ -208,7 +209,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  Para acionar trabalhos em mudanças de URI de conteúdo, o N Developer Preview estende
+  Para acionar trabalhos em mudanças de URI de conteúdo, o Android N estende
  a API {@link android.app.job.JobInfo} com os seguintes métodos:
 </p>
 
@@ -266,7 +267,7 @@ public static void scheduleJob(Context context) {
           MY_BACKGROUND_JOB,
           new ComponentName(context, MediaContentJob.class));
   builder.addTriggerContentUri(
-          new JobInfo.TriggerContentUri(MEDIA_URI,
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
           JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
   js.schedule(builder.build());
 }
@@ -283,7 +284,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  O N Developer Preview também estende {@link android.app.job.JobParameters} para
+  O Android N também estende {@link android.app.job.JobParameters} para
  permitir que o aplicativo receba informações úteis sobre quais autoridades de conteúdo
  e URIs acionaram o trabalho:
 </p>
@@ -356,14 +357,14 @@ public boolean onStartJob(JobParameters params) {
   A otimização dos aplicativos para execução em dispositivos com pouca memória ou em
  condições de pouca memória pode melhorar o desempenho e a experiência do usuário. A remoção de
  dependências de serviços em segundo plano e receptores de transmissão
- implícita registrados estatisticamente podem aprimorar a execução do aplicativo nesses dispositivos. Embora
- o N Developer Preview avance na redução de alguns desses problemas,
+ implícita registrados estatisticamente pode aprimorar a execução do aplicativo nesses dispositivos. Embora
+ o Android N avance na redução de alguns desses problemas,
  recomendamos que você otimize os aplicativos para execução sem o uso desses
  processos em segundo plano.
 </p>
 
 <p>
-  O N Developer Preview introduz alguns comandos adicionais do <a href="{@docRoot}tools/help/adb.html">Bridge de Debug Android (ADB)</a> que
+  O Android N introduz alguns comandos adicionais do <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> que
  podem ser usados para testar o comportamento do aplicativo de teste com esses processos em segundo plano desativados:
 </p>
 
@@ -374,7 +375,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
 </pre>
   </li>
 
@@ -384,7 +385,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
 </pre>
   </li>
 </ul>

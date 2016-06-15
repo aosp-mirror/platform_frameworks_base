@@ -1,0 +1,324 @@
+page.title=Menerapkan Citra OTA Perangkat
+
+@jd:body
+
+<div style="position:relative; min-height:600px">
+
+  <div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+
+    <p class="sdk-terms-intro">Sebelum mengunduh dan memasang
+      komponen Android Preview SDK, Anda harus menyetujui ketentuan dan persyaratan
+    berikut.</p>
+
+    <h2 class="norule">Ketentuan dan Persyaratan</h2>
+
+    <div class="sdk-terms" onfocus="this.blur()" style="width:678px">
+Ini adalah Perjanjian Lisensi Android SDK Preview ("Perjanjian Lisensi").
+
+1. Pengantar
+
+1.1 Android SDK Preview (dalam Perjanjian Lisensi ini disebut "Pratinjau" dan secara spesifik termasuk file sistem Android, paket API, dan file pustaka Pratinjau, jika disediakan) diberikan lisensinya kepada Anda sesuai dengan ketentuan Perjanjian Lisensi. Perjanjian Lisensi ini merupakan kontrak yang mengikat secara hukum antara Anda dan Google dalam kaitannya dengan penggunaan Pratinjau oleh Anda.
+
+1.2 "Android" berarti tumpukan perangkat lunak Android untuk perangkat, seperti yang tersedia di Android Open Source Project, yang ada di URL berikut: http://source.android.com/, yang selalu diperbarui.
+
+1.3 “Kompatibel dengan Android” berarti segala implementasi Android yang (i) sesuai dengan Android Compatibility Definition Document, yang bisa ditemukan di situs web kompatibilitas Android (http://source.android.com/compatibility) dan yang selalu diperbarui; serta (ii) berhasil lulus Android Compatibility Test Suite (CTS).
+
+1.4 "Google" berarti Google Inc., perusahaan asal Delaware dengan kantor bisnis utama di 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
+
+2. Menerima Perjanjian Lisensi
+
+2.1 Agar bisa menggunakan Pratinjau, Anda terlebih dahulu harus menyetujui Perjanjian Lisensi ini. Anda tidak boleh menggunakan Pratinjau jika tidak menerima Perjanjian Lisensi.
+
+2.2 Dengan mengklik untuk menerima dan/atau menggunakan Pratinjau, berarti Anda menyetujui ketentuan Perjanjian Lisensi.
+
+2.3 Anda tidak boleh menggunakan Pratinjau dan tidak boleh menerima Perjanjian Lisensi jika Anda adalah orang yang dilarang menerima Pratinjau berdasarkan hukum Amerika Serikat atau negara lainnya termasuk negara di mana Anda tinggal atau dari mana Anda menggunakan Pratinjau.
+
+2.4 Jika Anda akan menggunakan Pratinjau di lingkungan perusahaan atau organisasi Anda, berarti Anda setuju untuk terikat oleh Perjanjian Lisensi atas nama perusahaan Anda atau entitas lainnya, serta Anda mewakili dan menjamin bahwa Anda memiliki kewenangan hukum penuh untuk mengikat perusahaan Anda atau entitas tersebut pada Perjanjian Lisensi ini. Jika Anda tidak memiliki kewenangan yang disyaratkan, Anda tidak boleh menerima Perjanjian Lisensi atau menggunakan Pratinjau atas nama perusahaan Anda atau entitas lainnya.
+
+3. Lisensi Pratinjau dari Google
+
+3.1 Sesuai dengan ketentuan Perjanjian Lisensi ini, Google memberi Anda lisensi yang tidak bisa disublisensikan, non-eksklusif, tidak bisa dialihkan, bebas royalti, bersifat global dan terbatas dalam menggunakan Pratinjau hanya untuk keperluan pengembangan aplikasi yang kompatibel untuk diimplementasikan pada Android.
+
+3.2 Anda tidak boleh menggunakan Pratinjau ini untuk mengembangkan aplikasi platform lain (termasuk implementasi yang tidak kompatibel pada Android) atau untuk mengembangkan SDK lain. Anda tentu saja bebas mengembangkan aplikasi untuk platform lain, termasuk implementasi yang tidak kompatibel pada Android, karena Pratinjau ini tidak digunakan untuk tujuan tersebut.
+
+3.3 Anda setuju bahwa Google atau pihak ketiga memiliki semua hak, kuasa dan kepentingan hukum dalam dan pada Pratinjau, termasuk Hak Kekayaan Intelektual yang terdapat dalam Pratinjau. "Hak Kekayaan Intelektual" berarti setiap dan semua hak yang berdasarkan pada hukum paten, hukum hak cipta, hukum rahasia dagang, hukum merek dagang, dan setiap dan semua hak kepemilikan lainnya. Google memiliki semua hak yang tidak secara tersurat diberikan kepada Anda.
+
+3.4 Anda tidak boleh menggunakan Pratinjau untuk tujuan apa pun yang tidak secara tersurat diizinkan dalam Perjanjian Lisensi ini. Kecuali sejauh yang diperlukan oleh lisensi pihak ketiga yang berlaku, Anda tidak boleh: (a) menyalin (kecuali untuk keperluan pencadangan), memodifikasi, mengadaptasi, mendistribusikan kembali, mendekompilasi, merekayasa balik, membongkar atau membuat karya turunan dari Pratinjau atau bagian apa pun dari Pratinjau; atau (b) memuat bagian apa pun dari Pratinjau ke sebuah handset ponsel atau perangkat keras selain komputer pribadi, menggabungkan suatu bagian dari Pratinjau dengan perangkat lunak lain, atau mendistribusikan perangkat lunak atau perangkat yang menggabungkan suatu bagian dari Pratinjau.
+
+3.5 Penggunaan, reproduksi dan distribusi komponen Pratinjau yang berlisensi perangkat lunak sumber terbuka diatur semata-mata oleh ketentuan lisensi perangkat lunak sumber terbuka tersebut dan bukan oleh Perjanjian Lisensi ini. Anda menyetujui bagian selebihnya dari lisensi dengan maksud baik sehubungan dengan lisensi perangkat lunak sumber terbuka tersebut sesuai dengan semua hak yang diberikan dan untuk menahan diri dari segala tindakan yang mungkin akan mengakhiri, menangguhkan, atau melanggar hak tersebut.
+
+3.6 Anda setuju bahwa bentuk dan sifat Pratinjau yang disediakan oleh Google dapat berubah tanpa pemberitahuan sebelumnya kepada Anda dan bahwa versi Pratinjau mendatang mungkin tidak kompatibel dengan aplikasi yang dikembangkan di versi Pratinjau sebelumnya. Anda setuju bahwa Google boleh menghentikan (secara permanen atau sementara) penyediaan Pratinjau (atau fitur apa pun dalam Pratinjau) kepada Anda atau pengguna pada umumnya atas kebijakan Google semata, tanpa pemberitahuan sebelumnya kepada Anda.
+
+3.7 Perjanjian Lisensi ini tidak memberi Anda hak untuk menggunakan nama dagang, merek dagang, merek layanan, logo, nama domain, atau fitur merek khas Google lainnya.
+
+3.8 Anda setuju bahwa Anda tidak akan membuang, mengaburkan, atau mengubah pernyataan hak kepemilikan apa pun (termasuk pemberitahuan hak cipta dan merek dagang) yang terlampir atau termuat dalam Pratinjau.
+
+4. Penggunaan Pratinjau oleh Anda
+
+4.1 Google setuju bahwa Perjanjian Lisensi ini tidak memberi Google hak, kuasa, dan kepentingan hukum dari Anda (atau pemberi lisensi Anda) dalam atau pada aplikasi perangkat lunak apa pun yang Anda kembangkan menggunakan Pratinjau ini, termasuk kekayaan intelektual yang ada dalam aplikasi tersebut.
+
+4.2 Anda setuju untuk menggunakan Pratinjau dan menulis aplikasi hanya untuk tujuan yang diizinkan oleh (a) Perjanjian Lisensi, dan (b) hukum yang berlaku, peraturan atau praktik yang diterima secara umum atau panduan dalam yurisdiksi terkait (termasuk hukum mengenai ekspor data atau perangkat lunak ke dan dari Amerika Serikat atau negara lain yang terkait).
+
+4.3 Anda setuju jika Anda menggunakan Pratinjau untuk mengembangkan aplikasi, Anda akan melindungi hak privasi dan hak hukum pengguna. Jika pengguna memberikan nama pengguna, sandi, atau informasi login atau informasi pribadinya, Anda harus membuat pengguna tersebut menyadari bahwa informasi yang diberikannya akan bisa digunakan oleh aplikasi Anda, dan Anda harus memberikan perlindungan dan pemberitahuan privasi yang memadai secara hukum bagi pengguna tersebut. Jika aplikasi Anda menyimpan informasi pribadi atau sensitif yang diberikan oleh pengguna, aplikasi Anda harus melakukannya dengan aman. Jika pengguna memberikan informasi Akun Google, aplikasi Anda hanya boleh menggunakan informasi tersebut untuk mengakses Akun Google pengguna saat, dan untuk tujuan terbatas di mana, pengguna tersebut telah memberikan izin kepada Anda untuk melakukannya.
+
+4.4 Anda setuju bahwa Anda tidak akan terlibat dalam aktivitas apa pun dengan Pratinjau, termasuk pengembangan atau distribusi aplikasi yang mengganggu, mengacaukan, merusak, atau mengakses secara tidak sah server, jaringan atau properti layanan Google atau pihak ketiga lainnya.
+
+4.5 Anda setuju bertanggung jawab penuh untuk (dan bahwa Google tidak bertanggung jawab terhadap Anda atau pihak ketiga lainnya untuk) data, materi, atau sumber daya apa pun yang Anda buat, kirimkan atau tampilkan melalui Android dan/atau aplikasi untuk Android, dan terhadap konsekuensi tindakan Anda (termasuk kerugian atau kerusakan apa pun yang mungkin dialami Google).
+
+4.6 Anda setuju bertanggung jawab penuh terhadap (dan bahwa Google tidak bertanggung jawab terhadap Anda atau pihak ketiga lainnya untuk) pelanggaran kewajiban Anda berdasarkan Perjanjian Lisensi ini, kontrak pihak ketiga yang berlaku atau Ketentuan Layanan, atau hukum atau peraturan yang berlaku, dan terhadap konsekuensi (termasuk kerugian atau kerusakan yang mungkin dialami Google atau pihak ketiga lainnya) akibat pelanggaran tersebut.
+
+4.7 Pratinjau ini dalam tahap pengembangan, dan pengujian serta masukan Anda merupakan bagian penting dalam proses pengembangan. Dengan menggunakan Pratinjau, Anda mengakui bahwa implementasi beberapa fitur masih dalam tahap pengembangan dan bahwa Anda tidak seharusnya mengandalkan Pratinjau berfungsi sepenuhnya sebagaimana pada rilis stabil. Anda setuju untuk tidak mendistribusikan atau mengirimkan untuk umum penggunaan aplikasi menggunakan Pratinjau karena Pratinjau ini tidak akan lagi didukung setelah Android SDK dirilis secara resmi.
+
+5. Kredensial Pengembang Anda
+
+5.1 Anda setuju bertanggung jawab untuk menjaga kerahasiaan semua kredensial pengembang yang mungkin diberikan Google kepada Anda atau yang mungkin Anda pilih sendiri dan bahwa Anda akan bertanggung jawab penuh terhadap semua aplikasi yang dikembangkan dengan kredensial pengembang Anda.
+
+6. Privasi dan Informasi
+
+6.1 Untuk terus berinovasi dan meningkatkan Pratinjau, Google boleh mengumpulkan statistik penggunaan tertentu dari perangkat lunak termasuk namun tidak terbatas pada identifier unik, alamat IP terkait, nomor versi perangkat lunak, dan informasi yang menjadi tempat penggunaan alat dan/atau layanan dalam Pratinjau dan cara penggunaannya. Sebelum informasi ini dikumpulkan, Pratinjau akan memberi tahu dan meminta persetujuan Anda. Jika Anda tidak memberikan persetujuan, informasi tersebut tidak akan dikumpulkan.
+
+6.2 Data yang dikumpulkan akan diperiksa secara agregat untuk meningkatkan Pratinjau dan dikelola sesuai dengan Kebijakan Privasi Google yang terdapat di http://www.google.com/policies/privacy.
+
+7. Aplikasi Pihak Ketiga
+
+7.1 Jika Anda menggunakan Pratinjau untuk menjalankan aplikasi yang dikembangkan oleh pihak ketiga atau yang mengakses data, materi atau sumber daya yang disediakan oleh pihak ketiga, Anda setuju bahwa Google tidak bertanggung jawab terhadap aplikasi, data, materi atau sumber daya tersebut. Anda memahami bahwa semua data, materi atau sumber daya yang mungkin Anda akses melalui aplikasi pihak ketiga merupakan tanggung jawab penuh dari pihak yang menjadi asal data tersebut dan Google tidak bertanggung jawab terhadap kerugian atau kerusakan apa pun yang mungkin Anda alami sebagai akibat menggunakan atau mengakses aplikasi, data, materi, atau sumber daya pihak ketiga tersebut.
+
+7.2 Anda harus menyadari bahwa data, materi dan sumber daya yang diberikan kepada Anda melalui aplikasi pihak ketiga mungkin dilindungi oleh hak kekayaan intelektual yang dimiliki oleh penyedia (atau oleh orang lain atau perusahaan atas nama mereka). Anda tidak boleh memodifikasi, menyewakan, menyewabelikan, meminjamkan, menjual, mendistribusikan atau membuat karya turunan berdasarkan data, materi, atau sumber daya ini (baik secara keseluruhan atau sebagian) kecuali Anda secara khusus diberikan izin untuk melakukannya oleh pemilik yang bersangkutan.
+
+7.3 Anda mengakui bahwa penggunaan Anda atas aplikasi, data, materi, atau sumber daya pihak ketiga semacam itu tunduk pada ketentuan terpisah antara Anda dan pihak ketiga yang bersangkutan.
+
+8. Menggunakan Google API
+
+8.1 Google API
+
+8.1.1 Jika Anda menggunakan API (Antarmuka Pemrograman Aplikasi) untuk mengambil data dari Google, Anda mengakui bahwa data tersebut dilindungi hak kekayaan intelektual yang dimiliki Google atau pihak-pihak yang menyediakan data (atau oleh orang lain atau perusahaan atas nama mereka). Penggunaan API oleh Anda tunduk pada Ketentuan Layanan tambahan. Anda tidak boleh memodifikasi, menyewakan, menyewabelikan, meminjamkan, menjual, mendistribusikan atau membuat karya turunan berdasarkan data ini (baik secara keseluruhan atau sebagian) kecuali diizinkan oleh Ketentuan Layanan yang bersangkutan.
+
+8.1.2 Jika Anda menggunakan API dalam bentuk apa pun untuk mengambil data pengguna dari Google, Anda mengakui dan menyetujui bahwa Anda akan mengambil data hanya dengan persetujuan yang jelas dari pengguna dan hanya bila, dan sebatas keperluan yang diizinkan oleh pengguna tersebut untuk Anda lakukan.
+
+9. Mengakhiri Perjanjian Lisensi
+
+9.1 Perjanjian Lisensi ini akan terus berlaku hingga diakhiri oleh Anda atau Google sebagaimana diatur di bawah ini.
+
+9.2 Jika Anda ingin mengakhiri Perjanjian Lisensi ini, Anda boleh melakukannya dengan menghentikan penggunaan Pratinjau dan kredensial pengembang yang relevan.
+
+9.3 Google boleh mengakhiri Perjanjian Lisensi ini dengan Anda kapan saja, dengan atau tanpa sebab, setelah memberi tahu Anda.
+
+9.4 Perjanjian Lisensi akan berakhir secara otomatis tanpa pemberitahuan atau tindakan lainnya bila, mana saja yang lebih dahulu:
+(A) Google berhenti menyediakan Pratinjau atau bagian Pratinjau tertentu kepada pengguna di negara tempat Anda tinggal atau negara tempat asal Anda menggunakan layanan; dan
+(B) Google mengeluarkan versi rilis final dari Android SDK.
+
+9.5 Bila Perjanjian Lisensi berakhir, lisensi yang telah diberikan kepada Anda dalam Perjanjian Lisensi akan berakhir pula, Anda akan segera menghentikan semua penggunaan Pratinjau, dan ketetapan paragraf 10, 11, 12, dan 14 akan terus berlaku secara tak terbatas.
+
+10. SANGGAHAN
+
+10.1 ANDA SEPENUHNYA MEMAHAMI DAN MENYETUJUI BAHWA PENGGUNAAN PRATINJAU OLEH ANDA MERUPAKAN RISIKO ANDA SENDIRI DAN BAHWA PRATINJAU INI DISEDIAKAN "APA ADANYA" DAN "SEBAGAIMANA TERSEDIA" TANPA JAMINAN DALAM BENTUK APA PUN DARI GOOGLE.
+
+10.2 PENGGUNAAN PRATINJAU DAN MATERI APA PUN YANG DIUNDUH ATAU DIPEROLEH MELALUI PENGGUNAAN PRATINJAU OLEH ANDA ADALAH ATAS KEHENDAK DAN RISIKO ANDA SENDIRI DAN ANDA BERTANGGUNG JAWAB PENUH TERHADAP KERUSAKAN PADA SISTEM KOMPUTER ATAU PERANGKAT LAIN ATAU HILANGNYA DATA AKIBAT PENGGUNAAN TERSEBUT. TANPA MEMBATASI HAL TERSEBUT, ANDA MEMAHAMI BAHWA PRATINJAU BUKANLAH RILIS STABIL DAN MUNGKIN BERISI KESALAHAN, CACAT, DAN RISIKO KEAMANAN YANG BISA MENGAKIBATKAN KERUSAKAN SIGNIFIKAN, TERMASUK KEHILANGAN PENGGUNAAN ATAS SISTEM KOMPUTER ANDA ATAU PERANGKAT LAIN DENGAN SEPENUHNYA DAN TIDAK BISA DIPULIHKAN LAGI.
+
+10.3 GOOGLE LEBIH LANJUT MENYANGGAH SEMUA JAMINAN DAN PERSYARATAN APA PUN, BAIK TERSURAT MAUPUN TERSIRAT, TERMASUK NAMUN TIDAK TERBATAS PADA JAMINAN TERSIRAT DAN PERSYARATAN MENGENAI DAYA JUAL, KESESUAIAN DENGAN TUJUAN TERTENTU, DAN NON-PELANGGARAN.
+
+11. PEMBATASAN KEWAJIBAN
+
+11.1 ANDA SEPENUHNYA MEMAHAMI DAN MENYETUJUI BAHWA GOOGLE, ANAK PERUSAHAAN DAN AFILIASINYA, DAN PEMBERI LISENSINYA TIDAK AKAN BERTANGGUNG JAWAB KEPADA ANDA BERDASARKAN TEORI KEWAJIBAN TERHADAP SEGALA KERUGIAN LANGSUNG, TIDAK LANGSUNG, INSIDENTAL, KHUSUS, JANGKA PANJANG ATAU GANTI RUGI YANG DIAKIBATKAN OLEH ANDA, TERMASUK HILANGNYA DATA, WALAUPUN GOOGLE ATAU PERWAKILANNYA TELAH DIBERI TAHU ATAU SEHARUSNYA MENGETAHUI KEMUNGKINAN TIMBULNYA KEHILANGAN TERSEBUT.
+
+12. Penggantian Kerugian
+
+12.1 Sejauh maksimum yang diizinkan oleh hukum, Anda setuju untuk membela, mengganti kerugian dan melepaskan tanggung jawab Google, afiliasinya beserta direksi, petugas, karyawan dan agennya dari dan terhadap setiap dan semua klaim, tindakan, gugatan, proses hukum, serta setiap dan semua kehilangan, kewajiban, kerusakan, biaya dan pengeluaran (termasuk biaya pengacara yang sewajarnya) yang timbul atau diakibatkan dari (a) penggunaan Pratinjau oleh Anda, (b) aplikasi apa pun yang Anda kembangkan dari Pratinjau yang melanggar Hak Kekayaan Intelektual seseorang atau mencemarkan nama baik seseorang atau melanggar hak mereka berkaitan dengan publisitas atau privasi, dan (c) ketidakpatuhan Anda terhadap Perjanjian Lisensi ini.
+
+13. Perubahan pada Perjanjian Lisensi
+
+13.1 Google boleh membuat perubahan pada Perjanjian Lisensi saat mendistribusikan versi baru Pratinjau. Saat perubahan tersebut dibuat, Google akan menyediakan versi baru Perjanjian Lisensi di situs web penyediaan Pratinjau.
+
+14. Ketentuan Hukum Umum
+
+14.1 Perjanjian Lisensi ini merupakan perjanjian hukum antara Anda dan Google dan mengatur penggunaan Pratinjau oleh Anda (tidak termasuk layanan apa pun yang mungkin disediakan Google untuk Anda dalam perjanjian tertulis terpisah), dan sepenuhnya menggantikan perjanjian sebelumnya antara Anda dan Google dalam kaitannya dengan Pratinjau.
+
+14.2 Anda setuju bahwa jika Google tidak menjalankan atau menerapkan hak atau upaya hukum yang terkandung dalam Perjanjian Lisensi ini (atau bila Google memiliki kewenangan berdasarkan hukum yang berlaku), tindakan ini tidak akan dianggap sebagai pelepasan hak secara resmi oleh Google dan bahwa hak atau upaya hukum tersebut akan tetap bisa digunakan oleh Google.
+
+14.3 Jika persidangan hukum yang berwenang untuk memutuskan perkara ini menetapkan bahwa ada ketetapan Perjanjian Lisensi ini yang tidak valid, maka ketetapan tersebut akan dihapus dari Perjanjian Lisensi tanpa memengaruhi bagian selebihnya dari Perjanjian Lisensi ini. Ketetapan selebihnya dari Perjanjian Lisensi ini akan tetap sah dan berlaku.
+
+14.4 Anda mengakui dan menyetujui bahwa setiap anggota dari kelompok perusahaan yang diinduki oleh Google akan menjadi pihak ketiga penerima manfaat dari Perjanjian Lisensi ini dan bahwa perusahaan tersebut berhak untuk secara langsung memberlakukan, dan bergantung pada, ketetapan yang dimuat dalam Perjanjian Lisensi ini yang memberikan manfaat (atau hak yang mendukung) kepada mereka. Selain yang telah disebutkan di atas, tidak ada orang atau perusahaan lain yang akan menjadi pihak ketiga penerima manfaat dari Perjanjian Lisensi ini
+
+14.5 PEMBATASAN EKSPOR. PRATINJAU TUNDUK PADA HUKUM DAN PERATURAN EKSPOR AMERIKA SERIKAT. ANDA HARUS MEMATUHI SEMUA HUKUM DAN PERATURAN NASIONAL DAN INTERNASIONAL YANG BERLAKU PADA PRATINJAU. HUKUM INI MENYERTAKAN PEMBATASAN ATAS TUJUAN, PENGGUNA AKHIR DAN PENGGUNAAN AKHIR
+
+14.6 Perjanjian Lisensi ini tidak boleh diberikan atau dialihkan baik oleh Anda tanpa persetujuan tertulis sebelumnya dari Google, dan upaya apa pun untuk mengalihkannya tanpa persetujuan akan menjadi tidak sah. Anda tidak boleh mendelegasikan tanggung jawab atau kewajiban berdasarkan Perjanjian Lisensi ini tanpa persetujuan tertulis sebelumnya dari pihak lain.
+
+14.7 Perjanjian Lisensi ini, dan hubungan Anda dengan Google berdasarkan Perjanjian Lisensi ini, akan diatur oleh hukum Negara Bagian California tanpa mengindahkan pertentangan ketetapan hukumnya. Anda dan Google setuju untuk tunduk pada yurisdiksi eksklusif pengadilan yang berlokasi di county Santa Clara, California untuk menyelesaikan segala masalah hukum yang timbul dari Perjanjian Lisensi ini. Meski demikian, Anda setuju bahwa Google akan tetap diizinkan untuk mengajukan upaya hukum (atau tipe keringanan hukum setara yang mendesak) dalam yurisdiksi apa pun.
+  </div><!-- sdk terms -->
+
+
+
+    <div id="sdk-terms-form">
+      <p>
+        <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
+        <label id="agreeLabel" for="agree">Saya telah membaca dan menyetujui ketentuan dan persyaratan di atas</label>
+      </p>
+      <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
+    </div>
+
+
+  </div><!-- end TOS -->
+
+
+  <div id="landing">
+
+<p>
+  Halaman ini menyediakan tautan ke citra perangkat lewat jaringan seluler (OTA) dan menjelaskan
+  cara menerapkan pembaruan OTA secara manual ke suatu perangkat. Prosedur ini berguna
+  untuk memulihkan perangkat yang menerima pembaruan OTA melalui Android Beta
+  Program dan tidak jalan setelah pembaruan dipasang.
+</p>
+
+<h2 id="install-ota">Memasang Citra OTA</h2>
+
+<p></p>
+
+<p>Untuk pasang OTA pada perangkat:</p>
+
+<ol>
+  <li>Unduh citra perangkat OTA dari tabel di bawah.</li>
+  <li>Boot ulang perangkat ke dalam mode Recovery. Untuk informasi selengkapnya mengenai cara masuk ke mode ini
+    di perangkat Nexus, lihat
+    <a href="https://support.google.com/nexus/answer/4596836">Setel ulang perangkat Nexus
+      Anda ke setelan pabrik</a>.
+  </li>
+  <li>Pada perangkat, pilih <strong>ADB sideload</strong>.</li>
+  <li>Hubungkan perangkat ke komputer dengan lingkungan pengembangan Android
+     yang telah dimuat dan alat Android Debug Bridge (adb) yang telah dipasang.</li>
+  <li>Jalankan perintah berikut:
+    <pre>adb sideload <em>&lt;ota-package&gt;</em></pre>
+  </li>
+</ol>
+
+
+
+<h2 id="ota-images">Citra OTA Perangkat</h2>
+
+<table>
+  <tr>
+    <th scope="col">Perangkat</th>
+    <th scope="col">Unduhan / Checksum</th>
+  </tr>
+
+  <tr id="bullhead">
+    <td>Nexus 5X <br>"bullhead"</td>
+    <td><a href="#top" onclick="onDownload(this)">bullhead-ota-npd35k-b8cfbd80.zip</a><br>
+      MD5: 15fe2eba9b01737374196bdf0a792fe9<br>
+      SHA-1: 5014b2bba77f9e1a680ac3f90729621c85a14283
+    </td>
+  </tr>
+
+  <tr id="shamu">
+    <td>Nexus 6 <br>"shamu"</td>
+    <td><a href="#top" onclick="onDownload(this)">shamu-ota-npd35k-078e6fa5.zip</a><br>
+      MD5: e8b12f7721c53af9a450f7058928a5fc<br>
+      SHA-1: b7a9b756f84a1d2e482ff9c16749d65f6e51425a
+    </td>
+  </tr>
+
+  <tr id="angler">
+    <td>Nexus 6P <br>"angler"</td>
+    <td><a href="#top" onclick="onDownload(this)">angler-ota-npd35k-88457699.zip</a><br>
+      MD5: 3fac09fef759dde26e57cb80b20b6477<br>
+      SHA-1: 27d6caa786577d8a38b2da5bf94b33b4524a1a1c
+    </td>
+  </tr>
+
+  <tr id="volantis">
+    <td>Nexus 9 <br>"volantis"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantis-ota-npd35k-51dbae76.zip</a><br>
+      MD5: 58312c4a5971818ef5c77a3f446003da<br>
+      SHA-1: aad9005be33d3e2bab480509a6ab74c3c3b9d921
+    </td>
+  </tr>
+
+  <tr id="volantisg">
+    <td>Nexus 9G <br>"volantisg"</td>
+    <td><a href="#top" onclick="onDownload(this)">volantisg-ota-npd35k-834f047f.zip</a><br>
+      MD5: 92b7d1fa252f7394e70f957c72d4aac8<br>
+      SHA-1: b6c057c84d90893630e303cbb60530e20ddb8361
+    </td>
+  </tr>
+
+  <tr id="fugu">
+    <td>Nexus Player <br>"fugu"</td>
+    <td><a href="#top" onclick="onDownload(this)">fugu-ota-npd35k-6ac91298.zip</a><br>
+      MD5: 1461622ad53ea842b2722fa7b49b8172<br>
+      SHA-1: 409c061668ab270774877d7f3eae44fa48d2b931
+    </td>
+  </tr>
+
+  <tr id="ryu">
+    <td>Pixel C <br>"ryu"</td>
+    <td><a href="#top" onclick="onDownload(this)">ryu-ota-npd35k-a0b2347f.zip</a><br>
+      MD5: c60117f3640cc6db12386fd632289c7d<br>
+      SHA-1: 87349c767c69efb4172c90ce1d88cf578c3d28b3
+    </td>
+  </tr>
+
+  <tr id="seed">
+    <td>General Mobile 4G (Android One) <br>"seed"</td>
+    <td><a href="#top" onclick="onDownload(this)">seed_l8150-ota-npd35k-09897a1d.zip</a><br>
+      MD5: a55cf94f7cce0393ec6c0b35041766b7<br>
+      SHA-1: 6f33742290eb46f2561891f38ca2e754b4e50c6a
+    </td>
+  </tr>
+
+</table>
+
+
+  </div><!-- landing -->
+
+</div><!-- relative wrapper -->
+
+
+
+<script>
+  var urlRoot = "http://storage.googleapis.com/androiddevelopers/shareables/preview/ota/";
+  function onDownload(link) {
+
+    $("#downloadForRealz").html("Download " + $(link).text());
+    $("#downloadForRealz").attr('href', urlRoot + $(link).text());
+
+    $("#tos").fadeIn('fast');
+    $("#landing").fadeOut('fast');
+
+    return true;
+  }
+
+
+  function onAgreeChecked() {
+    /* verifikasi apakah TOS disetujui */
+    if ($("input#agree").is(":checked")) {
+      /* tampilkan tombol unduh */
+      $("a#downloadForRealz").removeClass('disabled');
+    } else {
+      $("a#downloadForRealz").addClass('disabled');
+    }
+  }
+
+  function onDownloadForRealz(link) {
+    if ($("input#agree").is(':checked')) {
+    /*
+      $("#tos").fadeOut('fast');
+      $("#landing").fadeIn('fast');
+    */
+
+      ga('send', 'event', 'M Preview', 'System Image', $("#downloadForRealz").html());
+
+    /*
+      location.hash = "";
+    */
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  $(window).hashchange( function(){
+    if (location.hash == "") {
+      location.reload();
+    }
+  });
+
+</script>

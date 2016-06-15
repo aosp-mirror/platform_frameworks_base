@@ -1,5 +1,5 @@
 page.title=Configuración de seguridad de la red
-page.keywords=preview,security,network
+page.keywords=androidn,security,network
 page.image=images/cards/card-nyc_2x.jpg
 
 @jd:body
@@ -7,7 +7,7 @@ page.image=images/cards/card-nyc_2x.jpg
 <div id="qv-wrapper">
 <div id="qv">
 
-<h2>Contenido del documento</h2>
+<h2>En este documento</h2>
 <ol>
   <li><a href="#manifest">Agregar un archivo de configuración de seguridad</a></li>
   <li><a href="#CustomTrust">Personalizar las CA de confianza</a>
@@ -71,12 +71,13 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-...
-&lt;app ...&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <h2 id="CustomTrust">Personalizar las CA de confianza</h2>
@@ -109,7 +110,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 
-<h3 id="ConfigCustom">Configurar una CA personalizada</h3>
+<h3 id="ConfigCustom">Configurar una CA de confianza personalizada</h3>
 
 <p>
   Supongamos que deseas conectarte a tu host, el cual usa un certificado SSL
@@ -213,7 +214,7 @@ page.image=images/cards/card-nyc_2x.jpg
  solo <i>son</i> de confianza cuando <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">
 android:debuggable</a>
  es {@code true} usando {@code debug-overrides}. Generalmente, las herramientas de IDE
- y de compilación configuran esta marca automáticamente para las versiones que no son de lanzamiento.
+ y de compilación configuran esta marca automáticamente para las compilaciones que no son de lanzamiento.
 </p>
 
 <p>
@@ -242,7 +243,7 @@ android:debuggable</a>
 <p>
   Las aplicaciones que deseen conectarse a destinos usando solo conexiones
  seguras pueden desactivar Cleartext (usando el protocolo
- HTTP no cifrado en lugar del protocolo HTTPS) para esos destinos. Esta opción ayuda a prevenir
+ HTTP no encriptado en lugar del protocolo HTTPS) para esos destinos. Esta opción ayuda a prevenir
  las regresiones accidentales en aplicaciones debido a cambios en direcciones URL generados por fuentes
  externas como servidores backend.
   Consulta {@link android.security.NetworkSecurityPolicy#isCleartextTrafficPermitted
@@ -310,6 +311,7 @@ secure.example.com} se hagan siempre mediante HTTPS para proteger el tráfico se
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
@@ -543,7 +545,7 @@ La configuración predeterminada para aplicaciones con API nivel 23 o inferior e
 
 <dl class="xml">
   <dt>
-    SINTAXIS:
+    sintaxis:
   </dt>
 
   <dd>
@@ -568,7 +570,7 @@ La configuración predeterminada para aplicaciones con API nivel 23 o inferior e
 
   <dd>
     Sobrescrituras que se deben aplicar cuando <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a>
- es {@code "true"}, que es, generalmente, el caso de las versiones que no sean de lanzamiento
+ es {@code "true"}, que es, generalmente, el caso de las compilaciones que no sean de lanzamiento
  generadas por herramientas de IDE y de compilación. Los anclajes de confianza especificados en {@code
  debug-overrides} se agregan a todas las demás configuraciones, y la fijación
  de certificados no se lleva a cabo cuando la cadena de certificados del servidor usa uno de estos
@@ -704,9 +706,9 @@ La fuente de los certificados de CA puede ser una de las siguientes opciones:
  expiran las fijaciones, lo cual deshabilita la fijación. Si el atributo no está establecido, las fijaciones
  no expiran.
         <p>
-          La expiración ayuda a evitar problemas de conectividad en aplicaciones
- que no reciben actualizaciones para el conjunto de fijaciones, por ejemplo,
-porque el usuario deshabilitó las actualizaciones de la aplicación.
+          La expiración ayuda a evitar problemas de conectividad en aplicaciones que no
+ reciben actualizaciones para el conjunto de fijaciones, por ejemplo, porque el usuario
+ deshabilitó las actualizaciones de la aplicación.
         </p>
       </dd>
     </dl>
@@ -716,7 +718,7 @@ porque el usuario deshabilitó las actualizaciones de la aplicación.
 <h3 id="pin">&lt;pin&gt;</h3>
 <dl class="xml">
   <dt>
-    SINTAXIS:
+    sintaxis:
   </dt>
 
   <dd>
