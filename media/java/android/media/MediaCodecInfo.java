@@ -2860,6 +2860,7 @@ public final class MediaCodecInfo {
         public static final int AACObjectHE         = 5;
         public static final int AACObjectScalable   = 6;
         public static final int AACObjectERLC       = 17;
+        public static final int AACObjectERScalable = 20;
         public static final int AACObjectLD         = 23;
         public static final int AACObjectHE_PS      = 29;
         public static final int AACObjectELD        = 39;
