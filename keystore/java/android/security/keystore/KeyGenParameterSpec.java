@@ -596,10 +596,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns {@code true} if the key will remain authorized while the device is on the user's
-     * body, even after the validity duration has expired.  This option has no effect on keys that
-     * don't have an authentication validity duration, and has no effect if the device lacks a
-     * secure on-body sensor.
+     * Returns {@code true} if the key will remain authorized only until the device is removed from
+     * the user's body, up to the validity duration.  This option has no effect on keys that don't
+     * have an authentication validity duration, and has no effect if the device lacks an on-body
+     * sensor.
      *
      * <p>Authorization applies only to secret key and private key operations. Public key operations
      * are not restricted.
@@ -1104,26 +1104,21 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets whether the key is authorized for use after the authentication validity period is
-         * expired (see {@link #setUserAuthenticationValidityDurationSeconds} and {@link
-         * #setUserAuthenticationRequired}) if the device has a secure on-body sensor and if the
-         * device has not been removed from the user's body since the last successful
-         * authentication.
+         * Sets whether the key will remain authorized only until the device is removed from the
+         * user's body up to the limit of the authentication validity period (see
+         * {@link #setUserAuthenticationValidityDurationSeconds} and
+         * {@link #setUserAuthenticationRequired}). Once the device has been removed from the
+         * user's body, the key will be considered unauthorized and the user will need to
+         * re-authenticate to use it. For keys without an authentication validity period this
+         * parameter has no effect.
          *
-         * <p>On devices that do not have a secure on-body sensor, creating a key with this
-         * parameter set to {@code true} will have no effect; the private or secret key will no
-         * longer be authorized for use after the validity period ends, and a fresh authentication
-         * will be required to use it again.
+         * <p>Similarly, on devices that do not have an on-body sensor, this parameter will have no
+         * effect; the device will always be considered to be "on-body" and the key will therefore
+         * remain authorized until the validity period ends.
          *
-         * <p>Note that "secure" on-body sensors are required by Android to have a secure path to
-         * the secure hardware, but the sensors themselves may not be difficult to fool.  It is
-         * recommended that this feature be used to increase slightly the security of keys which
-         * would otherwise have to allow unauthenticated access, or have a very long validity
-         * period. Keys that require high assurance of user authorization should not use this
-         * feature and should set a short validity period.
-         *
-         * @param remainsValid if {@code true}, and if the device supports secure on-body detection,
-         * key will remain valid after authentication validity duration has expired.
+         * @param remainsValid if {@code true}, and if the device supports on-body detection, key
+         * will be invalidated when the device is removed from the user's body or when the
+         * authentication validity expires, whichever occurs first.
          */
         @NonNull
         public Builder setUserAuthenticationValidWhileOnBody(boolean remainsValid) {
