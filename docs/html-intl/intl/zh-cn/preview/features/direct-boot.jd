@@ -1,5 +1,5 @@
 page.title=直接启动
-page.keywords=preview,sdk,direct boot
+page.keywords=Preview、SDK、直接启动
 page.tags=androidn
 page.image=images/cards/card-nyc_2x.jpg
 
@@ -18,7 +18,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </div>
 </div>
 
-<p>当设备已开机但用户尚未解锁设备时，Android N 将在安全的 <i>直接启动</i> 模式下运行。
+<p>当设备已开机但用户尚未解锁设备时，Android N 将在安全的“直接启动”模式下运行。<i></i>
 
 为支持此操作，系统为数据提供两个存储位置：</p>
 
@@ -35,10 +35,10 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <ul>
-<li>已安排通知的应用，如闹铃应用。
+<li>已安排通知的应用，如闹钟应用。
 </li>
 <li>提供重要用户通知的应用，如短信应用。</li>
-<li>提供辅助工具服务的应用，如 Talkback。</li>
+<li>提供无障碍服务的应用，如 Talkback。</li>
 </ul>
 
 <p>如果您的应用在“直接启动”模式下运行时需要访问数据，则使用设备加密存储。
@@ -57,8 +57,8 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <p>应用必须先向系统注册其组件，然后才能在“直接启动”模式下运行或访问设备加密存储。
 
-应用通过将组件标记为
-<i>加密感知</i>在系统中进行注册。若要将您的组件标记为加密感知，请在清单文件中将 <code>android:encryptionAware</code> 属性设为 true。
+应用通过将组件标记为“加密感知”来注册系统。
+<i></i>若要将您的组件标记为加密感知，请在清单中将 <code>android:directBootAware</code> 属性设为 true。
 <p>
 
 <p>当设备重启后，加密感知组件可以注册接收来自系统的 <code>LOCKED_BOOT_COMPLETED</code> 广播消息。
@@ -68,12 +68,12 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>以下代码段展示如何将
-{@link android.content.BroadcastReceiver} 注册为加密感知并在应用清单文件中为 <code>LOCKED_BOOT_COMPLETED</code> 添加 Intent 过滤器：
+{@link android.content.BroadcastReceiver} 注册为加密感知并在应用清单中为 <code>LOCKED_BOOT_COMPLETED</code> 添加 Intent 过滤器：
 </p>
 
 <pre>
-&lt;receiever
-  android:encryptionAware="true" &gt;
+&lt;receiver
+  android:directBootAware="true" &gt;
   ...
   &lt;intent-filter&gt;
     &lt;action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" /&gt;
@@ -87,14 +87,14 @@ page.image=images/cards/card-nyc_2x.jpg
 <h2 id="access">访问设备加密存储</h2>
 
 <p>要访问设备加密存储，请通过调用
-<code>Context.createDeviceEncryptedStorageContext()</code> 创建另一个
+<code>Context.createDeviceProtectedStorageContext()</code> 创建另一个
 {@link android.content.Context} 实例。使用此上下文执行的所有存储 API 调用均访问设备加密存储。
 以下示例访问设备加密存储并打开现有应用数据文件：
 
 </p>
 
 <pre>
-Context directBootContext = Context.createDeviceEncryptedStorageContext();
+Context directBootContext = appContext.createDeviceProtectedStorageContext();
 // Access appDataFilename that lives in device encrypted storage
 FileInputStream inStream = directBootContext.openFileInput(appDataFilename);
 // Use inStream to read content...
@@ -126,8 +126,8 @@ ACTION_BOOT_COMPLETED} 消息，该消息现在表明设备已启动，且用户
 
 <p>如果用户将其设备更新为使用“直接启动”模式，您可能需要将现有数据迁移到设备加密存储。
 使用
-<code>Context.migrateSharedPreferencesFrom()</code> 和
-<code>Context.migrateDatabaseFrom()</code> 在凭据加密存储和设备加密存储之间迁移首选项和数据库数据。
+<code>Context.moveSharedPreferencesFrom()</code> 和
+<code>Context.moveDatabaseFrom()</code> 在凭据加密存储和设备加密存储之间迁移首选项和数据库数据。
 </p>
 
 <p>请运用您的最佳判断来决定从凭据加密存储向设备加密存储迁移哪些数据。
@@ -141,7 +141,7 @@ ACTION_BOOT_COMPLETED} 消息，该消息现在表明设备已启动，且用户
 <p>使用新的“直接启动”模式测试您的加密感知应用。有两种方式可以启用直接启动模式：
 </p>
 
-<p class="caution"><strong>注意</strong>：启用“直接启动”将擦除设备上的所有用户数据。
+<p class="caution"><strong>注意：</strong>启用“直接启动”将擦除设备上的所有用户数据。
 </p>
 
 <p>在已安装 Android N 的受支持的设备上，通过执行以下操作之一启用“直接启动”：

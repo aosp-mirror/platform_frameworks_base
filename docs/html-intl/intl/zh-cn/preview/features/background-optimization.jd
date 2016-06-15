@@ -36,7 +36,7 @@ page.image=images/cards/card-nyc_2x.jpg
       </li>
 
       <li>
-        </a><a href="#new-jobparam">新的 JobParameter 方法
+        <a href="#new-jobparam">新的 JobParameter 方法</a>
       </li>
 
       <li>
@@ -54,15 +54,15 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 <p>
-  为减缓这个问题，N Developer Preview 应用了以下限制：
+  为缓解这个问题，Android N 应用了以下限制：
 
 </p>
 
 <ul>
   <li>面向 Preview 的应用不会收到 {@link
-android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单文件中注册接收这些广播。
-在前台运行的应用如果使用 {@link
-android.content.Context#registerReceiver Context.registerReceiver()} 注册 {@link android.content.BroadcastReceiver}，则仍可在主线程上侦听 {@code CONNECTIVITY_CHANGE}。
+android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单中注册接收这些广播。
+运行的应用如果使用 {@link android.content.Context#registerReceiver Context.registerReceiver()} 注册 
+{@link android.content.BroadcastReceiver}，则仍可在主线程上侦听 {@code CONNECTIVITY_CHANGE}。
 
 
   </li>
@@ -75,6 +75,8 @@ android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此项优化会影响所有�
 </ul>
 
 <p>
+  如果您的应用使用任何 Intent，您仍需要尽快移除它们的依赖关系，以正确适配 Android N 设备。
+
   Android 框架提供多个解决方案来缓解对这些隐式广播的需求。
 例如，{@link android.app.job.JobScheduler}
 和<a href="https://developers.google.com/android/reference/com/google/android/gms/gcm/GcmNetworkManager">
@@ -98,8 +100,8 @@ android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此项优化会影响所有�
 </h2>
 
 <p>
-  面向 N Developer Preview 的应用不会收到 {@link
-android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单文件中注册接收这些广播亦是如此，依赖此广播的流程也不会启动。
+  面向 Android N 的应用不会收到 {@link
+android.net.ConnectivityManager#CONNECTIVITY_ACTION} 广播，即使它们在清单中注册接收这些广播亦是如此，依赖此广播的流程也不会启动。
 
 这可能会给需要侦听网络变化或者需要在设备接入无限流量网络时执行批量网络活动的应用造成问题。
 
@@ -109,7 +111,7 @@ Android 框架中已存在多个可绕过此限制的解决方案，但需要根
 </p>
 
 <p class="note">
-  <strong>注</strong>：当应用位于前台时，通过
+  <strong>注：</strong>当应用运行时，通过
 {@link android.content.Context#registerReceiver Context.registerReceiver()}
 中注册的 {@link android.content.BroadcastReceiver} 将继续接收这些广播。
 </p>
@@ -145,7 +147,7 @@ public static void scheduleJob(Context context) {
 </pre>
 
 <p>
-  当符合作业条件时，应用会收到回调以运行指定 {@code JobService.class} 中的 {@link android.app.job.JobService#onStartJob onStartJob()} 方法。
+  当符合作业条件时，应用会收到回调以运行指定的{@code JobService.class} 中的 {@link android.app.job.JobService#onStartJob onStartJob()} 方法。
 
 如需查看 {@link
   android.app.job.JobScheduler} 实现的更多示例，请参阅 <a href="{@docRoot}samples/JobScheduler/index.html">JobScheduler 示例应用</a>。
@@ -162,9 +164,8 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  在前台运行的应用仍可以通过注册的 {@link
-android.content.BroadcastReceiver} 侦听 {@code
-CONNECTIVITY_CHANGE}。不过，{@link
+  注册了 {@link android.content.BroadcastReceiver} 的运行的应用仍可侦听 {@code CONNECTIVITY_CHANGE}。
+不过，{@link
 android.net.ConnectivityManager} API 提供了一个更稳健可靠的方法，可以仅在符合指定的网络条件时才请求回调。
 
 </p>
@@ -194,11 +195,11 @@ unregisterNetworkCallback()}。
 </h2>
 
 <p>
-  在 N Developer Preview 中，应用无法发送或接收 {@link
+  在 Android N 中，应用无法发送或接收 {@link
 android.hardware.Camera#ACTION_NEW_PICTURE} 或 {@link
 android.hardware.Camera#ACTION_NEW_VIDEO} 广播。此限制有助于缓解必须唤醒多个应用以处理新图像或视频时对性能和用户体验造成的影响。
 
-N Developer Preview 扩展了 {@link android.app.job.JobInfo} 和 {@link
+Android N 扩展了 {@link android.app.job.JobInfo} 和 {@link
 android.app.job.JobParameters} 以提供备用解决方案。
 
 </p>
@@ -208,7 +209,7 @@ android.app.job.JobParameters} 以提供备用解决方案。
 </h3>
 
 <p>
-  为了针对内容 URI 变化触发作业，N Developer Preview 使用以下方法扩展了 {@link android.app.job.JobInfo} API。
+  为了针对内容 URI 变化触发作业，Android N 使用以下方法扩展了 {@link android.app.job.JobInfo} API：
 
 </p>
 
@@ -266,7 +267,7 @@ public static void scheduleJob(Context context) {
           MY_BACKGROUND_JOB,
           new ComponentName(context, MediaContentJob.class));
   builder.addTriggerContentUri(
-          new JobInfo.TriggerContentUri(MEDIA_URI,
+          new JobInfo.TriggerContentUri(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
           JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS));
   js.schedule(builder.build());
 }
@@ -283,7 +284,7 @@ public static void scheduleJob(Context context) {
 </h3>
 
 <p>
-  N Developer Preview 也扩展了{@link android.app.job.JobParameters}，以允许应用接收有关哪些内容权限和 URI 已触发作业的有用信息：
+  Android N 也扩展了{@link android.app.job.JobParameters}，以允许应用接收有关哪些内容权限和 URI 已触发作业的有用信息：
 
 
 </p>
@@ -356,14 +357,14 @@ public boolean onStartJob(JobParameters params) {
   优化您的应用以在低内存设备上或在低内存条件下运行，这样可以提升性能和用户体验。
 删除后台服务依赖关系和静态注册的隐式广播接收器可帮助您的应用在此类设备上运行得更好。
 
-尽管 N Developer Preview 采取了措施以减少部分问题，但建议您优化自己的应用，使其能够在完全不使用这些后台进程的情况下运行。
+尽管 Android N 采取了措施以减少部分问题，但建议您优化自己的应用，使其能够在完全不使用这些后台进程的情况下运行。
 
 
 
 </p>
 
 <p>
-  N Developer Preview 推出了一些附加 <a href="{@docRoot}tools/help/adb.html">Android Debug Bridge (ADB)</a> 命令，您可以使用这些命令测试在禁用这些后台进程情况下的应用行为：
+  Android N 推出了一些附加 <a href="{@docRoot}tools/help/adb.html">Android 调试桥 (ADB)</a> 命令，您可以使用这些命令测试在禁用那些后台进程情况下的应用行为：
 
 </p>
 
@@ -374,7 +375,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND ignore}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND ignore}
 </pre>
   </li>
 
@@ -384,7 +385,7 @@ public boolean onStartJob(JobParameters params) {
 
   <li style="list-style: none; display: inline">
 <pre class="no-pretty-print">
-{@code $ adb shell cmd appops set RUN_IN_BACKGROUND allow}
+{@code $ adb shell cmd appops set &lt;package&gt; RUN_IN_BACKGROUND allow}
 </pre>
   </li>
 </ul>

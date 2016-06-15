@@ -12,7 +12,7 @@ page.image=images/cards/card-nyc_2x.jpg
   <li><a href="#manifest">セキュリティ構成ファイルの追加</a></li>
   <li><a href="#CustomTrust">信頼できる CA のカスタマイズ</a>
       <ol>
-      <li><a href="#ConfigCustom">信頼できる CA の構成</a></li>
+      <li><a href="#ConfigCustom">カスタムの CA の設定</a></li>
       <li><a href="#LimitingCas">信頼できる CA の制限</a></li>
       <li><a href="#TrustingAdditionalCas">信頼できる CA の追加</a></li>
       </ol>
@@ -44,12 +44,12 @@ page.image=images/cards/card-nyc_2x.jpg
   </li>
 
   <li>
-    <b>デバッグ限定のオーバーライド:</b>インストール ベースに対する追加リスクなしに、アプリのセキュアな接続を安全にデバッグできます。<b>クリアテキスト トラフィックのオプトアウト:</b>
+    <b>デバッグのみのオーバーライド:</b>インストール ベースに対する追加リスクなしに、アプリのセキュアな接続を安全にデバッグできます。
 
   </li>
 
   <li>
-クリアテキスト トラフィックの意図しない使用からアプリを保護できます。
+    <b>クリアテキスト トラフィックのオプトアウト:</b>クリアテキスト トラフィックの意図しない使用からアプリを保護できます。
 
   </li>
 
@@ -71,12 +71,13 @@ page.image=images/cards/card-nyc_2x.jpg
 
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
-...
-&lt;app ...&gt;
+&lt;manifest ... &gt;
+  &lt;application ... &gt;
     &lt;meta-data android:name="android.security.net.config"
                android:resource="@xml/network_security_config" /&gt;
     ...
-&lt;/app&gt;
+  &lt;/application&gt;
+&lt;/manifest&gt;
 </pre>
 
 <h2 id="CustomTrust">信頼できる CA のカスタマイズ</h2>
@@ -109,7 +110,7 @@ page.image=images/cards/card-nyc_2x.jpg
 </p>
 
 
-<h3 id="ConfigCustom">信頼できる CA の構成</h3>
+<h3 id="ConfigCustom">カスタムの CA の設定</h3>
 
 <p>
   自己署名 SSL 証明書を使用するホストか、または信頼できる非パブリック CA（社内の CA など）によって SSL 証明書が発行されているホストに接続するケースで説明します。
@@ -285,7 +286,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
 </p>
 
 <p>
-  証明書のピン留めを使用するときは、必ずバックアップの鍵を含めてください。そうすれば、新しい鍵に切り替えたり、CA を変更したりする必要が生じた場合に（CA の証明書またはその CA の中間証明書にピン留めしていても）、アプリの接続が影響を受けることはありません。
+  証明書のピン留めを使用するときは、必ずバックアップの鍵を含めてください。そうすれば、新しい鍵に切り替えたり、CA を変更したりする必要が生じた場合に（CA 証明書またはその CA の中間証明書にピン留めしていても）、アプリの接続が影響を受けることはありません。
 
 
 そうしないと、接続を復元するためにアプリにアップデートをプッシュしなければならなくなります。
@@ -310,6 +311,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
             &lt;pin digest="SHA-256"&gt;7HIpactkIAq2Y49orFOOQKurWxmmSFZhBCoQYcRhJ3Y=&lt;/pin&gt;
             &lt;!-- backup pin --&gt
             &lt;pin digest="SHA-256"&gt;fwza0LRMXouZHRC8Ei+4PyuldPDcf3UKgO/04cDM1oE=&lt;/pin&gt;
+        &lt;/pin-set&gt;
     &lt;/domain-config&gt;
 &lt;/network-security-config&gt;
 </pre>
@@ -327,7 +329,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
   固有のエントリに値が設定されていない場合、その次に汎用的なエントリの値が使用されます。
 {@code domain-config} で設定されていない値は、ネストされている場合は親の {@code domain-config} から、ネストされていない場合は {@code
   base-config} から取得されます。
-{@code base-config} で設定されていない値には、プラットフォームのデフォルト値を使用します。
+{@code base-config} で設定されていない値には、プラットフォームの既定値を使用します。
 
 </p>
 
@@ -409,7 +411,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
 
 <dl class="xml">
   <dt>
-    含めることのできる要素: 
+    含めることのできる要素:
   </dt>
 
   <dd>
@@ -426,7 +428,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
 
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 </dl>
 
@@ -438,7 +440,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
 </pre>
 <dl class="xml">
   <dt>
-    含めることのできる要素: 
+    含めることのできる要素:
   </dt>
 
   <dd>
@@ -446,7 +448,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
   </dd>
 
   <dt>
-    説明: 
+    説明:
   </dt>
 
   <dd>
@@ -454,7 +456,7 @@ CA を追加するには、アプリの構成で複数の証明書ソースを�
 
 
 <p>
-  設定されていない値はすべて、プラットフォームのデフォルト値を使用します。API レベル 24 以上をターゲットにしたアプリのデフォルトの構成は次のとおりです。
+  設定されていない値はすべて、プラットフォームの既定値を使用します。API レベル 24 以上をターゲットにしたアプリのデフォルトの構成は次のとおりです。
 
 </p>
 
@@ -480,14 +482,14 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
 
 <h3 id="domain-config">&lt;domain-config&gt;</h3>
 <dl class="xml">
-<dt>構文: </dt>
+<dt>構文:</dt>
 <dd>
 <pre class="stx">&lt;domain-config <a href="#usesCleartextTraffic">usesCleartextTraffic</a>=["true" | "false"]&gt;
     ...
 &lt;/domain-config&gt;</pre>
 </dd>
 
-<dt>含めることのできる要素: </dt>
+<dt>含めることのできる要素:</dt>
 
 <dd>
 1 つ以上の <code><a href="#domain">&lt;domain&gt;</a></code>
@@ -507,7 +509,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
 
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 
   <dd>
@@ -517,7 +519,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    属性: 
+    属性:
   </dt>
 
   <dd>
@@ -535,7 +537,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    説明: 
+    説明:
   </dt>
 </dl>
 
@@ -543,7 +545,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
 
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 
   <dd>
@@ -555,7 +557,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    含めることのできる要素: 
+    含めることのできる要素:
   </dt>
 
   <dd>
@@ -563,7 +565,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    説明: 
+    説明:
   </dt>
 
   <dd>
@@ -580,7 +582,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
 <h3 id="trust-anchors">&lt;trust-anchors&gt;</h3>
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 
   <dd>
@@ -592,7 +594,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    含めることのできる要素: 
+    含めることのできる要素:
   </dt>
 
   <dd>
@@ -600,7 +602,7 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
   </dd>
 
   <dt>
-    説明: 
+    説明:
   </dt>
 
   <dd>
@@ -611,14 +613,14 @@ API レベル 23 以下をターゲットにしたアプリのデフォルトの
 
 <h3 id="certificates">&lt;certificates&gt;</h3>
 <dl class="xml">
-<dt>構文: </dt>
+<dt>構文:</dt>
 <dd><pre class="stx">&lt;certificates src=["system" | "user" | "<i>raw resource</i>"]
               overridePins=["true" | "false"] /&gt;
 </pre></dd>
-<dt>説明: </dt>
+<dt>説明:</dt>
 <dd>{@code trust-anchors} 要素の X.509 証明書のセットです。</dd>
 
-<dt>属性: </dt>
+<dt>属性:</dt>
 <dd><dl class="attr">
 <dt>{@code src}</dt>
 <dd>
@@ -648,7 +650,7 @@ CA 証明書のソースには、次のいずれかを指定します。
   </p>
 
   <p>
-    デフォルトは {@code "false"} です。ただし、{@code debug-overrides} 要素で指定された場合のデフォルトは {@code "true"} です。
+    デフォルトは {@code "false"} です。ただし、{@code debug-overrides} 要素で指定された場合の既定値は {@code "true"} です。
 
   </p>
 </dd>
@@ -660,7 +662,7 @@ CA 証明書のソースには、次のいずれかを指定します。
 
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 
   <dd>
@@ -672,7 +674,7 @@ CA 証明書のソースには、次のいずれかを指定します。
   </dd>
 
   <dt>
-    含めることのできる要素: 
+    含めることのできる要素:
   </dt>
 
   <dd>
@@ -680,7 +682,7 @@ CA 証明書のソースには、次のいずれかを指定します。
   </dd>
 
   <dt>
-    説明: 
+    説明:
   </dt>
 
   <dd>
@@ -690,7 +692,7 @@ CA 証明書のソースには、次のいずれかを指定します。
   </dd>
 
   <dt>
-    属性: 
+    属性:
   </dt>
 
   <dd>
@@ -716,7 +718,7 @@ CA 証明書のソースには、次のいずれかを指定します。
 <h3 id="pin">&lt;pin&gt;</h3>
 <dl class="xml">
   <dt>
-    構文: 
+    構文:
   </dt>
 
   <dd>
@@ -727,7 +729,7 @@ CA 証明書のソースには、次のいずれかを指定します。
   </dd>
 
   <dt>
-    属性: 
+    属性:
   </dt>
 
   <dd>
@@ -737,7 +739,7 @@ CA 証明書のソースには、次のいずれかを指定します。
       </dt>
 
       <dd>
-        ピンの生成にはダイジェスト アルゴリズムが使用されます。現在サポートされているのは
+        PIN の生成にはダイジェスト アルゴリズムが使用されます。現在サポートされているのは
 {@code "SHA-256"} のみです。
       </dd>
     </dl>

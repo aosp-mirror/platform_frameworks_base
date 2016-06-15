@@ -1,0 +1,1188 @@
+page.title=Notas da versão e suporte
+meta.keywords="preview", "android"
+page.tags="preview", "developer preview"
+page.image=images/cards/card-n-support_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento</h2>
+
+<ul>
+  <li><a href="#dp3">Developer Preview 3</a>
+    <ul>
+      <li><a href="#general">Alertas gerais</a></li>
+      <li><a href="#new">Novidades no DP3</a></li>
+      <li><a href="#ki">Problemas conhecidos</a></li>
+    </ul>
+  </li>
+  <li><a href="#dp2">Developer Preview 2</a></li>
+  <li><a href="#dp1">Developer Preview 1</a></li>
+</ul>
+
+<!--
+<h2>See Also</h2>
+<ol>
+  <li></li>
+</ol>
+-->
+
+</div>
+</div>
+
+<p>
+  Estão disponíveis dois canais de suporte principais para quem está desenvolvendo ou testando
+ com o Android N Developer Preview: Registre relatórios de erro em <a href="https://developer.android.com/preview/bug">https://developer.android.com/preview/bug</a> para
+ erros específicos de dispositivo, do sistema e do Google App. Para problemas com outros aplicativos,
+ entre em contato diretamente com o desenvolvedor.
+</p>
+
+<p>Para discutir problemas ou ideias com outros desenvolvedores que trabalham com o Android N, junte-se à
+<a href="{@docRoot}preview/dev-community">comunidade Developer Preview do Google+</a>.</p>
+
+<h2 id="dp3">Developer Preview 3</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Data: Maio de 2016<br>
+        Versão: NPD35K<br>
+        Suporte do emulador: x86 &amp; ARM (32/64 bits)<br>
+        Serviços Google Play: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="general">Alertas gerais</h3>
+
+<p>
+  Esta versão do Developer Preview é para <strong>desenvolvedores de aplicativos e outros
+ usuários iniciais</strong> e está disponível para uso diário, desenvolvimento ou
+ testes de compatibilidade. Esteja ciente destas notas gerais sobre a
+ versão:
+</p>
+
+<ul>
+  <li>Esta versão pode ter vários <strong>problemas de estabilidade</strong> em
+ dispositivos compatíveis. Os usuários podem encontrar instabilidade no sistema, como
+ panes e falhas do kernel.
+  </li>
+
+  <li>Alguns aplicativos <strong>podem não funcionar como esperado</strong> na nova
+ versão da plataforma. Isso inclui aplicativos do Google e outros aplicativos.
+  </li>
+
+  <li>O Developer Preview 3 foi <strong>aprovado pelo Compatibility Test Suite (CTS)
+</strong> nestes dispositivos: Nexus 5X, Nexus 6, Nexus 6P e Pixel
+ C. Aplicativos que dependem de versões aprovadas pelo CTS
+ funcionam normalmente nesses dispositivos (por exemplo, Android Pay).
+  </li>
+
+  <li>O Developer Preview 3 está <strong>disponível em todos os
+ dispositivos compatíveis:</strong> Nexus 5X, Nexus 6, Nexus 6P, Nexus 9, Nexus Player, Pixel
+  C, General Mobile 4G (Android One), assim como Sony Xperia Z3 (modelos D6603 e
+  D6653).
+
+  </li>
+</ul>
+
+
+<h3 id="new">Novidades no DP3</h3>
+
+<h4 id="">Modo RV para Android</h4>
+
+<p>
+  O Android N adiciona compatibilidade de plataformas e otimizações para um novo Modo RV que dá aos
+ desenvolvedores a capacidade de projetar experiências de RV móveis de alta qualidade para os usuários. Há
+ diversas melhorias de desempenho, incluindo o acesso a um núcleo exclusivo da CPU
+ para aplicativos de RV. Dentro dos aplicativos, é possível aproveitar o rastreamento inteligente
+ da cabeça e notificações estéreo que funcionam para RV. Mais importante, 
+o Android N oferece gráficos de latência muito baixa.
+</p>
+
+<p>
+  Para obter mais informações, consulte o <a href="https://developers.google.com/vr/android/">Google VR SDK para Android</a>.
+</p>
+
+<h4 id="">Modo de desempenho sustentado</h4>
+
+<p>
+  O Android N inclui compatibilidade opcional para <a href="{@docRoot}preview/api-overview.html#sustained_performance_api">modo de desempenho 
+sustentado</a>, permitindo que OEMs ofereçam dicas sobre
+ capacidades de desempenho do dispositivo para aplicativos de longa duração. Desenvolvedores de aplicativos podem usar
+ essas dicas para ajustar os aplicativos para um nível de
+ desempenho do dispositivo previsível e consistente em períodos longos de tempo. Desenvolvedores de aplicativos podem testar essa nova
+ API na prévia para desenvolvedores apenas em dispositivos Nexus 6P.
+</p>
+
+<h4>Multiprocess WebView</h4>
+
+<p>
+  A partir da versão 51 do Android N, o WebView executará conteúdo da web em um
+ processo de segurança separado quando a opção de desenvolvedor “Multiprocess WebView”
+ estiver ativada. A equipe do WebView quer ouvir comentários sobre compatibilidade e
+ desempenho durante a execução no N antes de ativar o Multiprocess WebView em uma
+ versão futura do Android. Nesta versão, regressões no tempo de inicialização, no
+ uso de memória total e no desempenho de renderização do software são esperadas.
+</p>
+
+<p>
+  Queremos
+ ser informados se você encontrar problemas inesperados no modo multiprocesso. Entre em contato com a equipe WebView <a href="https://bugs.chromium.org/p/chromium/issues/entry?template=Webview%20Bugs">
+ enviando um relatório de erros</a>.
+</p>
+
+<h4 id="">Auxiliar de atalhos de teclado</h4>
+
+<p>
+  No Android N, o usuário pode pressionar <code>Meta+/</code> para acionar uma tela de <strong>atalhos
+ de teclado</strong> que exibe todos os atalhos disponíveis do
+ sistema e do aplicativo em questão. Os desenvolvedores podem adicionar os próprios atalhos ou
+ ativar a tela de atalhos nos aplicativos. Consulte o <a href="{@docRoot}preview/api-overview.html#keyboard_shortcuts_helper">Auxiliar de 
+atalhos de teclado</a> para saber mais.
+</p>
+
+<h4 id="">FrameMetrics API</h4>
+
+<p>
+  O DP3 introduz uma nova <a href="{@docRoot}preview/api-overview.html#framemetrics_api">FrameMetrics API</a>
+ que permite que um aplicativo monitore o desempenho de renderização da IU ao expor uma API pubsub de
+ transmissão para transferir informações sobre sincronização de quadros para a
+ janela atual do aplicativo. <code>FrameMetricsListener</code> pode ser usado para medir
+ o desempenho da IU em nível de interação em produção com granularidade maior e
+ sem precisar de uma conexão USB.
+</p>
+
+<h4 id="api-changes">Alterações de recursos e API</h4>
+
+<dl>
+  <dt>
+    Atalhos do inicializador e a Launcher Shortcuts API
+  </dt>
+
+  <dd>
+    Decidimos adiar esse recurso para uma versão futura do Android. Planejamos
+ remover as Launcher Shortcuts APIs (ShortcutManager e outros) da
+ API pública do Android N a partir da próxima prévia para desenvolvedores.
+  </dd>
+
+  <dt>
+    WebView JavaScript executado antes do carregamento da página
+  </dt>
+
+  <dd>
+    Começando em aplicativos destinados para o Android N, o contexto do JavaScript é redefinido
+ quando uma nova página é carregada. Atualmente, o contexto é transferido para
+ a primeira página carregada em uma nova situação de {@link android.webkit.WebView}.
+    Os desenvolvedores que desejam inserir JavaScript no {@link
+    android.webkit.WebView} devem executar o script antes de a página
+ começar a carregar.
+  </dd>
+
+  <dt>
+    WebView de Geolocalização em origens desprotegidas
+  </dt>
+
+  <dd>
+    Começando em aplicativos destinados ao Android N, a API de geolocalização será
+ permitida apenas em origens seguras (por HTTPS). Essa política tem como objetivo proteger
+ as informações privadas dos usuários quando eles estiverem usando uma conexão desprotegida.
+  </dd>
+
+  <dt>
+    Economia de dados
+  </dt>
+
+  <dd>
+    Começando no Developer Preview 3, os aplicativos podem usar uma intenção para exibir uma
+ caixa de diálogo do sistema que permite que os usuários adicionem o aplicativo diretamente na
+ lista de permissões da Economia de dados. Consulte a <a href="{@docRoot}preview/api-overview.html#data_saver">documentação sobre a Economia de dados
+</a> para obter mais detalhes.
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#number-blocking">Bloqueio de números</a>
+  </dt>
+
+  <dd>
+    Se um usuário não autorizado tenta bloquear ou desbloquear um número, agora a
+ operação falha com {@link java.lang.SecurityException}. (Anteriormente,
+ a operação lançava {@link java.lang.UnsupportedOperationException}.)
+  </dd>
+
+  <dt>
+    <a href="{@docRoot}preview/api-overview.html#tile_api">Quick Settings Tile
+API</a>
+  </dt>
+
+  <dd>
+    Agora o sistema usa os metadados da atividade para decidir o modo do bloco.
+    (Anteriormente, o modo do bloco era determinado pelo valor de retorno do
+ <code>TileService.onTileAdded()</code>.) Para obter mais informações, consulte 
+<code>TileService.META_DATA_ACTIVE_TILE</code> na <a href="{@docRoot}preview/setup-sdk.html#docs-dl">Referência da API</a>, disponível para download.
+  </dd>
+</dl>
+
+<h4 id="dp3-fixes">Correções de problemas relatados por desenvolvedores</h4>
+
+<p>
+  Diversos problemas relatados por desenvolvedores foram corrigidos, incluindo:
+</p>
+
+<ul>
+  <li>Reprodução de áudio por Bluetooth interrompida após 1 música (erro <a href="https://code.google.com/p/android/issues/detail?id=206889">206889</a>)
+  </li>
+
+  <li>Pixel C falha consistentemente (erro <a href="https://code.google.com/p/android/issues/detail?id=206962">206962</a>)
+  </li>
+
+  <li>Problemas de notificação do Relógio e Aviso (erro <a href="https://code.google.com/p/android/issues/detail?id=203094">203094</a>)
+  </li>
+
+  <li>Pixel C reinicia quando conectado ao MacBook Pro via cabo USB C (erro
+  <a href="https://code.google.com/p/android/issues/detail?id=205432">205432</a>)
+  </li>
+
+  <li>Agenda errada por um dia (erro <a href="https://code.google.com/p/android/issues/detail?id=203002">203002</a>)
+  </li>
+
+  <li>TelephonyManager.getAllCellInfo retorna dados inválidos (erro <a href="https://code.google.com/p/android/issues/detail?id=203022">203022</a>)
+  </li>
+
+  <li>No Nexus 6p, o Bluetooth desconecta continuamente (erro <a href="https://code.google.com/p/android/issues/detail?id=208062">208062</a>)
+  </li>
+</ul>
+
+<p>Para obter a lista completa de problemas corrigidos, consulte<a href="https://goo.gl/6uCKtf"> o
+issue tracker</a>.</p>
+
+<h3 id="ki">Problemas conhecidos</h3>
+
+<h4>Acessibilidade</h4>
+
+<ul>
+  <li>Impossível ouvir a produção de TTS quando o valor de inclinação está configurado quase no nível máximo.
+  </li>
+
+  <li>Recursos e configurações de acessibilidade podem ser interrompidos quando o usuário adiciona um
+ perfil de trabalho, incluindo gesto e configuração de ampliação. O
+ estado de acessibilidade é restaurado na próxima vez em que o usuário toca nas configurações relacionadas.
+  </li>
+</ul>
+
+<h4>Câmera</h4>
+
+<ul>
+  <li>O aplicativo Câmera mostrou instabilidade; ele pode falhar em diversas
+ circunstâncias, como quando é inicializado em modo de várias janelas.
+  </li>
+
+  <li>Pressionar o obturador continuamente no modo panorama pode fazer o
+ aplicativo Câmera falhar.
+  </li>
+</ul>
+
+<h4>Áudio</h4>
+<ul>
+  <li>Um problema na plataforma do reprodutor de áudio impede alguns aplicativos de funcionarem
+ normalmente. Por exemplo, o Skype e outros aplicativos são afetados por esse problema.
+  </li>
+</ul>
+
+<h4>Conectividade</h4>
+
+
+<ul>
+  <li>Quando um dispositivo Bluetooth Low Energy (BLE) de função periférica anuncia um
+ serviço e um dispositivo BLE de função central é conectado, o dispositivo de função periférica
+ é desconectado rapidamente.
+  </li>
+
+  <li>A conexão Wi-Fi pode cair quando a tela está desligada.
+  </li>
+
+  <li>Conexões RFCOMM são instáveis e podem resultar em corrompimento de dados e
+ oscilação na conexão.
+  </li>
+
+  <li>Os estados de rede ativos ({@link android.net.NetworkInfo#getState
+  NetworkInfo.getState()} e {@link android.net.NetworkInfo#getDetailedState
+  NetworkInfo.getDetailedState()}) podem retornar valores incorretos durante algumas
+ situações de segundo plano restritas.
+  </li>
+</ul>
+
+
+<h4>
+  Inicializador
+</h4>
+
+<ul>
+  <li>A bandeja Todos os Aplicativos padrão do inicializador pode parar de responder após
+ desligar e ligar a tela. Retornar à tela inicial e reinicializar
+ a bandeja Todos os Aplicativos pode resolver o problema.
+  </li>
+</ul>
+
+<h4>
+  Teclado
+</h4>
+
+<ul>
+  <li>Ao atualizar um dispositivo com Android 6.0 ou anterior para o N Developer
+ Preview, o Teclado do Google não preserva os dados de preferências como configurações recentes de
+ emoticons e som.
+  </li>
+
+  <li>O Teclado do Google em idioma indiano pode ficar instável.
+  </li>
+
+  <li>Ao inserir texto em um campo de senha, o usuário pode selecionar russo como
+ o idioma de entrada, mas o teclado continua em inglês. Isso impede que o
+ usuário insira senhas no idioma russo.
+  </li>
+</ul>
+
+<h4>
+  Localidades e idiomas
+</h4>
+
+<ul>
+  <li>Ao usar localidade da direita para esquerda (RTL), o sistema pode
+ alterar inesperadamente para apresentação de esquerda para direita (LTR) após a reinicialização do dispositivo.
+  </li>
+</ul>
+
+<h4>Mídia</h4>
+
+<ul>
+  <li>Reprodução de mídia instável no Nexus 9 e Nexus Player, incluindo
+ problemas ao reproduzir vídeos em HD.
+  </li>
+</ul>
+
+<h4>
+  Modo de várias janelas
+</h4>
+
+<ul>
+  <li>O dispositivo pode congelar após mudar a orientação em modo de várias janelas.
+  </li>
+
+  <li>Atualmente, diversos aplicativos apresentam problemas no modo de várias janelas:
+    <ul>
+      <li>A IU do sistema pode falhar ao ancorar o brilho de Settings &gt; Display &gt;
+ Screen no modo de várias janelas.
+      </li>
+
+      <li>O aplicativo Câmera pode falhar quando inicializado em modo de várias janelas.
+      </li>
+
+      <li>O YouTube pode falhar quando inicializado em modo de várias janelas. Para corrigir o
+ problema, você deve limpar os dados do aplicativo do YouTube em Storage &gt; Apps &gt;
+ YouTube.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>
+  Google Play Services
+</h4>
+
+<ul>
+  <li>Aplicativos que usam Google Cast via Google Play Services podem ficar instáveis quando
+ o usuário seleciona uma localidade do sistema que usa letras e números fora do
+ intervalo ASCII.
+  </li>
+</ul>
+
+<h4>
+  Política do dispositivo do Android for Work e Google Apps
+</h4>
+
+<ul>
+  <li>O aplicativo de Política do dispositivo pode falhar quando o usuário desbloqueia o dispositivo com a
+ tela de “status da política do dispositivo” fixada.
+  </li>
+
+  <li>Depois de configurar o perfil de trabalho com a criptografia baseada em arquivos habilitada e
+ desativar o perfil de trabalho, os usuários devem desbloquear o bloqueio de tela de perfil primário para poder
+ acessar novamente os aplicativos do Work.
+  </li>
+
+  <li>O dispositivo é reinicializado após remover o padrão de bloqueio de segurança e abrir
+ aplicativos de trabalho/pessoal no modo de várias janelas.
+  </li>
+
+  <li>A configuração DISALLOW_VPN_CONFIG faz com que a caixa de diálogo de autorização apareça como
+ always-on-vpn pelo Cliente de política do dispositivo.
+  </li>
+
+  <li>O tráfego não é bloqueado até a VPN conectar no modo always-on-vpn.
+  </li>
+</ul>
+
+<h4>
+  Armazenamento externo
+</h4>
+
+<ul>
+  <li>Aplicativos podem ficar instáveis quando o usuário os transfere do armazenamento interno
+ para o armazenamento externo adotável (isso pode incluir um cartão SD ou dispositivos conectados
+ via USB).
+  </li>
+</ul>
+
+<h4>
+  Zoom de tela e vários APKs no Google Play
+</h4>
+
+<ul>
+  <li>Em dispositivos com Android N, o Google Play Services 9.0.83 relata incorretamente
+ a densidade de tela atual em vez da densidade de tela estável. Quando o
+ zoom de tela é habilitado nesses dispositivos, isso pode fazer com que o Google Play selecione uma
+ versão de um aplicativo com vários APKs projetada para telas menores. Esse problema foi
+ corrigido na próxima versão do Google Play Services e será incluído em uma versão
+ próxima do Developer Preview.
+  </li>
+
+  <li>Em dispositivos com Android N, o Google Play Services 9.0.83 atualmente relata
+ compatibilidade com Vulkan, mas não com a versão do Vulkan. Isso pode fazer com que o Google Play selecione uma
+ versão de um aplicativo com vários APKs projetado para compatibilidade com versões anteriores do Vulkan em
+ dispositivos compatíveis com versões mais recentes. Atualmente, o Google Play Store
+ não aceita carregamento de aplicativos que usam segmentação de versão do Vulkan. Essa compatibilidade
+ será adicionada ao Google Play Store no futuro e corrigida na próxima
+ versão do Google Play Services (a ser incluída em uma versão futura do Developer Preview
+). Qualquer dispositivo N que estiver usando a versão 9.0.83 do Google Play Services
+ continuará a receber versões dos aplicativos com segmentação básica de compatibilidade com o Vulkan.
+  </li>
+</ul>
+
+<h4 id="">Notificações</h4>
+
+<ul>
+  <li>MessagingStyle não exibe notificações com emissor “null” (próprio).
+  </li>
+</ul>
+
+<h4 id="">Ferramentas para desenvolvedor</h4>
+
+<ul>
+  <li>
+    <code>adb</code> pode às vezes se desconectar durante o uso da depuração JDWP.
+  </li>
+</ul>
+
+<!-- TBA, if any
+<h4>Device-specific issues</h4>
+
+<dl>
+  <dt>
+    <strong>Device Name</strong>
+  </dt>
+
+  <dd>
+    Issue 1
+  </dd>
+
+  <dd>
+    Issue 2
+  </dd>
+</dl>
+
+-->
+
+
+
+
+
+
+
+<!-- DP2 Release Notes Archive -->
+
+<h2 id="dp2">Developer Preview 2</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Data: Abril de 2016<br>
+        Versões: NPC91K, NPC91O<br>
+        Suporte do emulador: x86 &amp; ARM (32/64 bits)<br>
+        Serviços Google Play: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp2-new">Novidades no DP2</h3>
+
+<ul>
+  <li>Compatibilidade da plataforma com Vulkan, uma nova API de renderização 3D que fornece
+ controle explícito e com baixa sobrecarga da GPU (unidade de processamento gráfico), além de oferecer
+ desempenho aprimorado para aplicativos com muitas chamadas de desenho. Para saber mais, consulte a
+  <a href="{@docRoot}ndk/guides/graphics/index.html">documentação</a>.
+  </li>
+
+  <li>Novos emoticons de pessoas com compatibilidade com variações de tons de pele e glifos do Unicode 9.
+  Os tons de pele e os novos emoticons não aparecerão até que os teclados adicionem compatibilidade para
+ eles na paleta. Os aplicativos não precisam tomar medidas para
+ aproveitar esses novos emoticons, a menos que usem uma fonte que não seja no sistema. Desenvolvedores
+ IME devem incorporar a compatibilidade para os novos emoticons.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/api-overview.html#launcher_shortcuts">Launcher
+    Shortcuts API</a>: Aplicativos que usam <code>ShortcutManager</code> para enviar
+ atalhos para pontos de partida dentro deles mesmos para o inicializador.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/features/multi-window.html">Várias janelas</a>:
+    Agora você pode especificar uma altura e um comprimento mínimos separados para uma
+ atividade. Além disso, vários nomes de API foram ligeiramente alterados.
+  </li>
+</ul>
+
+<h4 id="dp2-fixes">Correções de problemas relatados por desenvolvedores</h4>
+
+<p>
+  Diversos problemas relatados por desenvolvedores foram corrigidos, incluindo:
+</p>
+
+<ul>
+  <li>Impossível conectar com SSID oculto ou Wi-Fi sem transmissão. (erro <a href="https://code.google.com/p/android/issues/detail?id=203116">203116</a>)
+  </li>
+
+  <li>O estado mudo do microfone persiste em várias atividades. (erro <a href="https://code.google.com/p/android/issues/detail?id=205922">205922</a>)
+  </li>
+
+  <li>Alterar o foco no modo de várias janelas pausa o YouTube. (erro <a href="https://code.google.com/p/android/issues/detail?id=203424">203424</a>)
+  </li>
+
+  <li>Resposta direta pode fechar atividades abertas. (erro <a href="https://code.google.com/p/android/issues/detail?id=204411">204411</a>)
+  </li>
+
+  <li>Diversas correções de estabilidade.
+  </li>
+</ul>
+
+<h3 id="dp2-general">Alertas gerais</h3>
+
+<p>
+  Esta versão do Developer Preview é apenas para <strong>desenvolvedores de aplicativos</strong>
+ e foi projetada para uso apenas em testes de compatibilidade e desenvolvimento inicial.
+  Esteja ciente destas notas gerais sobre a versão:
+</p>
+
+<ul>
+
+  <li>Os componentes da ferramenta de desenvolvimento e bibliotecas de suporte foram atualizados
+ para a versão DP2. Lembre-se de atualizar seu ambiente de desenvolvimento de prévia
+ antes de desenvolver para o DP2. Para obter instruções sobre como configurar seu ambiente
+ de desenvolvimento, consulte
+ <a href="{@docRoot}preview/setup-sdk.html">Configuração do Preview</a>.
+  </li>
+
+  <li>Esta versão tem diversos problemas de estabilidade e desempenho em todos os dispositivos,
+ portanto, <strong>não é adequada para uso diário em celulares ou tablets</strong>,
+ especialmente para quem não é desenvolvedor.
+  </li>
+
+  <li>A vida útil da bateria e o desempenho não foram otimizados nesta
+ versão:
+
+    <ul>
+      <li>Sabe-se que o <strong>desempenho do sistema e de aplicativos fica lento/instável
+ periodicamente</strong> e dispositivos podem parar de responder ocasionalmente. Esses
+ problemas podem aumentar com o uso prolongado.
+      </li>
+
+      <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+ desligar a tela.
+      </li>
+    </ul>
+  </li>
+
+  <li>Alguns <strong>aplicativos podem não funcionar normalmente</strong> no Developer Preview
+ 2. Isso inclui aplicativos do Google e outros aplicativos.
+  </li>
+
+  <li>Esta versão inicial não foi aprovada pelo <strong>Compatibility Test Suite (CTS)
+</strong>. Aplicativos que dependem de versões aprovadas pelo CTS não funcionarão
+ (por exemplo, o Android Pay).
+  </li>
+
+  <li>Essa versão de prévia é compatível com os dispositivos a seguir: Nexus 5X, Nexus 6,
+  Nexus 6P, Nexus 9 e Pixel C, além do General Mobile 4G
+  (Android One). Compatibilidade com o Nexus Player em breve.
+  </li>
+
+
+  <li><a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a> foi
+ atualizado para lidar com alterações na API entre o DP1 e o DP2.
+  </li>
+</ul>
+
+<h3 id="dp2-ki">Problemas conhecidos</h3>
+
+<h4>Desempenho e bateria</h4>
+
+<ul>
+  <li>Sabe-se que o desempenho do sistema e de aplicativos fica <strong>lento/instável
+ periodicamente</strong> e o dispositivo pode parar de responder ocasionalmente. Esses
+ problemas podem aumentar com o uso prolongado.
+  </li>
+</ul>
+
+<h4>Contas do Google</h4>
+
+<ul>
+  <li>Em alguns casos, podem ocorrer problemas com o
+ <code>AccountManagerService</code> que impedem o login em contas do Google.
+  </li>
+</ul>
+
+<h4>Atualização do sistema</h4>
+
+<ul>
+  <li>O dispositivo pode reinicializar imediatamente após atualizar para o DP2.
+  </li>
+</ul>
+
+<h4>Acessibilidade</h4>
+
+<ul>
+  <li>Problemas ao ouvir a produção de texto para voz (TTS) quando o valor de inclinação está configurado
+ quase no nível máximo.
+  </li>
+</ul>
+
+<h4>Bluetooth</h4>
+
+<ul>
+  <li>Características do Bluetooth Low Energy (LE) GATT usam o tipo de gravação
+ errado e não serão enviadas a um dispositivo remoto. Assim, por exemplo, alguns dispositivos de fitness
+ não funcionarão.
+  </li>
+</ul>
+
+<h4>Assistente de configuração</h4>
+
+<ul>
+  <li>A opção de restaurar dados em um dispositivo novo (ou dispositivo recentemente redefinido) da
+ “Your Google Account” não pode ser realizada no assistente de configuração. Você deve restaurar os
+ dados de um dispositivo existente selecionando “another Android device” no
+ assistente de configuração ou configurá-lo como um novo dispositivo.
+  </li>
+</ul>
+
+<h4>Desbloquear OEM</h4>
+
+<ul>
+  <li>Em alguns dispositivos, <strong>Enable OEM unlock</strong> está desabilitado em
+ “Developer Options” durante o uso do DP2.<br>
+  <strong>Solução alternativa:</strong> Inscreva-se no
+ programa beta do Android (se ainda não estiver inscrito) acessando
+ <a href="https://www.google.com/android/beta" class="external-link">www.google.com/android/beta</a>. Depois, inscreva-se e aceite fazer
+ o downgrade OTA. Cancelar a inscrição causa o downgrade para o Android 6.0. Agora você
+ deve poder escolher <strong>Enable OEM unlock</strong> em
+  “Developer Options”. Os dados pessoais são apagados após o downgrade do
+ dispositivo; entretanto, o desbloqueio do bootloader pode já ter apagado esses dados.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Desafio de segurança de perfil de trabalho
+    <ul>
+      <li>Após a migração para o N ou após o usuário criar perfis de trabalho, os
+ perfis de trabalho não podem criar chaves no armazenamento de chaves até o usuário alterar o
+ padrão, o PIN ou a senha ou configurar um Desafio do Work.
+      </li>
+
+      <li>No modo de inicialização direta, aplicar as restrições de senha ao dispositivo
+ faz com que o perfil de trabalho seja desbloqueado, mesmo se o dispositivo estiver bloqueado.
+      Isso torna o perfil de trabalho acessível, mesmo que ele deva estar protegido
+ pela tela de bloqueio do dispositivo.
+      </li>
+    </ul>
+  </li>
+
+  <li>Always on VPN
+    <ul>
+      <li>Se modo Always on VPN estiver ativado, mas uma VPN não estiver disponível, os aplicativos
+ se conectarão pela rede comum. Os aplicativos devem ficar off-line se não há nenhuma
+ conexão VPN disponível.
+      </li>
+
+      <li>Quando o modo Always On estiver ativado, a conexão por VPN não será estabelecida após
+ um dispositivo reiniciar no modo de reinicialização direta, mesmo se o usuário desbloquear a
+ tela de bloqueio protegida.
+      </li>
+    </ul>
+  </li>
+
+  <li>Suspensão de pacotes
+    <ul>
+      <li>Os administradores do dispositivo podem suspender pacotes críticos do sistema, o que pode provocar
+ comportamentos inesperados, como realizar chamadas apesar de a caixa de diálogo “Telephone
+      disabled” ser exibida.
+      </li>
+    </ul>
+  </li>
+
+  <li>Outros
+    <ul>
+      <li>O aplicativo de Configurações falha durante a inicialização se {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} está configurado como verdadeiro quando
+ o usuário insere mídias físicas, como um cartão SD.
+      </li>
+
+      <li>A primeira verificação em um Perfil de trabalho leva vários minutos para
+ ser concluída.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="vulkan">Vulkan:</h4>
+
+<ul>
+   <li>Nexus 5X/6P</li>
+   <ul>
+      <li>Lacunas entre números de vinculação e outro número diferente de zero
+ como o primeiro número de vinculação faz com que {@code vkCreateGraphicsPipeline()} falhe.</li>
+      <li>O Vulkan exibe comportamento de amostragem incorreto em coordenadas projetadas de textura.</li>
+      <li>na amostra multithreadCmdBuffer, {@code vkCmdClearColorImage()} falha quando
+ é executado com o driver N-DP2.</li>
+      <li>Valores de retorno do {@code vkGetPhysicalDeviceFormatProperties()} não configuram um valor
+ para {@code VkFormatProperties::linearTilingFeatures}, que considera um valor de 0 como
+ um resultado.</li>
+      <li>Anexos do buffer de quadro de ponto flutuante do Vulkan não são tratados corretamente.</li>
+    </ul>
+   <li>Nexus Player</li>
+   <ul>
+      <li>Sombreadores SPIR-V podem acionar afirmações de driver.</li>
+      <li>Algumas configurações de pipeline podem fazer {@code vkCreateGraphicsPipeline()}
+ falhar.</li>
+  </ul>
+</ul>
+
+<h4>Problemas específicos de dispositivos</h4>
+
+<dl>
+  <dt>
+    <strong>Android One</strong>
+  </dt>
+
+  <dd>
+    A conexão de dados falha quando o dispositivo é alternado do slot 1 para o slot 2 do SIM.
+  </dd>
+
+  <dt>
+    <strong>Pixel C</strong>
+  </dt>
+
+  <dd>
+    Impossível ativar a opção “Always On” da Pesquisa de voz.
+  </dd>
+
+  <dt>
+    <strong>Nexus 6</strong>
+  </dt>
+
+  <dd>
+    Fotos da Câmera na orientação retrato ficam corrompidas, exceto em
+ fotos HDR+.
+  </dd>
+
+  <dt>
+    <strong>Nexus Player</strong>
+  </dt>
+
+  <dd>
+    A reprodução de conteúdo HD do Netflix pode falhar no Nexus Player.
+  </dd>
+
+  <dd>
+    Qualquer aplicativo que depende de alterações dinâmicas da resolução de vídeo pode falhar no
+ Nexus Player.
+  </dd>
+
+  <dd>
+    Qualquer aplicativo que usa o codec de vídeo VP9 pode falhar no Nexus Player.
+  </dd>
+</dl>
+
+<!-- DP 1 release notes archive -->
+
+<h2 id="dp1">Developer Preview 1</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Data: Março de 2016<br>
+        Versões: NPC56P, NPC56R, atualizada: NPC56W, NPC56X<br>
+        Suporte do emulador: x86 &amp; ARM (32/64 bits)<br>
+        Serviços Google Play: 8.4</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<h3 id="dp1-general">Alertas gerais</h3>
+
+<p>
+  Esta versão do Developer Preview é apenas para desenvolvedores de aplicativos e foi projetada para
+ uso apenas em testes de compatibilidade e desenvolvimento inicial. Esteja ciente
+ destas notas gerais sobre a versão:
+</p>
+<ul>
+  <li>Esta versão tem diversos problemas de estabilidade e desempenho em todos os dispositivos,
+ portanto, <em>não é adequada para uso diário em celulares ou tablets</em>,
+ especialmente para quem não é desenvolvedor.
+  </li>
+
+  <li>Sabe-se que o desempenho do sistema e de aplicativos fica <strong>lento/instável
+ periodicamente</strong> e o dispositivo pode parar de responder ocasionalmente. Esses
+ problemas podem aumentar com o uso prolongado.
+  </li>
+
+  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+ desligar a tela.
+  </li>
+
+  <li>Alguns aplicativos podem não funcionar normalmente no Developer Preview 1. Isso inclui
+ aplicativos do Google e outros aplicativos.
+  </li>
+
+  <li>Esta versão inicial não foi aprovada pelo Compatibility Test Suite (CTS). Aplicativos
+ que dependem de versões aprovadas pelo CTS não funcionarão (por exemplo, o Android Pay).
+  </li>
+
+  <li>Essa versão de prévia é compatível com os dispositivos a seguir: Nexus 5X, Nexus 6,
+  Nexus 6P, Nexus 9, Nexus Player e Pixel C, assim como o General Mobile 4G
+  (Android One).
+  </li>
+</ul>
+
+<h3 id="dp1-platform">Problemas da plataforma</h3>
+
+<h4>Desempenho e bateria</h4>
+
+<ul>
+  <li>Sabe-se que o desempenho do sistema e de aplicativos fica <strong>lento/instável
+ periodicamente</strong> e o dispositivo pode parar de responder ocasionalmente. Esses
+ problemas podem aumentar com o uso prolongado.
+  </li>
+
+  <li>A vida útil da bateria pode regredir nesta versão em casos de uso de ligar e 
+ desligar a tela.
+  </li>
+</ul>
+<h4 id="dialer">Discador</h4>
+
+<ul>
+  <li>O aplicativo Discador não é compatível com a inicialização direta. Isso será resolvido mais tarde no
+ N Developer Preview.
+  </li>
+
+  <li>A reprodução do correio de voz não funciona.
+  </li>
+</ul>
+
+<h4>Microfone</h4>
+
+<ul>
+   <li>O sistema pode incorretamente manter o microfone no estado mudo em todos os aplicativos e reinicializações. Se você colocar o microfone no mudo em um aplicativo e o estado persistir, abra qualquer aplicativo que tenha controles de som do telefone e desative o mudo.</li>
+</ul>
+
+<h4 id="ui">IU do sistema</h4>
+
+<ul>
+  <li>Algumas strings novas ou modificadas na IU do sistema não foram traduzidas para todos
+ os idiomas.
+  </li>
+
+  <li>A IU de visão geral ainda está em desenvolvimento e está sujeita a alterações. Por exemplo,
+ pretendemos remover o temporizador que aparece quando o usuário alterna entre
+ aplicativos.
+  </li>
+
+  <li>Os controles e botões de alternância das configurações podem ficar lentos ou parecer que pararam de responder.
+  </li>
+
+  <li>O design visual das notificações está sujeito a alterações.
+  </li>
+
+  <li>No aplicativo Gmail, o arquivamento direto de e-mails inclusos em um
+ pacote de notificações não funciona corretamente.
+  </li>
+</ul>
+
+<h4>Android for Work</h4>
+
+<ul>
+  <li>Desafio de segurança de perfil de trabalho
+    <ul>
+      <li>Após a migração para o N ou após o usuário criar perfis de trabalho, os
+ perfis de trabalho não podem criar chaves no armazenamento de chaves até o usuário alterar o
+ padrão, o PIN ou a senha ou configurar um Desafio do Work.
+      </li>
+
+      <li>No modo de inicialização direta, aplicar as restrições de senha ao dispositivo
+ faz com que o perfil de trabalho seja desbloqueado, mesmo se o dispositivo estiver bloqueado.
+      Isso torna o perfil de trabalho acessível, mesmo que ele deva estar protegido
+ pela tela de bloqueio do dispositivo.
+      </li>
+
+      <li>Quando o usuário insere senha e PIN errados, o sistema não
+ exibe nenhuma mensagem informativa; em vez disso, ele apenas limpa o campo
+ de entrada. Esse problema não afeta a entrada de padrão ou impressão digital.
+      </li>
+
+      <li>Em um tablet, o segundo plano exibido com o desafio do perfil de trabalho é
+ desproporcionalmente pequeno.
+      </li>
+
+      <li>A versão da <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.enterprise.dmagent">
+ Política do dispositivo do Google Apps</a> empacotada com o N Developer Preview
+ ainda não é compatível com o recurso de Desafio de segurança de perfil de trabalho.
+        Em vez disso, os desenvolvedores devem usar <a href="https://github.com/googlesamples/android-testdpc/releases">TestDPC</a>
+ para testar esse recurso.
+      </li>
+    </ul>
+  </li>
+
+  <li>Always on VPN
+    <ul>
+      <li>Se o modo Always on VPN estiver ativado, mas uma VPN não estiver disponível, os aplicativos
+ não especificados como exceções na política Always on se conectarão via 
+ rede comum. Exceto quando especificados como exceções na política Always on,
+ os aplicativos deverão ficar off-line se não houver nenhuma conexão VPN disponível.
+        <ul>
+          <li>Quando o modo Always On estiver ativado, a conexão por VPN não será estabelecida
+ após um dispositivo reiniciar no modo de reinicialização direta, mesmo se o usuário
+ desbloquear a tela de bloqueio protegida.
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <li>Contatos aprimorados
+    <ul>
+      <li>Dispositivos Bluetooth PBAP/MAP não exibem a identificação de chamadas para
+ contatos de trabalho. A próxima versão do Preview corrige esse problema.
+      </li>
+    </ul>
+  </li>
+
+  <li>Modo de trabalho
+    <ul>
+      <li>O Google Now Launcher não mostra se o Modo de trabalho está ativado ou
+ desativado. O Launcher também não exibe o estado de suspensão do aplicativo.
+      </li>
+
+      <li>Após o usuário desativar e ativar o Modo de trabalho, o sistema não exibe mais os
+ widgets de aplicativos do perfil de trabalho, como a Agenda.
+      </li>
+    </ul>
+  </li>
+
+  <li>Suspensão de pacotes
+  </li>
+
+  <li>Os administradores do dispositivo podem suspender pacotes críticos do sistema, o que pode provocar
+ comportamentos inesperados, como realizar chamadas apesar de a caixa de diálogo Telephone
+      disabled ser exibida.
+  </li>
+
+  <li>Outros
+    <ul>
+      <li>O aplicativo de Configurações falha durante a inicialização se {@link
+      android.os.UserManager#DISALLOW_MOUNT_PHYSICAL_MEDIA} está configurado como verdadeiro quando
+ o usuário insere mídias físicas, como um cartão SD.
+      </li>
+
+      <li>O estado {@code DPM.setPackagesSuspended} não persiste quando o
+ usuário desinstala e reinstala um aplicativo. O aplicativo deve continuar
+ suspenso após a desinstalação/reinstalação ou os aplicativos suspensos não podem ser
+ desinstalados.
+      </li>
+
+      <li>A primeira verificação em um Perfil de trabalho leva vários minutos para
+ ser concluída. Isso pode fazer com que o aplicativo demore mais que o normal para se tornar
+ visível na Play EMM API.
+      </li>
+
+      <li>Notificações dos aplicativos do perfil de trabalho não são visíveis para
+ detectores de notificações instalados no perfil pessoal. Como resultado, o sistema
+ não exibe Notificações conforme esperado.
+      </li>
+
+    </ul>
+  </li>
+</ul>
+
+<h4 >Teclado</h4>
+
+<ul>
+  <li>O pareamento por Bluetooth entre teclados e dispositivos Android pode ser instável.
+  </li>
+</ul>
+
+<h4 >Vídeo</h4>
+
+<ul>
+<li>A reprodução de vídeos pode demorar e exibir interrupções.</li>
+</ul>
+
+<h4>Wi-Fi</h4>
+
+<ul>
+  <li>Wi-Fi passou por refatoramento que pode alterar o
+ comportamento de caso isolado da API. Especificamente, aplicativos que tentarem se conectar
+ a redes específicas ou que tentarem se reconectar a redes deverão ser testados novamente.
+  </li>
+
+  <li>O cliente DHCP legado foi removido da plataforma. O único
+ cliente DHCP compatível com a plataforma é o cliente DHCP introduzido no M.
+  </li>
+</ul>
+
+<h4>Inicialização direta</h4>
+
+<ul>
+  <li>NFC não funciona até o primeiro desbloqueio.
+    <ul>
+      <li>Quando um celular com Bluetooth habilitado é reiniciado, o Bluetooth não
+ ativa automaticamente. Você deve reativar o Bluetooth manualmente.
+      </li>
+
+      <li>Sob certas circunstâncias, o toque padrão pode não soar para
+ chamadas e mensagens de telefone. Esse comportamento foi corrigido na próxima
+ versão do N Preview, com uma exceção (e solução alternativa):
+      </li>
+
+      <li>Em um dispositivos que não tenha sido apagado recentemente -- um que foi inicializado pelo
+ menos uma vez desde que foi configurado no modo de inicialização direta -- o
+ toque padrão de notificação não soa. O usuário pode resolver esse problema
+ selecionando um toque manualmente em Settings.
+      </li>
+
+      <li>A inicialização direta não está ativa por padrão em dispositivos com uma versão do N
+ Developer Preview. Para ativar a inicialização direta para testes e
+ desenvolvimento, acesse Developer Options e toque em Convert to File Encryption.
+      Nesta prévia de desenvolvedor, isso requer uma reconfiguração de fábrica para fazer o reparticionamento e
+ a reformatação do dispositivo para a criptografia baseada em arquivos.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4>Imagem em imagem para Android TV</h4>
+
+<ul>
+  <li>A integração PIP na IU de Recents não foi finalizada e está sujeita a
+ alterações.
+    <ul>
+      <li>A animação da janela PIP não é perfeita. Versões futuras do
+ Preview melhorarão isso.
+      </li>
+    </ul>
+  </li>
+
+  <li style="list-style: none">Versões futuras do Preview melhorarão
+ o design visual e o alinhamento do layout de PIP.
+  </li>
+</ul>
+
+<h4>Relatórios de erros</h4>
+
+<ul>
+  <li>Os relatórios de erros nem sempre são completados com sucesso (como solução alternativa,
+ às vezes eles ainda podem ser acessados usando o fornecedor de documentação do relatório de erros
+ no armazenamento interno).
+  </li>
+</ul>
+
+<h4>Várias janelas em tela dividida</h4>
+
+<ul>
+  <li>Os aplicativos podem falhar e apresentar comportamentos inesperados da IU quando colocados em
+ modo de tela dividida. Esses são problemas de aplicativo que devem ser corrigidos pelo
+ desenvolvedor do aplicativo.
+  </li>
+
+  <li>Quando o aplicativo é destinado para uma versão da plataforma Android anterior ao N, 
+ ele pode não funcionar com avisos de tela dividida que aparecem diversas vezes.
+  </li>
+
+  <li>Manter pressionado o botão Overview enquanto usa um aplicativo com uma
+ orientação corrigida pode provocar um comportamento inesperado do aplicativo.
+  </li>
+
+  <li>Os aplicativos podem tremular durante o redimensionamento.
+  </li>
+
+  <li>As animações ainda não estão finalizadas.
+  </li>
+</ul>
+
+<h4>Método de entrada</h4>
+
+<ul>
+  <li>O Teclado do Google volta inesperadamente ao teclado genérico do Google
+ quando <b>usa idiomas do sistema</b>, mas o Teclado do Google não é compatível com nenhum
+ dos idiomas selecionados nas preferências de idioma do sistema. Ele deve
+ voltar para inglês americano.
+    <p>
+      Alternativamente, você pode solucionar esse problema adicionando ao menos um idioma compatível com o
+ Teclado do Google.
+    </p>
+  </li>
+</ul>
+
+<h4>Acessibilidade</h4>
+
+<ul>
+  <li>TalkBack exibe problemas com recursos, incluindo Notifications, Quick
+  Settings Tiles e exibição de várias janelas, que podem causar falhas no sistema ou
+ uma falta de feedback falado do TalkBack. Versões futuras do Preview
+ resolverão esses problemas.
+  </li>
+</ul>
+
+<h3 id="dp1-device-sp">Observações e problemas específicos de dispositivos</h3>
+
+<h4>Nexus Player</h4>
+<ul>
+  <li>Problemas de reprodução de vídeo, compatibilidade de aplicativo e estabilidade são esperados no
+ Nexus Player nesta versão do Preview.
+  </li>
+</ul>
+
+<h4>Pixel C</h4>
+<ul>
+<li>O redimensionamento de várias janelas pode causar falhas.</li>
+</ul>
+
+<h4>Nexus 9</h4>
+<ul>
+<li>Dispositivos Nexus 9 podem não ligar após receberem atualizações OTA
+ via programa beta do Android. Para se recuperar desse problema, você deve tentar
+ instalar manualmente a imagem OTA. Para obter mais informações, consulte
+ <a href="{@docRoot}preview/download-ota.html">Aplicação de uma imagem OTA de dispositivo</a>.
+</li>
+</ul>
+

@@ -15,7 +15,7 @@ page.tags=androidn
 </div>
 </div>
 
-<p>Aplicativos, como aplicativos de fotos, normalmente só precisam acessar diretórios específicos de um
+<p>Alguns aplicativos, como aplicativos de fotos, normalmente só precisam acessar diretórios específicos de um
 armazenamento externo, como o diretório <code>Pictures</code>. As abordagens
 existentes para o acesso de armazenamentos externos não foram desenvolvidas para fornecer com facilidade
 acesso direcionado a diretórios para esses tipos de aplicativos. Por exemplo:</p>
@@ -28,7 +28,7 @@ que o aplicativo precisa.</li>
 <li>Usar a 
 <a href="{@docRoot}guide/topics/providers/document-provider.html">Estrutura de
 acesso ao armazenamento</a> geralmente faz com que o usuário selecione diretórios
-por meio de uma interface de sistema, o que é desnecessário se seu aplicativo sempre acessa o mesmo
+por meio de uma IU de sistema, o que é desnecessário se seu aplicativo sempre acessa o mesmo
 diretório externo.</li>
 </ul>
 
@@ -44,6 +44,20 @@ Use essa intenção para acessar os diretórios de armazenamento externo. Para o
 todos os volumes disponíveis, incluindo volumes de mídias removíveis, use
 <code>StorageManager.getVolumesList()</code>.</p>
 
+<p>Se você tiver informações sobre um arquivo específico, use
+<code>StorageManager.getStorageVolume(File)</code> para obter o
+<code>StorageVolume</code> que contém o arquivo. Chame
+<code>createAccessIntent()</code> neste <code>StorageVolume</code> para acessar
+o diretório de armazenamento externo para o arquivo.</p>
+
+<p>
+Em volumes secundários, como cartões SD externos, passe nulo ao chamar
+<code>StorageVolume.createAccessIntent()</code> para solicitar acesso ao
+volume todo em vez de um diretório específico.
+<code>StorageVolume.createAccessIntent()</code> retornará nulo se você passar 
+nulo no volume principal ou se passar um nome de diretório inválido.
+</p>
+
 <p>O fragmento de código a seguir é um exemplo de como abrir o diretório
 <code>Pictures</code> no armazenamento compartilhado principal:</p>
 
@@ -55,7 +69,7 @@ startActivityForResult(intent, request_code);
 </pre>
 
 <p>O sistema tenta conceder acesso ao diretório externo e,
-se necessário, confirma o acesso com o usuário usando uma interface simplificada:</p>
+se necessário, confirma o acesso com o usuário usando uma IU simplificada:</p>
 
 <img src="{@docRoot}preview/images/scoped-folder-access-framed.png" srcset="{@docRoot}preview/images/scoped-folder-access-framed.png 1x,
 {@docRoot}preview/images/scoped-folder-access-framed_2x.png 2x" />
@@ -116,9 +130,19 @@ startActivityForResult(intent, request_code);
 solicitar acesso ao usuário várias vezes. Quando o usuário conceder o acesso, chame
 <code>getContentResolver().takePersistableUriPermssion()</code> com o
 URI de acesso ao diretório. O sistema manterá o URI e as solicitações de acesso
-subsequentes retornarão <code>RESULT_OK</code> e não mostrarão a mensagem de confirmação para o
+subsequentes retornarão <code>RESULT_OK</code> e não mostrarão a IU de confirmação para o
 usuário.</p>
 
 <p>Se o usuário negar acesso a um diretório externo, não repita a
 solicitação imediatamente. Insistir em solicitações de acesso repetidas vezes gera uma experiência
-negativa para o usuário.</p>
+negativa para o usuário. Se uma solicitação for negada pelo usuário e o aplicativo solicitar acesso
+novamente, a IU exibirá uma caixa de seleção <b>Não perguntar novamente</b>.</p>
+
+<img src="{@docRoot}preview/images/scoped-folder-access-dont-ask.png" srcset="{@docRoot}preview/images/scoped-folder-access-dont-ask.png 1x,
+{@docRoot}preview/images/scoped-folder-access-dont-ask_2x.png 2x" />
+<p class="img-caption"><strong>Figura 1.</strong> Um aplicativo que faz uma
+segunda solicitação para acesso à mídia removível.</p>
+
+<p>Se o usuário selecionar <b>Não perguntar novamente</b> e negar a solicitação, todas
+as solicitações futuras para o diretório provenientes do aplicativo serão automaticamente
+negadas e a IU de solicitação não será apresentada ao usuário.</p>

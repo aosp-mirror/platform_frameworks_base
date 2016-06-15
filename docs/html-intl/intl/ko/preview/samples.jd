@@ -4,14 +4,14 @@ page.image=images/cards/card-n-samples_2x.png
 @jd:body
 
 <p>
-  Android N용으로 다음 코드 샘플이 제공됩니다. Android Studio에서 샘플을
-다운로드하려면 <b>File &gt; Import
-  Samples</b> 메뉴 옵션을 선택합니다.
+  Android N용으로 다음과 같은 코드 샘플이 제공됩니다. Android Studio에서 샘플을 다운로드하려면 <b>File &gt; Import Samples</b> 메뉴 옵션을 선택합니다.
+
+
 </p>
 
 <p class="note">
-  <strong>참고:</strong> 이러한 다운로드 가능한 프로젝트는 Gradle 및 Android Studio와 함께 사용하도록
-고안되었습니다.
+  <strong>참고:</strong> 이러한 다운로드 가능 프로젝트는 Gradle 및 Android Studio와 함께 사용하도록 고안되었습니다.
+
 </p>
 
 
@@ -30,9 +30,9 @@ GitHub에서 가져오기</a>
 <h3 id="an">활성 알림</h3>
 <img src="{@docRoot}preview/images/sample-activenotifications.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
-  NotificationCompat를 사용하여
-알림을 발송하는 간단한 서비스를 보여주는 기존 샘플입니다. 각각의 읽지 않은 사용자 대화는
-고유한 알림으로 발송됩니다.
+  이것은 NotificationCompat를 사용하여 알림을 발송하는 간단한 서비스를 보여주는 기존 샘플입니다.
+ 각각의 읽지 않은 사용자 대화는 고유한 알림으로 발송됩니다.
+
 </p>
 <p>
   이 샘플은 Android N에서 사용할 수 있는 새로운 알림 기능을

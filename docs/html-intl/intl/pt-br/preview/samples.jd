@@ -10,8 +10,8 @@ page.image=images/cards/card-n-samples_2x.png
 </p>
 
 <p class="note">
-  <strong>Observação:</strong> estes projetos disponíveis para download foram criados
- para uso com o Gradle e o Android Studio.
+  <strong>Observação:</strong> Esses projetos disponíveis para download são projetados
+ para uso com Gradle e Android Studio.
 </p>
 
 
@@ -73,7 +73,7 @@ Obter no GitHub</a>
 </p>
 
 <div style="clear: both;"></div>
-<h3 id="sda">Acessos a diretório com escopo</h3>
+<h3 id="sda">Acesso a diretórios com escopo</h3>
 <img src="{@docRoot}preview/images/sample-scopeddirectoryaccess.png" style="float: left; padding-right: 0.5em" height="250" width="141" />
 <p>
   Este exemplo demonstra como ler e gravar dados de diretórios
