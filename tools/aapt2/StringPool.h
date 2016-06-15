@@ -22,7 +22,7 @@
 #include "util/StringPiece.h"
 
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -199,7 +199,7 @@ private:
 
     std::vector<std::unique_ptr<Entry>> mStrings;
     std::vector<std::unique_ptr<StyleEntry>> mStyles;
-    std::multimap<StringPiece16, Entry*> mIndexedStrings;
+    std::unordered_multimap<StringPiece16, Entry*> mIndexedStrings;
 };
 
 //

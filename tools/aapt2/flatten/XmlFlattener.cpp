@@ -22,6 +22,7 @@
 
 #include <androidfw/ResourceTypes.h>
 #include <algorithm>
+#include <map>
 #include <utils/misc.h>
 #include <vector>
 
