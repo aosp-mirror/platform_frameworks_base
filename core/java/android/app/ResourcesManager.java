@@ -274,7 +274,7 @@ public class ResourcesManager {
                 if (libDir.endsWith(".apk")) {
                     // Avoid opening files we know do not have resources,
                     // like code-only .jar files.
-                    if (assets.addAssetPath(libDir) == 0) {
+                    if (assets.addAssetPathAsSharedLibrary(libDir) == 0) {
                         Log.w(TAG, "Asset path '" + libDir +
                                 "' does not exist or contains no resources.");
                     }
@@ -327,6 +327,22 @@ public class ResourcesManager {
             return impl;
         }
         return null;
+    }
+
+    /**
+     * Finds a cached ResourcesImpl object that matches the given ResourcesKey, or
+     * creates a new one and caches it for future use.
+     * @param key The key to match.
+     * @return a ResourcesImpl object matching the key.
+     */
+    private @NonNull ResourcesImpl findOrCreateResourcesImplForKeyLocked(
+            @NonNull ResourcesKey key) {
+        ResourcesImpl impl = findResourcesImplForKeyLocked(key);
+        if (impl == null) {
+            impl = createResourcesImpl(key);
+            mResourceImpls.put(key, new WeakReference<>(impl));
+        }
+        return impl;
     }
 
     /**
@@ -809,6 +825,77 @@ public class ResourcesManager {
             return changes != 0;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    /**
+     * Appends the library asset path to any ResourcesImpl object that contains the main
+     * assetPath.
+     * @param assetPath The main asset path for which to add the library asset path.
+     * @param libAsset The library asset path to add.
+     */
+    public void appendLibAssetForMainAssetPath(String assetPath, String libAsset) {
+        synchronized (this) {
+            // Record which ResourcesImpl need updating
+            // (and what ResourcesKey they should update to).
+            final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceKeys = new ArrayMap<>();
+
+            final int implCount = mResourceImpls.size();
+            for (int i = 0; i < implCount; i++) {
+                final ResourcesImpl impl = mResourceImpls.valueAt(i).get();
+                final ResourcesKey key = mResourceImpls.keyAt(i);
+                if (impl != null && key.mResDir.equals(assetPath)) {
+                    if (!ArrayUtils.contains(key.mLibDirs, libAsset)) {
+                        final int newLibAssetCount = 1 +
+                                (key.mLibDirs != null ? key.mLibDirs.length : 0);
+                        final String[] newLibAssets = new String[newLibAssetCount];
+                        if (key.mLibDirs != null) {
+                            System.arraycopy(key.mLibDirs, 0, newLibAssets, 0, key.mLibDirs.length);
+                        }
+                        newLibAssets[newLibAssetCount - 1] = libAsset;
+
+                        updatedResourceKeys.put(impl, new ResourcesKey(
+                                key.mResDir,
+                                key.mSplitResDirs,
+                                key.mOverlayDirs,
+                                newLibAssets,
+                                key.mDisplayId,
+                                key.mOverrideConfiguration,
+                                key.mCompatInfo));
+                    }
+                }
+            }
+
+            // Bail early if there is no work to do.
+            if (updatedResourceKeys.isEmpty()) {
+                return;
+            }
+
+            // Update any references to ResourcesImpl that require reloading.
+            final int resourcesCount = mResourceReferences.size();
+            for (int i = 0; i < resourcesCount; i++) {
+                final Resources r = mResourceReferences.get(i).get();
+                if (r != null) {
+                    final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+                    if (key != null) {
+                        r.setImpl(findOrCreateResourcesImplForKeyLocked(key));
+                    }
+                }
+            }
+
+            // Update any references to ResourcesImpl that require reloading for each Activity.
+            for (ActivityResources activityResources : mActivityResourceReferences.values()) {
+                final int resCount = activityResources.activityResources.size();
+                for (int i = 0; i < resCount; i++) {
+                    final Resources r = activityResources.activityResources.get(i).get();
+                    if (r != null) {
+                        final ResourcesKey key = updatedResourceKeys.get(r.getImpl());
+                        if (key != null) {
+                            r.setImpl(findOrCreateResourcesImplForKeyLocked(key));
+                        }
+                    }
+                }
+            }
         }
     }
 }
