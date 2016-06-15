@@ -355,14 +355,6 @@ void AssetManager::setLocale(const char* locale)
 }
 
 
-static const char kFilPrefix[] = "fil";
-static const char kTlPrefix[] = "tl";
-
-// The sizes of the prefixes, excluding the 0 suffix.
-// char.
-static const int kFilPrefixLen = sizeof(kFilPrefix) - 1;
-static const int kTlPrefixLen = sizeof(kTlPrefix) - 1;
-
 void AssetManager::setLocaleLocked(const char* locale)
 {
     if (mLocale != NULL) {
@@ -370,44 +362,6 @@ void AssetManager::setLocaleLocked(const char* locale)
         purgeFileNameCacheLocked();
         //mZipSet.purgeLocale();
         delete[] mLocale;
-    }
-
-    // If we're attempting to set a locale that starts with "fil",
-    // we should convert it to "tl" for backwards compatibility since
-    // we've been using "tl" instead of "fil" prior to L.
-    //
-    // If the resource table already has entries for "fil", we use that
-    // instead of attempting a fallback.
-    if (strncmp(locale, kFilPrefix, kFilPrefixLen) == 0) {
-        Vector<String8> locales;
-        ResTable* res = mResources;
-        if (res != NULL) {
-            res->getLocales(&locales);
-        }
-        const size_t localesSize = locales.size();
-        bool hasFil = false;
-        for (size_t i = 0; i < localesSize; ++i) {
-            if (locales[i].find(kFilPrefix) == 0) {
-                hasFil = true;
-                break;
-            }
-        }
-
-
-        if (!hasFil) {
-            const size_t newLocaleLen = strlen(locale);
-            // This isn't a bug. We really do want mLocale to be 1 byte
-            // shorter than locale, because we're replacing "fil-" with
-            // "tl-".
-            mLocale = new char[newLocaleLen];
-            // Copy over "tl".
-            memcpy(mLocale, kTlPrefix, kTlPrefixLen);
-            // Copy the rest of |locale|, including the terminating '\0'.
-            memcpy(mLocale + kTlPrefixLen, locale + kFilPrefixLen,
-                   newLocaleLen - kFilPrefixLen + 1);
-            updateResourceParamsLocked();
-            return;
-        }
     }
 
     mLocale = strdupNew(locale);
@@ -816,17 +770,7 @@ void AssetManager::getLocales(Vector<String8>* locales, bool includeSystemLocale
 {
     ResTable* res = mResources;
     if (res != NULL) {
-        res->getLocales(locales, includeSystemLocales);
-    }
-
-    const size_t numLocales = locales->size();
-    for (size_t i = 0; i < numLocales; ++i) {
-        const String8& localeStr = locales->itemAt(i);
-        if (localeStr.find(kTlPrefix) == 0) {
-            String8 replaced("fil");
-            replaced += (localeStr.string() + kTlPrefixLen);
-            locales->editItemAt(i) = replaced;
-        }
+        res->getLocales(locales, includeSystemLocales, true /* mergeEquivalentLangs */);
     }
 }
 

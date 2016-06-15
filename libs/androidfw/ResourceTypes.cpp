@@ -2024,7 +2024,6 @@ int ResTable_config::isLocaleMoreSpecificThan(const ResTable_config& o) const {
         ((o.localeVariant[0] != '\0') ? 2 : 0);
 
     return score - oScore;
-
 }
 
 bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
@@ -2170,6 +2169,23 @@ bool ResTable_config::isMoreSpecificThan(const ResTable_config& o) const {
     return false;
 }
 
+// Codes for specially handled languages and regions
+static const char kEnglish[2] = {'e', 'n'};  // packed version of "en"
+static const char kUnitedStates[2] = {'U', 'S'};  // packed version of "US"
+static const char kFilipino[2] = {'\xAD', '\x05'};  // packed version of "fil"
+static const char kTagalog[2] = {'t', 'l'};  // packed version of "tl"
+
+// Checks if two language or region codes are identical
+inline bool areIdentical(const char code1[2], const char code2[2]) {
+    return code1[0] == code2[0] && code1[1] == code2[1];
+}
+
+inline bool langsAreEquivalent(const char lang1[2], const char lang2[2]) {
+    return areIdentical(lang1, lang2) ||
+            (areIdentical(lang1, kTagalog) && areIdentical(lang2, kFilipino)) ||
+            (areIdentical(lang1, kFilipino) && areIdentical(lang2, kTagalog));
+}
+
 bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         const ResTable_config* requested) const {
     if (requested->locale == 0) {
@@ -2179,7 +2195,7 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
     }
 
     if (locale == 0 && o.locale == 0) {
-        // The locales parts of both resources are empty, so no one is better
+        // The locale part of both resources is empty, so none is better
         // than the other.
         return false;
     }
@@ -2194,10 +2210,11 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
     // 2) If the request's script is known, the resource scripts are either
     //    unknown or match the request.
 
-    if (language[0] != o.language[0]) {
-        // The languages of the two resources are not the same. We can only
-        // assume that one of the two resources matched the request because one
-        // doesn't have a language and the other has a matching language.
+    if (!langsAreEquivalent(language, o.language)) {
+        // The languages of the two resources are not equivalent. If we are
+        // here, we can only assume that the two resources matched the request
+        // because one doesn't have a language and the other has a matching
+        // language.
         //
         // We consider the one that has the language specified a better match.
         //
@@ -2205,15 +2222,15 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         // for US English and similar locales than locales that are a descendant
         // of Internatinal English (en-001), since no-language resources are
         // where the US English resource have traditionally lived for most apps.
-        if (requested->language[0] == 'e' && requested->language[1] == 'n') {
-            if (requested->country[0] == 'U' && requested->country[1] == 'S') {
+        if (areIdentical(requested->language, kEnglish)) {
+            if (areIdentical(requested->country, kUnitedStates)) {
                 // For US English itself, we consider a no-locale resource a
                 // better match if the other resource has a country other than
                 // US specified.
                 if (language[0] != '\0') {
-                    return country[0] == '\0' || (country[0] == 'U' && country[1] == 'S');
+                    return country[0] == '\0' || areIdentical(country, kUnitedStates);
                 } else {
-                    return !(o.country[0] == '\0' || (o.country[0] == 'U' && o.country[1] == 'S'));
+                    return !(o.country[0] == '\0' || areIdentical(o.country, kUnitedStates));
                 }
             } else if (localeDataIsCloseToUsEnglish(requested->country)) {
                 if (language[0] != '\0') {
@@ -2226,27 +2243,38 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         return (language[0] != '\0');
     }
 
-    // If we are here, both the resources have the same non-empty language as
-    // the request.
+    // If we are here, both the resources have an equivalent non-empty language
+    // to the request.
     //
-    // Because the languages are the same, computeScript() always
-    // returns a non-empty script for languages it knows about, and we have passed
-    // the script checks in match(), the scripts are either all unknown or are
-    // all the same. So we can't gain anything by checking the scripts. We need
-    // to check the region and variant.
+    // Because the languages are equivalent, computeScript() always returns a
+    // non-empty script for languages it knows about, and we have passed the
+    // script checks in match(), the scripts are either all unknown or are all
+    // the same. So we can't gain anything by checking the scripts. We need to
+    // check the region and variant.
 
-    // See if any of the regions is better than the other
+    // See if any of the regions is better than the other.
     const int region_comparison = localeDataCompareRegions(
             country, o.country,
-            language, requested->localeScript, requested->country);
+            requested->language, requested->localeScript, requested->country);
     if (region_comparison != 0) {
         return (region_comparison > 0);
     }
 
     // The regions are the same. Try the variant.
-    if (requested->localeVariant[0] != '\0'
-            && strncmp(localeVariant, requested->localeVariant, sizeof(localeVariant)) == 0) {
-        return (strncmp(o.localeVariant, requested->localeVariant, sizeof(localeVariant)) != 0);
+    const bool localeMatches = strncmp(
+            localeVariant, requested->localeVariant, sizeof(localeVariant)) == 0;
+    const bool otherMatches = strncmp(
+            o.localeVariant, requested->localeVariant, sizeof(localeVariant)) == 0;
+    if (localeMatches != otherMatches) {
+        return localeMatches;
+    }
+
+    // Finally, the languages, although equivalent, may still be different
+    // (like for Tagalog and Filipino). Identical is better than just
+    // equivalent.
+    if (areIdentical(language, requested->language)
+            && !areIdentical(o.language, requested->language)) {
+        return true;
     }
 
     return false;
@@ -2522,7 +2550,7 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         //
         // If two configs differ only in their country and variant,
         // they can be weeded out in the isMoreSpecificThan test.
-        if (language[0] != settings.language[0] || language[1] != settings.language[1]) {
+        if (!langsAreEquivalent(language, settings.language)) {
             return false;
         }
 
@@ -2550,9 +2578,7 @@ bool ResTable_config::match(const ResTable_config& settings) const {
         }
 
         if (countriesMustMatch) {
-            if (country[0] != '\0'
-                && (country[0] != settings.country[0]
-                    || country[1] != settings.country[1])) {
+            if (country[0] != '\0' && !areIdentical(country, settings.country)) {
                 return false;
             }
         } else {
@@ -2734,37 +2760,43 @@ void ResTable_config::appendDirLocale(String8& out) const {
     }
 }
 
-void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN]) const {
+void ResTable_config::getBcp47Locale(char str[RESTABLE_MAX_LOCALE_LEN], bool canonicalize) const {
     memset(str, 0, RESTABLE_MAX_LOCALE_LEN);
 
     // This represents the "any" locale value, which has traditionally been
     // represented by the empty string.
-    if (!language[0] && !country[0]) {
+    if (language[0] == '\0' && country[0] == '\0') {
         return;
     }
 
     size_t charsWritten = 0;
-    if (language[0]) {
-        charsWritten += unpackLanguage(str);
+    if (language[0] != '\0') {
+        if (canonicalize && areIdentical(language, kTagalog)) {
+            // Replace Tagalog with Filipino if we are canonicalizing
+            str[0] = 'f'; str[1] = 'i'; str[2] = 'l'; str[3] = '\0';  // 3-letter code for Filipino
+            charsWritten += 3;
+        } else {
+            charsWritten += unpackLanguage(str);
+        }
     }
 
-    if (localeScript[0] && !localeScriptWasComputed) {
-        if (charsWritten) {
+    if (localeScript[0] != '\0' && !localeScriptWasComputed) {
+        if (charsWritten > 0) {
             str[charsWritten++] = '-';
         }
         memcpy(str + charsWritten, localeScript, sizeof(localeScript));
         charsWritten += sizeof(localeScript);
     }
 
-    if (country[0]) {
-        if (charsWritten) {
+    if (country[0] != '\0') {
+        if (charsWritten > 0) {
             str[charsWritten++] = '-';
         }
         charsWritten += unpackRegion(str + charsWritten);
     }
 
-    if (localeVariant[0]) {
-        if (charsWritten) {
+    if (localeVariant[0] != '\0') {
+        if (charsWritten > 0) {
             str[charsWritten++] = '-';
         }
         memcpy(str + charsWritten, localeVariant, sizeof(localeVariant));
@@ -5879,12 +5911,13 @@ static bool compareString8AndCString(const String8& str, const char* cStr) {
     return strcmp(str.string(), cStr) < 0;
 }
 
-void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales) const {
+void ResTable::getLocales(Vector<String8>* locales, bool includeSystemLocales,
+                          bool mergeEquivalentLangs) const {
     char locale[RESTABLE_MAX_LOCALE_LEN];
 
     forEachConfiguration(false, false, includeSystemLocales, [&](const ResTable_config& cfg) {
         if (cfg.locale != 0) {
-            cfg.getBcp47Locale(locale);
+            cfg.getBcp47Locale(locale, mergeEquivalentLangs /* canonicalize if merging */);
 
             const auto beginIter = locales->begin();
             const auto endIter = locales->end();
