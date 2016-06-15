@@ -1239,6 +1239,7 @@ public abstract class Connection extends Conferenceable {
     private Conference mConference;
     private ConnectionService mConnectionService;
     private Bundle mExtras;
+    private final Object mExtrasLock = new Object();
 
     /**
      * Tracks the key set for the extras bundle provided on the last invocation of
@@ -1388,7 +1389,13 @@ public abstract class Connection extends Conferenceable {
      * @return The extras associated with this connection.
      */
     public final Bundle getExtras() {
-        return mExtras;
+        Bundle extras = null;
+        synchronized (mExtrasLock) {
+            if (mExtras != null) {
+                extras = new Bundle(mExtras);
+            }
+        }
+        return extras;
     }
 
     /**
@@ -1924,14 +1931,20 @@ public abstract class Connection extends Conferenceable {
         if (extras == null) {
             return;
         }
-
-        if (mExtras == null) {
-            mExtras = new Bundle();
+        // Creating a duplicate bundle so we don't have to synchronize on mExtrasLock while calling
+        // the listeners.
+        Bundle listenerExtras;
+        synchronized (mExtrasLock) {
+            if (mExtras == null) {
+                mExtras = new Bundle();
+            }
+            mExtras.putAll(extras);
+            listenerExtras = new Bundle(mExtras);
         }
-        mExtras.putAll(extras);
-
         for (Listener l : mListeners) {
-            l.onExtrasChanged(this, extras);
+            // Create a new clone of the extras for each listener so that they don't clobber
+            // each other
+            l.onExtrasChanged(this, new Bundle(listenerExtras));
         }
     }
 
@@ -1981,18 +1994,16 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     public final void removeExtras(List<String> keys) {
-        if (mExtras != null) {
-            for (String key : keys) {
-                mExtras.remove(key);
-            }
-
-            if (mExtras.size() == 0) {
-                mExtras = null;
+        synchronized (mExtrasLock) {
+            if (mExtras != null) {
+                for (String key : keys) {
+                    mExtras.remove(key);
+                }
             }
         }
-
+        List<String> unmodifiableKeys = Collections.unmodifiableList(keys);
         for (Listener l : mListeners) {
-            l.onExtrasRemoved(this, keys);
+            l.onExtrasRemoved(this, unmodifiableKeys);
         }
     }
 
@@ -2274,8 +2285,14 @@ public abstract class Connection extends Conferenceable {
      * @hide
      */
     final void handleExtrasChanged(Bundle extras) {
-        mExtras = extras;
-        onExtrasChanged(mExtras);
+        Bundle b = null;
+        synchronized (mExtrasLock) {
+            mExtras = extras;
+            if (mExtras != null) {
+                b = new Bundle(mExtras);
+            }
+        }
+        onExtrasChanged(b);
     }
 
     /**
