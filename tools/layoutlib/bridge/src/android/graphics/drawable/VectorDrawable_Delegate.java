@@ -91,16 +91,14 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateTree(long rootGroupPtr) {
-        VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
-        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroup));
+        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroupPtr));
     }
 
     @LayoutlibDelegate
     static long nCreateTreeFromCopy(long rendererToCopyPtr, long rootGroupPtr) {
-        VGroup_Delegate rootGroup = VNativeObject.getDelegate(rootGroupPtr);
         VPathRenderer_Delegate rendererToCopy = VNativeObject.getDelegate(rendererToCopyPtr);
         return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rendererToCopy,
-                rootGroup));
+                rootGroupPtr));
     }
 
     @LayoutlibDelegate
@@ -163,7 +161,6 @@ public class VectorDrawable_Delegate {
     @LayoutlibDelegate
     static long nCreateFullPath(long nativeFullPathPtr) {
         VFullPath_Delegate original = VNativeObject.getDelegate(nativeFullPathPtr);
-
         return sPathManager.addNewDelegate(new VFullPath_Delegate(original));
     }
 
@@ -247,8 +244,7 @@ public class VectorDrawable_Delegate {
     @LayoutlibDelegate
     static long nCreateGroup(long groupPtr) {
         VGroup_Delegate original = VNativeObject.getDelegate(groupPtr);
-        return sPathManager.addNewDelegate(
-                new VGroup_Delegate(original, new ArrayMap<String, Object>()));
+        return sPathManager.addNewDelegate(new VGroup_Delegate(original, new ArrayMap<>()));
     }
 
     @LayoutlibDelegate
@@ -1029,7 +1025,7 @@ public class VectorDrawable_Delegate {
         private final Path mPath;
         private final Path mRenderPath;
         private final Matrix mFinalPathMatrix = new Matrix();
-        private final VGroup_Delegate mRootGroup;
+        private final long mRootGroupPtr;
         private float mViewportWidth = 0;
         private float mViewportHeight = 0;
         private float mRootAlpha = 1.0f;
@@ -1037,15 +1033,15 @@ public class VectorDrawable_Delegate {
         private Paint mFillPaint;
         private PathMeasure mPathMeasure;
 
-        private VPathRenderer_Delegate(VGroup_Delegate rootGroup) {
-            mRootGroup = rootGroup;
+        private VPathRenderer_Delegate(long rootGroupPtr) {
+            mRootGroupPtr = rootGroupPtr;
             mPath = new Path();
             mRenderPath = new Path();
         }
 
         private VPathRenderer_Delegate(VPathRenderer_Delegate rendererToCopy,
-                VGroup_Delegate rootGroup) {
-            this(rootGroup);
+                long rootGroupPtr) {
+            this(rootGroupPtr);
             mViewportWidth = rendererToCopy.mViewportWidth;
             mViewportHeight = rendererToCopy.mViewportHeight;
             mRootAlpha = rendererToCopy.mRootAlpha;
@@ -1087,7 +1083,7 @@ public class VectorDrawable_Delegate {
 
         public void draw(long canvasPtr, long filterPtr, int w, int h) {
             // Traverse the tree in pre-order to draw.
-            drawGroupTree(mRootGroup, Matrix.IDENTITY_MATRIX, canvasPtr, w, h, filterPtr);
+            drawGroupTree(VNativeObject.getDelegate(mRootGroupPtr), Matrix.IDENTITY_MATRIX, canvasPtr, w, h, filterPtr);
         }
 
         private void drawPath(VGroup_Delegate VGroup, VPath_Delegate VPath, long canvasPtr,
@@ -1226,6 +1222,15 @@ public class VectorDrawable_Delegate {
 
         @Override
         public void setName(String name) {
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+
+            // The mRootGroupPtr is not explicitly freed by anything in the VectorDrawable so we
+            // need to free it here.
+            sPathManager.removeJavaReferenceFor(mRootGroupPtr);
         }
     }
 }

@@ -165,5 +165,6 @@ public final class DelegateManager<T> {
             int idx = sDelegates.indexOfValue(reference);
             out.printf("[%d] %s\n", sDelegates.keyAt(idx), reference.getClass().getSimpleName());
         }
+        out.printf("\nTotal number of objects: %d\n", sJavaReferences.size());
     }
 }
