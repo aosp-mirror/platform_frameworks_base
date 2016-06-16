@@ -2296,7 +2296,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public UserInfo createRestrictedProfile(String name, int parentUserId) {
-        checkManageUsersPermission("setupRestrictedProfile");
+        checkManageOrCreateUsersPermission("setupRestrictedProfile");
         final UserInfo user = createProfileForUser(name, UserInfo.FLAG_RESTRICTED, parentUserId);
         if (user == null) {
             return null;
