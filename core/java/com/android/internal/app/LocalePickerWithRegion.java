@@ -45,6 +45,7 @@ import java.util.Set;
  * default locale.</p>
  */
 public class LocalePickerWithRegion extends ListFragment implements SearchView.OnQueryTextListener {
+    private static final String PARENT_FRAGMENT_NAME = "localeListEditor";
 
     private SuggestedLocaleAdapter mAdapter;
     private LocaleSelectedListener mListener;
@@ -130,10 +131,23 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         return true;
     }
 
+    private void returnToParentFrame() {
+        getFragmentManager().popBackStack(PARENT_FRAGMENT_NAME,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        if (mLocaleList == null) {
+            // The fragment was killed and restored by the FragmentManager.
+            // At this point we have no data, no listener. Just return, to prevend a NPE.
+            // Fixes b/28748150. Created b/29400003 for a cleaner solution.
+            returnToParentFrame();
+            return;
+        }
 
         final boolean countryMode = mParentLocale != null;
         final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
@@ -197,8 +211,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             if (mListener != null) {
                 mListener.onLocaleSelected(locale);
             }
-            getFragmentManager().popBackStack("localeListEditor",
-                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            returnToParentFrame();
         } else {
             LocalePickerWithRegion selector = LocalePickerWithRegion.createCountryPicker(
                     getContext(), mListener, locale, mTranslatedOnly /* translate only */);
@@ -208,8 +221,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
                         .replace(getId(), selector).addToBackStack(null)
                         .commit();
             } else {
-                getFragmentManager().popBackStack("localeListEditor",
-                        FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                returnToParentFrame();
             }
         }
     }
