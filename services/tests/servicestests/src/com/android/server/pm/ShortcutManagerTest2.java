@@ -1488,7 +1488,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         // Simulate a call from sys UI.
         mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
-        mService.onApplicationActive(CALLING_PACKAGE_1, USER_0);
+        mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1509,7 +1509,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
-        mService.onApplicationActive(CALLING_PACKAGE_3, USER_0);
+        mManager.onApplicationActive(CALLING_PACKAGE_3, USER_0);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());
@@ -1530,7 +1530,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
             MoreAsserts.assertNotEqual(3, mManager.getRemainingCallCount());
         });
 
-        mService.onApplicationActive(CALLING_PACKAGE_1, USER_10);
+        mManager.onApplicationActive(CALLING_PACKAGE_1, USER_10);
 
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(3, mManager.getRemainingCallCount());

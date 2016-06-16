@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ShortcutManager;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -131,6 +132,15 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mController.removeRemoteInput(mEntry);
         mEditText.mShowImeOnInputConnection = false;
         mController.remoteInputSent(mEntry);
+
+        // Tell ShortcutManager that this package has been "activated".  ShortcutManager
+        // will reset the throttling for this package.
+        // Strictly speaking, the intent receiver may be different from the notification publisher,
+        // but that's an edge case, and also because we can't always know which package will receive
+        // an intent, so we just reset for the publisher.
+        getContext().getSystemService(ShortcutManager.class).onApplicationActive(
+                mEntry.notification.getPackageName(),
+                mEntry.notification.getUser().getIdentifier());
 
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_SEND,
                 mEntry.notification.getPackageName());
