@@ -280,6 +280,15 @@ page.image=images/cards/card-n-support_2x.png
   </li>
 </ul>
 
+<h4 id="">Android Auto</h4>
+
+<p>
+  The version of Google Maps included in Developer Preview 4 (9.30) crashes
+  when used with Android Auto. This issue will be fixed in the next update to
+  Google Maps (9.31), expected in the coming weeks.
+</p>
+
+
 <!-- TBA, if any
 <h4>Device-specific issues</h4>
 
