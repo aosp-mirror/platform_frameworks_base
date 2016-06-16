@@ -72,6 +72,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     private QSCustomizer mCustomizePanel;
     private Record mDetailRecord;
 
+    private BrightnessMirrorController mBrightnessMirrorController;
+
     public QSPanel(Context context) {
         this(context, null);
     }
@@ -157,7 +159,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     }
 
     public void setBrightnessMirror(BrightnessMirrorController c) {
-        super.onFinishInflate();
+        mBrightnessMirrorController = c;
         ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
         ToggleSlider mirror = (ToggleSlider) c.getMirror().findViewById(R.id.brightness_slider);
         brightnessSlider.setMirror(mirror);
@@ -203,6 +205,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mFooter.onConfigurationChanged();
+
+        if (mBrightnessMirrorController != null) {
+            // Reload the mirror in case it got reinflated but we didn't.
+            setBrightnessMirror(mBrightnessMirrorController);
+        }
     }
 
     public void onCollapse() {
