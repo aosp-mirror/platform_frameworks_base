@@ -227,7 +227,7 @@ class CopyJob extends Job {
         try {
             mBatchSize = calculateSize(mSrcs);
         } catch (ResourceException e) {
-            Log.w(TAG, "Failed to calculate total size. Copying without progress.");
+            Log.w(TAG, "Failed to calculate total size. Copying without progress.", e);
             mBatchSize = -1;
         }
 
@@ -236,25 +236,19 @@ class CopyJob extends Job {
         for (int i = 0; i < mSrcs.size() && !isCanceled(); ++i) {
             srcInfo = mSrcs.get(i);
 
-            // Guard unsupported recursive operation.
-            try {
-                if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
-                    throw new ResourceException("Cannot copy to itself recursively.");
-                }
-            } catch (ResourceException e) {
-                Log.e(TAG, e.toString());
-                onFileFailed(srcInfo);
-                continue;
-            }
-
             if (DEBUG) Log.d(TAG,
                     "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")"
                     + " to " + dstInfo.displayName + " (" + dstInfo.derivedUri + ")");
 
             try {
-                processDocument(srcInfo, null, dstInfo);
+                if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
+                    Log.e(TAG, "Skipping recursive copy of " + srcInfo.derivedUri);
+                    onFileFailed(srcInfo);
+                } else {
+                    processDocument(srcInfo, null, dstInfo);
+                }
             } catch (ResourceException e) {
-                Log.e(TAG, e.toString());
+                Log.e(TAG, "Failed to copy " + srcInfo.derivedUri, e);
                 onFileFailed(srcInfo);
             }
         }
@@ -306,7 +300,7 @@ class CopyJob extends Job {
                     }
                 } catch (RemoteException | RuntimeException e) {
                     Log.e(TAG, "Provider side copy failed for: " + src.derivedUri
-                            + " due to an exception: " + e);
+                            + " due to an exception.", e);
                 }
                 // If optimized copy fails, then fallback to byte-by-byte copy.
                 if (DEBUG) Log.d(TAG, "Fallback to byte-by-byte copy for: " + src.derivedUri);
