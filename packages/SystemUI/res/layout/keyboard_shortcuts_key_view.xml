@@ -24,4 +24,4 @@
           android:singleLine="true"
           android:gravity="center"
           android:textSize="@dimen/ksh_item_text_size"
-          android:textAllCaps="true" />
+          android:textAllCaps="true"/>
