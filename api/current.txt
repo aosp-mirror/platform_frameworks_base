@@ -47769,6 +47769,8 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock ANCIENT_GREEK_NUMBERS;
     field public static final java.lang.Character.UnicodeBlock ANCIENT_SYMBOLS;
     field public static final java.lang.Character.UnicodeBlock ARABIC;
+    field public static final java.lang.Character.UnicodeBlock ARABIC_EXTENDED_A;
+    field public static final java.lang.Character.UnicodeBlock ARABIC_MATHEMATICAL_ALPHABETIC_SYMBOLS;
     field public static final java.lang.Character.UnicodeBlock ARABIC_PRESENTATION_FORMS_A;
     field public static final java.lang.Character.UnicodeBlock ARABIC_PRESENTATION_FORMS_B;
     field public static final java.lang.Character.UnicodeBlock ARABIC_SUPPLEMENT;
@@ -47791,6 +47793,7 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock BUHID;
     field public static final java.lang.Character.UnicodeBlock BYZANTINE_MUSICAL_SYMBOLS;
     field public static final java.lang.Character.UnicodeBlock CARIAN;
+    field public static final java.lang.Character.UnicodeBlock CHAKMA;
     field public static final java.lang.Character.UnicodeBlock CHAM;
     field public static final java.lang.Character.UnicodeBlock CHEROKEE;
     field public static final java.lang.Character.UnicodeBlock CJK_COMPATIBILITY;
@@ -47896,6 +47899,10 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock MATHEMATICAL_ALPHANUMERIC_SYMBOLS;
     field public static final java.lang.Character.UnicodeBlock MATHEMATICAL_OPERATORS;
     field public static final java.lang.Character.UnicodeBlock MEETEI_MAYEK;
+    field public static final java.lang.Character.UnicodeBlock MEETEI_MAYEK_EXTENSIONS;
+    field public static final java.lang.Character.UnicodeBlock MEROITIC_CURSIVE;
+    field public static final java.lang.Character.UnicodeBlock MEROITIC_HIEROGLYPHS;
+    field public static final java.lang.Character.UnicodeBlock MIAO;
     field public static final java.lang.Character.UnicodeBlock MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A;
     field public static final java.lang.Character.UnicodeBlock MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B;
     field public static final java.lang.Character.UnicodeBlock MISCELLANEOUS_SYMBOLS;
@@ -47931,12 +47938,15 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock RUNIC;
     field public static final java.lang.Character.UnicodeBlock SAMARITAN;
     field public static final java.lang.Character.UnicodeBlock SAURASHTRA;
+    field public static final java.lang.Character.UnicodeBlock SHARADA;
     field public static final java.lang.Character.UnicodeBlock SHAVIAN;
     field public static final java.lang.Character.UnicodeBlock SINHALA;
     field public static final java.lang.Character.UnicodeBlock SMALL_FORM_VARIANTS;
+    field public static final java.lang.Character.UnicodeBlock SORA_SOMPENG;
     field public static final java.lang.Character.UnicodeBlock SPACING_MODIFIER_LETTERS;
     field public static final java.lang.Character.UnicodeBlock SPECIALS;
     field public static final java.lang.Character.UnicodeBlock SUNDANESE;
+    field public static final java.lang.Character.UnicodeBlock SUNDANESE_SUPPLEMENT;
     field public static final java.lang.Character.UnicodeBlock SUPERSCRIPTS_AND_SUBSCRIPTS;
     field public static final java.lang.Character.UnicodeBlock SUPPLEMENTAL_ARROWS_A;
     field public static final java.lang.Character.UnicodeBlock SUPPLEMENTAL_ARROWS_B;
@@ -47954,6 +47964,7 @@ package java.lang {
     field public static final java.lang.Character.UnicodeBlock TAI_THAM;
     field public static final java.lang.Character.UnicodeBlock TAI_VIET;
     field public static final java.lang.Character.UnicodeBlock TAI_XUAN_JING_SYMBOLS;
+    field public static final java.lang.Character.UnicodeBlock TAKRI;
     field public static final java.lang.Character.UnicodeBlock TAMIL;
     field public static final java.lang.Character.UnicodeBlock TELUGU;
     field public static final java.lang.Character.UnicodeBlock THAANA;
@@ -47993,6 +48004,7 @@ package java.lang {
     enum_constant public static final java.lang.Character.UnicodeScript BUHID;
     enum_constant public static final java.lang.Character.UnicodeScript CANADIAN_ABORIGINAL;
     enum_constant public static final java.lang.Character.UnicodeScript CARIAN;
+    enum_constant public static final java.lang.Character.UnicodeScript CHAKMA;
     enum_constant public static final java.lang.Character.UnicodeScript CHAM;
     enum_constant public static final java.lang.Character.UnicodeScript CHEROKEE;
     enum_constant public static final java.lang.Character.UnicodeScript COMMON;
@@ -48037,6 +48049,9 @@ package java.lang {
     enum_constant public static final java.lang.Character.UnicodeScript MALAYALAM;
     enum_constant public static final java.lang.Character.UnicodeScript MANDAIC;
     enum_constant public static final java.lang.Character.UnicodeScript MEETEI_MAYEK;
+    enum_constant public static final java.lang.Character.UnicodeScript MEROITIC_CURSIVE;
+    enum_constant public static final java.lang.Character.UnicodeScript MEROITIC_HIEROGLYPHS;
+    enum_constant public static final java.lang.Character.UnicodeScript MIAO;
     enum_constant public static final java.lang.Character.UnicodeScript MONGOLIAN;
     enum_constant public static final java.lang.Character.UnicodeScript MYANMAR;
     enum_constant public static final java.lang.Character.UnicodeScript NEW_TAI_LUE;
@@ -48055,8 +48070,10 @@ package java.lang {
     enum_constant public static final java.lang.Character.UnicodeScript RUNIC;
     enum_constant public static final java.lang.Character.UnicodeScript SAMARITAN;
     enum_constant public static final java.lang.Character.UnicodeScript SAURASHTRA;
+    enum_constant public static final java.lang.Character.UnicodeScript SHARADA;
     enum_constant public static final java.lang.Character.UnicodeScript SHAVIAN;
     enum_constant public static final java.lang.Character.UnicodeScript SINHALA;
+    enum_constant public static final java.lang.Character.UnicodeScript SORA_SOMPENG;
     enum_constant public static final java.lang.Character.UnicodeScript SUNDANESE;
     enum_constant public static final java.lang.Character.UnicodeScript SYLOTI_NAGRI;
     enum_constant public static final java.lang.Character.UnicodeScript SYRIAC;
@@ -48065,6 +48082,7 @@ package java.lang {
     enum_constant public static final java.lang.Character.UnicodeScript TAI_LE;
     enum_constant public static final java.lang.Character.UnicodeScript TAI_THAM;
     enum_constant public static final java.lang.Character.UnicodeScript TAI_VIET;
+    enum_constant public static final java.lang.Character.UnicodeScript TAKRI;
     enum_constant public static final java.lang.Character.UnicodeScript TAMIL;
     enum_constant public static final java.lang.Character.UnicodeScript TELUGU;
     enum_constant public static final java.lang.Character.UnicodeScript THAANA;
