@@ -68,16 +68,19 @@ piex::Error BufferedStream::GetData(
         if (sizeToRead <= kMinSizeToRead) {
             sizeToRead = kMinSizeToRead;
         }
+
         void* tempBuffer = malloc(sizeToRead);
-        if (tempBuffer != NULL) {
-            size_t bytesRead = mStream->read(tempBuffer, sizeToRead);
-            if (bytesRead != sizeToRead) {
-                free(tempBuffer);
-                return piex::Error::kFail;
-            }
-            mStreamBuffer.write(tempBuffer, bytesRead);
-            free(tempBuffer);
+        if (tempBuffer == NULL) {
+          return piex::Error::kFail;
         }
+
+        size_t bytesRead = mStream->read(tempBuffer, sizeToRead);
+        if (bytesRead != sizeToRead) {
+            free(tempBuffer);
+            return piex::Error::kFail;
+        }
+        mStreamBuffer.write(tempBuffer, bytesRead);
+        free(tempBuffer);
     }
 
     // Read bytes.
@@ -126,8 +129,8 @@ piex::Error FileStream::GetData(
     size_t size = fread((void*)data, sizeof(std::uint8_t), length, mFile);
     mPosition += size;
 
-    // Handle errors.
-    if (ferror(mFile)) {
+    // Handle errors and verify the size.
+    if (ferror(mFile) || size != length) {
         ALOGV("GetData read failed: (offset: %zu, length: %zu)", offset, length);
         return piex::Error::kFail;
     }
