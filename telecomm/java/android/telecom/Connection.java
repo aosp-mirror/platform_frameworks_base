@@ -375,6 +375,14 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.ANSWERING_DROPS_FG_CALL";
 
     /**
+     * Boolean connection extra key on a {@link Connection} which indicates that adding an
+     * additional call is disallowed when there is a video call in progress.
+     * @hide
+     */
+    public static final String EXTRA_DISABLE_ADD_CALL_DURING_VIDEO_CALL =
+            "android.telecom.extra.DISABLE_ADD_CALL_DURING_VIDEO_CALL";
+
+    /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
      * {@link #sendConnectionEvent(String)}.
