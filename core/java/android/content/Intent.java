@@ -1556,7 +1556,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Used as an int extra field with {@link #ACTION_INSTALL_PACKAGE} and
-     * {@link} #ACTION_VIEW} to indicate the uid of the package that initiated the install
+     * {@link #ACTION_VIEW} to indicate the uid of the package that initiated the install
      * @hide
      */
     @SystemApi
