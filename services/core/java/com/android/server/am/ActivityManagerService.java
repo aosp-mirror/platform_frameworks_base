@@ -2292,11 +2292,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final ActivityRecord r = (ActivityRecord) msg.obj;
                 final boolean needsVrMode = r != null && r.requestedVrComponent != null;
                 if (needsVrMode) {
-                    VrManagerInternal vrService =
-                            LocalServices.getService(VrManagerInternal.class);
-                    boolean enable = msg.arg1 == 1;
-                    vrService.setVrMode(enable, r.requestedVrComponent, r.userId,
-                            r.info.getComponentName());
+                    applyVrMode(msg.arg1 == 1, r.requestedVrComponent, r.userId,
+                            r.info.getComponentName(), false);
                 }
             } break;
             }
@@ -3082,6 +3079,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     private void applyVrModeIfNeededLocked(ActivityRecord r, boolean enable) {
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_APPLY_IF_NEEDED_MSG, enable ? 1 : 0, 0, r));
+    }
+
+    private void applyVrMode(boolean enabled, ComponentName packageName, int userId,
+            ComponentName callingPackage, boolean immediate) {
+        VrManagerInternal vrService =
+                LocalServices.getService(VrManagerInternal.class);
+        if (immediate) {
+            vrService.setVrModeImmediate(enabled, packageName, userId, callingPackage);
+        } else {
+            vrService.setVrMode(enabled, packageName, userId, callingPackage);
+        }
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -21424,11 +21432,25 @@ public final class ActivityManagerService extends ActivityManagerNative
         public SleepToken acquireSleepToken(String tag) {
             Preconditions.checkNotNull(tag);
 
+            ComponentName requestedVrService = null;
+            ComponentName callingVrActivity = null;
+            int userId = -1;
+            synchronized (ActivityManagerService.this) {
+                if (mFocusedActivity != null) {
+                    requestedVrService = mFocusedActivity.requestedVrComponent;
+                    callingVrActivity = mFocusedActivity.info.getComponentName();
+                    userId = mFocusedActivity.userId;
+                }
+            }
+
+            if (requestedVrService != null) {
+                applyVrMode(false, requestedVrService, userId, callingVrActivity, true);
+            }
+
             synchronized (ActivityManagerService.this) {
                 SleepTokenImpl token = new SleepTokenImpl(tag);
                 mSleepTokens.add(token);
                 updateSleepIfNeededLocked();
-                applyVrModeIfNeededLocked(mFocusedActivity, false);
                 return token;
             }
         }
