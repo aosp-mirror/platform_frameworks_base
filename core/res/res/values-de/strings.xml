@@ -21,7 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"KB"</string>
+    <!-- no translation found for kilobyteShort (7542884022844556968) -->
+    <skip />
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
@@ -245,7 +246,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"auf deine Kontakte zugreifen"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zuzugreifen"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
