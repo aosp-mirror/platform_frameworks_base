@@ -27,9 +27,6 @@
     <!-- Use micro alert controller -->
     <integer name="config_alertDialogController">1</integer>
 
-    <!-- Dialog windows in watch should occupy the whole screen and not be floating. -->
-    <bool name="config_dialogWindowIsFloating">false</bool>
-
     <!-- Always overscan by default to ensure onApplyWindowInsets will always be called. -->
     <bool name="config_windowOverscanByDefault">true</bool>
 

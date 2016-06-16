@@ -864,17 +864,14 @@ please see themes_device_defaults.xml.
         <item name="searchViewStyle">@style/Widget.Material.SearchView.ActionBar</item>
     </style>
 
-    <!-- Theme overlay that overrides window properties to display as a dialog. -->
-    <style name="ThemeOverlay.Material.Dialog">
-        <item name="colorBackgroundCacheHint">@null</item>
-        <item name="colorBackground">?attr/colorBackgroundFloating</item>
-
+    <!-- Base theme for overlay dialogs, customize the colours in the actual dialog theme. -->
+    <style name="ThemeOverlay.Material.BaseDialog">
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
         <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
-        <item name="windowIsFloating">@bool/config_dialogWindowIsFloating</item>
+        <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
@@ -895,6 +892,12 @@ please see themes_device_defaults.xml.
         <item name="windowFixedWidthMinor">@null</item>
         <item name="windowFixedHeightMajor">@null</item>
         <item name="windowFixedHeightMinor">@null</item>
+    </style>
+
+    <!-- Theme overlay that overrides window properties to display as a dialog. -->
+    <style name="ThemeOverlay.Material.Dialog" parent="ThemeOverlay.Material.BaseDialog">
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="colorBackground">?attr/colorBackgroundFloating</item>
     </style>
 
     <!-- Theme overlay that overrides window properties to display as a date picker dialog. -->
@@ -1080,7 +1083,7 @@ please see themes_device_defaults.xml.
         <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
-        <item name="windowIsFloating">@bool/config_dialogWindowIsFloating</item>
+        <item name="windowIsFloating">true</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
         <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
