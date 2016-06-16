@@ -22,6 +22,7 @@ import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
@@ -63,6 +64,33 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
     };
+    final AccessibilityDelegate mExpandDelegate = new AccessibilityDelegate() {
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            if (super.performAccessibilityAction(host, action, args)) {
+                return true;
+            }
+            if (action == AccessibilityNodeInfo.ACTION_COLLAPSE
+                    || action == AccessibilityNodeInfo.ACTION_EXPAND) {
+                mExpandClickListener.onClick(mExpandButton);
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            // Avoid that the button description is also spoken
+            info.setClassName(getClass().getName());
+            if (mExpanded) {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+            } else {
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+            }
+        }
+    };
 
     public NotificationHeaderView(Context context) {
         this(context, null);
@@ -92,6 +120,9 @@ public class NotificationHeaderView extends ViewGroup {
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
         mExpandButton = (ImageView) findViewById(com.android.internal.R.id.expand_button);
+        if (mExpandButton != null) {
+            mExpandButton.setAccessibilityDelegate(mExpandDelegate);
+        }
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
     }
@@ -230,7 +261,7 @@ public class NotificationHeaderView extends ViewGroup {
     public void setOnClickListener(@Nullable OnClickListener l) {
         mExpandClickListener = l;
         setOnTouchListener(mExpandClickListener != null ? mTouchListener : null);
-        setFocusable(l != null);
+        mExpandButton.setOnClickListener(mExpandClickListener);
         updateTouchListener();
     }
 
@@ -378,19 +409,6 @@ public class NotificationHeaderView extends ViewGroup {
             }
         }
         return this;
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        if (mExpandClickListener != null) {
-            AccessibilityNodeInfo.AccessibilityAction expand
-                    = new AccessibilityNodeInfo.AccessibilityAction(
-                    AccessibilityNodeInfo.ACTION_CLICK,
-                    getContext().getString(
-                            com.android.internal.R.string.expand_action_accessibility));
-            info.addAction(expand);
-        }
     }
 
     public ImageView getExpandButton() {
