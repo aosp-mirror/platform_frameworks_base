@@ -28,6 +28,7 @@ import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.hardware.input.InputManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
@@ -289,7 +290,7 @@ class DragState {
         if (!targetWin.isPotentialDragTarget()) {
             return false;
         }
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0 || !targetWindowSupportsGlobalDrag(targetWin)) {
             // Drag is limited to the current window.
             if (mLocalWin != targetWin.mClient.asBinder()) {
                 return false;
@@ -298,6 +299,13 @@ class DragState {
 
         return mCrossProfileCopyAllowed ||
                 mSourceUserId == UserHandle.getUserId(targetWin.getOwningUid());
+    }
+
+    private boolean targetWindowSupportsGlobalDrag(WindowState targetWin) {
+        // Global drags are limited to system windows, and windows for apps that are targeting N and
+        // above.
+        return targetWin.mAppToken == null
+                || targetWin.mAppToken.targetSdk >= Build.VERSION_CODES.N;
     }
 
     /* helper - send a ACTION_DRAG_STARTED event only if the window has not
