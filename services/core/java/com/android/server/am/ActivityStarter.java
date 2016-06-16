@@ -1465,14 +1465,23 @@ class ActivityStarter {
                                 intentActivity.task, mNoAnimation, mOptions,
                                 mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
                         mMovedToFront = true;
-                    } else if ((launchStack.mStackId == DOCKED_STACK_ID
-                            || launchStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID)
-                            && (mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
-                        // If we want to launch adjacent and mTargetStack is not the computed
-                        // launch stack - move task to top of computed stack.
-                        mSupervisor.moveTaskToStackLocked(intentActivity.task.taskId,
-                                launchStack.mStackId, ON_TOP, FORCE_FOCUS, "launchToSide",
-                                ANIMATE);
+                    } else if (launchStack.mStackId == DOCKED_STACK_ID
+                            || launchStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
+                            // If we want to launch adjacent and mTargetStack is not the computed
+                            // launch stack - move task to top of computed stack.
+                            mSupervisor.moveTaskToStackLocked(intentActivity.task.taskId,
+                                    launchStack.mStackId, ON_TOP, FORCE_FOCUS, "launchToSide",
+                                    ANIMATE);
+                        } else {
+                            // TODO: This should be reevaluated in MW v2.
+                            // We choose to move task to front instead of launching it adjacent
+                            // when specific stack was requested explicitly and it appeared to be
+                            // adjacent stack, but FLAG_ACTIVITY_LAUNCH_ADJACENT was not set.
+                            mTargetStack.moveTaskToFrontLocked(intentActivity.task, mNoAnimation,
+                                    mOptions, mStartActivity.appTimeTracker,
+                                    "bringToFrontInsteadOfAdjacentLaunch");
+                        }
                         mMovedToFront = true;
                     }
                     mOptions = null;
