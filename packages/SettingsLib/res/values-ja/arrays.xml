@@ -80,6 +80,16 @@
     <item msgid="3606047780792894151">"4 M / ログバッファ"</item>
     <item msgid="5431354956856655120">"16 M / ログバッファ"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"OFF"</item>
+    <item msgid="3054662377365844197">"すべて"</item>
+    <item msgid="688870735111627832">"ラジオ以外すべて"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"OFF"</item>
+    <item msgid="172978079776521897">"すべてのログバッファ"</item>
+    <item msgid="3873873912383879240">"ラジオ ログバッファ以外すべて"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"アニメーションオフ"</item>
     <item msgid="6624864048416710414">"アニメーションスケール.5x"</item>
@@ -151,7 +161,7 @@
     <item msgid="7899496259191969307">"プロセスの上限: 4"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"充電しています"</item>
+    <item msgid="488237561639712799">"充電"</item>
     <item msgid="5220695614993094977">"MTP（Media Transfer Protocol）"</item>
     <item msgid="2086000968159047375">"PTP（Picture Transfer Protocol）"</item>
     <item msgid="7398830860950841822">"RNDIS（USBイーサネット）"</item>

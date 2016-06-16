@@ -50,7 +50,7 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Хэзээ ч шалгахгүй"</item>
-    <item msgid="6042769699089883931">"Зөвхөн DRM контентыг шалгах"</item>
+    <item msgid="6042769699089883931">"Зөвхөн DRM агуулгыг шалгах"</item>
     <item msgid="9174900380056846820">"Байнга шалгах"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
@@ -79,6 +79,16 @@
     <item msgid="1314234299552254621">"лог буфер бүрт 1M"</item>
     <item msgid="3606047780792894151">"лог буфер бүрт 4M"</item>
     <item msgid="5431354956856655120">"лог буфер бүрт 16M"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Идэвхгүй"</item>
+    <item msgid="3054662377365844197">"Бүгд"</item>
+    <item msgid="688870735111627832">"Радиогоос бусад бүх"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Идэвхгүй"</item>
+    <item msgid="172978079776521897">"Бүх логийн хамгаалалт"</item>
+    <item msgid="3873873912383879240">"Радиогоос бусад бүх логийн хамгаалалт"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Дүрс амилуулалт идэвхгүй"</item>

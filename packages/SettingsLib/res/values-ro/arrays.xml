@@ -80,6 +80,16 @@
     <item msgid="3606047780792894151">"4 MB/zonă-tampon de înregistrări în jurnal"</item>
     <item msgid="5431354956856655120">"16 MB/zonă-tampon de înregistrări în jurnal"</item>
   </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Dezactivată"</item>
+    <item msgid="3054662377365844197">"Toate"</item>
+    <item msgid="688870735111627832">"Toate, fără radio"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Dezactivată"</item>
+    <item msgid="172978079776521897">"Toate zonele-tampon pentru jurnale"</item>
+    <item msgid="3873873912383879240">"Toate zonele-tampon pentru jurnale fără cele radio"</item>
+  </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animație dezactivată"</item>
     <item msgid="6624864048416710414">"Animație la scara 0,5x"</item>
@@ -125,7 +135,7 @@
     <item msgid="3191973083884253830">"Niciuna"</item>
     <item msgid="9089630089455370183">"Logcat"</item>
     <item msgid="5397807424362304288">"Systrace (imagini)"</item>
-    <item msgid="1340692776955662664">"Apelaţi stiva pentru glGetError"</item>
+    <item msgid="1340692776955662664">"Apelați stiva pentru glGetError"</item>
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="993742912147090253">"Dezactivat"</item>
