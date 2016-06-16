@@ -429,7 +429,7 @@ public class UserRestrictionsUtils {
                     if (newValue) {
                         PersistentDataBlockManager manager = (PersistentDataBlockManager) context
                                 .getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
-                        if (manager != null) {
+                        if (manager != null && manager.getOemUnlockEnabled()) {
                             manager.setOemUnlockEnabled(false);
                         }
                     }

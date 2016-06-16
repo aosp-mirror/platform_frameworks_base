@@ -466,12 +466,13 @@ public class PersistentDataBlockService extends SystemService {
             enforceOemUnlockWritePermission();
             enforceIsAdmin();
 
-            // Do not allow oem unlock modification if it has been disallowed.
-            if (Settings.Global.getInt(getContext().getContentResolver(),
-                    Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
-                throw new SecurityException("OEM unlock has been disallowed.");
-            }
             if (enabled) {
+                // Do not allow oem unlock to be enabled if it has been disallowed.
+                if (Settings.Global.getInt(getContext().getContentResolver(),
+                        Settings.Global.OEM_UNLOCK_DISALLOWED, 0) == 1) {
+                    throw new SecurityException(
+                            "OEM unlock has been disallowed by OEM_UNLOCK_DISALLOWED.");
+                }
                 enforceFactoryResetAllowed();
             }
             synchronized (mLock) {
