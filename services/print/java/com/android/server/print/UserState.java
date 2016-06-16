@@ -67,6 +67,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
@@ -315,7 +317,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
      * @param printerId the id of the printer the icon should be loaded for
      * @return the custom icon to be used for the printer or null if the icon is
      *         not yet available
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
         Icon icon = mSpooler.getCustomPrinterIcon(printerId);
@@ -422,6 +424,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
             if (isChanged) {
                 writeDisabledPrintServicesLocked(mDisabledServices);
+
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_PRINT_SERVICE_TOGGLE,
+                        isEnabled ? 0 : 1);
 
                 onConfigurationChangedLocked();
             }
@@ -1577,7 +1582,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
          * in all users of the currently known printers.
          *
          * @param printerId the id of the printer the icon belongs to
-         * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+         * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
          */
         public void onCustomPrinterIconLoadedLocked(PrinterId printerId) {
             if (DEBUG) {

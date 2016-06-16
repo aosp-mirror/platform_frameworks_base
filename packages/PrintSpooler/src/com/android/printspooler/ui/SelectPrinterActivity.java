@@ -16,6 +16,7 @@
 
 package com.android.printspooler.ui;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ComponentName;
@@ -56,6 +57,8 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.printspooler.R;
 
 import java.util.ArrayList;
@@ -79,6 +82,12 @@ public final class SelectPrinterActivity extends Activity implements
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
     private static final String KEY_NOT_FIRST_CREATE = "KEY_NOT_FIRST_CREATE";
+    private static final String KEY_DID_SEARCH = "DID_SEARCH";
+
+    // Constants for MetricsLogger.count and MetricsLogger.histo
+    private static final String PRINTERS_LISTED_COUNT = "printers_listed";
+    private static final String PRINTERS_ICON_COUNT = "printers_icon";
+    private static final String PRINTERS_INFO_COUNT = "printers_info";
 
     /** The currently enabled print services by their ComponentName */
     private ArrayMap<ComponentName, PrintServiceInfo> mEnabledPrintServices;
@@ -89,7 +98,10 @@ public final class SelectPrinterActivity extends Activity implements
 
     private AnnounceFilterResult mAnnounceFilterResult;
 
+    private boolean mDidSearch;
+
     private void startAddPrinterActivity() {
+        MetricsLogger.action(this, MetricsEvent.ACTION_PRINT_SERVICE_ADD);
         startActivity(new Intent(this, AddPrinterActivity.class));
     }
 
@@ -185,12 +197,17 @@ public final class SelectPrinterActivity extends Activity implements
                 }
             }
         }
+
+        if (savedInstanceState != null) {
+            mDidSearch = savedInstanceState.getBoolean(KEY_DID_SEARCH);
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(KEY_NOT_FIRST_CREATE, true);
+        outState.putBoolean(KEY_DID_SEARCH, mDidSearch);
     }
 
     @Override
@@ -305,6 +322,37 @@ public final class SelectPrinterActivity extends Activity implements
         super.onStop();
     }
 
+    @Override
+    protected void onDestroy() {
+        if (isFinishing()) {
+            DestinationAdapter adapter = (DestinationAdapter) mListView.getAdapter();
+            List<PrinterInfo> printers = adapter.getPrinters();
+            int numPrinters = adapter.getPrinters().size();
+
+            MetricsLogger.action(this, MetricsEvent.PRINT_ALL_PRINTERS, numPrinters);
+            MetricsLogger.count(this, PRINTERS_LISTED_COUNT, numPrinters);
+
+            int numInfoPrinters = 0;
+            int numIconPrinters = 0;
+            for (int i = 0; i < numPrinters; i++) {
+                PrinterInfo printer = printers.get(i);
+
+                if (printer.getInfoIntent() != null) {
+                    numInfoPrinters++;
+                }
+
+                if (printer.getHasCustomPrinterIcon()) {
+                    numIconPrinters++;
+                }
+            }
+
+            MetricsLogger.count(this, PRINTERS_INFO_COUNT, numInfoPrinters);
+            MetricsLogger.count(this, PRINTERS_ICON_COUNT, numIconPrinters);
+        }
+
+        super.onDestroy();
+    }
+
     private void onPrinterSelected(PrinterInfo printer) {
         Intent intent = new Intent();
         intent.putExtra(INTENT_EXTRA_PRINTER, printer);
@@ -380,6 +428,15 @@ public final class SelectPrinterActivity extends Activity implements
 
         private CharSequence mLastSearchString;
 
+        /**
+         * Get the currently known printers.
+         *
+         * @return The currently known printers
+         */
+        @NonNull List<PrinterInfo> getPrinters() {
+            return mPrinters;
+        }
+
         public DestinationAdapter() {
             mPrinterRegistry.setOnPrintersChangeListener(new PrinterRegistry.OnPrintersChangeListener() {
                 @Override
@@ -453,6 +510,12 @@ public final class SelectPrinterActivity extends Activity implements
                     }
                     if (resultCountChanged) {
                         announceSearchResultIfNeeded();
+                    }
+
+                    if (!mDidSearch) {
+                        MetricsLogger.action(SelectPrinterActivity.this,
+                                MetricsEvent.ACTION_PRINTER_SEARCH);
+                        mDidSearch = true;
                     }
                     notifyDataSetChanged();
                 }

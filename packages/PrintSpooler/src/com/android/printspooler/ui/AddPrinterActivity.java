@@ -46,6 +46,8 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.printspooler.R;
 
 import java.text.Collator;
@@ -121,6 +123,16 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
         getLoaderManager().initLoader(LOADER_ID_RECOMMENDED_SERVICES, null,
                 new PrintServicePrintServiceRecommendationLoaderCallbacks());
         getLoaderManager().initLoader(LOADER_ID_ALL_SERVICES, null, printServiceLoaderCallbacks);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (isFinishing()) {
+            MetricsLogger.action(this, MetricsEvent.PRINT_ADD_PRINTERS,
+                    mEnabledServicesAdapter.getCount());
+        }
+
+        super.onDestroy();
     }
 
     /**
@@ -673,6 +685,10 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
                 }
             } else {
                 RecommendationInfo recommendation = (RecommendationInfo) getItem(position);
+
+                MetricsLogger.action(AddPrinterActivity.this,
+                        MetricsEvent.ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL,
+                        recommendation.getPackageName().toString());
 
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(
