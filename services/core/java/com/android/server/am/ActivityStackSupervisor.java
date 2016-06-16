@@ -2619,11 +2619,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mTmpFindTaskResult.r;
     }
 
-    ActivityRecord findActivityLocked(Intent intent, ActivityInfo info) {
+    ActivityRecord findActivityLocked(Intent intent, ActivityInfo info,
+                                      boolean compareIntentFilters) {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityRecord ar = stacks.get(stackNdx).findActivityLocked(intent, info);
+                final ActivityRecord ar = stacks.get(stackNdx)
+                        .findActivityLocked(intent, info, compareIntentFilters);
                 if (ar != null) {
                     return ar;
                 }
