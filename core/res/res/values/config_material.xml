@@ -29,9 +29,6 @@
     <!-- The alert controller to use for alert dialogs. -->
     <integer name="config_alertDialogController">0</integer>
 
-    <!-- True if dialog windows are floating. -->
-    <bool name="config_dialogWindowIsFloating">true</bool>
-
     <!-- True if windowOverscan should be on by default. -->
     <bool name="config_windowOverscanByDefault">false</bool>
 
