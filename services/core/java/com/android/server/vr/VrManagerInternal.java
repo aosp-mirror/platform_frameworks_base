@@ -43,6 +43,9 @@ public abstract class VrManagerInternal {
 
     /**
      * Set the current VR mode state.
+     * <p/>
+     * This may delay the mode change slightly during application transitions to avoid frequently
+     * tearing down VrListenerServices unless necessary.
      *
      * @param enabled {@code true} to enable VR mode.
      * @param packageName The package name of the requested VrListenerService to bind.
@@ -51,6 +54,18 @@ public abstract class VrManagerInternal {
      */
     public abstract void setVrMode(boolean enabled, @NonNull ComponentName packageName,
             int userId, @NonNull ComponentName calling);
+
+    /**
+     * Set the current VR mode state immediately.
+     *
+     * @param enabled {@code true} to enable VR mode.
+     * @param packageName The package name of the requested VrListenerService to bind.
+     * @param userId the user requesting the VrListenerService component.
+     * @param calling the component currently using VR mode, or null to leave unchanged.
+     */
+    public abstract void setVrModeImmediate(boolean enabled, @NonNull ComponentName packageName,
+            int userId, @NonNull ComponentName calling);
+
 
    /**
     * Return NO_ERROR if the given package is installed on the device and enabled as a
