@@ -27,6 +27,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -37,11 +38,11 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Chronometer;
 import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
@@ -50,6 +51,7 @@ import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackScrollState;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.StackViewState;
@@ -148,6 +150,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                         nowExpanded);
                 logExpansionEvent(true /* userAction */, wasExpanded);
             } else {
+                if (v.isAccessibilityFocused()) {
+                    mPrivateLayout.setFocusOnVisibilityChange();
+                }
                 boolean nowExpanded;
                 if (isPinned()) {
                     nowExpanded = !mExpandedWhenPinned;
@@ -180,6 +185,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 }
     };
     private OnClickListener mOnClickListener;
+    private View mChildAfterViewWhenDismissed;
+    private View mGroupParentWhenDismissed;
+    private boolean mRefocusOnDismiss;
 
     public boolean isGroupExpansionChanging() {
         if (isChildInGroup()) {
@@ -716,8 +724,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
-    public void setDismissed(boolean dismissed) {
+    public void setDismissed(boolean dismissed, boolean fromAccessibility) {
         mDismissed = dismissed;
+        mGroupParentWhenDismissed = mNotificationParent;
+        mRefocusOnDismiss = fromAccessibility;
+        mChildAfterViewWhenDismissed = null;
+        if (isChildInGroup()) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mNotificationParent.getNotificationChildren();
+            int i = notificationChildren.indexOf(this);
+            if (i != -1 && i < notificationChildren.size() - 1) {
+                mChildAfterViewWhenDismissed = notificationChildren.get(i + 1);
+            }
+        }
     }
 
     public boolean isDismissed() {
@@ -747,6 +766,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public NotificationChildrenContainer getChildrenContainer() {
         return mChildrenContainer;
+    }
+
+    public View getChildAfterViewWhenDismissed() {
+        return mChildAfterViewWhenDismissed;
+    }
+
+    public View getGroupParentWhenDismissed() {
+        return mGroupParentWhenDismissed;
     }
 
     public interface ExpansionLogger {
@@ -1325,8 +1352,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void updateClearability() {
         // public versions cannot be dismissed
-        mVetoButton.setVisibility(isClearable() && (!mShowingPublic
-                || !mSensitiveHiddenInGeneral) ? View.VISIBLE : View.GONE);
+        mVetoButton.setVisibility(canViewBeDismissed() ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean canViewBeDismissed() {
+        return isClearable() && (!mShowingPublic || !mSensitiveHiddenInGeneral);
     }
 
     public void makeActionsVisibile() {
@@ -1566,6 +1596,32 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (wasExpanded != nowExpanded && mLogger != null) {
             mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded) ;
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (canViewBeDismissed()) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_DISMISS:
+                NotificationStackScrollLayout.performDismiss(this, mGroupManager,
+                        true /* fromAccessibility */);
+                return true;
+        }
+        return false;
+    }
+
+    public boolean shouldRefocusOnDismiss() {
+        return mRefocusOnDismiss || isAccessibilityFocused();
     }
 
     public interface OnExpandClickListener {
