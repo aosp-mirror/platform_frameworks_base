@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
@@ -117,6 +118,7 @@ public class NotificationContentView extends FrameLayout {
     private PendingIntent mPreviousHeadsUpRemoteInputIntent;
 
     private int mContentHeightAtAnimationStart = UNDEFINED;
+    private boolean mFocusOnVisibilityChange;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -395,6 +397,19 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    private void focusExpandButtonIfNecessary() {
+        if (mFocusOnVisibilityChange) {
+            NotificationHeaderView header = getVisibleNotificationHeader();
+            if (header != null) {
+                ImageView expandButton = header.getExpandButton();
+                if (expandButton != null) {
+                    expandButton.requestAccessibilityFocus();
+                }
+            }
+            mFocusOnVisibilityChange = false;
+        }
+    }
+
     public void setContentHeight(int contentHeight) {
         mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());
         selectLayout(mAnimate /* animate */, false /* force */);
@@ -584,7 +599,8 @@ public class NotificationContentView extends FrameLayout {
             updateContentTransformation();
         } else {
             int visibleType = calculateVisibleType();
-            if (visibleType != mVisibleType || force) {
+            boolean changedType = visibleType != mVisibleType;
+            if (changedType || force) {
                 View visibleView = getViewForVisibleType(visibleType);
                 if (visibleView != null) {
                     visibleView.setVisibility(VISIBLE);
@@ -604,6 +620,9 @@ public class NotificationContentView extends FrameLayout {
                     updateViewVisibilities(visibleType);
                 }
                 mVisibleType = visibleType;
+                if (changedType) {
+                    focusExpandButtonIfNecessary();
+                }
                 updateBackgroundColor(animate);
             }
         }
@@ -1132,5 +1151,9 @@ public class NotificationContentView extends FrameLayout {
         if (!animating) {
             mContentHeightAtAnimationStart = UNDEFINED;
         }
+    }
+
+    public void setFocusOnVisibilityChange() {
+        mFocusOnVisibilityChange = true;
     }
 }
