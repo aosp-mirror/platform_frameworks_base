@@ -373,7 +373,13 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         @Override
         public void setVrMode(boolean enabled, ComponentName packageName, int userId,
                 ComponentName callingPackage) {
-            VrManagerService.this.setVrMode(enabled, packageName, userId, callingPackage);
+            VrManagerService.this.setVrMode(enabled, packageName, userId, callingPackage, false);
+        }
+
+        @Override
+        public void setVrModeImmediate(boolean enabled, ComponentName packageName, int userId,
+                ComponentName callingPackage) {
+            VrManagerService.this.setVrMode(enabled, packageName, userId, callingPackage, true);
         }
 
         @Override
@@ -916,11 +922,11 @@ public class VrManagerService extends SystemService implements EnabledComponentC
      */
 
     private void setVrMode(boolean enabled, @NonNull ComponentName targetPackageName,
-            int userId, @NonNull ComponentName callingPackage) {
+            int userId, @NonNull ComponentName callingPackage, boolean immediate) {
 
         synchronized (mLock) {
 
-            if (!enabled && mCurrentVrService != null) {
+            if (!enabled && mCurrentVrService != null && !immediate) {
                 // If we're transitioning out of VR mode, delay briefly to avoid expensive HAL calls
                 // and service bind/unbind in case we are immediately switching to another VR app.
                 if (mPendingState == null) {
