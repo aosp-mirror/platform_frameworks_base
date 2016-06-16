@@ -691,7 +691,7 @@ public class RttManager {
 
         /**
          * spread (i.e. max - min) distance
-         * @deprecate Use {@link android.net.wifi.RttManager.RttResult#distanceSpread} API.
+         * @deprecated Use {@link android.net.wifi.RttManager.RttResult#distanceSpread} API.
          */
         @Deprecated
         public int distance_spread_cm;
