@@ -249,7 +249,6 @@ public final class MultiSelectManager {
         handleAdapterEvent(input);
     }
 
-    @VisibleForTesting
     boolean onSingleTapUp(InputEvent input) {
         if (DEBUG) Log.d(TAG, "Processing tap event.");
         if (!hasSelection()) {

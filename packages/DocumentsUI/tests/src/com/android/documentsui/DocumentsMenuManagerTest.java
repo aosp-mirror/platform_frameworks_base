@@ -48,6 +48,9 @@ public final class DocumentsMenuManagerTest {
     private TestMenuItem fileSize;
     private TestMenuItem grid;
     private TestMenuItem list;
+    private TestMenuItem cut;
+    private TestMenuItem copy;
+    private TestMenuItem paste;
 
     private TestSelectionDetails selectionDetails;
     private TestDirectoryDetails directoryDetails;
@@ -66,6 +69,9 @@ public final class DocumentsMenuManagerTest {
         fileSize = testMenu.findItem(R.id.menu_file_size);
         grid = testMenu.findItem(R.id.menu_grid);
         list = testMenu.findItem(R.id.menu_list);
+        cut = testMenu.findItem(R.id.menu_cut_to_clipboard);
+        copy = testMenu.findItem(R.id.menu_copy_to_clipboard);
+        paste = testMenu.findItem(R.id.menu_paste_from_clipboard);
 
         selectionDetails = new TestSelectionDetails();
         directoryDetails = new TestDirectoryDetails();
@@ -144,5 +150,30 @@ public final class DocumentsMenuManagerTest {
 
         grid.assertInvisible();
         list.assertInvisible();
+    }
+
+    @Test
+    public void testContextMenu_NoSelection() {
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        mgr.updateContextMenu(testMenu, null, directoryDetails);
+        cut.assertVisible();
+        copy.assertVisible();
+        cut.assertDisabled();
+        copy.assertDisabled();
+        paste.assertVisible();
+        createDir.assertVisible();
+        delete.assertVisible();
+    }
+
+    @Test
+    public void testContextMenu_Selection() {
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        mgr.updateContextMenu(testMenu, selectionDetails, directoryDetails);
+        cut.assertVisible();
+        copy.assertVisible();
+        paste.assertVisible();
+        rename.assertVisible();
+        createDir.assertVisible();
+        delete.assertVisible();
     }
 }

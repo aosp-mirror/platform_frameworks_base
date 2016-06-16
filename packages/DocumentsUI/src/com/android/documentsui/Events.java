@@ -128,6 +128,8 @@ public final class Events {
         boolean isActionUp();
 
         Point getOrigin();
+        float getX();
+        float getY();
 
         /** Returns true if the there is an item under the finger/cursor. */
         boolean isOverItem();
@@ -213,6 +215,16 @@ public final class Events {
         @Override
         public Point getOrigin() {
             return new Point((int) mEvent.getX(), (int) mEvent.getY());
+        }
+
+        @Override
+        public float getX() {
+            return mEvent.getX();
+        }
+
+        @Override
+        public float getY() {
+            return mEvent.getY();
         }
 
         @Override

@@ -61,15 +61,18 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionMode;
+import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -147,6 +150,7 @@ public class DirectoryFragment extends Fragment
     private MultiSelectManager mSelectionManager;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
     private ItemEventListener mItemEventListener = new ItemEventListener();
+    private SelectionModeListener mSelectionModeListener;
     private FocusManager mFocusManager;
 
     private IconHelper mIconHelper;
@@ -297,6 +301,7 @@ public class DirectoryFragment extends Fragment
                 new ListeningGestureDetector(this.getContext(), mDragHelper, new GestureListener());
 
         mRecView.addOnItemTouchListener(mGestureDetector);
+        mEmptyView.setOnTouchListener(mGestureDetector);
 
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
@@ -313,7 +318,8 @@ public class DirectoryFragment extends Fragment
             mBandController = new BandController(mRecView, mAdapter, mSelectionManager);
         }
 
-        mSelectionManager.addCallback(new SelectionModeListener());
+        mSelectionModeListener = new SelectionModeListener();
+        mSelectionManager.addCallback(mSelectionModeListener);
 
         mModel = new Model();
         mModel.addUpdateListener(mAdapter);
@@ -362,6 +368,31 @@ public class DirectoryFragment extends Fragment
         }
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu,
+            View v,
+            ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu, menu);
+
+        menu.add(Menu.NONE, R.id.menu_create_dir, Menu.NONE, R.string.menu_create_dir);
+        menu.add(Menu.NONE, R.id.menu_delete, Menu.NONE, R.string.menu_delete);
+        menu.add(Menu.NONE, R.id.menu_rename, Menu.NONE, R.string.menu_rename);
+
+        if (v == mRecView || v == mEmptyView) {
+            mMenuManager.updateContextMenu(menu, null, getBaseActivity().getDirectoryDetails());
+        } else {
+            mMenuManager.updateContextMenu(menu, mSelectionModeListener,
+                    getBaseActivity().getDirectoryDetails());
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        return handleMenuItemClick(item);
+    }
+
     private void handleCopyResult(int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_CANCELED || data == null) {
             // User pressed the back button or otherwise cancelled the destination pick. Don't
@@ -382,14 +413,49 @@ public class DirectoryFragment extends Fragment
                 mFileOpCallback);
     }
 
-    protected boolean onDoubleTap(MotionEvent e) {
-        if (Events.isMouseEvent(e)) {
-            String id = getModelId(e);
+    protected boolean onDoubleTap(MotionInputEvent event) {
+        if (event.isMouseEvent()) {
+            String id = getModelId(event);
             if (id != null) {
                 return handleViewItem(id);
             }
         }
         return false;
+    }
+
+    protected boolean onRightClick(MotionInputEvent e) {
+        // First get target to see if it's a blank window or a file/doc
+        DocumentHolder holder = getTarget(e);
+        if (holder != null) {
+          String modelId = getModelId(holder.itemView);
+          if (!mSelectionManager.getSelection().contains(modelId)) {
+              mSelectionManager.clearSelection();
+              // Set selection on the one single item
+              List<String> ids = Collections.singletonList(modelId);
+              mSelectionManager.setItemsSelected(ids, true);
+          }
+
+          // We are registering for context menu here so long-press doesn't trigger this
+          // floating context menu, and then quickly unregister right afterwards
+          registerForContextMenu(holder.itemView);
+          mRecView.showContextMenuForChild(holder.itemView,
+              e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
+          unregisterForContextMenu(holder.itemView);
+        }
+        // If there was no holder item, that means user right-clicked on the blank pane
+        // We would want to show different options then, and not select any item
+        // The blank pane could be the recyclerView or the emptyView, so we need to register
+        // according to whichever one is visible
+        else if (mEmptyView.getVisibility() == View.VISIBLE) {
+            registerForContextMenu(mEmptyView);
+            mEmptyView.showContextMenu(e.getX(), e.getY());
+            unregisterForContextMenu(mEmptyView);
+        } else {
+            registerForContextMenu(mRecView);
+            mRecView.showContextMenu(e.getX(), e.getY());
+            unregisterForContextMenu(mRecView);
+        }
+        return true;
     }
 
     private boolean handleViewItem(String id) {
@@ -690,58 +756,74 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            Selection selection = mSelectionManager.getSelection(new Selection());
+            return handleMenuItemClick(item);
+        }
+    }
 
-            switch (item.getItemId()) {
-                case R.id.menu_open:
-                    openDocuments(selection);
-                    mode.finish();
-                    return true;
+    private boolean handleMenuItemClick(MenuItem item) {
+        Selection selection = mSelectionManager.getSelection(new Selection());
 
-                case R.id.menu_share:
-                    shareDocuments(selection);
-                    // TODO: Only finish selection if share action is completed.
-                    mode.finish();
-                    return true;
+        switch (item.getItemId()) {
+            case R.id.menu_open:
+                openDocuments(selection);
+                mActionMode.finish();
+                return true;
 
-                case R.id.menu_delete:
-                    // deleteDocuments will end action mode if the documents are deleted.
-                    // It won't end action mode if user cancels the delete.
-                    deleteDocuments(selection);
-                    return true;
+            case R.id.menu_share:
+                shareDocuments(selection);
+                // TODO: Only finish selection if share action is completed.
+                mActionMode.finish();
+                return true;
 
-                case R.id.menu_copy_to:
-                    transferDocuments(selection, FileOperationService.OPERATION_COPY);
-                    // TODO: Only finish selection mode if copy-to is not canceled.
-                    // Need to plum down into handling the way we do with deleteDocuments.
-                    mode.finish();
-                    return true;
+            case R.id.menu_delete:
+                // deleteDocuments will end action mode if the documents are deleted.
+                // It won't end action mode if user cancels the delete.
+                deleteDocuments(selection);
+                return true;
 
-                case R.id.menu_move_to:
-                    // Exit selection mode first, so we avoid deselecting deleted documents.
-                    mode.finish();
-                    transferDocuments(selection, FileOperationService.OPERATION_MOVE);
-                    return true;
+            case R.id.menu_copy_to:
+                transferDocuments(selection, FileOperationService.OPERATION_COPY);
+                // TODO: Only finish selection mode if copy-to is not canceled.
+                // Need to plum down into handling the way we do with deleteDocuments.
+                mActionMode.finish();
+                return true;
 
-                case R.id.menu_copy_to_clipboard:
-                    copySelectedToClipboard();
-                    return true;
+            case R.id.menu_move_to:
+                // Exit selection mode first, so we avoid deselecting deleted documents.
+                mActionMode.finish();
+                transferDocuments(selection, FileOperationService.OPERATION_MOVE);
+                return true;
 
-                case R.id.menu_select_all:
-                    selectAllFiles();
-                    return true;
+            case R.id.menu_cut_to_clipboard:
+                cutSelectedToClipboard();
+                return true;
 
-                case R.id.menu_rename:
-                    // Exit selection mode first, so we avoid deselecting deleted
-                    // (renamed) documents.
-                    mode.finish();
-                    renameDocuments(selection);
-                    return true;
+            case R.id.menu_copy_to_clipboard:
+                copySelectedToClipboard();
+                return true;
 
-                default:
+            case R.id.menu_paste_from_clipboard:
+                pasteFromClipboard();
+                return true;
+
+            case R.id.menu_select_all:
+                selectAllFiles();
+                return true;
+
+            case R.id.menu_rename:
+                // Exit selection mode first, so we avoid deselecting deleted
+                // (renamed) documents.
+                mActionMode.finish();
+                renameDocuments(selection);
+                return true;
+
+            default:
+                // See if BaseActivity can handle this particular MenuItem
+                if (!getBaseActivity().onOptionsItemSelected(item)) {
                     if (DEBUG) Log.d(TAG, "Unhandled menu item selected: " + item);
                     return false;
-            }
+                }
+                return true;
         }
     }
 
@@ -1258,14 +1340,19 @@ public class DirectoryFragment extends Fragment
     /**
      * Gets the model ID for a given motion event (using the event position)
      */
-    private String getModelId(MotionEvent e) {
-        View view = mRecView.findChildViewUnder(e.getX(), e.getY());
-        if (view == null) {
-            return null;
-        }
-        RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(view);
+    private String getModelId(MotionInputEvent e) {
+        RecyclerView.ViewHolder vh = getTarget(e);
         if (vh instanceof DocumentHolder) {
             return ((DocumentHolder) vh).modelId;
+        } else {
+            return null;
+        }
+    }
+
+    private @Nullable DocumentHolder getTarget(MotionInputEvent e) {
+        View childView = mRecView.findChildViewUnder(e.getX(), e.getY());
+        if (childView != null) {
+            return (DocumentHolder) mRecView.getChildViewHolder(childView);
         } else {
             return null;
         }
@@ -1277,7 +1364,7 @@ public class DirectoryFragment extends Fragment
      * @return The Model ID for the given document, or null if the given view is not associated with
      *     a document item view.
      */
-    protected String getModelId(View view) {
+    protected @Nullable String getModelId(View view) {
         View itemView = mRecView.findContainingItemView(view);
         if (itemView != null) {
             RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(itemView);
@@ -1565,29 +1652,24 @@ public class DirectoryFragment extends Fragment
     // to GestureDetector. We're still doing that here, but with a single class
     // that reduces overall complexity in our glue code.
     private static final class ListeningGestureDetector extends GestureDetector
-            implements OnItemTouchListener {
+            implements OnItemTouchListener, OnTouchListener {
 
-        private int mLastTool = -1;
         private DragStartHelper mDragHelper;
+        private GestureListener mGestureListener;
 
         public ListeningGestureDetector(
                 Context context, DragStartHelper dragHelper, GestureListener listener) {
             super(context, listener);
             mDragHelper = dragHelper;
+            mGestureListener = listener;
             setOnDoubleTapListener(listener);
-        }
-
-        boolean mouseSpawnedLastEvent() {
-            return Events.isMouseType(mLastTool);
-        }
-
-        boolean touchSpawnedLastEvent() {
-            return Events.isTouchType(mLastTool);
         }
 
         @Override
         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            mLastTool = e.getToolType(0);
+            if (e.getAction() == MotionEvent.ACTION_DOWN && Events.isMouseEvent(e)) {
+                mGestureListener.setLastButtonState(e.getButtonState());
+            }
 
             // Detect drag events. When a drag is detected, intercept the rest of the gesture.
             View itemView = rv.findChildViewUnder(e.getX(), e.getY());
@@ -1612,6 +1694,15 @@ public class DirectoryFragment extends Fragment
 
         @Override
         public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
+
+        // For mEmptyView right-click context menu
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY) {
+                return mGestureListener.onSingleTapConfirmed(event);
+            }
+            return false;
+        }
     }
 
     /**
@@ -1619,11 +1710,32 @@ public class DirectoryFragment extends Fragment
      * events to the target DocumentHolder, whence they are routed to the appropriate listener.
      */
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        // From the RecyclerView, we get two events sent to
+        // ListeningGestureDetector#onInterceptTouchEvent on a mouse click; we first get an
+        // ACTION_DOWN Event for clicking on the mouse, and then an ACTION_UP event from releasing
+        // the mouse click. ACTION_UP event doesn't have information regarding the button (primary
+        // vs. secondary), so we have to save that somewhere first from ACTION_DOWN, and then reuse
+        // it later. The ACTION_DOWN event doesn't get forwarded to GestureListener, so we have open
+        // up a public set method to set it.
+        private int mLastButtonState = -1;
+
+        public void setLastButtonState(int state) {
+            mLastButtonState = state;
+        }
+
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             // Single tap logic:
+            // We first see if it's a mouse event, and if it was right click by checking on
+            // @{code ListeningGestureDetector#mLastButtonState}
             // If the selection manager is active, it gets first whack at handling tap
             // events. Otherwise, tap events are routed to the target DocumentHolder.
+            if (Events.isMouseEvent(e) && mLastButtonState == MotionEvent.BUTTON_SECONDARY) {
+                mLastButtonState = -1;
+                final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+                return DirectoryFragment.this.onRightClick(event);
+            }
+
             final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
             try {
                 boolean handled = mSelectionManager.onSingleTapUp(event);
@@ -1633,7 +1745,7 @@ public class DirectoryFragment extends Fragment
                 }
 
                 // Give the DocumentHolder a crack at the event.
-                DocumentHolder holder = getTarget(e);
+                DocumentHolder holder = DirectoryFragment.this.getTarget(event);
                 if (holder != null) {
                     handled = holder.onSingleTapUp(e);
                 }
@@ -1660,16 +1772,8 @@ public class DirectoryFragment extends Fragment
         public boolean onDoubleTap(MotionEvent e) {
             // Double-tap events are handled directly by the DirectoryFragment. They can be changed
             // to route through the DocumentHolder if necessary.
-            return DirectoryFragment.this.onDoubleTap(e);
-        }
-
-        private @Nullable DocumentHolder getTarget(MotionEvent e) {
-            View childView = mRecView.findChildViewUnder(e.getX(), e.getY());
-            if (childView != null) {
-                return (DocumentHolder) mRecView.getChildViewHolder(childView);
-            } else {
-                return null;
-            }
+            final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+            return DirectoryFragment.this.onDoubleTap(event);
         }
     }
 

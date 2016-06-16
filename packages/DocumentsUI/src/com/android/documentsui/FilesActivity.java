@@ -468,6 +468,11 @@ public class FilesActivity extends BaseActivity {
       return mMenuManager;
     }
 
+    @Override
+    public DirectoryDetails getDirectoryDetails() {
+        return mDetails;
+    }
+
     /**
      * Builds a stack for the specific Uris. Multi roots are not supported, as it's impossible
      * to know which root to select. Also, the stack doesn't contain intermediate directories.

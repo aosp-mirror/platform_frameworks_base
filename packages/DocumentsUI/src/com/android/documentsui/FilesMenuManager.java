@@ -19,9 +19,7 @@ package com.android.documentsui;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.documentsui.R;
-
-final class FilesMenuManager implements MenuManager {
+final class FilesMenuManager extends MenuManager {
 
     private final SearchViewManager mSearchManager;
 
@@ -30,58 +28,76 @@ final class FilesMenuManager implements MenuManager {
     }
 
     @Override
-    public void updateActionMenu(Menu menu, SelectionDetails selection) {
-
-        menu.findItem(R.id.menu_open).setVisible(false); // "open" is never used in Files.
-
-        // Commands accessible only via keyboard...
-        MenuItem copy = menu.findItem(R.id.menu_copy_to_clipboard);
-        MenuItem paste = menu.findItem(R.id.menu_paste_from_clipboard);
-
-        // Commands visible in the UI...
-        MenuItem rename = menu.findItem(R.id.menu_rename);
-        MenuItem moveTo = menu.findItem(R.id.menu_move_to);
-        MenuItem copyTo = menu.findItem(R.id.menu_copy_to);
-        MenuItem share = menu.findItem(R.id.menu_share);
-        MenuItem delete = menu.findItem(R.id.menu_delete);
-
-        // Commands usually on action-bar, so we always manage visibility.
-        share.setVisible(!selection.containsDirectories() && !selection.containsPartialFiles());
-        delete.setVisible(selection.canDelete());
-
-        // Commands always in overflow, so we don't bother showing/hiding...
-        copyTo.setVisible(true);
-        moveTo.setVisible(true);
-        rename.setVisible(true);
-
-        // copy is not visible, keyboard only
-        copy.setEnabled(!selection.containsPartialFiles());
-
-        copyTo.setEnabled(!selection.containsPartialFiles());
-        moveTo.setEnabled(!selection.containsPartialFiles() && selection.canDelete());
-        rename.setEnabled(!selection.containsPartialFiles() && selection.canRename());
-
-        Menus.disableHiddenItems(menu, copy, paste);
-    }
-
-    @Override
     public void updateOptionMenu(Menu menu, DirectoryDetails details) {
-
-        final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
-        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
-
-        createDir.setVisible(true);
-        createDir.setEnabled(details.canCreateDirectory());
-        pasteFromCb.setEnabled(details.hasItemsToPaste());
-        settings.setVisible(details.hasRootSettings());
-        newWindow.setVisible(details.shouldShowFancyFeatures());
-
-        Menus.disableHiddenItems(menu, pasteFromCb);
+        super.updateOptionMenu(menu, details);
 
         // It hides icon if searching in progress
         mSearchManager.updateMenu();
     }
 
+    @Override
+    void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
+        assert(!grid.isVisible());
+        assert(list.isVisible());
+    }
+
+    @Override
+    void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
+        assert(fileSize.isVisible());
+    }
+
+    @Override
+    void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
+        settings.setVisible(directoryDetails.hasRootSettings());
+    }
+
+    @Override
+    void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {
+        newWindow.setVisible(directoryDetails.shouldShowFancyFeatures());
+    }
+
+    @Override
+    void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails) {
+        moveTo.setVisible(true);
+        moveTo.setEnabled(!selectionDetails.containsPartialFiles() && selectionDetails.canDelete());
+    }
+
+    @Override
+    void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails) {
+        copyTo.setVisible(true);
+        copyTo.setEnabled(!selectionDetails.containsPartialFiles());
+    }
+
+    @Override
+    void updateSelectAll(MenuItem selectAll, SelectionDetails selectionDetails) {
+        assert(selectAll.isVisible());
+    }
+
+    @Override
+    void updateCreateDir(MenuItem createDir, DirectoryDetails directoryDetails) {
+        createDir.setVisible(true);
+        createDir.setEnabled(directoryDetails.canCreateDirectory());
+    }
+
+    @Override
+    void updateOpen(MenuItem open, SelectionDetails selectionDetails) {
+        open.setVisible(false);
+    }
+
+    @Override
+    void updateShare(MenuItem share, SelectionDetails selectionDetails) {
+        share.setVisible(!selectionDetails.containsDirectories()
+                && !selectionDetails.containsPartialFiles());
+    }
+
+    @Override
+    void updateDelete(MenuItem delete, SelectionDetails selectionDetails) {
+        delete.setVisible(selectionDetails.canDelete());
+    }
+
+    @Override
+    void updateRename(MenuItem rename, SelectionDetails selectionDetails) {
+        rename.setVisible(true);
+        rename.setEnabled(!selectionDetails.containsPartialFiles() && selectionDetails.canRename());
+    }
 }

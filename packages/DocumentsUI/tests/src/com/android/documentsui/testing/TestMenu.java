@@ -38,20 +38,21 @@ public abstract class TestMenu implements Menu {
     public static TestMenu create() {
         return create(R.id.menu_open,
                 R.id.menu_rename,
-                R.id.menu_copy_to_clipboard,
-                R.id.menu_paste_from_clipboard,
                 R.id.menu_move_to,
                 R.id.menu_copy_to,
+                R.id.menu_cut_to_clipboard,
+                R.id.menu_copy_to_clipboard,
+                R.id.menu_paste_from_clipboard,
                 R.id.menu_share,
                 R.id.menu_delete,
                 R.id.menu_create_dir,
-                R.id.menu_paste_from_clipboard,
                 R.id.menu_settings,
                 R.id.menu_new_window,
                 R.id.menu_select_all,
                 R.id.menu_file_size,
                 R.id.menu_grid,
-                R.id.menu_list);
+                R.id.menu_list,
+                R.id.menu_sort);
     }
 
     public static TestMenu create(int... ids) {

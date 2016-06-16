@@ -58,13 +58,6 @@
             android:showAsAction="never"
             android:visible="false" />
         <item
-            android:id="@+id/menu_paste_from_clipboard"
-            android:title="@string/menu_paste_from_clipboard"
-            android:alphabeticShortcut="v"
-            android:showAsAction="never"
-            android:visible="false" />
-        <!-- Copy action is defined in mode_directory.xml -->
-        <item
             android:id="@+id/menu_sort"
             android:title="@string/menu_sort"
             android:icon="@drawable/ic_menu_sortby"
