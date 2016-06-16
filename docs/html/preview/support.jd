@@ -17,6 +17,7 @@ page.image=images/cards/card-n-support_2x.png
       <li><a href="#general">General advisories</a></li>
       <li><a href="#new">New in DP4</a></li>
       <li><a href="#ki">Known issues</a></li>
+      <li><a href="#upgrade-notes">Notes on publishing apps that target API 24</a></li>
     </ul>
   </li>
   <li><a href="#dp3">Developer Preview 3</a></li>
@@ -328,13 +329,34 @@ page.image=images/cards/card-n-support_2x.png
 
   <li>Additional bluetooth connectivity fixes
   </li>
+
 </ul>
 
 <p>For the full list of fixed issues, see <a href="https://goo.gl/6uCKtf">the
 issue tracker</a>.</p>
 
+<h3 id="upgrade-notes">Notes on publishing apps that target API 24</h3>
 
+<p>
+  Before publishing apps that target API 24 in Google Play, keep these points
+  in mind:
+</p>
 
+<ul>
+  <li>If your app’s current <code>targetSdkVersion</code> is 22 or lower and
+  you want to target API 24, you’ll need to support <a href=
+  "{@docRoot}about/versions/marshmallow/android-6.0-changes.html">behaviors
+  introduced with Android 6.0 (Marshmallow)</a>, such as <a href=
+  "{@docRoot}training/permissions/requesting.html">runtime permissions</a>, in
+  addition to Android N behaviors.
+  </li>
+
+  <li>Once you publish an app with <code>targetSdkVersion</code> set to 23 or
+  higher, you can't later publish a version of the app with a higher
+  <code>versionCode</code> that targets 22 or lower. This restriction applies
+  in alpha and beta channels as well as production channel.
+  </li>
+</ul>
 
 <!-- DP3 Release Notes Archive -->
 
