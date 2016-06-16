@@ -89,7 +89,7 @@
         android:layout="@layout/notification_template_part_chronometer"
         android:visibility="gone"
         />
-    <ImageView
+    <com.android.internal.widget.NotificationExpandButton
         android:id="@+id/expand_button"
         android:background="@null"
         android:layout_width="wrap_content"
