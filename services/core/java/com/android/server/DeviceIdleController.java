@@ -212,7 +212,6 @@ public class DeviceIdleController extends SystemService
 
     private int mActiveIdleOpCount;
     private PowerManager.WakeLock mActiveIdleWakeLock;
-    private IBinder mDownloadServiceActive;
     private boolean mJobsActive;
     private boolean mAlarmsActive;
     private boolean mReportedMaintenanceActivity;
@@ -607,7 +606,7 @@ public class DeviceIdleController extends SystemService
          * This is the minimum amount of time that we will stay in maintenance mode after
          * a light doze.  We have this minimum to allow various things to respond to switching
          * in to maintenance mode and scheduling their work -- otherwise we may
-         * see there is nothing to do (no jobs or downloads pending) and go out of maintenance
+         * see there is nothing to do (no jobs pending) and go out of maintenance
          * mode immediately.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MIN_LIGHT_MAINTENANCE_TIME
@@ -618,7 +617,7 @@ public class DeviceIdleController extends SystemService
          * This is the minimum amount of time that we will stay in maintenance mode after
          * a full doze.  We have this minimum to allow various things to respond to switching
          * in to maintenance mode and scheduling their work -- otherwise we may
-         * see there is nothing to do (no jobs or downloads pending) and go out of maintenance
+         * see there is nothing to do (no jobs pending) and go out of maintenance
          * mode immediately.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_MIN_DEEP_MAINTENANCE_TIME
@@ -1215,28 +1214,6 @@ public class DeviceIdleController extends SystemService
             long ident = Binder.clearCallingIdentity();
             try {
                 exitIdleInternal(reason);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override public void downloadServiceActive(IBinder token) {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                DeviceIdleController.this.downloadServiceActive(token);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        @Override public void downloadServiceInactive() {
-            getContext().enforceCallingOrSelfPermission(
-                    "android.permission.SEND_DOWNLOAD_COMPLETED_INTENTS", null);
-            long ident = Binder.clearCallingIdentity();
-            try {
-                DeviceIdleController.this.downloadServiceInactive();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2086,30 +2063,6 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void downloadServiceActive(IBinder token) {
-        synchronized (this) {
-            mDownloadServiceActive = token;
-            reportMaintenanceActivityIfNeededLocked();
-            try {
-                token.linkToDeath(new IBinder.DeathRecipient() {
-                    @Override public void binderDied() {
-                        downloadServiceInactive();
-                    }
-                }, 0);
-            } catch (RemoteException e) {
-                mDownloadServiceActive = null;
-            }
-        }
-    }
-
-    void downloadServiceInactive() {
-        synchronized (this) {
-            mDownloadServiceActive = null;
-            reportMaintenanceActivityIfNeededLocked();
-            exitMaintenanceEarlyIfNeededLocked();
-        }
-    }
-
     void setJobsActive(boolean active) {
         synchronized (this) {
             mJobsActive = active;
@@ -2143,7 +2096,7 @@ public class DeviceIdleController extends SystemService
     }
 
     void reportMaintenanceActivityIfNeededLocked() {
-        boolean active = mJobsActive | (mDownloadServiceActive != null);
+        boolean active = mJobsActive;
         if (active == mReportedMaintenanceActivity) {
             return;
         }
@@ -2154,8 +2107,7 @@ public class DeviceIdleController extends SystemService
     }
 
     boolean isOpsInactiveLocked() {
-        return mActiveIdleOpCount <= 0 && mDownloadServiceActive == null
-                && !mJobsActive && !mAlarmsActive;
+        return mActiveIdleOpCount <= 0 && !mJobsActive && !mAlarmsActive;
     }
 
     void exitMaintenanceEarlyIfNeededLocked() {
@@ -3052,9 +3004,6 @@ public class DeviceIdleController extends SystemService
             }
             if (mAlarmsActive) {
                 pw.print("  mAlarmsActive="); pw.println(mAlarmsActive);
-            }
-            if (mDownloadServiceActive != null) {
-                pw.print("  mDownloadServiceActive="); pw.println(mDownloadServiceActive);
             }
         }
     }

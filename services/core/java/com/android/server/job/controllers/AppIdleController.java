@@ -142,8 +142,11 @@ public class AppIdleController extends StateController {
                 UserHandle.formatUid(pw, jobStatus.getSourceUid());
                 pw.print(": ");
                 pw.print(jobStatus.getSourcePackageName());
-                pw.print(", runnable=");
-                pw.println((jobStatus.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0);
+                if ((jobStatus.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0) {
+                    pw.println(" RUNNABLE");
+                } else {
+                    pw.println(" WAITING");
+                }
             }
         });
     }

@@ -103,6 +103,9 @@ public final class JobStatus {
     final int requiredConstraints;
     int satisfiedConstraints = 0;
 
+    // Set to true if doze constraint was satisfied due to app being whitelisted.
+    public boolean dozeWhitelisted;
+
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
@@ -403,7 +406,8 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
     }
 
-    boolean setDeviceNotDozingConstraintSatisfied(boolean state) {
+    boolean setDeviceNotDozingConstraintSatisfied(boolean state, boolean whitelisted) {
+        dozeWhitelisted = whitelisted;
         return setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state);
     }
 
@@ -651,6 +655,9 @@ public final class JobStatus {
             pw.print(prefix); pw.print("Unsatisfied constraints:");
             dumpConstraints(pw, (requiredConstraints & ~satisfiedConstraints));
             pw.println();
+            if (dozeWhitelisted) {
+                pw.print(prefix); pw.println("Doze whitelisted: true");
+            }
         }
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
