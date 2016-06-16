@@ -141,7 +141,7 @@ public class WifiScanner {
     /**
      * reports {@link ScanListener#onResults} when underlying buffers are full
      * this is simply the lack of the {@link #REPORT_EVENT_AFTER_EACH_SCAN} flag
-     * @deprecated
+     * @deprecated It is not supported anymore.
      */
     @Deprecated
     public static final int REPORT_EVENT_AFTER_BUFFER_FULL = 0;
