@@ -2614,17 +2614,18 @@ public class NotificationManagerService extends SystemService {
     private static void setPendingIntentWhitelistDuration(ActivityManagerInternal am, long duration,
             Bundle extras) {
         for (String key : extras.keySet()) {
-            setPendingIntentWhitelistDuration(am, duration, extras.getParcelable(key));
-            final Parcelable[] parcelableArray = extras.getParcelableArray(key);
-            if (parcelableArray != null) {
-                for (Parcelable parcelable: parcelableArray) {
+            final Object value = extras.get(key);
+            if (value instanceof Parcelable) {
+                setPendingIntentWhitelistDuration(am, duration, (Parcelable) value);
+            } else if (value instanceof Parcelable[]) {
+                for (Parcelable parcelable : (Parcelable[]) value) {
                     setPendingIntentWhitelistDuration(am, duration, parcelable);
                 }
-            }
-            final ArrayList<Parcelable> parcelableList = extras.getParcelableArrayList(key);
-            if (parcelableList != null) {
-                for (Parcelable parcelable: parcelableList) {
-                    setPendingIntentWhitelistDuration(am, duration, parcelable);
+            } else if (value instanceof List) {
+                for (Object element : (List <?>) value) {
+                    if (element instanceof Parcelable) {
+                        setPendingIntentWhitelistDuration(am, duration, (Parcelable) element);
+                    }
                 }
             }
         }
