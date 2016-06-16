@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.Theme;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -162,10 +163,9 @@ public class HelpUtils {
             intent.putExtra(EXTRA_CONTEXT, backupContext);
         }
         intent.putExtra(EXTRA_THEME, 1 /* Light, dark action bar */);
-        Theme theme = context.getTheme();
-        TypedValue typedValue = new TypedValue();
-        theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
-        intent.putExtra(EXTRA_PRIMARY_COLOR, context.getColor(typedValue.resourceId));
+        TypedArray array = context.obtainStyledAttributes(new int[]{android.R.attr.colorPrimary});
+        intent.putExtra(EXTRA_PRIMARY_COLOR, array.getColor(0, 0));
+        array.recycle();
     }
 
     /**
