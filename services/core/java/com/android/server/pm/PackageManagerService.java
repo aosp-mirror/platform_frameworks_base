@@ -4753,10 +4753,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 final int N = sus.packages.size();
                 final String[] res = new String[N];
-                final Iterator<PackageSetting> it = sus.packages.iterator();
-                int i = 0;
-                while (it.hasNext()) {
-                    res[i++] = it.next().name;
+                for (int i = 0; i < N; i++) {
+                    res[i] = sus.packages.valueAt(i).name;
                 }
                 return res;
             } else if (obj instanceof PackageSetting) {
@@ -14478,7 +14476,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Remove existing system package
         removePackageLI(deletedPackage, true);
 
-        disabledSystem = disableSystemPackageLPw(deletedPackage, pkg);
+        synchronized (mPackages) {
+            disabledSystem = disableSystemPackageLPw(deletedPackage, pkg);
+        }
         if (!disabledSystem) {
             // We didn't need to disable the .apk as a current system package,
             // which means we are replacing another update that is already
