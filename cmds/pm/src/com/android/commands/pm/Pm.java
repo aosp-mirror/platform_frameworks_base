@@ -261,6 +261,11 @@ public final class Pm {
             return;
         }
 
+        if ("set-user-restriction".equals(op)) {
+            runSetUserRestriction();
+            return;
+        }
+
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -1259,6 +1264,40 @@ public final class Pm {
             mPm.forceDexOpt(packageName);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    public void runSetUserRestriction() {
+        int userId = UserHandle.USER_OWNER;
+        String opt = nextOption();
+        if (opt != null && "--user".equals(opt)) {
+            String arg = nextArg();
+            if (arg == null || !isNumber(arg)) {
+                System.err.println("Error: valid userId not specified");
+                return;
+            }
+            userId = Integer.parseInt(arg);
+        }
+
+        String restriction = nextArg();
+        String arg = nextArg();
+        boolean value;
+        if ("1".equals(arg)) {
+            value = true;
+        } else if ("0".equals(arg)) {
+            value = false;
+        } else {
+            System.err.println("Error: valid value not specified");
+            return;
+        }
+        try {
+            Bundle restrictions = new Bundle();
+            restrictions.putBoolean(restriction, value);
+            mUm.setUserRestrictions(restrictions, userId);
+            return;
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            return;
         }
     }
 
