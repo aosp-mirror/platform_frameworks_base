@@ -692,8 +692,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
         boolean active = mPendingJobs.size() > 0;
         if (mPendingJobs.size() <= 0) {
             for (int i=0; i<mActiveServices.size(); i++) {
-                JobServiceContext jsc = mActiveServices.get(i);
-                if (jsc.getRunningJob() != null) {
+                final JobServiceContext jsc = mActiveServices.get(i);
+                final JobStatus job = jsc.getRunningJob();
+                if (job != null
+                        && (job.getJob().getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) == 0
+                        && !job.dozeWhitelisted) {
+                    // We will report active if we have a job running and it is not an exception
+                    // due to being in the foreground or whitelisted.
                     active = true;
                     break;
                 }
