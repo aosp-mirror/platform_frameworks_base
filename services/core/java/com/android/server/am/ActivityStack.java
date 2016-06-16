@@ -1820,7 +1820,8 @@ final class ActivityStack {
             boolean stackVisibleBehind, ActivityRecord visibleBehind,
             boolean behindFullscreenActivity) {
 
-        if (!okToShowLocked(r)) {
+        if (!okToShowLocked(r)
+                || (mService.isSleepingOrShuttingDown() && r.voiceSession == null)) {
             return false;
         }
 
