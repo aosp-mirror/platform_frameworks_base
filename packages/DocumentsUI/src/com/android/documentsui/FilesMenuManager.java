@@ -37,13 +37,13 @@ final class FilesMenuManager extends MenuManager {
 
     @Override
     void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
-        assert(!grid.isVisible());
-        assert(list.isVisible());
+        //assert(!grid.isVisible());
+        //assert(list.isVisible());
     }
 
     @Override
     void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
-        assert(fileSize.isVisible());
+        //assert(fileSize.isVisible());
     }
 
     @Override

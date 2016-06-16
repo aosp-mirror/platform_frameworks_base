@@ -66,12 +66,12 @@ final class DocumentsMenuManager extends MenuManager {
 
     @Override
     void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
-        assert(!settings.isVisible());
+        //assert(!settings.isVisible());
     }
 
     @Override
     void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {
-        assert(!newWindow.isVisible());
+        //assert(!newWindow.isVisible());
     }
 
     @Override
@@ -108,11 +108,11 @@ final class DocumentsMenuManager extends MenuManager {
 
     @Override
     void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails) {
-        assert(!moveTo.isVisible());
+        //assert(!moveTo.isVisible());
     }
 
     @Override
     void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails) {
-        assert(!copyTo.isVisible());
+        //assert(!copyTo.isVisible());
     }
 }
