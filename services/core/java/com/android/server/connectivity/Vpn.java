@@ -259,26 +259,37 @@ public class Vpn {
      *
      * @param packageName the package to designate as always-on VPN supplier.
      * @param lockdown whether to prevent traffic outside of a VPN, for example while connecting.
+     * @return {@code true} if the package has been set as always-on, {@code false} otherwise.
      */
     public synchronized boolean setAlwaysOnPackage(String packageName, boolean lockdown) {
         enforceControlPermissionOrInternalCaller();
+        if (VpnConfig.LEGACY_VPN.equals(packageName)) {
+            Log.w(TAG, "Not setting legacy VPN \"" + packageName + "\" as always-on.");
+            return false;
+        }
 
-        // Disconnect current VPN.
-        prepareInternal(VpnConfig.LEGACY_VPN);
-
-        // Pre-authorize new always-on VPN package.
         if (packageName != null) {
+            // Pre-authorize new always-on VPN package.
             if (!setPackageAuthorization(packageName, true)) {
                 return false;
             }
-            prepareInternal(packageName);
+            mAlwaysOn = true;
+        } else {
+            packageName = VpnConfig.LEGACY_VPN;
+            mAlwaysOn = false;
         }
 
-        mAlwaysOn = (packageName != null);
         mLockdown = (mAlwaysOn && lockdown);
+        if (!isCurrentPreparedPackage(packageName)) {
+            prepareInternal(packageName);
+        }
         maybeRegisterPackageChangeReceiverLocked(packageName);
         setVpnForcedLocked(mLockdown);
         return true;
+    }
+
+    private static boolean isNullOrLegacyVpn(String packageName) {
+        return packageName == null || VpnConfig.LEGACY_VPN.equals(packageName);
     }
 
     private void unregisterPackageChangeReceiverLocked() {
@@ -293,7 +304,7 @@ public class Vpn {
         // Unregister IntentFilter listening for previous always-on package change
         unregisterPackageChangeReceiverLocked();
 
-        if (packageName != null) {
+        if (!isNullOrLegacyVpn(packageName)) {
             mIsPackageIntentReceiverRegistered = true;
 
             IntentFilter intentFilter = new IntentFilter();
