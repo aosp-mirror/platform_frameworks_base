@@ -469,7 +469,7 @@ public class Main {
     @Test
     public void testGetResourceNameVariants() throws Exception {
         // Setup
-        SessionParams params = createSessionParams("", ConfigGenerator.NEXUS_4);
+        SessionParams params = createSessionParams("empty.xml", ConfigGenerator.NEXUS_4);
         AssetManager assetManager = AssetManager.getSystem();
         DisplayMetrics metrics = new DisplayMetrics();
         Configuration configuration = RenderAction.getConfiguration(params);
