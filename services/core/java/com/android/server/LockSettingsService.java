@@ -423,6 +423,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (Intent.ACTION_USER_ADDED.equals(intent.getAction())) {
                 // Notify keystore that a new user was added.
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                if (userHandle > UserHandle.USER_SYSTEM) {
+                    removeUser(userHandle, /* unknownUser= */ true);
+                }
                 final KeyStore ks = KeyStore.getInstance();
                 final UserInfo parentInfo = mUserManager.getProfileParent(userHandle);
                 final int parentHandle = parentInfo != null ? parentInfo.id : -1;
@@ -433,7 +436,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             } else if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (userHandle > 0) {
-                    removeUser(userHandle);
+                    removeUser(userHandle, /* unknownUser= */ false);
                 }
             }
         }
@@ -1464,7 +1467,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return false;
     }
 
-    private void removeUser(int userId) {
+    private void removeUser(int userId, boolean unknownUser) {
         mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
 
@@ -1479,7 +1482,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (RemoteException ex) {
             Slog.w(TAG, "unable to clear GK secure user id");
         }
-        if (mUserManager.getUserInfo(userId).isManagedProfile()) {
+        if (unknownUser || mUserManager.getUserInfo(userId).isManagedProfile()) {
             removeKeystoreProfileKey(userId);
         }
     }
