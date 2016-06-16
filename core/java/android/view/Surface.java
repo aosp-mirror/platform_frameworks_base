@@ -58,6 +58,7 @@ public class Surface implements Parcelable {
 
     private static native long nativeGetNextFrameNumber(long nativeObject);
     private static native int nativeSetScalingMode(long nativeObject, int scalingMode);
+    private static native void nativeSetBuffersTransform(long nativeObject, long transform);
 
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
