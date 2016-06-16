@@ -72,6 +72,7 @@ class AppWindowToken extends WindowToken {
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean layoutConfigChanges;
     boolean showForAllUsers;
+    int targetSdk;
 
     // The input dispatching timeout for this application token in nanoseconds.
     long inputDispatchingTimeoutNanos;
