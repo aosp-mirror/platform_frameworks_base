@@ -3425,7 +3425,7 @@ public class AccountManagerService
     /** {@hide} */
     @NonNull
     public AccountAndUser[] getAllAccounts() {
-        final List<UserInfo> users = getUserManager().getUsers();
+        final List<UserInfo> users = getUserManager().getUsers(true);
         final int[] userIds = new int[users.size()];
         for (int i = 0; i < userIds.length; i++) {
             userIds[i] = users.get(i).id;

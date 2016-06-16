@@ -470,7 +470,7 @@ public final class SystemServer {
         }
 
         traceBeginAndSlog("StartUserManagerService");
-        ServiceManager.addService(Context.USER_SERVICE, UserManagerService.getInstance());
+        mSystemServiceManager.startService(UserManagerService.LifeCycle.class);
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
         // Initialize attribute cache used to cache resources from packages.
