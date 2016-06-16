@@ -29,7 +29,6 @@ import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.StateSet;
 import android.view.HapticFeedbackConstants;
@@ -84,7 +83,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     private int mCurrentView = UNINITIALIZED;
 
-    private final Calendar mCurrentDate;
     private final Calendar mTempDate;
     private final Calendar mMinDate;
     private final Calendar mMaxDate;
@@ -324,10 +322,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
         // TODO: This should use live regions.
         if (announce) {
-            final long millis = mCurrentDate.getTimeInMillis();
-            final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
-            final String fullDateText = DateUtils.formatDateTime(mContext, millis, flags);
-            mAnimator.announceForAccessibility(fullDateText);
+            mAnimator.announceForAccessibility(getFormattedCurrentDate());
         }
     }
 
@@ -580,11 +575,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         onPopulateAccessibilityEvent(event);
         return true;
-    }
-
-    @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        event.getText().add(mCurrentDate.getTime().toString());
     }
 
     public CharSequence getAccessibilityClassName() {

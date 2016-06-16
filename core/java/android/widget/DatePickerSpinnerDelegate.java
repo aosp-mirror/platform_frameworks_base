@@ -24,7 +24,6 @@ import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,8 +85,6 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     private Calendar mMinDate;
 
     private Calendar mMaxDate;
-
-    private Calendar mCurrentDate;
 
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
@@ -396,14 +393,6 @@ class DatePickerSpinnerDelegate extends AbstractDatePickerDelegate {
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         onPopulateAccessibilityEvent(event);
         return true;
-    }
-
-    @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR;
-        String selectedDateUtterance = DateUtils.formatDateTime(mContext,
-                mCurrentDate.getTimeInMillis(), flags);
-        event.getText().add(selectedDateUtterance);
     }
 
     /**
