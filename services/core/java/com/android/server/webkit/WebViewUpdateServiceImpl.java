@@ -20,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.os.UserHandle;
 import android.util.Base64;
 import android.util.Slog;
 import android.webkit.WebViewFactory;
@@ -49,7 +50,10 @@ public class WebViewUpdateServiceImpl {
         mWebViewUpdater = new WebViewUpdater(mContext, mSystemInterface);
     }
 
-    void packageStateChanged(String packageName, int changedState) {
+    void packageStateChanged(String packageName, int changedState, int userId) {
+        // We don't early out here in different cases where we could potentially early-out (e.g. if
+        // we receive PACKAGE_CHANGED for another user than the system user) since that would
+        // complicate this logic further and open up for more edge cases.
         updateFallbackStateOnPackageChange(packageName, changedState);
         mWebViewUpdater.packageStateChanged(packageName, changedState);
     }
@@ -64,7 +68,7 @@ public class WebViewUpdateServiceImpl {
             if (provider.availableByDefault && !provider.isFallback) {
                 try {
                     PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(provider);
-                    if (isEnabledPackage(packageInfo)
+                    if (isInstalledPackage(packageInfo) && isEnabledPackage(packageInfo)
                             && mWebViewUpdater.isValidProvider(provider, packageInfo)) {
                         return true;
                     }
@@ -103,7 +107,7 @@ public class WebViewUpdateServiceImpl {
     }
 
     WebViewProviderInfo[] getValidWebViewPackages() {
-        return mWebViewUpdater.getValidWebViewPackages();
+        return mWebViewUpdater.getValidAndInstalledWebViewPackages();
     }
 
     WebViewProviderInfo[] getWebViewPackages() {
@@ -254,6 +258,12 @@ public class WebViewUpdateServiceImpl {
                                     // (not if it has been enabled/disabled).
                                     return;
                                 }
+                                if (newPackage.packageName.equals(oldProviderName)
+                                        && (newPackage.lastUpdateTime
+                                            == mCurrentWebViewPackage.lastUpdateTime)) {
+                                    // If the chosen package hasn't been updated, then early-out
+                                    return;
+                                }
                             }
                             // Only trigger update actions if the updated package is the one
                             // that will be used, or the one that was in use before the
@@ -373,14 +383,15 @@ public class WebViewUpdateServiceImpl {
             }
         }
 
-        private ProviderAndPackageInfo[] getValidWebViewPackagesAndInfos() {
+        private ProviderAndPackageInfo[] getValidWebViewPackagesAndInfos(boolean onlyInstalled) {
             WebViewProviderInfo[] allProviders = mSystemInterface.getWebViewPackages();
             List<ProviderAndPackageInfo> providers = new ArrayList<>();
             for(int n = 0; n < allProviders.length; n++) {
                 try {
                     PackageInfo packageInfo =
                         mSystemInterface.getPackageInfoForProvider(allProviders[n]);
-                    if (isValidProvider(allProviders[n], packageInfo)) {
+                    if ((!onlyInstalled || isInstalledPackage(packageInfo))
+                            && isValidProvider(allProviders[n], packageInfo)) {
                         providers.add(new ProviderAndPackageInfo(allProviders[n], packageInfo));
                     }
                 } catch (NameNotFoundException e) {
@@ -393,8 +404,9 @@ public class WebViewUpdateServiceImpl {
         /**
          * Fetch only the currently valid WebView packages.
          **/
-        public WebViewProviderInfo[] getValidWebViewPackages() {
-            ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
+        public WebViewProviderInfo[] getValidAndInstalledWebViewPackages() {
+            ProviderAndPackageInfo[] providersAndPackageInfos =
+                getValidWebViewPackagesAndInfos(true /* only fetch installed packages */);
             WebViewProviderInfo[] providers =
                 new WebViewProviderInfo[providersAndPackageInfos.length];
             for(int n = 0; n < providersAndPackageInfos.length; n++) {
@@ -421,29 +433,33 @@ public class WebViewUpdateServiceImpl {
          *
          */
         private PackageInfo findPreferredWebViewPackage() {
-            ProviderAndPackageInfo[] providers = getValidWebViewPackagesAndInfos();
+            ProviderAndPackageInfo[] providers =
+                getValidWebViewPackagesAndInfos(false /* onlyInstalled */);
 
             String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider(mContext);
 
             // If the user has chosen provider, use that
             for (ProviderAndPackageInfo providerAndPackage : providers) {
                 if (providerAndPackage.provider.packageName.equals(userChosenProvider)
+                        && isInstalledPackage(providerAndPackage.packageInfo)
                         && isEnabledPackage(providerAndPackage.packageInfo)) {
                     return providerAndPackage.packageInfo;
                 }
             }
 
             // User did not choose, or the choice failed; use the most stable provider that is
-            // enabled and available by default (not through user choice).
+            // installed and enabled for the device owner, and available by default (not through
+            // user choice).
             for (ProviderAndPackageInfo providerAndPackage : providers) {
                 if (providerAndPackage.provider.availableByDefault
+                        && isInstalledPackage(providerAndPackage.packageInfo)
                         && isEnabledPackage(providerAndPackage.packageInfo)) {
                     return providerAndPackage.packageInfo;
                 }
             }
 
-            // Could not find any enabled package either, use the most stable and default-available
-            // provider.
+            // Could not find any installed and enabled package either, use the most stable and
+            // default-available provider.
             for (ProviderAndPackageInfo providerAndPackage : providers) {
                 if (providerAndPackage.provider.availableByDefault) {
                     return providerAndPackage.packageInfo;
@@ -640,6 +656,15 @@ public class WebViewUpdateServiceImpl {
      */
     private static boolean isEnabledPackage(PackageInfo packageInfo) {
         return packageInfo.applicationInfo.enabled;
+    }
+
+    /**
+     * Return true if the package is installed and not hidden
+     */
+    private static boolean isInstalledPackage(PackageInfo packageInfo) {
+        return (((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
+            && ((packageInfo.applicationInfo.privateFlags
+                        & ApplicationInfo.PRIVATE_FLAG_HIDDEN) == 0));
     }
 
 }
