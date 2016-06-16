@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"t"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"kt"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"kt"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"Mt"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"Gt"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Tt"</string>
