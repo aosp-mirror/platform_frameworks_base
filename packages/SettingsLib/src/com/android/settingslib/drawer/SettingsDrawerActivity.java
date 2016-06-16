@@ -319,9 +319,6 @@ public class SettingsDrawerActivity extends Activity {
     private class CategoriesUpdater extends AsyncTask<Void, Void, List<DashboardCategory>> {
         @Override
         protected List<DashboardCategory> doInBackground(Void... params) {
-            if (sConfigTracker == null || sTileCache == null) {
-                getDashboardCategories();
-            }
             if (sConfigTracker.applyNewConfig(getResources())) {
                 sTileCache.clear();
             }
