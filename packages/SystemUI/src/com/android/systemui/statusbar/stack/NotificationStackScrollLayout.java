@@ -769,7 +769,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
         }
-        performDismiss(v);
+        performDismiss(v, mGroupManager, false /* fromAccessibility */);
 
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
@@ -778,17 +778,18 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    private void performDismiss(View v) {
+    public static void performDismiss(View v, NotificationGroupManager groupManager,
+            boolean fromAccessibility) {
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            if (mGroupManager.isOnlyChildInSuppressedGroup(row.getStatusBarNotification())) {
+            if (groupManager.isOnlyChildInGroup(row.getStatusBarNotification())) {
                 ExpandableNotificationRow groupSummary =
-                        mGroupManager.getLogicalGroupSummary(row.getStatusBarNotification());
+                        groupManager.getLogicalGroupSummary(row.getStatusBarNotification());
                 if (groupSummary.isClearable()) {
-                    performDismiss(groupSummary);
+                    performDismiss(groupSummary, groupManager, fromAccessibility);
                 }
             }
-            row.setDismissed(true);
+            row.setDismissed(true, fromAccessibility);
         }
         final View veto = v.findViewById(R.id.veto);
         if (veto != null && veto.getVisibility() != View.GONE) {
@@ -2265,6 +2266,27 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         // Make sure the clipRect we might have set is removed
         expandableView.setClipTopAmount(0);
+
+        focusNextViewIfFocused(child);
+    }
+
+    private void focusNextViewIfFocused(View view) {
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (row.shouldRefocusOnDismiss()) {
+                View nextView = row.getChildAfterViewWhenDismissed();
+                if (nextView == null) {
+                    View groupParentWhenDismissed = row.getGroupParentWhenDismissed();
+                    nextView = getFirstChildBelowTranlsationY(groupParentWhenDismissed != null
+                            ? groupParentWhenDismissed.getTranslationY()
+                            : view.getTranslationY());
+                }
+                if (nextView != null) {
+                    nextView.requestAccessibilityFocus();
+                }
+            }
+        }
+
     }
 
     private boolean isChildInGroup(View child) {
