@@ -27,6 +27,7 @@ import android.icu.util.Calendar;
 import android.icu.util.TimeZone;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
@@ -500,6 +501,8 @@ public class DatePicker extends FrameLayout {
         // The context
         protected Context mContext;
 
+        protected Calendar mCurrentDate;
+
         // The current locale
         protected Locale mCurrentLocale;
 
@@ -539,6 +542,17 @@ public class DatePicker extends FrameLayout {
 
         protected void onLocaleChanged(Locale locale) {
             // Stub.
+        }
+
+        @Override
+        public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+            event.getText().add(getFormattedCurrentDate());
+        }
+
+        protected String getFormattedCurrentDate() {
+           return DateUtils.formatDateTime(mContext, mCurrentDate.getTimeInMillis(),
+                   DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR
+                           | DateUtils.FORMAT_SHOW_WEEKDAY);
         }
 
         /**
