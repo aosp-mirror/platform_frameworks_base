@@ -157,8 +157,9 @@ public class DeviceIdleJobsController extends StateController {
     }
 
     private void updateTaskStateLocked(JobStatus task) {
-        boolean enableTask = !mDeviceIdleMode || isWhitelistedLocked(task);
-        task.setDeviceNotDozingConstraintSatisfied(enableTask);
+        final boolean whitelisted = isWhitelistedLocked(task);
+        final boolean enableTask = !mDeviceIdleMode || whitelisted;
+        task.setDeviceNotDozingConstraintSatisfied(enableTask, whitelisted);
     }
 
     @Override
@@ -186,9 +187,13 @@ public class DeviceIdleJobsController extends StateController {
                 UserHandle.formatUid(pw, jobStatus.getSourceUid());
                 pw.print(": ");
                 pw.print(jobStatus.getSourcePackageName());
-                pw.print(", runnable=");
-                pw.println((jobStatus.satisfiedConstraints
-                        & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
+                pw.print((jobStatus.satisfiedConstraints
+                        & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0
+                                ? " RUNNABLE" : " WAITING");
+                if (jobStatus.dozeWhitelisted) {
+                    pw.print(" WHITELISTED");
+                }
+                pw.println();
             }
         });
     }
