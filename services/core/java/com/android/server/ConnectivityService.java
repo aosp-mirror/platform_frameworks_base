@@ -3431,10 +3431,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 Slog.w(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
             }
-            // If the current VPN package is the same as the new one, this is a no-op
-            if (TextUtils.equals(packageName, vpn.getAlwaysOnPackage())) {
-                return true;
-            }
             if (!vpn.setAlwaysOnPackage(packageName, lockdown)) {
                 return false;
             }
