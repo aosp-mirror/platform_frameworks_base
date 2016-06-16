@@ -617,6 +617,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean getSeparateProfileChallengeEnabled(int userId) throws RemoteException {
+        checkReadPermission(SEPARATE_PROFILE_CHALLENGE_KEY, userId);
         synchronized (mSeparateChallengeLock) {
             return getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
         }
@@ -625,6 +626,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void setSeparateProfileChallengeEnabled(int userId, boolean enabled,
             String managedUserPassword) throws RemoteException {
+        checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
             setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userId);
             if (enabled) {
@@ -672,7 +674,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public long getLong(String key, long defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
-
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
     }
@@ -680,7 +681,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public String getString(String key, String defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
-
         return getStringUnchecked(key, defaultValue, userId);
     }
 
@@ -899,7 +899,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void setLockPatternInternal(String pattern, String savedCredential, int userId)
+    private void setLockPatternInternal(String pattern, String savedCredential, int userId)
             throws RemoteException {
         byte[] currentHandle = getCurrentHandle(userId);
 
@@ -962,7 +962,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    public void setLockPasswordInternal(String password, String savedCredential, int userId)
+    private void setLockPasswordInternal(String password, String savedCredential, int userId)
             throws RemoteException {
         byte[] currentHandle = getCurrentHandle(userId);
         if (password == null) {
@@ -1156,6 +1156,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void resetKeyStore(int userId) throws RemoteException {
+        checkWritePermission(userId);
         if (DEBUG) Slog.v(TAG, "Reset keystore for user: " + userId);
         int managedUserId = -1;
         String managedUserDecryptedPassword = null;
@@ -1558,6 +1559,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
             LockPatternUtils.PASSWORD_HISTORY_KEY,
             LockPatternUtils.PASSWORD_TYPE_KEY,
+            SEPARATE_PROFILE_CHALLENGE_KEY
     };
 
     private static final String[] SETTINGS_TO_BACKUP = new String[] {
