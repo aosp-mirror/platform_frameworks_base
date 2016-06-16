@@ -474,7 +474,7 @@ void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
 }
 #endif
 
-void RenderNode::syncDisplayList(TreeObserver* observer) {
+void RenderNode::syncDisplayList(TreeInfo* info) {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
@@ -482,7 +482,7 @@ void RenderNode::syncDisplayList(TreeObserver* observer) {
             child->renderNode->incParentRefCount();
         }
     }
-    deleteDisplayList(observer);
+    deleteDisplayList(info ? info->observer : nullptr, info);
     mDisplayList = mStagingDisplayList;
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
@@ -501,15 +501,15 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         // Damage with the old display list first then the new one to catch any
         // changes in isRenderable or, in the future, bounds
         damageSelf(info);
-        syncDisplayList(info.observer);
+        syncDisplayList(&info);
         damageSelf(info);
     }
 }
 
-void RenderNode::deleteDisplayList(TreeObserver* observer) {
+void RenderNode::deleteDisplayList(TreeObserver* observer, TreeInfo* info) {
     if (mDisplayList) {
         for (auto&& child : mDisplayList->getChildren()) {
-            child->renderNode->decParentRefCount(observer);
+            child->renderNode->decParentRefCount(observer, info);
         }
     }
     delete mDisplayList;
@@ -541,35 +541,38 @@ void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayL
     }
 }
 
-void RenderNode::destroyHardwareResources(TreeObserver* observer) {
+void RenderNode::destroyHardwareResources(TreeObserver* observer, TreeInfo* info) {
     if (mLayer) {
         destroyLayer(mLayer);
         mLayer = nullptr;
     }
     if (mDisplayList) {
         for (auto&& child : mDisplayList->getChildren()) {
-            child->renderNode->destroyHardwareResources(observer);
+            child->renderNode->destroyHardwareResources(observer, info);
         }
         if (mNeedsDisplayListSync) {
             // Next prepare tree we are going to push a new display list, so we can
             // drop our current one now
-            deleteDisplayList(observer);
+            deleteDisplayList(observer, info);
         }
     }
 }
 
-void RenderNode::decParentRefCount(TreeObserver* observer) {
+void RenderNode::decParentRefCount(TreeObserver* observer, TreeInfo* info) {
     LOG_ALWAYS_FATAL_IF(!mParentCount, "already 0!");
     mParentCount--;
     if (!mParentCount) {
         if (observer) {
             observer->onMaybeRemovedFromTree(this);
         }
+        if (CC_UNLIKELY(mPositionListener.get())) {
+            mPositionListener->onPositionLost(*this, info);
+        }
         // If a child of ours is being attached to our parent then this will incorrectly
         // destroy its hardware resources. However, this situation is highly unlikely
         // and the failure is "just" that the layer is re-created, so this should
         // be safe enough
-        destroyHardwareResources(observer);
+        destroyHardwareResources(observer, info);
     }
 }
 
