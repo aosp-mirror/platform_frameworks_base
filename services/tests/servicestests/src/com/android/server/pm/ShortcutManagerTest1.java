@@ -4884,6 +4884,117 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
+    public void testManifestShortcuts_intentDefinitions() {
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_error_4);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // Make sure invalid ones are not published.
+            // Note that at this point disabled ones don't show up because they weren't pinned.
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2")
+                    .areAllManifest()
+                    .areAllNotDynamic()
+                    .areAllNotPinned()
+                    .areAllImmutable()
+                    .areAllEnabled()
+                    .forShortcutWithId("ms1", si -> {
+                        assertTrue(si.isEnabled());
+                        assertEquals("action1", si.getIntent().getAction());
+                    })
+                    .forShortcutWithId("ms2", si -> {
+                        assertTrue(si.isEnabled());
+                        assertEquals("action2_1", si.getIntent().getAction());
+                    });
+        });
+
+        // Publish 5 enabled to pin some, so we can later test disabled manfiest shortcuts..
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_5);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            // Make sure 5 manifest shortcuts are published.
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2", "ms3", "ms4", "ms5")
+                    .areAllManifest()
+                    .areAllNotDynamic()
+                    .areAllNotPinned()
+                    .areAllImmutable()
+                    .areAllEnabled();
+        });
+
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
+                    list("ms3", "ms4", "ms5"), HANDLE_USER_0);
+        });
+
+        // Make sure they're pinned.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2", "ms3", "ms4", "ms5")
+                    .selectByIds("ms1", "ms2")
+                    .areAllNotPinned()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms3", "ms4", "ms5")
+                    .areAllPinned()
+                    .areAllEnabled();
+        });
+
+        // Update the app.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_error_4);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_0));
+
+        // Make sure 3, 4 and 5 still exist but disabled.
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2", "ms3", "ms4", "ms5")
+                    .areAllNotDynamic()
+                    .areAllImmutable()
+
+                    .selectByIds("ms1", "ms2")
+                    .areAllManifest()
+                    .areAllNotPinned()
+                    .areAllEnabled()
+
+                    .revertToOriginalList()
+                    .selectByIds("ms3", "ms4", "ms5")
+                    .areAllNotManifest()
+                    .areAllPinned()
+                    .areAllDisabled()
+
+                    .revertToOriginalList()
+                    .forShortcutWithId("ms1", si -> {
+                        assertEquals(si.getId(), "action1", si.getIntent().getAction());
+                    })
+                    .forShortcutWithId("ms2", si -> {
+                        assertEquals(si.getId(), "action2_1", si.getIntent().getAction());
+                    })
+                    .forShortcutWithId("ms3", si -> {
+                        assertEquals(si.getId(), Intent.ACTION_VIEW, si.getIntent().getAction());
+                    })
+                    .forShortcutWithId("ms4", si -> {
+                        assertEquals(si.getId(), Intent.ACTION_VIEW, si.getIntent().getAction());
+                    })
+                    .forShortcutWithId("ms5", si -> {
+                        assertEquals(si.getId(), "action", si.getIntent().getAction());
+                    });
+        });
+    }
+
     public void testManifestShortcuts_checkAllFields() {
         mService.handleUnlockUser(USER_0);
 
@@ -4897,63 +5008,95 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Only the valid one is published.
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
-            assertShortcutIds(assertAllManifest(assertAllImmutable(assertAllEnabled(
-                    mManager.getManifestShortcuts()))),
-                    "ms1", "ms2", "ms3", "ms4", "ms5");
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2", "ms3", "ms4", "ms5")
+                    .areAllManifest()
+                    .areAllImmutable()
+                    .areAllEnabled()
+                    .areAllNotPinned()
+                    .areAllNotDynamic()
 
-            // check first shortcut.
-            ShortcutInfo si = getCallerShortcut("ms1");
+                    .forShortcutWithId("ms1", si -> {
+                        assertEquals(R.drawable.icon1, si.getIconResourceId());
+                        assertEquals(new ComponentName(CALLING_PACKAGE_1,
+                                ShortcutActivity.class.getName()),
+                                si.getActivity());
 
-            assertEquals("ms1", si.getId());
-            assertEquals(R.drawable.icon1, si.getIconResourceId());
-            assertEquals(new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
-                    si.getActivity());
+                        assertEquals(R.string.shortcut_title1, si.getTitleResId());
+                        assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
+                        assertEquals(R.string.shortcut_text1, si.getTextResId());
+                        assertEquals("r" + R.string.shortcut_text1, si.getTextResName());
+                        assertEquals(R.string.shortcut_disabled_message1,
+                                si.getDisabledMessageResourceId());
+                        assertEquals("r" + R.string.shortcut_disabled_message1,
+                                si.getDisabledMessageResName());
 
-            assertEquals(R.string.shortcut_title1, si.getTitleResId());
-            assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
-            assertEquals(R.string.shortcut_text1, si.getTextResId());
-            assertEquals("r" + R.string.shortcut_text1, si.getTextResName());
-            assertEquals(R.string.shortcut_disabled_message1, si.getDisabledMessageResourceId());
-            assertEquals("r" + R.string.shortcut_disabled_message1, si.getDisabledMessageResName());
+                        assertEquals(set("android.shortcut.conversation", "android.shortcut.media"),
+                                si.getCategories());
+                        assertEquals("action1", si.getIntent().getAction());
+                        assertEquals(Uri.parse("http://a.b.c/1"), si.getIntent().getData());
+                    })
 
-            assertEquals(set("android.shortcut.conversation", "android.shortcut.media"),
-                    si.getCategories());
-            assertEquals("action1", si.getIntent().getAction());
-            assertEquals(Uri.parse("http://a.b.c/1"), si.getIntent().getData());
+                    .forShortcutWithId("ms2", si -> {
+                        assertEquals("ms2", si.getId());
+                        assertEquals(R.drawable.icon2, si.getIconResourceId());
 
-            // check another
-            si = getCallerShortcut("ms2");
+                        assertEquals(R.string.shortcut_title2, si.getTitleResId());
+                        assertEquals("r" + R.string.shortcut_title2, si.getTitleResName());
+                        assertEquals(R.string.shortcut_text2, si.getTextResId());
+                        assertEquals("r" + R.string.shortcut_text2, si.getTextResName());
+                        assertEquals(R.string.shortcut_disabled_message2,
+                                si.getDisabledMessageResourceId());
+                        assertEquals("r" + R.string.shortcut_disabled_message2,
+                                si.getDisabledMessageResName());
 
-            assertEquals("ms2", si.getId());
-            assertEquals(R.drawable.icon2, si.getIconResourceId());
+                        assertEquals(set("android.shortcut.conversation"), si.getCategories());
+                        assertEquals("action2", si.getIntent().getAction());
+                        assertEquals(null, si.getIntent().getData());
+                    })
 
-            assertEquals(R.string.shortcut_title2, si.getTitleResId());
-            assertEquals("r" + R.string.shortcut_title2, si.getTitleResName());
-            assertEquals(R.string.shortcut_text2, si.getTextResId());
-            assertEquals("r" + R.string.shortcut_text2, si.getTextResName());
-            assertEquals(R.string.shortcut_disabled_message2, si.getDisabledMessageResourceId());
-            assertEquals("r" + R.string.shortcut_disabled_message2, si.getDisabledMessageResName());
+                    .forShortcutWithId("ms3", si -> {
+                        assertEquals(0, si.getIconResourceId());
+                        assertEquals(R.string.shortcut_title1, si.getTitleResId());
+                        assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
 
-            assertEquals(set("android.shortcut.conversation"), si.getCategories());
-            assertEquals("action2", si.getIntent().getAction());
-            assertEquals(null, si.getIntent().getData());
+                        assertEquals(0, si.getTextResId());
+                        assertEquals(null, si.getTextResName());
+                        assertEquals(0, si.getDisabledMessageResourceId());
+                        assertEquals(null, si.getDisabledMessageResName());
 
-            // check another
-            si = getCallerShortcut("ms3");
+                        assertEmpty(si.getCategories());
+                        assertEquals("android.intent.action.VIEW", si.getIntent().getAction());
+                        assertEquals(null, si.getIntent().getData());
+                    })
 
-            assertEquals("ms3", si.getId());
-            assertEquals(0, si.getIconResourceId());
-            assertEquals(R.string.shortcut_title1, si.getTitleResId());
-            assertEquals("r" + R.string.shortcut_title1, si.getTitleResName());
+                    .forShortcutWithId("ms4", si -> {
+                        assertEquals(0, si.getIconResourceId());
+                        assertEquals(R.string.shortcut_title2, si.getTitleResId());
+                        assertEquals("r" + R.string.shortcut_title2, si.getTitleResName());
 
-            assertEquals(0, si.getTextResId());
-            assertEquals(null, si.getTextResName());
-            assertEquals(0, si.getDisabledMessageResourceId());
-            assertEquals(null, si.getDisabledMessageResName());
+                        assertEquals(0, si.getTextResId());
+                        assertEquals(null, si.getTextResName());
+                        assertEquals(0, si.getDisabledMessageResourceId());
+                        assertEquals(null, si.getDisabledMessageResName());
 
-            assertEquals(null, si.getCategories());
-            assertEquals("android.intent.action.VIEW", si.getIntent().getAction());
-            assertEquals(null, si.getIntent().getData());
+                        assertEquals(set("cat"), si.getCategories());
+                        assertEquals("android.intent.action.VIEW2", si.getIntent().getAction());
+                        assertEquals(null, si.getIntent().getData());
+                    })
+
+                    .forShortcutWithId("ms5", si -> {
+                        si = getCallerShortcut("ms5");
+                        assertEquals("action", si.getIntent().getAction());
+                        assertEquals("http://www/", si.getIntent().getData().toString());
+                        assertEquals("foo/bar", si.getIntent().getType());
+                        assertEquals(
+                                new ComponentName("abc", ".xyz"), si.getIntent().getComponent());
+
+                        assertEquals(set("cat1", "cat2"), si.getIntent().getCategories());
+                        assertEquals("value1", si.getIntent().getStringExtra("key1"));
+                        assertEquals("value2", si.getIntent().getStringExtra("key2"));
+                    });
         });
     }
 
