@@ -17,6 +17,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UserIdInt;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.os.RemoteException;
@@ -374,6 +375,22 @@ public class ShortcutManager {
         try {
             mService.reportShortcutUsed(mContext.getPackageName(), shortcutId,
                     injectMyUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called internally when an application is considered to have come to foreground
+     * even when technically it's not.  This method resets the throttling for this package.
+     * For example, when the user sends an "inline reply" on an notification, the system UI will
+     * call it.
+     *
+     * @hide
+     */
+    public void onApplicationActive(@NonNull String packageName, @UserIdInt int userId) {
+        try {
+            mService.onApplicationActive(packageName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
