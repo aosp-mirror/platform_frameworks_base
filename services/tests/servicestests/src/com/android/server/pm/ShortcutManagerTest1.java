@@ -4394,11 +4394,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     public void testOnApplicationActive_permission() {
         assertExpectException(SecurityException.class, "Missing permission", () ->
-                mService.onApplicationActive(CALLING_PACKAGE_1, USER_0));
+                mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0));
 
         // Has permission, now it should pass.
         mCallerPermissions.add(permission.RESET_SHORTCUT_MANAGER_THROTTLING);
-        mService.onApplicationActive(CALLING_PACKAGE_1, USER_0);
+        mManager.onApplicationActive(CALLING_PACKAGE_1, USER_0);
     }
 
     public void testDumpsys_crossProfile() {
