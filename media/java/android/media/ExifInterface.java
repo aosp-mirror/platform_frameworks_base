@@ -67,8 +67,9 @@ import libcore.io.Streams;
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
     private static final boolean DEBUG = false;
+    private static final boolean HANDLE_RAW = false;
 
-    // The Exif tag names
+    // The Exif tag names. See Tiff 6.0 Section 3 and Section 8.
     /** Type is String. */
     public static final String TAG_ARTIST = "Artist";
     /** Type is int. */
@@ -213,6 +214,8 @@ public class ExifInterface {
     public static final String TAG_MAX_APERTURE_VALUE = "MaxApertureValue";
     /** Type is int. */
     public static final String TAG_METERING_MODE = "MeteringMode";
+    /** Type is int. */
+    public static final String TAG_NEW_SUBFILE_TYPE = "NewSubfileType";
     /** Type is String. */
     public static final String TAG_OECF = "OECF";
     /** Type is int. */
@@ -237,6 +240,8 @@ public class ExifInterface {
     public static final String TAG_SPATIAL_FREQUENCY_RESPONSE = "SpatialFrequencyResponse";
     /** Type is String. */
     public static final String TAG_SPECTRAL_SENSITIVITY = "SpectralSensitivity";
+    /** Type is int. */
+    public static final String TAG_SUBFILE_TYPE = "SubfileType";
     /** Type is String. */
     public static final String TAG_SUBSEC_TIME = "SubSecTime";
     /**
@@ -342,10 +347,16 @@ public class ExifInterface {
     /** Type is int. */
     public static final String TAG_THUMBNAIL_IMAGE_WIDTH = "ThumbnailImageWidth";
 
-    // Private tags used for pointing the other IFD offset. The types of the following tags are int.
+    /**
+     * Private tags used for pointing the other IFD offsets.
+     * The types of the following tags are int.
+     * See JEITA CP-3451C Section 4.6.3: Exif-specific IFD.
+     * For SubIFD, see Note 1 of Adobe PageMaker® 6.0 TIFF Technical Notes.
+     */
     private static final String TAG_EXIF_IFD_POINTER = "ExifIFDPointer";
     private static final String TAG_GPS_INFO_IFD_POINTER = "GPSInfoIFDPointer";
     private static final String TAG_INTEROPERABILITY_IFD_POINTER = "InteroperabilityIFDPointer";
+    private static final String TAG_SUB_IFD_POINTER = "SubIFDPointer";
 
     // Private tags used for thumbnail information.
     private static final String TAG_HAS_THUMBNAIL = "HasThumbnail";
@@ -380,11 +391,15 @@ public class ExifInterface {
     // They are called "Image File Directory". They have multiple data formats to cover various
     // image metadata from GPS longitude to camera model name.
 
-    // Types of Exif byte alignments (see JEITA CP-3451 page 10)
+    // Types of Exif byte alignments (see JEITA CP-3451C Section 4.5.2)
     private static final short BYTE_ALIGN_II = 0x4949;  // II: Intel order
     private static final short BYTE_ALIGN_MM = 0x4d4d;  // MM: Motorola order
 
-    // Formats for the value in IFD entry (See TIFF 6.0 spec Types page 15).
+    // TIFF Header Fixed Constant (see JEITA CP-3451C Section 4.5.2)
+    private static final byte START_CODE = 0x2a; // 42
+    private static final int IFD_OFFSET = 8;
+
+    // Formats for the value in IFD entry (See TIFF 6.0 Section 2, "Image File Directory".)
     private static final int IFD_FORMAT_BYTE = 1;
     private static final int IFD_FORMAT_STRING = 2;
     private static final int IFD_FORMAT_USHORT = 3;
@@ -409,6 +424,20 @@ public class ExifInterface {
     private static final byte[] EXIF_ASCII_PREFIX = new byte[] {
             0x41, 0x53, 0x43, 0x49, 0x49, 0x0, 0x0, 0x0
     };
+
+    /**
+     * Constants used for Compression tag.
+     * For Value 1, 2, 32773, see TIFF 6.0 Spec Section 3: Bilevel Images, Compression
+     * For Value 6, see TIFF 6.0 Spec Section 22: JPEG Compression, Extensions to Existing Fields
+     * For Value 7, 8, 34892, see DNG Specification 1.4.0.0. Section 3, Compression
+     */
+    private static final int DATA_UNCOMPRESSED = 1;
+    private static final int DATA_HUFFMAN_COMPRESSED = 2;
+    private static final int DATA_JPEG = 6;
+    private static final int DATA_JPEG_COMPRESSED = 7;
+    private static final int DATA_DEFLATE_ZIP = 8;
+    private static final int DATA_PACK_BITS_COMPRESSED = 32773;
+    private static final int DATA_LOSSY_JPEG = 34892;
 
     // A class for indicating EXIF rational type.
     private static class Rational {
@@ -814,8 +843,11 @@ public class ExifInterface {
         }
     }
 
-    // Primary image IFD TIFF tags (See JEITA CP-3451 Table 14. page 54).
+    // Primary image IFD TIFF tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_TIFF_TAGS = new ExifTag[] {
+            // For below two, see TIFF 6.0 Spec Section 3: Bilevel Images.
+            new ExifTag(TAG_NEW_SUBFILE_TYPE, 254, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_SUBFILE_TYPE, 255, IFD_FORMAT_ULONG),
             new ExifTag(TAG_IMAGE_WIDTH, 256, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
             new ExifTag(TAG_IMAGE_LENGTH, 257, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
             new ExifTag(TAG_BITS_PER_SAMPLE, 258, IFD_FORMAT_USHORT),
@@ -839,6 +871,8 @@ public class ExifInterface {
             new ExifTag(TAG_ARTIST, 315, IFD_FORMAT_STRING),
             new ExifTag(TAG_WHITE_POINT, 318, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_PRIMARY_CHROMATICITIES, 319, IFD_FORMAT_URATIONAL),
+            // See Adobe PageMaker® 6.0 TIFF Technical Notes, Note 1.
+            new ExifTag(TAG_SUB_IFD_POINTER, 330, IFD_FORMAT_ULONG),
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT, 513, IFD_FORMAT_ULONG),
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH, 514, IFD_FORMAT_ULONG),
             new ExifTag(TAG_Y_CB_CR_COEFFICIENTS, 529, IFD_FORMAT_URATIONAL),
@@ -850,7 +884,7 @@ public class ExifInterface {
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
     };
 
-    // Primary image IFD Exif Private tags (See JEITA CP-3451 Table 15. page 55).
+    // Primary image IFD Exif Private tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_EXIF_TAGS = new ExifTag[] {
             new ExifTag(TAG_EXPOSURE_TIME, 33434, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_F_NUMBER, 33437, IFD_FORMAT_URATIONAL),
@@ -911,7 +945,7 @@ public class ExifInterface {
             new ExifTag(TAG_IMAGE_UNIQUE_ID, 42016, IFD_FORMAT_STRING),
     };
 
-    // Primary image IFD GPS Info tags (See JEITA CP-3451 Table 16. page 56).
+    // Primary image IFD GPS Info tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_GPS_TAGS = new ExifTag[] {
             new ExifTag(TAG_GPS_VERSION_ID, 0, IFD_FORMAT_BYTE),
             new ExifTag(TAG_GPS_LATITUDE_REF, 1, IFD_FORMAT_STRING),
@@ -945,12 +979,15 @@ public class ExifInterface {
             new ExifTag(TAG_GPS_DATESTAMP, 29, IFD_FORMAT_STRING),
             new ExifTag(TAG_GPS_DIFFERENTIAL, 30, IFD_FORMAT_USHORT),
     };
-    // Primary image IFD Interoperability tag (See JEITA CP-3451 Table 17. page 56).
+    // Primary image IFD Interoperability tag (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_INTEROPERABILITY_TAGS = new ExifTag[] {
             new ExifTag(TAG_INTEROPERABILITY_INDEX, 1, IFD_FORMAT_STRING),
     };
-    // IFD Thumbnail tags (See JEITA CP-3451 Table 18. page 57).
+    // IFD Thumbnail tags (See JEITA CP-3451C Section 4.6.8 Tag Support Levels)
     private static final ExifTag[] IFD_THUMBNAIL_TAGS = new ExifTag[] {
+            // For below two, see TIFF 6.0 Spec Section 3: Bilevel Images.
+            new ExifTag(TAG_NEW_SUBFILE_TYPE, 254, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_SUBFILE_TYPE, 255, IFD_FORMAT_ULONG),
             new ExifTag(TAG_THUMBNAIL_IMAGE_WIDTH, 256, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
             new ExifTag(TAG_THUMBNAIL_IMAGE_LENGTH, 257, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
             new ExifTag(TAG_BITS_PER_SAMPLE, 258, IFD_FORMAT_USHORT),
@@ -959,7 +996,7 @@ public class ExifInterface {
             new ExifTag(TAG_IMAGE_DESCRIPTION, 270, IFD_FORMAT_STRING),
             new ExifTag(TAG_MAKE, 271, IFD_FORMAT_STRING),
             new ExifTag(TAG_MODEL, 272, IFD_FORMAT_STRING),
-            new ExifTag(TAG_STRIP_OFFSETS, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_STRIP_OFFSETS, 273, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
             new ExifTag(TAG_ORIENTATION, 274, IFD_FORMAT_USHORT),
             new ExifTag(TAG_SAMPLES_PER_PIXEL, 277, IFD_FORMAT_USHORT),
             new ExifTag(TAG_ROWS_PER_STRIP, 278, IFD_FORMAT_USHORT, IFD_FORMAT_ULONG),
@@ -974,6 +1011,8 @@ public class ExifInterface {
             new ExifTag(TAG_ARTIST, 315, IFD_FORMAT_STRING),
             new ExifTag(TAG_WHITE_POINT, 318, IFD_FORMAT_URATIONAL),
             new ExifTag(TAG_PRIMARY_CHROMATICITIES, 319, IFD_FORMAT_URATIONAL),
+            // See Adobe PageMaker® 6.0 TIFF Technical Notes, Note 1.
+            new ExifTag(TAG_SUB_IFD_POINTER, 330, IFD_FORMAT_ULONG),
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT, 513, IFD_FORMAT_ULONG),
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH, 514, IFD_FORMAT_ULONG),
             new ExifTag(TAG_Y_CB_CR_COEFFICIENTS, 529, IFD_FORMAT_URATIONAL),
@@ -985,8 +1024,8 @@ public class ExifInterface {
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
     };
 
-    // See JEITA CP-3451 Figure 5. page 9.
-    // The following values are used for indicating pointers to the other Image File Directorys.
+    // See JEITA CP-3451C Section 4.6.3: Exif-specific IFD.
+    // The following values are used for indicating pointers to the other Image File Directories.
 
     // Indices of Exif Ifd tag groups
     private static final int IFD_TIFF_HINT = 0;
@@ -1001,13 +1040,14 @@ public class ExifInterface {
     };
     // List of tags for pointing to the other image file directory offset.
     private static final ExifTag[] IFD_POINTER_TAGS = new ExifTag[] {
+            new ExifTag(TAG_SUB_IFD_POINTER, 330, IFD_FORMAT_ULONG),
             new ExifTag(TAG_EXIF_IFD_POINTER, 34665, IFD_FORMAT_ULONG),
             new ExifTag(TAG_GPS_INFO_IFD_POINTER, 34853, IFD_FORMAT_ULONG),
-            new ExifTag(TAG_INTEROPERABILITY_IFD_POINTER, 40965, IFD_FORMAT_ULONG),
+            new ExifTag(TAG_INTEROPERABILITY_IFD_POINTER, 40965, IFD_FORMAT_ULONG)
     };
     // List of indices of the indicated tag groups according to the IFD_POINTER_TAGS
     private static final int[] IFD_POINTER_TAG_HINTS = new int[] {
-            IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT
+            IFD_TIFF_HINT, IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT
     };
     // Tags for indicating the thumbnail offset and length
     private static final ExifTag JPEG_INTERCHANGE_FORMAT_TAG =
@@ -1076,6 +1116,7 @@ public class ExifInterface {
     private final AssetManager.AssetInputStream mAssetInputStream;
     private final boolean mIsInputStream;
     private boolean mIsRaw;
+    private int mRawType;
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     private boolean mHasThumbnail;
@@ -1270,6 +1311,26 @@ public class ExifInterface {
     }
 
     /**
+     * Returns the long array value of the specified tag. If there is no such tag
+     * in the image file or the value cannot be parsed as an array of long, return null.
+     *
+     * @param tag the name of the tag.
+     */
+    public long[] getAttributeLongArray(String tag) {
+        ExifAttribute exifAttribute = getExifAttribute(tag);
+        if (exifAttribute == null) {
+            return null;
+        }
+
+        try {
+            return (long[]) exifAttribute.getValue(mExifByteOrder);
+        } catch (NumberFormatException e) {
+            Log.w(TAG, "Invalid value for " + tag, e);
+            return null;
+        }
+    }
+
+    /**
      * Set the value of the specified tag.
      *
      * @param tag the name of the tag.
@@ -1452,21 +1513,30 @@ public class ExifInterface {
             }
 
             // Process RAW input stream
-            if (mAssetInputStream != null) {
-                long asset = mAssetInputStream.getNativeAsset();
-                if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
-                    return;
-                }
-            } else if (mSeekableFileDescriptor != null) {
-                if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
-                        mSeekableFileDescriptor))) {
+            if (HANDLE_RAW) {
+                in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
+
+                if (!isJpegInputStream((BufferedInputStream) in)) {
+                    getRawAttributes(in);
                     return;
                 }
             } else {
-                in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
-                if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
-                        nativeGetRawAttributesFromInputStream(in))) {
-                    return;
+                if (mAssetInputStream != null) {
+                    long asset = mAssetInputStream.getNativeAsset();
+                    if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
+                        return;
+                    }
+                } else if (mSeekableFileDescriptor != null) {
+                    if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
+                            mSeekableFileDescriptor))) {
+                        return;
+                    }
+                } else {
+                    in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
+                    if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
+                            nativeGetRawAttributesFromInputStream(in))) {
+                        return;
+                    }
                 }
             }
 
@@ -1819,7 +1889,7 @@ public class ExifInterface {
 
     // Loads EXIF attributes from a JPEG input stream.
     private void getJpegAttributes(InputStream inputStream) throws IOException {
-        // See JPEG File Interchange Format Specification page 5.
+        // See JPEG File Interchange Format Specification, "JFIF Specification"
         if (DEBUG) {
             Log.d(TAG, "getJpegAttributes starting with: " + inputStream);
         }
@@ -1946,10 +2016,28 @@ public class ExifInterface {
         }
     }
 
+    private void getRawAttributes(InputStream in) throws IOException {
+        int bytesRead = 0;
+        byte[] exifBytes = new byte[in.available()];
+        in.read(exifBytes);
+
+        ByteOrderAwarenessDataInputStream dataInputStream =
+                new ByteOrderAwarenessDataInputStream(exifBytes);
+
+        // Parse TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
+        parseTiffHeaders(dataInputStream, exifBytes.length);
+
+        // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
+        readImageFileDirectory(dataInputStream, IFD_THUMBNAIL_HINT);
+
+        // Process thumbnail.
+        processThumbnail(dataInputStream, bytesRead, exifBytes.length);
+    }
+
     // Stores a new JPEG image with EXIF attributes into a given output stream.
     private void saveJpegAttributes(InputStream inputStream, OutputStream outputStream)
             throws IOException {
-        // See JPEG File Interchange Format Specification page 5.
+        // See JPEG File Interchange Format Specification, "JFIF Specification"
         if (DEBUG) {
             Log.d(TAG, "saveJpegAttributes starting with (inputStream: " + inputStream
                     + ", outputStream: " + outputStream + ")");
@@ -2046,91 +2134,17 @@ public class ExifInterface {
 
     // Reads the given EXIF byte area and save its tag data into attributes.
     private void readExifSegment(byte[] exifBytes, int exifOffsetFromBeginning) throws IOException {
-        // Parse TIFF Headers. See JEITA CP-3451C Table 1. page 10.
         ByteOrderAwarenessDataInputStream dataInputStream =
                 new ByteOrderAwarenessDataInputStream(exifBytes);
 
-        // Read byte align
-        short byteOrder = dataInputStream.readShort();
-        switch (byteOrder) {
-            case BYTE_ALIGN_II:
-                if (DEBUG) {
-                    Log.d(TAG, "readExifSegment: Byte Align II");
-                }
-                mExifByteOrder = ByteOrder.LITTLE_ENDIAN;
-                break;
-            case BYTE_ALIGN_MM:
-                if (DEBUG) {
-                    Log.d(TAG, "readExifSegment: Byte Align MM");
-                }
-                mExifByteOrder = ByteOrder.BIG_ENDIAN;
-                break;
-            default:
-                throw new IOException("Invalid byte order: " + Integer.toHexString(byteOrder));
-        }
+        // Parse TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
+        parseTiffHeaders(dataInputStream, exifBytes.length);
 
-        // Set byte order.
-        dataInputStream.setByteOrder(mExifByteOrder);
-
-        int startCode = dataInputStream.readUnsignedShort();
-        if (startCode != 0x2a) {
-            throw new IOException("Invalid exif start: " + Integer.toHexString(startCode));
-        }
-
-        // Read first ifd offset
-        long firstIfdOffset = dataInputStream.readUnsignedInt();
-        if (firstIfdOffset < 8 || firstIfdOffset >= exifBytes.length) {
-            throw new IOException("Invalid first Ifd offset: " + firstIfdOffset);
-        }
-        firstIfdOffset -= 8;
-        if (firstIfdOffset > 0) {
-            if (dataInputStream.skip(firstIfdOffset) != firstIfdOffset) {
-                throw new IOException("Couldn't jump to first Ifd: " + firstIfdOffset);
-            }
-        }
-
-        // Read primary image TIFF image file directory.
+        // Read TIFF image file directories. See JEITA CP-3451C Section 4.5.2. Figure 6.
         readImageFileDirectory(dataInputStream, IFD_TIFF_HINT);
 
         // Process thumbnail.
-        String jpegInterchangeFormatString = getAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
-        String jpegInterchangeFormatLengthString =
-                getAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
-        if (jpegInterchangeFormatString != null && jpegInterchangeFormatLengthString != null) {
-            try {
-                int jpegInterchangeFormat = Integer.parseInt(jpegInterchangeFormatString);
-                int jpegInterchangeFormatLength = Integer
-                        .parseInt(jpegInterchangeFormatLengthString);
-                // The following code limits the size of thumbnail size not to overflow EXIF data area.
-                jpegInterchangeFormatLength = Math.min(jpegInterchangeFormat
-                        + jpegInterchangeFormatLength, exifBytes.length) - jpegInterchangeFormat;
-                if (jpegInterchangeFormat > 0 && jpegInterchangeFormatLength > 0) {
-                    mHasThumbnail = true;
-                    mThumbnailOffset = exifOffsetFromBeginning + jpegInterchangeFormat;
-                    mThumbnailLength = jpegInterchangeFormatLength;
-
-                    if (mFilename == null && mAssetInputStream == null
-                            && mSeekableFileDescriptor == null) {
-                        // Save the thumbnail in memory if the input doesn't support reading again.
-                        byte[] thumbnailBytes = new byte[jpegInterchangeFormatLength];
-                        dataInputStream.seek(jpegInterchangeFormat);
-                        dataInputStream.readFully(thumbnailBytes);
-                        mThumbnailBytes = thumbnailBytes;
-
-                        if (DEBUG) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(
-                                    thumbnailBytes, 0, thumbnailBytes.length);
-                            Log.d(TAG, "Thumbnail offset: " + mThumbnailOffset + ", length: "
-                                    + mThumbnailLength + ", width: " + bitmap.getWidth()
-                                    + ", height: "
-                                    + bitmap.getHeight());
-                        }
-                    }
-                }
-            } catch (NumberFormatException e) {
-                // Ignored the corrupted image.
-            }
-        }
+        processThumbnail(dataInputStream, exifOffsetFromBeginning, exifBytes.length);
     }
 
     private void addDefaultValuesForCompatibility() {
@@ -2160,6 +2174,48 @@ public class ExifInterface {
         }
     }
 
+    private void parseTiffHeaders(ByteOrderAwarenessDataInputStream dataInputStream,
+            int exifBytesLength) throws IOException {
+        // Read byte align
+        short byteOrder = dataInputStream.readShort();
+        switch (byteOrder) {
+            case BYTE_ALIGN_II:
+                if (DEBUG) {
+                    Log.d(TAG, "readExifSegment: Byte Align II");
+                }
+                mExifByteOrder = ByteOrder.LITTLE_ENDIAN;
+                break;
+            case BYTE_ALIGN_MM:
+                if (DEBUG) {
+                    Log.d(TAG, "readExifSegment: Byte Align MM");
+                }
+                mExifByteOrder = ByteOrder.BIG_ENDIAN;
+                break;
+            default:
+                throw new IOException("Invalid byte order: " + Integer.toHexString(byteOrder));
+        }
+
+        // Set byte order.
+        dataInputStream.setByteOrder(mExifByteOrder);
+
+        int startCode = dataInputStream.readUnsignedShort();
+        if (startCode != START_CODE) {
+            throw new IOException("Invalid exif start code: " + Integer.toHexString(startCode));
+        }
+
+        // Read first ifd offset
+        long firstIfdOffset = dataInputStream.readUnsignedInt();
+        if (firstIfdOffset < 8 || firstIfdOffset >= exifBytesLength) {
+            throw new IOException("Invalid first Ifd offset: " + firstIfdOffset);
+        }
+        firstIfdOffset -= 8;
+        if (firstIfdOffset > 0) {
+            if (dataInputStream.skip(firstIfdOffset) != firstIfdOffset) {
+                throw new IOException("Couldn't jump to first Ifd: " + firstIfdOffset);
+            }
+        }
+    }
+
     // Reads image file directory, which is a tag group in EXIF.
     private void readImageFileDirectory(ByteOrderAwarenessDataInputStream dataInputStream, int hint)
             throws IOException {
@@ -2167,7 +2223,7 @@ public class ExifInterface {
             // Return if there is no data from the offset.
             return;
         }
-        // See JEITA CP-3451 Figure 5. page 9.
+        // See TIFF 6.0 Section 2: TIFF Structure, Figure 1.
         short numberOfDirectoryEntry = dataInputStream.readShort();
         if (dataInputStream.peek() + 12 * numberOfDirectoryEntry > dataInputStream.mLength) {
             // Return if the size of entries is too big.
@@ -2178,6 +2234,7 @@ public class ExifInterface {
             Log.d(TAG, "numberOfDirectoryEntry: " + numberOfDirectoryEntry);
         }
 
+        // See TIFF 6.0 Section 2: TIFF Structure, "Image File Directory".
         for (short i = 0; i < numberOfDirectoryEntry; ++i) {
             int tagNumber = dataInputStream.readUnsignedShort();
             int dataFormat = dataInputStream.readUnsignedShort();
@@ -2216,7 +2273,7 @@ public class ExifInterface {
                 if (offset + byteCount <= dataInputStream.mLength) {
                     dataInputStream.seek(offset);
                 } else {
-                     // Skip if invalid data offset.
+                    // Skip if invalid data offset.
                     Log.w(TAG, "Skip the tag entry since data offset is invalid: " + offset);
                     dataInputStream.seek(nextEntryOffset);
                     continue;
@@ -2291,6 +2348,97 @@ public class ExifInterface {
         }
     }
 
+    // Processes Thumbnail based on Compression Value
+    private void processThumbnail(ByteOrderAwarenessDataInputStream dataInputStream,
+            int exifOffsetFromBeginning, int exifBytesLength) throws IOException {
+        if (mAttributes[IFD_THUMBNAIL_HINT].containsKey(TAG_COMPRESSION)) {
+            ExifAttribute compressionAttribute =
+                    (ExifAttribute) mAttributes[IFD_THUMBNAIL_HINT].get(TAG_COMPRESSION);
+            int compressionValue = compressionAttribute.getIntValue(mExifByteOrder);
+            switch (compressionValue) {
+                case DATA_UNCOMPRESSED: {
+                    // TODO: add implementation for reading Uncompressed Thumbnail Data (b/28156704)
+                    Log.d(TAG, "Uncompressed thumbnail data cannot be processed");
+                    break;
+                }
+                case DATA_JPEG: {
+                    String jpegInterchangeFormatString =
+                            getAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
+                    String jpegInterchangeFormatLengthString =
+                            getAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
+                    if (jpegInterchangeFormatString != null
+                            && jpegInterchangeFormatLengthString != null) {
+                        try {
+                            int jpegInterchangeFormat =
+                                    Integer.parseInt(jpegInterchangeFormatString);
+                            int jpegInterchangeFormatLength =
+                                    Integer.parseInt(jpegInterchangeFormatLengthString);
+                            retrieveJPEGThumbnail(dataInputStream, jpegInterchangeFormat,
+                                    jpegInterchangeFormatLength, exifOffsetFromBeginning,
+                                    exifBytesLength);
+                        } catch (NumberFormatException e) {
+                            // Ignore corrupted format/formatLength values
+                        }
+                    }
+                    break;
+                }
+                case DATA_JPEG_COMPRESSED: {
+                    long[] stripOffsetsArray = getAttributeLongArray(TAG_STRIP_OFFSETS);
+                    long[] stripByteCountsArray = getAttributeLongArray(TAG_STRIP_BYTE_COUNTS);
+                    if (stripOffsetsArray != null && stripByteCountsArray != null) {
+                        if (stripOffsetsArray.length == 1) {
+                            int stripOffsetsSum = (int) Arrays.stream(stripOffsetsArray).sum();
+                            int stripByteCountSum = (int) Arrays.stream(stripByteCountsArray).sum();
+                            retrieveJPEGThumbnail(dataInputStream, stripOffsetsSum,
+                                    stripByteCountSum, exifOffsetFromBeginning,
+                                    exifBytesLength);
+                        } else {
+                            // TODO: implement method to read multiple strips (b/29737797)
+                            Log.d(TAG, "Multiple strip thumbnail data cannot be processed");
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
+    }
+
+    // Retrieves Thumbnail for JPEG Compression
+    private void retrieveJPEGThumbnail(ByteOrderAwarenessDataInputStream dataInputStream,
+            int thumbnailOffset, int thumbnailLength, int exifOffsetFromBeginning,
+            int exifBytesLength) throws IOException {
+        if (DEBUG) {
+            Log.d(TAG, "Retrieving JPEG Thumbnail");
+        }
+        // The following code limits the size of thumbnail size not to overflow EXIF data area.
+        thumbnailLength = Math.min(thumbnailLength, exifBytesLength - thumbnailOffset);
+        if (thumbnailOffset > 0 && thumbnailLength > 0) {
+            mHasThumbnail = true;
+            mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
+            mThumbnailLength = thumbnailLength;
+
+            if (mFilename == null && mAssetInputStream == null && mSeekableFileDescriptor == null) {
+                // Save the thumbnail in memory if the input doesn't support reading again.
+                byte[] thumbnailBytes = new byte[thumbnailLength];
+                dataInputStream.seek(thumbnailOffset);
+                dataInputStream.readFully(thumbnailBytes);
+                mThumbnailBytes = thumbnailBytes;
+
+                if (DEBUG) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(
+                            thumbnailBytes, 0, thumbnailBytes.length);
+                    Log.d(TAG, "Thumbnail offset: " + mThumbnailOffset + ", length: "
+                            + mThumbnailLength + ", width: " + bitmap.getWidth()
+                            + ", height: "
+                            + bitmap.getHeight());
+                }
+            }
+        }
+    }
+
     // Gets the corresponding IFD group index of the given tag number for writing Exif Tags.
     private static int getIfdHintFromTagNumber(int tagNumber) {
         for (int i = 0; i < IFD_POINTER_TAG_HINTS.length; ++i) {
@@ -2328,16 +2476,16 @@ public class ExifInterface {
 
         // Add IFD pointer tags. The next offset of primary image TIFF IFD will have thumbnail IFD
         // offset when there is one or more tags in the thumbnail IFD.
-        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            mAttributes[IFD_EXIF_HINT].put(IFD_POINTER_TAGS[2].name,
-                    ExifAttribute.createULong(0, mExifByteOrder));
-        }
         if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[0].name,
+            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[1].name,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[1].name,
+            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[2].name,
+                    ExifAttribute.createULong(0, mExifByteOrder));
+        }
+        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
+            mAttributes[IFD_EXIF_HINT].put(IFD_POINTER_TAGS[3].name,
                     ExifAttribute.createULong(0, mExifByteOrder));
         }
         if (mHasThumbnail) {
@@ -2389,31 +2537,31 @@ public class ExifInterface {
 
         // Update IFD pointer tags with the calculated offsets.
         if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[0].name,
+            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[1].name,
                     ExifAttribute.createULong(ifdOffsets[IFD_EXIF_HINT], mExifByteOrder));
         }
         if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[1].name,
+            mAttributes[IFD_TIFF_HINT].put(IFD_POINTER_TAGS[2].name,
                     ExifAttribute.createULong(ifdOffsets[IFD_GPS_HINT], mExifByteOrder));
         }
         if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            mAttributes[IFD_EXIF_HINT].put(IFD_POINTER_TAGS[2].name, ExifAttribute.createULong(
+            mAttributes[IFD_EXIF_HINT].put(IFD_POINTER_TAGS[3].name, ExifAttribute.createULong(
                     ifdOffsets[IFD_INTEROPERABILITY_HINT], mExifByteOrder));
         }
 
-        // Write TIFF Headers. See JEITA CP-3451C Table 1. page 10.
+        // Write TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
         dataOutputStream.writeUnsignedShort(totalSize);
         dataOutputStream.write(IDENTIFIER_EXIF_APP1);
         dataOutputStream.writeShort(mExifByteOrder == ByteOrder.BIG_ENDIAN
                 ? BYTE_ALIGN_MM : BYTE_ALIGN_II);
         dataOutputStream.setByteOrder(mExifByteOrder);
-        dataOutputStream.writeUnsignedShort(0x2a);
-        dataOutputStream.writeUnsignedInt(8);
+        dataOutputStream.writeUnsignedShort(START_CODE);
+        dataOutputStream.writeUnsignedInt(IFD_OFFSET);
 
-        // Write IFD groups. See JEITA CP-3451C Figure 7. page 12.
+        // Write IFD groups. See JEITA CP-3451C Section 4.5.8. Figure 9.
         for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
             if (!mAttributes[hint].isEmpty()) {
-                // See JEITA CP-3451C 4.6.2 IFD structure. page 13.
+                // See JEITA CP-3451C Section 4.6.2: IFD structure.
                 // Write entry count
                 dataOutputStream.writeUnsignedShort(mAttributes[hint].size());
 
@@ -2482,7 +2630,7 @@ public class ExifInterface {
                data formats for the given entry value, returns {@code -1} in the second of the pair.
      */
     private static Pair<Integer, Integer> guessDataFormat(String entryValue) {
-        // See TIFF 6.0 spec Types. page 15.
+        // See TIFF 6.0 Section 2, "Image File Directory".
         // Take the first component if there are more than one component.
         if (entryValue.contains(",")) {
             String[] entryValues = entryValue.split(",");
