@@ -106,12 +106,13 @@ interface IWindowManager
      * @param alwaysFocusable True if the app windows are always focusable regardless of the stack
      *                        they are in.
      * @param homeTask True if this is the task.
+     * @param targetSdkVersion The application's target SDK version
      */
     void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind,
             in Rect taskBounds, in Configuration configuration, int taskResizeMode,
-            boolean alwaysFocusable, boolean homeTask);
+            boolean alwaysFocusable, boolean homeTask, int targetSdkVersion);
     /**
      *
      * @param token The token we are adding to the input task Id.
