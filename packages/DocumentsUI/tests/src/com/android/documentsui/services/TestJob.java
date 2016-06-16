@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertTrue;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
+import android.icu.text.NumberFormat;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -30,16 +31,23 @@ import com.android.documentsui.model.DocumentStack;
 public class TestJob extends Job {
 
     private boolean mStarted;
+    private Runnable mStartRunnable;
+
+    private int mNumOfNotifications = 0;
 
     TestJob(
             Context service, Context appContext, Listener listener,
-            int operationType, String id, DocumentStack stack) {
+            int operationType, String id, DocumentStack stack, Runnable startRunnable) {
         super(service, appContext, listener, operationType, id, stack);
+
+        mStartRunnable = startRunnable;
     }
 
     @Override
     void start() {
         mStarted = true;
+
+        mStartRunnable.run();
     }
 
     void assertStarted() {
@@ -54,9 +62,24 @@ public class TestJob extends Job {
         onFileFailed(doc);
     }
 
+    int getNumOfNotifications() {
+        return mNumOfNotifications;
+    }
+
     @Override
     Notification getSetupNotification() {
+        ++mNumOfNotifications;
         return getSetupNotification(service.getString(R.string.copy_preparing));
+    }
+
+    @Override
+    Notification getProgressNotification() {
+        ++mNumOfNotifications;
+        double completed = mStarted ? 1F : 0F;
+        return mProgressBuilder
+                .setProgress(1, (int) completed, true)
+                .setSubText(NumberFormat.getPercentInstance().format(completed))
+                .build();
     }
 
     @Override
@@ -73,6 +96,7 @@ public class TestJob extends Job {
 
     @Override
     Builder createProgressBuilder() {
+        ++mNumOfNotifications;
         // the "copy" stuff was just convenient and available :)
         return super.createProgressBuilder(
                 service.getString(R.string.copy_notification_title),

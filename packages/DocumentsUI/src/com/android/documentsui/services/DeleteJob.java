@@ -37,6 +37,8 @@ final class DeleteJob extends Job {
     private List<DocumentInfo> mSrcs;
     final DocumentInfo mSrcParent;
 
+    private volatile int mDocsProcessed = 0;
+
     /**
      * Moves files to a destination identified by {@code destination}.
      * Performs most work by delegating to CopyJob, then deleting
@@ -69,6 +71,17 @@ final class DeleteJob extends Job {
     }
 
     @Override
+    public Notification getProgressNotification() {
+        mProgressBuilder.setProgress(mSrcs.size(), mDocsProcessed, false);
+        String format = service.getString(R.string.delete_progress);
+        mProgressBuilder.setSubText(String.format(format, mDocsProcessed, mSrcs.size()));
+
+        mProgressBuilder.setContentText(null);
+
+        return mProgressBuilder.build();
+    }
+
+    @Override
     Notification getFailureNotification() {
         return getFailureNotification(
                 R.plurals.delete_error_notification_title, R.drawable.ic_menu_delete);
@@ -85,10 +98,17 @@ final class DeleteJob extends Job {
             if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
             try {
                 deleteDocument(doc, mSrcParent);
+
+                if (isCanceled()) {
+                    // Canceled, dump the rest of the work. Deleted docs are not recoverable.
+                    return;
+                }
             } catch (ResourceException e) {
                 Log.e(TAG, "Failed to delete document @ " + doc.derivedUri);
                 onFileFailed(doc);
             }
+
+            ++mDocsProcessed;
         }
         Metrics.logFileOperation(service, operationType, mSrcs, null);
     }

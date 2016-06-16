@@ -47,6 +47,17 @@ public class TestTimer extends Timer {
         }
     }
 
+    public boolean hasScheduledTask() {
+        return !mTaskList.isEmpty();
+    }
+
+    public void fastForwardToNextTask() {
+        if (!hasScheduledTask()) {
+            throw new IllegalStateException("There is no scheduled task!");
+        }
+        fastForwardTo(mTaskList.getFirst().mExecuteTime);
+    }
+
     @Override
     public void cancel() {
         mTaskList.clear();
@@ -68,7 +79,8 @@ public class TestTimer extends Timer {
 
     @Override
     public void schedule(TimerTask task, Date time) {
-        throw new UnsupportedOperationException();
+        long executeTime = time.getTime();
+        scheduleAtTime(task, executeTime);
     }
 
     @Override
@@ -79,16 +91,7 @@ public class TestTimer extends Timer {
     @Override
     public void schedule(TimerTask task, long delay) {
         long executeTime = mNow + delay;
-        Task testTimerTask = (Task) task;
-        testTimerTask.mExecuteTime = executeTime;
-
-        ListIterator<Task> iter = mTaskList.listIterator(0);
-        while (iter.hasNext()) {
-            if (iter.next().mExecuteTime >= executeTime) {
-                break;
-            }
-        }
-        iter.add(testTimerTask);
+        scheduleAtTime(task, executeTime);
     }
 
     @Override
@@ -104,6 +107,19 @@ public class TestTimer extends Timer {
     @Override
     public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
         throw new UnsupportedOperationException();
+    }
+
+    public void scheduleAtTime(TimerTask task, long executeTime) {
+        Task testTimerTask = (Task) task;
+        testTimerTask.mExecuteTime = executeTime;
+
+        ListIterator<Task> iter = mTaskList.listIterator(0);
+        while (iter.hasNext()) {
+            if (iter.next().mExecuteTime >= executeTime) {
+                break;
+            }
+        }
+        iter.add(testTimerTask);
     }
 
     public static class Task extends TimerTask {

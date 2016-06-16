@@ -46,11 +46,6 @@ public class TestJobListener implements Job.Listener {
         latch.countDown();
     }
 
-    @Override
-    public void onProgress(CopyJob job) {
-        progress.add(job);
-    }
-
     public void assertStarted() {
         if (started == null) {
             fail("Job didn't start. onStart never called.");
