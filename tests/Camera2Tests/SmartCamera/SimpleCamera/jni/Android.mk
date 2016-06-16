@@ -40,12 +40,6 @@ LOCAL_SRC_FILES := contrast.cpp \
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
-LOCAL_STATIC_LIBRARIES += \
-    libcutils
-
-LOCAL_C_INCLUDES += \
-    system/core/include \
-
 LOCAL_NDK_STL_VARIANT := stlport_static
 
 include $(BUILD_SHARED_LIBRARY)
