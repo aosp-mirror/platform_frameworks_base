@@ -1508,7 +1508,9 @@ public class UserManager {
     }
 
     /**
-     * Returns information for all users on this device.
+     * Returns information for all users on this device, including ones marked for deletion.
+     * To retrieve only users that are alive, use {@link #getUsers(boolean)}.
+     * <p>
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @return the list of users that exist on the device.
      * @hide

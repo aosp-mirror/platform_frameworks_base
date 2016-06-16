@@ -3644,6 +3644,12 @@ public abstract class Context {
     public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";
 
     /**
+     * Gatekeeper Service.
+     * @hide
+     */
+    public static final String GATEKEEPER_SERVICE = "android.service.gatekeeper.IGateKeeperService";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

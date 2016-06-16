@@ -19359,10 +19359,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             if ((flags & StorageManager.FLAG_STORAGE_DE) != 0 && !mOnlyCore) {
                 UserManagerService.enforceSerialNumber(
                         Environment.getDataUserDeDirectory(volumeUuid, userId), userSerial);
+                if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
+                    UserManagerService.enforceSerialNumber(
+                            Environment.getDataSystemDeDirectory(userId), userSerial);
+                }
             }
             if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && !mOnlyCore) {
                 UserManagerService.enforceSerialNumber(
                         Environment.getDataUserCeDirectory(volumeUuid, userId), userSerial);
+                if (Objects.equals(volumeUuid, StorageManager.UUID_PRIVATE_INTERNAL)) {
+                    UserManagerService.enforceSerialNumber(
+                            Environment.getDataSystemCeDirectory(userId), userSerial);
+                }
             }
 
             synchronized (mInstallLock) {
@@ -19431,6 +19439,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 .listFilesOrEmpty(Environment.getDataUserDeDirectory(volumeUuid)));
         Collections.addAll(files, FileUtils
                 .listFilesOrEmpty(Environment.getDataUserCeDirectory(volumeUuid)));
+        Collections.addAll(files, FileUtils
+                .listFilesOrEmpty(Environment.getDataSystemDeDirectory()));
+        Collections.addAll(files, FileUtils
+                .listFilesOrEmpty(Environment.getDataSystemCeDirectory()));
         for (File file : files) {
             if (!file.isDirectory()) continue;
 

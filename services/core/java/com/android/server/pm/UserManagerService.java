@@ -67,6 +67,8 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.security.GateKeeper;
+import android.service.gatekeeper.IGateKeeperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -90,6 +92,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.am.UserState;
 
 import libcore.io.IoUtils;
@@ -122,6 +125,7 @@ import java.util.List;
  * </ul>
  */
 public class UserManagerService extends IUserManager.Stub {
+
     private static final String LOG_TAG = "UserManagerService";
     static final boolean DBG = false; // DO NOT SUBMIT WITH TRUE
     private static final boolean DBG_WITH_STACKTRACE = false; // DO NOT SUBMIT WITH TRUE
@@ -370,6 +374,31 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    public static class LifeCycle extends SystemService {
+
+        private UserManagerService mUms;
+
+        /**
+         * @param context
+         */
+        public LifeCycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mUms = UserManagerService.getInstance();
+            publishBinderService(Context.USER_SERVICE, mUms);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mUms.cleanupPartialUsers();
+            }
+        }
+    }
+
     @VisibleForTesting
     UserManagerService(File dataDir) {
         this(null, null, new Object(), dataDir);
@@ -411,25 +440,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     void systemReady() {
-        // Prune out any partially created, partially removed and ephemeral users.
-        ArrayList<UserInfo> partials = new ArrayList<>();
-        synchronized (mUsersLock) {
-            final int userSize = mUsers.size();
-            for (int i = 0; i < userSize; i++) {
-                UserInfo ui = mUsers.valueAt(i).info;
-                if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
-                    partials.add(ui);
-                }
-            }
-        }
-        final int partialsSize = partials.size();
-        for (int i = 0; i < partialsSize; i++) {
-            UserInfo ui = partials.get(i);
-            Slog.w(LOG_TAG, "Removing partially created user " + ui.id
-                    + " (name=" + ui.name + ")");
-            removeUserState(ui.id);
-        }
-
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
 
@@ -450,6 +460,27 @@ public class UserManagerService extends IUserManager.Stub {
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
                 null, mHandler);
+    }
+
+    void cleanupPartialUsers() {
+        // Prune out any partially created, partially removed and ephemeral users.
+        ArrayList<UserInfo> partials = new ArrayList<>();
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            for (int i = 0; i < userSize; i++) {
+                UserInfo ui = mUsers.valueAt(i).info;
+                if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
+                    partials.add(ui);
+                }
+            }
+        }
+        final int partialsSize = partials.size();
+        for (int i = 0; i < partialsSize; i++) {
+            UserInfo ui = partials.get(i);
+            Slog.w(LOG_TAG, "Removing partially created user " + ui.id
+                    + " (name=" + ui.name + ")");
+            removeUserState(ui.id);
+        }
     }
 
     @Override
@@ -2479,8 +2510,23 @@ public class UserManagerService extends IUserManager.Stub {
                 "Destroying key for user " + userHandle + " failed, continuing anyway", e);
         }
 
+        // Cleanup gatekeeper secure user id
+        try {
+            final IGateKeeperService gk = GateKeeper.getService();
+            if (gk != null) {
+                gk.clearSecureUserId(userHandle);
+            }
+        } catch (Exception ex) {
+            Slog.w(LOG_TAG, "unable to clear GK secure user id");
+        }
+
         // Cleanup package manager settings
         mPm.cleanUpUser(this, userHandle);
+
+        // Clean up all data before removing metadata
+        mPm.destroyUserData(userHandle,
+                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+
         // Remove this user from the list
         synchronized (mUsersLock) {
             mUsers.remove(userHandle);
@@ -2503,12 +2549,6 @@ public class UserManagerService extends IUserManager.Stub {
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
         updateUserIds();
-
-        // Now that we've purged all the metadata above, destroy the actual data
-        // on disk; if we battery pull in here we'll finish cleaning up when
-        // reconciling after reboot.
-        mPm.destroyUserData(userHandle,
-                StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
     }
 
     private void sendProfileRemovedBroadcast(int parentUserId, int removedUserId) {
