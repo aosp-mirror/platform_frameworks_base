@@ -85,7 +85,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi: signal to‘liq"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"O‘chirilgan ilovalar"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"O‘chirib yuborilgan ilovalar va foydalanuvchilar"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"O‘chirib tashlangan ilova va foydalanuvchilar"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB modem"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Ixcham hotspot"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Bluetooth modem"</string>
