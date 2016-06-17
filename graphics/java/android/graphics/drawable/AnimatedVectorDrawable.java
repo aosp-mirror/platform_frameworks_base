@@ -239,6 +239,17 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     @Override
     public void draw(Canvas canvas) {
+        if (!canvas.isHardwareAccelerated() && mAnimatorSet instanceof VectorDrawableAnimatorRT) {
+            // If we have SW canvas and the RT animation is waiting to start, We need to fallback
+            // to UI thread animation for AVD.
+            if (!mAnimatorSet.isRunning() &&
+                    ((VectorDrawableAnimatorRT) mAnimatorSet).mPendingAnimationActions.size() > 0) {
+                VectorDrawableAnimatorRT oldAnim = (VectorDrawableAnimatorRT) mAnimatorSet;
+                mAnimatorSet = new VectorDrawableAnimatorUI(this);
+                mAnimatorSet.init(mAnimatorSetFromXml);
+                oldAnim.transferPendingActions(mAnimatorSet);
+            }
+        }
         mAnimatorSet.onDraw(canvas);
         mAnimatedVectorState.mVectorDrawable.draw(canvas);
     }
@@ -1589,6 +1600,25 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         // onFinished: should be called from native
         private static void callOnFinished(VectorDrawableAnimatorRT set, int id) {
             set.onAnimationEnd(id);
+        }
+
+        private void transferPendingActions(VectorDrawableAnimator animatorSet) {
+            for (int i = 0; i < mPendingAnimationActions.size(); i++) {
+                int pendingAction = mPendingAnimationActions.get(i);
+                if (pendingAction == START_ANIMATION) {
+                    animatorSet.start();
+                } else if (pendingAction == END_ANIMATION) {
+                    animatorSet.end();
+                } else if (pendingAction == REVERSE_ANIMATION) {
+                    animatorSet.reverse();
+                } else if (pendingAction == RESET_ANIMATION) {
+                    animatorSet.reset();
+                } else {
+                    throw new UnsupportedOperationException("Animation action " +
+                            pendingAction + "is not supported");
+                }
+            }
+            mPendingAnimationActions.clear();
         }
     }
 
