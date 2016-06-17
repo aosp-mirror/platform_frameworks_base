@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"Usa sempre la verifica HDCP"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
-    <item msgid="8665206199209698501">"Non attiva"</item>
+    <item msgid="8665206199209698501">"Off"</item>
     <item msgid="1593289376502312923">"64 kB"</item>
     <item msgid="487545340236145324">"256 kB"</item>
     <item msgid="2423528675294333831">"1 MB"</item>
@@ -67,18 +67,28 @@
     <item msgid="2803199102589126938">"16 MB"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
-    <item msgid="6089470720451068364">"Non attiva"</item>
+    <item msgid="6089470720451068364">"Off"</item>
     <item msgid="4622460333038586791">"64 kB"</item>
     <item msgid="2212125625169582330">"256 kB"</item>
     <item msgid="1704946766699242653">"1 MB"</item>
   </string-array>
   <string-array name="select_logd_size_summaries">
-    <item msgid="6921048829791179331">"Non attiva"</item>
+    <item msgid="6921048829791179331">"Off"</item>
     <item msgid="2969458029344750262">"64 kB/buffer log"</item>
     <item msgid="1342285115665698168">"256 kB/buffer log"</item>
     <item msgid="1314234299552254621">"1 MB/buffer log"</item>
     <item msgid="3606047780792894151">"4 MB/buffer log"</item>
     <item msgid="5431354956856655120">"16 MB/buffer log"</item>
+  </string-array>
+  <string-array name="select_logpersist_titles">
+    <item msgid="1744840221860799971">"Off"</item>
+    <item msgid="3054662377365844197">"Tutti"</item>
+    <item msgid="688870735111627832">"Tutti tranne il segnale radio"</item>
+  </string-array>
+  <string-array name="select_logpersist_summaries">
+    <item msgid="2216470072500521830">"Off"</item>
+    <item msgid="172978079776521897">"Tutti i buffer log"</item>
+    <item msgid="3873873912383879240">"Tutti tranne i buffer log del segnale radio"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animazione disattivata"</item>
