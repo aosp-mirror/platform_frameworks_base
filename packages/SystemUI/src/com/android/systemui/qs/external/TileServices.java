@@ -78,7 +78,7 @@ public class TileServices extends IQSService.Stub {
 
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
-        TileServiceManager service = onCreateTileService(component);
+        TileServiceManager service = onCreateTileService(component, tile.getQsTile());
         synchronized (mServices) {
             mServices.put(tile, service);
             mTiles.put(component, tile);
@@ -86,8 +86,8 @@ public class TileServices extends IQSService.Stub {
         return service;
     }
 
-    protected TileServiceManager onCreateTileService(ComponentName component) {
-        return new TileServiceManager(this, mHandler, component);
+    protected TileServiceManager onCreateTileService(ComponentName component, Tile tile) {
+        return new TileServiceManager(this, mHandler, component, tile);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {
