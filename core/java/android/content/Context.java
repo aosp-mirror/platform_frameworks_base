@@ -4279,6 +4279,11 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * @hide
+     */
+    public abstract Display getDisplay();
+
+    /**
      * Indicates whether this Context is restricted.
      *
      * @return {@code true} if this Context is restricted, {@code false} otherwise.
