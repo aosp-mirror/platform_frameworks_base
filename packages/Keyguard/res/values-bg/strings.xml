@@ -108,7 +108,7 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кодът е приет!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Няма покритие."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Бутон за превключване на метода на въвеждане."</string>
+    <string name="accessibility_ime_switch_button" msgid="2829803408288433429">"Превключване на метода на въвеждане"</string>
     <string name="airplane_mode" msgid="3122107900897202805">"Самолетен режим"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="5519822969283306009">"След рестартиране на устройството се изисква фигура"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="4411398237158448198">"След рестартиране на устройството се изисква ПИН код"</string>
@@ -119,6 +119,8 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="8476293962695171574">"При превключване между потребителските профили се изисква фигура"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="2343607138520460043">"При превключване между потребителските профили се изисква ПИН код"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1295960907951965927">"При превключване между потребителските профили се изисква парола"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Устройството е заключено от администратора му"</string>
+    <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Устройството бе заключено ръчно"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">Устройството не е отключвано от <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потвърдете фигурата.</item>
       <item quantity="one">Устройството не е отключвано от <xliff:g id="NUMBER_0">%d</xliff:g> час. Потвърдете фигурата.</item>
