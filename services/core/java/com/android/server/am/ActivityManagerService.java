@@ -11504,11 +11504,15 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // Actually is sleeping or shutting down or whatever else in the future
     // is an inactive state.
-    public boolean isSleepingOrShuttingDown() {
-        return isSleeping() || mShuttingDown;
+    boolean isSleepingOrShuttingDownLocked() {
+        return isSleepingLocked() || mShuttingDown;
     }
 
-    public boolean isSleeping() {
+    boolean isShuttingDownLocked() {
+        return mShuttingDown;
+    }
+
+    boolean isSleepingLocked() {
         return mSleeping;
     }
 
@@ -12878,7 +12882,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
                     proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, true,
-                            mTestPssMode, isSleeping(), now);
+                            mTestPssMode, isSleepingLocked(), now);
                 }
             }
 
@@ -19812,7 +19816,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                        mTestPssMode, isSleeping(), now);
+                        mTestPssMode, isSleepingLocked(), now);
                 mPendingPssProcesses.add(app);
             }
         }
@@ -19860,7 +19864,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return !processingBroadcasts
-                && (isSleeping() || mStackSupervisor.allResumedActivitiesIdle());
+                && (isSleepingLocked() || mStackSupervisor.allResumedActivitiesIdle());
     }
 
     /**
@@ -20151,7 +20155,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             app.lastStateTime = now;
             app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                    mTestPssMode, isSleeping(), now);
+                    mTestPssMode, isSleepingLocked(), now);
             if (DEBUG_PSS) Slog.d(TAG_PSS, "Process state change from "
                     + ProcessList.makeProcStateString(app.setProcState) + " to "
                     + ProcessList.makeProcStateString(app.curProcState) + " next pss in "
@@ -20162,7 +20166,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mTestPssMode)))) {
                 requestPssLocked(app, app.setProcState);
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
-                        mTestPssMode, isSleeping(), now);
+                        mTestPssMode, isSleepingLocked(), now);
             } else if (false && DEBUG_PSS) Slog.d(TAG_PSS,
                     "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
         }
@@ -20688,7 +20692,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mLruProcesses.size();
-        boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !isSleeping(), now);
+        boolean allChanged = mProcessStats.setMemFactorLocked(memFactor, !isSleepingLocked(), now);
         final int trackerMemFactor = mProcessStats.getMemFactorLocked();
         if (memFactor != ProcessStats.ADJ_MEM_FACTOR_NORMAL) {
             if (mLowRamStartTime == 0) {
