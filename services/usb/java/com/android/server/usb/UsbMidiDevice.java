@@ -51,7 +51,7 @@ public final class UsbMidiDevice implements Closeable {
 
     private MidiDeviceServer mServer;
 
-    // event schedulers for each output port
+    // event schedulers for each input port of the physical device
     private MidiEventScheduler[] mEventSchedulers;
 
     private static final int BUFFER_SIZE = 512;
@@ -160,9 +160,9 @@ public final class UsbMidiDevice implements Closeable {
         mSubdeviceCount = subdeviceCount;
 
         // FIXME - support devices with different number of input and output ports
-        int inputCount = subdeviceCount;
-        mInputPortReceivers = new InputReceiverProxy[inputCount];
-        for (int port = 0; port < inputCount; port++) {
+        int inputPortCount = subdeviceCount;
+        mInputPortReceivers = new InputReceiverProxy[inputPortCount];
+        for (int port = 0; port < inputPortCount; port++) {
             mInputPortReceivers[port] = new InputReceiverProxy();
         }
     }
@@ -176,14 +176,14 @@ public final class UsbMidiDevice implements Closeable {
         }
 
         mFileDescriptors = fileDescriptors;
-        int inputCount = fileDescriptors.length;
+        int inputStreamCount = fileDescriptors.length;
         // last file descriptor returned from nativeOpen() is only used for unblocking Os.poll()
         // in our input thread
-        int outputCount = fileDescriptors.length - 1;
+        int outputStreamCount = fileDescriptors.length - 1;
 
-        mPollFDs = new StructPollfd[inputCount];
-        mInputStreams = new FileInputStream[inputCount];
-        for (int i = 0; i < inputCount; i++) {
+        mPollFDs = new StructPollfd[inputStreamCount];
+        mInputStreams = new FileInputStream[inputStreamCount];
+        for (int i = 0; i < inputStreamCount; i++) {
             FileDescriptor fd = fileDescriptors[i];
             StructPollfd pollfd = new StructPollfd();
             pollfd.fd = fd;
@@ -192,9 +192,9 @@ public final class UsbMidiDevice implements Closeable {
             mInputStreams[i] = new FileInputStream(fd);
         }
 
-        mOutputStreams = new FileOutputStream[outputCount];
-        mEventSchedulers = new MidiEventScheduler[outputCount];
-        for (int i = 0; i < outputCount; i++) {
+        mOutputStreams = new FileOutputStream[outputStreamCount];
+        mEventSchedulers = new MidiEventScheduler[outputStreamCount];
+        for (int i = 0; i < outputStreamCount; i++) {
             mOutputStreams[i] = new FileOutputStream(fileDescriptors[i]);
 
             MidiEventScheduler scheduler = new MidiEventScheduler();
@@ -204,7 +204,7 @@ public final class UsbMidiDevice implements Closeable {
 
         final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
 
-        // Create input thread which will read from all input ports
+        // Create input thread which will read from all output ports of the physical device
         new Thread("UsbMidiDevice input thread") {
             @Override
             public void run() {
@@ -249,8 +249,8 @@ public final class UsbMidiDevice implements Closeable {
             }
         }.start();
 
-        // Create output thread for each output port
-        for (int port = 0; port < outputCount; port++) {
+        // Create output thread for each input port of the physical device
+        for (int port = 0; port < outputStreamCount; port++) {
             final MidiEventScheduler eventSchedulerF = mEventSchedulers[port];
             final FileOutputStream outputStreamF = mOutputStreams[port];
             final int portF = port;
