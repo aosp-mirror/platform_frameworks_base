@@ -17,6 +17,7 @@ package com.android.systemui.qs.external;
 
 import android.content.ComponentName;
 import android.os.Looper;
+import android.service.quicksettings.Tile;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -109,7 +110,7 @@ public class TileServicesTests extends SysuiTestCase {
         }
 
         @Override
-        protected TileServiceManager onCreateTileService(ComponentName component) {
+        protected TileServiceManager onCreateTileService(ComponentName component, Tile qsTile) {
             TileServiceManager manager = Mockito.mock(TileServiceManager.class);
             mManagers.add(manager);
             return manager;
