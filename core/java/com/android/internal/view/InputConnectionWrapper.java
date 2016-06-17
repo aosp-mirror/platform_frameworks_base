@@ -16,7 +16,6 @@
 
 package com.android.internal.view;
 
-import android.content.ClipData;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -48,7 +47,7 @@ public class InputConnectionWrapper implements InputConnection {
         public ExtractedText mExtractedText;
         public int mCursorCapsMode;
         public boolean mRequestUpdateCursorAnchorInfoResult;
-        public boolean mInsertContentResult;
+        public boolean mCommitContentResult;
 
         // A 'pool' of one InputContextCallback.  Each ICW request will attempt to gain
         // exclusive access to this object.
@@ -175,15 +174,15 @@ public class InputConnectionWrapper implements InputConnection {
             }
         }
 
-        public void setInsertContentResult(boolean result, int seq) {
+        public void setCommitContentResult(boolean result, int seq) {
             synchronized (this) {
                 if (seq == mSeq) {
-                    mInsertContentResult = result;
+                    mCommitContentResult = result;
                     mHaveValue = true;
                     notifyAll();
                 } else {
                     Log.i(TAG, "Got out-of-sequence callback " + seq + " (expected " + mSeq
-                            + ") in setInsertContentResult, ignoring.");
+                            + ") in setCommitContentResult, ignoring.");
                 }
             }
         }
@@ -507,19 +506,19 @@ public class InputConnectionWrapper implements InputConnection {
         // Nothing should happen when called from input method.
     }
 
-    public boolean insertContent(InputContentInfo inputContentInfo, Bundle opts) {
+    public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) {
         boolean result = false;
-        if (isMethodMissing(MissingMethodFlags.INSERT_CONTENT)) {
+        if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
             // This method is not implemented.
             return false;
         }
         try {
             InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.insertContent(inputContentInfo, opts, callback.mSeq, callback);
+            mIInputContext.commitContent(inputContentInfo, opts, callback.mSeq, callback);
             synchronized (callback) {
                 callback.waitForResultLocked();
                 if (callback.mHaveValue) {
-                    result = callback.mInsertContentResult;
+                    result = callback.mCommitContentResult;
                 }
             }
             callback.dispose();

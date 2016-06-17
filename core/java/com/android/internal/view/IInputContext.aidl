@@ -78,6 +78,6 @@ import com.android.internal.view.IInputContextCallback;
     void requestUpdateCursorAnchorInfo(int cursorUpdateMode, int seq,
             IInputContextCallback callback);
 
-    void insertContent(in InputContentInfo inputContentInfo, in Bundle opts, int sec,
+    void commitContent(in InputContentInfo inputContentInfo, in Bundle opts, int sec,
             IInputContextCallback callback);
 }
