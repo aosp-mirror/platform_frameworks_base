@@ -332,35 +332,199 @@ $('#Downloads').after($('#download-table'));
 <h2 id="rel">Release Notes</h2>
 
 <p>
-  Android NDK, Revision 11c <em>(March 2016)</em>
+  Android NDK, Revision 12 <em>(June 2016)</em>
 </p>
 
 <dl>
-  <dt>
-    NDK
-  </dt>
+<dt>
+  Announcements
+</dt>
 
-  <dd>
-    <ul>
-      <li>Changes
-        <ul>
-          <li>Applied additional fixes to the {@code ndk-gdb.py} script.
-          </li>
-          <li>Added an optional package name argument to the {@code ndk-gdb}
-            command {@code --attach} option.
-            (<a href="https://github.com/android-ndk/ndk/issues/13">Issue 13</a>)
-          </li>
-          <li>Fixed invalid toolchain paths for 32-bit Windows platform.
-            (<a href="https://github.com/android-ndk/ndk/issues/45">Issue 45</a>)
-          </li>
-          <li>Fixed the relative path for the {@code ndk-which} command.
-            (<a href="https://github.com/android-ndk/ndk/issues/29">Issue 29</a>)
-          </li>
-          <li>Fixed use of cygpath for the libgcc compiler.
-            (Android <a href="http://b.android.com/195486">Issue 195486</a>)
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </dd>
+<ul>
+  <li>The <code>ndk-build</code> command will default to using
+  Clang in an upcoming release. GCC will be removed in a later release.
+  </li>
+  <li>The <code>make-standalone-toolchain.sh</code> script will be removed
+  in an upcoming release. If you use this script, please plan to migrate to the
+  <code>make_standalone_toolchain.py</code> as soon as possible.
+  </li>
+</ul>
+
+<dt>
+  NDK
+</dt>
+
+<ul>
+  <li>Removed support for the armeabi-v7a-hard ABI. See the explanation in the
+  <a href=
+  "https://android.googlesource.com/platform/ndk/+/ndk-r12-release/docs/HardFloatAbi.md">
+    documentation</a>.
+  </li>
+
+  <li>Removed all sysroots for platform levels prior to Android 2.3 (API level 10).
+    We dropped support for them in NDK r11, but neglected to actually remove them.
+  </li>
+
+  <li>Updated exception handling when using c++_shared on ARM32 so that it
+    mostly works (see <a href="#known-issues">Known Issues</a>). The unwinder
+    is now linked into each linked object rather than into libc++ itself.
+  </li>
+
+  <li>Pruned the default compiler flags (<a href=
+  "https://github.com/android-ndk/ndk/issues/27">NDK Issue 27</a>). You can see
+  details of this update in <a href=
+  "https://android-review.googlesource.com/#/c/207721/5">Change 207721</a>.
+  </li>
+
+  <li>Added a Python implementation of standalone toolchains in <code>
+  build/tools/make_standalone_toolchain.py</code>. On Windows, you no longer
+  need Cygwin to use this feature. Note that the bash flavor will be removed
+  in an upcoming release, so please test the new one now.
+  </li>
+
+  <li>Configured Clang debug builds to have the <code>-fno-limit-debug-info</code>
+  option is enabled by default. This change enables better debugging with LLDB.
+  </li>
+
+  <li>Enabled the <code>--build-id</code> as a default option. This option
+  causes an identifier to be shown in native crash reports so you can easily
+  identify which version of your code was running.
+  </li>
+
+  <li>Fixed issue with <code>NDK_USE_CYGPATH</code> so that it no longer causes
+  problems with libgcc
+  (<a href="http://b.android.com/195486">Issue 195486</a>).
+  </li>
+
+  <li>Enabled the following options as default:
+  <code>-Wl,--warn-shared-textrel</code> and <code>-Wl,--fatal-warnings</code>.
+  If you have shared text relocations, your app does not load on Android 6.0
+  (API level 23) and higher. Note that this configuration has never been
+  allowed for 64-bit apps.
+  </li>
+
+  <li>Fixed a few issues so that precompiled headers work better
+    (<a href="https://github.com/android-ndk/ndk/issues/14">NDK Issue 14</a>,
+     <a href="https://github.com/android-ndk/ndk/issues/16">NDK Issue 16</a>).
+  </li>
+
+  <li>Removed unreachable ARM (non-thumb) STL libraries.
+  </li>
+
+  <li>Added Vulkan support to android-24.
+  </li>
+
+  <li>Added Choreographer API to android-24.
+  </li>
+
+  <li>Added libcamera2 APIs for devices that support the
+  <code>INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED</code> feature level or higher.
+  For more information, see the
+  <a href="{@docRoot}reference/android/hardware/camera2/CameraCharacteristics.html#INFO_SUPPORTED_HARDWARE_LEVEL">
+    <code>CameraCharacteristics</code></a> reference.
+  </li>
+
+</ul>
+
+<dt>
+  Clang
+</dt>
+
+<ul>
+  <li>Clang has been updated to 3.8svn (r256229, build 2812033). Note that
+    Clang packaged in the Windows 64-bit NDK is actually 32-bit.
+  </li>
+
+  <li>Fixed <code>__thread</code> so that it works for real this time.
+  </li>
+</ul>
+
+<dt>
+  GCC
+</dt>
+
+<ul>
+  <li>Synchronized the compiler with the ChromeOS GCC @ google/gcc-4_9 r227810.
+  </li>
+
+  <li>Backported coverage sanitizer patch from ToT (r231296).
+  </li>
+
+  <li>Fixed <code>libatomic</code> to not use ifuncs (<a href=
+  "https://github.com/android-ndk/ndk/issues/31">NDK Issue 31</a>).
+  </li>
+</ul>
+
+<dt>
+  Binutils
+</dt>
+
+<ul>
+  <li>Silenced the "Erratum 843419 found and fixed" info messages.
+  </li>
+
+  <li>Introduced option <code>--long-plt</code> to fix an internal linker error
+  when linking huge arm32 binaries.
+  </li>
+
+  <li>Fixed wrong run time stubs for <code>AArch64</code>. This problem was
+  causing jump addresses to be calculated incorrectly for very large
+  dynamic shared objects (DSOs).
+  </li>
+
+  <li>Introduced default option <code>--no-apply-dynamic</code> to work around
+  a dynamic linker bug for earlier Android releases.
+  </li>
+
+  <li>Fixed a known issue with NDK r11 where <code>dynamic_cast</code> was not
+  working with Clang, x86, stlport_static and optimization.
+  </li>
+</ul>
+
+<dt>
+  GDB
+</dt>
+
+<ul>
+  <li>Updated to GDB version 7.11. For more information about this release, see
+  <a href="https://www.gnu.org/software/gdb/news/">GDB News</a>.
+  </li>
+
+  <li>Fixed a number of bugs in the <code>ndk-gdb.py</code> script.
+  </li>
+</ul>
+
+<dt id="known-issues">
+  Known Issues
+</dt>
+
+<ul>
+  <li>The x86 <a href="http://source.android.com/devices/tech/debug/asan.html">Address
+  Sanitizer</a> (ASAN) currently does not work. For more information, see
+  <a href="https://android-review.googlesource.com/#/c/186276/">Issue 186276</a>.
+  </li>
+
+  <li>Exception unwinding with <code>c++_shared</code> does not work for ARM on
+  Android 2.3 (API level 9) or Android 4.0 (API level 14).
+  </li>
+
+  <li>Bionic headers and libraries for Android 6.0 (API level 23) and higher
+  are not yet exposed despite the presence of android-24. Those platforms still
+  have the Android 5.0 (API level 21) headers and libraries, which is consistent
+  with NDK r11.
+  </li>
+
+  <li>The RenderScript tools are not present, which is consistent with
+  NDK r11.
+  (<a href="https://github.com/android-ndk/ndk/issues/7">NDK Issue 7</a>)
+  </li>
+
+  <li>In <code>NdkCameraMetadataTags.h</code> header file, the camera metadata
+  tag enum value <code>ACAMERA_STATISTICS_LENS_SHADING_CORRECTION_MAP</code>
+  was listed by accident and will be removed in next release. Use
+  the <code>ACAMERA_STATISTICS_LENS_SHADING_MAP</code> value instead.
+  </li>
+
+</ul>
+
 </dl>
