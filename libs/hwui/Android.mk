@@ -104,6 +104,7 @@ hwui_src_files := \
 
 hwui_test_common_src_files := \
     $(call all-cpp-files-under, tests/common/scenes) \
+    tests/common/TestListViewSceneBase.cpp \
     tests/common/TestContext.cpp \
     tests/common/TestScene.cpp \
     tests/common/TestUtils.cpp
