@@ -38,9 +38,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Canvas;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -48,7 +45,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.support.design.widget.Snackbar;
 import android.support.v13.view.DragStartHelper;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
@@ -108,8 +104,6 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
-
-import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -966,6 +960,7 @@ public class DirectoryFragment extends Fragment
                     .setPositiveButton(
                          android.R.string.ok,
                          new DialogInterface.OnClickListener() {
+                            @Override
                             public void onClick(DialogInterface dialog, int id) {
                                 // Finish selection mode first which clears selection so we
                                 // don't end up trying to deselect deleted documents.
@@ -1156,19 +1151,15 @@ public class DirectoryFragment extends Fragment
         if (selection.isEmpty()) {
             return;
         }
-
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                mClipper.clipDocumentsForCopy(docs);
-                Activity activity = getActivity();
-                Snackbars.makeSnackbar(activity,
-                        activity.getResources().getQuantityString(
-                                R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                        Snackbar.LENGTH_SHORT).show();
-            }
-        }.execute(selection);
         mSelectionManager.clearSelection();
+
+        // Clips the docs in the background, then displays a message
+        new ClipTask(
+                getActivity(),
+                () -> {
+                    mClipper.clipDocumentsForCopy(mModel::getItemUri, selection);
+                },
+                selection.size()).execute();
     }
 
     public void cutSelectedToClipboard() {
@@ -1178,21 +1169,18 @@ public class DirectoryFragment extends Fragment
         if (selection.isEmpty()) {
             return;
         }
-
-        new GetDocumentsTask() {
-            @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                // We need the srcParent for move operations because we do a copy / delete
-                DocumentInfo currentDoc = getDisplayState().stack.peek();
-                mClipper.clipDocumentsForCut(docs, currentDoc);
-                Activity activity = getActivity();
-                Snackbars.makeSnackbar(activity,
-                        activity.getResources().getQuantityString(
-                                R.plurals.clipboard_files_clipped, docs.size(), docs.size()),
-                        Snackbar.LENGTH_SHORT).show();
-            }
-        }.execute(selection);
         mSelectionManager.clearSelection();
+
+        // Clips the docs in the background, then displays a message
+        new ClipTask(
+                getActivity(),
+                () -> {
+                    mClipper.clipDocumentsForCut(
+                            mModel::getItemUri,
+                            selection,
+                            getDisplayState().stack.peek());
+                },
+                selection.size()).execute();
     }
 
     public void pasteFromClipboard() {
@@ -1375,94 +1363,6 @@ public class DirectoryFragment extends Fragment
         return null;
     }
 
-    private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
-        String modelId = getModelId(currentItemView);
-        if (modelId == null) {
-            return Collections.EMPTY_LIST;
-        }
-
-        final List<DocumentInfo> selectedDocs =
-                mModel.getDocuments(mSelectionManager.getSelection());
-        if (!selectedDocs.isEmpty()) {
-            if (!isSelected(modelId)) {
-                // There is a selection that does not include the current item, drag nothing.
-                return Collections.EMPTY_LIST;
-            }
-            return selectedDocs;
-        }
-
-        final Cursor cursor = mModel.getItem(modelId);
-        if (cursor == null) {
-            Log.w(TAG, "Undraggable document. Can't obtain cursor for modelId " + modelId);
-            return Collections.EMPTY_LIST;
-        }
-
-        return Lists.newArrayList(
-                DocumentInfo.fromDirectoryCursor(cursor));
-    }
-
-    private static class DragShadowBuilder extends View.DragShadowBuilder {
-
-        private final Context mContext;
-        private final IconHelper mIconHelper;
-        private final LayoutInflater mInflater;
-        private final View mShadowView;
-        private final TextView mTitle;
-        private final ImageView mIcon;
-        private final int mWidth;
-        private final int mHeight;
-
-        public DragShadowBuilder(Context context, IconHelper iconHelper, List<DocumentInfo> docs) {
-            mContext = context;
-            mIconHelper = iconHelper;
-            mInflater = LayoutInflater.from(context);
-
-            mWidth = mContext.getResources().getDimensionPixelSize(R.dimen.drag_shadow_width);
-            mHeight= mContext.getResources().getDimensionPixelSize(R.dimen.drag_shadow_height);
-
-            mShadowView = mInflater.inflate(R.layout.drag_shadow_layout, null);
-            mTitle = (TextView) mShadowView.findViewById(android.R.id.title);
-            mIcon = (ImageView) mShadowView.findViewById(android.R.id.icon);
-
-            mTitle.setText(getTitle(docs));
-            mIcon.setImageDrawable(getIcon(docs));
-        }
-
-        private Drawable getIcon(List<DocumentInfo> docs) {
-            if (docs.size() == 1) {
-                final DocumentInfo doc = docs.get(0);
-                return mIconHelper.getDocumentIcon(mContext, doc.authority, doc.documentId,
-                        doc.mimeType, doc.icon);
-            }
-            return mContext.getDrawable(R.drawable.ic_doc_generic);
-        }
-
-        private String getTitle(List<DocumentInfo> docs) {
-            if (docs.size() == 1) {
-                final DocumentInfo doc = docs.get(0);
-                return doc.displayName;
-            }
-            return Shared.getQuantityString(mContext, R.plurals.elements_dragged, docs.size());
-        }
-
-        @Override
-        public void onProvideShadowMetrics(
-                Point shadowSize, Point shadowTouchPoint) {
-            shadowSize.set(mWidth, mHeight);
-            shadowTouchPoint.set(mWidth, mHeight);
-        }
-
-        @Override
-        public void onDrawShadow(Canvas canvas) {
-            Rect r = canvas.getClipBounds();
-            // Calling measure is necessary in order for all child views to get correctly laid out.
-            mShadowView.measure(
-                    View.MeasureSpec.makeMeasureSpec(r.right- r.left, View.MeasureSpec.EXACTLY),
-                    View.MeasureSpec.makeMeasureSpec(r.top- r.bottom, View.MeasureSpec.EXACTLY));
-            mShadowView.layout(r.left, r.top, r.right, r.bottom);
-            mShadowView.draw(canvas);
-        }
-    }
     /**
      * Abstract task providing support for loading documents *off*
      * the main thread. And if it isn't obvious, creating a list
@@ -1615,29 +1515,68 @@ public class DirectoryFragment extends Fragment
         }
     }
 
+    private Drawable getDragIcon(Selection selection) {
+        if (selection.size() == 1) {
+            DocumentInfo doc = getSingleSelectedDocument(selection);
+            return mIconHelper.getDocumentIcon(getContext(), doc);
+        }
+        return getContext().getDrawable(R.drawable.ic_doc_generic);
+    }
+
+    private String getDragTitle(Selection selection) {
+        assert (!selection.isEmpty());
+        if (selection.size() == 1) {
+            DocumentInfo doc = getSingleSelectedDocument(selection);
+            return doc.displayName;
+        }
+
+        return Shared.getQuantityString(getContext(), R.plurals.elements_dragged, selection.size());
+    }
+
+    private DocumentInfo getSingleSelectedDocument(Selection selection) {
+        assert (selection.size() == 1);
+        final List<DocumentInfo> docs = mModel.getDocuments(mSelectionManager.getSelection());
+        assert (docs.size() == 1);
+        return docs.get(0);
+    }
+
     private DragStartHelper.OnDragStartListener mOnDragStartListener =
             new DragStartHelper.OnDragStartListener() {
-        @Override
-        public boolean onDragStart(View v, DragStartHelper helper) {
-            if (isSelected(getModelId(v))) {
-                List<DocumentInfo> docs = getDraggableDocuments(v);
-                if (docs.isEmpty()) {
-                    return false;
-                }
-                v.startDragAndDrop(
-                        mClipper.getClipDataForDocuments(docs,
-                                FileOperationService.OPERATION_COPY),
-                        new DragShadowBuilder(getActivity(), mIconHelper, docs),
-                        getDisplayState().stack.peek(),
-                        View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
-                                View.DRAG_FLAG_GLOBAL_URI_WRITE
-                );
-                return true;
-            }
+                @Override
+                public boolean onDragStart(View v, DragStartHelper helper) {
+                    Selection selection = mSelectionManager.getSelection();
 
-            return false;
-        }
-    };
+                    if (v == null) {
+                        Log.d(TAG, "Ignoring drag event, null view");
+                        return false;
+                    }
+                    if (!isSelected(getModelId(v))) {
+                        Log.d(TAG, "Ignoring drag event, unselected view.");
+                        return false;
+                    }
+
+                    // NOTE: Preparation of the ClipData object can require a lot of time
+                    // and ideally should be done in the background. Unfortunately
+                    // the current code layout and framework assumptions don't support
+                    // this. So for now, we could end up doing a bunch of i/o on main thread.
+                    v.startDragAndDrop(
+                            mClipper.getClipDataForDocuments(
+                                    mModel::getItemUri,
+                                    selection,
+                                    FileOperationService.OPERATION_COPY),
+                            new DragShadowBuilder(
+                                    getActivity(),
+                                    getDragTitle(selection),
+                                    getDragIcon(selection)),
+                            getDisplayState().stack.peek(),
+                            View.DRAG_FLAG_GLOBAL
+                                    | View.DRAG_FLAG_GLOBAL_URI_READ
+                                    | View.DRAG_FLAG_GLOBAL_URI_WRITE);
+
+                    return true;
+                }
+            };
+
 
     private DragStartHelper mDragHelper = new DragStartHelper(null, mOnDragStartListener);
 
@@ -1892,7 +1831,7 @@ public class DirectoryFragment extends Fragment
         updateLayout(state.derivedMode);
 
         if (mRestoredSelection != null) {
-            mSelectionManager.setItemsSelected(mRestoredSelection.getAll(), true);
+            mSelectionManager.restoreSelection(mRestoredSelection);
             // Note, we'll take care of cleaning up retained selection
             // in the selection handler where we already have some
             // specialized code to handle when selection was restored.

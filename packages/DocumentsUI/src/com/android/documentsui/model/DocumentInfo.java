@@ -30,14 +30,16 @@ import android.support.annotation.VisibleForTesting;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.RootCursorWrapper;
 
-import libcore.io.IoUtils;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+
+import libcore.io.IoUtils;
 
 /**
  * Representation of a {@link Document}.
@@ -263,10 +265,12 @@ public class DocumentInfo implements Durable, Parcelable {
         return (flags & Document.FLAG_VIRTUAL_DOCUMENT) != 0;
     }
 
+    @Override
     public int hashCode() {
         return derivedUri.hashCode() + mimeType.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == null) {
             return false;
@@ -322,5 +326,22 @@ public class DocumentInfo implements Durable, Parcelable {
         final FileNotFoundException fnfe = new FileNotFoundException(t.getMessage());
         fnfe.initCause(t);
         throw fnfe;
+    }
+
+    public static Uri getUri(Cursor cursor) {
+        return DocumentsContract.buildDocumentUri(
+            getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY),
+            getCursorString(cursor, Document.COLUMN_DOCUMENT_ID));
+    }
+
+    public static void addMimeTypes(ContentResolver resolver, Uri uri, Set<String> mimeTypes) {
+        assert(uri != null);
+        if ("content".equals(uri.getScheme())) {
+            mimeTypes.add(resolver.getType(uri));
+            final String[] streamTypes = resolver.getStreamTypes(uri, "*/*");
+            if (streamTypes != null) {
+                mimeTypes.addAll(Arrays.asList(streamTypes));
+            }
+        }
     }
 }

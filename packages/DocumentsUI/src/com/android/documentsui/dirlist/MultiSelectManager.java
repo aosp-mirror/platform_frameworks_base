@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -184,10 +185,12 @@ public final class MultiSelectManager {
     }
 
     /**
-     * Updates selection to include items in {@code selection}.
+     * Returns an unordered array of selected positions, including any
+     * provisional selection currently in effect.
      */
-    public void updateSelection(Selection selection) {
-        setItemsSelected(selection.getAll(), true);
+    public void restoreSelection(Selection other) {
+        setItemsSelected(other.mSelection, true);
+        // NOTE: We intentionally don't restore provisional selection. It's provisional.
     }
 
     /**
@@ -233,7 +236,10 @@ public final class MultiSelectManager {
         Selection oldSelection = getSelection(new Selection());
         mSelection.clear();
 
-        for (String id: oldSelection.getAll()) {
+        for (String id: oldSelection.mSelection) {
+            notifyItemStateChanged(id, false);
+        }
+        for (String id: oldSelection.mProvisionalSelection) {
             notifyItemStateChanged(id, false);
         }
     }
@@ -600,7 +606,7 @@ public final class MultiSelectManager {
      * Object representing the current selection. Provides read only access
      * public access, and private write access.
      */
-    public static final class Selection implements Parcelable {
+    public static final class Selection implements Iterable<String>, Parcelable {
 
         // This class tracks selected items by managing two sets: the saved selection, and the total
         // selection. Saved selections are those which have been completed by tapping an item or by
@@ -640,19 +646,18 @@ public final class MultiSelectManager {
         }
 
         /**
-         * Returns an unordered array of selected positions, including any
-         * provisional selection currently in effect.
+         * Returns an {@link Iterator} that iterators over the selection, *excluding*
+         * any provisional selection.
+         *
+         * {@inheritDoc}
          */
-        public List<String> getAll() {
-            ArrayList<String> selection =
-                    new ArrayList<String>(mSelection.size() + mProvisionalSelection.size());
-            selection.addAll(mSelection);
-            selection.addAll(mProvisionalSelection);
-            return selection;
+        @Override
+        public Iterator<String> iterator() {
+            return mSelection.iterator();
         }
 
         /**
-         * @return size of the selection.
+         * @return size of the selection including both final and provisional selected items.
          */
         public int size() {
             return mSelection.size() + mProvisionalSelection.size();
@@ -833,6 +838,7 @@ public final class MultiSelectManager {
             return 0;
         }
 
+        @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(mDirectoryKey);
             dest.writeStringList(new ArrayList<>(mSelection));
