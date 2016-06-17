@@ -16,7 +16,11 @@
 
 package android.text;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PluralsRes;
+import android.content.Context;
 import android.content.res.Resources;
 import android.icu.util.ULocale;
 import android.os.Parcel;
@@ -60,6 +64,7 @@ import libcore.icu.ICU;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -1191,16 +1196,103 @@ public class TextUtils {
     }
 
     /**
+     * Formats a list of CharSequences by repeatedly inserting the separator between them,
+     * but stopping when the resulting sequence is too wide for the specified width.
+     *
+     * This method actually tries to fit the maximum number of elements. So if {@code "A, 11 more"
+     * fits}, {@code "A, B, 10 more"} doesn't fit, but {@code "A, B, C, 9 more"} fits again (due to
+     * the glyphs for the digits being very wide, for example), it returns
+     * {@code "A, B, C, 9 more"}. Because of this, this method may be inefficient for very long
+     * lists.
+     *
+     * Note that the elements of the returned value, as well as the string for {@code moreId}, will
+     * be bidi-wrapped using {@link BidiFormatter#unicodeWrap} based on the locale of the input
+     * Context. If the input {@code Context} is null, the default BidiFormatter from
+     * {@link BidiFormatter#getInstance()} will be used.
+     *
+     * @param context the {@code Context} to get the {@code moreId} resource from. If {@code null},
+     *     an ellipsis (U+2026) would be used for {@code moreId}.
+     * @param elements the list to format
+     * @param separator a separator, such as {@code ", "}
+     * @param paint the Paint with which to measure the text
+     * @param avail the horizontal width available for the text (in pixels)
+     * @param moreId the resource ID for the pluralized string to insert at the end of sequence when
+     *     some of the elements don't fit.
+     *
+     * @return the formatted CharSequence. If even the shortest sequence (e.g. {@code "A, 11 more"})
+     *     doesn't fit, it will return an empty string.
+     */
+
+    public static CharSequence listEllipsize(@Nullable Context context,
+            @Nullable List<CharSequence> elements, @NonNull String separator,
+            @NonNull TextPaint paint, @FloatRange(from=0.0,fromInclusive=false) float avail,
+            @PluralsRes int moreId) {
+        if (elements == null) {
+            return "";
+        }
+        final int totalLen = elements.size();
+        if (totalLen == 0) {
+            return "";
+        }
+
+        final Resources res;
+        final BidiFormatter bidiFormatter;
+        if (context == null) {
+            res = null;
+            bidiFormatter = BidiFormatter.getInstance();
+        } else {
+            res = context.getResources();
+            bidiFormatter = BidiFormatter.getInstance(res.getConfiguration().getLocales().get(0));
+        }
+
+        final SpannableStringBuilder output = new SpannableStringBuilder();
+        final int[] endIndexes = new int[totalLen];
+        for (int i = 0; i < totalLen; i++) {
+            output.append(bidiFormatter.unicodeWrap(elements.get(i)));
+            if (i != totalLen - 1) {  // Insert a separator, except at the very end.
+                output.append(separator);
+            }
+            endIndexes[i] = output.length();
+        }
+
+        for (int i = totalLen - 1; i >= 0; i--) {
+            // Delete the tail of the string, cutting back to one less element.
+            output.delete(endIndexes[i], output.length());
+
+            final int remainingElements = totalLen - i - 1;
+            if (remainingElements > 0) {
+                CharSequence morePiece = (res == null) ?
+                        ELLIPSIS_STRING :
+                        res.getQuantityString(moreId, remainingElements, remainingElements);
+                morePiece = bidiFormatter.unicodeWrap(morePiece);
+                output.append(morePiece);
+            }
+
+            final float width = paint.measureText(output, 0, output.length());
+            if (width <= avail) {  // The string fits.
+                return output;
+            }
+        }
+        return "";  // Nothing fits.
+    }
+
+    /**
      * Converts a CharSequence of the comma-separated form "Andy, Bob,
      * Charles, David" that is too wide to fit into the specified width
      * into one like "Andy, Bob, 2 more".
      *
      * @param text the text to truncate
      * @param p the Paint with which to measure the text
-     * @param avail the horizontal width available for the text
+     * @param avail the horizontal width available for the text (in pixels)
      * @param oneMore the string for "1 more" in the current locale
      * @param more the string for "%d more" in the current locale
+     *
+     * @deprecated Do not use. This is not internationalized, and has known issues
+     * with right-to-left text, languages that have more than one plural form, languages
+     * that use a different character as a comma-like separator, etc.
+     * Use {@link #listEllipsize} instead.
      */
+    @Deprecated
     public static CharSequence commaEllipsize(CharSequence text,
                                               TextPaint p, float avail,
                                               String oneMore,
@@ -1212,6 +1304,7 @@ public class TextUtils {
     /**
      * @hide
      */
+    @Deprecated
     public static CharSequence commaEllipsize(CharSequence text, TextPaint p,
          float avail, String oneMore, String more, TextDirectionHeuristic textDir) {
 
