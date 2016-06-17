@@ -731,9 +731,7 @@ class WindowSurfacePlacer {
                     }
 
                     try {
-                        if (task == null || task.mStack.getBoundsAnimating()) {
-                            w.mClient.moved(left, top);
-                        }
+                        w.mClient.moved(left, top);
                     } catch (RemoteException e) {
                     }
                     w.mMovedByResize = false;
