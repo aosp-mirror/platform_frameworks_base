@@ -16,15 +16,21 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.State.ACTION_CREATE;
+import static com.android.documentsui.State.ACTION_GET_CONTENT;
+import static com.android.documentsui.State.ACTION_OPEN;
+import static com.android.documentsui.State.ACTION_OPEN_TREE;
+import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
+
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.documentsui.MenuManager.DirectoryDetails;
+
 final class FilesMenuManager extends MenuManager {
 
-    private final SearchViewManager mSearchManager;
-
-    public FilesMenuManager(SearchViewManager searchManager) {
-        mSearchManager = searchManager;
+    public FilesMenuManager(SearchViewManager searchManager, State displayState) {
+        super(searchManager, displayState);
     }
 
     @Override
@@ -33,17 +39,6 @@ final class FilesMenuManager extends MenuManager {
 
         // It hides icon if searching in progress
         mSearchManager.updateMenu();
-    }
-
-    @Override
-    void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
-        //assert(!grid.isVisible());
-        //assert(list.isVisible());
-    }
-
-    @Override
-    void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
-        //assert(fileSize.isVisible());
     }
 
     @Override
@@ -70,18 +65,13 @@ final class FilesMenuManager extends MenuManager {
 
     @Override
     void updateSelectAll(MenuItem selectAll, SelectionDetails selectionDetails) {
-        assert(selectAll.isVisible());
+        selectAll.setVisible(true);
     }
 
     @Override
     void updateCreateDir(MenuItem createDir, DirectoryDetails directoryDetails) {
         createDir.setVisible(true);
         createDir.setEnabled(directoryDetails.canCreateDirectory());
-    }
-
-    @Override
-    void updateOpen(MenuItem open, SelectionDetails selectionDetails) {
-        open.setVisible(false);
     }
 
     @Override

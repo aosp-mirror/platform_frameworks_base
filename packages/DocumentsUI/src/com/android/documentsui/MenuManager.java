@@ -22,6 +22,14 @@ import android.view.MenuItem;
 
 public abstract class MenuManager {
 
+    final State mState;
+    final SearchViewManager mSearchManager;
+
+    public MenuManager(SearchViewManager searchManager, State displayState) {
+        mSearchManager = searchManager;
+        mState = displayState;
+    }
+
     /** @See DirectoryFragment.SelectionModeListener#updateActionMenu */
     public void updateActionMenu(Menu menu, SelectionDetails selection) {
         updateOpen(menu.findItem(R.id.menu_open), selection);
@@ -36,12 +44,17 @@ public abstract class MenuManager {
     }
 
     /** @See Activity#onPrepareOptionsMenu */
-    public void updateOptionMenu(Menu menu, DirectoryDetails details) {
-        updateCreateDir(menu.findItem(R.id.menu_create_dir), details);
-        updateSettings(menu.findItem(R.id.menu_settings), details);
-        updateNewWindow(menu.findItem(R.id.menu_new_window), details);
-        updateFileSize(menu.findItem(R.id.menu_file_size), details);
-        updateModePicker(menu.findItem(R.id.menu_grid), menu.findItem(R.id.menu_list), details);
+    public void updateOptionMenu(Menu menu, DirectoryDetails directoryDetails) {
+        updateCreateDir(menu.findItem(R.id.menu_create_dir), directoryDetails);
+        updateSettings(menu.findItem(R.id.menu_settings), directoryDetails);
+        updateNewWindow(menu.findItem(R.id.menu_new_window), directoryDetails);
+        updateFileSize(menu.findItem(R.id.menu_file_size), directoryDetails);
+        updateModePicker(menu.findItem(
+                R.id.menu_grid), menu.findItem(R.id.menu_list), directoryDetails);
+        updateSort(menu.findItem(R.id.menu_sort),
+                menu.findItem(R.id.menu_sort_size),
+                directoryDetails);
+        updateAdvanced(menu.findItem(R.id.menu_advanced), directoryDetails);
 
         Menus.disableHiddenItems(menu);
     }
@@ -81,18 +94,64 @@ public abstract class MenuManager {
         delete.setVisible(true);
     }
 
-    abstract void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails);
-    abstract void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails);
-    abstract void updateSettings(MenuItem settings, DirectoryDetails directoryDetails);
-    abstract void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails);
-    abstract void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails);
-    abstract void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails);
+    void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
+        grid.setVisible(mState.derivedMode != State.MODE_GRID);
+        list.setVisible(mState.derivedMode != State.MODE_LIST);
+    }
+
+    void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
+        fileSize.setVisible(!mState.forceSize);
+        fileSize.setTitle(directoryDetails.getDisplayFileSize()
+                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
+    }
+
+    void updateSort(MenuItem sort, MenuItem sortSize, DirectoryDetails directoryDetails) {
+        // Search uses backend ranking; no sorting, recents doesn't support sort.
+        sort.setEnabled(!directoryDetails.isInRecents() && !mSearchManager.isSearching());
+        sort.setVisible(true);
+        sortSize.setVisible(mState.showSize); // Only sort by size when file sizes are visible
+    }
+
+    void updateAdvanced(MenuItem advanced, DirectoryDetails directoryDetails) {
+        advanced.setVisible(mState.showAdvancedOption);
+        advanced.setTitle(mState.showAdvancedOption && mState.showAdvanced
+                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
+    }
+
+    void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
+        settings.setVisible(false);
+    }
+
+    void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {
+        newWindow.setVisible(false);
+    }
+
+    void updateOpen(MenuItem open, SelectionDetails selectionDetails) {
+        open.setVisible(false);
+    }
+
+    void updateShare(MenuItem share, SelectionDetails selectionDetails) {
+        share.setVisible(false);
+    }
+
+    void updateDelete(MenuItem delete, SelectionDetails selectionDetails) {
+        delete.setVisible(false);
+    }
+
+    void updateRename(MenuItem rename, SelectionDetails selectionDetails) {
+        rename.setVisible(false);
+    }
+
+    void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails) {
+        moveTo.setVisible(false);
+    }
+
+    void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails) {
+        copyTo.setVisible(false);
+    }
+
     abstract void updateSelectAll(MenuItem selectAll, SelectionDetails selectionDetails);
     abstract void updateCreateDir(MenuItem createDir, DirectoryDetails directoryDetails);
-    abstract void updateOpen(MenuItem open, SelectionDetails selectionDetails);
-    abstract void updateShare(MenuItem share, SelectionDetails selectionDetails);
-    abstract void updateRename(MenuItem rename, SelectionDetails selectionDetails);
-    abstract void updateDelete(MenuItem delete, SelectionDetails selectionDetails);
 
     /**
      * Access to meta data about the selection.
@@ -134,6 +193,10 @@ public abstract class MenuManager {
 
         public boolean canCreateDirectory() {
             return mActivity.canCreateDirectory();
+        }
+
+        public boolean getDisplayFileSize() {
+            return LocalPreferences.getDisplayFileSize(mActivity);
         }
     }
 }

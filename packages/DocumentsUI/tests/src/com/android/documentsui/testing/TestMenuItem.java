@@ -19,6 +19,7 @@ package com.android.documentsui.testing;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.StringRes;
 import android.view.MenuItem;
 
 import org.mockito.Mockito;
@@ -36,12 +37,19 @@ public abstract class TestMenuItem implements MenuItem {
 
     boolean enabled;
     boolean visible;
+    @StringRes int title;
 
     public static TestMenuItem create(int id) {
         final TestMenuItem mockMenuItem = Mockito.mock(TestMenuItem.class,
                 Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
 
         return mockMenuItem;
+    }
+
+    @Override
+    public TestMenuItem setTitle(@StringRes int title) {
+        this.title = title;
+        return this;
     }
 
     @Override
@@ -80,5 +88,9 @@ public abstract class TestMenuItem implements MenuItem {
 
     public void assertInvisible() {
         assertFalse(this.visible);
+    }
+
+    public void assertTitle(@StringRes int title) {
+        assertTrue(this.title == title);
     }
 }

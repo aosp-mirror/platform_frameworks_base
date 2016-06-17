@@ -28,6 +28,7 @@ public class TestDirectoryDetails extends DirectoryDetails {
     public boolean hasRootSettings;
     public boolean hasItemsToPaste;
     public boolean canCreateDirectory;
+    public boolean getDisplayFileSize;
 
     public TestDirectoryDetails() {
         super(null);
@@ -56,5 +57,10 @@ public class TestDirectoryDetails extends DirectoryDetails {
     @Override
     public boolean canCreateDirectory() {
         return canCreateDirectory;
+    }
+
+    @Override
+    public boolean getDisplayFileSize() {
+        return getDisplayFileSize;
     }
 }

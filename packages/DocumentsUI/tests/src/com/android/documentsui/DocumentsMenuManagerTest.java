@@ -51,6 +51,9 @@ public final class DocumentsMenuManagerTest {
     private TestMenuItem cut;
     private TestMenuItem copy;
     private TestMenuItem paste;
+    private TestMenuItem sort;
+    private TestMenuItem sortSize;
+    private TestMenuItem advanced;
 
     private TestSelectionDetails selectionDetails;
     private TestDirectoryDetails directoryDetails;
@@ -72,6 +75,9 @@ public final class DocumentsMenuManagerTest {
         cut = testMenu.findItem(R.id.menu_cut_to_clipboard);
         copy = testMenu.findItem(R.id.menu_copy_to_clipboard);
         paste = testMenu.findItem(R.id.menu_paste_from_clipboard);
+        sort = testMenu.findItem(R.id.menu_sort);
+        sortSize = testMenu.findItem(R.id.menu_sort_size);
+        advanced = testMenu.findItem(R.id.menu_advanced);
 
         selectionDetails = new TestSelectionDetails();
         directoryDetails = new TestDirectoryDetails();
@@ -116,19 +122,33 @@ public final class DocumentsMenuManagerTest {
         DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
+        sort.assertEnabled();
+        sortSize.assertInvisible();
+        advanced.assertInvisible();
+        advanced.assertTitle(R.string.menu_advanced_show);
         createDir.assertDisabled();
         fileSize.assertInvisible();
         assertTrue(testSearchManager.showMenuCalled());
     }
 
     @Test
+    public void testOptionMenu_hideSize() {
+        state.showSize = true;
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        sortSize.assertVisible();
+    }
+
+    @Test
     public void testOptionMenu_notPicking() {
         state.action = ACTION_OPEN;
+        state.derivedMode = State.MODE_LIST;
         DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
         createDir.assertInvisible();
-        grid.assertInvisible();
+        grid.assertVisible();
         list.assertInvisible();
         assertFalse(testSearchManager.showMenuCalled());
     }
@@ -143,18 +163,30 @@ public final class DocumentsMenuManagerTest {
     }
 
     @Test
+    public void testOptionMenu_showAdvanced() {
+        state.showAdvanced = true;
+        state.showAdvancedOption = true;
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        advanced.assertVisible();
+        advanced.assertTitle(R.string.menu_advanced_hide);
+    }
+
+    @Test
     public void testOptionMenu_inRecents() {
         directoryDetails.isInRecents = true;
         DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
+        sort.assertDisabled();
         grid.assertInvisible();
         list.assertInvisible();
     }
 
     @Test
     public void testContextMenu_NoSelection() {
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateContextMenu(testMenu, null, directoryDetails);
         cut.assertVisible();
         copy.assertVisible();
@@ -167,12 +199,12 @@ public final class DocumentsMenuManagerTest {
 
     @Test
     public void testContextMenu_Selection() {
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        DocumentsMenuManager mgr = new DocumentsMenuManager(testSearchManager, state);
         mgr.updateContextMenu(testMenu, selectionDetails, directoryDetails);
         cut.assertVisible();
         copy.assertVisible();
         paste.assertVisible();
-        rename.assertVisible();
+        rename.assertInvisible();
         createDir.assertVisible();
         delete.assertVisible();
     }
