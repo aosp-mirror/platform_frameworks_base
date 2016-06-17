@@ -1303,14 +1303,16 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (mAppOpsService != null) { // We skip it until system-ready.
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mAppOpsService.setUserRestrictions(effective, mUserRestriconToken, userId);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mAppOpsService.setUserRestrictions(effective, mUserRestriconToken, userId);
+                    } catch (RemoteException e) {
+                        Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+                    }
+                }
+            });
         }
 
         propagateUserRestrictionsLR(userId, effective, prevAppliedRestrictions);
