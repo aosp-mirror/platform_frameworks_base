@@ -3074,9 +3074,6 @@ class AlarmManagerService extends SystemService {
                 if (alarm.workSource != null && alarm.workSource.size() > 0) {
                     for (int wi=0; wi<alarm.workSource.size(); wi++) {
                         final String wsName = alarm.workSource.getName(wi);
-                        if (wsName == null) {
-                            Slog.w(TAG, "Null worksource name for alarm " + alarm);
-                        }
                         ActivityManagerNative.noteWakeupAlarm(
                                 alarm.operation, alarm.workSource.get(wi),
                                 (wsName != null) ? wsName : alarm.packageName,
