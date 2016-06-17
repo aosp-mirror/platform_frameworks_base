@@ -254,7 +254,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 case KEY_WIFI_NEW_CONFIG:
                     byte[] restoredWifiNewConfigData = new byte[size];
                     data.readEntityData(restoredWifiNewConfigData, 0, size);
-                    restoreNewWifiConfigData(restoredWifiNewConfigData, size);
+                    restoreNewWifiConfigData(restoredWifiNewConfigData);
                     break;
 
                 default :
@@ -266,8 +266,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         // Do this at the end so that we also pull in the ipconfig data.
         if (restoredWifiSupplicantData != null) {
             restoreSupplicantWifiConfigData(
-                    restoredWifiSupplicantData, restoredWifiSupplicantData.length,
-                    restoredWifiIpConfigData, restoredWifiIpConfigData.length);
+                    restoredWifiSupplicantData, restoredWifiIpConfigData);
         }
     }
 
@@ -397,8 +396,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) Log.d(TAG, ipconfig_size + " bytes of ip config data");
                 byte[] ipconfig_buffer = new byte[ipconfig_size];
                 in.readFully(ipconfig_buffer, 0, nBytes);
-                restoreSupplicantWifiConfigData(supplicant_buffer, supplicant_size, ipconfig_buffer,
-                        ipconfig_size);
+                restoreSupplicantWifiConfigData(supplicant_buffer, ipconfig_buffer);
             }
 
             if (version >= FULL_BACKUP_ADDED_LOCK_SETTINGS) {
@@ -436,7 +434,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of full wifi config data");
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 in.readFully(buffer, 0, nBytes);
-                restoreNewWifiConfigData(buffer, nBytes);
+                restoreNewWifiConfigData(buffer);
             }
 
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
@@ -752,8 +750,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return result;
     }
 
-    private void restoreSupplicantWifiConfigData(byte[] supplicant_bytes, int supplicant_size,
-            byte[] ipconfig_bytes, int ipconfig_size) {
+    private void restoreSupplicantWifiConfigData(byte[] supplicant_bytes, byte[] ipconfig_bytes) {
         if (DEBUG_BACKUP) {
             Log.v(TAG, "Applying restored supplicant wifi data");
         }
@@ -812,7 +809,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return mWifiManager.retrieveBackupData();
     }
 
-    private void restoreNewWifiConfigData(byte[] bytes, int size) {
+    private void restoreNewWifiConfigData(byte[] bytes) {
         if (DEBUG_BACKUP) {
             Log.v(TAG, "Applying restored wifi data");
         }
