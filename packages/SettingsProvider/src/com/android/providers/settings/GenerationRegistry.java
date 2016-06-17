@@ -76,6 +76,8 @@ final class GenerationRegistry {
                         bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
                                 backingStore);
                         bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
+                        bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
+                                backingStore.get(index));
                         if (DEBUG) {
                             Slog.i(LOG_TAG, "Exported index:" + index + " for key:"
                                     + SettingsProvider.keyToString(key));
