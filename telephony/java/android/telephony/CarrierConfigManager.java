@@ -420,6 +420,12 @@ public class CarrierConfigManager {
             "carrier_data_call_apn_delay_faster_long";
 
     /**
+     * Data call setup permanent failure causes by the carrier
+     */
+    public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS =
+            "carrier_data_call_permanent_failure_strings";
+
+    /**
      * Default APN types that are metered by the carrier
      * @hide
      */
