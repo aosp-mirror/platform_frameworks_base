@@ -17,11 +17,19 @@
     <shortcut
         android:shortcutId="ms1"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="action1"
-    />
+        >
+        <intent
+            android:action="action1"
+            >
+        </intent>
+    </shortcut>
     <shortcut
         android:shortcutId="ms1"
         android:shortcutShortLabel="@string/shortcut_title2"
-        android:shortcutIntentAction="action2"
-    />
+        >
+        <intent
+            android:action="action2"
+            >
+        </intent>
+    </shortcut>
 </shortcuts>
