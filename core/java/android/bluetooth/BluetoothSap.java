@@ -138,7 +138,7 @@ public final class BluetoothSap implements BluetoothProfile {
     }
 
     boolean doBind() {
-        Intent intent = new Intent(IBluetoothMap.class.getName());
+        Intent intent = new Intent(IBluetoothSap.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
