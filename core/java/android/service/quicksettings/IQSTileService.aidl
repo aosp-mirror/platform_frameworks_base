@@ -15,15 +15,10 @@
  */
 package android.service.quicksettings;
 
-import android.service.quicksettings.Tile;
-import android.service.quicksettings.IQSService;
-
 /**
  * @hide
  */
 oneway interface IQSTileService {
-    void setQSService(in IQSService service);
-    void setQSTile(in Tile tile);
     void onTileAdded();
     void onTileRemoved();
     void onStartListening();

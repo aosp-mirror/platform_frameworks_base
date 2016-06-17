@@ -118,6 +118,16 @@ public class TileService extends Service {
     /**
      * @hide
      */
+    public static final String EXTRA_SERVICE = "service";
+
+    /**
+     * @hide
+     */
+    public static final String EXTRA_TILE = "tile";
+
+    /**
+     * @hide
+     */
     public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
     private final H mHandler = new H(Looper.getMainLooper());
@@ -305,17 +315,10 @@ public class TileService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mTile = intent.getParcelableExtra(EXTRA_TILE);
+        mService = IQSService.Stub.asInterface(intent.getIBinderExtra(EXTRA_SERVICE));
+        mTile.setService(mService);
         return new IQSTileService.Stub() {
-            @Override
-            public void setQSService(IQSService service) throws RemoteException {
-                mHandler.obtainMessage(H.MSG_SET_SERVICE, service).sendToTarget();
-            }
-
-            @Override
-            public void setQSTile(Tile tile) throws RemoteException {
-                mHandler.obtainMessage(H.MSG_SET_TILE, tile).sendToTarget();
-            }
-
             @Override
             public void onTileRemoved() throws RemoteException {
                 mHandler.sendEmptyMessage(H.MSG_TILE_REMOVED);
@@ -349,14 +352,12 @@ public class TileService extends Service {
     }
 
     private class H extends Handler {
-        private static final int MSG_SET_TILE = 1;
-        private static final int MSG_START_LISTENING = 2;
-        private static final int MSG_STOP_LISTENING = 3;
-        private static final int MSG_TILE_ADDED = 4;
-        private static final int MSG_TILE_REMOVED = 5;
-        private static final int MSG_TILE_CLICKED = 6;
-        private static final int MSG_SET_SERVICE = 7;
-        private static final int MSG_UNLOCK_COMPLETE = 8;
+        private static final int MSG_START_LISTENING = 1;
+        private static final int MSG_STOP_LISTENING = 2;
+        private static final int MSG_TILE_ADDED = 3;
+        private static final int MSG_TILE_REMOVED = 4;
+        private static final int MSG_TILE_CLICKED = 5;
+        private static final int MSG_UNLOCK_COMPLETE = 6;
 
         public H(Looper looper) {
             super(looper);
@@ -365,18 +366,6 @@ public class TileService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_SET_SERVICE:
-                    mService = (IQSService) msg.obj;
-                    if (mTile != null) {
-                        mTile.setService(mService);
-                    }
-                    break;
-                case MSG_SET_TILE:
-                    mTile = (Tile) msg.obj;
-                    if (mService != null && mTile != null) {
-                        mTile.setService(mService);
-                    }
-                    break;
                 case MSG_TILE_ADDED:
                     TileService.this.onTileAdded();
                     break;
