@@ -30,6 +30,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -245,7 +246,7 @@ public final class ShortcutInfo implements Parcelable {
         mTextResId = b.mTextResId;
         mDisabledMessage = b.mDisabledMessage;
         mDisabledMessageResId = b.mDisabledMessageResId;
-        mCategories = clone(b.mCategories);
+        mCategories = cloneCategories(b.mCategories);
         mIntent = b.mIntent;
         if (mIntent != null) {
             final Bundle intentExtras = mIntent.getExtras();
@@ -259,8 +260,17 @@ public final class ShortcutInfo implements Parcelable {
         updateTimestamp();
     }
 
-    private <T> ArraySet<T> clone(Set<T> source) {
-        return (source == null) ? null : new ArraySet<>(source);
+    private ArraySet<String> cloneCategories(Set<String> source) {
+        if (source == null) {
+            return null;
+        }
+        final ArraySet<String> ret = new ArraySet<>(source.size());
+        for (CharSequence s : source) {
+            if (!TextUtils.isEmpty(s)) {
+                ret.add(s.toString().intern());
+            }
+        }
+        return ret;
     }
 
     /**
@@ -304,7 +314,7 @@ public final class ShortcutInfo implements Parcelable {
             mTextResId = source.mTextResId;
             mDisabledMessage = source.mDisabledMessage;
             mDisabledMessageResId = source.mDisabledMessageResId;
-            mCategories = clone(source.mCategories);
+            mCategories = cloneCategories(source.mCategories);
             if ((cloneFlags & CLONE_REMOVE_INTENT) == 0) {
                 mIntent = source.mIntent;
                 mIntentPersistableExtras = source.mIntentPersistableExtras;
@@ -614,7 +624,7 @@ public final class ShortcutInfo implements Parcelable {
             mDisabledMessageResName = null;
         }
         if (source.mCategories != null) {
-            mCategories = clone(source.mCategories);
+            mCategories = cloneCategories(source.mCategories);
         }
         if (source.mIntent != null) {
             mIntent = source.mIntent;
@@ -752,7 +762,7 @@ public final class ShortcutInfo implements Parcelable {
          * an icon.  The recommend max length is 10 characters.
          */
         @NonNull
-        public Builder setShortLabel(@NonNull String shortLabel) {
+        public Builder setShortLabel(@NonNull CharSequence shortLabel) {
             Preconditions.checkState(mTitleResId == 0, "shortLabelResId already set");
             mTitle = Preconditions.checkStringNotEmpty(shortLabel, "shortLabel");
             return this;
@@ -776,14 +786,14 @@ public final class ShortcutInfo implements Parcelable {
          * The recommend max length is 25 characters.
          */
         @NonNull
-        public Builder setLongLabel(@NonNull String longLabel) {
+        public Builder setLongLabel(@NonNull CharSequence longLabel) {
             Preconditions.checkState(mTextResId == 0, "longLabelResId already set");
             mText = Preconditions.checkStringNotEmpty(longLabel, "longLabel");
             return this;
         }
 
         /** @hide -- old signature, the internal code still uses it. */
-        public Builder setTitle(@NonNull String value) {
+        public Builder setTitle(@NonNull CharSequence value) {
             return setShortLabel(value);
         }
 
@@ -793,7 +803,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /** @hide -- old signature, the internal code still uses it. */
-        public Builder setText(@NonNull String value) {
+        public Builder setText(@NonNull CharSequence value) {
             return setLongLabel(value);
         }
 
@@ -813,7 +823,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         @NonNull
-        public Builder setDisabledMessage(@NonNull String disabledMessage) {
+        public Builder setDisabledMessage(@NonNull CharSequence disabledMessage) {
             Preconditions.checkState(
                     mDisabledMessageResId == 0, "disabledMessageResId already set");
             mDisabledMessage =
@@ -1355,6 +1365,37 @@ public final class ShortcutInfo implements Parcelable {
         mIconResName = iconResName;
     }
 
+    /**
+     * Replaces the intent
+     *
+     * @throws IllegalArgumentException when extra is not compatible with {@link PersistableBundle}.
+     *
+     * @hide
+     */
+    public void setIntent(Intent intent) throws IllegalArgumentException {
+        Preconditions.checkNotNull(intent);
+
+        final Bundle intentExtras = intent.getExtras();
+
+        mIntent = intent;
+
+        if (intentExtras != null) {
+            intent.replaceExtras((Bundle) null);
+            mIntentPersistableExtras = new PersistableBundle(intentExtras);
+        } else {
+            mIntentPersistableExtras = null;
+        }
+    }
+
+    /**
+     * Replaces the categories.
+     *
+     * @hide
+     */
+    public void setCategories(Set<String> categories) {
+        mCategories = cloneCategories(categories);
+    }
+
     private ShortcutInfo(Parcel source) {
         final ClassLoader cl = getClass().getClassLoader();
 
@@ -1591,7 +1632,7 @@ public final class ShortcutInfo implements Parcelable {
         mDisabledMessage = disabledMessage;
         mDisabledMessageResId = disabledMessageResId;
         mDisabledMessageResName = disabledMessageResName;
-        mCategories = clone(categories);
+        mCategories = cloneCategories(categories);
         mIntent = intent;
         mIntentPersistableExtras = intentPersistableExtras;
         mRank = rank;

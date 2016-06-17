@@ -2733,13 +2733,9 @@
        =============================================================== -->
     <eat-comment />
     <public type="attr" name="shortcutId" />
-    <public type="attr" name="shortcutIcon" />
     <public type="attr" name="shortcutShortLabel" />
     <public type="attr" name="shortcutLongLabel" />
     <public type="attr" name="shortcutDisabledMessage" />
-    <public type="attr" name="shortcutCategories" />
-    <public type="attr" name="shortcutIntentAction" />
-    <public type="attr" name="shortcutIntentData" />
     <public type="attr" name="roundIcon" />
 
     <public type="attr" name="contextUri" />

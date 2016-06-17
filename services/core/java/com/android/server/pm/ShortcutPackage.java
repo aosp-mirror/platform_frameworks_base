@@ -682,6 +682,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             changed |= pushOutExcessShortcuts();
         }
 
+        s.verifyStates();
+
         if (changed) {
             // This will send a notification to the launcher, and also save .
             s.packageShortcutsChanged(getPackageName(), getPackageUserId());
@@ -774,6 +776,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             removeOrphans();
         }
+        adjustRanks();
         return changed;
     }
 
@@ -810,7 +813,6 @@ class ShortcutPackage extends ShortcutPackageItem {
                 deleteDynamicWithId(shortcut.getId());
             }
         }
-        service.verifyStates();
 
         return changed;
     }

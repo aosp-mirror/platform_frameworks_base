@@ -1510,6 +1510,10 @@ public class ShortcutService extends IShortcutService.Stub {
             ps.clearAllImplicitRanks();
             assignImplicitRanks(newShortcuts);
 
+            for (int i = 0; i < size; i++) {
+                fixUpIncomingShortcutInfo(newShortcuts.get(i), /* forUpdate= */ false);
+            }
+
             // First, remove all un-pinned; dynamic shortcuts
             ps.deleteAllDynamicShortcuts();
 

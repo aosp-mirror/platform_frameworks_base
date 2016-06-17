@@ -16,11 +16,19 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
     <shortcut
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
     <shortcut
         android:shortcutId="x1"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
 </shortcuts>

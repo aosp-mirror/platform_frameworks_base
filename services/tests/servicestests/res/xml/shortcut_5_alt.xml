@@ -17,37 +17,58 @@
     <shortcut
         android:shortcutId="ms1_alt"
         android:enabled="true"
-        android:shortcutIcon="@drawable/icon1"
+        android:icon="@drawable/icon1"
         android:shortcutShortLabel="@string/shortcut_title1"
         android:shortcutLongLabel="@string/shortcut_text1"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message1"
-        android:shortcutCategories="android.shortcut.conversation:android.shortcut.media"
-        android:shortcutIntentAction="action1"
-        android:shortcutIntentData="http://a.b.c/1"
-    />
+        >
+        <intent
+            android:action="action1"
+            android:data="http://a.b.c/1"
+            >
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+        <categories android:name="android.shortcut.media" />
+    </shortcut>
     <shortcut
         android:shortcutId="ms2_alt"
         android:enabled="true"
-        android:shortcutIcon="@drawable/icon2"
+        android:icon="@drawable/icon2"
         android:shortcutShortLabel="@string/shortcut_title2"
         android:shortcutLongLabel="@string/shortcut_text2"
         android:shortcutDisabledMessage="@string/shortcut_disabled_message2"
-        android:shortcutCategories="android.shortcut.conversation"
-        android:shortcutIntentAction="action2"
-    />
+        >
+        <intent
+            android:action="action2"
+            >
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
     <shortcut
         android:shortcutId="ms3_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
     <shortcut
         android:shortcutId="ms4_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
     <shortcut
         android:shortcutId="ms5_alt"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
 </shortcuts>
