@@ -83,8 +83,7 @@
     <string name="print_dialog">Print dialog</string>
 
     <!-- Template for the message that shows the current page out of the total number of pages [CHAR LIMIT=none] -->
-    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>
-        /<xliff:g id="page_count">%2$d</xliff:g></string>
+    <string name="current_page_template"><xliff:g id="current_page">%1$d</xliff:g>/<xliff:g id="page_count">%2$d</xliff:g></string>
 
     <!-- Description of the current page - spoken to the user [CHAR LIMIT=none] -->
     <string name="page_description_template">Page <xliff:g id="current_page" example="1">%1$d</xliff:g>
