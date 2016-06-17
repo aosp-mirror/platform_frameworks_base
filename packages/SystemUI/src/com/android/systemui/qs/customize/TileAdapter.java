@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
@@ -227,6 +228,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             });
             if (mNeedsFocus) {
                 // Wait for this to get laid out then set its focus.
+                // Ensure that tile gets laid out so we get the callback.
+                holder.mTileView.requestLayout();
                 holder.mTileView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
                     @Override
                     public void onLayoutChange(View v, int left, int top, int right, int bottom,
