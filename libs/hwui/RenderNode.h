@@ -196,7 +196,7 @@ public:
     }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
-    void destroyHardwareResources(TreeObserver* observer);
+    void destroyHardwareResources(TreeObserver* observer, TreeInfo* info = nullptr);
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
@@ -228,10 +228,19 @@ public:
     OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
 #endif
 
+    // Note: The position callbacks are relying on the listener using
+    // the frameNumber to appropriately batch/synchronize these transactions.
+    // There is no other filtering/batching to ensure that only the "final"
+    // state called once per frame.
     class ANDROID_API PositionListener {
     public:
         virtual ~PositionListener() {}
+        // Called when the RenderNode's position changes
         virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) = 0;
+        // Called when the RenderNode no longer has a position. As in, it's
+        // no longer being drawn.
+        // Note, tree info might be null
+        virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
     };
 
     // Note this is not thread safe, this needs to be called
@@ -306,7 +315,7 @@ private:
 
 
     void syncProperties();
-    void syncDisplayList(TreeObserver* observer);
+    void syncDisplayList(TreeInfo* info);
 
     void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
@@ -317,11 +326,11 @@ private:
 #endif
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);
-    void deleteDisplayList(TreeObserver* observer);
+    void deleteDisplayList(TreeObserver* observer, TreeInfo* info = nullptr);
     void damageSelf(TreeInfo& info);
 
     void incParentRefCount() { mParentCount++; }
-    void decParentRefCount(TreeObserver* observer);
+    void decParentRefCount(TreeObserver* observer, TreeInfo* info = nullptr);
 
     String8 mName;
     sp<VirtualLightRefBase> mUserContext;
