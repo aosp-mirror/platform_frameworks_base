@@ -1822,6 +1822,19 @@ public final class ViewRootImpl implements ViewParent,
                             + mAttachInfo.mVisibleInsets);
                 }
 
+                // If any of the insets changed, do a forceLayout on the view so that the
+                // measure cache is cleared. We might have a pending MSG_RESIZED_REPORT
+                // that is supposed to take care of it, but since pending insets are
+                // already modified here, it won't detect the frame change after this.
+                final boolean framesChanged = overscanInsetsChanged
+                        || contentInsetsChanged
+                        || stableInsetsChanged
+                        || visibleInsetsChanged
+                        || outsetsChanged;
+                if (mAdded && mView != null && framesChanged) {
+                    forceLayout(mView);
+                }
+
                 if (!hadSurface) {
                     if (mSurface.isValid()) {
                         // If we are creating a new surface, then we need to
