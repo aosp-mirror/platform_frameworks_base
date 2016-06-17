@@ -36,6 +36,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 import android.util.Log;
 
+import org.mockito.Mockito;
+
 @SmallTest
 public class TileLifecycleManagerTests extends AndroidTestCase {
     public static final String TILE_UPDATE_BROADCAST = "com.android.systemui.tests.TILE_UPDATE";
@@ -54,8 +56,11 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         mThread = new HandlerThread("TestThread");
         mThread.start();
         mHandler = new Handler(mThread.getLooper());
+        ComponentName component = new ComponentName(mContext, FakeTileService.class);
         mStateManager = new TileLifecycleManager(mHandler, getContext(),
-                new Intent(mContext, FakeTileService.class), new UserHandle(UserHandle.myUserId()));
+                Mockito.mock(IQSService.class), new Tile(component),
+                new Intent().setComponent(component),
+                new UserHandle(UserHandle.myUserId()));
         mCallbacks.clear();
         getContext().registerReceiver(mReceiver, new IntentFilter(TILE_UPDATE_BROADCAST));
     }
@@ -251,16 +256,6 @@ public class TileLifecycleManagerTests extends AndroidTestCase {
         @Override
         public IBinder onBind(Intent intent) {
             return new IQSTileService.Stub() {
-
-                @Override
-                public void setQSService(IQSService service) {
-
-                }
-
-                @Override
-                public void setQSTile(Tile tile) throws RemoteException {
-                }
-
                 @Override
                 public void onTileAdded() throws RemoteException {
                     sendCallback("onTileAdded");
