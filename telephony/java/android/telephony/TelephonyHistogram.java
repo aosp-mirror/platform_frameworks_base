@@ -31,35 +31,35 @@ import java.util.List;
 public final class TelephonyHistogram implements Parcelable {
     // Type of Telephony histogram Eg: RIL histogram will have all timing data associated with
     // RIL calls. Similarly we can have any other Telephony histogram.
-    private final int category;
+    private final int mCategory;
 
     // Unique Id identifying a sample within particular category of histogram
-    private final int id;
+    private final int mId;
 
     // Min time taken in ms
-    private int minTimeMs;
+    private int mMinTimeMs;
 
     // Max time taken in ms
-    private int maxTimeMs;
+    private int mMaxTimeMs;
 
     // Average time taken in ms
-    private int averageTimeMs;
+    private int mAverageTimeMs;
 
     // Total count of samples
-    private int sampleCount;
+    private int mSampleCount;
 
     // Array storing time taken for first #RANGE_CALCULATION_COUNT samples of histogram.
-    private int[] initialTimings;
+    private int[] mInitialTimings;
 
     // Total number of time ranges expected (must be greater than 1)
-    private final int bucketCount;
+    private final int mBucketCount;
 
     // Array storing endpoints of range buckets. Calculated based on values of minTime & maxTime
     // after totalTimeCount is #RANGE_CALCULATION_COUNT.
-    private final int[] bucketEndPoints;
+    private final int[] mBucketEndPoints;
 
     // Array storing counts for each time range starting from smallest value range
-    private final int[] bucketCounters;
+    private final int[] mBucketCounters;
 
     /**
      * Constant for Telephony category
@@ -81,69 +81,85 @@ public final class TelephonyHistogram implements Parcelable {
         if (bucketCount <= 1) {
             throw new IllegalArgumentException("Invalid number of buckets");
         }
-        this.category = category;
-        this.id = id;
-        this.minTimeMs = Integer.MAX_VALUE;
-        this.maxTimeMs = 0;
-        this.averageTimeMs = 0;
-        this.sampleCount = 0;
-        initialTimings = new int[RANGE_CALCULATION_COUNT];
-        this.bucketCount = bucketCount;
-        bucketEndPoints = new int[bucketCount - 1];
-        bucketCounters = new int[bucketCount];
+        mCategory = category;
+        mId = id;
+        mMinTimeMs = Integer.MAX_VALUE;
+        mMaxTimeMs = 0;
+        mAverageTimeMs = 0;
+        mSampleCount = 0;
+        mInitialTimings = new int[RANGE_CALCULATION_COUNT];
+        mBucketCount = bucketCount;
+        mBucketEndPoints = new int[bucketCount - 1];
+        mBucketCounters = new int[bucketCount];
     }
 
     public TelephonyHistogram(TelephonyHistogram th) {
-        category = th.getCategory();
-        id = th.getId();
-        minTimeMs = th.getMinTime();
-        maxTimeMs = th.getMaxTime();
-        averageTimeMs = th.getAverageTime();
-        sampleCount = th.getSampleCount();
-        initialTimings = th.getInitialTimings();
-        bucketCount = th.getBucketCount();
-        bucketEndPoints = th.getBucketEndPoints();
-        bucketCounters = th.getBucketCounters();
+        mCategory = th.getCategory();
+        mId = th.getId();
+        mMinTimeMs = th.getMinTime();
+        mMaxTimeMs = th.getMaxTime();
+        mAverageTimeMs = th.getAverageTime();
+        mSampleCount = th.getSampleCount();
+        mInitialTimings = th.getInitialTimings();
+        mBucketCount = th.getBucketCount();
+        mBucketEndPoints = th.getBucketEndPoints();
+        mBucketCounters = th.getBucketCounters();
     }
 
     public int getCategory() {
-        return category;
+        return mCategory;
     }
 
     public int getId() {
-        return id;
+        return mId;
     }
 
     public int getMinTime() {
-        return minTimeMs;
+        return mMinTimeMs;
     }
 
     public int getMaxTime() {
-        return maxTimeMs;
+        return mMaxTimeMs;
     }
 
     public int getAverageTime() {
-        return averageTimeMs;
+        return mAverageTimeMs;
     }
 
     public int getSampleCount () {
-        return sampleCount;
+        return mSampleCount;
     }
 
     private int[] getInitialTimings() {
-        return initialTimings;
+        return mInitialTimings;
     }
 
     public int getBucketCount() {
-        return bucketCount;
+        return mBucketCount;
     }
 
     public int[] getBucketEndPoints() {
-        return getDeepCopyOfArray(bucketEndPoints);
+        if (mSampleCount > 1 && mSampleCount < 10) {
+            int[] tempEndPoints = new int[mBucketCount - 1];
+            calculateBucketEndPoints(tempEndPoints);
+            return tempEndPoints;
+        } else {
+            return getDeepCopyOfArray(mBucketEndPoints);
+        }
     }
 
     public int[] getBucketCounters() {
-        return getDeepCopyOfArray(bucketCounters);
+        if (mSampleCount > 1 && mSampleCount < 10) {
+            int[] tempEndPoints = new int[mBucketCount - 1];
+            int[] tempBucketCounters = new int[mBucketCount];
+            calculateBucketEndPoints(tempEndPoints);
+            for (int j = 0; j < mSampleCount; j++) {
+                addToBucketCounter(tempEndPoints, tempBucketCounters, mInitialTimings[j]);
+            }
+            return tempBucketCounters;
+        } else {
+            return getDeepCopyOfArray(mBucketCounters);
+        }
     }
 
     private int[] getDeepCopyOfArray(int[] array) {
@@ -152,7 +168,7 @@ public final class TelephonyHistogram implements Parcelable {
         return clone;
     }
 
-    private void addToBucketCounter(int time) {
+    private void addToBucketCounter(int[] bucketEndPoints, int[] bucketCounters, int time) {
         int i;
         for (i = 0; i < bucketEndPoints.length; i++) {
             if (time <= bucketEndPoints[i]) {
@@ -161,6 +177,13 @@ public final class TelephonyHistogram implements Parcelable {
             }
         }
         bucketCounters[i]++;
+    }
+
+    private void calculateBucketEndPoints(int[] bucketEndPoints) {
+        for (int i = 1; i < mBucketCount; i++) {
+            int endPt = mMinTimeMs + (i * (mMaxTimeMs - mMinTimeMs)) / mBucketCount;
+            bucketEndPoints[i - 1] = endPt;
+        }
     }
 
     // Add new value of time taken
@@ -172,65 +195,62 @@ public final class TelephonyHistogram implements Parcelable {
     public void addTimeTaken(int time) {
         // Initialize all fields if its first entry or if integer overflow is going to occur while
         // trying to calculate averageTime
-        if (sampleCount == 0 || (sampleCount == Integer.MAX_VALUE)) {
-            if (sampleCount == 0) {
-                minTimeMs = time;
-                maxTimeMs = time;
-                averageTimeMs = time;
+        if (mSampleCount == 0 || (mSampleCount == Integer.MAX_VALUE)) {
+            if (mSampleCount == 0) {
+                mMinTimeMs = time;
+                mMaxTimeMs = time;
+                mAverageTimeMs = time;
             } else {
-                initialTimings = new int[RANGE_CALCULATION_COUNT];
+                mInitialTimings = new int[RANGE_CALCULATION_COUNT];
             }
-            sampleCount = 1;
-            Arrays.fill(initialTimings, 0);
-            initialTimings[0] = time;
-            Arrays.fill(bucketEndPoints, 0);
-            Arrays.fill(bucketCounters, 0);
+            mSampleCount = 1;
+            Arrays.fill(mInitialTimings, 0);
+            mInitialTimings[0] = time;
+            Arrays.fill(mBucketEndPoints, 0);
+            Arrays.fill(mBucketCounters, 0);
         } else {
-            if (time < minTimeMs) {
-                minTimeMs = time;
+            if (time < mMinTimeMs) {
+                mMinTimeMs = time;
             }
-            if (time > maxTimeMs) {
-                maxTimeMs = time;
+            if (time > mMaxTimeMs) {
+                mMaxTimeMs = time;
             }
-            long totalTime = ((long)averageTimeMs) * sampleCount + time;
-            averageTimeMs = (int)(totalTime/++sampleCount);
+            long totalTime = ((long)mAverageTimeMs) * mSampleCount + time;
+            mAverageTimeMs = (int)(totalTime/++mSampleCount);
 
-            if (sampleCount < RANGE_CALCULATION_COUNT) {
-                initialTimings[sampleCount - 1] = time;
-            } else if (sampleCount == RANGE_CALCULATION_COUNT) {
-                initialTimings[sampleCount - 1] = time;
+            if (mSampleCount < RANGE_CALCULATION_COUNT) {
+                mInitialTimings[mSampleCount - 1] = time;
+            } else if (mSampleCount == RANGE_CALCULATION_COUNT) {
+                mInitialTimings[mSampleCount - 1] = time;
 
                 // Calculate bucket endpoints based on bucketCount expected
-                for (int i = 1; i < bucketCount; i++) {
-                    int endPt = minTimeMs + (i * (maxTimeMs - minTimeMs)) / bucketCount;
-                    bucketEndPoints[i - 1] = endPt;
-                }
+                calculateBucketEndPoints(mBucketEndPoints);
 
                 // Use values stored in initialTimings[] to update bucketCounters
                 for (int j = 0; j < RANGE_CALCULATION_COUNT; j++) {
-                    addToBucketCounter(initialTimings[j]);
+                    addToBucketCounter(mBucketEndPoints, mBucketCounters, mInitialTimings[j]);
                 }
-                initialTimings = null;
+                mInitialTimings = null;
             } else {
-                addToBucketCounter(time);
+                addToBucketCounter(mBucketEndPoints, mBucketCounters, time);
             }
 
         }
     }
 
     public String toString() {
-        String basic = " Histogram id = " + id + " Time(ms): min = " + minTimeMs + " max = "
-                + maxTimeMs + " avg = " + averageTimeMs + " Count = " + sampleCount;
-        if (sampleCount < RANGE_CALCULATION_COUNT) {
+        String basic = " Histogram id = " + mId + " Time(ms): min = " + mMinTimeMs + " max = "
+                + mMaxTimeMs + " avg = " + mAverageTimeMs + " Count = " + mSampleCount;
+        if (mSampleCount < RANGE_CALCULATION_COUNT) {
             return basic;
         } else {
             StringBuffer intervals = new StringBuffer(" Interval Endpoints:");
-            for (int i = 0; i < bucketEndPoints.length; i++) {
-                intervals.append(" " + bucketEndPoints[i]);
+            for (int i = 0; i < mBucketEndPoints.length; i++) {
+                intervals.append(" " + mBucketEndPoints[i]);
             }
             intervals.append(" Interval counters:");
-            for (int i = 0; i < bucketCounters.length; i++) {
-                intervals.append(" " + bucketCounters[i]);
+            for (int i = 0; i < mBucketCounters.length; i++) {
+                intervals.append(" " + mBucketCounters[i]);
             }
             return basic + intervals;
         }
@@ -251,39 +271,39 @@ public final class TelephonyHistogram implements Parcelable {
             };
 
     public TelephonyHistogram(Parcel in) {
-        category = in.readInt();
-        id = in.readInt();
-        minTimeMs = in.readInt();
-        maxTimeMs = in.readInt();
-        averageTimeMs = in.readInt();
-        sampleCount = in.readInt();
+        mCategory = in.readInt();
+        mId = in.readInt();
+        mMinTimeMs = in.readInt();
+        mMaxTimeMs = in.readInt();
+        mAverageTimeMs = in.readInt();
+        mSampleCount = in.readInt();
         if (in.readInt() == PRESENT) {
-            initialTimings = new int[RANGE_CALCULATION_COUNT];
-            in.readIntArray(initialTimings);
+            mInitialTimings = new int[RANGE_CALCULATION_COUNT];
+            in.readIntArray(mInitialTimings);
         }
-        bucketCount = in.readInt();
-        bucketEndPoints = new int[bucketCount - 1];
-        in.readIntArray(bucketEndPoints);
-        bucketCounters = new int[bucketCount];
-        in.readIntArray(bucketCounters);
+        mBucketCount = in.readInt();
+        mBucketEndPoints = new int[mBucketCount - 1];
+        in.readIntArray(mBucketEndPoints);
+        mBucketCounters = new int[mBucketCount];
+        in.readIntArray(mBucketCounters);
     }
 
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(category);
-        out.writeInt(id);
-        out.writeInt(minTimeMs);
-        out.writeInt(maxTimeMs);
-        out.writeInt(averageTimeMs);
-        out.writeInt(sampleCount);
-        if (initialTimings == null) {
+        out.writeInt(mCategory);
+        out.writeInt(mId);
+        out.writeInt(mMinTimeMs);
+        out.writeInt(mMaxTimeMs);
+        out.writeInt(mAverageTimeMs);
+        out.writeInt(mSampleCount);
+        if (mInitialTimings == null) {
             out.writeInt(ABSENT);
         } else {
             out.writeInt(PRESENT);
-            out.writeIntArray(initialTimings);
+            out.writeIntArray(mInitialTimings);
         }
-        out.writeInt(bucketCount);
-        out.writeIntArray(bucketEndPoints);
-        out.writeIntArray(bucketCounters);
+        out.writeInt(mBucketCount);
+        out.writeIntArray(mBucketEndPoints);
+        out.writeIntArray(mBucketCounters);
     }
 
     @Override
