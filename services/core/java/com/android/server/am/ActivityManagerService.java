@@ -18718,7 +18718,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 starting = mainStack.topRunningActivityLocked();
             }
 
-            if (starting != null) {
+            if (starting != null && starting.state != ActivityState.STOPPED) {
                 kept = mainStack.ensureActivityConfigurationLocked(starting, changes, false);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
