@@ -17,7 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumen"</string>
-    <string name="files_label" msgid="6051402950202690279">"File"</string>
     <string name="downloads_label" msgid="959113951084633612">"Unduhan"</string>
     <string name="title_open" msgid="4353228937663917801">"Buka dari"</string>
     <string name="title_save" msgid="2433679664882857999">"Simpan ke"</string>
@@ -53,7 +52,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Sembunyikan akar"</string>
     <string name="save_error" msgid="6167009778003223664">"Gagal menyimpan dokumen"</string>
     <string name="create_error" msgid="3735649141335444215">"Gagal membuat folder"</string>
-    <string name="query_error" msgid="1222448261663503501">"Gagal mengirim kueri untuk dokumen"</string>
+    <string name="query_error" msgid="5999895349602476581">"Saat ini tidak dapat memuat konten"</string>
     <string name="root_recent" msgid="4470053704320518133">"Terkini"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> kosong"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Layanan penyimpanan"</string>
@@ -62,11 +61,12 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Aplikasi lain"</string>
     <string name="empty" msgid="7858882803708117596">"Tidak ada item"</string>
     <string name="no_results" msgid="6622510343880730446">"Tidak ada kecocokan dalam %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Tidak dapat membuka file"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Tidak dapat membuka file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Tidak dapat menghapus beberapa dokumen"</string>
     <string name="share_via" msgid="8966594246261344259">"Bagikan melalui"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Menyalin file"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Memindahkan file"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"Menghapus file"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> lagi"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">Menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> file.</item>
@@ -84,22 +84,23 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Menyiapkan salinan..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Menyiapkan pemindahan…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Bersiap menghapus…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other">Tidak dapat menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other">Tidak dapat memindahkan <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat memindahkan <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="other">Tidak dapat menghapus <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat menghapus <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Ketuk untuk melihat detail"</string>
     <string name="close" msgid="3043722427445528732">"Tutup"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Semua file ini tidak disalin: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Semua file ini tidak dipindahkan: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Semua file ini tidak disalin: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Semua file ini tidak dipindahkan: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="delete_failure_alert_content" msgid="892393767207938353">"Semua file ini tidak dihapus: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"File ini dikonversi ke format lain: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> file disalin ke papan klip.</item>
@@ -109,6 +110,34 @@
     <string name="menu_rename" msgid="7678802479104285353">"Ganti nama"</string>
     <string name="rename_error" msgid="4203041674883412606">"Gagal mengganti nama dokumen"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Beberapa file dikonversi"</string>
+    <string name="open_external_dialog_request" msgid="5789329484285817629">"Beri <xliff:g id="APPNAME"><b>^1</b></xliff:g> akses ke direktori <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> di <xliff:g id="STORAGE"><i>^3</i></xliff:g>?"</string>
+    <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"Beri <xliff:g id="APPNAME"><b>^1</b></xliff:g> akses ke direktori <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>?"</string>
+    <string name="open_external_dialog_root_request" msgid="8899108702926347720">"Beri <xliff:g id="APPNAME"><b>^1</b></xliff:g> akses ke data Anda, termasuk foto dan video, di <xliff:g id="STORAGE"><i>^2</i></xliff:g>?"</string>
+    <string name="never_ask_again" msgid="4295278542972859268">"Jangan tanya lagi"</string>
     <string name="allow" msgid="7225948811296386551">"Izinkan"</string>
     <string name="deny" msgid="2081879885755434506">"Tolak"</string>
+    <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dipilih</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
+    </plurals>
+    <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> item</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> item</item>
+    </plurals>
+    <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"Hapus \"<xliff:g id="NAME">%1$s</xliff:g>\"?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"Hapus folder \"<xliff:g id="NAME">%1$s</xliff:g>\" dan kontennya?"</string>
+    <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
+      <item quantity="other">Hapus <xliff:g id="COUNT_1">%1$d</xliff:g> file?</item>
+      <item quantity="one">Hapus <xliff:g id="COUNT_0">%1$d</xliff:g> file?</item>
+    </plurals>
+    <plurals name="delete_folders_confirmation_message" formatted="false" msgid="9185648028213507769">
+      <item quantity="other">Hapus <xliff:g id="COUNT_1">%1$d</xliff:g> folder dan kontennya?</item>
+      <item quantity="one">Hapus <xliff:g id="COUNT_0">%1$d</xliff:g> folder dan kontennya?</item>
+    </plurals>
+    <plurals name="delete_items_confirmation_message" formatted="false" msgid="5376214433530243459">
+      <item quantity="other">Hapus <xliff:g id="COUNT_1">%1$d</xliff:g> item?</item>
+      <item quantity="one">Hapus <xliff:g id="COUNT_0">%1$d</xliff:g> item?</item>
+    </plurals>
+    <string name="too_many_selected" msgid="6781456208116966753">"Maaf, Anda hanya dapat memilih maksimal 1000 item sekaligus"</string>
+    <string name="too_many_in_select_all" msgid="8281987479885307456">"Hanya dapat memilih 1000 item"</string>
 </resources>
