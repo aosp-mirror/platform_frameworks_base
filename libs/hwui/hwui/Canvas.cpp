@@ -79,8 +79,9 @@ static void simplifyPaint(int color, SkPaint* paint) {
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
-            const SkPaint& paint, float x, float y, MinikinRect& bounds, float totalAdvance)
+    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
+            const SkPaint& paint, float x, float y, minikin::MinikinRect& bounds,
+            float totalAdvance)
         : layout(layout)
         , canvas(canvas)
         , glyphs(glyphs)
@@ -135,14 +136,14 @@ public:
         }
     }
 private:
-    const Layout& layout;
+    const minikin::Layout& layout;
     Canvas* canvas;
     uint16_t* glyphs;
     float* pos;
     const SkPaint& paint;
     float x;
     float y;
-    MinikinRect& bounds;
+    minikin::MinikinRect& bounds;
     float totalAdvance;
 };
 
@@ -151,7 +152,7 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
     // minikin may modify the original paint
     Paint paint(origPaint);
 
-    Layout layout;
+    minikin::Layout layout;
     MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, start, count, contextCount);
 
     size_t nGlyphs = layout.nGlyphs();
@@ -160,7 +161,7 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
 
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
-    MinikinRect bounds;
+    minikin::MinikinRect bounds;
     layout.getBounds(&bounds);
     if (!drawTextAbsolutePos()) {
         bounds.offset(x, y);
@@ -178,7 +179,7 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
 
 class DrawTextOnPathFunctor {
 public:
-    DrawTextOnPathFunctor(const Layout& layout, Canvas* canvas, float hOffset,
+    DrawTextOnPathFunctor(const minikin::Layout& layout, Canvas* canvas, float hOffset,
             float vOffset, const Paint& paint, const SkPath& path)
         : layout(layout)
         , canvas(canvas)
@@ -198,7 +199,7 @@ public:
         }
     }
 private:
-    const Layout& layout;
+    const minikin::Layout& layout;
     Canvas* canvas;
     float hOffset;
     float vOffset;
@@ -209,7 +210,7 @@ private:
 void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
         float hOffset, float vOffset, const Paint& paint, Typeface* typeface) {
     Paint paintCopy(paint);
-    Layout layout;
+    minikin::Layout layout;
     MinikinUtils::doLayout(&layout, &paintCopy, bidiFlags, typeface, text, 0, count, count);
     hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
 

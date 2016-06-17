@@ -716,7 +716,7 @@ TEST(RecordingCanvas, drawText) {
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::kBidi_Force_LTR, paint, NULL);
     });
 
     int count = 0;
@@ -740,7 +740,7 @@ TEST(RecordingCanvas, drawTextInHighContrast) {
         paint.setTextSize(20);
         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, kBidi_Force_LTR, paint, NULL);
+        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::kBidi_Force_LTR, paint, NULL);
     });
 
     int count = 0;

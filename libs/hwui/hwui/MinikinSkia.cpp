@@ -24,7 +24,7 @@ namespace android {
 
 MinikinFontSkia::MinikinFontSkia(SkTypeface* typeface, const void* fontData, size_t fontSize,
         int ttcIndex) :
-    MinikinFont(typeface->uniqueID()), mTypeface(typeface), mFontData(fontData),
+    minikin::MinikinFont(typeface->uniqueID()), mTypeface(typeface), mFontData(fontData),
     mFontSize(fontSize), mTtcIndex(ttcIndex) {
 }
 
@@ -32,7 +32,8 @@ MinikinFontSkia::~MinikinFontSkia() {
     SkSafeUnref(mTypeface);
 }
 
-static void MinikinFontSkia_SetSkiaPaint(const MinikinFont* font, SkPaint* skPaint, const MinikinPaint& paint) {
+static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
+        const minikin::MinikinPaint& paint) {
     skPaint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     skPaint->setTextSize(paint.size);
     skPaint->setTextScaleX(paint.scaleX);
@@ -43,7 +44,7 @@ static void MinikinFontSkia_SetSkiaPaint(const MinikinFont* font, SkPaint* skPai
 }
 
 float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
-    const MinikinPaint &paint) const {
+        const minikin::MinikinPaint &paint) const {
     SkPaint skPaint;
     uint16_t glyph16 = glyph_id;
     SkScalar skWidth;
@@ -55,8 +56,8 @@ float MinikinFontSkia::GetHorizontalAdvance(uint32_t glyph_id,
     return skWidth;
 }
 
-void MinikinFontSkia::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
-    const MinikinPaint& paint) const {
+void MinikinFontSkia::GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
+        const minikin::MinikinPaint& paint) const {
     SkPaint skPaint;
     uint16_t glyph16 = glyph_id;
     SkRect skBounds;
@@ -68,7 +69,8 @@ void MinikinFontSkia::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
     bounds->mBottom = skBounds.fBottom;
 }
 
-const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy) {
+const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size,
+        minikin::MinikinDestroyFunc* destroy) {
     // we don't have a buffer to the font data, copy to own buffer
     const size_t tableSize = mTypeface->getTableSize(tag);
     *size = tableSize;
@@ -117,7 +119,8 @@ void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
     paint->setHinting(static_cast<SkPaint::Hinting>(paintFlags >> 16));
 }
 
-void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery) {
+void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font,
+        minikin::FontFakery fakery) {
     paint->setTypeface(reinterpret_cast<const MinikinFontSkia*>(font)->GetSkTypeface());
     paint->setFakeBoldText(paint->isFakeBoldText() || fakery.isFakeBold());
     if (fakery.isFakeItalic()) {

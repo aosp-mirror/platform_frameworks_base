@@ -27,7 +27,7 @@
 namespace android {
 
 struct ANDROID_API Typeface {
-    FontCollection *fFontCollection;
+  minikin::FontCollection *fFontCollection;
 
     // style used for constructing and querying Typeface objects
     SkTypeface::Style fSkiaStyle;
@@ -35,7 +35,7 @@ struct ANDROID_API Typeface {
     int fBaseWeight;
 
     // resolved style actually used for rendering
-    FontStyle fStyle;
+    minikin::FontStyle fStyle;
 
     void unref();
 
@@ -45,7 +45,7 @@ struct ANDROID_API Typeface {
 
     static Typeface* createWeightAlias(Typeface* src, int baseweight);
 
-    static Typeface* createFromFamilies(const std::vector<FontFamily*>& families);
+    static Typeface* createFromFamilies(const std::vector<minikin::FontFamily*>& families);
 
     static void setDefault(Typeface* face);
 };

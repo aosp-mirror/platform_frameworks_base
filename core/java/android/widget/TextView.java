@@ -6761,6 +6761,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                  BoringLayout.Metrics boring,
                                  BoringLayout.Metrics hintBoring,
                                  int ellipsisWidth, boolean bringIntoView) {
+        android.util.Log.e("TextView", "makeNewLayout", new Exception());
         stopMarquee();
 
         // Update "old" cached values

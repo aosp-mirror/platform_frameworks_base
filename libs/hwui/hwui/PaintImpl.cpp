@@ -20,7 +20,7 @@ namespace android {
 
 Paint::Paint() :
         SkPaint(), mLetterSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
-        mFontVariant(VARIANT_DEFAULT) {
+        mFontVariant(minikin::VARIANT_DEFAULT) {
 }
 
 Paint::Paint(const Paint& paint) : SkPaint(paint),
@@ -31,7 +31,7 @@ Paint::Paint(const Paint& paint) : SkPaint(paint),
 
 Paint::Paint(const SkPaint& paint) : SkPaint(paint),
         mLetterSpacing(0), mFontFeatureSettings(), mMinikinLangListId(0),
-        mFontVariant(VARIANT_DEFAULT) {
+        mFontVariant(minikin::VARIANT_DEFAULT) {
 }
 
 Paint::~Paint() {

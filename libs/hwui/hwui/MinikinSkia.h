@@ -25,7 +25,7 @@ class SkTypeface;
 
 namespace android {
 
-class ANDROID_API MinikinFontSkia : public MinikinFont {
+class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
     // Note: this takes ownership of the reference (will unref on dtor)
     explicit MinikinFontSkia(SkTypeface *typeface, const void* fontData, size_t fontSize,
@@ -34,12 +34,12 @@ public:
     ~MinikinFontSkia();
 
     float GetHorizontalAdvance(uint32_t glyph_id,
-        const MinikinPaint &paint) const;
+        const minikin::MinikinPaint &paint) const;
 
-    void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
-        const MinikinPaint &paint) const;
+    void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
+        const minikin::MinikinPaint &paint) const;
 
-    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
+    const void* GetTable(uint32_t tag, size_t* size, minikin::MinikinDestroyFunc* destroy);
 
     SkTypeface* GetSkTypeface() const;
 
@@ -52,7 +52,8 @@ public:
     static void unpackPaintFlags(SkPaint* paint, uint32_t paintFlags);
 
     // set typeface and fake bold/italic parameters
-    static void populateSkPaint(SkPaint* paint, const MinikinFont* font, FontFakery fakery);
+    static void populateSkPaint(SkPaint* paint, const minikin::MinikinFont* font,
+            minikin::FontFakery fakery);
 private:
     SkTypeface* mTypeface;
 
