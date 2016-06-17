@@ -24,10 +24,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -48,10 +48,12 @@ public class ShortcutParser {
     private static final boolean DEBUG = ShortcutService.DEBUG || false; // DO NOT SUBMIT WITH TRUE
 
     @VisibleForTesting
-    static final String METADATA_KEY = "android.pm.Shortcuts";
+    static final String METADATA_KEY = "android.app.shortcuts";
 
     private static final String TAG_SHORTCUTS = "shortcuts";
     private static final String TAG_SHORTCUT = "shortcut";
+    private static final String TAG_INTENT = "intent";
+    private static final String TAG_CATEGORIES = "categories";
 
     @Nullable
     public static List<ShortcutInfo> parseShortcuts(ShortcutService service,
@@ -60,10 +62,17 @@ public class ShortcutParser {
 
         List<ShortcutInfo> result = null;
 
-        if (pi != null && pi.activities != null) {
-            for (ActivityInfo activityInfo : pi.activities) {
-                result = parseShortcutsOneFile(service, activityInfo, packageName, userId, result);
+        try {
+            if (pi != null && pi.activities != null) {
+                for (ActivityInfo activityInfo : pi.activities) {
+                    result = parseShortcutsOneFile(service, activityInfo, packageName, userId, result);
+                }
             }
+        } catch (RuntimeException e) {
+            // Resource ID mismatch may cause various runtime exceptions when parsing XMLs.
+            service.wtf(
+                    "Exception caught while parsing shortcut XML for package=" + packageName, e);
+            return null;
         }
         return result;
     }
@@ -89,14 +98,58 @@ public class ShortcutParser {
             final int maxShortcuts = service.getMaxActivityShortcuts();
             int numShortcuts = 0;
 
+            // We instantiate ShortcutInfo at <shortcut>, but we add it to the list at </shortcut>,
+            // after parsing <intent>.  We keep the current one in here.
+            ShortcutInfo currentShortcut = null;
+
+            Set<String> categories = null;
+
             outer:
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                     && (type != XmlPullParser.END_TAG || parser.getDepth() > 0)) {
+                final int depth = parser.getDepth();
+                final String tag = parser.getName();
+
+                // When a shortcut tag is closing, publish.
+                if ((type == XmlPullParser.END_TAG) && (depth == 2) && (TAG_SHORTCUT.equals(tag))) {
+                    if (currentShortcut == null) {
+                        // Shortcut was invalid.
+                        continue;
+                    }
+                    final ShortcutInfo si = currentShortcut;
+                    currentShortcut = null; // Make sure to null out for the next iteration.
+
+                    if (si.getIntent() == null) {
+                        Log.e(TAG, "Shortcut " + si.getId() + " has no intent. Skipping it.");
+                        continue;
+                    }
+
+                    if (numShortcuts >= maxShortcuts) {
+                        Log.e(TAG, "More than " + maxShortcuts + " shortcuts found for "
+                                + activityInfo.getComponentName() + ". Skipping the rest.");
+                        return result;
+                    }
+                    if (categories != null) {
+                        si.setCategories(categories);
+                        categories = null;
+                    }
+
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
+                    result.add(si);
+                    numShortcuts++;
+                    rank++;
+                    if (ShortcutService.DEBUG) {
+                        Slog.d(TAG, "Shortcut added: " + si.toInsecureString());
+                    }
+                    continue;
+                }
+
+                // Otherwise, just look at start tags.
                 if (type != XmlPullParser.START_TAG) {
                     continue;
                 }
-                final int depth = parser.getDepth();
-                final String tag = parser.getName();
 
                 if (depth == 1 && TAG_SHORTCUTS.equals(tag)) {
                     continue; // Root tag.
@@ -104,35 +157,73 @@ public class ShortcutParser {
                 if (depth == 2 && TAG_SHORTCUT.equals(tag)) {
                     final ShortcutInfo si = parseShortcutAttributes(
                             service, attrs, packageName, activity, userId, rank);
+                    if (si == null) {
+                        // Shortcut was invalid.
+                        continue;
+                    }
                     if (ShortcutService.DEBUG) {
-                        Slog.d(TAG, "Shortcut=" + si);
+                        Slog.d(TAG, "Shortcut found: " + si.toInsecureString());
                     }
                     if (result != null) {
                         for (int i = result.size() - 1; i >= 0; i--) {
                             if (si.getId().equals(result.get(i).getId())) {
-                                Slog.w(TAG, "Duplicate shortcut ID detected, skipping.");
+                                Log.e(TAG, "Duplicate shortcut ID detected. Skipping it.");
                                 continue outer;
                             }
                         }
                     }
+                    if (!si.isEnabled()) {
+                        // Just set the default intent to disabled shortcuts.
+                        si.setIntent(new Intent(Intent.ACTION_VIEW));
+                    }
+                    currentShortcut = si;
+                    categories = null;
+                    continue;
+                }
+                if (depth == 3 && TAG_INTENT.equals(tag)) {
+                    if ((currentShortcut == null)
+                            || (currentShortcut.getIntentNoExtras() != null)
+                            || !currentShortcut.isEnabled()) {
+                        Log.e(TAG, "Ignoring excessive intent tag.");
+                        continue;
+                    }
 
-                    if (si != null) {
-                        if (numShortcuts >= maxShortcuts) {
-                            Slog.w(TAG, "More than " + maxShortcuts + " shortcuts found for "
-                                    + activityInfo.getComponentName() + ", ignoring the rest.");
-                            return result;
-                        }
-
-                        if (result == null) {
-                            result = new ArrayList<>();
-                        }
-                        result.add(si);
-                        numShortcuts++;
-                        rank++;
+                    final Intent intent = Intent.parseIntent(service.mContext.getResources(),
+                            parser, attrs);
+                    if (TextUtils.isEmpty(intent.getAction())) {
+                        Log.e(TAG, "Shortcut intent action must be provided. activity=" + activity);
+                        continue;
+                    }
+                    try {
+                        currentShortcut.setIntent(intent);
+                    } catch (RuntimeException e) {
+                        // This shouldn't happen because intents in XML can't have complicated
+                        // extras, but just in case Intent.parseIntent() supports such a thing one
+                        // day.
+                        Log.e(TAG, "Shortcut's extras contain un-persistable values. Skipping it.");
+                        continue;
                     }
                     continue;
                 }
-                Slog.w(TAG, "Unknown tag " + tag);
+                if (depth == 3 && TAG_CATEGORIES.equals(tag)) {
+                    if ((currentShortcut == null)
+                            || (currentShortcut.getCategories() != null)) {
+                        continue;
+                    }
+                    final String name = parseCategories(service, attrs);
+                    if (TextUtils.isEmpty(name)) {
+                        Log.e(TAG, "Empty category found. activity=" + activity);
+                        continue;
+                    }
+
+                    if (categories == null) {
+                        categories = new ArraySet<>();
+                    }
+                    categories.add(name);
+                    continue;
+                }
+
+                Log.w(TAG, "Unknown tag " + tag + " at depth " + depth);
             }
         } finally {
             if (parser != null) {
@@ -140,6 +231,16 @@ public class ShortcutParser {
             }
         }
         return result;
+    }
+
+    private static String parseCategories(ShortcutService service, AttributeSet attrs) {
+        final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
+                R.styleable.ShortcutCategories);
+        try {
+            return sa.getString(R.styleable.ShortcutCategories_name);
+        } finally {
+            sa.recycle();
+        }
     }
 
     private static ShortcutInfo parseShortcutAttributes(ShortcutService service,
@@ -150,14 +251,11 @@ public class ShortcutParser {
         try {
             final String id = sa.getString(R.styleable.Shortcut_shortcutId);
             final boolean enabled = sa.getBoolean(R.styleable.Shortcut_enabled, true);
-            final int iconResId = sa.getResourceId(R.styleable.Shortcut_shortcutIcon, 0);
+            final int iconResId = sa.getResourceId(R.styleable.Shortcut_icon, 0);
             final int titleResId = sa.getResourceId(R.styleable.Shortcut_shortcutShortLabel, 0);
             final int textResId = sa.getResourceId(R.styleable.Shortcut_shortcutLongLabel, 0);
             final int disabledMessageResId = sa.getResourceId(
                     R.styleable.Shortcut_shortcutDisabledMessage, 0);
-            final String categories = sa.getString(R.styleable.Shortcut_shortcutCategories);
-            String intentAction = sa.getString(R.styleable.Shortcut_shortcutIntentAction);
-            final String intentData = sa.getString(R.styleable.Shortcut_shortcutIntentData);
 
             if (TextUtils.isEmpty(id)) {
                 Slog.w(TAG, "Shortcut ID must be provided. activity=" + activity);
@@ -166,31 +264,6 @@ public class ShortcutParser {
             if (titleResId == 0) {
                 Slog.w(TAG, "Shortcut title must be provided. activity=" + activity);
                 return null;
-            }
-            if (TextUtils.isEmpty(intentAction)) {
-                if (enabled) {
-                    Slog.w(TAG, "Shortcut intent action must be provided. activity=" + activity);
-                    return null;
-                } else {
-                    // Disabled shortcut doesn't have to have an action, but just set VIEW as the
-                    // default.
-                    intentAction = Intent.ACTION_VIEW;
-                }
-            }
-
-            final ArraySet<String> categoriesSet;
-            if (categories == null) {
-                categoriesSet = null;
-            } else {
-                final String[] arr = categories.split(":");
-                categoriesSet = new ArraySet<>(arr.length);
-                for (String v : arr) {
-                    categoriesSet.add(v);
-                }
-            }
-            final Intent intent = new Intent(intentAction);
-            if (!TextUtils.isEmpty(intentData)) {
-                intent.setData(Uri.parse(intentData));
             }
 
             return createShortcutFromManifest(
@@ -202,8 +275,6 @@ public class ShortcutParser {
                     titleResId,
                     textResId,
                     disabledMessageResId,
-                    categoriesSet,
-                    intent,
                     rank,
                     iconResId,
                     enabled);
@@ -214,8 +285,8 @@ public class ShortcutParser {
 
     private static ShortcutInfo createShortcutFromManifest(ShortcutService service,
             @UserIdInt int userId, String id, String packageName, ComponentName activityComponent,
-            int titleResId, int textResId, int disabledMessageResId, Set<String> categories,
-            Intent intent, int rank, int iconResId, boolean enabled) {
+            int titleResId, int textResId, int disabledMessageResId,
+            int rank, int iconResId, boolean enabled) {
 
         final int flags =
                 (enabled ? ShortcutInfo.FLAG_MANIFEST : ShortcutInfo.FLAG_DISABLED)
@@ -239,8 +310,8 @@ public class ShortcutParser {
                 null, // disabled message string
                 disabledMessageResId,
                 null, // disabled message res name
-                categories,
-                intent,
+                null, // categories
+                null, // intent
                 null, // intent extras
                 rank,
                 null, // extras

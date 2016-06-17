@@ -8253,12 +8253,13 @@ i
     <declare-styleable name="Shortcut">
         <attr name="shortcutId" format="string" />
         <attr name="enabled" />
-        <attr name="shortcutIcon" format="reference" />
+        <attr name="icon" />
         <attr name="shortcutShortLabel" format="reference" />
         <attr name="shortcutLongLabel" format="reference" />
         <attr name="shortcutDisabledMessage" format="reference" />
-        <attr name="shortcutCategories" format="string" />
-        <attr name="shortcutIntentAction" format="string" />
-        <attr name="shortcutIntentData" format="string" />
+    </declare-styleable>
+
+    <declare-styleable name="ShortcutCategories">
+        <attr name="name" />
     </declare-styleable>
 </resources>

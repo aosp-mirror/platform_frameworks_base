@@ -21,6 +21,10 @@
     <shortcut
         android:shortcutId="x3"
         android:shortcutShortLabel="@string/shortcut_title1"
-        android:shortcutIntentAction="android.intent.action.VIEW"
-    />
+        >
+        <intent
+            android:action="android.intent.action.VIEW"
+            >
+        </intent>
+    </shortcut>
 </shortcuts>

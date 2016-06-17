@@ -43,9 +43,11 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
+import android.util.ArraySet;
 import android.util.Log;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -66,6 +68,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -259,9 +262,12 @@ public class ShortcutManagerTestUtils {
         }
     }
 
-    public static <T> List<T> assertEmpty(List<T> list) {
-        assertEquals(0, list.size());
-        return list;
+    public static <T extends Collection<?>> T assertEmpty(T collection) {
+        if (collection == null) {
+            return collection; // okay.
+        }
+        assertEquals(0, collection.size());
+        return collection;
     }
 
     public static List<ShortcutInfo> filter(List<ShortcutInfo> list, Predicate<ShortcutInfo> p) {
@@ -653,40 +659,71 @@ public class ShortcutManagerTestUtils {
      * New style assertion that allows chained calls.
      */
     public static class ShortcutListAsserter {
+        private final ShortcutListAsserter mOriginal;
         private final List<ShortcutInfo> mList;
 
         ShortcutListAsserter(List<ShortcutInfo> list) {
+            this(null, list);
+        }
+
+        private ShortcutListAsserter(ShortcutListAsserter original, List<ShortcutInfo> list) {
+            mOriginal = original == null ? this : original;
             mList = new ArrayList<>(list);
         }
 
+        public ShortcutListAsserter revertToOriginalList() {
+            return mOriginal;
+        }
+
         public ShortcutListAsserter selectDynamic() {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     filter(mList, ShortcutInfo::isDynamic));
         }
 
         public ShortcutListAsserter selectManifest() {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     filter(mList, ShortcutInfo::isManifestShortcut));
         }
 
         public ShortcutListAsserter selectPinned() {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     filter(mList, ShortcutInfo::isPinned));
         }
 
         public ShortcutListAsserter selectByActivity(ComponentName activity) {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     ShortcutManagerTestUtils.filterByActivity(mList, activity));
         }
 
         public ShortcutListAsserter selectByChangedSince(long time) {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     ShortcutManagerTestUtils.changedSince(mList, time));
         }
 
+        public ShortcutListAsserter selectByIds(String... ids) {
+            final Set<String> idSet = set(ids);
+            final ArrayList<ShortcutInfo> selected = new ArrayList<>();
+            for (ShortcutInfo si : mList) {
+                if (idSet.contains(si.getId())) {
+                    selected.add(si);
+                    idSet.remove(si.getId());
+                }
+            }
+            if (idSet.size() > 0) {
+                fail("Shortcuts not found for IDs=" + idSet);
+            }
+
+            return new ShortcutListAsserter(this, selected);
+        }
+
         public ShortcutListAsserter toSortByRank() {
-            return new ShortcutListAsserter(
+            return new ShortcutListAsserter(this,
                     ShortcutManagerTestUtils.sortedByRank(mList));
+        }
+
+        public ShortcutListAsserter call(Consumer<List<ShortcutInfo>> c) {
+            c.accept(mList);
+            return this;
         }
 
         public ShortcutListAsserter haveIds(String... expectedIds) {
@@ -701,7 +738,8 @@ public class ShortcutManagerTestUtils {
 
         private ShortcutListAsserter haveSequentialRanks() {
             for (int i = 0; i < mList.size(); i++) {
-                assertEquals("Rank not sequential", i, mList.get(i).getRank());
+                final ShortcutInfo si = mList.get(i);
+                assertEquals("Rank not sequential: id=" + si.getId(), i, si.getRank());
             }
             return this;
         }
@@ -715,6 +753,88 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter isEmpty() {
             assertEquals(0, mList.size());
+            return this;
+        }
+
+        public ShortcutListAsserter areAllDynamic() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isDynamic()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotDynamic() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isDynamic()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllPinned() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isPinned()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotPinned() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isPinned()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllManifest() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isManifestShortcut()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotManifest() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isManifestShortcut()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllImmutable() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isImmutable()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllMutable() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isImmutable()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllEnabled() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isEnabled()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllDisabled() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isEnabled()));
+            return this;
+        }
+
+        public ShortcutListAsserter forAllShortcuts(Consumer<ShortcutInfo> sa) {
+            for (int i = 0; i < mList.size(); i++) {
+                final ShortcutInfo si = mList.get(i);
+                sa.accept(si);
+            }
+            return this;
+        }
+
+        public ShortcutListAsserter forShortcut(Predicate<ShortcutInfo> p,
+                Consumer<ShortcutInfo> sa) {
+            boolean found = false;
+            for (int i = 0; i < mList.size(); i++) {
+                final ShortcutInfo si = mList.get(i);
+                if (p.test(si)) {
+                    found = true;
+                    try {
+                        sa.accept(si);
+                    } catch (Throwable e) {
+                        throw new AssertionError("Assertion failed for shortcut " + si.getId(), e);
+                    }
+                }
+            }
+            assertTrue("Shortcut with the given condition not found.", found);
+            return this;
+        }
+
+        public ShortcutListAsserter forShortcutWithId(String id, Consumer<ShortcutInfo> sa) {
+            forShortcut(si -> si.getId().equals(id), sa);
+
             return this;
         }
     }
