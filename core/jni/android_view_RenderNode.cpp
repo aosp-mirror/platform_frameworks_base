@@ -534,6 +534,7 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 jmethodID gSurfaceViewPositionUpdateMethod;
+jmethodID gSurfaceViewPositionLostMethod;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         jlong renderNodePtr, jobject surfaceview) {
@@ -581,6 +582,20 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             info.canvasContext.enqueueFrameWork(std::move(functor));
         }
 
+        virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
+            if (CC_UNLIKELY(!mWeakRef || (info && !info->updateWindowPositions))) return;
+
+            if (info) {
+                auto functor = std::bind(
+                    std::mem_fn(&SurfaceViewPositionUpdater::doNotifyPositionLost), this,
+                    (jlong) info->canvasContext.getFrameNumber());
+
+                info->canvasContext.enqueueFrameWork(std::move(functor));
+            } else {
+                doNotifyPositionLost(0);
+            }
+        }
+
     private:
         JNIEnv* jnienv() {
             JNIEnv* env;
@@ -604,6 +619,21 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
             env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
                     frameNumber, left, top, right, bottom);
+            env->DeleteLocalRef(localref);
+        }
+
+        void doNotifyPositionLost(jlong frameNumber) {
+            ATRACE_NAME("SurfaceView position lost");
+
+            JNIEnv* env = jnienv();
+            jobject localref = env->NewLocalRef(mWeakRef);
+            if (CC_UNLIKELY(!localref)) {
+                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                mWeakRef = nullptr;
+                return;
+            }
+
+            env->CallVoidMethod(localref, gSurfaceViewPositionLostMethod, frameNumber);
             env->DeleteLocalRef(localref);
         }
 
@@ -701,6 +731,8 @@ int register_android_view_RenderNode(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
     gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
             "updateWindowPositionRT", "(JIIII)V");
+    gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
+            "windowPositionLostRT", "(J)V");
     clazz = FindClassOrDie(env, "android/view/RenderNode");
     gOnRenderNodeDetached = GetMethodIDOrDie(env, clazz,
             "onRenderNodeDetached", "()V");
