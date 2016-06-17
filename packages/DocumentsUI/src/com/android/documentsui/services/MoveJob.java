@@ -98,7 +98,7 @@ final class MoveJob extends CopyJob {
                     }
                 } catch (RemoteException | RuntimeException e) {
                     Log.e(TAG, "Provider side move failed for: " + src.derivedUri
-                            + " due to an exception: " + e);
+                            + " due to an exception: ", e);
                 }
                 // If optimized move fails, then fallback to byte-by-byte copy.
                 if (DEBUG) Log.d(TAG, "Fallback to byte-by-byte move for: " + src.derivedUri);
