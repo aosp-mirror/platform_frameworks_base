@@ -1443,6 +1443,12 @@ public final class ActiveServices {
             boolean allowCancel) {
         boolean canceled = false;
 
+        if (mAm.isShuttingDownLocked()) {
+            Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortName
+                    + " - system is shutting down");
+            return false;
+        }
+
         ServiceMap smap = getServiceMap(r.userId);
         if (smap.mServicesByName.get(r.name) != r) {
             ServiceRecord cur = smap.mServicesByName.get(r.name);

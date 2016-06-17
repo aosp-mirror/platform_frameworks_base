@@ -2708,7 +2708,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void checkReadyForSleepLocked() {
-        if (!mService.isSleepingOrShuttingDown()) {
+        if (!mService.isSleepingOrShuttingDownLocked()) {
             // Do not care.
             return;
         }
@@ -3048,7 +3048,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
-            if ((!waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
+            if ((!waitingVisible || mService.isSleepingOrShuttingDownLocked()) && remove) {
                 if (DEBUG_STATES) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
                     stops = new ArrayList<>();
@@ -3772,7 +3772,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 } break;
                 case SLEEP_TIMEOUT_MSG: {
                     synchronized (mService) {
-                        if (mService.isSleepingOrShuttingDown()) {
+                        if (mService.isSleepingOrShuttingDownLocked()) {
                             Slog.w(TAG, "Sleep timeout!  Sleeping now.");
                             mSleepTimeout = true;
                             checkReadyForSleepLocked();
