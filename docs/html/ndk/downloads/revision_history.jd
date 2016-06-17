@@ -10,6 +10,44 @@ took place in each new version.</p>
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
      src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 11c</a> <em>(March 2016)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+
+<dl>
+  <dd>
+    <ul>
+      <li>Changes
+        <ul>
+          <li>Applied additional fixes to the {@code ndk-gdb.py} script.
+          </li>
+          <li>Added an optional package name argument to the {@code ndk-gdb}
+            command {@code --attach} option.
+            (<a href="https://github.com/android-ndk/ndk/issues/13">Issue 13</a>)
+          </li>
+          <li>Fixed invalid toolchain paths for 32-bit Windows platform.
+            (<a href="https://github.com/android-ndk/ndk/issues/45">Issue 45</a>)
+          </li>
+          <li>Fixed the relative path for the {@code ndk-which} command.
+            (<a href="https://github.com/android-ndk/ndk/issues/29">Issue 29</a>)
+          </li>
+          <li>Fixed use of cygpath for the libgcc compiler.
+            (Android <a href="http://b.android.com/195486">Issue 195486</a>)
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </dd>
+</dl>
+
+ </div>
+</div>
+
+<div class="toggle-content closed">
+<a name="11b"></a>
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/styles/disclosure_down.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 11b</a> <em>(March 2016)</em>
  </p>
  <div class="toggle-content-toggleme">
