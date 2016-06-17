@@ -464,7 +464,8 @@ public class SurfaceView extends View {
             || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded) {
             getLocationInWindow(mLocation);
 
-            if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
+            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                    + "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged
                     + " left=" + (mWindowSpaceLeft != mLocation[0])
@@ -534,7 +535,8 @@ public class SurfaceView extends View {
                     mReportDrawNeeded = false;
                     mDrawingStopped = !visible;
 
-                    if (DEBUG) Log.i(TAG, "Cur surface: " + mSurface);
+                    if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                            + "Cur surface: " + mSurface);
 
                     relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWindowSpaceWidth, mWindowSpaceHeight,
@@ -547,7 +549,8 @@ public class SurfaceView extends View {
                         reportDrawNeeded = true;
                     }
 
-                    if (DEBUG) Log.i(TAG, "New surface: " + mNewSurface
+                    if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                            + "New surface: " + mNewSurface
                             + ", vis=" + visible + ", frame=" + mWinFrame);
 
                     mSurfaceFrame.left = 0;
@@ -581,7 +584,8 @@ public class SurfaceView extends View {
                     if (mSurfaceCreated && (surfaceChanged || (!visible && visibleChanged))) {
                         mSurfaceCreated = false;
                         if (mSurface.isValid()) {
-                            if (DEBUG) Log.i(TAG, "visibleChanged -- surfaceDestroyed");
+                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                    + "visibleChanged -- surfaceDestroyed");
                             callbacks = getSurfaceCallbacks();
                             for (SurfaceHolder.Callback c : callbacks) {
                                 c.surfaceDestroyed(mSurfaceHolder);
@@ -594,7 +598,8 @@ public class SurfaceView extends View {
                         if (!mSurfaceCreated && (surfaceChanged || visibleChanged)) {
                             mSurfaceCreated = true;
                             mIsCreating = true;
-                            if (DEBUG) Log.i(TAG, "visibleChanged -- surfaceCreated");
+                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                    + "visibleChanged -- surfaceCreated");
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
@@ -604,7 +609,8 @@ public class SurfaceView extends View {
                         }
                         if (creating || formatChanged || sizeChanged
                                 || visibleChanged || realSizeChanged) {
-                            if (DEBUG) Log.i(TAG, "surfaceChanged -- format=" + mFormat
+                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                    + "surfaceChanged -- format=" + mFormat
                                     + " w=" + myWidth + " h=" + myHeight);
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
@@ -614,7 +620,8 @@ public class SurfaceView extends View {
                             }
                         }
                         if (redrawNeeded) {
-                            if (DEBUG) Log.i(TAG, "surfaceRedrawNeeded");
+                            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                    + "surfaceRedrawNeeded");
                             if (callbacks == null) {
                                 callbacks = getSurfaceCallbacks();
                             }
@@ -629,7 +636,8 @@ public class SurfaceView extends View {
                 } finally {
                     mIsCreating = false;
                     if (redrawNeeded) {
-                        if (DEBUG) Log.i(TAG, "finishedDrawing");
+                        if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " "
+                                + "finishedDrawing");
                         mSession.finishDrawing(mWindow);
                     }
                     mSession.performDeferredDestroy(mWindow);
@@ -663,8 +671,9 @@ public class SurfaceView extends View {
                 }
 
                 try {
-                    Log.d(TAG, String.format("updateWindowPosition UI, " +
-                            "postion = [%d, %d, %d, %d]", mWinFrame.left, mWinFrame.top,
+                    Log.d(TAG, String.format("%d updateWindowPosition UI, " +
+                            "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
+                            mWinFrame.left, mWinFrame.top,
                             mWinFrame.right, mWinFrame.bottom));
                     mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
                             mWinFrame.right, mWinFrame.bottom, -1, mWinFrame);
@@ -697,9 +706,9 @@ public class SurfaceView extends View {
         }
         try {
             if (DEBUG) {
-                Log.d(TAG, String.format("updateWindowPosition RT, frameNr = %d, " +
-                        "postion = [%d, %d, %d, %d]", frameNumber, left, top,
-                        right, bottom));
+                Log.d(TAG, String.format("%d updateWindowPosition RT, frameNr = %d, " +
+                        "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
+                        frameNumber, left, top, right, bottom));
             }
             // Just using mRTLastReportedPosition as a dummy rect here
             session.repositionChild(window, left, top, right, bottom,
@@ -710,6 +719,25 @@ public class SurfaceView extends View {
         } catch (RemoteException ex) {
             Log.e(TAG, "Exception from repositionChild", ex);
         }
+    }
+
+    /**
+     * Called by native on RenderThread to notify that the window is no longer in the
+     * draw tree
+     * @hide
+     */
+    public final void windowPositionLostRT(long frameNumber) {
+        if (DEBUG) {
+            Log.d(TAG, String.format("%d windowPositionLostRT RT, frameNr = %d",
+                    System.identityHashCode(this), frameNumber));
+        }
+        // TODO: This is a bit of a hack as we don't have an API to report to WM
+        // to hide a window with a frameNumber, so just shift the window very far into
+        // negative space which will do effectively the same thing.
+        // Use the last reported size to avoid influencing the size of the bufferqueue
+        int x = -1000 - mRTLastReportedPosition.width();
+        int y = -1000 - mRTLastReportedPosition.height();
+        updateWindowPositionRT(frameNumber, x, y, -1000, -1000);
     }
 
     private SurfaceHolder.Callback[] getSurfaceCallbacks() {
@@ -750,8 +778,7 @@ public class SurfaceView extends View {
                 boolean alwaysConsumeNavBar) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
-                if (DEBUG) Log.v(
-                        "SurfaceView", surfaceView + " got resized: w=" + frame.width()
+                if (DEBUG) Log.v(TAG, surfaceView + " got resized: w=" + frame.width()
                         + " h=" + frame.height() + ", cur w=" + mCurWidth + " h=" + mCurHeight);
                 surfaceView.mSurfaceLock.lock();
                 try {
@@ -907,7 +934,7 @@ public class SurfaceView extends View {
         private final Canvas internalLockCanvas(Rect dirty) {
             mSurfaceLock.lock();
 
-            if (DEBUG) Log.i(TAG, "Locking canvas... stopped="
+            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " " + "Locking canvas... stopped="
                     + mDrawingStopped + ", win=" + mWindow);
 
             Canvas c = null;
@@ -919,7 +946,7 @@ public class SurfaceView extends View {
                 }
             }
 
-            if (DEBUG) Log.i(TAG, "Returned canvas: " + c);
+            if (DEBUG) Log.i(TAG, System.identityHashCode(this) + " " + "Returned canvas: " + c);
             if (c != null) {
                 mLastLockTime = SystemClock.uptimeMillis();
                 return c;
