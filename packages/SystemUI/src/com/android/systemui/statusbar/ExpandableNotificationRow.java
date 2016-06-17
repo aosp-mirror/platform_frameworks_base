@@ -186,6 +186,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 }
     };
     private OnClickListener mOnClickListener;
+    private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
     private boolean mRefocusOnDismiss;
@@ -769,6 +770,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mChildrenContainer;
     }
 
+    public void setHeadsupDisappearRunning(boolean running) {
+        mHeadsupDisappearRunning = running;
+        mPrivateLayout.setHeadsupDisappearRunning(running);
+    }
+
     public View getChildAfterViewWhenDismissed() {
         return mChildAfterViewWhenDismissed;
     }
@@ -1174,8 +1180,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getMinHeight();
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
-        } else if (mIsHeadsUp) {
-            if (isPinned()) {
+        } else if (mIsHeadsUp || mHeadsupDisappearRunning) {
+            if (isPinned() || mHeadsupDisappearRunning) {
                 return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
             } else if (isExpanded()) {
                 return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
