@@ -368,10 +368,10 @@ public class EditorInfo implements InputType, Parcelable {
 
     /**
      * List of acceptable MIME types for
-     * {@link InputConnection#insertContent(InputContentInfo, Bundle)}.
+     * {@link InputConnection#commitContent(InputContentInfo, Bundle)}.
      *
      * <p>{@code null} or an empty array means that
-     * {@link InputConnection#insertContent(InputContentInfo, Bundle)} is not supported in this
+     * {@link InputConnection#commitContent(InputContentInfo, Bundle)} is not supported in this
      * editor.</p>
      */
     @Nullable

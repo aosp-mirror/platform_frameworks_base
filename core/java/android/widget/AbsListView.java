@@ -19,7 +19,6 @@ package android.widget;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -5986,8 +5985,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         @Override
-        public boolean insertContent(InputContentInfo inputContentInfo, Bundle opts) {
-            return getTarget().insertContent(inputContentInfo, opts);
+        public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) {
+            return getTarget().commitContent(inputContentInfo, opts);
         }
     }
 

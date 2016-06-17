@@ -43,7 +43,7 @@ public final class InputConnectionInspector {
             MissingMethodFlags.DELETE_SURROUNDING_TEXT_IN_CODE_POINTS,
             MissingMethodFlags.GET_HANDLER,
             MissingMethodFlags.CLOSE_CONNECTION,
-            MissingMethodFlags.INSERT_CONTENT,
+            MissingMethodFlags.COMMIT_CONTENT,
     })
     public @interface MissingMethodFlags {
         /**
@@ -82,10 +82,10 @@ public final class InputConnectionInspector {
          */
         int CLOSE_CONNECTION = 1 << 6;
         /**
-         * {@link InputConnection#insertContent(InputContentInfo, Bundle)} is available in
+         * {@link InputConnection#commitContent(InputContentInfo, Bundle)} is available in
          * {@link android.os.Build.VERSION_CODES#N} MR-1 and later.
          */
-        int INSERT_CONTENT = 1 << 7;
+        int COMMIT_CONTENT = 1 << 7;
     }
 
     private static final Map<Class, Integer> sMissingMethodsMap = Collections.synchronizedMap(
@@ -135,8 +135,8 @@ public final class InputConnectionInspector {
         if (!hasCloseConnection(clazz)) {
             flags |= MissingMethodFlags.CLOSE_CONNECTION;
         }
-        if (!hasInsertContent(clazz)) {
-            flags |= MissingMethodFlags.INSERT_CONTENT;
+        if (!hasCommitContent(clazz)) {
+            flags |= MissingMethodFlags.COMMIT_CONTENT;
         }
         sMissingMethodsMap.put(clazz, flags);
         return flags;
@@ -206,9 +206,9 @@ public final class InputConnectionInspector {
         }
     }
 
-    private static boolean hasInsertContent(@NonNull final Class clazz) {
+    private static boolean hasCommitContent(@NonNull final Class clazz) {
         try {
-            final Method method = clazz.getMethod("insertContent", InputContentInfo.class,
+            final Method method = clazz.getMethod("commitContent", InputContentInfo.class,
                     Bundle.class);
             return !Modifier.isAbstract(method.getModifiers());
         } catch (NoSuchMethodException e) {
@@ -263,11 +263,11 @@ public final class InputConnectionInspector {
             }
             sb.append("closeConnection()");
         }
-        if ((flags & MissingMethodFlags.INSERT_CONTENT) != 0) {
+        if ((flags & MissingMethodFlags.COMMIT_CONTENT) != 0) {
             if (!isEmpty) {
                 sb.append(",");
             }
-            sb.append("InsertContent(InputContentInfo, Bundle)");
+            sb.append("commitContent(InputContentInfo, Bundle)");
         }
         return sb.toString();
     }
