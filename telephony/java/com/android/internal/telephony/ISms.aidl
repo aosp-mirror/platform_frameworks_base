@@ -184,7 +184,7 @@ interface ISms {
      */
     void sendTextForSubscriberWithSelfPermissions(in int subId, String callingPkg,
             in String destAddr, in String scAddr, in String text, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent);
+            in PendingIntent deliveryIntent, in boolean persistMessage);
 
     /**
      * Inject an SMS PDU into the android platform.
