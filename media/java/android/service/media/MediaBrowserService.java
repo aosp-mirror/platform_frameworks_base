@@ -48,6 +48,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -465,14 +466,15 @@ public abstract class MediaBrowserService extends Service {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (IBinder key : mConnections.keySet()) {
-                    ConnectionRecord connection = mConnections.get(key);
+                Iterator<ConnectionRecord> iter = mConnections.values().iterator();
+                while (iter.hasNext()){
+                    ConnectionRecord connection = iter.next();
                     try {
                         connection.callbacks.onConnect(connection.root.getRootId(), token,
                                 connection.root.getExtras());
                     } catch (RemoteException e) {
                         Log.w(TAG, "Connection for " + connection.pkg + " is no longer valid.");
-                        mConnections.remove(key);
+                        iter.remove();
                     }
                 }
             }
@@ -610,10 +612,11 @@ public abstract class MediaBrowserService extends Service {
         boolean removed = false;
         List<Pair<IBinder, Bundle>> callbackList = connection.subscriptions.get(id);
         if (callbackList != null) {
-            for (Pair<IBinder, Bundle> callback : callbackList) {
-                if (token == callback.first) {
+            Iterator<Pair<IBinder, Bundle>> iter = callbackList.iterator();
+            while (iter.hasNext()){
+                if (token == iter.next().first) {
                     removed = true;
-                    callbackList.remove(callback);
+                    iter.remove();
                 }
             }
             if (callbackList.size() == 0) {
