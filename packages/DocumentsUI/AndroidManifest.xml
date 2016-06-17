@@ -113,9 +113,13 @@
             </intent-filter>
         </receiver>
 
+        <!-- Run FileOperationService in a separate process so that we can use FileLock class to
+            wait until jumbo clip is done writing to disk before reading it. See ClipStorage for
+            details. -->
         <service
             android:name=".services.FileOperationService"
-            android:exported="false">
+            android:exported="false"
+            android:process=":com.android.documentsui.services">
         </service>
     </application>
 </manifest>

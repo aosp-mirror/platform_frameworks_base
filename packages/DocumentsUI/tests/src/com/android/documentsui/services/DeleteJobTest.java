@@ -16,13 +16,15 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.model.DocumentStack;
 
 import java.util.List;
@@ -49,15 +51,14 @@ public class DeleteJobTest extends AbstractJobTest<DeleteJob> {
      */
     private final DeleteJob createJob(List<Uri> srcs, Uri srcParent) throws Exception {
         Uri stack = DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId);
-        return createJob(srcs, srcParent, stack);
+        return createJob(OPERATION_DELETE, srcs, srcParent, stack);
     }
 
-    @Override
     // TODO: Remove inheritance, as stack is not used for deleting, nor srcParent.
-    DeleteJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+    @Override
+    DeleteJob createJob(ClipDetails details, DocumentStack stack)
             throws Exception {
         return new DeleteJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs,
-                srcParent);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
     }
 }

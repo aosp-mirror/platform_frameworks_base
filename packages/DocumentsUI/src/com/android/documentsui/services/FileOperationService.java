@@ -29,8 +29,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.Shared;
-import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.Job.Factory;
 
@@ -58,13 +58,10 @@ public class FileOperationService extends Service implements Job.Listener {
     public static final String EXTRA_JOB_ID = "com.android.documentsui.JOB_ID";
     public static final String EXTRA_OPERATION = "com.android.documentsui.OPERATION";
     public static final String EXTRA_CANCEL = "com.android.documentsui.CANCEL";
-    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
+    public static final String EXTRA_CLIP_DETAILS = "com.android.documentsui.SRC_CLIP_DETAIL";
     public static final String EXTRA_DIALOG_TYPE = "com.android.documentsui.DIALOG_TYPE";
 
-    // This extra is used only for moving and deleting. Currently it's not the case,
-    // but in the future those files may be from multiple different parents. In
-    // such case, this needs to be replaced with pairs of parent and child.
-    public static final String EXTRA_SRC_PARENT = "com.android.documentsui.SRC_PARENT";
+    public static final String EXTRA_SRC_LIST = "com.android.documentsui.SRC_LIST";
 
     @IntDef(flag = true, value = {
             OPERATION_UNKNOWN,
@@ -145,6 +142,7 @@ public class FileOperationService extends Service implements Job.Listener {
         executor = null;
         deletionExecutor = null;
         handler = null;
+
         if (DEBUG) Log.d(TAG, "Destroyed.");
     }
 
@@ -154,35 +152,33 @@ public class FileOperationService extends Service implements Job.Listener {
         // checkArgument(flags == 0);  // retry and redeliver are not supported.
 
         String jobId = intent.getStringExtra(EXTRA_JOB_ID);
-        @OpType int operationType = intent.getIntExtra(EXTRA_OPERATION, OPERATION_UNKNOWN);
         assert(jobId != null);
+
+        if (DEBUG) Log.d(TAG, "onStartCommand: " + jobId + " with serviceId " + serviceId);
 
         if (intent.hasExtra(EXTRA_CANCEL)) {
             handleCancel(intent);
         } else {
-            assert(operationType != OPERATION_UNKNOWN);
-            handleOperation(intent, serviceId, jobId, operationType);
+            ClipDetails details = intent.getParcelableExtra(EXTRA_CLIP_DETAILS);
+            assert(details.getOpType() != OPERATION_UNKNOWN);
+            handleOperation(intent, jobId, details);
         }
-
-        return START_NOT_STICKY;
-    }
-
-    private void handleOperation(Intent intent, int serviceId, String jobId, int operationType) {
-        if (DEBUG) Log.d(TAG, "onStartCommand: " + jobId + " with serviceId " + serviceId);
 
         // Track the service supplied id so we can stop the service once we're out of work to do.
         mLastServiceId = serviceId;
 
+        return START_NOT_STICKY;
+    }
+
+    private void handleOperation(Intent intent, String jobId, ClipDetails details) {
         synchronized (mRunning) {
             if (mWakeLock == null) {
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             }
 
-            List<DocumentInfo> srcs = intent.getParcelableArrayListExtra(EXTRA_SRC_LIST);
-            DocumentInfo srcParent = intent.getParcelableExtra(EXTRA_SRC_PARENT);
             DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
 
-            Job job = createJob(operationType, jobId, srcs, srcParent, stack);
+            Job job = createJob(jobId, details, stack);
 
             if (job == null) {
                 return;
@@ -192,7 +188,7 @@ public class FileOperationService extends Service implements Job.Listener {
 
             assert (job != null);
             if (DEBUG) Log.d(TAG, "Scheduling job " + job.id + ".");
-            Future<?> future = getExecutorService(operationType).submit(job);
+            Future<?> future = getExecutorService(details.getOpType()).submit(job);
             mRunning.put(jobId, new JobRecord(job, future));
         }
     }
@@ -236,32 +232,26 @@ public class FileOperationService extends Service implements Job.Listener {
      */
     @GuardedBy("mRunning")
     private @Nullable Job createJob(
-            @OpType int operationType, String id, List<DocumentInfo> srcs, DocumentInfo srcParent,
-            DocumentStack stack) {
+            String id, ClipDetails details, DocumentStack stack) {
 
-        if (srcs.isEmpty()) {
-            Log.w(TAG, "Ignoring job request with empty srcs list. Id: " + id);
-            return null;
-        }
+        assert(details.getItemCount() > 0);
 
         if (mRunning.containsKey(id)) {
             Log.w(TAG, "Duplicate job id: " + id
-                    + ". Ignoring job request for srcs: " + srcs + ", stack: " + stack + ".");
+                    + ". Ignoring job request for details: " + details + ", stack: " + stack + ".");
             return null;
         }
 
-        switch (operationType) {
+        switch (details.getOpType()) {
             case OPERATION_COPY:
                 return jobFactory.createCopy(
-                        this, getApplicationContext(), this, id, stack, srcs);
+                        this, getApplicationContext(), this, id, stack, details);
             case OPERATION_MOVE:
                 return jobFactory.createMove(
-                        this, getApplicationContext(), this, id, stack, srcs,
-                        srcParent);
+                        this, getApplicationContext(), this, id, stack, details);
             case OPERATION_DELETE:
                 return jobFactory.createDelete(
-                        this, getApplicationContext(), this, id, stack, srcs,
-                        srcParent);
+                        this, getApplicationContext(), this, id, stack, details);
             default:
                 throw new UnsupportedOperationException();
         }
@@ -341,7 +331,7 @@ public class FileOperationService extends Service implements Job.Listener {
             mNotificationManager.cancel(job.id, NOTIFICATION_ID_PROGRESS);
 
             if (job.hasFailures()) {
-                Log.e(TAG, "Job failed on files: " + job.failedFiles.size() + ".");
+                Log.e(TAG, "Job failed on files: " + job.failedFileCount + ".");
                 mNotificationManager.notify(
                         job.id, NOTIFICATION_ID_FAILURE, job.getFailureNotification());
             }
@@ -376,7 +366,6 @@ public class FileOperationService extends Service implements Job.Listener {
      * we poll states of jobs.
      */
     private static final class JobMonitor implements Runnable {
-        private static final long INITIAL_PROGRESS_DELAY_MILLIS = 10L;
         private static final long PROGRESS_INTERVAL_MILLIS = 500L;
 
         private final Job mJob;
@@ -390,8 +379,7 @@ public class FileOperationService extends Service implements Job.Listener {
         }
 
         private void start() {
-            // Delay the first update to avoid dividing by 0 when calculate speed
-            mHandler.postDelayed(this, INITIAL_PROGRESS_DELAY_MILLIS);
+            mHandler.post(this);
         }
 
         @Override
@@ -402,8 +390,11 @@ public class FileOperationService extends Service implements Job.Listener {
                 return;
             }
 
-            mNotificationManager.notify(
-                    mJob.id, NOTIFICATION_ID_PROGRESS, mJob.getProgressNotification());
+            // Only job in set up state has progress bar
+            if (mJob.getState() == Job.STATE_SET_UP) {
+                mNotificationManager.notify(
+                        mJob.id, NOTIFICATION_ID_PROGRESS, mJob.getProgressNotification());
+            }
 
             mHandler.postDelayed(this, PROGRESS_INTERVAL_MILLIS);
         }

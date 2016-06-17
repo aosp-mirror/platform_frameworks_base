@@ -22,6 +22,9 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
+import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
+import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
+import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 
 import android.annotation.DrawableRes;
@@ -40,6 +43,7 @@ import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.FilesActivity;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.OperationDialogFragment;
@@ -53,7 +57,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,16 +67,17 @@ abstract public class Job implements Runnable {
     private static final String TAG = "Job";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATE_CREATED, STATE_STARTED, STATE_COMPLETED, STATE_CANCELED})
+    @IntDef({STATE_CREATED, STATE_STARTED, STATE_SET_UP, STATE_COMPLETED, STATE_CANCELED})
     @interface State {}
     static final int STATE_CREATED = 0;
     static final int STATE_STARTED = 1;
-    static final int STATE_COMPLETED = 2;
+    static final int STATE_SET_UP = 2;
+    static final int STATE_COMPLETED = 3;
     /**
      * A job is in canceled state as long as {@link #cancel()} is called on it, even after it is
      * completed.
      */
-    static final int STATE_CANCELED = 3;
+    static final int STATE_CANCELED = 4;
 
     static final String INTENT_TAG_WARNING = "warning";
     static final String INTENT_TAG_FAILURE = "failure";
@@ -87,7 +91,9 @@ abstract public class Job implements Runnable {
     final @OpType int operationType;
     final String id;
     final DocumentStack stack;
+    final ClipDetails details;
 
+    int failedFileCount = 0;
     final ArrayList<DocumentInfo> failedFiles = new ArrayList<>();
     final Notification.Builder mProgressBuilder;
 
@@ -97,8 +103,6 @@ abstract public class Job implements Runnable {
     /**
      * A simple progressable job, much like an AsyncTask, but with support
      * for providing various related notification, progress and navigation information.
-     * @param operationType
-     *
      * @param service The service context in which this job is running.
      * @param appContext The context of the invoking application. This is usually
      *     just {@code getApplicationContext()}.
@@ -107,19 +111,21 @@ abstract public class Job implements Runnable {
      * @param stack The documents stack context relating to this request. This is the
      *     destination in the Files app where the user will be take when the
      *     navigation intent is invoked (presumably from notification).
+     * @param details details that contains {@link FileOperationService.OpType}
      */
     Job(Context service, Context appContext, Listener listener,
-            @OpType int operationType, String id, DocumentStack stack) {
+            String id, DocumentStack stack, ClipDetails details) {
 
-        assert(operationType != OPERATION_UNKNOWN);
+        assert(details.getOpType() != OPERATION_UNKNOWN);
 
         this.service = service;
         this.appContext = appContext;
         this.listener = listener;
-        this.operationType = operationType;
+        this.operationType = details.getOpType();
 
         this.id = id;
         this.stack = stack;
+        this.details = details;
 
         mProgressBuilder = createProgressBuilder();
     }
@@ -134,18 +140,29 @@ abstract public class Job implements Runnable {
         mState = STATE_STARTED;
         listener.onStart(this);
         try {
-            start();
+            boolean result = setUp();
+            if (result && !isCanceled()) {
+                mState = STATE_SET_UP;
+                start();
+            }
         } catch (RuntimeException e) {
             // No exceptions should be thrown here, as all calls to the provider must be
             // handled within Job implementations. However, just in case catch them here.
             Log.e(TAG, "Operation failed due to an unhandled runtime exception.", e);
             Metrics.logFileOperationErrors(service, operationType, failedFiles);
         } finally {
-            mState = (mState == STATE_STARTED) ? STATE_COMPLETED : mState;
+            mState = (mState == STATE_STARTED || mState == STATE_SET_UP) ? STATE_COMPLETED : mState;
             listener.onFinished(this);
+
+            // NOTE: If this details is a JumboClipDetails, and it's still referred in primary clip
+            // at this point, user won't be able to paste it to anywhere else because the underlying
+            details.dispose(appContext);
         }
     }
 
+    boolean setUp() {
+        return true;
+    }
     abstract void start();
 
     abstract Notification getSetupNotification();
@@ -201,11 +218,12 @@ abstract public class Job implements Runnable {
     }
 
     void onFileFailed(DocumentInfo file) {
+        ++failedFileCount;
         failedFiles.add(file);
     }
 
     final boolean hasFailures() {
-        return !failedFiles.isEmpty();
+        return failedFileCount > 0;
     }
 
     boolean hasWarnings() {
@@ -242,7 +260,7 @@ abstract public class Job implements Runnable {
 
         final Notification.Builder errorBuilder = new Notification.Builder(service)
                 .setContentTitle(service.getResources().getQuantityString(titleId,
-                        failedFiles.size(), failedFiles.size()))
+                        failedFileCount, failedFileCount))
                 .setContentText(service.getString(R.string.notification_touch_for_details))
                 .setContentIntent(PendingIntent.getActivity(appContext, 0, navigateIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT))
@@ -319,28 +337,29 @@ abstract public class Job implements Runnable {
         static final Factory instance = new Factory();
 
         Job createCopy(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, List<DocumentInfo> srcs) {
-            assert(!srcs.isEmpty());
+                String id, DocumentStack stack, ClipDetails details) {
+            assert(details.getOpType() == OPERATION_COPY);
+            assert(details.getItemCount() > 0);
             assert(stack.peek().isCreateSupported());
-            return new CopyJob(service, appContext, listener, id, stack, srcs);
+            return new CopyJob(service, appContext, listener, id, stack, details);
         }
 
         Job createMove(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, List<DocumentInfo> srcs,
-                DocumentInfo srcParent) {
-            assert(!srcs.isEmpty());
+                String id, DocumentStack stack, ClipDetails details) {
+            assert(details.getOpType() == OPERATION_MOVE);
+            assert(details.getItemCount() > 0);
             assert(stack.peek().isCreateSupported());
-            return new MoveJob(service, appContext, listener, id, stack, srcs, srcParent);
+            return new MoveJob(service, appContext, listener, id, stack, details);
         }
 
         Job createDelete(Context service, Context appContext, Listener listener,
-                String id, DocumentStack stack, List<DocumentInfo> srcs,
-                DocumentInfo srcParent) {
-            assert(!srcs.isEmpty());
+                String id, DocumentStack stack, ClipDetails details) {
+            assert(details.getOpType() == OPERATION_DELETE);
+            assert(details.getItemCount() > 0);
             // stack is empty if we delete docs from recent.
             // we can't currently delete from archives.
             assert(stack.isEmpty() || stack.peek().isDirectory());
-            return new DeleteJob(service, appContext, listener, id, stack, srcs, srcParent);
+            return new DeleteJob(service, appContext, listener, id, stack, details);
         }
     }
 

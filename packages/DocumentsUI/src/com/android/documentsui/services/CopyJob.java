@@ -29,13 +29,13 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG_TYPE;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
-import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
 
 import android.annotation.StringRes;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.PendingIntent;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
@@ -50,11 +50,12 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.Metrics;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.services.FileOperationService.OpType;
+import com.android.documentsui.model.RootInfo;
 
 import libcore.io.IoUtils;
 
@@ -83,30 +84,18 @@ class CopyJob extends Job {
     private long mRemainingTime;
 
     /**
-     * Copies files to a destination identified by {@code destination}.
      * @see @link {@link Job} constructor for most param descriptions.
      *
-     * @param srcs List of files to be copied.
+     * @param details clip details containing source file list
      */
     CopyJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack stack, List<DocumentInfo> srcs) {
-        super(service, appContext, listener, OPERATION_COPY, id, stack);
+            String id, DocumentStack destination, ClipDetails details) {
+        super(service, appContext, listener, id, destination, details);
 
-        assert(!srcs.isEmpty());
-        this.mSrcs = srcs;
-    }
+        assert(details.getItemCount() > 0);
 
-    /**
-     * @see @link {@link Job} constructor for most param descriptions.
-     *
-     * @param srcs List of files to be copied.
-     */
-    CopyJob(Context service, Context appContext, Listener listener,
-            @OpType int opType, String id, DocumentStack destination, List<DocumentInfo> srcs) {
-        super(service, appContext, listener, opType, id, destination);
-
-        assert(!srcs.isEmpty());
-        this.mSrcs = srcs;
+        // delay the initialization of it to setUp() because it may be IO extensive.
+        mSrcs = new ArrayList<>(details.getItemCount());
     }
 
     @Override
@@ -167,7 +156,7 @@ class CopyJob extends Job {
         // mBytesCopied is modified in worker thread, but this method is called in monitor thread,
         // so take a snapshot of mBytesCopied to make sure the updated estimate is consistent.
         final long bytesCopied = mBytesCopied;
-        final long sampleDuration = elapsedTime - mSampleTime;
+        final long sampleDuration = Math.max(elapsedTime - mSampleTime, 1L); // avoid dividing 0
         final long sampleSpeed = ((bytesCopied - mBytesCopiedSample) * 1000) / sampleDuration;
         if (mSpeed == 0) {
             mSpeed = sampleSpeed;
@@ -215,8 +204,18 @@ class CopyJob extends Job {
     }
 
     @Override
-    void start() {
-        mStartTime = elapsedRealtime();
+    boolean setUp() {
+
+        try {
+            buildDocumentList();
+        } catch (ResourceException e) {
+            Log.e(TAG, "Failed to get the list of docs.", e);
+            return false;
+        }
+
+        if (isCanceled()) {
+            return false;
+        }
 
         try {
             mBatchSize = calculateSize(mSrcs);
@@ -225,6 +224,12 @@ class CopyJob extends Job {
             mBatchSize = -1;
         }
 
+        return true;
+    }
+
+    @Override
+    void start() {
+        mStartTime = elapsedRealtime();
         DocumentInfo srcInfo;
         DocumentInfo dstInfo = stack.peek();
         for (int i = 0; i < mSrcs.size() && !isCanceled(); ++i) {
@@ -247,6 +252,33 @@ class CopyJob extends Job {
             }
         }
         Metrics.logFileOperation(service, operationType, mSrcs, dstInfo);
+    }
+
+    private void buildDocumentList() throws ResourceException {
+        try {
+            final ContentResolver resolver = appContext.getContentResolver();
+            final Iterable<Uri> uris = details.getDocs(appContext);
+            for (Uri uri : uris) {
+                DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
+                if (canCopy(doc, stack.root)) {
+                    mSrcs.add(doc);
+                } else {
+                    onFileFailed(doc);
+                }
+
+                if (isCanceled()) {
+                    return;
+                }
+            }
+        } catch(IOException e) {
+            failedFileCount += details.getItemCount();
+            throw new ResourceException("Failed to open the list of docs to copy.", e);
+        }
+    }
+
+    private static boolean canCopy(DocumentInfo doc, RootInfo root) {
+        // Can't copy folders to downloads, because we don't show folders there.
+        return !root.isDownloads() || !doc.isDirectory();
     }
 
     @Override
@@ -553,6 +585,10 @@ class CopyJob extends Job {
             } else {
                 result += src.size;
             }
+
+            if (isCanceled()) {
+                return result;
+            }
         }
         return result;
     }
@@ -562,7 +598,7 @@ class CopyJob extends Job {
      *
      * @throws ResourceException
      */
-    private static long calculateFileSizesRecursively(
+    private long calculateFileSizesRecursively(
             ContentProviderClient client, Uri uri) throws ResourceException {
         final String authority = uri.getAuthority();
         final Uri queryUri = buildChildDocumentsUri(authority, getDocumentId(uri));
@@ -576,7 +612,7 @@ class CopyJob extends Job {
         Cursor cursor = null;
         try {
             cursor = client.query(queryUri, queryColumns, null, null, null);
-            while (cursor.moveToNext()) {
+            while (cursor.moveToNext() && !isCanceled()) {
                 if (Document.MIME_TYPE_DIR.equals(
                         getCursorString(cursor, Document.COLUMN_MIME_TYPE))) {
                     // Recurse into directories.
@@ -623,7 +659,7 @@ class CopyJob extends Job {
                 .append("CopyJob")
                 .append("{")
                 .append("id=" + id)
-                .append(", srcs=" + mSrcs)
+                .append(", details=" + details)
                 .append(", destination=" + stack)
                 .append("}")
                 .toString();
