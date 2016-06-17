@@ -104,6 +104,7 @@ hwui_src_files := \
 
 hwui_test_common_src_files := \
     $(call all-cpp-files-under, tests/common/scenes) \
+    tests/common/LeakChecker.cpp \
     tests/common/TestListViewSceneBase.cpp \
     tests/common/TestContext.cpp \
     tests/common/TestScene.cpp \
@@ -307,6 +308,7 @@ LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 # set to libhwui_static_debug to skip actual GL commands
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
+LOCAL_SHARED_LIBRARIES := libmemunreachable
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
@@ -337,6 +339,7 @@ LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_debug
 LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
+LOCAL_SHARED_LIBRARIES := libmemunreachable
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
