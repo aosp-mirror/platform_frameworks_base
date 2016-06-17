@@ -75,6 +75,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private long mEnterAnimationEnd;
     private long mExitAnimationEnd;
 
+    /** Callback that blocks invalidation. Used for drawable initialization. */
+    private BlockInvalidateCallback mBlockInvalidateCallback;
+
     // overrides from Drawable
 
     @Override
@@ -500,11 +503,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      * @param d The drawable to initialize.
      */
     private void initializeDrawableForDisplay(Drawable d) {
+        if (mBlockInvalidateCallback == null) {
+            mBlockInvalidateCallback = new BlockInvalidateCallback();
+        }
+
         // Temporary fix for suspending callbacks during initialization. We
         // don't want any of these setters causing an invalidate() since that
         // may call back into DrawableContainer.
-        final Callback cb = d.getCallback();
-        d.setCallback(null);
+        d.setCallback(mBlockInvalidateCallback.wrap(d.getCallback()));
 
         try {
             if (mDrawableContainerState.mEnterFadeDuration <= 0 && mHasAlpha) {
@@ -537,7 +543,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                         hotspotBounds.right, hotspotBounds.bottom);
             }
         } finally {
-            d.setCallback(cb);
+            d.setCallback(mBlockInvalidateCallback.unwrap());
         }
     }
 
@@ -1214,5 +1220,42 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         // propagate local state from the past.
         mLastIndex = -1;
         mLastDrawable = null;
+    }
+
+    /**
+     * Callback that blocks drawable invalidation.
+     */
+    private static class BlockInvalidateCallback implements Drawable.Callback {
+        private Drawable.Callback mCallback;
+
+        public BlockInvalidateCallback wrap(Drawable.Callback callback) {
+            mCallback = callback;
+            return this;
+        }
+
+        public Drawable.Callback unwrap() {
+            final Drawable.Callback callback = mCallback;
+            mCallback = null;
+            return callback;
+        }
+
+        @Override
+        public void invalidateDrawable(@NonNull Drawable who) {
+            // Ignore invalidation.
+        }
+
+        @Override
+        public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
+            if (mCallback != null) {
+                mCallback.scheduleDrawable(who, what, when);
+            }
+        }
+
+        @Override
+        public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
+            if (mCallback != null) {
+                mCallback.unscheduleDrawable(who, what);
+            }
+        }
     }
 }
