@@ -2609,4 +2609,7 @@
   <java-symbol type="array" name="config_defaultPinnerServiceFiles" />
 
   <java-symbol type="string" name="suspended_widget_accessibility" />
+
+  <java-symbol type="layout" name="unsupported_display_size_dialog_content" />
+  <java-symbol type="string" name="unsupported_display_size_message" />
 </resources>
