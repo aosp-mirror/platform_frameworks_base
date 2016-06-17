@@ -20,6 +20,7 @@ import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import android.annotation.UserIdInt;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -67,6 +68,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -650,7 +652,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void ensureGroupStateLoadedLocked(int userId, boolean enforceUserUnlockingOrUnlocked) {
-        if (enforceUserUnlockingOrUnlocked && !mUserManager.isUserUnlockingOrUnlocked(userId)) {
+        if (enforceUserUnlockingOrUnlocked && !isUserRunningAndUnlocked(userId)) {
             throw new IllegalStateException(
                     "User " + userId + " must be unlocked for widgets to be available");
         }
@@ -693,6 +695,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         loadGroupWidgetProvidersLocked(newProfileIds);
         loadGroupStateLocked(newProfileIds);
+    }
+
+    private boolean isUserRunningAndUnlocked(@UserIdInt int userId) {
+        return mUserManager.isUserRunning(userId) && StorageManager.isUserKeyUnlocked(userId);
     }
 
     @Override
@@ -3381,7 +3387,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (userInfo != null && userInfo.isManagedProfile()) {
                 UserInfo parentInfo = mUserManager.getProfileParent(userId);
                 if (parentInfo != null
-                        && !mUserManager.isUserUnlockingOrUnlocked(parentInfo.getUserHandle())) {
+                        && !isUserRunningAndUnlocked(parentInfo.getUserHandle().getIdentifier())) {
                     return true;
                 }
             }
