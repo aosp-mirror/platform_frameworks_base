@@ -95,14 +95,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected void handleSecondaryClick() {
-        boolean dataEnabled = mDataController.isMobileDataSupported()
-                && mDataController.isMobileDataEnabled();
-        MetricsLogger.action(mContext, MetricsEvent.QS_CELLULAR_TOGGLE, !dataEnabled);
-        mDataController.setMobileDataEnabled(!dataEnabled);
-    }
-
-    @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_cellular_detail_title);
     }
@@ -152,8 +144,8 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         }
         state.contentDescription = state.contentDescription + "," + r.getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
-        state.expandedAccessibilityClassName = Button.class.getName();
-        state.minimalAccessibilityClassName = Switch.class.getName();
+        state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
+                = Button.class.getName();
         state.value = mDataController.isMobileDataSupported()
                 && mDataController.isMobileDataEnabled();
     }
