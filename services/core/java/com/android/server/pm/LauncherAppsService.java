@@ -775,8 +775,7 @@ public class LauncherAppsService extends SystemService {
                                     /* changedSince= */ 0, packageName, /* shortcutIds=*/ null,
                                     /* component= */ null,
                                     ShortcutQuery.FLAG_GET_KEY_FIELDS_ONLY
-                                    | ShortcutQuery.FLAG_GET_PINNED
-                                    | ShortcutQuery.FLAG_GET_DYNAMIC
+                                    | ShortcutQuery.FLAG_GET_ALL_KINDS
                                     , userId);
                     try {
                         listener.onShortcutChanged(user, packageName,

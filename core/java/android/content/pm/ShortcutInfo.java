@@ -294,6 +294,7 @@ public final class ShortcutInfo implements Parcelable {
         mUserId = source.mUserId;
         mId = source.mId;
         mPackageName = source.mPackageName;
+        mActivity = source.mActivity;
         mFlags = source.mFlags;
         mLastChangedTimestamp = source.mLastChangedTimestamp;
 
@@ -301,7 +302,6 @@ public final class ShortcutInfo implements Parcelable {
         mIconResId = source.mIconResId;
 
         if ((cloneFlags & CLONE_REMOVE_NON_KEY_INFO) == 0) {
-            mActivity = source.mActivity;
 
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
@@ -1252,6 +1252,7 @@ public final class ShortcutInfo implements Parcelable {
      * <ul>
      *     <li>{@link #getId()}
      *     <li>{@link #getPackage()}
+     *     <li>{@link #getActivity()}
      *     <li>{@link #getLastChangedTimestamp()}
      *     <li>{@link #isDynamic()}
      *     <li>{@link #isPinned()}
@@ -1403,6 +1404,14 @@ public final class ShortcutInfo implements Parcelable {
         mId = source.readString();
         mPackageName = source.readString();
         mActivity = source.readParcelable(cl);
+        mFlags = source.readInt();
+        mIconResId = source.readInt();
+        mLastChangedTimestamp = source.readLong();
+
+        if (source.readInt() == 0) {
+            return; // key information only.
+        }
+
         mIcon = source.readParcelable(cl);
         mTitle = source.readCharSequence();
         mTitleResId = source.readInt();
@@ -1414,9 +1423,6 @@ public final class ShortcutInfo implements Parcelable {
         mIntentPersistableExtras = source.readParcelable(cl);
         mRank = source.readInt();
         mExtras = source.readParcelable(cl);
-        mLastChangedTimestamp = source.readLong();
-        mFlags = source.readInt();
-        mIconResId = source.readInt();
         mBitmapPath = source.readString();
 
         mIconResName = source.readString();
@@ -1441,6 +1447,16 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeString(mId);
         dest.writeString(mPackageName);
         dest.writeParcelable(mActivity, flags);
+        dest.writeInt(mFlags);
+        dest.writeInt(mIconResId);
+        dest.writeLong(mLastChangedTimestamp);
+
+        if (hasKeyFieldsOnly()) {
+            dest.writeInt(0);
+            return;
+        }
+        dest.writeInt(1);
+
         dest.writeParcelable(mIcon, flags);
         dest.writeCharSequence(mTitle);
         dest.writeInt(mTitleResId);
@@ -1453,9 +1469,6 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeParcelable(mIntentPersistableExtras, flags);
         dest.writeInt(mRank);
         dest.writeParcelable(mExtras, flags);
-        dest.writeLong(mLastChangedTimestamp);
-        dest.writeInt(mFlags);
-        dest.writeInt(mIconResId);
         dest.writeString(mBitmapPath);
 
         dest.writeString(mIconResName);
