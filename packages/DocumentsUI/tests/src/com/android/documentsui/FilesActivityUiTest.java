@@ -49,6 +49,8 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
 
     @Override
     public void initTestFiles() throws RemoteException {
+        mDocsHelper.createFolder(rootDir0, dirName1);
+
         mDocsHelper.createDocument(rootDir0, "text/plain", "file0.log");
         mDocsHelper.createDocument(rootDir0, "image/png", "file1.png");
         mDocsHelper.createDocument(rootDir0, "text/csv", "file2.csv");
@@ -122,6 +124,30 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.keyboard.pressEnter();
 
         bots.directory.assertDocumentsPresent("Kung Fu Panda");
+    }
+
+    public void testOpenBreadcrumb() throws Exception {
+        initTestFiles();
+
+        bots.roots.openRoot(ROOT_0_ID);
+
+        bots.directory.openDocument(dirName1);
+        if (bots.main.isTablet()) {
+            openBreadcrumbTabletHelper();
+        } else {
+            openBreadcrumbPhoneHelper();
+        }
+        bots.main.assertBreadcrumbItemsPresent(dirName1, "TEST_ROOT_0");
+        bots.main.clickBreadcrumbItem("TEST_ROOT_0");
+
+        bots.directory.assertDocumentsPresent(dirName1);
+    }
+
+    private void openBreadcrumbTabletHelper() throws Exception {
+    }
+
+    private void openBreadcrumbPhoneHelper() throws Exception {
+        bots.main.clickDropdownBreadcrumb();
     }
 
     public void testDeleteDocument() throws Exception {

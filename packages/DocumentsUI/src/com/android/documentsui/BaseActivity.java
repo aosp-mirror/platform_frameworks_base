@@ -48,9 +48,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Spinner;
 
 import com.android.documentsui.MenuManager.DirectoryDetails;
+import com.android.documentsui.NavigationViewManager.Breadcrumb;
 import com.android.documentsui.SearchViewManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.AnimationView;
@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 public abstract class BaseActivity extends Activity
-        implements SearchManagerListener, NavigationView.Environment {
+        implements SearchManagerListener, NavigationViewManager.Environment {
 
     private static final String BENCHMARK_TESTING_PACKAGE = "com.android.documentsui.appperftests";
 
@@ -78,7 +78,7 @@ public abstract class BaseActivity extends Activity
     RootsCache mRoots;
     SearchViewManager mSearchManager;
     DrawerController mDrawer;
-    NavigationView mNavigator;
+    NavigationViewManager mNavigator;
     List<EventListener> mEventListeners = new ArrayList<>();
 
     private final String mTag;
@@ -141,13 +141,9 @@ public abstract class BaseActivity extends Activity
         mSearchManager = new SearchViewManager(this, icicle);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
+        Breadcrumb breadcrumb = (Breadcrumb) findViewById(R.id.breadcrumb);
         setActionBar(toolbar);
-        mNavigator = new NavigationView(
-                mDrawer,
-                toolbar,
-                (Spinner) findViewById(R.id.stack),
-                mState,
-                this);
+        mNavigator = new NavigationViewManager(mDrawer, toolbar, mState, this, breadcrumb);
 
         // Base classes must update result in their onCreate.
         setResult(Activity.RESULT_CANCELED);
