@@ -840,7 +840,7 @@ public interface InputConnection {
     public void closeConnection();
 
     /**
-     * Called by the input method to insert a content such as PNG image to the editor.
+     * Called by the input method to commit a content such as PNG image to the editor.
      *
      * <p>In order to avoid variety of compatibility issues, this focuses on a simple use case,
      * where we expect editors and IMEs work cooperatively as follows:</p>
@@ -866,5 +866,5 @@ public interface InputConnection {
      * @return {@code true} if this request is accepted by the application, no matter if the request
      * is already handled or still being handled in background.
      */
-    public boolean insertContent(@NonNull InputContentInfo inputContentInfo, @Nullable Bundle opts);
+    public boolean commitContent(@NonNull InputContentInfo inputContentInfo, @Nullable Bundle opts);
 }
