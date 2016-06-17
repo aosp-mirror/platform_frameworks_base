@@ -134,6 +134,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             = SystemProperties.getBoolean("debug.child_notifs", true);
     public static final boolean FORCE_REMOTE_INPUT_HISTORY =
             SystemProperties.getBoolean("debug.force_remoteinput_history", false);
+    private static boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -708,10 +709,13 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
                 mSettingsObserver,
                 UserHandle.USER_ALL);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT), false,
-                mSettingsObserver,
-                UserHandle.USER_ALL);
+        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT),
+                    false,
+                    mSettingsObserver,
+                    UserHandle.USER_ALL);
+        }
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
@@ -2308,16 +2312,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         final boolean allowedByDpm = (dpmFlags
                 & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
 
-        final boolean remoteInput = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
-                0,
-                mCurrentUserId) != 0;
-        final boolean remoteInputDpm = (dpmFlags
-                & DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT) == 0;
-
-
         setShowLockscreenNotifications(show && allowedByDpm);
-        setLockScreenAllowRemoteInput(remoteInput && remoteInputDpm);
+
+        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
+            final boolean remoteInput = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
+                    0,
+                    mCurrentUserId) != 0;
+            final boolean remoteInputDpm =
+                    (dpmFlags & DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT) == 0;
+
+            setLockScreenAllowRemoteInput(remoteInput && remoteInputDpm);
+        } else {
+            setLockScreenAllowRemoteInput(false);
+        }
     }
 
     protected abstract void setAreThereNotifications();
