@@ -3492,13 +3492,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // app launch boost for big.little configurations
         // use cpusets to migrate freshly launched tasks to big cores
-        synchronized(ActivityManagerService.this) {
-            nativeMigrateToBoost();
-            mIsBoosted = true;
-            mBoostStartTime = SystemClock.uptimeMillis();
-            Message msg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
-            mHandler.sendMessageDelayed(msg, APP_BOOST_MESSAGE_DELAY);
-        }
+        nativeMigrateToBoost();
+        mIsBoosted = true;
+        mBoostStartTime = SystemClock.uptimeMillis();
+        Message msg = mHandler.obtainMessage(APP_BOOST_DEACTIVATE_MSG);
+        mHandler.sendMessageDelayed(msg, APP_BOOST_MESSAGE_DELAY);
 
         // We don't have to do anything more if:
         // (1) There is an existing application record; and
@@ -3511,7 +3509,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 + " thread=" + (app != null ? app.thread : null)
                 + " pid=" + (app != null ? app.pid : -1));
         if (app != null && app.pid > 0) {
-            if (!knownToBeDead || app.thread == null) {
+            if ((!knownToBeDead && !app.killed) || app.thread == null) {
                 // We already have the app running, or are waiting for it to
                 // come up (we have a pid but not yet its thread), so keep it.
                 if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "App already running: " + app);
@@ -10553,7 +10551,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            boolean providerRunning = cpr != null;
+            boolean providerRunning = cpr != null && cpr.proc != null && !cpr.proc.killed;
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
@@ -10595,35 +10593,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                if (cpr.proc != null) {
-                    checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
-                    boolean success = updateOomAdjLocked(cpr.proc);
-                    maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
-                    checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
-                    if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
-                    // NOTE: there is still a race here where a signal could be
-                    // pending on the process even though we managed to update its
-                    // adj level.  Not sure what to do about this, but at least
-                    // the race is now smaller.
-                    if (!success) {
-                        // Uh oh...  it looks like the provider's process
-                        // has been killed on us.  We need to wait for a new
-                        // process to be started, and make sure its death
-                        // doesn't kill our process.
-                        Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
-                                + " is crashing; detaching " + r);
-                        boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                        checkTime(startTime, "getContentProviderImpl: before appDied");
-                        appDiedLocked(cpr.proc);
-                        checkTime(startTime, "getContentProviderImpl: after appDied");
-                        if (!lastRef) {
-                            // This wasn't the last ref our process had on
-                            // the provider...  we have now been killed, bail.
-                            return null;
-                        }
-                        providerRunning = false;
-                        conn = null;
+                checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
+                boolean success = updateOomAdjLocked(cpr.proc);
+                maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
+                checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
+                if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
+                // NOTE: there is still a race here where a signal could be
+                // pending on the process even though we managed to update its
+                // adj level.  Not sure what to do about this, but at least
+                // the race is now smaller.
+                if (!success) {
+                    // Uh oh...  it looks like the provider's process
+                    // has been killed on us.  We need to wait for a new
+                    // process to be started, and make sure its death
+                    // doesn't kill our process.
+                    Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
+                            + " is crashing; detaching " + r);
+                    boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
+                    checkTime(startTime, "getContentProviderImpl: before appDied");
+                    appDiedLocked(cpr.proc);
+                    checkTime(startTime, "getContentProviderImpl: after appDied");
+                    if (!lastRef) {
+                        // This wasn't the last ref our process had on
+                        // the provider...  we have now been killed, bail.
+                        return null;
                     }
+                    providerRunning = false;
+                    conn = null;
                 }
 
                 Binder.restoreCallingIdentity(origId);
@@ -10767,7 +10763,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         checkTime(startTime, "getContentProviderImpl: looking for process record");
                         ProcessRecord proc = getProcessRecordLocked(
                                 cpi.processName, cpr.appInfo.uid, false);
-                        if (proc != null && proc.thread != null) {
+                        if (proc != null && proc.thread != null && !proc.killed) {
                             if (DEBUG_PROVIDER) Slog.d(TAG_PROVIDER,
                                     "Installing in existing process " + proc);
                             if (!proc.pubProviders.containsKey(cpi.name)) {
@@ -16568,7 +16564,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         && capp.pid != MY_PID) {
                     capp.kill("depends on provider "
                             + cpr.name.flattenToShortString()
-                            + " in dying proc " + (proc != null ? proc.processName : "??"), true);
+                            + " in dying proc " + (proc != null ? proc.processName : "??")
+                            + " (adj " + (proc != null ? proc.setAdj : "??") + ")", true);
                 }
             } else if (capp.thread != null && conn.provider.provider != null) {
                 try {
