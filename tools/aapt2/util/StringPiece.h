@@ -19,6 +19,7 @@
 
 #include <ostream>
 #include <string>
+#include <utils/JenkinsHash.h>
 #include <utils/String8.h>
 #include <utils/Unicode.h>
 
@@ -256,5 +257,18 @@ inline ::std::ostream& operator<<(::std::ostream& out, const std::u16string& str
     android::String8 utf8(str.data(), str.size());
     return out.write(utf8.string(), utf8.size());
 }
+
+namespace std {
+
+template <typename TChar>
+struct hash<aapt::BasicStringPiece<TChar>> {
+    size_t operator()(const aapt::BasicStringPiece<TChar>& str) const {
+        uint32_t hashCode = android::JenkinsHashMixBytes(
+                0, reinterpret_cast<const uint8_t*>(str.data()), sizeof(TChar) * str.size());
+        return static_cast<size_t>(hashCode);
+    }
+};
+
+} // namespace std
 
 #endif // AAPT_STRING_PIECE_H
