@@ -1322,11 +1322,18 @@ public final class Settings {
 
     /**
      * @hide Key with the location in the {@link android.util.MemoryIntArray} where
-     * to look up the generation id of the backing table.
+     * to look up the generation id of the backing table. The value is an integer.
      *
      * @see #CALL_METHOD_TRACK_GENERATION_KEY
      */
     public static final String CALL_METHOD_GENERATION_INDEX_KEY = "_generation_index";
+
+    /**
+     * @hide Key with the settings table generation. The value is an integer.
+     *
+     * @see #CALL_METHOD_TRACK_GENERATION_KEY
+     */
+    public static final String CALL_METHOD_GENERATION_KEY = "_generation";
 
     /**
      * @hide - User handle argument extra to the fast-path call()-based requests
@@ -1478,11 +1485,11 @@ public final class Settings {
         private int mCurrentGeneration;
 
         public GenerationTracker(@NonNull MemoryIntArray array, int index,
-                Runnable errorHandler) {
+                int generation, Runnable errorHandler) {
             mArray = array;
             mIndex = index;
             mErrorHandler = errorHandler;
-            mCurrentGeneration = readCurrentGeneration();
+            mCurrentGeneration = generation;
         }
 
         public boolean isGenerationChanged() {
@@ -1638,6 +1645,8 @@ public final class Settings {
                                     final int index = b.getInt(
                                             CALL_METHOD_GENERATION_INDEX_KEY, -1);
                                     if (array != null && index >= 0) {
+                                        final int generation = b.getInt(
+                                                CALL_METHOD_GENERATION_KEY, 0);
                                         if (DEBUG) {
                                             Log.i(TAG, "Received generation tracker for type:"
                                                     + mUri.getPath() + " in package:"
@@ -1645,7 +1654,7 @@ public final class Settings {
                                                     + userHandle + " with index:" + index);
                                         }
                                         mGenerationTracker = new GenerationTracker(array, index,
-                                                () -> {
+                                                generation, () -> {
                                             synchronized (this) {
                                                 Log.e(TAG, "Error accessing generation"
                                                         + " tracker - removing");
