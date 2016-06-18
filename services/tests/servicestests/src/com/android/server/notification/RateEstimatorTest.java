@@ -59,6 +59,15 @@ public class RateEstimatorTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testInstantaneousBurstIsEstimatedUnderTwoPercent() throws Exception {
+        assertUpdateTime(mTestStartTime);
+        long eventStart = mTestStartTime + 1000; // start event a long time after initialization
+        long nextEventTime = postEvents(eventStart, 0, 5); // five events at \inf
+        final float rate = mEstimator.getRate(nextEventTime);
+        assertLessThan("Rate", rate, 20f);
+    }
+
+    @SmallTest
     public void testCompactBurstIsEstimatedUnderTwoPercent() throws Exception {
         assertUpdateTime(mTestStartTime);
         long eventStart = mTestStartTime + 1000; // start event a long time after initialization
@@ -110,12 +119,19 @@ public class RateEstimatorTest extends AndroidTestCase {
         assertLessThan("Rate", rate, 0.1f);
     }
 
+    @SmallTest
+    public void testGetRateWithOneUpdate() throws Exception {
+        assertUpdateTime(mTestStartTime);
+        final float rate = mEstimator.getRate(mTestStartTime+1);
+        assertLessThan("Rate", rate, 1f);
+    }
+
     private void assertLessThan(String label, float a, float b)  {
-        assertTrue(String.format("%s was %f, but should be less than %f", label, a, b), a < b);
+        assertTrue(String.format("%s was %f, but should be less than %f", label, a, b), a <= b);
     }
 
     private void assertGreaterThan(String label, float a, float b)  {
-        assertTrue(String.format("%s was %f, but should be more than %f", label, a, b), a > b);
+        assertTrue(String.format("%s was %f, but should be more than %f", label, a, b), a >= b);
     }
 
     /** @returns the next event time. */
