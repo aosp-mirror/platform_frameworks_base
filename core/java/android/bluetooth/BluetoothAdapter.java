@@ -897,27 +897,9 @@ public final class BluetoothAdapter {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean enable() {
-        int state = BluetoothAdapter.STATE_OFF;
         if (isEnabled() == true) {
             if (DBG) Log.d(TAG, "enable(): BT is already enabled..!");
             return true;
-        }
-        // Use service interface to get the exact state
-        try {
-            mServiceLock.readLock().lock();
-            if (mService != null) {
-                state = mService.getState();
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        } finally {
-            mServiceLock.readLock().unlock();
-        }
-
-        if (state == BluetoothAdapter.STATE_BLE_ON) {
-                Log.e(TAG, "BT is in BLE_ON State");
-                notifyUserAction(true);
-                return true;
         }
         try {
             return mManagerService.enable();
