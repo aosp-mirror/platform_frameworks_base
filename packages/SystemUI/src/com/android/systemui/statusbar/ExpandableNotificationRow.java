@@ -1307,6 +1307,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (!animated) {
             mPublicLayout.animate().cancel();
             mPrivateLayout.animate().cancel();
+            if (mChildrenContainer != null) {
+                mChildrenContainer.animate().cancel();
+                mChildrenContainer.setAlpha(1f);
+            }
             mPublicLayout.setAlpha(1f);
             mPrivateLayout.setAlpha(1f);
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
