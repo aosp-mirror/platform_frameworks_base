@@ -20,6 +20,7 @@
 #include "DeferredLayerUpdater.h"
 #include "LayerRenderer.h"
 
+#include <renderthread/EglManager.h>
 #include <utils/Unicode.h>
 
 namespace android {
@@ -112,12 +113,18 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
 
 void TestUtils::TestTask::run() {
     // RenderState only valid once RenderThread is running, so queried here
-    RenderState& renderState = renderthread::RenderThread::getInstance().renderState();
+    renderthread::RenderThread& renderThread = renderthread::RenderThread::getInstance();
+    bool hasEglContext = renderThread.eglManager().hasEglContext();
+    RenderState& renderState = renderThread.renderState();
+    if (!hasEglContext) {
+        renderState.onGLContextCreated();
+    }
 
-    renderState.onGLContextCreated();
-    rtCallback(renderthread::RenderThread::getInstance());
-    renderState.flush(Caches::FlushMode::Full);
-    renderState.onGLContextDestroyed();
+    rtCallback(renderThread);
+    if (!hasEglContext) {
+        renderState.flush(Caches::FlushMode::Full);
+        renderState.onGLContextDestroyed();
+    }
 }
 
 std::unique_ptr<uint16_t[]> TestUtils::asciiToUtf16(const char* str) {

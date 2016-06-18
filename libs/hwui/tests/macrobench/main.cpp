@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "tests/common/LeakChecker.h"
 #include "tests/common/TestScene.h"
 
 #include "protos/hwui.pb.h"
@@ -262,5 +263,6 @@ int main(int argc, char* argv[]) {
         }
     }
     printf("Success!\n");
+    LeakChecker::checkForLeaks();
     return 0;
 }
