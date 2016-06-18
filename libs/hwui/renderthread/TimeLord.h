@@ -34,7 +34,6 @@ public:
     // returns true if the vsync is newer, false if it was rejected for staleness
     bool vsyncReceived(nsecs_t vsync);
     nsecs_t latestVsync() { return mFrameTimeNanos; }
-    nsecs_t computeFrameTimeMs();
     nsecs_t computeFrameTimeNanos();
 
 private:
