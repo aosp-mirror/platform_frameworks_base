@@ -174,6 +174,9 @@ public class AudioService extends IAudioService.Stub {
     // the platform type affects volume and silent mode behavior
     private final int mPlatformType;
 
+    // indicates whether the system maps all streams to a single stream.
+    private final boolean mIsSingleVolume;
+
     private boolean isPlatformVoice() {
         return mPlatformType == AudioSystem.PLATFORM_VOICE;
     }
@@ -606,6 +609,8 @@ public class AudioService extends IAudioService.Stub {
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
+        mIsSingleVolume = AudioSystem.isSingleVolume(context);
+
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -958,21 +963,22 @@ public class AudioService extends IAudioService.Stub {
     private void updateStreamVolumeAlias(boolean updateVolumes, String caller) {
         int dtmfStreamAlias;
 
-        switch (mPlatformType) {
-        case AudioSystem.PLATFORM_VOICE:
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE;
-            dtmfStreamAlias = AudioSystem.STREAM_RING;
-            break;
-        case AudioSystem.PLATFORM_TELEVISION:
+        if (mIsSingleVolume) {
             mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION;
             dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
-            break;
-        default:
-            mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT;
-            dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
+        } else {
+            switch (mPlatformType) {
+                case AudioSystem.PLATFORM_VOICE:
+                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE;
+                    dtmfStreamAlias = AudioSystem.STREAM_RING;
+                    break;
+                default:
+                    mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT;
+                    dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
+            }
         }
 
-        if (isPlatformTelevision()) {
+        if (mIsSingleVolume) {
             mRingerModeAffectedStreams = 0;
         } else {
             if (isInCommunication()) {
@@ -1080,7 +1086,7 @@ public class AudioService extends IAudioService.Stub {
         if (ringerMode != ringerModeFromSettings) {
             Settings.Global.putInt(cr, Settings.Global.MODE_RINGER, ringerMode);
         }
-        if (mUseFixedVolume || isPlatformTelevision()) {
+        if (mUseFixedVolume || mIsSingleVolume) {
             ringerMode = AudioManager.RINGER_MODE_NORMAL;
         }
         synchronized(mSettingsLock) {
@@ -1354,7 +1360,7 @@ public class AudioService extends IAudioService.Stub {
                         // unmute immediately for volume up
                         streamState.mute(false);
                     } else if (direction == AudioManager.ADJUST_LOWER) {
-                        if (mPlatformType == AudioSystem.PLATFORM_TELEVISION) {
+                        if (mIsSingleVolume) {
                             sendMsg(mAudioHandler, MSG_UNMUTE_STREAM, SENDMSG_QUEUE,
                                     streamTypeAlias, flags, null, UNMUTE_STREAM_DELAY);
                         }
@@ -2067,7 +2073,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void setRingerMode(int ringerMode, String caller, boolean external) {
-        if (mUseFixedVolume || isPlatformTelevision()) {
+        if (mUseFixedVolume || mIsSingleVolume) {
             return;
         }
         if (caller == null || caller.length() == 0) {
@@ -3384,7 +3390,6 @@ public class AudioService extends IAudioService.Stub {
      */
     private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted,
             String caller, int flags) {
-        final boolean isTv = mPlatformType == AudioSystem.PLATFORM_TELEVISION;
         int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerModeInternal();
 
@@ -3406,7 +3411,7 @@ public class AudioService extends IAudioService.Stub {
                         ringerMode = RINGER_MODE_SILENT;
                     }
                 }
-            } else if (isTv && (direction == AudioManager.ADJUST_TOGGLE_MUTE
+            } else if (mIsSingleVolume && (direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_MUTE)) {
                 if (mHasVibrator) {
                     ringerMode = RINGER_MODE_VIBRATE;
@@ -3425,7 +3430,7 @@ public class AudioService extends IAudioService.Stub {
             }
             if ((direction == AudioManager.ADJUST_LOWER)) {
                 // This is the case we were muted with the volume turned up
-                if (isTv && oldIndex >= 2 * step && isMuted) {
+                if (mIsSingleVolume && oldIndex >= 2 * step && isMuted) {
                     ringerMode = RINGER_MODE_NORMAL;
                 } else if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
                     if (mVolumePolicy.volumeDownToEnterSilent) {
@@ -3447,7 +3452,7 @@ public class AudioService extends IAudioService.Stub {
             result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
-            if (isTv && direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
+            if (mIsSingleVolume && direction == AudioManager.ADJUST_LOWER && oldIndex >= 2 * step && isMuted) {
                 // This is the case we were muted with the volume turned up
                 ringerMode = RINGER_MODE_NORMAL;
             } else if (direction == AudioManager.ADJUST_RAISE
@@ -3501,7 +3506,7 @@ public class AudioService extends IAudioService.Stub {
                  (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
                  UserHandle.USER_CURRENT);
 
-        if (mPlatformType == AudioSystem.PLATFORM_TELEVISION) {
+        if (mIsSingleVolume) {
             ringerModeAffectedStreams = 0;
         } else if (mRingerModeDelegate != null) {
             ringerModeAffectedStreams = mRingerModeDelegate
@@ -3586,6 +3591,11 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private int getActiveStreamType(int suggestedStreamType) {
+        if (mIsSingleVolume
+                && suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            return AudioSystem.STREAM_MUSIC;
+        }
+
         switch (mPlatformType) {
         case AudioSystem.PLATFORM_VOICE:
             if (isInCommunication()) {
@@ -3611,12 +3621,6 @@ public class AudioService extends IAudioService.Stub {
                 if (DEBUG_VOL)
                     Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                 return AudioSystem.STREAM_MUSIC;
-            }
-            break;
-        case AudioSystem.PLATFORM_TELEVISION:
-            if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                    // TV always defaults to STREAM_MUSIC
-                    return AudioSystem.STREAM_MUSIC;
             }
             break;
         default:
@@ -4300,7 +4304,7 @@ public class AudioService extends IAudioService.Stub {
             if (mUseFixedVolume) {
                 return;
             }
-            if (isPlatformTelevision() && (streamState.mStreamType != AudioSystem.STREAM_MUSIC)) {
+            if (mIsSingleVolume && (streamState.mStreamType != AudioSystem.STREAM_MUSIC)) {
                 return;
             }
             System.putIntForUser(mContentResolver,
@@ -5522,7 +5526,7 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
                 if (cameraSoundForcedChanged) {
-                    if (!isPlatformTelevision()) {
+                    if (!mIsSingleVolume) {
                         VolumeStreamState s = mStreamStates[AudioSystem.STREAM_SYSTEM_ENFORCED];
                         if (cameraSoundForced) {
                             s.setAllIndexesToMax();

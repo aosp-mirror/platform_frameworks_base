@@ -1326,6 +1326,11 @@
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
 
+    <!-- Flag indicating whether all audio streams should be mapped to
+         one single stream. If true, all audio streams are mapped to
+         STREAM_MUSIC as if it's on TV platform. -->
+    <bool name="config_single_volume">false</bool>
+
     <!-- Flag indicating that an outbound call must have a call capable phone account
          that has declared it can process the call's handle. -->
     <bool name="config_requireCallCapableAccountForHandle">false</bool>
