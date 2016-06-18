@@ -753,7 +753,7 @@ public class ZygoteInit {
             closeServerSocket();
         } catch (MethodAndArgsCaller caller) {
             caller.run();
-        } catch (RuntimeException ex) {
+        } catch (Throwable ex) {
             Log.e(TAG, "Zygote died with exception", ex);
             closeServerSocket();
             throw ex;
