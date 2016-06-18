@@ -89,6 +89,7 @@ import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -187,6 +188,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -554,7 +557,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         if (mRestrictPower != enabled) {
                             mRestrictPower = enabled;
                             updateRulesForRestrictPowerLocked();
-                            updateRulesForGlobalChangeLocked(true);
                         }
                     }
                 }
@@ -570,6 +572,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 writePolicyLocked();
             }
 
+            setRestrictBackgroundLocked(mRestrictBackground);
             updateRulesForGlobalChangeLocked(false);
             updateNotificationsLocked();
         }
@@ -674,7 +677,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and POWER_SAVE_WHITELIST_CHANGED is protected
             synchronized (mRulesLock) {
                 updatePowerSaveWhitelistLocked();
-                updateRulesForGlobalChangeLocked(false);
+                updateRulesForRestrictPowerLocked();
             }
         }
     };
@@ -1994,7 +1997,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // Must whitelist foreground apps before turning data saver mode on.
         // TODO: there is no need to iterate through all apps here, just those in the foreground,
         // so it could call AM to get the UIDs of such apps, and iterate through them instead.
-        updateRulesForRestrictBackgroundLocked();
+        updateRulesForAllAppsLocked(TYPE_RESTRICT_BACKGROUND);
         try {
             if (!mNetworkManager.setDataSaverModeEnabled(mRestrictBackground)) {
                 Slog.e(TAG, "Could not change Data Saver Mode on NMS to " + mRestrictBackground);
@@ -2151,7 +2154,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (mSystemReady) {
                     // Device idle change means we need to rebuild rules for all
                     // known apps, so do a global refresh.
-                    updateRulesForGlobalChangeLocked(false);
+                    updateRulesForRestrictPowerLocked();
                 }
                 if (enabled) {
                     EventLogTags.writeDeviceIdleOnPhase("net");
@@ -2544,7 +2547,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
     }
 
-    void updateRulesForRestrictPowerLocked() {
+    void updateRulesForPowerSaveLocked() {
         updateRulesForWhitelistedPowerSaveLocked(mRestrictPower, FIREWALL_CHAIN_POWERSAVE,
                 mUidFirewallPowerSaveRules);
     }
@@ -2669,11 +2672,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         long start;
         if (LOGD) start = System.currentTimeMillis();
 
-        updateRulesForDeviceIdleLocked();
-        updateRulesForAppIdleLocked();
         updateRulesForRestrictPowerLocked();
         updateRulesForRestrictBackgroundLocked();
-        setRestrictBackgroundLocked(mRestrictBackground);
 
         // If the set of restricted networks may have changed, re-evaluate those.
         if (restrictedNetworksChanged) {
@@ -2687,7 +2687,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void updateRulesForRestrictPowerLocked() {
+        updateRulesForDeviceIdleLocked();
+        updateRulesForAppIdleLocked();
+        updateRulesForPowerSaveLocked();
+        updateRulesForAllAppsLocked(TYPE_RESTRICT_POWER);
+    }
+
     private void updateRulesForRestrictBackgroundLocked() {
+        updateRulesForAllAppsLocked(TYPE_RESTRICT_BACKGROUND);
+    }
+
+    private static final int TYPE_RESTRICT_BACKGROUND = 1;
+    private static final int TYPE_RESTRICT_POWER = 2;
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, value = {
+            TYPE_RESTRICT_BACKGROUND,
+            TYPE_RESTRICT_POWER,
+    })
+    public @interface RestrictType {
+    }
+
+    // TODO: refactor / consolidate all those updateXyz methods, there are way too many of them...
+    private void updateRulesForAllAppsLocked(@RestrictType int type) {
         final PackageManager pm = mContext.getPackageManager();
 
         // update rules for all installed applications
@@ -2704,8 +2726,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int j = 0; j < appsSize; j++) {
                 final ApplicationInfo app = apps.get(j);
                 final int uid = UserHandle.getUid(user.id, app.uid);
-                updateRulesForDataUsageRestrictionsLocked(uid);
-                updateRulesForPowerRestrictionsLocked(uid);
+                switch (type) {
+                    case TYPE_RESTRICT_BACKGROUND:
+                        updateRulesForDataUsageRestrictionsLocked(uid);
+                        break;
+                    case TYPE_RESTRICT_POWER:
+                        updateRulesForPowerRestrictionsLocked(uid);
+                        break;
+                    default:
+                        Slog.w(TAG, "Invalid type for updateRulesForAllApps: " + type);
+                }
             }
         }
     }
@@ -2717,6 +2747,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int j = mPowerSaveTempWhitelistAppIds.size() - 1; j >= 0; j--) {
                 int appId = mPowerSaveTempWhitelistAppIds.keyAt(j);
                 int uid = UserHandle.getUid(user.id, appId);
+                updateRulesForRestrictPowerLocked();
                 // Update external firewall rules.
                 updateRuleForAppIdleLocked(uid);
                 updateRuleForDeviceIdleLocked(uid);
