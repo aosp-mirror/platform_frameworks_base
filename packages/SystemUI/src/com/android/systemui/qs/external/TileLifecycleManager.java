@@ -71,23 +71,24 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     private QSTileServiceWrapper mWrapper;
     private boolean mListening;
-    private Tile mTile;
     private IBinder mClickBinder;
 
     private int mBindTryCount;
     private boolean mBound;
     @VisibleForTesting
     boolean mReceiverRegistered;
-    private IQSService mService;
     private boolean mUnbindImmediate;
     private TileChangeListener mChangeListener;
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private boolean mIsBound;
 
-    public TileLifecycleManager(Handler handler, Context context, Intent intent, UserHandle user) {
+    public TileLifecycleManager(Handler handler, Context context, IQSService service,
+            Tile tile, Intent intent, UserHandle user) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
+        mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
+        mIntent.putExtra(TileService.EXTRA_TILE, tile);
         mUser = user;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
@@ -163,14 +164,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         try {
             service.linkToDeath(this, 0);
         } catch (RemoteException e) {
-        }
-        if (!wrapper.setQSService(mService)) {
-            handleDeath();
-            return;
-        }
-        if (!wrapper.setQSTile(mTile)) {
-            handleDeath();
-            return;
         }
         mWrapper = wrapper;
         handlePendingMessages();
@@ -255,15 +248,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         }
     }
 
-    @Override
-    public void setQSTile(Tile tile) {
-        if (DEBUG) Log.d(TAG, "setQSTile " + tile);
-        mTile = tile;
-        if (mWrapper != null && !mWrapper.setQSTile(tile)) {
-            handleDeath();
-        }
-    }
-
     private boolean checkComponentState() {
         PackageManager pm = mContext.getPackageManager();
         if (!isPackageAvailable(pm) || !isComponentAvailable(pm)) {
@@ -343,14 +327,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private void queueMessage(int message) {
         synchronized (mQueuedMessages) {
             mQueuedMessages.add(message);
-        }
-    }
-
-    @Override
-    public void setQSService(IQSService service) {
-        mService = service;
-        if (mWrapper == null || !mWrapper.setQSService(service)) {
-            handleDeath();
         }
     }
 

@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -403,10 +404,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
             String tileSpec = previousTiles.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!newTiles.contains(tileSpec)) {
-                Intent intent = new Intent().setComponent(
-                        CustomTile.getComponentFromSpec(tileSpec));
+                ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
+                Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                        mContext, mServices, new Tile(component), intent,
+                        new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
                 lifecycleManager.flushMessagesAndUnbind();
@@ -416,10 +418,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
             String tileSpec = newTiles.get(i);
             if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
             if (!previousTiles.contains(tileSpec)) {
-                Intent intent = new Intent().setComponent(
-                        CustomTile.getComponentFromSpec(tileSpec));
+                ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
+                Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                        mContext, mServices, new Tile(component), intent,
+                        new UserHandle(ActivityManager.getCurrentUser()));
                 lifecycleManager.onTileAdded();
                 lifecycleManager.flushMessagesAndUnbind();
             }

@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSTileService;
+import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
@@ -68,9 +69,10 @@ public class TileServiceManager {
     // This defaults to true to ensure tiles start out unavailable.
     private boolean mPendingBind = true;
 
-    TileServiceManager(TileServices tileServices, Handler handler, ComponentName component) {
+    TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
+            Tile tile) {
         this(tileServices, handler, new TileLifecycleManager(handler,
-                tileServices.getContext(), new Intent().setComponent(component),
+                tileServices.getContext(), tileServices, tile, new Intent().setComponent(component),
                 new UserHandle(ActivityManager.getCurrentUser())));
     }
 
@@ -80,7 +82,6 @@ public class TileServiceManager {
         mServices = tileServices;
         mHandler = handler;
         mStateManager = tileLifecycleManager;
-        mStateManager.setQSService(tileServices);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);

@@ -35,16 +35,6 @@ public class QSTileServiceWrapper {
         return mService.asBinder();
     }
 
-    public boolean setQSTile(Tile tile) {
-        try {
-            mService.setQSTile(tile);
-            return true;
-        } catch (Exception e) {
-            Log.d(TAG, "Caught exception from TileService", e);
-            return false;
-        }
-    }
-
     public boolean onTileAdded() {
         try {
             mService.onTileAdded();
@@ -88,16 +78,6 @@ public class QSTileServiceWrapper {
     public boolean onClick(IBinder token) {
         try {
             mService.onClick(token);
-            return true;
-        } catch (Exception e) {
-            Log.d(TAG, "Caught exception from TileService", e);
-            return false;
-        }
-    }
-
-    public boolean setQSService(IQSService service) {
-        try {
-            mService.setQSService(service);
             return true;
         } catch (Exception e) {
             Log.d(TAG, "Caught exception from TileService", e);
