@@ -761,9 +761,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mRemoved = true;
 
         mPrivateLayout.setRemoved();
-        if (mChildrenContainer != null) {
-            mChildrenContainer.setRemoved();
-        }
     }
 
     public NotificationChildrenContainer getChildrenContainer() {
