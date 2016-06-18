@@ -237,6 +237,14 @@ public class SignalClusterView
         super.onDetachedFromWindow();
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+
+        // Re-run all checks against the tint area for all icons
+        applyIconTint();
+    }
+
     // From SecurityController.
     @Override
     public void onStateChanged() {
