@@ -1075,7 +1075,7 @@ final class ActivityStack {
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.state);
-            if (!mService.isSleeping()) {
+            if (!mService.isSleepingLocked()) {
                 // Avoid recursion among check for sleep and complete pause during sleeping.
                 // Because activity will be paused immediately after resume, just let pause
                 // be completed by the order of activity paused from clients.
@@ -1139,7 +1139,7 @@ final class ActivityStack {
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!uiSleeping && !mService.isSleepingOrShuttingDown()) {
+        if (!uiSleeping && !mService.isSleepingOrShuttingDownLocked()) {
             mStackSupervisor.acquireLaunchWakelock();
         }
 
@@ -1292,7 +1292,7 @@ final class ActivityStack {
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.state = ActivityState.STOPPING;
                 } else if ((!prev.visible && !hasVisibleBehindActivity())
-                        || mService.isSleepingOrShuttingDown()) {
+                        || mService.isSleepingOrShuttingDownLocked()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     addToStopping(prev, true /* immediate */);
@@ -1310,7 +1310,7 @@ final class ActivityStack {
 
         if (resumeNext) {
             final ActivityStack topStack = mStackSupervisor.getFocusedStack();
-            if (!mService.isSleepingOrShuttingDown()) {
+            if (!mService.isSleepingOrShuttingDownLocked()) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked(topStack, prev, null);
             } else {
                 mStackSupervisor.checkReadyForSleepLocked();
@@ -1821,7 +1821,7 @@ final class ActivityStack {
             boolean behindFullscreenActivity) {
 
         if (!okToShowLocked(r)
-                || (mService.isSleepingOrShuttingDown() && r.voiceSession == null)) {
+                || (mService.isSleepingOrShuttingDownLocked() && r.voiceSession == null)) {
             return false;
         }
 
@@ -2196,7 +2196,7 @@ final class ActivityStack {
 
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
-        if (mService.isSleepingOrShuttingDown()
+        if (mService.isSleepingOrShuttingDownLocked()
                 && mLastPausedActivity == next
                 && mStackSupervisor.allPausedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
@@ -2278,7 +2278,7 @@ final class ActivityStack {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (mService.isSleeping() && mLastNoHistoryActivity != null &&
+        if (mService.isSleepingLocked() && mLastNoHistoryActivity != null &&
                 !mLastNoHistoryActivity.finishing) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
@@ -3212,7 +3212,7 @@ final class ActivityStack {
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
             if (!r.finishing) {
-                if (!mService.isSleeping()) {
+                if (!mService.isSleepingLocked()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
                     if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                             "stop-no-history", false)) {
@@ -3244,7 +3244,7 @@ final class ActivityStack {
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
                 r.app.thread.scheduleStopActivity(r.appToken, r.visible, r.configChangeFlags);
-                if (mService.isSleepingOrShuttingDown()) {
+                if (mService.isSleepingOrShuttingDownLocked()) {
                     r.setSleeping(true);
                 }
                 Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG, r);
