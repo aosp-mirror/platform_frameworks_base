@@ -402,34 +402,45 @@ final class OverlayManagerServiceImpl {
     private int calculateNewState(@Nullable final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, final int userId)
         throws OverlayManagerSettings.BadKeyException {
+
+        // STATE 0 CHECK: Check if the overlay package is disabled by PackageManager
         if (!overlayPackage.applicationInfo.enabled) {
             return STATE_NOT_APPROVED_COMPONENT_DISABLED;
         }
 
+        // OVERLAY STATE CHECK: Check the current overlay's activation
+        boolean stateCheck = mSettings.getEnabled(overlayPackage.packageName, userId);
+
+        // STATE 1 CHECK: Check if the overlay's target package is missing from the device
         if (targetPackage == null) {
             return STATE_NOT_APPROVED_MISSING_TARGET;
         }
 
+        // STATE 2 CHECK: Check if the overlay has an existing idmap file created. Perhaps
+        // there were no matching resources between the two packages? (Overlay & Target)
         if (!mIdmapManager.idmapExists(overlayPackage, userId)) {
             return STATE_NOT_APPROVED_NO_IDMAP;
         }
 
-        final boolean enableIfApproved = mSettings.getEnabled(overlayPackage.packageName, userId);
-
-        if (mPackageManager.signaturesMatching(targetPackage.packageName,
-                    overlayPackage.packageName, userId)) {
-            return enableIfApproved ? STATE_APPROVED_ENABLED : STATE_APPROVED_DISABLED;
-        }
-
+        // STATE 6 CHECK: System Overlays, also known as RRO overlay files, work the same
+        // as OMS, but with enable/disable limitations. A system overlay resides in the
+        // directory "/vendor/overlay" depending on your device.
+        //
+        // Team Substratum: Disable this as this is a security vulnerability and a
+        // memory-limited partition.
         if ((overlayPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            return enableIfApproved ? STATE_APPROVED_ENABLED : STATE_APPROVED_DISABLED;
+            return STATE_NOT_APPROVED_COMPONENT_DISABLED;
         }
 
+        // STATE 3 CHECK: If the overlay only modifies resources explicitly granted by the
+        // target, we approve it.
+        //
+        // Team Substratum: Always approve dangerous packages but disabled state
         if (!mIdmapManager.isDangerous(overlayPackage, userId)) {
-            return enableIfApproved ? STATE_APPROVED_ENABLED : STATE_APPROVED_DISABLED;
+            return STATE_APPROVED_DISABLED;
         }
 
-        return STATE_NOT_APPROVED_DANGEROUS_OVERLAY;
+        return stateCheck ? STATE_APPROVED_ENABLED : STATE_APPROVED_DISABLED;
     }
 
     private void removeIdmapIfPossible(@NonNull final OverlayInfo oi) {
