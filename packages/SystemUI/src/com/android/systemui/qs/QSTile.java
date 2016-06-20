@@ -238,7 +238,7 @@ public abstract class QSTile<TState extends State> {
 
     private void handleAddCallback(Callback callback) {
         mCallbacks.add(callback);
-        handleRefreshState(null);
+        callback.onStateChanged(mState);
     }
 
     private void handleRemoveCallback(Callback callback) {

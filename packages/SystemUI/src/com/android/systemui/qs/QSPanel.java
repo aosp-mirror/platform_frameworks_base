@@ -363,7 +363,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             }
         };
         r.tileView.init(click, longClick);
-        callback.onStateChanged(r.tile.getState());
         r.tile.refreshState();
         mRecords.add(r);
 
