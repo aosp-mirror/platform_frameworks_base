@@ -15132,16 +15132,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
             // Do not run PackageDexOptimizer through the local performDexOpt
-            // method because `pkg` is not in `mPackages` yet.
-            int result = mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
+            // method because `pkg` may not be in `mPackages` yet.
+            //
+            // Also, don't fail application installs if the dexopt step fails.
+            mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                     null /* instructionSets */, false /* checkProfiles */,
                     getCompilerFilterForReason(REASON_INSTALL));
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                String msg = "Extracting package failed for " + pkgName;
-                res.setError(INSTALL_FAILED_DEXOPT, msg);
-                return;
-            }
 
             // Notify BackgroundDexOptService that the package has been changed.
             // If this is an update of a package which used to fail to compile,
