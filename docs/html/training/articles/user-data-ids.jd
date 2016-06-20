@@ -189,15 +189,15 @@ page.article=true
 
 <div style="padding:.5em 2em;">
 <div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
-<p>...upon reset, a new advertising
+<p>...if reset, a new advertising
   identifier must not be connected to a previous advertising identifier or data
   derived from a previous advertising identifier without the explicit consent
-  of the user</span></p>
+  of the user.</span></p>
 </div>
 </div>
 
 <p>
-  <em><strong>Always respect the associated Interest Based Advertising
+  <em><strong>Always respect the associated Personalized Ads
   flag</strong></em>. Advertising IDs are configurable in that users can limit
   the amount of tracking associated with the ID. Always use the <code><a href=
   "https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info.html#isLimitAdTrackingEnabled()">
@@ -210,10 +210,10 @@ page.article=true
 
 <div style="padding:.5em 2em;">
 <div style="border-left:4px solid #999;padding:0 1em;font-style:italic;">
-<p>...you must abide by a user’s ‘opt out of
-  interest-based advertising’ setting. If a user has enabled this setting, you
+<p>...you must abide by a user’s ‘Opt out of interest-based advertising’ or 'Opt
+  out of Ads Personalization' setting. If a user has enabled this setting, you
   may not use the advertising identifier for creating user profiles for
-  advertising purposes or for targeting users with interest-based advertising.
+  advertising purposes or for targeting users with personalized advertising.
   Allowed activities include contextual advertising, frequency capping,
   conversion tracking, reporting and security and fraud detection.</span></p>
 </div>
@@ -286,7 +286,8 @@ page.article=true
   <code>account_id</code> column in both tables, which would be a violation of
   the <a href=
   "https://play.google.com/about/developer-content-policy.html">Google Play
-  Developer Content Policy</a>.
+  Developer Content Policy</a>, if you did not get explicit permission from
+  your users.
 </p>
 
 <p>
