@@ -797,54 +797,6 @@ redirects:
   to: https://code.google.com/p/android/issues/list?can=2&q=label%3ADevPreview-N
 - from: /2016/03/first-preview-of-android-n-developer.html
   to: http://android-developers.blogspot.com/2016/03/first-preview-of-android-n-developer.html
-- from: /r/studio-ui/vector-asset-studio.html
-  to: /studio/write/vector-asset-studio.html
-- from: /r/studio-ui/image-asset-studio.html
-  to: /studio/write/image-asset-studio.html
-- from: /r/studio-ui/project-structure.html
-  to: /studio/projects/index.html
-- from: /r/studio-ui/android-monitor.html
-  to: /studio/profile/android-monitor.html
-- from: /r/studio-ui/am-logcat.html
-  to: /studio/debug/am-logcat.html
-- from: /r/studio-ui/am-memory.html
-  to: /studio/profile/am-memory.html
-- from: /r/studio-ui/am-cpu.html
-  to: /studio/profile/am-cpu.html
-- from: /r/studio-ui/am-gpu.html
-  to: /studio/profile/am-gpu.html
-- from: /r/studio-ui/am-network.html
-  to: /studio/profile/am-network.html
-- from: /r/studio-ui/am-hprof.html
-  to: /studio/profile/am-hprof.html
-- from: /r/studio-ui/am-allocation.html
-  to: /studio/profile/am-allocation.html
-- from: /r/studio-ui/am-methodtrace.html
-  to: /studio/profile/am-methodtrace.html
-- from: /r/studio-ui/am-sysinfo.html
-  to: /studio/profile/am-sysinfo.html
-- from: /r/studio-ui/am-screenshot.html
-  to: /studio/debug/am-screenshot.html
-- from: /r/studio-ui/am-video.html
-  to: /studio/debug/am-video.html
-- from: /r/studio-ui/avd-manager.html
-  to: /studio/run/managing-avds.html
-- from: /r/studio-ui/rundebugconfig.html
-  to: /studio/run/index.html
-- from: /r/studio-ui/devicechooser.html
-  to: /studio/run/emulator.html
-- from: /r/studio-ui/virtualdeviceconfig.html
-  to: /studio/run/managing-avds.html
-- from: /r/studio-ui/emulator.html
-  to: /studio/run/emulator.html
-- from: /r/studio-ui/instant-run.html
-  to: /studio/run/index.html#instant-run
-- from: /r/studio-ui/test-recorder.html
-  to: http://tools.android.com/tech-docs/test-recorder
-- from: /r/studio-ui/export-licenses.html
-  to: http://tools.android.com/tech-docs/new-build-system/license
-- from: /r/studio-ui/experimental-to-stable-gradle.html
-  to: http://tools.android.com/tech-docs/new-build-system/gradle-experimental/experimental-to-stable-gradle
 - from: /reference/org/apache/http/...
   to: /about/versions/marshmallow/android-6.0-changes.html#behavior-apache-http-client
 - from: /shareables/...
@@ -1169,3 +1121,55 @@ redirects:
   to: /preview/features/background-optimization.html
 - from: /bgopt/
   to: /preview/features/background-optimization.html
+
+
+
+# Android Studio help button redirects
+- from: /r/studio-ui/vector-asset-studio.html
+  to: /studio/write/vector-asset-studio.html
+- from: /r/studio-ui/image-asset-studio.html
+  to: /studio/write/image-asset-studio.html
+- from: /r/studio-ui/project-structure.html
+  to: /studio/projects/index.html
+- from: /r/studio-ui/android-monitor.html
+  to: /studio/profile/android-monitor.html
+- from: /r/studio-ui/am-logcat.html
+  to: /studio/debug/am-logcat.html
+- from: /r/studio-ui/am-memory.html
+  to: /studio/profile/am-memory.html
+- from: /r/studio-ui/am-cpu.html
+  to: /studio/profile/am-cpu.html
+- from: /r/studio-ui/am-gpu.html
+  to: /studio/profile/am-gpu.html
+- from: /r/studio-ui/am-network.html
+  to: /studio/profile/am-network.html
+- from: /r/studio-ui/am-hprof.html
+  to: /studio/profile/am-hprof.html
+- from: /r/studio-ui/am-allocation.html
+  to: /studio/profile/am-allocation.html
+- from: /r/studio-ui/am-methodtrace.html
+  to: /studio/profile/am-methodtrace.html
+- from: /r/studio-ui/am-sysinfo.html
+  to: /studio/profile/am-sysinfo.html
+- from: /r/studio-ui/am-screenshot.html
+  to: /studio/debug/am-screenshot.html
+- from: /r/studio-ui/am-video.html
+  to: /studio/debug/am-video.html
+- from: /r/studio-ui/avd-manager.html
+  to: /studio/run/managing-avds.html
+- from: /r/studio-ui/rundebugconfig.html
+  to: /studio/run/index.html
+- from: /r/studio-ui/devicechooser.html
+  to: /studio/run/emulator.html
+- from: /r/studio-ui/virtualdeviceconfig.html
+  to: /studio/run/managing-avds.html
+- from: /r/studio-ui/emulator.html
+  to: /studio/run/emulator.html
+- from: /r/studio-ui/instant-run.html
+  to: /studio/run/index.html#instant-run
+- from: /r/studio-ui/test-recorder.html
+  to: http://tools.android.com/tech-docs/test-recorder
+- from: /r/studio-ui/export-licenses.html
+  to: http://tools.android.com/tech-docs/new-build-system/license
+- from: /r/studio-ui/experimental-to-stable-gradle.html
+  to: http://tools.android.com/tech-docs/new-build-system/gradle-experimental/experimental-to-stable-gradle
