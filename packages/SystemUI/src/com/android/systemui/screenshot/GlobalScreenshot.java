@@ -60,6 +60,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.SystemUI;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -165,11 +166,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         c.drawColor(overlayColor);
         c.setBitmap(null);
 
-        // swap "System UI" out for "Android System"
-        final Bundle extras = new Bundle();
-        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                context.getString(com.android.internal.R.string.android_system_label));
-
         // Show the intermediate notification
         mTickerAddSpace = !mTickerAddSpace;
         mNotificationManager = nManager;
@@ -187,9 +183,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setWhen(now)
                 .setShowWhen(true)
-                .addExtras(extras)
                 .setColor(r.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+        SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
 
         mNotificationBuilder = new Notification.Builder(context)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
@@ -199,11 +195,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             .setSmallIcon(R.drawable.stat_notify_image)
             .setWhen(now)
             .setShowWhen(true)
-            .addExtras(extras)
             .setColor(r.getColor(com.android.internal.R.color.system_notification_accent_color))
             .setStyle(mNotificationStyle)
             .setPublicVersion(mPublicNotificationBuilder.build());
         mNotificationBuilder.setFlag(Notification.FLAG_NO_CLEAR, true);
+        SystemUI.overrideNotificationAppName(context, mNotificationBuilder);
 
         mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
 
@@ -864,6 +860,7 @@ class GlobalScreenshot {
             .setAutoCancel(true)
             .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+        SystemUI.overrideNotificationAppName(context, b);
 
         Notification n = new Notification.BigTextStyle(b)
                 .bigText(errorMsg)

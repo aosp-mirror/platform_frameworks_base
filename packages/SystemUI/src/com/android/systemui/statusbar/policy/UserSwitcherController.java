@@ -51,6 +51,7 @@ import com.android.internal.util.UserIcons;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.GuestResumeSessionReceiver;
 import com.android.systemui.R;
+import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUISecondaryUserService;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.tiles.UserDetailView;
@@ -523,7 +524,7 @@ public class UserSwitcherController {
         private void showLogoutNotification(int userId) {
             PendingIntent logoutPI = PendingIntent.getBroadcastAsUser(mContext,
                     0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
-            Notification notification = new Notification.Builder(mContext)
+            Notification.Builder builder = new Notification.Builder(mContext)
                     .setVisibility(Notification.VISIBILITY_SECRET)
                     .setPriority(Notification.PRIORITY_MIN)
                     .setSmallIcon(R.drawable.ic_person)
@@ -534,10 +535,10 @@ public class UserSwitcherController {
                     .setShowWhen(false)
                     .addAction(R.drawable.ic_delete,
                             mContext.getString(R.string.user_logout_notification_action),
-                            logoutPI)
-                    .build();
+                            logoutPI);
+            SystemUI.overrideNotificationAppName(mContext, builder);
             NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER, ID_LOGOUT_USER,
-                    notification, new UserHandle(userId));
+                    builder.build(), new UserHandle(userId));
         }
     };
 
@@ -547,7 +548,7 @@ public class UserSwitcherController {
         PendingIntent removeGuestPI = canSwitchUsers ? PendingIntent.getBroadcastAsUser(mContext,
                 0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM) : null;
 
-        Notification notification = new Notification.Builder(mContext)
+        Notification.Builder builder = new Notification.Builder(mContext)
                 .setVisibility(Notification.VISIBILITY_SECRET)
                 .setPriority(Notification.PRIORITY_MIN)
                 .setSmallIcon(R.drawable.ic_person)
@@ -557,10 +558,10 @@ public class UserSwitcherController {
                 .setShowWhen(false)
                 .addAction(R.drawable.ic_delete,
                         mContext.getString(R.string.guest_notification_remove_action),
-                        removeGuestPI)
-                .build();
+                        removeGuestPI);
+        SystemUI.overrideNotificationAppName(mContext, builder);
         NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
-                notification, new UserHandle(guestUserId));
+                builder.build(), new UserHandle(guestUserId));
     }
 
     private final Runnable mUnpauseRefreshUsers = new Runnable() {
