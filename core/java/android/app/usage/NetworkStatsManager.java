@@ -305,7 +305,8 @@ public class NetworkStatsManager {
      */
     public void registerUsageCallback(int networkType, String subscriberId, long thresholdBytes,
             UsageCallback callback) {
-        registerUsageCallback(networkType, subscriberId, thresholdBytes, null /* handler */);
+        registerUsageCallback(networkType, subscriberId, thresholdBytes, callback,
+                null /* handler */);
     }
 
     /**
