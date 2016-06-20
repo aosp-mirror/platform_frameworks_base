@@ -1355,7 +1355,11 @@ public class SyncManager {
             operation.extras.remove(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
         }
 
-        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)) {
+        if (operation.extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
+                && !syncResult.syncAlreadyInProgress) {
+            // syncAlreadyInProgress flag is set by AbstractThreadedSyncAdapter. The sync adapter
+            // has no way of knowing that a sync error occured. So we DO retry if the error is
+            // syncAlreadyInProgress.
             if (isLoggable) {
                 Log.d(TAG, "not retrying sync operation because SYNC_EXTRAS_DO_NOT_RETRY was specified "
                         + operation);
@@ -2445,6 +2449,10 @@ public class SyncManager {
             if (op.isPeriodic) {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
+                // mSyncJobService.callJobFinished is async, so cancel the job to ensure we don't
+                // find the this job in the pending jobs list while looking for duplicates
+                // before scheduling it at a later time.
+                getJobScheduler().cancel(op.jobId);
                 scheduleSyncOperationH(op, delay);
             }
         }
@@ -2886,6 +2894,14 @@ public class SyncManager {
             String historyMessage;
             int downstreamActivity;
             int upstreamActivity;
+
+            if (!syncOperation.isPeriodic) {
+                // mSyncJobService.jobFinidhed is async, we need to ensure that this job is
+                // removed from JobScheduler's pending jobs list before moving forward and
+                // potentially rescheduling all pending jobs to respect new backoff values.
+                getJobScheduler().cancel(syncOperation.jobId);
+            }
+
             if (syncResult != null) {
                 if (isLoggable) {
                     Slog.v(TAG, "runSyncFinishedOrCanceled [finished]: "
