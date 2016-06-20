@@ -3023,8 +3023,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** Checks whether the activity should be shown for current user. */
     boolean okToShowLocked(ActivityRecord r) {
-        return r != null && (isCurrentProfileLocked(r.userId)
-                || (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
+        return r != null && ((r.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
+                || (isCurrentProfileLocked(r.userId)
+                && !mService.mUserController.isUserStoppingOrShuttingDownLocked(r.userId)));
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {
