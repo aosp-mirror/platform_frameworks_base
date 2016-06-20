@@ -9598,6 +9598,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         return list;
     }
 
+    public String[] getTransportWhitelist() {
+        // No permission check, intentionally.
+        String[] whitelist = new String[mTransportWhitelist.size()];
+        for (int i = mTransportWhitelist.size() - 1; i >= 0; i--) {
+            whitelist[i] = mTransportWhitelist.valueAt(i).flattenToShortString();
+        }
+        return whitelist;
+    }
+
     // Select which transport to use for the next backup operation.
     public String selectBackupTransport(String transport) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,

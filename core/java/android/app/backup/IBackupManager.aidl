@@ -218,6 +218,14 @@ interface IBackupManager {
     String[] listAllTransports();
 
     /**
+     * Retrieve the list of whitelisted transport components.  Callers do </i>not</i> need
+     * any special permission.
+     *
+     * @return The names of all whitelisted transport components defined by the system.
+     */
+    String[] getTransportWhitelist();
+
+    /**
      * Specify the current backup transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      *

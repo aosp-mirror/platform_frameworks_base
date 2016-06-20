@@ -122,6 +122,11 @@ public final class Bmgr {
             return;
         }
 
+        if ("whitelist".equals(op)) {
+            doPrintWhitelist();
+            return;
+        }
+
         System.err.println("Unknown command");
         showUsage();
     }
@@ -598,6 +603,20 @@ public final class Bmgr {
 
             // once the restore has finished, close down the session and we're done
             mRestore.endRestoreSession();
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    private void doPrintWhitelist() {
+        try {
+            final String[] whitelist = mBmgr.getTransportWhitelist();
+            if (whitelist != null) {
+                for (String transport : whitelist) {
+                    System.out.println(transport);
+                }
+            }
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);
