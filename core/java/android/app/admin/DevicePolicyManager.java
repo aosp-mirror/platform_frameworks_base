@@ -3031,8 +3031,6 @@ public class DevicePolicyManager {
      * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
      *        {@code false} otherwise. This carries the risk that any failure of the VPN provider
      *        could break networking for all apps. This has no effect when clearing.
-     * @return {@code true} if the package is set as always-on VPN controller; {@code false}
-     *         otherwise.
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
      * @throws NameNotFoundException if {@code vpnPackage} is not installed.
      * @throws UnsupportedOperationException if {@code vpnPackage} exists but does not support being
