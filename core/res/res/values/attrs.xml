@@ -1048,6 +1048,9 @@ i
              the status bar (via statusBarColor) and navigation bar (via navigationBarColor). -->
         <attr name="colorPrimaryDark" format="color" />
 
+        <!-- The secondary branding color for the app. -->
+        <attr name="colorSecondary" format="color" />
+
         <!-- Bright complement to the primary branding color. By default, this is the color applied
              to framework controls (via colorControlActivated). -->
         <attr name="colorAccent" format="color" />

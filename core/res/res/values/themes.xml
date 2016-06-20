@@ -57,6 +57,7 @@ please see themes_device_defaults.xml.
 
         <item name="colorPrimaryDark">@color/legacy_primary_dark</item>
         <item name="colorPrimary">@color/legacy_primary</item>
+        <item name="colorSecondary">?attr/colorPrimary</item>
         <item name="colorControlActivated">@color/legacy_control_activated</item>
         <item name="colorControlNormal">@color/legacy_control_normal</item>
         <item name="colorControlHighlight">@color/legacy_button_pressed</item>
