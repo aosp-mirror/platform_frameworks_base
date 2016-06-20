@@ -36,15 +36,16 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
-public class HotspotTile extends QSTile<QSTile.BooleanState> {
+public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
                     R.drawable.ic_hotspot_disable);
     private final AnimationIcon mDisable =
             new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
                     R.drawable.ic_hotspot_enable);
-    private final Icon mUnavailable =
-            ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
+    private final Icon mDisableNoAnimation = ResourceIcon.get(R.drawable.ic_hotspot_enable);
+    private final Icon mUnavailable = ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
+
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
     private final GlobalSetting mAirplaneMode;
@@ -72,8 +73,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    public BooleanState newTileState() {
-        return new BooleanState();
+    public AirplaneBooleanState newTileState() {
+        return new AirplaneBooleanState();
     }
 
     @Override
@@ -84,10 +85,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
             mController.addCallback(mCallback);
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            mContext.registerReceiver(mReceiver, filter);
         } else {
             mController.removeCallback(mCallback);
-            mContext.unregisterReceiver(mReceiver);
         }
         mAirplaneMode.setListening(listening);
     }
@@ -113,7 +112,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleUpdateState(BooleanState state, Object arg) {
+    protected void handleUpdateState(AirplaneBooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
@@ -123,12 +122,16 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
             state.value = mController.isHotspotEnabled();
         }
         state.icon = state.value ? mEnable : mDisable;
-        if (mAirplaneMode.getValue() != 0) {
+        boolean wasAirplane = state.isAirplaneMode;
+        state.isAirplaneMode = mAirplaneMode.getValue() != 0;
+        if (state.isAirplaneMode) {
             final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
             state.label = new SpannableStringBuilder().append(state.label,
                     new ForegroundColorSpan(disabledColor),
                     SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
             state.icon = mUnavailable;
+        } else if (wasAirplane) {
+            state.icon = mDisableNoAnimation;
         }
         state.minimalAccessibilityClassName = state.expandedAccessibilityClassName
                 = Switch.class.getName();
@@ -153,15 +156,6 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         @Override
         public void onHotspotChanged(boolean enabled) {
             refreshState(enabled);
-        }
-    };
-
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())) {
-                refreshState();
-            }
         }
     };
 }
