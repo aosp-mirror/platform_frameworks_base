@@ -38,6 +38,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.systemui.R;
+import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
@@ -143,6 +144,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
+        SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
     }
@@ -173,8 +175,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             attachLowBatterySound(nb);
             mPlaySound = false;
         }
-        final Notification n = nb.build();
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
+        SystemUI.overrideNotificationAppName(mContext, nb);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, nb.build(), UserHandle.ALL);
     }
 
     private PendingIntent pendingActivity(Intent intent) {
