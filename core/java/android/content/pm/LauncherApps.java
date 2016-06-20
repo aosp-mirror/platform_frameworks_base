@@ -171,8 +171,9 @@ public class LauncherApps {
          * as defined in {@link #hasShortcutHostPermission()}, will receive it.
          *
          * @param packageName The name of the package that has the shortcuts.
-         * @param shortcuts all shortcuts from the package (dynamic and/or pinned).  Only "key"
-         *    information will be provided, as defined in {@link ShortcutInfo#hasKeyFieldsOnly()}.
+         * @param shortcuts all shortcuts from the package (dynamic, manifest and/or pinned).
+         *    Only "key" information will be provided, as defined in
+         *    {@link ShortcutInfo#hasKeyFieldsOnly()}.
          * @param user The UserHandle of the profile that generated the change.
          */
         public void onShortcutsChanged(@NonNull String packageName,
@@ -198,6 +199,10 @@ public class LauncherApps {
          * Include manifest shortcuts in the result.
          */
         public static final int FLAG_GET_MANIFEST = 1 << 3;
+
+        /** @hide */
+        public static final int FLAG_GET_ALL_KINDS =
+                FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
 
         /**
          * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
@@ -485,7 +490,7 @@ public class LauncherApps {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
         q.setShortcutIds(ids);
-        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_ALL_KINDS);
         return getShortcuts(q, user);
     }
 
@@ -526,7 +531,7 @@ public class LauncherApps {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
         q.setShortcutIds(Arrays.asList(shortcutId));
-        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_ALL_KINDS);
         final List<ShortcutInfo> shortcuts = getShortcuts(q, user);
 
         return shortcuts.size() > 0 ? shortcuts.get(0).getIconResourceId() : 0;

@@ -532,7 +532,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     static {
         QUERY_ALL.setQueryFlags(
-                ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+                ShortcutQuery.FLAG_GET_ALL_KINDS);
     }
 
     @Override
@@ -1434,7 +1434,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static ShortcutQuery buildAllQuery(String packageName) {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
-        q.setQueryFlags(ShortcutQuery.FLAG_GET_DYNAMIC | ShortcutQuery.FLAG_GET_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_GET_ALL_KINDS);
         return q;
     }
 
@@ -1442,6 +1442,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final ShortcutQuery q = new ShortcutQuery();
         q.setPackage(packageName);
         q.setQueryFlags(ShortcutQuery.FLAG_GET_PINNED);
+        return q;
+    }
+
+    protected static ShortcutQuery buildQueryWithFlags(int queryFlags) {
+        final ShortcutQuery q = new ShortcutQuery();
+        q.setQueryFlags(queryFlags);
         return q;
     }
 
