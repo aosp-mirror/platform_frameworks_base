@@ -2343,6 +2343,61 @@ message MetricsEvent {
     // Keyboard Shortcuts Helper is opened/closed.
     KEYBOARD_SHORTCUTS_HELPER = 500;
 
+    // OPEN: Print Preview screen
+    // Package: Package of app where print job is from
+    PRINT_PREVIEW = 501;
+
+    // OPEN: User expands full print job options shade in print preview.
+    PRINT_JOB_OPTIONS = 502;
+
+    // OPEN: “All Printers” screen for selecting printer
+    // Subtype: # of printers listed
+    PRINT_ALL_PRINTERS = 503;
+
+    // OPEN: “Add Printers” screen for adding printers
+    // Subtype: # of enabled print service listed
+    PRINT_ADD_PRINTERS = 504;
+
+    // ACTION: Queue a print job (Usually: User presses Print FAB from Print Preview)
+    // Package: Package of print service.
+    ACTION_PRINT = 505;
+
+    // ACTION: User selects a printer from the dropdown in the print preview screen. This also
+    //         Count all ACTION_PRINTER_SELECT_ALL actions.
+    // Package: Package of print service tied to printer
+    ACTION_PRINTER_SELECT_DROPDOWN = 506;
+
+    // ACTION: User selects a printer from the “All printers” screen.
+    // Package: Package of print service tied to printer
+    ACTION_PRINTER_SELECT_ALL = 507;
+
+    // ACTION: User changes an option for the print job from print preview.
+    // Subtype:   1: Copies
+    //            2: Color mode
+    //            3: Duplex mode
+    //            4: Media (==Paper) size
+    //            5: Orientation
+    //            6: Page range
+    // Package: Package of print service tied to printer
+    ACTION_PRINT_JOB_OPTIONS = 508;
+
+    // ACTION: User searches for printer from All Printers
+    ACTION_PRINTER_SEARCH = 509;
+
+    // ACTION: User selects “Add print service” button from All Printers
+    ACTION_PRINT_SERVICE_ADD = 510;
+
+    // ACTION: User Enables/Disables Print Service via any means.
+    // Subtype:   0: Enabled
+    //            1: Disabled
+    ACTION_PRINT_SERVICE_TOGGLE = 511;
+
+    // ACTION: User installs print recommended print service
+    // Package: Package of print service
+    ACTION_PRINT_RECOMMENDED_SERVICE_INSTALL = 512;
+
+    // ---- End O Constants, all O constants go above this line ----
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
