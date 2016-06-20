@@ -856,14 +856,6 @@ public class NotificationChildrenContainer extends ViewGroup {
                 mNotificationParent.getNotificationColor());
     }
 
-    public void setRemoved() {
-        int childCount = mChildren.size();
-        for (int i = 0; i < childCount; i++) {
-            ExpandableNotificationRow child = mChildren.get(i);
-            child.setRemoved();
-        }
-    }
-
     public int getPositionInLinearLayout(View childInGroup) {
         int position = mNotificationHeaderMargin + mNotificatonTopPadding;
 
