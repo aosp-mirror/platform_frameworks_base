@@ -3538,7 +3538,7 @@ public class AccountManagerService
 
     @Override
     public void addSharedAccountsFromParentUser(int parentUserId, int userId) {
-        checkManageUsersPermission("addSharedAccountsFromParentUser");
+        checkManageOrCreateUsersPermission("addSharedAccountsFromParentUser");
         Account[] accounts = getAccountsAsUser(null, parentUserId, mContext.getOpPackageName());
         for (Account account : accounts) {
             addSharedAccountAsUser(account, userId);
@@ -5089,6 +5089,16 @@ public class AccountManagerService
                 android.Manifest.permission.MANAGE_USERS, Binder.getCallingUid(), -1, true)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("You need MANAGE_USERS permission to: " + message);
+        }
+    }
+
+    private static void checkManageOrCreateUsersPermission(String message) {
+        if (ActivityManager.checkComponentPermission(android.Manifest.permission.MANAGE_USERS,
+                Binder.getCallingUid(), -1, true) != PackageManager.PERMISSION_GRANTED &&
+                ActivityManager.checkComponentPermission(android.Manifest.permission.CREATE_USERS,
+                        Binder.getCallingUid(), -1, true) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need MANAGE_USERS or CREATE_USERS permission to: "
+                    + message);
         }
     }
 
