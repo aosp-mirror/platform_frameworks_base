@@ -456,7 +456,7 @@ public final class BroadcastQueue {
         }
     }
 
-    private void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
+    void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
             boolean ordered, boolean sticky, int sendingUser) throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
