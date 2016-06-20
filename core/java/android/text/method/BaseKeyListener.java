@@ -179,6 +179,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
                         ++deleteCharCount;
                     }
                     state = STATE_FINISHED;
+                    break;
                 case STATE_ODD_NUMBERED_RIS:
                     if (Emoji.isRegionalIndicatorSymbol(codePoint)) {
                         deleteCharCount += 2; /* Char count of RIS */
