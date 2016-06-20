@@ -119,6 +119,7 @@ public class NotificationContentView extends FrameLayout {
 
     private int mContentHeightAtAnimationStart = UNDEFINED;
     private boolean mFocusOnVisibilityChange;
+    private boolean mHeadsupDisappearRunning;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -446,7 +447,8 @@ public class NotificationContentView extends FrameLayout {
             boolean transitioningBetweenHunAndExpanded =
                     isTransitioningFromTo(VISIBLE_TYPE_HEADSUP, VISIBLE_TYPE_EXPANDED) ||
                     isTransitioningFromTo(VISIBLE_TYPE_EXPANDED, VISIBLE_TYPE_HEADSUP);
-            boolean pinned = !isVisibleOrTransitioning(VISIBLE_TYPE_CONTRACTED) && mIsHeadsUp;
+            boolean pinned = !isVisibleOrTransitioning(VISIBLE_TYPE_CONTRACTED)
+                    && (mIsHeadsUp || mHeadsupDisappearRunning);
             if (transitioningBetweenHunAndExpanded || pinned) {
                 return Math.min(mHeadsUpChild.getHeight(), mExpandedChild.getHeight());
             }
@@ -830,7 +832,7 @@ public class NotificationContentView extends FrameLayout {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
-        if (mIsHeadsUp && mHeadsUpChild != null) {
+        if ((mIsHeadsUp || mHeadsupDisappearRunning) && mHeadsUpChild != null) {
             if (viewHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;
             } else {
@@ -1151,6 +1153,11 @@ public class NotificationContentView extends FrameLayout {
         if (!animating) {
             mContentHeightAtAnimationStart = UNDEFINED;
         }
+    }
+
+    public void setHeadsupDisappearRunning(boolean headsupDisappearRunning) {
+        mHeadsupDisappearRunning = headsupDisappearRunning;
+        selectLayout(false /* animate */, true /* force */);
     }
 
     public void setFocusOnVisibilityChange() {

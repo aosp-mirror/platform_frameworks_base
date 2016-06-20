@@ -733,6 +733,7 @@ public class StackStateAnimator {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
+        final boolean isHeadsUpDisappear = mHeadsUpDisappearChildren.contains(child);
         // remove the tag when the animation is finished
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -741,6 +742,9 @@ public class StackStateAnimator {
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);
+                if (isHeadsUpDisappear) {
+                    ((ExpandableNotificationRow) child).setHeadsupDisappearRunning(false);
+                }
             }
         });
         startAnimator(animator);
