@@ -464,7 +464,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
 
-    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFFFFF;
+    private static int DEFAULT_EPHEMERAL_HASH_PREFIX_MASK = 0xFFFFF000;
     private static int DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT = 5;
 
     /** Permission grant: not grant the permission. */
@@ -5018,7 +5018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Go in reverse order so we match the narrowest scope first.
-        for (int i = shaPrefix.length; i >= 0 ; --i) {
+        for (int i = shaPrefix.length - 1; i >= 0 ; --i) {
             for (EphemeralResolveInfo ephemeralApplication : ephemeralResolveInfoList) {
                 if (!Arrays.equals(digestBytes[i], ephemeralApplication.getDigestBytes())) {
                     continue;
