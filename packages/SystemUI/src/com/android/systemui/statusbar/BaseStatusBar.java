@@ -1104,6 +1104,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             settingsButton.setVisibility(View.GONE);
         }
 
+        guts.bindImportance(pmUser, sbn, row, mNotificationData.getImportance(sbn.getKey()));
         row.findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1124,7 +1125,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
             }
         });
-        guts.bindImportance(pmUser, sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }
 
     private void saveImportanceCloseControls(StatusBarNotification sbn,
