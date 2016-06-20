@@ -213,18 +213,18 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         return isGroupSuppressed(getGroupKey(sbn)) && sbn.getNotification().isGroupSummary();
     }
 
-    public boolean isOnlyChildInSuppressedGroup(StatusBarNotification sbn) {
-        return isGroupSuppressed(sbn.getGroupKey())
-                && isOnlyChild(sbn);
-    }
-
     private boolean isOnlyChild(StatusBarNotification sbn) {
         return !sbn.getNotification().isGroupSummary()
                 && getTotalNumberOfChildren(sbn) == 1;
     }
 
     public boolean isOnlyChildInGroup(StatusBarNotification sbn) {
-        return isOnlyChild(sbn) && getLogicalGroupSummary(sbn) != null;
+        if (!isOnlyChild(sbn)) {
+            return false;
+        }
+        ExpandableNotificationRow logicalGroupSummary = getLogicalGroupSummary(sbn);
+        return logicalGroupSummary != null
+                && !logicalGroupSummary.getStatusBarNotification().equals(sbn);
     }
 
     private int getTotalNumberOfChildren(StatusBarNotification sbn) {
