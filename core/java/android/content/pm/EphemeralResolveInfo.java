@@ -27,6 +27,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Information about an ephemeral application.
@@ -152,7 +153,7 @@ public final class EphemeralResolveInfo implements Parcelable {
         private static byte[][] generateDigest(Uri uri, int maxDigests) {
             ArrayList<byte[]> digests = new ArrayList<>();
             try {
-                final String host = uri.getHost();
+                final String host = uri.getHost().toLowerCase(Locale.ENGLISH);
                 final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
                 if (maxDigests <= 0) {
                     final byte[] hostBytes = host.getBytes();
