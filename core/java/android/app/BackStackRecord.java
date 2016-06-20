@@ -17,6 +17,7 @@
 package android.app;
 
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -35,6 +36,7 @@ import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -462,6 +464,19 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private void doAddOp(int containerViewId, Fragment fragment, String tag, int opcmd) {
+        if (mManager.mHost.getContext() != null) {
+            final int targetSdkVersion =
+                    mManager.mHost.getContext().getApplicationInfo().targetSdkVersion;
+            final Class fragmentClass = fragment.getClass();
+            final int modifiers = fragmentClass.getModifiers();
+            // TODO: make the check N_MR1 or O
+            if (targetSdkVersion > Build.VERSION_CODES.N && (fragmentClass.isAnonymousClass()
+                    || !Modifier.isPublic(modifiers)
+                    || (fragmentClass.isMemberClass() && !Modifier.isStatic(modifiers)))) {
+                throw new IllegalStateException("Fragment must be a public static class to be "
+                        + "properly recreated on configuration change.");
+            }
+        }
         fragment.mFragmentManager = mManager;
 
         if (tag != null) {
