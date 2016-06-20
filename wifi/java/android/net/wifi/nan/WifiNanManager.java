@@ -16,6 +16,7 @@
 
 package android.net.wifi.nan;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -28,11 +29,19 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.Base64;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
+import libcore.util.HexEncoding;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
@@ -57,6 +66,101 @@ public class WifiNanManager {
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private static final int INVALID_CLIENT_ID = 0;
+
+    /**
+     * Keys used to generate a Network Specifier for the NAN network request. The network specifier
+     * is formatted as a JSON string.
+     */
+
+    /**
+     * TYPE_1A: role, client_id, session_id, peer_id, token
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_1A = 0;
+
+    /**
+     * TYPE_1B: role, client_id, session_id, peer_id [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_1B = 1;
+
+    /**
+     * TYPE_1C: role, client_id, session_id, token [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_1C = 2;
+
+    /**
+     * TYPE_1C: role, client_id, session_id [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_1D = 3;
+
+    /**
+     * TYPE_2A: role, client_id, peer_mac, token
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_2A = 4;
+
+    /**
+     * TYPE_2B: role, client_id, peer_mac [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_2B = 5;
+
+    /**
+     * TYPE_2C: role, client_id, token [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_2C = 6;
+
+    /**
+     * TYPE_2D: role, client_id [only permitted for RESPONDER]
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_2D = 7;
+
+    /**
+     * @hide
+     */
+    public static final int NETWORK_SPECIFIER_TYPE_MAX_VALID = NETWORK_SPECIFIER_TYPE_2D;
+
+    /**
+     * @hide
+     */
+
+    public static final String NETWORK_SPECIFIER_KEY_TYPE = "type";
+
+    /**
+     * @hide
+     */
+
+    public static final String NETWORK_SPECIFIER_KEY_ROLE = "role";
+
+    /**
+     * @hide
+     */
+
+    public static final String NETWORK_SPECIFIER_KEY_CLIENT_ID = "client_id";
+    /**
+     * @hide
+     */
+    public static final String NETWORK_SPECIFIER_KEY_SESSION_ID = "session_id";
+
+    /**
+     * @hide
+     */
+    public static final String NETWORK_SPECIFIER_KEY_PEER_ID = "peer_id";
+
+    /**
+     * @hide
+     */
+    public static final String NETWORK_SPECIFIER_KEY_PEER_MAC = "peer_mac";
+
+    /**
+     * @hide
+     */
+    public static final String NETWORK_SPECIFIER_KEY_TOKEN = "token";
 
     /**
      * Broadcast intent action to indicate whether Wi-Fi NAN is enabled or
@@ -91,6 +195,27 @@ public class WifiNanManager {
      * @see #WIFI_NAN_STATE_CHANGED_ACTION
      */
     public static final int WIFI_NAN_STATE_ENABLED = 2;
+
+    @IntDef({
+            WIFI_NAN_DATA_PATH_ROLE_INITIATOR, WIFI_NAN_DATA_PATH_ROLE_RESPONDER})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataPathRole {
+    }
+
+    /**
+     * Data-path creation role is that of INITIATOR. Used in
+     * {@link #createNetworkSpecifier(int, byte[], byte[], int)} and
+     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[], int)}.
+     */
+    public static final int WIFI_NAN_DATA_PATH_ROLE_INITIATOR = 0;
+
+    /**
+     * Data-path creation role is that of RESPONDER. Used in
+     * {@link #createNetworkSpecifier(int, byte[], byte[], int)} and
+     * {@link WifiNanSession#createNetworkSpecifier(int, int, byte[], int)}.
+     */
+
+    public static final int WIFI_NAN_DATA_PATH_ROLE_RESPONDER = 1;
 
     private final IWifiNanManager mService;
 
@@ -455,6 +580,181 @@ public class WifiNanManager {
         synchronized (mLock) {
             mRangingListeners.put(rangingKey, listener);
         }
+    }
+
+    /**
+     * {@hide}
+     */
+    public String createNetworkSpecifier(@DataPathRole int role, int sessionId, int peerId,
+            byte[] token, int tokenLength) {
+        if (VDBG) {
+            Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
+                    + ", peerId=" + peerId + ", token=" + token + ", tokenLength=" + tokenLength);
+        }
+
+        int type;
+        if (token != null && peerId != 0) {
+            type = NETWORK_SPECIFIER_TYPE_1A;
+        } else if (token == null && peerId != 0) {
+            type = NETWORK_SPECIFIER_TYPE_1B;
+        } else if (token != null && peerId == 0) {
+            type = NETWORK_SPECIFIER_TYPE_1C;
+        } else {
+            type = NETWORK_SPECIFIER_TYPE_1D;
+        }
+
+        if (role != WIFI_NAN_DATA_PATH_ROLE_INITIATOR
+                && role != WIFI_NAN_DATA_PATH_ROLE_RESPONDER) {
+            throw new IllegalArgumentException(
+                    "createNetworkSpecifier: Invalid 'role' argument when creating a network "
+                            + "specifier");
+        }
+        if (role == WIFI_NAN_DATA_PATH_ROLE_INITIATOR) {
+            if (token == null) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
+            }
+            if (peerId == 0) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer ID (value of 0) - not permitted on "
+                                + "INITIATOR");
+            }
+        }
+        if (tokenLength != 0 && (token == null || token.length < tokenLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of token and tokenLength");
+        }
+
+        int clientId;
+        synchronized (mLock) {
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG,
+                        "createNetworkSpecifier: called with invalid client ID - not connected "
+                                + "first?");
+                return null;
+            }
+
+            clientId = mClientId;
+        }
+
+        JSONObject json;
+        try {
+            json = new JSONObject();
+            json.put(NETWORK_SPECIFIER_KEY_TYPE, type);
+            json.put(NETWORK_SPECIFIER_KEY_ROLE, role);
+            json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
+            json.put(NETWORK_SPECIFIER_KEY_SESSION_ID, sessionId);
+            if (peerId != 0) {
+                json.put(NETWORK_SPECIFIER_KEY_PEER_ID, peerId);
+            }
+            if (token != null) {
+                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
+                        Base64.encodeToString(token, 0, tokenLength, Base64.DEFAULT));
+            }
+        } catch (JSONException e) {
+            return "";
+        }
+
+        return json.toString();
+    }
+
+    /**
+     * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)}  for a
+     * WiFi NAN data-path connection to the specified peer. The peer MAC cannot be obtained
+     * through {@link WifiNanManager} services - but could be obtained out-of-bound - it refers
+     * to the MAC address of the NAN discovery interface of the peer NAN device.
+     *
+     * @param role  The role of this device:
+     *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_INITIATOR} or
+     *              {@link WifiNanManager#WIFI_NAN_DATA_PATH_ROLE_RESPONDER}
+     * @param peer  The MAC address of the peer's NAN discovery interface. A null is permitted
+     *              for a RESPONDER - which implies that any peer can connect.
+     * @param token An arbitrary token (message) to be passed to the peer as part of the
+     *              data-path setup process. On the RESPONDER a null token is permitted and
+     *              matches any peer token - an empty token requires the peer token to be empty
+     *              as well.
+     * @param tokenLength The number of significant (usable) bytes from the {@code token} parameter.
+     * @return A string to be used to construct
+     * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(String)} to pass to {@link
+     * android.net.ConnectivityManager#requestNetwork(NetworkRequest,
+     * ConnectivityManager.NetworkCallback)}
+     * [or other varierties of that API].
+     */
+    public String createNetworkSpecifier(@DataPathRole int role, @Nullable byte[] peer,
+            @Nullable byte[] token, int tokenLength) {
+        if (VDBG) {
+            Log.v(TAG,
+                    "createNetworkSpecifier: role=" + role + ", token=" + token + ", tokenLength="
+                            + tokenLength);
+        }
+
+        int type;
+        if (token != null && peer != null) {
+            type = NETWORK_SPECIFIER_TYPE_2A;
+        } else if (token == null && peer != null) {
+            type = NETWORK_SPECIFIER_TYPE_2B;
+        } else if (token != null && peer == null) {
+            type = NETWORK_SPECIFIER_TYPE_2C;
+        } else { // both are null
+            type = NETWORK_SPECIFIER_TYPE_2D;
+        }
+
+        if (role != WIFI_NAN_DATA_PATH_ROLE_INITIATOR
+                && role != WIFI_NAN_DATA_PATH_ROLE_RESPONDER) {
+            throw new IllegalArgumentException(
+                    "createNetworkSpecifier: Invalid 'role' argument when creating a network "
+                            + "specifier");
+        }
+        if (role == WIFI_NAN_DATA_PATH_ROLE_INITIATOR) {
+            if (peer == null || peer.length != 6) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer MAC address");
+            }
+            if (token == null) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid null token - not permitted on INITIATOR");
+            }
+        } else {
+            if (peer != null && peer.length != 6) {
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer MAC address");
+            }
+        }
+        if (tokenLength != 0 && (token == null || token.length < tokenLength)) {
+            throw new IllegalArgumentException(
+                    "Non-matching combination of token and tokenLength");
+        }
+
+        int clientId;
+        synchronized (mLock) {
+            if (mClientId == INVALID_CLIENT_ID) {
+                Log.e(TAG,
+                        "createNetworkSpecifier: called with invalid client ID - not connected "
+                                + "first?");
+                return null;
+            }
+
+            clientId = mClientId;
+        }
+
+        JSONObject json;
+        try {
+            json = new JSONObject();
+            json.put(NETWORK_SPECIFIER_KEY_TYPE, type);
+            json.put(NETWORK_SPECIFIER_KEY_ROLE, role);
+            json.put(NETWORK_SPECIFIER_KEY_CLIENT_ID, clientId);
+            if (peer != null) {
+                json.put(NETWORK_SPECIFIER_KEY_PEER_MAC, new String(HexEncoding.encode(peer)));
+            }
+            if (token != null) {
+                json.put(NETWORK_SPECIFIER_KEY_TOKEN,
+                        Base64.encodeToString(token, 0, tokenLength, Base64.DEFAULT));
+            }
+        } catch (JSONException e) {
+            return "";
+        }
+
+        return json.toString();
     }
 
     private static class WifiNanEventCallbackProxy extends IWifiNanEventCallback.Stub {
