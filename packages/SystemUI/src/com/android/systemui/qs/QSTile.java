@@ -634,6 +634,18 @@ public abstract class QSTile<TState extends State> {
         }
     }
 
+    public static class AirplaneBooleanState extends BooleanState {
+        public boolean isAirplaneMode;
+
+        @Override
+        public boolean copyTo(State other) {
+            final AirplaneBooleanState o = (AirplaneBooleanState) other;
+            final boolean changed = super.copyTo(other) || o.isAirplaneMode != isAirplaneMode;
+            o.isAirplaneMode = isAirplaneMode;
+            return changed;
+        }
+    }
+
     public static final class SignalState extends BooleanState {
         public boolean connected;
         public boolean activityIn;
