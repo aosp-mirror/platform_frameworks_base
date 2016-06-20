@@ -185,6 +185,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 }
     };
     private OnClickListener mOnClickListener;
+    private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
     private boolean mRefocusOnDismiss;
@@ -759,13 +760,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mRemoved = true;
 
         mPrivateLayout.setRemoved();
-        if (mChildrenContainer != null) {
-            mChildrenContainer.setRemoved();
-        }
     }
 
     public NotificationChildrenContainer getChildrenContainer() {
         return mChildrenContainer;
+    }
+
+    public void setHeadsupDisappearRunning(boolean running) {
+        mHeadsupDisappearRunning = running;
+        mPrivateLayout.setHeadsupDisappearRunning(running);
     }
 
     public View getChildAfterViewWhenDismissed() {
@@ -1173,8 +1176,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getMinHeight();
         } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
-        } else if (mIsHeadsUp) {
-            if (isPinned()) {
+        } else if (mIsHeadsUp || mHeadsupDisappearRunning) {
+            if (isPinned() || mHeadsupDisappearRunning) {
                 return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
             } else if (isExpanded()) {
                 return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
@@ -1300,6 +1303,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (!animated) {
             mPublicLayout.animate().cancel();
             mPrivateLayout.animate().cancel();
+            if (mChildrenContainer != null) {
+                mChildrenContainer.animate().cancel();
+                mChildrenContainer.setAlpha(1f);
+            }
             mPublicLayout.setAlpha(1f);
             mPrivateLayout.setAlpha(1f);
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);

@@ -3695,6 +3695,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mAnimationsEnabled) {
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
             mNeedsAnimation = true;
+            if (!mIsExpanded && !isHeadsUp) {
+                row.setHeadsupDisappearRunning(true);
+            }
             requestChildrenUpdate();
         }
     }
