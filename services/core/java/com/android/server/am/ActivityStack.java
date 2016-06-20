@@ -4448,7 +4448,7 @@ final class ActivityStack {
             }
         }
         if (updatedConfig) {
-            // Ensure the resumed state of the focus activity if we updated the confiugaration of
+            // Ensure the resumed state of the focus activity if we updated the configuration of
             // any activity.
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
         }
@@ -4465,6 +4465,15 @@ final class ActivityStack {
         if (mConfigWillChange) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Skipping config check (will change): " + r);
+            return true;
+        }
+
+        // TODO: We could probably make the condition below just check that the activity state is
+        // stopped, but also checking the sleep state for now to reduce change impact late in
+        // development cycle.
+        if (mService.isSleepingOrShuttingDownLocked() && r.state == ActivityState.STOPPED) {
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
+                    "Skipping config check (stopped while sleeping): " + r);
             return true;
         }
 
