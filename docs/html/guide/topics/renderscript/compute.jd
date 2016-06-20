@@ -21,7 +21,7 @@ parent.link=index.html
     <h2>Related Samples</h2>
 
     <ol>
-      <li><a href="{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">Hello
+      <li><a class="external-link"href="https://github.com/android/platform_development/tree/master/samples/RenderScript/HelloCompute">Hello
       Compute</a></li>
     </ol>
   </div>
