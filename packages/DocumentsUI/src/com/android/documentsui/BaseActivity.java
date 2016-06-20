@@ -165,33 +165,7 @@ public abstract class BaseActivity extends Activity
     @CallSuper
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-
         mSearchManager.showMenu(canSearchRoot());
-
-        final boolean inRecents = getCurrentDirectory() == null;
-
-        final MenuItem sort = menu.findItem(R.id.menu_sort);
-        final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
-        final MenuItem grid = menu.findItem(R.id.menu_grid);
-        final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
-        final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-
-        // Search uses backend ranking; no sorting, recents doesn't support sort.
-        sort.setEnabled(!inRecents && !mSearchManager.isSearching());
-        sortSize.setVisible(mState.showSize); // Only sort by size when file sizes are visible
-        fileSize.setVisible(!mState.forceSize);
-
-        // grid/list is effectively a toggle.
-        grid.setVisible(mState.derivedMode != State.MODE_GRID);
-        list.setVisible(mState.derivedMode != State.MODE_LIST);
-
-        advanced.setVisible(mState.showAdvancedOption);
-        advanced.setTitle(mState.showAdvancedOption && mState.showAdvanced
-                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
-        fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
-                ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
-
         return true;
     }
 

@@ -25,15 +25,14 @@ import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.documentsui.MenuManager.DirectoryDetails;
+
 final class DocumentsMenuManager extends MenuManager {
 
-    private final State mState;
-    private final SearchViewManager mSearchManager;
     private boolean mPicking;
 
     public DocumentsMenuManager(SearchViewManager searchManager, State displayState) {
-        mSearchManager = searchManager;
-        mState = displayState;
+        super(searchManager, displayState);
 
         mPicking = mState.action == ACTION_CREATE
                 || mState.action == ACTION_OPEN_TREE
@@ -52,26 +51,19 @@ final class DocumentsMenuManager extends MenuManager {
 
     @Override
     void updateModePicker(MenuItem grid, MenuItem list, DirectoryDetails directoryDetails) {
-     // No display options in recent directories
+        // No display options in recent directories
         if (mPicking && directoryDetails.isInRecents()) {
             grid.setVisible(false);
             list.setVisible(false);
+        } else {
+            super.updateModePicker(grid, list, directoryDetails);
         }
     }
 
     @Override
     void updateFileSize(MenuItem fileSize, DirectoryDetails directoryDetails) {
+        super.updateFileSize(fileSize, directoryDetails);
         fileSize.setVisible(fileSize.isVisible() && !mPicking);
-    }
-
-    @Override
-    void updateSettings(MenuItem settings, DirectoryDetails directoryDetails) {
-        //assert(!settings.isVisible());
-    }
-
-    @Override
-    void updateNewWindow(MenuItem newWindow, DirectoryDetails directoryDetails) {
-        //assert(!newWindow.isVisible());
     }
 
     @Override
@@ -89,30 +81,5 @@ final class DocumentsMenuManager extends MenuManager {
     void updateOpen(MenuItem open, SelectionDetails selectionDetails) {
         open.setVisible(mState.action == ACTION_GET_CONTENT
                 || mState.action == ACTION_OPEN);
-    }
-
-    @Override
-    void updateShare(MenuItem share, SelectionDetails selectionDetails) {
-        share.setVisible(false);
-    }
-
-    @Override
-    void updateDelete(MenuItem delete, SelectionDetails selectionDetails) {
-        delete.setVisible(false);
-    }
-
-    @Override
-    void updateRename(MenuItem rename, SelectionDetails selectionDetails) {
-        rename.setVisible(false);
-    }
-
-    @Override
-    void updateMoveTo(MenuItem moveTo, SelectionDetails selectionDetails) {
-        //assert(!moveTo.isVisible());
-    }
-
-    @Override
-    void updateCopyTo(MenuItem copyTo, SelectionDetails selectionDetails) {
-        //assert(!copyTo.isVisible());
     }
 }

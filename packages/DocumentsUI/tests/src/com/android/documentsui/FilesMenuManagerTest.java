@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static org.junit.Assert.assertTrue;
+
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -41,14 +43,19 @@ public final class FilesMenuManagerTest {
     private TestMenuItem share;
     private TestMenuItem delete;
     private TestMenuItem createDir;
+    private TestMenuItem fileSize;
     private TestMenuItem settings;
     private TestMenuItem newWindow;
     private TestMenuItem cut;
     private TestMenuItem copy;
     private TestMenuItem paste;
+    private TestMenuItem sort;
+    private TestMenuItem sortSize;
+    private TestMenuItem advanced;
     private TestSelectionDetails selectionDetails;
     private TestDirectoryDetails directoryDetails;
     private TestSearchViewManager testSearchManager;
+    private State state = new State();
 
     @Before
     public void setUp() {
@@ -59,11 +66,15 @@ public final class FilesMenuManagerTest {
         share = testMenu.findItem(R.id.menu_share);
         delete = testMenu.findItem(R.id.menu_delete);
         createDir = testMenu.findItem(R.id.menu_create_dir);
+        fileSize = testMenu.findItem(R.id.menu_file_size);
         settings = testMenu.findItem(R.id.menu_settings);
         newWindow = testMenu.findItem(R.id.menu_new_window);
         cut = testMenu.findItem(R.id.menu_cut_to_clipboard);
         copy = testMenu.findItem(R.id.menu_copy_to_clipboard);
         paste = testMenu.findItem(R.id.menu_paste_from_clipboard);
+        sort = testMenu.findItem(R.id.menu_sort);
+        sortSize = testMenu.findItem(R.id.menu_sort_size);
+        advanced = testMenu.findItem(R.id.menu_advanced);
 
         // These items by default are visible
         testMenu.findItem(R.id.menu_select_all).setVisible(true);
@@ -80,7 +91,7 @@ public final class FilesMenuManagerTest {
         selectionDetails.canDelete = true;
         selectionDetails.canRename = true;
 
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateActionMenu(testMenu, selectionDetails);
 
         rename.assertEnabled();
@@ -93,7 +104,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testActionMenu_containsPartial() {
         selectionDetails.containPartial = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateActionMenu(testMenu, selectionDetails);
 
         rename.assertDisabled();
@@ -105,7 +116,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testActionMenu_cantRename() {
         selectionDetails.canRename = false;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateActionMenu(testMenu, selectionDetails);
 
         rename.assertDisabled();
@@ -114,7 +125,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testActionMenu_cantDelete() {
         selectionDetails.canDelete = false;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateActionMenu(testMenu, selectionDetails);
 
         delete.assertInvisible();
@@ -125,7 +136,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testActionMenu_containsDirectory() {
         selectionDetails.containDirectories = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateActionMenu(testMenu, selectionDetails);
 
         // We can't share directories
@@ -133,9 +144,52 @@ public final class FilesMenuManagerTest {
     }
 
     @Test
+    public void testOptionMenu() {
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        sort.assertEnabled();
+        sortSize.assertInvisible();
+        advanced.assertInvisible();
+        advanced.assertTitle(R.string.menu_advanced_show);
+        createDir.assertDisabled();
+        fileSize.assertVisible();
+        assertTrue(testSearchManager.updateMenuCalled());
+    }
+
+    @Test
+    public void testOptionMenu_hideSize() {
+        state.showSize = true;
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        sortSize.assertVisible();
+    }
+
+    @Test
+    public void testOptionMenu_showAdvanced() {
+        state.showAdvanced = true;
+        state.showAdvancedOption = true;
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        advanced.assertVisible();
+        advanced.assertTitle(R.string.menu_advanced_hide);
+    }
+
+    @Test
+    public void testOptionMenu_inRecents() {
+        directoryDetails.isInRecents = true;
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
+        mgr.updateOptionMenu(testMenu, directoryDetails);
+
+        sort.assertDisabled();
+    }
+
+    @Test
     public void testOptionMenu_canCreateDirectory() {
         directoryDetails.canCreateDirectory = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
         createDir.assertEnabled();
@@ -144,7 +198,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testOptionMenu_hasRootSettings() {
         directoryDetails.hasRootSettings = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
         settings.assertVisible();
@@ -153,7 +207,7 @@ public final class FilesMenuManagerTest {
     @Test
     public void testOptionMenu_shouldShowFancyFeatures() {
         directoryDetails.shouldShowFancyFeatures = true;
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateOptionMenu(testMenu, directoryDetails);
 
         newWindow.assertVisible();
@@ -161,7 +215,7 @@ public final class FilesMenuManagerTest {
 
     @Test
     public void testContextMenu_NoSelection() {
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateContextMenu(testMenu, null, directoryDetails);
         cut.assertVisible();
         copy.assertVisible();
@@ -174,7 +228,7 @@ public final class FilesMenuManagerTest {
 
     @Test
     public void testContextMenu_Selection() {
-        FilesMenuManager mgr = new FilesMenuManager(testSearchManager);
+        FilesMenuManager mgr = new FilesMenuManager(testSearchManager, state);
         mgr.updateContextMenu(testMenu, selectionDetails, directoryDetails);
         cut.assertVisible();
         copy.assertVisible();

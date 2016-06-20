@@ -82,7 +82,7 @@ public class FilesActivity extends BaseActivity {
         super.onCreate(icicle);
 
         mClipper = DocumentsApplication.getDocumentClipper(this);
-        mMenuManager = new FilesMenuManager(mSearchManager);
+        mMenuManager = new FilesMenuManager(mSearchManager, getDisplayState());
         mDetails = new DirectoryDetails(this) {
             @Override
             public boolean hasItemsToPaste() {
