@@ -8333,7 +8333,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final IPackageManager pm = AppGlobals.getPackageManager();
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfoLocked(authority, grantUri.sourceUserId,
-                MATCH_DEBUG_TRIAGED_MISSING);
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission revoke: "
                     + grantUri.toSafeString());
@@ -8431,7 +8431,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             final String authority = uri.getAuthority();
             final ProviderInfo pi = getProviderInfoLocked(authority, userId,
-                    MATCH_DEBUG_TRIAGED_MISSING);
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE);
             if (pi == null) {
                 Slog.w(TAG, "No content provider found for permission revoke: "
                         + uri.toSafeString());
@@ -8828,10 +8828,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         Preconditions.checkNotNull(packageName, "packageName");
 
         final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            final int packageUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
-                    UserHandle.getUserId(callingUid));
+            final int packageUid = pm.getPackageUid(packageName,
+                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, callingUserId);
             if (packageUid != callingUid) {
                 throw new SecurityException(
                         "Package " + packageName + " does not belong to calling UID " + callingUid);
@@ -8848,30 +8849,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (perms == null) {
                     Slog.w(TAG, "No permission grants found for " + packageName);
                 } else {
-                    final int userId = UserHandle.getUserId(callingUid);
-                    Set<String> existingAuthorities = null;
-
                     for (UriPermission perm : perms.values()) {
                         if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
-                            // Is this provider available in the current boot state? If the user
-                            // is not running and unlocked we check if the provider package exists.
-                            if (!mUserController.isUserRunningLocked(userId,
-                                    ActivityManager.FLAG_AND_UNLOCKED)) {
-                                String authority = perm.uri.uri.getAuthority();
-                                if (existingAuthorities == null
-                                        || !existingAuthorities.contains(authority)) {
-                                    ProviderInfo providerInfo = getProviderInfoLocked(authority,
-                                            userId, MATCH_DEBUG_TRIAGED_MISSING);
-                                    if (providerInfo != null) {
-                                        if (existingAuthorities == null) {
-                                            existingAuthorities = new ArraySet<>();
-                                        }
-                                        existingAuthorities.add(authority);
-                                    } else {
-                                        continue;
-                                    }
-                                }
-                            }
                             result.add(perm.buildPersistedPublicApiObject());
                         }
                     }

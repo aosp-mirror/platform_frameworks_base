@@ -1819,6 +1819,7 @@ public abstract class ContentResolver {
      * calling app. That is, the returned permissions have been granted
      * <em>to</em> the calling app. Only persistable grants taken with
      * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     * <p>Note: Some of the returned URIs may not be usable until after the user is unlocked.
      *
      * @see #takePersistableUriPermission(Uri, int)
      * @see #releasePersistableUriPermission(Uri, int)
@@ -1837,6 +1838,7 @@ public abstract class ContentResolver {
      * calling app. That is, the returned permissions have been granted
      * <em>from</em> the calling app. Only grants taken with
      * {@link #takePersistableUriPermission(Uri, int)} are returned.
+     * <p>Note: Some of the returned URIs may not be usable until after the user is unlocked.
      */
     public @NonNull List<UriPermission> getOutgoingPersistedUriPermissions() {
         try {
