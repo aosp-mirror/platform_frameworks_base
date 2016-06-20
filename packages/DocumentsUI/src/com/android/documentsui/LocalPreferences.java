@@ -18,9 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.State.MODE_UNKNOWN;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,11 +25,16 @@ import android.content.SharedPreferences;
 import android.os.UserHandle;
 import android.preference.PreferenceManager;
 
+import com.android.documentsui.State.ActionType;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.model.RootInfo;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public class LocalPreferences {
     private static final String KEY_FILE_SIZE = "fileSize";
+    private static final String INCLUDE_DEVICE_ROOT = "includeDeviceRoot-";
     private static final String ROOT_VIEW_MODE_PREFIX = "rootViewMode-";
 
     public static boolean getDisplayFileSize(Context context) {
@@ -48,9 +50,17 @@ public class LocalPreferences {
         getPrefs(context).edit().putBoolean(KEY_FILE_SIZE, display).apply();
     }
 
+    public static boolean getShowDeviceRoot(Context context, @ActionType int action) {
+        return getPrefs(context).getBoolean(INCLUDE_DEVICE_ROOT + action, false);
+    }
+
+    public static void setShowDeviceRoot(
+            Context context, @ActionType int action, boolean display) {
+        getPrefs(context).edit().putBoolean(INCLUDE_DEVICE_ROOT + action, display).apply();
+    }
+
     public static void setViewMode(Context context, RootInfo root, @ViewMode int viewMode) {
         assert(viewMode != MODE_UNKNOWN);
-
         getPrefs(context).edit().putInt(createKey(root), viewMode).apply();
     }
 
