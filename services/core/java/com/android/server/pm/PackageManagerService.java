@@ -1214,7 +1214,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     StringBuffer sb = new StringBuffer();
 
                     String firstLine = readLine(in, sb);
-                    if (firstLine.equals(USAGE_FILE_MAGIC_VERSION_1)) {
+                    if (firstLine == null) {
+                        // Empty file. Do nothing.
+                    } else if (USAGE_FILE_MAGIC_VERSION_1.equals(firstLine)) {
                         readVersion1LP(in, sb);
                     } else {
                         readVersion0LP(in, sb, firstLine);
