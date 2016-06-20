@@ -22,6 +22,7 @@ import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.Nullable;
 import android.net.NetworkStats;
 import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
@@ -199,9 +200,14 @@ public class NetworkStatsRecorder {
      * Record any delta that occurred since last {@link NetworkStats} snapshot,
      * using the given {@link Map} to identify network interfaces. First
      * snapshot is considered bootstrap, and is not counted as delta.
+     *
+     * @param vpnArray Optional info about the currently active VPN, if any. This is used to
+     *                 redistribute traffic from the VPN app to the underlying responsible apps.
+     *                 This should always be set to null if the provided snapshot is aggregated
+     *                 across all UIDs (e.g. contains UID_ALL buckets), regardless of VPN state.
      */
     public void recordSnapshotLocked(NetworkStats snapshot,
-            Map<String, NetworkIdentitySet> ifaceIdent, VpnInfo[] vpnArray,
+            Map<String, NetworkIdentitySet> ifaceIdent, @Nullable VpnInfo[] vpnArray,
             long currentTimeMillis) {
         final HashSet<String> unknownIfaces = Sets.newHashSet();
 

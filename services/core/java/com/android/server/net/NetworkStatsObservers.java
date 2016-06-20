@@ -355,9 +355,10 @@ class NetworkStatsObservers {
         @Override
         protected void recordSample(StatsContext statsContext) {
             // Recorder does not need to be locked in this context since only the handler
-            // thread will update it
+            // thread will update it. We pass a null VPN array because usage is aggregated by uid
+            // for this snapshot, so VPN traffic can't be reattributed to responsible apps.
             mRecorder.recordSnapshotLocked(statsContext.mXtSnapshot, statsContext.mActiveIfaces,
-                    statsContext.mVpnArray, statsContext.mCurrentTime);
+                    null /* vpnArray */, statsContext.mCurrentTime);
         }
 
         /**
@@ -396,7 +397,8 @@ class NetworkStatsObservers {
         @Override
         protected void recordSample(StatsContext statsContext) {
             // Recorder does not need to be locked in this context since only the handler
-            // thread will update it
+            // thread will update it. We pass the VPN info so VPN traffic is reattributed to
+            // responsible apps.
             mRecorder.recordSnapshotLocked(statsContext.mUidSnapshot, statsContext.mActiveUidIfaces,
                     statsContext.mVpnArray, statsContext.mCurrentTime);
         }

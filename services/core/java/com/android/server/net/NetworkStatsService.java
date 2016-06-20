@@ -1009,9 +1009,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
+
+        // For xt/dev, we pass a null VPN array because usage is aggregated by UID, so VPN traffic
+        // can't be reattributed to responsible apps.
+        mDevRecorder.recordSnapshotLocked(
+                devSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+        mXtRecorder.recordSnapshotLocked(
+                xtSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+
+        // For per-UID stats, pass the VPN info so VPN traffic is reattributed to responsible apps.
         VpnInfo[] vpnArray = mConnManager.getAllVpnInfo();
-        mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, null, currentTime);
-        mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, null, currentTime);
         mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
         mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
 
