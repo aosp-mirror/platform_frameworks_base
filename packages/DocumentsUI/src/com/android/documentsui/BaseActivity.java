@@ -221,9 +221,12 @@ public abstract class BaseActivity extends Activity
         includeState(state);
 
         // Advanced roots are shown by default without menu option if forced by config or intent.
-        state.showAdvanced = Shared.shouldShowDeviceRoot(this, intent);
+        boolean forceAdvanced = Shared.shouldShowDeviceRoot(this, intent);
+        boolean chosenAdvanced = LocalPreferences.getShowDeviceRoot(this, state.action);
+        state.showAdvanced = forceAdvanced || chosenAdvanced;
+
         // Menu option is shown for whitelisted intents if advanced roots are not shown by default.
-        state.showAdvancedOption = !state.showAdvanced && (
+        state.showAdvancedOption = !forceAdvanced && (
                 Shared.shouldShowFancyFeatures(this)
                 || state.action == ACTION_OPEN
                 || state.action == ACTION_CREATE
@@ -489,6 +492,7 @@ public abstract class BaseActivity extends Activity
         Metrics.logUserAction(this,
                 display ? Metrics.USER_ACTION_SHOW_ADVANCED : Metrics.USER_ACTION_HIDE_ADVANCED);
 
+        LocalPreferences.setShowDeviceRoot(this, mState.action, display);
         mState.showAdvanced = display;
         RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
         invalidateOptionsMenu();
