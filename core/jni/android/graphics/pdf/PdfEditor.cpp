@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "PdfUtils.h"
+
 #include "jni.h"
 #include "JNIHelp.h"
 
@@ -50,79 +52,16 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
-// Also used in PdfRenderer.cpp
-int sUnmatchedPdfiumInitRequestCount = 0;
-
-static void initializeLibraryIfNeeded() {
-    if (sUnmatchedPdfiumInitRequestCount == 0) {
-        FPDF_InitLibrary();
-    }
-    sUnmatchedPdfiumInitRequestCount++;
-}
-
-static void destroyLibraryIfNeeded() {
-    sUnmatchedPdfiumInitRequestCount--;
-    if (sUnmatchedPdfiumInitRequestCount == 0) {
-       FPDF_DestroyLibrary();
-    }
-}
-
-static int getBlock(void* param, unsigned long position, unsigned char* outBuffer,
-        unsigned long size) {
-    const int fd = reinterpret_cast<intptr_t>(param);
-    const int readCount = pread(fd, outBuffer, size, position);
-    if (readCount < 0) {
-        ALOGE("Cannot read from file descriptor. Error:%d", errno);
-        return 0;
-    }
-    return 1;
-}
-
-static jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size) {
-    initializeLibraryIfNeeded();
-
-    FPDF_FILEACCESS loader;
-    loader.m_FileLen = size;
-    loader.m_Param = reinterpret_cast<void*>(intptr_t(fd));
-    loader.m_GetBlock = &getBlock;
-
-    FPDF_DOCUMENT document = FPDF_LoadCustomDocument(&loader, NULL);
-
-    if (!document) {
-        const long error = FPDF_GetLastError();
-        switch (error) {
-            case FPDF_ERR_PASSWORD:
-            case FPDF_ERR_SECURITY: {
-                jniThrowExceptionFmt(env, "java/lang/SecurityException",
-                        "cannot create document. Error: %ld", error);
-            } break;
-            default: {
-                jniThrowExceptionFmt(env, "java/io/IOException",
-                        "cannot create document. Error: %ld", error);
-            } break;
-        }
-        destroyLibraryIfNeeded();
-        return -1;
-    }
-
-    return reinterpret_cast<jlong>(document);
-}
-
-static void nativeClose(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    FPDF_CloseDocument(document);
-    destroyLibraryIfNeeded();
-}
-
-static jint nativeGetPageCount(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    return FPDF_GetPageCount(document);
-}
-
 static jint nativeRemovePage(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
+
     FPDFPage_Delete(document, pageIndex);
-    return FPDF_GetPageCount(document);
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
+
+    int pageCount = FPDF_GetPageCount(document);
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
+
+    return pageCount;
 }
 
 struct PdfToFdWriter : FPDF_FILEWRITE {
@@ -167,8 +106,8 @@ static void nativeWrite(JNIEnv* env, jclass thiz, jlong documentPtr, jint fd) {
     if (!success) {
         jniThrowExceptionFmt(env, "java/io/IOException",
                 "cannot write to fd. Error: %d", errno);
-        destroyLibraryIfNeeded();
     }
+    HANDLE_PDFIUM_ERROR_STATE(env)
 }
 
 static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
@@ -181,6 +120,7 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
                 "cannot open page");
         return;
     }
+    HANDLE_PDFIUM_ERROR_STATE(env);
 
     double width = 0;
     double height = 0;
@@ -191,7 +131,11 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
                     "cannot get page size");
         return;
     }
-
+    bool isExceptionPending = forwardPdfiumError(env);
+    if (isExceptionPending) {
+        FPDF_ClosePage(page);
+        return;
+    }
 
     // PDF's coordinate system origin is left-bottom while in graphics it
     // is the top-left. So, translate the PDF coordinates to ours.
@@ -208,6 +152,8 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
 
     SkScalar transformValues[6];
     if (!matrix.asAffine(transformValues)) {
+        FPDF_ClosePage(page);
+
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "transform matrix has perspective. Only affine matrices are allowed.");
         return;
@@ -221,8 +167,14 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
     FS_RECTF clip = {(float) clipLeft, (float) clipTop, (float) clipRight, (float) clipBottom};
 
     FPDFPage_TransFormWithClip(page, &transform, &clip);
+    isExceptionPending = forwardPdfiumError(env);
+    if (isExceptionPending) {
+        FPDF_ClosePage(page);
+        return;
+    }
 
     FPDF_ClosePage(page);
+    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
@@ -235,6 +187,7 @@ static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
                 "cannot open page");
         return;
     }
+    HANDLE_PDFIUM_ERROR_STATE(env);
 
     double width = 0;
     double height = 0;
@@ -245,17 +198,17 @@ static void nativeGetPageSize(JNIEnv* env, jclass thiz, jlong documentPtr,
                     "cannot get page size");
         return;
     }
+    bool isExceptionPending = forwardPdfiumError(env);
+    if (isExceptionPending) {
+        FPDF_ClosePage(page);
+        return;
+    }
 
     env->SetIntField(outSize, gPointClassInfo.x, width);
     env->SetIntField(outSize, gPointClassInfo.y, height);
 
     FPDF_ClosePage(page);
-}
-
-static jboolean nativeScaleForPrinting(JNIEnv* env, jclass thiz, jlong documentPtr) {
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-    FPDF_BOOL success = FPDF_VIEWERREF_GetPrintScaling(document);
-    return success ? JNI_TRUE : JNI_FALSE;
+    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
@@ -268,6 +221,7 @@ static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
                 "cannot open page");
         return false;
     }
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
 
     float left;
     float top;
@@ -277,8 +231,14 @@ static bool nativeGetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
     const FPDF_BOOL success = (pageBox == PAGE_BOX_MEDIA)
         ? FPDFPage_GetMediaBox(page, &left, &top, &right, &bottom)
         : FPDFPage_GetCropBox(page, &left, &top, &right, &bottom);
+    bool isExceptionPending = forwardPdfiumError(env);
+    if (isExceptionPending) {
+        FPDF_ClosePage(page);
+        return false;
+    }
 
     FPDF_ClosePage(page);
+    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
 
     if (!success) {
         return false;
@@ -316,6 +276,7 @@ static void nativeSetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
                 "cannot open page");
         return;
     }
+    HANDLE_PDFIUM_ERROR_STATE(env);
 
     const int left = env->GetIntField(box, gRectClassInfo.left);
     const int top = env->GetIntField(box, gRectClassInfo.top);
@@ -327,8 +288,14 @@ static void nativeSetPageBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint p
     } else {
         FPDFPage_SetCropBox(page, left, top, right, bottom);
     }
+    bool isExceptionPending = forwardPdfiumError(env);
+    if (isExceptionPending) {
+        FPDF_ClosePage(page);
+        return;
+    }
 
     FPDF_ClosePage(page);
+    HANDLE_PDFIUM_ERROR_STATE(env);
 }
 
 static void nativeSetPageMediaBox(JNIEnv* env, jclass thiz, jlong documentPtr, jint pageIndex,
