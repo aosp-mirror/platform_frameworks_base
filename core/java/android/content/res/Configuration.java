@@ -1543,27 +1543,41 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @hide
      */
     public static String localesToResourceQualifier(LocaleList locs) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < locs.size(); i++) {
-            Locale loc = locs.get(i);
-            boolean l = (loc.getLanguage().length() != 0);
-            boolean c = (loc.getCountry().length() != 0);
-            boolean s = (loc.getScript().length() != 0);
-            boolean v = (loc.getVariant().length() != 0);
-            // TODO: take script and extensions into account
-            if (l) {
-                if (sb.length() != 0) {
-                    sb.append(",");
-                }
+            final Locale loc = locs.get(i);
+            final int l = loc.getLanguage().length();
+            if (l == 0) {
+                continue;
+            }
+            final int s = loc.getScript().length();
+            final int c = loc.getCountry().length();
+            final int v = loc.getVariant().length();
+            // We ignore locale extensions, since they are not supported by AAPT
+
+            if (sb.length() != 0) {
+                sb.append(",");
+            }
+            if (l == 2 && s == 0 && (c == 0 || c == 2) && v == 0) {
+                // Traditional locale format: xx or xx-rYY
                 sb.append(loc.getLanguage());
-                if (c) {
+                if (c == 2) {
                     sb.append("-r").append(loc.getCountry());
-                    if (s) {
-                        sb.append("-s").append(loc.getScript());
-                        if (v) {
-                            sb.append("-v").append(loc.getVariant());
-                        }
-                    }
+                }
+            } else {
+                sb.append("b+");
+                sb.append(loc.getLanguage());
+                if (s != 0) {
+                    sb.append("+");
+                    sb.append(loc.getScript());
+                }
+                if (c != 0) {
+                    sb.append("+");
+                    sb.append(loc.getCountry());
+                }
+                if (v != 0) {
+                    sb.append("+");
+                    sb.append(loc.getVariant());
                 }
             }
         }
