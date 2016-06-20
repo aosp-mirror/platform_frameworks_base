@@ -275,6 +275,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public String[] getTransportWhitelist() {
+        BackupManagerService svc = mService;
+        return (svc != null) ? svc.getTransportWhitelist() : null;
+    }
+
+    @Override
     public String selectBackupTransport(String transport) throws RemoteException {
         BackupManagerService svc = mService;
         return (svc != null) ? svc.selectBackupTransport(transport) : null;
