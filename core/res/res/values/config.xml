@@ -2461,6 +2461,10 @@
     <!-- True if the device supports Sustained Performance Mode-->
     <bool name="config_sustainedPerformanceModeSupported">false</bool>
 
+    <!-- File used to enable the double touch gesture.
+         TODO: move to input HAL once ready. -->
+    <string name="config_doubleTouchGestureEnableFile"></string>
+
     <!-- Controls how we deal with externally connected physical keyboards.
          0 - When using this device, it is not clear for users to recognize when the physical
              keyboard is (should be) connected and when it is (should be) disconnected.  Most of
