@@ -848,7 +848,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                     new Intent(BANNER_ACTION_SETUP).setPackage(packageName),
                     PendingIntent.FLAG_CANCEL_CURRENT);
 
-            final Resources res = mContext.getResources();
             final int colorRes = com.android.internal.R.color.system_notification_accent_color;
             Notification.Builder note = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.ic_android)
@@ -864,6 +863,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     .addAction(R.drawable.ic_settings,
                             mContext.getString(R.string.hidden_notifications_setup),
                             setupIntent);
+            overrideNotificationAppName(mContext, note);
 
             NotificationManager noMan =
                     (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
