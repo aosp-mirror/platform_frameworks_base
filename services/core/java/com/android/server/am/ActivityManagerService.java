@@ -17863,6 +17863,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // Apps should use JobScehduler to monitor for media provider changes.
                     Slog.w(TAG, action + " no longer allowed; dropping from "
                             + UserHandle.formatUid(callingUid));
+                    if (resultTo != null) {
+                        final BroadcastQueue queue = broadcastQueueForIntent(intent);
+                        try {
+                            queue.performReceiveLocked(callerApp, resultTo, intent,
+                                    Activity.RESULT_CANCELED, null, null,
+                                    false, false, userId);
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "Failure ["
+                                    + queue.mQueueName + "] sending broadcast result of "
+                                    + intent, e);
+
+                        }
+                    }
                     // Lie; we don't want to crash the app.
                     return ActivityManager.BROADCAST_SUCCESS;
             }
