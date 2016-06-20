@@ -476,10 +476,10 @@ import java.lang.ref.WeakReference;
  *     <td>This method can be called in any state and calling it does not change
  *         the object state. </p></td></tr>
  * <tr><td>setPlaybackParams</p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
+ *     <td>{Initialized, Prepared, Started, Paused, PlaybackCompleted, Error}</p></td>
+ *     <td>{Idle, Stopped} </p></td>
+ *     <td>This method will change state in some cases, depending on when it's called.
+ *         </p></td></tr>
  * <tr><td>setScreenOnWhilePlaying</></td>
  *     <td>any </p></td>
  *     <td>{} </p></td>
@@ -1449,12 +1449,18 @@ public class MediaPlayer extends PlayerBase
     }
 
     /**
-     * Sets playback rate using {@link PlaybackParams}.
+     * Sets playback rate using {@link PlaybackParams}. The object sets its internal
+     * PlaybackParams to the input, except that the object remembers previous speed
+     * when input speed is zero. This allows the object to resume at previous speed
+     * when start() is called. Calling it before the object is prepared does not change
+     * the object state. After the object is prepared, calling it with zero speed is
+     * equivalent to calling pause(). After the object is prepared, calling it with
+     * non-zero speed is equivalent to calling start().
      *
      * @param params the playback params.
      *
      * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
+     * initialized or has been released.
      * @throws IllegalArgumentException if params is not supported.
      */
     public native void setPlaybackParams(@NonNull PlaybackParams params);
