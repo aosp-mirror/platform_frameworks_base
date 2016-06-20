@@ -114,6 +114,17 @@ public class NotificationUsageStats {
     }
 
     /**
+     * Called when a notification is tentatively enqueued by an app, before rate checking.
+     */
+    public synchronized void registerEnqueuedByApp(String packageName) {
+        AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(packageName);
+        for (AggregatedStats stats : aggregatedStatsArray) {
+            stats.numEnqueuedByApp++;
+        }
+        releaseAggregatedStatsLocked(aggregatedStatsArray);
+    }
+
+    /**
      * Called when a notification has been posted.
      */
     public synchronized void registerPostedByApp(NotificationRecord notification) {
@@ -344,6 +355,7 @@ public class NotificationUsageStats {
         private AggregatedStats mPrevious;
 
         // ---- Updated as the respective events occur.
+        public int numEnqueuedByApp;
         public int numPostedByApp;
         public int numUpdatedByApp;
         public int numRemovedByApp;
@@ -470,6 +482,7 @@ public class NotificationUsageStats {
 
         public void emit() {
             AggregatedStats previous = getPrevious();
+            maybeCount("note_enqueued", (numEnqueuedByApp - previous.numEnqueuedByApp));
             maybeCount("note_post", (numPostedByApp - previous.numPostedByApp));
             maybeCount("note_update", (numUpdatedByApp - previous.numUpdatedByApp));
             maybeCount("note_remove", (numRemovedByApp - previous.numRemovedByApp));
@@ -501,6 +514,7 @@ public class NotificationUsageStats {
             quietImportance.maybeCount(previous.quietImportance);
             finalImportance.maybeCount(previous.finalImportance);
 
+            previous.numEnqueuedByApp = numEnqueuedByApp;
             previous.numPostedByApp = numPostedByApp;
             previous.numUpdatedByApp = numUpdatedByApp;
             previous.numRemovedByApp = numRemovedByApp;
@@ -568,6 +582,8 @@ public class NotificationUsageStats {
             output.append(indentPlusTwo);
             output.append("key='").append(key).append("',\n");
             output.append(indentPlusTwo);
+            output.append("numEnqueuedByApp=").append(numEnqueuedByApp).append(",\n");
+            output.append(indentPlusTwo);
             output.append("numPostedByApp=").append(numPostedByApp).append(",\n");
             output.append(indentPlusTwo);
             output.append("numUpdatedByApp=").append(numUpdatedByApp).append(",\n");
@@ -631,6 +647,7 @@ public class NotificationUsageStats {
             JSONObject dump = new JSONObject();
             dump.put("key", key);
             dump.put("duration", SystemClock.elapsedRealtime() - mCreated);
+            maybePut(dump, "numEnqueuedByApp", numEnqueuedByApp);
             maybePut(dump, "numPostedByApp", numPostedByApp);
             maybePut(dump, "numUpdatedByApp", numUpdatedByApp);
             maybePut(dump, "numRemovedByApp", numRemovedByApp);

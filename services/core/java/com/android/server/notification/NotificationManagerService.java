@@ -2521,6 +2521,8 @@ public class NotificationManagerService extends SystemService {
             return;
         }
 
+        mUsageStats.registerEnqueuedByApp(pkg);
+
         // Limit the number of notifications that any given package except the android
         // package or a registered listener can enqueue.  Prevents DOS attacks and deals with leaks.
         if (!isSystemNotification && !isNotificationFromListener) {
