@@ -329,7 +329,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertEquals(mClientContext.getPackageName(), si.getPackage());
         assertEquals("id", si.getId());
-        assertEquals(null, si.getActivity());
+        assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(null, si.getIcon());
         assertEquals(null, si.getTitle());
         assertEquals(null, si.getText());
@@ -445,7 +445,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
 
         assertEquals(mClientContext.getPackageName(), si.getPackage());
         assertEquals("id", si.getId());
-        assertEquals(null, si.getActivity());
+        assertEquals(new ComponentName("a", "b"), si.getActivity());
         assertEquals(null, si.getIcon());
         assertEquals(0, si.getTitleResId());
         assertEquals(null, si.getTitleResName());

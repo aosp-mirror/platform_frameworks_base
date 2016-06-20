@@ -806,11 +806,24 @@ public class ShortcutManagerTestUtils {
             return this;
         }
 
+        public ShortcutListAsserter areAllWithKeyFieldsOnly() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.hasKeyFieldsOnly()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotWithKeyFieldsOnly() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.hasKeyFieldsOnly()));
+            return this;
+        }
+
         public ShortcutListAsserter forAllShortcuts(Consumer<ShortcutInfo> sa) {
+            boolean found = false;
             for (int i = 0; i < mList.size(); i++) {
                 final ShortcutInfo si = mList.get(i);
+                found = true;
                 sa.accept(si);
             }
+            assertTrue("No shortcuts found.", found);
             return this;
         }
 
