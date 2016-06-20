@@ -108,7 +108,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 146 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 147 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -547,6 +547,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private int mLoadedNumConnectivityChange;
     private int mUnpluggedNumConnectivityChange;
 
+    private int mEstimatedBatteryCapacity = -1;
+
     private final NetworkStats.Entry mTmpNetworkStatsEntry = new NetworkStats.Entry();
 
     private PowerProfile mPowerProfile;
@@ -576,6 +578,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @Override
     public LongCounter getDischargeCoulombCounter() {
         return mDischargeCounter;
+    }
+
+    @Override
+    public int getEstimatedBatteryCapacity() {
+        return mEstimatedBatteryCapacity;
     }
 
     public BatteryStatsImpl() {
@@ -7625,6 +7632,11 @@ public class BatteryStatsImpl extends BatteryStats {
                         numSpeedSteps);
                 firstCpuOfCluster += mPowerProfile.getNumCoresInCpuCluster(i);
             }
+
+            if (mEstimatedBatteryCapacity == -1) {
+                // Initialize the estimated battery capacity to a known preset one.
+                mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
+            }
         }
     }
 
@@ -8174,6 +8186,7 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false);
         }
+        mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
         mLastIdleTimeStart = elapsedRealtimeMillis;
@@ -9158,7 +9171,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime, final boolean onBattery,
-            final int oldStatus, final int level) {
+            final int oldStatus, final int level, final int chargeUAh) {
         boolean doWrite = false;
         Message m = mHandler.obtainMessage(MSG_REPORT_POWER_CHANGE);
         m.arg1 = onBattery ? 1 : 0;
@@ -9212,6 +9225,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 doWrite = true;
                 resetAllStatsLocked();
+                if (chargeUAh > 0) {
+                    // Only use the reported coulomb charge value if it is supported and reported.
+                    mEstimatedBatteryCapacity = (int) ((level / 100.0) * (chargeUAh / 1000));
+                }
                 mDischargeStartLevel = level;
                 reset = true;
                 mDischargeStepTracker.init();
@@ -9379,7 +9396,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mDischargeScreenOffCounter.addCountLocked(chargeDiff);
             }
             mHistoryCur.batteryChargeUAh = chargeUAh;
-            setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level);
+            setOnBatteryLocked(elapsedRealtime, uptime, onBattery, oldStatus, level, chargeUAh);
         } else {
             boolean changed = false;
             if (mHistoryCur.batteryLevel != level) {
@@ -10093,6 +10110,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
         mCurrentBatteryLevel = in.readInt();
+        mEstimatedBatteryCapacity = in.readInt();
         mLowDischargeAmountSinceCharge = in.readInt();
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
@@ -10445,6 +10463,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);
         out.writeInt(mCurrentBatteryLevel);
+        out.writeInt(mEstimatedBatteryCapacity);
         out.writeInt(getLowDischargeAmountSinceCharge());
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
@@ -10809,6 +10828,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mRealtime = in.readLong();
         mRealtimeStart = in.readLong();
         mOnBattery = in.readInt() != 0;
+        mEstimatedBatteryCapacity = in.readInt();
         mOnBatteryInternal = false; // we are no longer really running.
         mOnBatteryTimeBase.readFromParcel(in);
         mOnBatteryScreenOffTimeBase.readFromParcel(in);
@@ -10992,6 +11012,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mRealtime);
         out.writeLong(mRealtimeStart);
         out.writeInt(mOnBattery ? 1 : 0);
+        out.writeInt(mEstimatedBatteryCapacity);
         mOnBatteryTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
         mOnBatteryScreenOffTimeBase.writeToParcel(out, uSecUptime, uSecRealtime);
 

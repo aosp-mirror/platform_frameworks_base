@@ -2385,6 +2385,13 @@ public abstract class BatteryStats implements Parcelable {
     public abstract LongCounter getDischargeCoulombCounter();
 
     /**
+     * Returns the estimated real battery capacity, which may be less than the capacity
+     * declared by the PowerProfile.
+     * @return The estimated battery capacity in mAh.
+     */
+    public abstract int getEstimatedBatteryCapacity();
+
+    /**
      * Return the array of discharge step durations.
      */
     public abstract LevelStepTracker getDischargeLevelStepTracker();
@@ -2836,7 +2843,8 @@ public abstract class BatteryStats implements Parcelable {
                 whichBatteryRealtime / 1000, whichBatteryUptime / 1000,
                 totalRealtime / 1000, totalUptime / 1000,
                 getStartClockTime(),
-                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000);
+                whichBatteryScreenOffRealtime / 1000, whichBatteryScreenOffUptime / 1000,
+                getEstimatedBatteryCapacity());
 
         
         // Calculate wakelock times across all uids.
@@ -3347,6 +3355,16 @@ public abstract class BatteryStats implements Parcelable {
         
         final SparseArray<? extends Uid> uidStats = getUidStats();
         final int NU = uidStats.size();
+
+        final int estimatedBatteryCapacity = getEstimatedBatteryCapacity();
+        if (estimatedBatteryCapacity > 0) {
+            sb.setLength(0);
+            sb.append(prefix);
+                sb.append("  Estimated battery capacity: ");
+                sb.append(BatteryStatsHelper.makemAh(estimatedBatteryCapacity));
+                sb.append(" mAh");
+            pw.println(sb.toString());
+        }
 
         sb.setLength(0);
         sb.append(prefix);
