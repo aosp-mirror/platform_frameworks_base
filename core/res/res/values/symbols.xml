@@ -2625,4 +2625,7 @@
 
   <!-- For System navigation keys -->
   <java-symbol type="bool" name="config_supportSystemNavigationKeys" />
+
+  <java-symbol type="layout" name="unsupported_display_size_dialog_content" />
+  <java-symbol type="string" name="unsupported_display_size_message" />
 </resources>

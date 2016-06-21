@@ -2768,6 +2768,11 @@
     <!-- [CHAR LIMIT=200] Compat mode dialog: hint to re-enable compat mode dialog. -->
     <string name="screen_compat_mode_hint">Re-enable this in System settings &gt; Apps &gt; Downloaded.</string>
 
+    <!-- [CHAR LIMIT=200] Unsupported display size dialog: message. Refers to "Display size" setting. -->
+    <string name="unsupported_display_size_message"><xliff:g id="app_name">%1$s</xliff:g> does not support the current Display size setting and may behave unexpectedly.</string>
+    <!-- [CHAR LIMIT=50] Unsupported display size dialog: check box label. -->
+    <string name="unsupported_display_size_show">Always show</string>
+
     <!-- Text of the alert that is displayed when an application has violated StrictMode. -->
     <string name="smv_application">The app <xliff:g id="application">%1$s</xliff:g>
         (process <xliff:g id="process">%2$s</xliff:g>) has violated its self-enforced StrictMode policy.</string>
