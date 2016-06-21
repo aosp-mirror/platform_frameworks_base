@@ -5006,7 +5006,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Global.EPHEMERAL_HASH_PREFIX_MASK, DEFAULT_EPHEMERAL_HASH_PREFIX_MASK);
         final int ephemeralPrefixCount = Global.getInt(mContext.getContentResolver(),
                 Global.EPHEMERAL_HASH_PREFIX_COUNT, DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT);
-        final EphemeralDigest digest = new EphemeralDigest(intent.getData(), ephemeralPrefixCount);
+        final EphemeralDigest digest = new EphemeralDigest(intent.getData(), ephemeralPrefixMask,
+                ephemeralPrefixCount);
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
         final List<EphemeralResolveInfo> ephemeralResolveInfoList =
