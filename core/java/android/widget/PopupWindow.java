@@ -1001,9 +1001,13 @@ public class PopupWindow {
     }
 
     /**
-     * Returns the popup's height MeasureSpec.
+     * Returns the popup's requested height. May be a layout constant such as
+     * {@link LayoutParams#WRAP_CONTENT} or {@link LayoutParams#MATCH_PARENT}.
+     * <p>
+     * The actual size of the popup may depend on other factors such as
+     * clipping and window layout.
      *
-     * @return the height MeasureSpec of the popup
+     * @return the popup height in pixels or a layout constant
      * @see #setHeight(int)
      */
     public int getHeight() {
@@ -1011,12 +1015,16 @@ public class PopupWindow {
     }
 
     /**
-     * Sets the popup's height MeasureSpec.
+     * Sets the popup's requested height. May be a layout constant such as
+     * {@link LayoutParams#WRAP_CONTENT} or {@link LayoutParams#MATCH_PARENT}.
+     * <p>
+     * The actual size of the popup may depend on other factors such as
+     * clipping and window layout.
      * <p>
      * If the popup is showing, calling this method will take effect the next
      * time the popup is shown.
      *
-     * @param height the height MeasureSpec of the popup
+     * @param height the popup height in pixels or a layout constant
      * @see #getHeight()
      * @see #isShowing()
      */
@@ -1025,9 +1033,13 @@ public class PopupWindow {
     }
 
     /**
-     * Returns the popup's width MeasureSpec.
+     * Returns the popup's requested width. May be a layout constant such as
+     * {@link LayoutParams#WRAP_CONTENT} or {@link LayoutParams#MATCH_PARENT}.
+     * <p>
+     * The actual size of the popup may depend on other factors such as
+     * clipping and window layout.
      *
-     * @return the width MeasureSpec of the popup
+     * @return the popup width in pixels or a layout constant
      * @see #setWidth(int)
      */
     public int getWidth() {
@@ -1035,12 +1047,16 @@ public class PopupWindow {
     }
 
     /**
-     * Sets the popup's width MeasureSpec.
+     * Sets the popup's requested width. May be a layout constant such as
+     * {@link LayoutParams#WRAP_CONTENT} or {@link LayoutParams#MATCH_PARENT}.
+     * <p>
+     * The actual size of the popup may depend on other factors such as
+     * clipping and window layout.
      * <p>
      * If the popup is showing, calling this method will take effect the next
      * time the popup is shown.
      *
-     * @param width the width MeasureSpec of the popup
+     * @param width the popup width in pixels or a layout constant
      * @see #getWidth()
      * @see #isShowing()
      */
@@ -1958,8 +1974,8 @@ public class PopupWindow {
      * Calling this function also updates the window with the current popup
      * state as described for {@link #update()}.
      *
-     * @param width the new width, must be >= 0 or -1 to ignore
-     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param width the new width in pixels, must be >= 0 or -1 to ignore
+     * @param height the new height in pixels, must be >= 0 or -1 to ignore
      */
     public void update(int width, int height) {
         final WindowManager.LayoutParams p =
@@ -1976,8 +1992,8 @@ public class PopupWindow {
      *
      * @param x the new x location
      * @param y the new y location
-     * @param width the new width, must be >= 0 or -1 to ignore
-     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param width the new width in pixels, must be >= 0 or -1 to ignore
+     * @param height the new height in pixels, must be >= 0 or -1 to ignore
      */
     public void update(int x, int y, int width, int height) {
         update(x, y, width, height, false);
@@ -1992,8 +2008,8 @@ public class PopupWindow {
      *
      * @param x the new x location
      * @param y the new y location
-     * @param width the new width, must be >= 0 or -1 to ignore
-     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param width the new width in pixels, must be >= 0 or -1 to ignore
+     * @param height the new height in pixels, must be >= 0 or -1 to ignore
      * @param force {@code true} to reposition the window even if the specified
      *              position already seems to correspond to the LayoutParams,
      *              {@code false} to only reposition if needed
@@ -2072,8 +2088,8 @@ public class PopupWindow {
      * state as described for {@link #update()}.
      *
      * @param anchor the popup's anchor view
-     * @param width the new width, must be >= 0 or -1 to ignore
-     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param width the new width in pixels, must be >= 0 or -1 to ignore
+     * @param height the new height in pixels, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int width, int height) {
         update(anchor, false, 0, 0, width, height);
@@ -2092,8 +2108,8 @@ public class PopupWindow {
      * @param anchor the popup's anchor view
      * @param xoff x offset from the view's left edge
      * @param yoff y offset from the view's bottom edge
-     * @param width the new width, must be >= 0 or -1 to ignore
-     * @param height the new height, must be >= 0 or -1 to ignore
+     * @param width the new width in pixels, must be >= 0 or -1 to ignore
+     * @param height the new height in pixels, must be >= 0 or -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
         update(anchor, true, xoff, yoff, width, height);
