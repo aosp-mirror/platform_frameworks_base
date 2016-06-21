@@ -553,6 +553,13 @@ class ActivityStarter {
             return;
         }
 
+        // We're waiting for an activity launch to finish, but that activity simply
+        // brought another activity to front. Let startActivityMayWait() know about
+        // this, so it waits for the new activity to become visible instead.
+        if (result == START_TASK_TO_FRONT && !mSupervisor.mWaitingActivityLaunched.isEmpty()) {
+            mSupervisor.reportTaskToFrontNoLaunch(mStartActivity);
+        }
+
         int startedActivityStackId = INVALID_STACK_ID;
         if (r.task != null && r.task.stack != null) {
             startedActivityStackId = r.task.stack.mStackId;
@@ -840,8 +847,13 @@ class ActivityStarter {
                             mService.wait();
                         } catch (InterruptedException e) {
                         }
-                    } while (!outResult.timeout && outResult.who == null);
-                } else if (res == START_TASK_TO_FRONT) {
+                    } while (outResult.result != START_TASK_TO_FRONT
+                            && !outResult.timeout && outResult.who == null);
+                    if (outResult.result == START_TASK_TO_FRONT) {
+                        res = START_TASK_TO_FRONT;
+                    }
+                }
+                if (res == START_TASK_TO_FRONT) {
                     ActivityRecord r = stack.topRunningActivityLocked();
                     if (r.nowVisible && r.state == RESUMED) {
                         outResult.timeout = false;
