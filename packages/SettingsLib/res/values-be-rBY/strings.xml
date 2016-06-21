@@ -175,7 +175,7 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дазволіць/забараніць роўмінгавае сканіраванне Wi‑Fi ў залежнасці ад аб\'ёму трафіку даных у інтэрфейсе"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Памеры буфера для сродку вядзення журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Выберыце памеры сродку вядзення журнала для буфераў журнала"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ачысціць пастаяннае сховішча для захоўвання?"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ачысціць пастаяннае сховішча журнала?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Калі перастае выконвацца адсочванне з дапамогай пастаяннага журнала, мы павінны сцерці даныя журнала, якія захоўваюцца на вашай прыладзе."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"Захоўваць даныя журнала на прыл."</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Выберыце буферы журнала для пастаяннага захоўвання на прыладзе"</string>
