@@ -282,10 +282,11 @@ public class GradientDrawable extends Drawable {
     }
 
     /**
-     * Returns the radius for the corners of the gradient.
+     * Returns the radius for the corners of the gradient, that was previously set with
+     * {@link #setCornerRadius(float)}.
      * <p>
-     * If the radius was previously set with {@link #setCornerRadii(float[])},
-     * or if the corners are not rounded, this method will return {@code null}.
+     * If the radius was previously cleared via passing {@code null}
+     * to {@link #setCornerRadii(float[])}, this method will return 0.
      *
      * @return the radius in pixels of the corners of the rectangle shape, or 0
      * @see #setCornerRadius
