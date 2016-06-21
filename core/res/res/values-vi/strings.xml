@@ -21,8 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <!-- no translation found for kilobyteShort (7542884022844556968) -->
-    <skip />
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
@@ -1016,6 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Tỷ lệ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Luôn hiển thị"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Bật lại chế độ này trong cài đặt Hệ thống &gt; Ứng dụng &gt; Đã tải xuống."</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ cài đặt kích thước Màn hình hiện tại và có thể hoạt động không như mong đợi."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Luôn hiển thị"</string>
     <string name="smv_application" msgid="3307209192155442829">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (quá trình <xliff:g id="PROCESS">%2$s</xliff:g>) đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="smv_process" msgid="5120397012047462446">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android đang nâng cấp..."</string>

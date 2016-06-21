@@ -31,5 +31,5 @@ please see styles_device_defaults.xml.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="candidates_style" msgid="8052530148128607468"><font color="#80cbc4">"ကိုယ်စားလှယ်များ"</font></string>
+    <string name="candidates_style" msgid="8052530148128607468"><font color="#80cbc4">"candidates"</font></string>
 </resources>

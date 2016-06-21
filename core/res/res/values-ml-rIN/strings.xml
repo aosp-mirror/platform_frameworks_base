@@ -21,8 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <!-- no translation found for kilobyteShort (7542884022844556968) -->
-    <skip />
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
@@ -1016,6 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"സ്കെയിൽ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"എപ്പോഴും പ്രദര്‍ശിപ്പിക്കുക"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ &gt; അപ്ലിക്കേഷനുകൾ &gt; ഡൗൺലോഡുചെയ്‌തവ എന്നതിൽ ഇത് വീണ്ടും പ്രവർത്തനക്ഷമമാക്കുക."</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"നിലവിലെ ഡിസ്പ്ലേ വലുപ്പ ക്രമീകരണത്തെ <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്ക്കുന്നില്ല, അതിനാൽ പ്രതീക്ഷിക്കാത്ത തരത്തിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കാം."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"എല്ലായ്പ്പോഴും ദൃശ്യമാക്കുക"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷൻ (<xliff:g id="PROCESS">%2$s</xliff:g> പ്രോസസ്സ്) അതിന്റെ സ്വയം നിർബന്ധിത StrictMode നയം ലംഘിച്ചു."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> എന്ന പ്രോസസ്സ് അതിന്റെ സ്വയം നടപ്പിലാക്കിയ StrictMode നയം ലംഘിച്ചു."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android അപ്ഗ്രേഡുചെയ്യുന്നു…"</string>
