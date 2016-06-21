@@ -825,7 +825,8 @@ final class ActivityStack {
      * is the same as the given activity.  Returns null if no such activity
      * is found.
      */
-    ActivityRecord findActivityLocked(Intent intent, ActivityInfo info) {
+    ActivityRecord findActivityLocked(Intent intent, ActivityInfo info,
+                                      boolean compareIntentFilters) {
         ComponentName cls = intent.getComponent();
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
@@ -843,8 +844,16 @@ final class ActivityStack {
                 if (notCurrentUserTask && (r.info.flags & FLAG_SHOW_FOR_ALL_USERS) == 0) {
                     continue;
                 }
-                if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
-                    return r;
+                if (!r.finishing && r.userId == userId) {
+                    if (compareIntentFilters) {
+                        if (r.intent.filterEquals(intent)) {
+                            return r;
+                        }
+                    } else {
+                        if (r.intent.getComponent().equals(cls)) {
+                            return r;
+                        }
+                    }
                 }
             }
         }
