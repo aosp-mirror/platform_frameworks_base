@@ -146,7 +146,8 @@ public class NotificationUsageStats {
     /**
      * Called when a notification has been updated.
      */
-    public void registerUpdatedByApp(NotificationRecord notification, NotificationRecord old) {
+    public synchronized void registerUpdatedByApp(NotificationRecord notification,
+            NotificationRecord old) {
         notification.stats.updateFrom(old.stats);
         AggregatedStats[] aggregatedStatsArray = getAggregatedStatsLocked(notification);
         for (AggregatedStats stats : aggregatedStatsArray) {
