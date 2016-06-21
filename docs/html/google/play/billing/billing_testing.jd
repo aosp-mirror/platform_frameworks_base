@@ -79,14 +79,11 @@ launch. They let authorized user accounts make purchases of your in-app products
 through Google Play without incurring any actual charges to the user
 accounts.</p>
 
-<p>Once authorized for testing access, those users can make purchases without
-being charged.
-Test purchases are real orders and Google Play processes them in the same way as
-other orders. However, the <code>orderId</code> field for test purchases is
-blank.
-When purchases are complete, Google Play prevents the orders from
-going to financial processing, ensuring that there are no actual charges to user
-accounts, and automatically canceling the completed orders after 14 days.</p>
+<p>
+  Once authorized for testing access, those users can make purchases without
+  being charged. The <code>orderId</code> field for test purchases remains
+  blank, ensuring that there are no actual charges to user accounts.
+</p>
 
 <p class="note">
   <strong>Note:</strong> Test subscription purchases recur daily, regardless of
@@ -130,8 +127,8 @@ account. Users can confirm the account that is making a purchase by expanding th
 purchase dialog.</p>
 
 <p class="note">
-  <strong>Note:</strong> For test subscription purchases, leave the {@code orderId}
-  field blank. You can use the {@code purchaseToken} field to identify test purchases.
+  <strong>Note:</strong> For test purchases, leave the {@code orderId} field
+  blank. You can use the {@code purchaseToken} field to identify test purchases.
 </p>
 
 
@@ -150,33 +147,22 @@ with a notice across the center of the purchase dialog, for easy identification.
 
 <h4 id="cancelling">Canceling completed test purchases</h4>
 <p>Google Play accumulates completed test purchases for each user but does not
-pass them on  to financial processing. Over time, it automatically clears out
-the purchases by canceling them. </p>
+pass them on to financial processing.</p>
 
 <p>In some cases, you might want to manually cancel a test purchase to continue
-testing. For canceling purchases, you have these options:</p>
-
-<ul>
-<li>Wait for the transactions to expire&mdash;Google Play clears completed test
-purchases 14 days after their purchase date. </li>
-<li>Cancel purchases manually&mdash;you can go to the Google payments merchant
-center, look up the transaction, and then cancel it. You can find transactions
-by looking up their order numbers.</li>
+testing. To do so, open the app page in the Play Store. If the test purchase
+that you want to cancel is a subscription, you can also use the
+<a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/cancel">
+{@code cancel()}</a> method of the Purchases.subscriptions API.
 </ul>
-
-<p>
-  You can cancel test subscriptions purchases from the app page in the Play Store,
-  or use the 
-  <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/cancel">
-  {@code cancel}</a> method.
-</p>
 
 <p class="caution">
   <strong>Important:</strong> The
   <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/refund">
-  {@code refund}</a> and
+  {@code refund()}</a> and
   <a href="https://developers.google.com/android-publisher/api-ref/purchases/subscriptions/revoke">
-  {@code revoke}</a> methods do not support test purchases.
+  {@code revoke()}</a> methods of the Purchases.subscriptions API don't support
+  test purchases.
 </p>
 
 
