@@ -747,6 +747,15 @@ you at the conclusion of the purchase flow, as the value of the
 <code>orderId</code> field of the <code>PURCHASE_STATE_CHANGED</code>
 intent.</p>
 
+<p class="note">
+  <strong>Note:</strong> When a user completes a test purchase, the
+  <code>orderId</code> field remains blank. To track test transactions, use
+  the <code>purchaseToken</code> field instead. For more information about
+  working with test purchases, see <a
+  href="{@docRoot}google/play/billing/billing_testing.html">Testing In-app
+  Billing</a>.
+</p>
+
 <p>In your app, you can use the order number as a general-purpose identifier for
 the in-app purchase transaction. After the purchase, you can use the order
 number as a means of tracking the transaction in reconciliation reports and for
