@@ -38,7 +38,8 @@
     <string name="save_as_pdf" msgid="5718454119847596853">"Gem som PDF"</string>
     <string name="all_printers" msgid="5018829726861876202">"Alle printere..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Udskriftsdialog"</string>
-    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> af <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <!-- no translation found for current_page_template (5145005201131935302) -->
+    <skip />
     <string name="page_description_template" msgid="6831239682256197161">"Side <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ud af <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="summary_template" msgid="8899734908625669193">"Opsummering, kopier <xliff:g id="COPIES">%1$s</xliff:g>, papirstørrelse <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"Håndtag til visning"</string>
