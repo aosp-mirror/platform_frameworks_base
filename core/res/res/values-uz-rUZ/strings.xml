@@ -526,7 +526,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran qulfini o‘zgartiradi."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranni qulflash"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranning qachon va qanday qulflanishini boshqaradi."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Barcha ma’lumotlarni tozalash"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Barcha ma’lumotlarni o‘chirib tashlash"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Planshetdagi barcha ma’lumotlarni ogohlantirishsiz zavod sozlamalarini tiklash orqali o‘chirib tashlaydi."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Zavod sozlamalarini tiklaydi va televizordagi barcha ma’lumotlarni ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Telefondagi barcha ma’lumotlarni ogohlantirishsiz zavod sozlamalarini tiklash orqali o‘chirib tashlaydi."</string>
@@ -537,7 +537,7 @@
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Qurilmaga global proksi o‘rnatish"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Qoida faollashtirilgan vaqtda ishlatiladigan qurilmaning global proksi-serverini o‘rnatadi. Faqat qurilma egasi global proksi-serverini o‘rnatishi mumkin."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Parol muddatini o‘rnatish"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Ekran qulfi paroli, PIN kodi yoki chizmali paroli o‘zgartiriladigan muddatni o‘zgartiradi."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Ekran qulfi paroli, PIN kodi yoki grafik kaliti o‘zgartiriladigan muddatni o‘zgartiradi."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Xotirani kodlashni o‘rnatish"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zaxiralangan ilovalar ma‘lumotlarini kodlashni talab qiladi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameralarni o‘chirish"</string>
@@ -672,7 +672,7 @@
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Ekran qulflangan."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Qulfdan chiqarish yoki favqulodda qo‘ng‘iroqni amalga oshirish uchun \"Menyu\"ni bosing."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Qulfni ochish uchun \"Menyu\"ga bosing."</string>
-    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Qulfni ochish uchun namuna ustiga chizing"</string>
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Qulfni ochish uchun grafik kalitni chizing"</string>
     <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Favqulodda chaqiruv"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Qo‘ng‘iroqni qaytarish"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"To‘g‘ri!"</string>
@@ -700,12 +700,12 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Foydalanuvchi qo‘llanmasiga qarang yoki Abonentlarni qo‘llab-quvvatlash markaziga murojaat qiling."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM karta qulflangan."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM karta qulfdan chiqarilmoqda…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Siz parolni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Siz PIN-kodni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urining."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Telefon qulfini ochish uchun yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri urinish qilsangiz, sizdan Google hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qayta urining."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Planshet qulfini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta ochishga urinib ko‘rdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng, planshet ishlab chiqarilgan holatiga tiklanadi va barcha foydalanuvchi ma’lumotlari yo‘qoladi."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizda zavod sozlamalari qayta tiklanadi hamda undagi barcha ma’lumotlaringiz o‘chib ketadi."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefon qulfini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta ochishga urinib ko‘rdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng, telefon ishlab chiqarilgan holatiga tiklanadi va barcha foydalanuvchi ma’lumotlari yo‘qoladi."</string>
@@ -713,9 +713,9 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri kiritdingiz. Endi, televizoringizda zavod sozlamalari qayta tiklanadi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon qulfini <xliff:g id="NUMBER">%d</xliff:g> marta ochishga urinib ko‘rdingiz. Telefon hozir ishlab chiqarilgan holatiga tiklanadi."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Chizma namunasi yodingizdan chiqdimi?"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Grafik kalit esingizdan chiqdimi?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Qulfni ochish hisobi"</string>
-    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
+    <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Foydalanuvchi nomi (e-pochta)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Parol"</string>
@@ -726,12 +726,12 @@
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Qulfdan chiqarish"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ovozni yoqish"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Ovozni o‘chirish"</string>
-    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Chizma namunasi ishga tushirildi"</string>
-    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Chizma namunasi tozalandi"</string>
+    <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Grafik kalitni chizish boshlandi"</string>
+    <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Grafik kalit tozalandi"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Katak qo‘shildi"</string>
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> katak qo‘shildi"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Chizma namunasi tugatildi"</string>
-    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Chizmali kalit hududi."</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Grafik kalitni chizish tugallandi"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Grafik kalit chiziladigan hudud."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Vidjet %2$d / %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Vidjet qo‘shish."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Bo‘sh"</string>
@@ -747,11 +747,11 @@
     <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> vidjeti o‘chirildi."</string>
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Qulfni ochish maydonini kengaytirish."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Qulfni silab ochish"</string>
-    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Chizmali qulfni ochish."</string>
+    <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Grafik kalit bilan ochish."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Qulfni yuzni tanitib ochish"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin qulfini ochish."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Parolli qulfni ochish."</string>
-    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Chizmali qulf maydoni."</string>
+    <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Grafik kalit chiziladigan hudud."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Maydonni silang"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
@@ -1378,8 +1378,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tasvir uzatish #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", xavfsiz"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Chizmali parol unutilgan"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Chizmali kalit noto‘g‘ri"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit noto‘g‘ri"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN-kod noto‘g‘ri"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
@@ -1396,7 +1396,7 @@
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kod 8 ta raqam bo‘lishi shart."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"To‘g‘ri PUK kodni qayta kiriting. Qayta-qayta urinishlar SIM kartani butunlay o‘chirib qo‘yadi."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-kod mos kelmadi"</string>
-    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Chizmali parolni ochishga juda ko‘p urinildi"</string>
+    <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Grafik kalit juda ko‘p marta chizildi"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Qulfni ochish uchun Google hisobingiz bilan kiring."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Foydalanuvchi nomi (e-pochta)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Parol"</string>
@@ -1406,16 +1406,16 @@
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Hisob tekshirilmoqda…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Siz PIN-kodni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Siz parolni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> soniyadan so‘ng qayta urinib ko‘ring."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Siz planshet qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng planshetning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizda zavod sozlamalari qayta tiklanadi hamda undagi barcha ma’lumotlaringiz o‘chib ketadi."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Siz telefon qulfini ochish uchun <xliff:g id="NUMBER_0">%1$d</xliff:g> marta muvaffaqiyatsiz urindingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishlardan so‘ng telefonning zavod sozlamalari tiklanadi va barcha foydalanuvchi ma’lumotlari o‘chiriladi."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Planshet qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Planshetning hozir zavod sozlamari tiklanadi."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Siz televizorni qulfdan chiqarish parolini <xliff:g id="NUMBER">%d</xliff:g> marta noto‘g‘ri kiritdingiz. Endi, televizoringizda zavod sozlamalari qayta tiklanadi."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon qulfini ochish uchun <xliff:g id="NUMBER">%d</xliff:g> marta muvaffaqiyatsiz urinib ko‘rdingiz. Telefonning hozir zavod sozlamari tiklanadi."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz chizmali kalitni  <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun sizda e-pochta hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz chizmali kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Siz grafik kalitni  <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, planshet qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri kiritdingiz. Agar uni yana <xliff:g id="NUMBER_1">%2$d</xliff:g> marta noto‘g‘ri kiritsangiz, televizoringizni qulfdan chiqarish uchun sizda e-pochta hisobingizga kirish talab qilinadi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng qaytadan urining."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"O‘chirish"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ovoz balandligi tavsiya etilgan darajadan ham yuqori ko‘tarilsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
@@ -1550,7 +1550,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekran qadab qo‘yildi"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekran bo‘shatildi"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Yechishda PIN-kod so‘ralsin"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bo‘shatishdan oldin chizmali parol so‘ralsin"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Yechishdan oldin grafik kalit so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratoringiz tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
