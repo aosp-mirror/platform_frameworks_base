@@ -39,6 +39,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.Set;
 
 // TODO Enhance javadoc
@@ -694,24 +695,40 @@ public final class ShortcutInfo implements Parcelable {
 
         private PersistableBundle mExtras;
 
-        /** Constructor. */
+        /**
+         * Old style constructor.  STOPSHIP hide it before launch.
+         */
+        @Deprecated
         public Builder(Context context) {
             mContext = context;
         }
 
         /**
-         * Sets the ID of the shortcut.  This is a mandatory field.
+         * Used with the old style constructor, kept for unit tests. STOPSHIP hide it before launch.
          */
         @NonNull
+        @Deprecated
         public Builder setId(@NonNull String id) {
             mId = Preconditions.checkStringNotEmpty(id, "id");
             return this;
         }
 
         /**
-         * Optionally sets the target activity.  If it's not set, and if the caller application
-         * has multiple launcher icons, this shortcut will be shown on all those icons.
-         * If it's set, this shortcut will be only shown on this activity.
+         * Constructor.
+         *
+         * @param context Client context.
+         * @param id ID of the shortcut.
+         */
+        public Builder(Context context, String id) {
+            mContext = context;
+            mId = Preconditions.checkStringNotEmpty(id, "id");
+        }
+
+        /**
+         * Sets the target activity. A shortcut will be shown with this activity on the launcher.
+         *
+         * <p>This is a mandatory field, unless it's passed to
+         * {@link ShortcutManager#updateShortcuts(List)}.
          *
          * <p>The package name of the target activity must match the package name of the shortcut
          * publisher.
@@ -726,18 +743,18 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optionally sets an icon.
+         * Sets an icon.
          *
          * <ul>
          *     <li>Tints set by {@link Icon#setTint} or {@link Icon#setTintList} are not supported.
          *     <li>Bitmaps and resources are supported, but "content:" URIs are not supported.
          * </ul>
          *
-         * <p>For performance reasons, icons will <b>NOT</b> be available on instances
-         * returned by {@link ShortcutManager} or {@link LauncherApps}.  Launcher applications
-         * can use {@link ShortcutInfo#getIconResourceId()} if {@link #hasIconResource()} is true.
-         * Otherwise, if {@link #hasIconFile()} is true, use
-         * {@link LauncherApps#getShortcutIconFd} to load the image.
+         * <p>For performance and security reasons, icons will <b>NOT</b> be available on instances
+         * returned by {@link ShortcutManager} or {@link LauncherApps}.  Default launcher application
+         * can use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}
+         * or {@link LauncherApps#getShortcutBadgedIconDrawable(ShortcutInfo, int)} to fetch
+         * shortcut icons.
          */
         @NonNull
         public Builder setIcon(Icon icon) {
@@ -749,6 +766,7 @@ public final class ShortcutInfo implements Parcelable {
          * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
          * use it.)
          */
+        @Deprecated
         public Builder setShortLabelResId(int shortLabelResId) {
             Preconditions.checkState(mTitle == null, "shortLabel already set");
             mTitleResId = shortLabelResId;
@@ -756,7 +774,10 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets the short title of a shortcut.  This is a mandatory field.
+         * Sets the short title of a shortcut.
+         *
+         * <p>This is a mandatory field, unless it's passed to
+         * {@link ShortcutManager#updateShortcuts(List)}.
          *
          * <p>This field is intended for a concise description of a shortcut displayed under
          * an icon.  The recommend max length is 10 characters.
@@ -772,6 +793,7 @@ public final class ShortcutInfo implements Parcelable {
          * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
          * use it.)
          */
+        @Deprecated
         public Builder setLongLabelResId(int longLabelResId) {
             Preconditions.checkState(mText == null, "longLabel already set");
             mTextResId = longLabelResId;
@@ -779,7 +801,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Sets the text of a shortcut.  This is an optional field.
+         * Sets the text of a shortcut.
          *
          * <p>This field is intended to be more descriptive than the shortcut title.  The launcher
          * shows this instead of the short title, when it has enough space.
@@ -793,21 +815,25 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /** @hide -- old signature, the internal code still uses it. */
+        @Deprecated
         public Builder setTitle(@NonNull CharSequence value) {
             return setShortLabel(value);
         }
 
         /** @hide -- old signature, the internal code still uses it. */
+        @Deprecated
         public Builder setTitleResId(int value) {
             return setShortLabelResId(value);
         }
 
         /** @hide -- old signature, the internal code still uses it. */
+        @Deprecated
         public Builder setText(@NonNull CharSequence value) {
             return setLongLabel(value);
         }
 
         /** @hide -- old signature, the internal code still uses it. */
+        @Deprecated
         public Builder setTextResId(int value) {
             return setLongLabelResId(value);
         }
@@ -816,6 +842,7 @@ public final class ShortcutInfo implements Parcelable {
          * @hide We don't support resource strings for dynamic shortcuts for now.  (But unit tests
          * use it.)
          */
+        @Deprecated
         public Builder setDisabledMessageResId(int disabledMessageResId) {
             Preconditions.checkState(mDisabledMessage == null, "disabledMessage already set");
             mDisabledMessageResId = disabledMessageResId;
@@ -867,7 +894,9 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         /**
-         * Optional values that applications can set.  Applications can store any meta-data of
+         * Extras that application can set to any purposes.
+         *
+         * <p>Applications can store any meta-data of
          * shortcuts in this, and retrieve later from {@link ShortcutInfo#getExtras()}.
          */
         @NonNull
@@ -931,22 +960,26 @@ public final class ShortcutInfo implements Parcelable {
 
     /** @hide -- old signature, the internal code still uses it. */
     @Nullable
+    @Deprecated
     public CharSequence getTitle() {
         return mTitle;
     }
 
     /** @hide -- old signature, the internal code still uses it. */
+    @Deprecated
     public int getTitleResId() {
         return mTitleResId;
     }
 
     /** @hide -- old signature, the internal code still uses it. */
     @Nullable
+    @Deprecated
     public CharSequence getText() {
         return mText;
     }
 
     /** @hide -- old signature, the internal code still uses it. */
+    @Deprecated
     public int getTextResId() {
         return mTextResId;
     }
@@ -1094,7 +1127,7 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Optional values that application can set.
+     * Extras that application can set to any purposes.
      */
     @Nullable
     public PersistableBundle getExtras() {
@@ -1168,8 +1201,14 @@ public final class ShortcutInfo implements Parcelable {
      * <p>NOTE this is whether a shortcut is published from the <b>current version's</b>
      * AndroidManifest.xml.
      */
-    public boolean isManifestShortcut() {
+    public boolean isDeclaredInManifest() {
         return hasFlags(FLAG_MANIFEST);
+    }
+
+    /** @hide kept for unit tests */
+    @Deprecated
+    public boolean isManifestShortcut() {
+        return isDeclaredInManifest();
     }
 
     /**
@@ -1191,7 +1230,7 @@ public final class ShortcutInfo implements Parcelable {
      *
      * <p>All manifest shortcuts are immutable.  When a manifest shortcut is pinned and then
      * disabled because the app is upgraded and its AndroidManifest.xml no longer publishes it,
-     * {@link #isManifestShortcut} returns {@code false}, but it is still immutable.
+     * {@link #isDeclaredInManifest()} returns {@code false}, but it is still immutable.
      *
      * <p>All shortcuts originally published via the {@link ShortcutManager} APIs
      * are all mutable.
@@ -1221,7 +1260,7 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return whether a shortcut's icon is a resource in the owning package.
      *
-     * @see LauncherApps#getShortcutIconResId(ShortcutInfo)
+     * @hide internal/unit tests only
      */
     public boolean hasIconResource() {
         return hasFlags(FLAG_HAS_ICON_RES);
@@ -1240,7 +1279,7 @@ public final class ShortcutInfo implements Parcelable {
     /**
      * Return whether a shortcut's icon is stored as a file.
      *
-     * @see LauncherApps#getShortcutIconFd(ShortcutInfo)
+     * @hide internal/unit tests only
      */
     public boolean hasIconFile() {
         return hasFlags(FLAG_HAS_ICON_FILE);
@@ -1256,15 +1295,17 @@ public final class ShortcutInfo implements Parcelable {
      *     <li>{@link #getLastChangedTimestamp()}
      *     <li>{@link #isDynamic()}
      *     <li>{@link #isPinned()}
-     *     <li>{@link #hasIconResource()}
-     *     <li>{@link #hasIconFile()}
+     *     <li>{@link #isDeclaredInManifest()}
+     *     <li>{@link #isImmutable()}
+     *     <li>{@link #isEnabled()}
+     *     <li>{@link #getUserHandle()}
      * </ul>
      */
     public boolean hasKeyFieldsOnly() {
         return hasFlags(FLAG_KEY_FIELDS_ONLY);
     }
 
-    /** TODO Javadoc */
+    /** @hide */
     public boolean hasStringResourcesResolved() {
         return hasFlags(FLAG_STRINGS_RESOLVED);
     }
@@ -1295,6 +1336,7 @@ public final class ShortcutInfo implements Parcelable {
 
     /**
      * Get the resource ID for the icon, valid only when {@link #hasIconResource()} } is true.
+     * @hide internal / tests only.
      */
     public int getIconResourceId() {
         return mIconResId;
