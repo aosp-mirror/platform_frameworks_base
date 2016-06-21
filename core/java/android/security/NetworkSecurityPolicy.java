@@ -17,7 +17,10 @@
 package android.security;
 
 import android.annotation.TestApi;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.security.net.config.ApplicationConfig;
+import android.security.net.config.ManifestConfigSource;
 
 /**
  * Network security policy.
@@ -97,5 +100,17 @@ public class NetworkSecurityPolicy {
     @TestApi
     public void handleTrustStorageUpdate() {
         ApplicationConfig.getDefaultInstance().handleTrustStorageUpdate();
+    }
+
+    /**
+     * Returns an {@link ApplicationConfig} based on the configuration for {@code packageName}.
+     *
+     * @hide
+     */
+    public static ApplicationConfig getApplicationConfigForPackage(Context context,
+            String packageName) throws PackageManager.NameNotFoundException {
+        Context appContext = context.createPackageContext(packageName, 0);
+        ManifestConfigSource source = new ManifestConfigSource(appContext);
+        return new ApplicationConfig(source);
     }
 }
