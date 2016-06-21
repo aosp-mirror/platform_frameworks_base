@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.Utils;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
@@ -64,7 +65,7 @@ public class DataUsageDetailView extends LinearLayout {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;
-        int usageColor = R.color.system_accent_color;
+        int usageColor = 0;
         final String top;
         String bottom = null;
         if (info.usageLevel < info.warningLevel || info.limitLevel <= 0) {
@@ -90,6 +91,10 @@ public class DataUsageDetailView extends LinearLayout {
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                     formatBytes(info.limitLevel));
             usageColor = R.color.system_warning_color;
+        }
+
+        if (usageColor == 0) {
+            usageColor = Utils.getColorAccent(mContext);
         }
 
         final TextView title = (TextView) findViewById(android.R.id.title);

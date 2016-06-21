@@ -132,7 +132,7 @@
 
     <style name="TextAppearance.QS.DetailItemSecondary">
         <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
-        <item name="android:textColor">@color/system_accent_color</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
     <style name="TextAppearance.QS.Introduction">
@@ -177,7 +177,7 @@
 
     <style name="TextAppearance.QS.DataUsage.Usage">
         <item name="android:textSize">@dimen/qs_data_usage_usage_text_size</item>
-        <item name="android:textColor">@color/system_accent_color</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage.Secondary">
@@ -217,19 +217,13 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault">
-        <item name="android:colorPrimary">@color/system_primary_color</item>
-        <item name="android:colorControlActivated">@color/system_accent_color</item>
-    </style>
+    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault" />
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
-        <item name="android:colorPrimary">@color/system_primary_color</item>
-        <item name="android:colorControlActivated">@color/system_accent_color</item>
-    </style>
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
@@ -323,12 +317,12 @@
         <item name="android:layout_height">48dp</item>
     </style>
 
-    <style name="TunerSettings" parent="@android:style/Theme.Material.Settings">
+    <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
-    <style name="TunerPreferenceTheme" parent="@android:style/Theme.Material.Settings">
+    <style name="TunerPreferenceTheme" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
@@ -344,16 +338,16 @@
     </style>
 
     <style name="TextAppearance.NotificationGuts.Secondary">
-        <item name="android:alpha">.54</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.NotificationGuts.Primary">
-        <item name="android:alpha">.87</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">16sp</item>
     </style>
 
     <style name="TextAppearance.NotificationGuts.Radio">
-        <item name="android:alpha">.87</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.NotificationGuts.Button">
@@ -361,11 +355,7 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:gravity">center</item>
-        <item name="android:textColor">@*android:color/material_deep_teal_500</item>
-    </style>
-
-    <style name="ThemeOverlay.SwitchBar" parent="@android:style/ThemeOverlay">
-        <item name="android:colorAccent">@color/switch_accent_color</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
     <style name="edit_theme" parent="@android:style/Theme.Material">

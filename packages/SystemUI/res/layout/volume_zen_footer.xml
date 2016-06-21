@@ -78,7 +78,7 @@
         android:paddingStart="15dp"
         android:paddingEnd="15dp"
         android:text="@string/volume_zen_end_now"
-        android:textColor="@color/system_accent_color"
+        android:textColor="?android:attr/colorAccent"
         android:textAppearance="@style/TextAppearance.QS.DetailButton" />
 
 </com.android.systemui.volume.ZenFooter>

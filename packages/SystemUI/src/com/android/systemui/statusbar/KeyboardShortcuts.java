@@ -60,6 +60,7 @@ import android.widget.TextView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 
@@ -120,7 +121,7 @@ public final class KeyboardShortcuts {
     private KeyCharacterMap mBackupKeyCharacterMap;
 
     private KeyboardShortcuts(Context context) {
-        this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
+        this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault_Light);
         this.mPackageManager = AppGlobals.getPackageManager();
         loadResources(context);
     }
@@ -595,7 +596,7 @@ public final class KeyboardShortcuts {
                     R.layout.keyboard_shortcuts_category_title, keyboardShortcutsLayout, false);
             categoryTitle.setText(group.getLabel());
             categoryTitle.setTextColor(group.isSystemGroup()
-                    ? mContext.getColor(R.color.ksh_system_group_color)
+                    ? Utils.getColorAccent(mContext)
                     : mContext.getColor(R.color.ksh_application_group_color));
             keyboardShortcutsLayout.addView(categoryTitle);
 

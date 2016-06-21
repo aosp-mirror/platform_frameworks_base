@@ -26,7 +26,8 @@
         android:orientation="vertical"
         android:paddingStart="@*android:dimen/notification_content_margin_start"
         android:paddingEnd="8dp"
-        android:background="@color/notification_guts_bg_color">
+        android:background="@color/notification_guts_bg_color"
+        android:theme="@*android:style/Theme.DeviceDefault.Light">
 
     <!-- header -->
     <LinearLayout
@@ -145,8 +146,8 @@
                     android:focusable="true"
                     android:background="#00ffffff"
                     android:progressBackgroundTint="@color/notification_guts_secondary_slider_color"
-                    android:thumbTint="@color/notification_guts_slider_color"
-                    android:progressTint="@color/notification_guts_slider_color"
+                    android:thumbTint="?android:attr/colorAccent"
+                    android:progressTint="?android:attr/colorAccent"
                     style="@android:style/Widget.Material.SeekBar.Discrete"
                     android:tickMarkTint="@android:color/black" />
 

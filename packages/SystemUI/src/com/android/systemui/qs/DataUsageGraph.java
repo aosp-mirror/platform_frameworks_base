@@ -24,6 +24,7 @@ import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class DataUsageGraph extends View {
@@ -45,7 +46,7 @@ public class DataUsageGraph extends View {
         super(context, attrs);
         final Resources res = context.getResources();
         mTrackColor = context.getColor(R.color.data_usage_graph_track);
-        mUsageColor = context.getColor(R.color.system_accent_color);
+        mUsageColor = Utils.getColorAccent(context);
         mOverlimitColor = context.getColor(R.color.system_warning_color);
         mWarningColor = context.getColor(R.color.data_usage_graph_warning);
         mMarkerWidth = res.getDimensionPixelSize(R.dimen.data_usage_graph_marker_width);
