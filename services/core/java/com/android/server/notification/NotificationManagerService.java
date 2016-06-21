@@ -67,7 +67,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -2805,7 +2804,7 @@ public class NotificationManagerService extends SystemService {
         // notification was a summary and its group key changed.
         if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
             cancelGroupChildrenLocked(old, callingUid, callingPid, null,
-                    REASON_GROUP_SUMMARY_CANCELED);
+                    REASON_GROUP_SUMMARY_CANCELED, false /* sendDelete */);
         }
     }
 
@@ -3438,7 +3437,7 @@ public class NotificationManagerService extends SystemService {
 
                         cancelNotificationLocked(r, sendDelete, reason);
                         cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
-                                REASON_GROUP_SUMMARY_CANCELED);
+                                REASON_GROUP_SUMMARY_CANCELED, sendDelete);
                         updateLightsLocked();
                     }
                 }
@@ -3517,7 +3516,7 @@ public class NotificationManagerService extends SystemService {
                 final int M = canceledNotifications.size();
                 for (int i = 0; i < M; i++) {
                     cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                            listenerName, REASON_GROUP_SUMMARY_CANCELED);
+                            listenerName, REASON_GROUP_SUMMARY_CANCELED, false /* sendDelete */);
                 }
             }
             if (canceledNotifications != null) {
@@ -3561,14 +3560,14 @@ public class NotificationManagerService extends SystemService {
         int M = canceledNotifications != null ? canceledNotifications.size() : 0;
         for (int i = 0; i < M; i++) {
             cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                    listenerName, REASON_GROUP_SUMMARY_CANCELED);
+                    listenerName, REASON_GROUP_SUMMARY_CANCELED, false /* sendDelete */);
         }
         updateLightsLocked();
     }
 
     // Warning: The caller is responsible for invoking updateLightsLocked().
     private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
-            String listenerName, int reason) {
+            String listenerName, int reason, boolean sendDelete) {
         Notification n = r.getNotification();
         if (!n.isGroupSummary()) {
             return;
@@ -3591,7 +3590,7 @@ public class NotificationManagerService extends SystemService {
                 EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
                         childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 mNotificationList.remove(i);
-                cancelNotificationLocked(childR, false, reason);
+                cancelNotificationLocked(childR, sendDelete, reason);
             }
         }
     }
