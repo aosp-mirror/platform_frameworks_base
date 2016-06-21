@@ -7269,7 +7269,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean areSystemNavigationKeysEnabled() {
         return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SYSTEM_NAVIGATION_KEYS_ENABLED, 0) == 1;
+                Settings.Global.SYSTEM_NAVIGATION_KEYS_ENABLED, 1) == 1;
     }
 
     @Override
