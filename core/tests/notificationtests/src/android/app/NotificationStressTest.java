@@ -40,9 +40,9 @@ public class NotificationStressTest extends InstrumentationTestCase {
     private static final int NUM_ITERATIONS = 200;
     private static final int NUM_ITERATIONS_2 = 30;
     private static final int LONG_TIMEOUT = 2000;
-    // 50 notifications per app: defined as Variable MAX_PACKAGE_NOTIFICATIONS in
+    // 49 notifications per app: defined as Variable MAX_PACKAGE_NOTIFICATIONS in
     // NotificationManagerService.java
-    private static final int MAX_NOTIFCATIONS = 50;
+    private static final int MAX_NOTIFCATIONS = 49;
     private static final int[] ICONS = new int[] {
             android.R.drawable.stat_notify_call_mute,
             android.R.drawable.stat_notify_chat,
@@ -76,9 +76,10 @@ public class NotificationStressTest extends InstrumentationTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
         mDevice.unfreezeRotation();
         mNotificationManager.cancelAll();
+        mDevice.waitForIdle();
+        super.tearDown();
     }
 
     @RepetitiveTest(numIterations = NUM_ITERATIONS)
@@ -97,7 +98,7 @@ public class NotificationStressTest extends InstrumentationTestCase {
         for (int j = 0; j < MAX_NOTIFCATIONS; j++) {
             sendNotification(mNotifyId++, "testNotificationStressNotify");
         }
-        Thread.sleep(500);
+        Thread.sleep(LONG_TIMEOUT);
         assertTrue(mNotificationManager.getActiveNotifications().length == MAX_NOTIFCATIONS);
         for (int j = 0; j < MAX_NOTIFCATIONS; j++) {
             mNotificationManager.cancel(--mNotifyId);
@@ -124,7 +125,8 @@ public class NotificationStressTest extends InstrumentationTestCase {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .build();
         mNotificationManager.notify(id, notification);
-        SystemClock.sleep(10);
+        //update rate limit is 50 notifications/second.
+        SystemClock.sleep(20);
     }
 
     private boolean isLockScreen() {
