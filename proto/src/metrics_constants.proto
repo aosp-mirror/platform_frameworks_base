@@ -2337,6 +2337,27 @@ message MetricsEvent {
     // ACTION: Settings -> Select support tab.
     ACTION_SELECT_SUPPORT_FRAGMENT = 477;
 
+    // ACTION: Settings -> Support -> Tips & tricks
+    ACTION_SUPPORT_TIPS_AND_TRICKS = 478;
+
+    // ACTION: Settings -> Support -> Help & feedback
+    ACTION_SUPPORT_HELP_AND_FEEDBACK = 479;
+
+    // ACTION: Settings -> Support -> Sign in
+    ACTION_SUPPORT_SIGN_IN = 480;
+
+    // ACTION: Settings -> Support -> Phone
+    ACTION_SUPPORT_PHONE = 481;
+
+    // ACTION: Settings -> Support -> Chat
+    ACTION_SUPPORT_CHAT = 482;
+
+    // ACTION: Settings -> Support -> Phone/Chat -> Disclaimer Cancel
+    ACTION_SUPPORT_DISCLAIMER_CANCEL = 483;
+
+    // ACTION: Settings -> Support -> Phone/Chat -> Disclaimer OK
+    ACTION_SUPPORT_DISCLAIMER_OK = 484;
+
     // ---- End N-MR1 Constants, all N-MR1 constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
