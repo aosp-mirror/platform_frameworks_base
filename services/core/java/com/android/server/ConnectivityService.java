@@ -30,8 +30,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
-import static android.net.NetworkPolicyManager.MASK_METERED_NETWORKS;
-import static android.net.NetworkPolicyManager.MASK_ALL_NETWORKS;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
@@ -932,7 +930,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Networks aren't blocked when ignoring blocked status
         if (ignoreBlocked) return false;
         // Networks are never blocked for system services
-        if (uid < Process.FIRST_APPLICATION_UID) return false;
+        if (isSystem(uid)) return false;
 
         final boolean networkMetered;
         final int uidRules;
@@ -4046,12 +4044,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return false;
     }
 
+    private boolean isSystem(int uid) {
+        return uid < Process.FIRST_APPLICATION_UID;
+    }
 
     private void enforceMeteredApnPolicy(NetworkCapabilities networkCapabilities) {
+        final int uid = Binder.getCallingUid();
+        if (isSystem(uid)) {
+            return;
+        }
         // if UID is restricted, don't allow them to bring up metered APNs
         if (networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED) == false) {
             final int uidRules;
-            final int uid = Binder.getCallingUid();
             synchronized(mRulesLock) {
                 uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             }
