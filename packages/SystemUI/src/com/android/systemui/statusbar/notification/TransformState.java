@@ -301,6 +301,9 @@ public class TransformState {
     }
 
     public static void setClippingDeactivated(final View transformedView, boolean deactivated) {
+        if (!(transformedView.getParent() instanceof ViewGroup)) {
+            return;
+        }
         ViewGroup view = (ViewGroup) transformedView.getParent();
         while (true) {
             ArraySet<View> clipSet = (ArraySet<View>) view.getTag(CLIP_CLIPPING_SET);
@@ -456,12 +459,14 @@ public class TransformState {
         mTransformationEndY = UNDEFINED;
     }
 
-    public void setVisible(boolean visible) {
-        if (mTransformedView.getVisibility() == View.GONE) {
+    public void setVisible(boolean visible, boolean force) {
+        if (!force && mTransformedView.getVisibility() == View.GONE) {
             return;
         }
+        if (mTransformedView.getVisibility() != View.GONE) {
+            mTransformedView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        }
         mTransformedView.animate().cancel();
-        mTransformedView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         mTransformedView.setAlpha(visible ? 1.0f : 0.0f);
         resetTransformedView();
     }

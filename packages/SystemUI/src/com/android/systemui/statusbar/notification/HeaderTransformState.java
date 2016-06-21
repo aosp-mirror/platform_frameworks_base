@@ -123,8 +123,9 @@ public class HeaderTransformState extends TransformState {
         }
     }
 
-    public void setVisible(boolean visible) {
-        super.setVisible(visible);
+    @Override
+    public void setVisible(boolean visible, boolean force) {
+        super.setVisible(visible, force);
         if (!(mTransformedView instanceof NotificationHeaderView)) {
             return;
         }
@@ -132,11 +133,13 @@ public class HeaderTransformState extends TransformState {
         int childCount = header.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View headerChild = header.getChildAt(i);
-            if (headerChild.getVisibility() == View.GONE) {
+            if (!force && headerChild.getVisibility() == View.GONE) {
                 continue;
             }
             headerChild.animate().cancel();
-            headerChild.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+            if (headerChild.getVisibility() != View.GONE) {
+                headerChild.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+            }
             if (headerChild == mExpandButton) {
                 headerChild.setAlpha(visible ? 1.0f : 0.0f);
             }
