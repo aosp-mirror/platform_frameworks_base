@@ -380,6 +380,7 @@ public class LauncherAppsService extends SystemService {
                         "To query by shortcut ID, package name must also be set");
             }
 
+            // TODO(b/29399275): Eclipse compiler requires explicit List<ShortcutInfo> cast below.
             return new ParceledListSlice<>((List<ShortcutInfo>)
                     mShortcutServiceInternal.getShortcuts(getCallingUserId(),
                             callingPackage, changedSince, packageName, shortcutIds,
