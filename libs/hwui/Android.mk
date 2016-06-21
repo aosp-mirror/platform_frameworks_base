@@ -323,13 +323,8 @@ include $(BUILD_EXECUTABLE)
 # ---------------------
 include $(CLEAR_VARS)
 
-LOCAL_MODULE_PATH := $(TARGET_OUT_DATA)/local/tmp
 LOCAL_MODULE:= hwuimicro
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE_CLASS := EXECUTABLES
-LOCAL_MULTILIB := both
-LOCAL_MODULE_STEM_32 := hwuimicro
-LOCAL_MODULE_STEM_64 := hwuimicro64
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -include debug/wrap_gles.h \
@@ -338,7 +333,6 @@ LOCAL_CFLAGS := \
 LOCAL_C_INCLUDES := $(hwui_c_includes)
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static_debug
-LOCAL_STATIC_LIBRARIES := libgoogle-benchmark
 LOCAL_SHARED_LIBRARIES := libmemunreachable
 
 LOCAL_SRC_FILES += \
@@ -357,4 +351,4 @@ ifeq (true, $(HWUI_NEW_OPS))
 endif
 
 include $(LOCAL_PATH)/hwui_static_deps.mk
-include $(BUILD_EXECUTABLE)
+include $(BUILD_NATIVE_BENCHMARK)
