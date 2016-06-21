@@ -1517,13 +1517,9 @@ public class PopupWindow {
         anchor.getWindowVisibleDisplayFrame(displayFrame);
         if (width == MATCH_PARENT) {
             width = displayFrame.right - displayFrame.left;
-        } else if (width == WRAP_CONTENT) {
-            width = mContentView.getMeasuredWidth();
         }
         if (height == MATCH_PARENT) {
             height = displayFrame.bottom - displayFrame.top;
-        } else if (height == WRAP_CONTENT) {
-            height = mContentView.getMeasuredHeight();
         }
 
         // Let the window manager know to align the top to y.
