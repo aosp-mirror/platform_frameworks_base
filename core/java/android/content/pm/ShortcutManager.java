@@ -296,12 +296,13 @@ public class ShortcutManager {
     }
 
     /**
-     * Return the max number of dynamic shortcuts + manifest shortcuts that each launcehr icon
+     * Return the max number of dynamic shortcuts + manifest shortcuts that each launcher icon
      * can have at a time.
      */
     public int getMaxShortcutCountForActivity() {
         try {
-            return mService.getMaxDynamicShortcutCount(mContext.getPackageName(), injectMyUserId());
+            return mService.getMaxShortcutCountForActivity(
+                    mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

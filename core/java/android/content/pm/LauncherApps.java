@@ -188,21 +188,37 @@ public class LauncherApps {
         /**
          * Include dynamic shortcuts in the result.
          */
-        public static final int FLAG_GET_DYNAMIC = 1 << 0;
+        public static final int FLAG_MATCH_DYNAMIC = 1 << 0;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_DYNAMIC = FLAG_MATCH_DYNAMIC;
 
         /**
          * Include pinned shortcuts in the result.
          */
-        public static final int FLAG_GET_PINNED = 1 << 1;
+        public static final int FLAG_MATCH_PINNED = 1 << 1;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_PINNED = FLAG_MATCH_PINNED;
 
         /**
          * Include manifest shortcuts in the result.
          */
-        public static final int FLAG_GET_MANIFEST = 1 << 3;
+        public static final int FLAG_MATCH_MANIFEST = 1 << 3;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
         /** @hide */
-        public static final int FLAG_GET_ALL_KINDS =
+        public static final int FLAG_MATCH_ALL_KINDS =
                 FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
+
+        /** @hide kept for unit tests */
+        @Deprecated
+        public static final int FLAG_GET_ALL_KINDS = FLAG_MATCH_ALL_KINDS;
 
         /**
          * Requests "key" fields only.  See {@link ShortcutInfo#hasKeyFieldsOnly()} for which
@@ -213,9 +229,9 @@ public class LauncherApps {
         /** @hide */
         @IntDef(flag = true,
                 value = {
-                        FLAG_GET_DYNAMIC,
-                        FLAG_GET_PINNED,
-                        FLAG_GET_MANIFEST,
+                        FLAG_MATCH_DYNAMIC,
+                        FLAG_MATCH_PINNED,
+                        FLAG_MATCH_MANIFEST,
                         FLAG_GET_KEY_FIELDS_ONLY,
                 })
         @Retention(RetentionPolicy.SOURCE)
@@ -485,6 +501,7 @@ public class LauncherApps {
      * @hide // No longer used.  Use getShortcuts() instead.  Kept for unit tests.
      */
     @Nullable
+    @Deprecated
     public List<ShortcutInfo> getShortcutInfo(@NonNull String packageName,
             @NonNull List<String> ids, @NonNull UserHandle user) {
         final ShortcutQuery q = new ShortcutQuery();
@@ -519,6 +536,7 @@ public class LauncherApps {
     /**
      * @hide kept for testing.
      */
+    @Deprecated
     public int getShortcutIconResId(@NonNull ShortcutInfo shortcut) {
         return shortcut.getIconResourceId();
     }
@@ -526,6 +544,7 @@ public class LauncherApps {
     /**
      * @hide kept for testing.
      */
+    @Deprecated
     public int getShortcutIconResId(@NonNull String packageName, @NonNull String shortcutId,
             @NonNull UserHandle user) {
         final ShortcutQuery q = new ShortcutQuery();
@@ -538,13 +557,7 @@ public class LauncherApps {
     }
 
     /**
-     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
-     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param shortcut The target shortcut.
+     * @hide internal/unit tests only
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull ShortcutInfo shortcut) {
@@ -553,15 +566,7 @@ public class LauncherApps {
     }
 
     /**
-     * Return the icon as {@link ParcelFileDescriptor}, when it's stored as a file
-     * (i.e. when {@link ShortcutInfo#hasIconFile()} returns {@code true}).
-     *
-     * <p>Callers must be allowed to access the shortcut information, as defined in {@link
-     * #hasShortcutHostPermission()}.
-     *
-     * @param packageName The target package name.
-     * @param shortcutId The ID of the shortcut to lad rom.
-     * @param user The UserHandle of the profile.
+     * @hide internal/unit tests only
      */
     public ParcelFileDescriptor getShortcutIconFd(
             @NonNull String packageName, @NonNull String shortcutId, @NonNull UserHandle user) {

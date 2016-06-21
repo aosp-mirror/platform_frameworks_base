@@ -15,8 +15,11 @@
  */
 package com.android.server.pm;
 
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBundlesEqual;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertWith;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.makeBundle;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.parceled;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.set;
 
@@ -35,12 +38,14 @@ import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.frameworks.servicestests.R;
+import com.android.server.pm.ShortcutService.ConfigConstants;
 
 /**
  * Tests for ShortcutService and ShortcutManager.
@@ -777,6 +782,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setRank(123)
                 .setExtras(pb)
                 .build();
+        sorig.setTimestamp(mInjectedCurrentTimeMillis);
 
         ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
                 .setId("id2")
@@ -785,11 +791,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(456)
                 .build();
+        sorig2.setTimestamp(mInjectedCurrentTimeMillis);
 
         mManager.addDynamicShortcuts(list(sorig, sorig2));
 
-        Thread.sleep(2);
-        final long now = System.currentTimeMillis();
+        mInjectedCurrentTimeMillis += 1;
+        final long now = mInjectedCurrentTimeMillis;
+        mInjectedCurrentTimeMillis += 1;
 
         // Save and load.
         mService.saveDirtyInfo();
@@ -845,6 +853,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setRank(123)
                 .setExtras(pb)
                 .build();
+        sorig.setTimestamp(mInjectedCurrentTimeMillis);
 
         ShortcutInfo sorig2 = new ShortcutInfo.Builder(mClientContext)
                 .setId("id2")
@@ -853,11 +862,13 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(456)
                 .build();
+        sorig2.setTimestamp(mInjectedCurrentTimeMillis);
 
         mManager.addDynamicShortcuts(list(sorig, sorig2));
 
-        Thread.sleep(2);
-        final long now = System.currentTimeMillis();
+        mInjectedCurrentTimeMillis += 1;
+        final long now = mInjectedCurrentTimeMillis;
+        mInjectedCurrentTimeMillis += 1;
 
         // Save and load.
         mService.saveDirtyInfo();
@@ -1028,6 +1039,63 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         // Note when restored from backup, it's no longer dynamic, so shouldn't have a rank.
         si = mService.getPackageShortcutForTest(CALLING_PACKAGE_1, "id2", USER_0);
         assertEquals(0, si.getRank());
+    }
+
+    private void checkShortcutInfoSaveAndLoad_intents(Intent intent) {
+        assertTrue(mManager.setDynamicShortcuts(list(
+                makeShortcutWithIntent("s1", intent))));
+        initService();
+        mService.handleUnlockUser(USER_0);
+
+        assertWith(getCallerShortcuts())
+                .haveIds("s1")
+                .forShortcutWithId("s1", si -> {
+                    assertEquals(intent.getAction(), si.getIntent().getAction());
+                    assertEquals(intent.getData(), si.getIntent().getData());
+                    assertEquals(intent.getComponent(), si.getIntent().getComponent());
+                    assertBundlesEqual(intent.getExtras(), si.getExtras());
+                });
+    }
+
+    public void testShortcutInfoSaveAndLoad_intents() {
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_VIEW));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_MAIN));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.example.com/")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_MAIN,
+                Uri.parse("http://www.example.com/")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_VIEW)
+                .setComponent(new ComponentName("a", "b")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_MAIN)
+                .setComponent(new ComponentName("a", "b")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_VIEW)
+                .putExtras(makeBundle("a", "b")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
+
+
+        checkShortcutInfoSaveAndLoad_intents(new Intent(Intent.ACTION_MAIN)
+                .putExtras(makeBundle("a", "b")));
+
+        mInjectedCurrentTimeMillis += INTERVAL; // reset throttling.
     }
 
     public void testThrottling() {
