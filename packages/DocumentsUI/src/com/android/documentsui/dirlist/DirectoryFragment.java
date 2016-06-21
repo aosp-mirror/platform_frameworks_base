@@ -417,37 +417,44 @@ public class DirectoryFragment extends Fragment
         return false;
     }
 
-    protected boolean onRightClick(MotionInputEvent e) {
+    protected boolean onRightClick(MotionEvent e) {
         // First get target to see if it's a blank window or a file/doc
-        DocumentHolder holder = getTarget(e);
-        if (holder != null) {
-          String modelId = getModelId(holder.itemView);
-          if (!mSelectionManager.getSelection().contains(modelId)) {
-              mSelectionManager.clearSelection();
-              // Set selection on the one single item
-              List<String> ids = Collections.singletonList(modelId);
-              mSelectionManager.setItemsSelected(ids, true);
-          }
+        final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
+        try {
+            if (event.getItemPosition() != RecyclerView.NO_POSITION) {
+                final DocumentHolder holder = getTarget(event);
+                String modelId = getModelId(holder.itemView);
+                if (!mSelectionManager.getSelection().contains(modelId)) {
+                    mSelectionManager.clearSelection();
+                    // Set selection on the one single item
+                    List<String> ids = Collections.singletonList(modelId);
+                    mSelectionManager.setItemsSelected(ids, true);
+                }
 
-          // We are registering for context menu here so long-press doesn't trigger this
-          // floating context menu, and then quickly unregister right afterwards
-          registerForContextMenu(holder.itemView);
-          mRecView.showContextMenuForChild(holder.itemView,
-              e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
-          unregisterForContextMenu(holder.itemView);
-        }
-        // If there was no holder item, that means user right-clicked on the blank pane
-        // We would want to show different options then, and not select any item
-        // The blank pane could be the recyclerView or the emptyView, so we need to register
-        // according to whichever one is visible
-        else if (mEmptyView.getVisibility() == View.VISIBLE) {
-            registerForContextMenu(mEmptyView);
-            mEmptyView.showContextMenu(e.getX(), e.getY());
-            unregisterForContextMenu(mEmptyView);
-        } else {
-            registerForContextMenu(mRecView);
-            mRecView.showContextMenu(e.getX(), e.getY());
-            unregisterForContextMenu(mRecView);
+                // We are registering for context menu here so long-press doesn't trigger this
+                // floating context menu, and then quickly unregister right afterwards
+                registerForContextMenu(holder.itemView);
+                mRecView.showContextMenuForChild(holder.itemView,
+                        e.getX() - holder.itemView.getLeft(), e.getY() - holder.itemView.getTop());
+                unregisterForContextMenu(holder.itemView);
+            }
+            // If there was no corresponding item pos, that means user right-clicked on the blank
+            // pane
+            // We would want to show different options then, and not select any item
+            // The blank pane could be the recyclerView or the emptyView, so we need to register
+            // according to whichever one is visible
+            else if (mEmptyView.getVisibility() == View.VISIBLE) {
+                registerForContextMenu(mEmptyView);
+                mEmptyView.showContextMenu(e.getX(), e.getY());
+                unregisterForContextMenu(mEmptyView);
+                return true;
+            } else {
+                registerForContextMenu(mRecView);
+                mRecView.showContextMenu(e.getX(), e.getY());
+                unregisterForContextMenu(mRecView);
+            }
+        } finally {
+            event.recycle();
         }
         return true;
     }
@@ -1638,7 +1645,7 @@ public class DirectoryFragment extends Fragment
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY) {
-                return mGestureListener.onSingleTapConfirmed(event);
+                return mGestureListener.onRightClick(event);
             }
             return false;
         }
@@ -1671,8 +1678,7 @@ public class DirectoryFragment extends Fragment
             // events. Otherwise, tap events are routed to the target DocumentHolder.
             if (Events.isMouseEvent(e) && mLastButtonState == MotionEvent.BUTTON_SECONDARY) {
                 mLastButtonState = -1;
-                final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
-                return DirectoryFragment.this.onRightClick(event);
+                return onRightClick(e);
             }
 
             final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
@@ -1713,6 +1719,10 @@ public class DirectoryFragment extends Fragment
             // to route through the DocumentHolder if necessary.
             final MotionInputEvent event = MotionInputEvent.obtain(e, mRecView);
             return DirectoryFragment.this.onDoubleTap(event);
+        }
+
+        public boolean onRightClick(MotionEvent e) {
+            return DirectoryFragment.this.onRightClick(e);
         }
     }
 
