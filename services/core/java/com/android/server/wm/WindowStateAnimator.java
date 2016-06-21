@@ -1412,12 +1412,7 @@ class WindowStateAnimator {
         // However, this would be unsafe, as the client may be in the middle
         // of producing a frame at the old size, having just completed layout
         // to find the surface size changed underneath it.
-        //
-        // TODO: For N we only apply this fix to the pinned workspace. As we
-        // aren't observing known issues here outside of PiP resizing. (Typically
-        // the other windows that use -1 are PopupWindows which aren't likely
-        // to be rendering while we resize).
-        if (!w.inPinnedWorkspace() || (!w.mRelayoutCalled || w.mInRelayout)) {
+        if (!w.mRelayoutCalled || w.mInRelayout) {
             mSurfaceResized = mSurfaceController.setSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
         } else {
