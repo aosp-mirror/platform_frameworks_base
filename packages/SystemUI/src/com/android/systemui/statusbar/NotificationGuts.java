@@ -264,7 +264,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     private void bindSlider(final View importanceSlider, final boolean systemApp) {
-        mActiveSliderTint = loadColorStateList(R.color.notification_guts_slider_color);
+        mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.notification_guts_disabled_slider_color);
 
         mImportanceSummary = ((TextView) importanceSlider.findViewById(R.id.summary));

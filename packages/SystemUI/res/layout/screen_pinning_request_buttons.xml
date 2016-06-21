@@ -28,7 +28,7 @@
     android:id="@+id/screen_pinning_buttons"
     android:layout_width="match_parent"
     android:layout_height="@dimen/screen_pinning_request_button_height"
-    android:background="@color/screen_pinning_request_bg" >
+    android:background="?android:attr/colorAccent">
 
     <View
         android:layout_width="@dimen/screen_pinning_request_side_width"
@@ -42,7 +42,8 @@
         android:layout_height="@dimen/screen_pinning_request_button_height"
         android:layout_weight="0"
         android:paddingStart="@dimen/screen_pinning_request_frame_padding"
-        android:paddingEnd="@dimen/screen_pinning_request_frame_padding" >
+        android:paddingEnd="@dimen/screen_pinning_request_frame_padding"
+        android:theme="@*android:style/ThemeOverlay.DeviceDefault.Accent">
 
         <ImageView
             android:id="@+id/screen_pinning_back_bg_light"
