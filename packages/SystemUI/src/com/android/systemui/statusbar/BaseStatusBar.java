@@ -2483,7 +2483,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean shouldPeek(Entry entry, StatusBarNotification sbn) {
-        if (isDeviceInVrMode()) {
+        if (!mUseHeadsUp || isDeviceInVrMode()) {
             return false;
         }
 
