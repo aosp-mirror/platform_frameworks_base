@@ -1018,6 +1018,8 @@ redirects:
   to: /studio/projects/templates.html
 - from: /tools/publishing/app-signing.html
   to: /studio/publish/app-signing.html
+- from: /guide/publishing/app-signing.html
+  to: /studio/publish/app-signing.html
 - from: /tools/publishing/preparing.html
   to: /studio/publish/preparing.html
 - from: /tools/publishing/publishing_overview.html
