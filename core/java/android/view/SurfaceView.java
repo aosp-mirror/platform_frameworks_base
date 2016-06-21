@@ -498,7 +498,7 @@ public class SurfaceView extends View {
                               | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                               | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                               ;
-                if (!creating && !force && !mUpdateWindowNeeded && !sizeChanged) {
+                if (!creating && !force && !sizeChanged) {
                     mLayout.privateFlags |=
                             WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY;
                 } else {
