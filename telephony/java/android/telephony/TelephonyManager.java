@@ -1445,11 +1445,11 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_EHRPD = 14;
     /** Current network is HSPA+ */
     public static final int NETWORK_TYPE_HSPAP = 15;
-    /** Current network is GSM {@hide} */
+    /** Current network is GSM */
     public static final int NETWORK_TYPE_GSM = 16;
-     /** Current network is TD_SCDMA {@hide} */
+    /** Current network is TD_SCDMA */
     public static final int NETWORK_TYPE_TD_SCDMA = 17;
-   /** Current network is IWLAN {@hide} */
+    /** Current network is IWLAN */
     public static final int NETWORK_TYPE_IWLAN = 18;
 
     /**
