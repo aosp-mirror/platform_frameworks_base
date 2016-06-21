@@ -465,5 +465,12 @@ public class BackspaceTest extends KeyListenerTestCase {
         state.assertEquals("U+1F466 U+1F3FB |");
         backspace(state, 0);
         state.assertEquals("|");
+
+        // RIS + LF
+        state.setByString("U+1F1E6 U+000A |");
+        backspace(state, 0);
+        state.assertEquals("U+1F1E6 |");
+        backspace(state, 0);
+        state.assertEquals("|");
     }
 }
