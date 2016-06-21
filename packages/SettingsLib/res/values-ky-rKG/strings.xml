@@ -175,9 +175,9 @@
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Интерфейстеги дайындар трафигинин көлөмүнө жараша Wi-Fi Роуминг скандоо мүмкүнчүлүгүн иштетүү/өчүрүү"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Каттагыч буферлеринин өлчөмдөрү"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Каттоо буфери үчүн Каттагычтын көлөмүн тандаңыз"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Каттагычтын туруктуу сактагычы тазалансынбы?"</string>
-    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Туруктуу каттагычты көзөмөлдөбөй калганыбызда, түзмөгүңүздөгү каттагыч дайындарын тазалап салышыбыз керек."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Каттагыч дайындары түзмөккө сакталсын"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Таржымалдын туруктуу диски тазалансынбы?"</string>
+    <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Туруктуу таржымалга көз салууну токтотсок, анын түзмөктө сакталган дайындарын жок кылууга аргасыз болобуз."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Таржымалдагы дайындар түзмөккө сакталсын"</string>
     <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Түзмөккө туруктуу сактоо үчүн таржымал буферлерин тандаңыз"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB конфигурациясын тандоо"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB конфигурациясын тандоо"</string>

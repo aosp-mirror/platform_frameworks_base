@@ -178,7 +178,7 @@
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"லாகரின் நிலையான சேமிப்பகத்தை அழிக்கவா?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"இனி நிலையான லாகர் மூலம் நாங்கள் கண்காணிக்க முடியாத நிலை ஏற்படும் போது, உங்கள் சாதனத்தில் உள்ள லாகர் தரவை நாங்கள் அழிக்க வேண்டி இருக்கும்."</string>
     <string name="select_logpersist_title" msgid="7530031344550073166">"சாதனத்தில் தொடர்ந்து லாகர் தரவைச் சேமி"</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"தொடர்ந்து சாதனத்தில் சேமிக்க வேண்டிய லாக் பஃபர்களைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"தொடர்ந்து சாதனத்தில் தற்காலிகமாகச் சேமிக்க வேண்டிய பதிவுகளைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"USB உள்ளமைவைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"USB உள்ளமைவைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"போலி இருப்பிடங்களை அனுமதி"</string>

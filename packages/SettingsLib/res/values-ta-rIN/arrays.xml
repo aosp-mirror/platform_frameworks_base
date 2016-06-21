@@ -87,8 +87,8 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="2216470072500521830">"முடக்கத்தில்"</item>
-    <item msgid="172978079776521897">"எல்லா லாக் பஃபர்களும்"</item>
-    <item msgid="3873873912383879240">"எல்லாம் (ரேடியோ லாக் பஃபர்கள் தவிர்த்து)"</item>
+    <item msgid="172978079776521897">"தற்காலிகமாகச் சேமித்த எல்லா பதிவுகளும்"</item>
+    <item msgid="3873873912383879240">"எல்லாம் (தற்காலிகமாகச் சேமித்த ரேடியோ பதிவுகள் தவிர்த்து)"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"அனிமேஷனை முடக்கு"</item>

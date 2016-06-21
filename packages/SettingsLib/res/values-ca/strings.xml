@@ -177,8 +177,8 @@
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Mida Logger per memòria intermèdia"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>
-    <string name="select_logpersist_title" msgid="7530031344550073166">"Emm. dades registr. de manera persistent al disp."</string>
-    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Selecciona registres de memòria interm. per emmag. de manera persistent al disp."</string>
+    <string name="select_logpersist_title" msgid="7530031344550073166">"Emm. dades reg. persist. a disp."</string>
+    <string name="select_logpersist_dialog_title" msgid="4003400579973269060">"Selecciona memòries interm. de registre per emmag. de manera persistent al disp."</string>
     <string name="select_usb_configuration_title" msgid="2649938511506971843">"Selecciona configuració USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="6385564442851599963">"Selecciona configuració USB"</string>
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicacions simulades"</string>
