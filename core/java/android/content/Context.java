@@ -3615,7 +3615,8 @@ public abstract class Context {
     public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
 
     /**
-     * TODO Javadoc
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
      * @see #getSystemService
      * @see android.content.pm.ShortcutManager

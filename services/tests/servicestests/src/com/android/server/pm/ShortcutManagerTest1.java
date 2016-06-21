@@ -19,9 +19,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamic;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllDynamicOrPinned;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllEnabled;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIcon;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconFile;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIconResId;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveIntents;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllHaveTitle;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllImmutable;
@@ -32,7 +29,6 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotKeyFieldsOnly;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllNotManifest;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllPinned;
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllStringsResolved;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertAllUnique;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBitmapSize;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertBundleEmpty;
@@ -191,7 +187,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         + ConfigConstants.KEY_ICON_FORMAT + "=WEBP,"
                         + ConfigConstants.KEY_ICON_QUALITY + "=75");
         assertEquals(123000, mService.getResetIntervalForTest());
-        assertEquals(4, mService.getMaxDynamicShortcutsForTest());
+        assertEquals(4, mService.getMaxShortcutsForTest());
         assertEquals(5, mService.getMaxUpdatesPerIntervalForTest());
         assertEquals(100, mService.getMaxIconDimensionForTest());
         assertEquals(CompressFormat.WEBP, mService.getIconPersistFormatForTest());
@@ -206,7 +202,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 mService.getResetIntervalForTest());
 
         assertEquals(ShortcutService.DEFAULT_MAX_SHORTCUTS_PER_APP,
-                mService.getMaxDynamicShortcutsForTest());
+                mService.getMaxShortcutsForTest());
 
         assertEquals(ShortcutService.DEFAULT_MAX_UPDATES_PER_INTERVAL,
                 mService.getMaxUpdatesPerIntervalForTest());
