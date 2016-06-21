@@ -225,16 +225,22 @@ public class StackStateAnimator {
         // start height animation
         if (heightChanging) {
             startHeightAnimation(child, viewState, duration, delay);
+        }  else {
+            abortAnimation(child, TAG_ANIMATOR_HEIGHT);
         }
 
         // start shadow alpha animation
         if (shadowAlphaChanging) {
             startShadowAlphaAnimation(child, viewState, duration, delay);
+        } else {
+            abortAnimation(child, TAG_ANIMATOR_SHADOW_ALPHA);
         }
 
         // start top inset animation
         if (topInsetChanging) {
             startInsetAnimation(child, viewState, duration, delay);
+        } else {
+            abortAnimation(child, TAG_ANIMATOR_TOP_INSET);
         }
 
         // start dimmed animation
@@ -286,16 +292,29 @@ public class StackStateAnimator {
         // start translationY animation
         if (yTranslationChanging) {
             startYTranslationAnimation(child, viewState, duration, delay);
+        } else {
+            abortAnimation(child, TAG_ANIMATOR_TRANSLATION_Y);
         }
 
         // start translationZ animation
         if (zTranslationChanging) {
             startZTranslationAnimation(child, viewState, duration, delay);
+        } else {
+            abortAnimation(child, TAG_ANIMATOR_TRANSLATION_Z);
         }
 
         // start alpha animation
         if (alphaChanging && child.getTranslationX() == 0) {
             startAlphaAnimation(child, viewState, duration, delay);
+        }  else {
+            abortAnimation(child, TAG_ANIMATOR_ALPHA);
+        }
+    }
+
+    private void abortAnimation(View child, int animatorTag) {
+        Animator previousAnimator = getChildTag(child, animatorTag);
+        if (previousAnimator != null) {
+            previousAnimator.cancel();
         }
     }
 
@@ -413,7 +432,8 @@ public class StackStateAnimator {
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
@@ -472,7 +492,8 @@ public class StackStateAnimator {
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
@@ -548,7 +569,8 @@ public class StackStateAnimator {
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
@@ -630,7 +652,8 @@ public class StackStateAnimator {
         });
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
@@ -674,7 +697,8 @@ public class StackStateAnimator {
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
@@ -729,7 +753,8 @@ public class StackStateAnimator {
         animator.setInterpolator(interpolator);
         long newDuration = cancelAnimatorAndGetNewDuration(duration, previousAnimator);
         animator.setDuration(newDuration);
-        if (delay > 0 && (previousAnimator == null || !previousAnimator.isRunning())) {
+        if (delay > 0 && (previousAnimator == null
+                || previousAnimator.getAnimatedFraction() == 0)) {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
