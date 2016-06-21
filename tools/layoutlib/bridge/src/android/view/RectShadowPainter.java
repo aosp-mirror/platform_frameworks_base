@@ -54,12 +54,18 @@ public class RectShadowPainter {
         if (saved == -1) {
             return;
         }
+
+        float radius = viewOutline.getRadius();
+        if (radius <= 0) {
+            // We can not paint a shadow with radius 0
+            return;
+        }
+
         try {
             Paint cornerPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
             cornerPaint.setStyle(Style.FILL);
             Paint edgePaint = new Paint(cornerPaint);
             edgePaint.setAntiAlias(false);
-            float radius = viewOutline.getRadius();
             float outerArcRadius = radius + shadowSize;
             int[] colors = {START_COLOR, START_COLOR, END_COLOR};
             cornerPaint.setShader(new RadialGradient(0, 0, outerArcRadius, colors,
