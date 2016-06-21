@@ -710,6 +710,7 @@ public class TableLayout extends LinearLayout {
          */
         public LayoutParams(ViewGroup.LayoutParams p) {
             super(p);
+            width = MATCH_PARENT;
         }
 
         /**
@@ -717,6 +718,10 @@ public class TableLayout extends LinearLayout {
          */
         public LayoutParams(MarginLayoutParams source) {
             super(source);
+            width = MATCH_PARENT;
+            if (source instanceof TableLayout.LayoutParams) {
+                weight = ((TableLayout.LayoutParams) source).weight;
+            }
         }
 
         /**
