@@ -16,28 +16,24 @@
 
 package android.graphics.perftests;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.VectorDrawable;
-import android.os.Bundle;
 
 import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.BitmapUtils;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 
 import com.android.frameworks.perftests.R;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 @LargeTest
 public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<StubActivity> {
 
-    private static final String TAG = "PathPerfTest";
-    private static final boolean DBG_PERF = false;
+    private static final boolean DUMP_BITMAP = false;
 
     private int[] mTestWidths = {1024, 512};
     private int[] mTestHeights = {512, 1024};
@@ -48,37 +44,8 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
         super(StubActivity.class);
     }
 
-    // Save a bitmap into a PNG, only for debugging purpose.
-    // TODO: move into utility class.
-    private void saveBitmapIntoPNG(Bitmap bitmap, int resId) throws IOException {
-        // Save the image to the disk.
-        FileOutputStream out = null;
-        try {
-            String originalFilePath = getActivity().getResources().getString(resId);
-            File originalFile = new File(originalFilePath);
-            String fileFullName = originalFile.getName();
-            String fileTitle = fileFullName.substring(0, fileFullName.lastIndexOf("."));
-
-            File externalFilesDir = getActivity().getExternalFilesDir(null);
-            File outputFile = new File(externalFilesDir, fileTitle + "_golden.png");
-            if (!outputFile.exists()) {
-                outputFile.createNewFile();
-            }
-
-            out = new FileOutputStream(outputFile, false);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Log.v(TAG, "Write test No." + outputFile.getAbsolutePath() + " to file successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
     @LargeTest
-    public void testVectorDrawableInflatePerf() throws IOException {
+    public void testBitmapDrawPerf() throws IOException {
         int resId = R.drawable.vector_drawable01;
         VectorDrawable vd = (VectorDrawable) getActivity().getDrawable(resId);
 
@@ -98,9 +65,15 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
 
         // Double check the bitmap pixels to make sure we draw correct content.
         int backgroundColor = bmp.getPixel(w / 4, h / 2);
-        int objColor = bmp.getPixel(w / 8, h / 2);
-        assertTrue("The background should be white", backgroundColor == 0xFFFFFFFF);
-        assertTrue("The object should be black", objColor == 0xFF000000);
+        int objColor = bmp.getPixel(w / 8, h / 2 + 1);
+        int emptyColor = bmp.getPixel(w * 3 / 4, h * 3 / 4);
+        assertTrue("The background should be white", backgroundColor == Color.WHITE);
+        assertTrue("The object should be black", objColor == Color.BLACK);
+        assertTrue("The right bottom part should be empty", emptyColor == Color.TRANSPARENT);
+
+        if (DUMP_BITMAP) {
+            BitmapUtils.saveBitmapIntoPNG(getActivity(), bmp, resId);
+        }
 
         state.sendFullStatusReport(getInstrumentation(), KEY_VECTORDRAWABLE_DRAW_TIME);
     }
