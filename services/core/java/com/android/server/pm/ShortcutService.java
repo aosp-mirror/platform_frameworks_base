@@ -123,19 +123,8 @@ import java.util.function.Predicate;
  * - Deal with the async nature of PACKAGE_ADD.  Basically when a publisher does anything after
  *   it's upgraded, the manager should make sure the upgrade process has been executed.
  *
- * - HandleUnlockUser needs to be async.  Wait on it in onCleanupUser.
- *
- * - Implement reportShortcutUsed().
- *
- * - validateForXml() should be removed.
- *
- * - Ranks should be recalculated after each update.
- *
- * - When the system locale changes, update timestamps for shortcuts with string resources,
- *   and notify the launcher.  Right now, it resets the throttling, but timestamps are not changed
- *   and there's no notification either.
- *
  * - getIconMaxWidth()/getIconMaxHeight() should use xdpi and ydpi.
+ *   -> But TypedValue.applyDimension() doesn't differentiate x and y..?
  *
  * - Default launcher check does take a few ms.  Worth caching.
  *
@@ -143,8 +132,6 @@ import java.util.function.Predicate;
  *   internal bitmap handling.
  *
  * - Add more call stats.
- *
- * - Rename mMaxDynamicShortcuts, because it includes manifest shortcuts too.
  */
 public class ShortcutService extends IShortcutService.Stub {
     static final String TAG = "ShortcutService";
@@ -256,9 +243,9 @@ public class ShortcutService extends IShortcutService.Stub {
     private final SparseArray<ShortcutUser> mUsers = new SparseArray<>();
 
     /**
-     * Max number of dynamic shortcuts that each application can have at a time.
+     * Max number of dynamic + manifest shortcuts that each application can have at a time.
      */
-    private int mMaxDynamicShortcuts;
+    private int mMaxShortcuts;
 
     /**
      * Max number of updating API calls that each application can make during the interval.
@@ -563,7 +550,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mMaxUpdatesPerInterval = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL, DEFAULT_MAX_UPDATES_PER_INTERVAL));
 
-        mMaxDynamicShortcuts = Math.max(0, (int) parser.getLong(
+        mMaxShortcuts = Math.max(0, (int) parser.getLong(
                 ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
@@ -647,15 +634,19 @@ public class ShortcutService extends IShortcutService.Stub {
     @Nullable
     static Intent parseIntentAttribute(XmlPullParser parser, String attribute) {
         final String value = parseStringAttribute(parser, attribute);
-        if (TextUtils.isEmpty(value)) {
-            return null;
+        Intent parsed = null;
+        if (!TextUtils.isEmpty(value)) {
+            try {
+                parsed = Intent.parseUri(value, /* flags =*/ 0);
+            } catch (URISyntaxException e) {
+                Slog.e(TAG, "Error parsing intent", e);
+            }
         }
-        try {
-            return Intent.parseUri(value, /* flags =*/ 0);
-        } catch (URISyntaxException e) {
-            Slog.e(TAG, "Error parsing intent", e);
-            return null;
+        if (parsed == null) {
+            // Default intent.
+            parsed = new Intent(Intent.ACTION_VIEW);
         }
+        return parsed;
     }
 
     static void writeTagValue(XmlSerializer out, String tag, String value) throws IOException {
@@ -1361,7 +1352,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * {@link #getMaxActivityShortcuts()}.
      */
     void enforceMaxActivityShortcuts(int numShortcuts) {
-        if (numShortcuts > mMaxDynamicShortcuts) {
+        if (numShortcuts > mMaxShortcuts) {
             throw new IllegalArgumentException("Max number of dynamic shortcuts exceeded");
         }
     }
@@ -1370,7 +1361,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * Return the max number of dynamic + manifest shortcuts for each launcher icon.
      */
     int getMaxActivityShortcuts() {
-        return mMaxDynamicShortcuts;
+        return mMaxShortcuts;
     }
 
     /**
@@ -1431,51 +1422,7 @@ public class ShortcutService extends IShortcutService.Stub {
             ShortcutInfo.validateIcon(shortcut.getIcon());
         }
 
-        validateForXml(shortcut.getId());
-        validateForXml(shortcut.getTitle());
-        validatePersistableBundleForXml(shortcut.getIntentPersistableExtras());
-        validatePersistableBundleForXml(shortcut.getExtras());
-
         shortcut.replaceFlags(0);
-    }
-
-    // KXmlSerializer is strict and doesn't allow certain characters, so we disallow those
-    // characters.
-
-    private static void validatePersistableBundleForXml(PersistableBundle b) {
-        if (b == null || b.size() == 0) {
-            return;
-        }
-        for (String key : b.keySet()) {
-            validateForXml(key);
-            final Object value = b.get(key);
-            if (value == null) {
-                continue;
-            } else if (value instanceof String) {
-                validateForXml((String) value);
-            } else if (value instanceof String[]) {
-                for (String v : (String[]) value) {
-                    validateForXml(v);
-                }
-            } else if (value instanceof PersistableBundle) {
-                validatePersistableBundleForXml((PersistableBundle) value);
-            }
-        }
-    }
-
-    private static void validateForXml(CharSequence s) {
-        if (TextUtils.isEmpty(s)) {
-            return;
-        }
-        for (int i = s.length() - 1; i >= 0; i--) {
-            if (!isAllowedInXml(s.charAt(i))) {
-                throw new IllegalArgumentException("Unsupported character detected in: " + s);
-            }
-        }
-    }
-
-    private static boolean isAllowedInXml(char c) {
-        return (c >= 0x20 && c <= 0xd7ff) || (c >= 0xe000 && c <= 0xfffd);
     }
 
     private void assignImplicitRanks(List<ShortcutInfo> shortcuts) {
@@ -1784,11 +1731,11 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @Override
-    public int getMaxDynamicShortcutCount(String packageName, @UserIdInt int userId)
+    public int getMaxShortcutCountForActivity(String packageName, @UserIdInt int userId)
             throws RemoteException {
         verifyCaller(packageName, userId);
 
-        return mMaxDynamicShortcuts;
+        return mMaxShortcuts;
     }
 
     @Override
@@ -2710,7 +2657,7 @@ public class ShortcutService extends IShortcutService.Stub {
             pw.print("    maxUpdatesPerInterval: ");
             pw.println(mMaxUpdatesPerInterval);
             pw.print("    maxDynamicShortcuts: ");
-            pw.println(mMaxDynamicShortcuts);
+            pw.println(mMaxShortcuts);
             pw.println();
 
             pw.println("  Stats:");
@@ -3077,8 +3024,8 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    int getMaxDynamicShortcutsForTest() {
-        return mMaxDynamicShortcuts;
+    int getMaxShortcutsForTest() {
+        return mMaxShortcuts;
     }
 
     @VisibleForTesting

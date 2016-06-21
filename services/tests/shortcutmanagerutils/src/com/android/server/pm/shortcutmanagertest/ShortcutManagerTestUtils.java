@@ -18,6 +18,7 @@ package com.android.server.pm.shortcutmanagertest;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -41,6 +42,7 @@ import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.test.MoreAsserts;
 import android.util.ArraySet;
@@ -232,6 +234,33 @@ public class ShortcutManagerTestUtils {
         return ret;
     }
 
+    public static PersistableBundle makePersistableBundle(Object... keysAndValues) {
+        assertTrue((keysAndValues.length % 2) == 0);
+
+        if (keysAndValues.length == 0) {
+            return null;
+        }
+        final PersistableBundle ret = new PersistableBundle();
+
+        for (int i = keysAndValues.length - 2; i >= 0; i -= 2) {
+            final String key = keysAndValues[i].toString();
+            final Object value = keysAndValues[i + 1];
+
+            if (value == null) {
+                ret.putString(key, null);
+            } else if (value instanceof Integer) {
+                ret.putInt(key, (Integer) value);
+            } else if (value instanceof String) {
+                ret.putString(key, (String) value);
+            } else if (value instanceof PersistableBundle) {
+                ret.putPersistableBundle(key, (PersistableBundle) value);
+            } else {
+                fail("Type not supported yet: " + value.getClass().getName());
+            }
+        }
+        return ret;
+    }
+
     public static <T> List<T> list(T... array) {
         return Arrays.asList(array);
     }
@@ -280,7 +309,7 @@ public class ShortcutManagerTestUtils {
             ComponentName activity) {
         return filter(list, si ->
                 (si.getActivity().equals(activity)
-                        && (si.isManifestShortcut() || si.isDynamic())));
+                        && (si.isDeclaredInManifest() || si.isDynamic())));
     }
 
     public static List<ShortcutInfo> changedSince(List<ShortcutInfo> list, long time) {
@@ -377,32 +406,6 @@ public class ShortcutManagerTestUtils {
         return actualShortcuts;
     }
 
-    public static List<ShortcutInfo> assertAllHaveIconResId(
-            List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
-            assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
-        }
-        return actualShortcuts;
-    }
-
-    public static List<ShortcutInfo> assertAllHaveIconFile(
-            List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
-            assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
-        }
-        return actualShortcuts;
-    }
-
-    public static List<ShortcutInfo> assertAllHaveIcon(
-            List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId() + " has no icon ", s.hasIconFile() || s.hasIconResource());
-        }
-        return actualShortcuts;
-    }
-
     public static List<ShortcutInfo> assertAllKeyFieldsOnly(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
@@ -444,7 +447,7 @@ public class ShortcutManagerTestUtils {
     public static List<ShortcutInfo> assertAllManifest(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId(), s.isManifestShortcut());
+            assertTrue("ID " + s.getId(), s.isDeclaredInManifest());
         }
         return actualShortcuts;
     }
@@ -452,7 +455,7 @@ public class ShortcutManagerTestUtils {
     public static List<ShortcutInfo> assertAllNotManifest(
             List<ShortcutInfo> actualShortcuts) {
         for (ShortcutInfo s : actualShortcuts) {
-            assertFalse("ID " + s.getId(), s.isManifestShortcut());
+            assertFalse("ID " + s.getId(), s.isDeclaredInManifest());
         }
         return actualShortcuts;
     }
@@ -481,14 +484,6 @@ public class ShortcutManagerTestUtils {
         return actualShortcuts;
     }
 
-    public static List<ShortcutInfo> assertAllStringsResolved(
-            List<ShortcutInfo> actualShortcuts) {
-        for (ShortcutInfo s : actualShortcuts) {
-            assertTrue("ID " + s.getId(), s.hasStringResourcesResolved());
-        }
-        return actualShortcuts;
-    }
-
     public static void assertDynamicOnly(ShortcutInfo si) {
         assertTrue(si.isDynamic());
         assertFalse(si.isPinned());
@@ -496,7 +491,7 @@ public class ShortcutManagerTestUtils {
 
     public static void assertPinnedOnly(ShortcutInfo si) {
         assertFalse(si.isDynamic());
-        assertFalse(si.isManifestShortcut());
+        assertFalse(si.isDeclaredInManifest());
         assertTrue(si.isPinned());
     }
 
@@ -682,7 +677,7 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter selectManifest() {
             return new ShortcutListAsserter(this,
-                    filter(mList, ShortcutInfo::isManifestShortcut));
+                    filter(mList, ShortcutInfo::isDeclaredInManifest));
         }
 
         public ShortcutListAsserter selectPinned() {
@@ -777,12 +772,12 @@ public class ShortcutManagerTestUtils {
         }
 
         public ShortcutListAsserter areAllManifest() {
-            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isManifestShortcut()));
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isDeclaredInManifest()));
             return this;
         }
 
         public ShortcutListAsserter areAllNotManifest() {
-            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isManifestShortcut()));
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isDeclaredInManifest()));
             return this;
         }
 
@@ -849,6 +844,60 @@ public class ShortcutManagerTestUtils {
             forShortcut(si -> si.getId().equals(id), sa);
 
             return this;
+        }
+    }
+
+    public static void assertBundlesEqual(BaseBundle b1, BaseBundle b2) {
+        if (b1 == null && b2 == null) {
+            return; // pass
+        }
+        assertNotNull(b1);
+        assertNotNull(b2);
+
+        // HashSet makes the error message readable.
+        assertEquals(set(b1.keySet()), set(b2.keySet()));
+
+        for (String key : b1.keySet()) {
+            final Object v1 = b1.get(key);
+            final Object v2 = b2.get(key);
+            if (v1 == null) {
+                if (v2 == null) {
+                    return;
+                }
+            }
+            if (v1.equals(v2)) {
+                return;
+            }
+
+            assertTrue("Only either value is null: key=" + key
+                    + " b1=" + b1 + " b2=" + b2, v1 != null && v2 != null);
+            assertEquals("Class mismatch: key=" + key, v1.getClass(), v2.getClass());
+
+            if (v1 instanceof BaseBundle) {
+                assertBundlesEqual((BaseBundle) v1, (BaseBundle) v2);
+
+            } else if (v1 instanceof boolean[]) {
+                assertTrue(Arrays.equals((boolean[]) v1, (boolean[]) v2));
+
+            } else if (v1 instanceof int[]) {
+                MoreAsserts.assertEquals((int[]) v1, (int[]) v2);
+
+            } else if (v1 instanceof double[]) {
+                MoreAsserts.assertEquals((double[]) v1, (double[]) v2);
+
+            } else if (v1 instanceof String[]) {
+                MoreAsserts.assertEquals((String[]) v1, (String[]) v2);
+
+            } else if (v1 instanceof Double) {
+                if (((Double) v1).isNaN()) {
+                    assertTrue(((Double) v2).isNaN());
+                } else {
+                    assertEquals(v1, v2);
+                }
+
+            } else {
+                assertEquals(v1, v2);
+            }
         }
     }
 }
