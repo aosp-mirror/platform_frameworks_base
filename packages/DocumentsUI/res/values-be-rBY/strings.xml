@@ -34,6 +34,7 @@
     <string name="menu_copy" msgid="3612326052677229148">"Капіраваць у..."</string>
     <string name="menu_move" msgid="1828090633118079817">"Перамясціць у..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Новае акно"</string>
+    <string name="menu_cut_to_clipboard" msgid="2467149185452488383">"Выразаць"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Капіраваць"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Уставіць"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Паказаць унутр. сховішча"</string>
@@ -90,6 +91,8 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Падрыхтоўка да капіравання..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Падрыхтоўка да перамяшчэння..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Падрыхтоўка да выдалення..."</string>
+    <!-- no translation found for delete_progress (5399405983046157222) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Не атрымалася скапіраваць <xliff:g id="COUNT_1">%1$d</xliff:g> файл</item>
       <item quantity="few">Не атрымалася скапіраваць <xliff:g id="COUNT_1">%1$d</xliff:g> файлы</item>

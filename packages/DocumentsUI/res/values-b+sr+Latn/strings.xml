@@ -34,6 +34,7 @@
     <string name="menu_copy" msgid="3612326052677229148">"Kopiraj na..."</string>
     <string name="menu_move" msgid="1828090633118079817">"Premesti u..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Novi prozor"</string>
+    <string name="menu_cut_to_clipboard" msgid="2467149185452488383">"Iseci"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopiraj"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Nalepi"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Prikaži internu memoriju"</string>
@@ -87,6 +88,8 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Priprema se kopiranje…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprema se premeštanje..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Priprema se brisanje…"</string>
+    <!-- no translation found for delete_progress (5399405983046157222) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku</item>
       <item quantity="few">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>

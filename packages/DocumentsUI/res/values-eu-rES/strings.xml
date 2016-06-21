@@ -34,6 +34,7 @@
     <string name="menu_copy" msgid="3612326052677229148">"Kopiatu hemen…"</string>
     <string name="menu_move" msgid="1828090633118079817">"Eraman hona…"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Leiho berria"</string>
+    <string name="menu_cut_to_clipboard" msgid="2467149185452488383">"Ebaki"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopiatu"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Itsatsi"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Erakutsi barneko memoria"</string>
@@ -84,6 +85,8 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Kopiatzeko prestatzen…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Mugitzeko prestatzen…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Ezabatzeko prestatzen…"</string>
+    <!-- no translation found for delete_progress (5399405983046157222) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other">Ezin izan dira kopiatu <xliff:g id="COUNT_1">%1$d</xliff:g> fitxategi</item>
       <item quantity="one">Ezin izan da kopiatu <xliff:g id="COUNT_0">%1$d</xliff:g> fitxategi</item>
