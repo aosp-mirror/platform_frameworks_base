@@ -90,7 +90,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about using Bluetooth, read the
- * <a href="{@docRoot}guide/topics/wireless/bluetooth.html">Bluetooth</a> developer guide.
+ * <a href="{@docRoot}guide/topics/connectivity/bluetooth.html">Bluetooth</a> developer guide.
  * </div>
  *
  * {@see BluetoothDevice}
