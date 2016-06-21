@@ -926,6 +926,11 @@ public class KeyguardViewMediator extends SystemUI {
             // In this case, send out ACTION_USER_PRESENT here instead of in
             // handleKeyguardDone()
             sendUserPresentBroadcast();
+        } else if (mSystemReady && shouldWaitForProvisioning()) {
+            // Skipping the lockscreen because we're not yet provisioned, but we still need to
+            // notify the StrongAuthTracker that it's now safe to run trust agents, in case the
+            // user sets a credential later.
+            getLockPatternUtils().userPresent(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
 
