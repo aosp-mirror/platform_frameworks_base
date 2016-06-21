@@ -1015,6 +1015,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"स्केल"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"नेहमी दर्शवा"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टीम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
+    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
+    <skip />
+    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
+    <skip />
     <string name="smv_application" msgid="3307209192155442829">"अॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> प्रक्रियेने तिच्या स्वतः-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android श्रेणीसुधारित होत आहे..."</string>

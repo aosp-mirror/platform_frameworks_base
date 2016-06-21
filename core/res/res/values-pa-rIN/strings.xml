@@ -1015,6 +1015,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"ਸਕੇਲ"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"ਹਮੇਸ਼ਾਂ ਦਿਖਾਓ"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ &gt; ਐਪਸ &gt; ਡਾਊਨਲੋਡ ਕੀਤਿਆਂ ਵਿੱਚ ਇਸਨੂੰ ਮੁੜ-ਸਮਰੱਥ ਬਣਾਓ।"</string>
+    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
+    <skip />
+    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
+    <skip />
     <string name="smv_application" msgid="3307209192155442829">"ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> (ਪ੍ਰਕਿਰਿਆ<xliff:g id="PROCESS">%2$s</xliff:g>) ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
     <string name="smv_process" msgid="5120397012047462446">"ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%1$s</xliff:g> ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ਅਪਗ੍ਰੇਡ ਕਰ ਰਿਹਾ ਹੈ…"</string>
