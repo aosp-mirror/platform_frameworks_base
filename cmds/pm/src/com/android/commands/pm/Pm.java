@@ -262,6 +262,10 @@ public final class Pm {
             return runMovePrimaryStorage();
         }
 
+        if ("set-user-restriction".equals(op)) {
+            return runSetUserRestriction();
+        }
+
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("-l")) {
@@ -1515,6 +1519,38 @@ public final class Pm {
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    public int runSetUserRestriction() {
+        int userId = UserHandle.USER_OWNER;
+        String opt = nextOption();
+        if (opt != null && "--user".equals(opt)) {
+            String arg = nextArg();
+            if (arg == null || !isNumber(arg)) {
+                System.err.println("Error: valid userId not specified");
+                return 1;
+            }
+            userId = Integer.parseInt(arg);
+        }
+
+        String restriction = nextArg();
+        String arg = nextArg();
+        boolean value;
+        if ("1".equals(arg)) {
+            value = true;
+        } else if ("0".equals(arg)) {
+            value = false;
+        } else {
+            System.err.println("Error: valid value not specified");
+            return 1;
+        }
+        try {
+            mUm.setUserRestriction(restriction, value, userId);
+            return 0;
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            return 1;
         }
     }
 
