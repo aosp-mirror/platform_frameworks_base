@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -194,7 +195,7 @@ public class ViewTransformationHelper implements TransformableView {
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
-                ownState.setVisible(visible);
+                ownState.setVisible(visible, false /* force */);
                 ownState.recycle();
             }
         }
@@ -250,6 +251,19 @@ public class ViewTransformationHelper implements TransformableView {
                 }
             }
         }
+    }
+
+    public void resetTransformedView(View view) {
+        TransformState state = TransformState.createFrom(view);
+        state.setVisible(true /* visible */, true /* force */);
+        state.recycle();
+    }
+
+    /**
+     * @return a set of all views are being transformed.
+     */
+    public ArraySet<View> getAllTransformingViews() {
+        return new ArraySet<>(mTransformedViews.values());
     }
 
     public static abstract class CustomTransformation {
