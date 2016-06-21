@@ -22,18 +22,17 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -92,12 +91,25 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public void notifyContentUpdated(StatusBarNotification notification) {
         super.notifyContentUpdated(notification);
+
+        ArraySet<View> previousViews = mTransformationHelper.getAllTransformingViews();
+
         // Reinspect the notification.
         resolveHeaderViews();
         updateInvertHelper();
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
+
+        // We need to reset all views that are no longer transforming in case a view was previously
+        // transformed, but now we decided to transform its container instead.
+        ArraySet<View> currentViews = mTransformationHelper.getAllTransformingViews();
+        for (int i = 0; i < previousViews.size(); i++) {
+            View view = previousViews.valueAt(i);
+            if (!currentViews.contains(view)) {
+                mTransformationHelper.resetTransformedView(view);
+            }
+        }
     }
 
     /**
