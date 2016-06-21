@@ -75,6 +75,7 @@ final class ProcessRecord {
     ProcessState baseProcessTracker;
     BatteryStatsImpl.Uid.Proc curProcBatteryStats;
     int pid;                    // The process of this application; 0 if none
+    String procStatFile;        // path to /proc/<pid>/stat
     int[] gids;                 // The gids this process was launched with
     String requiredAbi;         // The ABI this process was launched with
     String instructionSet;      // The instruction set this process was launched with
@@ -93,6 +94,7 @@ final class ProcessRecord {
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
+    int verifiedAdj;            // The last adjustment that was verified as actually being set
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
@@ -441,7 +443,7 @@ final class ProcessRecord {
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.versionCode));
         maxAdj = ProcessList.UNKNOWN_ADJ;
         curRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
-        curAdj = setAdj = ProcessList.INVALID_ADJ;
+        curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
         persistent = false;
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
@@ -449,6 +451,7 @@ final class ProcessRecord {
 
     public void setPid(int _pid) {
         pid = _pid;
+        procStatFile = null;
         shortStringName = null;
         stringName = null;
     }

@@ -273,6 +273,10 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
+import static android.os.Process.PROC_CHAR;
+import static android.os.Process.PROC_OUT_LONG;
+import static android.os.Process.PROC_PARENS;
+import static android.os.Process.PROC_SPACE_TERM;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
@@ -6384,7 +6388,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
         app.makeActive(thread, mProcessStats);
-        app.curAdj = app.setAdj = ProcessList.INVALID_ADJ;
+        app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
         app.curSchedGroup = app.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT;
         app.forcingToForeground = null;
         updateProcessForegroundLocked(app, false, false);
@@ -10504,6 +10508,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private static final int[] PROCESS_STATE_STATS_FORMAT = new int[] {
+            PROC_SPACE_TERM,
+            PROC_SPACE_TERM|PROC_PARENS,
+            PROC_SPACE_TERM|PROC_CHAR|PROC_OUT_LONG,        // 3: process state
+    };
+
+    private final long[] mProcessStateStatsLongs = new long[1];
+
+    boolean isProcessAliveLocked(ProcessRecord proc) {
+        if (proc.procStatFile == null) {
+            proc.procStatFile = "/proc/" + proc.pid + "/stat";
+        }
+        mProcessStateStatsLongs[0] = 0;
+        if (!Process.readProcFile(proc.procStatFile, PROCESS_STATE_STATS_FORMAT, null,
+                mProcessStateStatsLongs, null)) {
+            if (DEBUG_OOM_ADJ) Slog.d(TAG, "UNABLE TO RETRIEVE STATE FOR " + proc.procStatFile);
+            return false;
+        }
+        final long state = mProcessStateStatsLongs[0];
+        if (DEBUG_OOM_ADJ) Slog.d(TAG, "RETRIEVED STATE FOR " + proc.procStatFile + ": "
+                + (char)state);
+        return state != 'Z' && state != 'X' && state != 'x' && state != 'K';
+    }
+
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
             String name, IBinder token, boolean stable, int userId) {
         ContentProviderRecord cpr;
@@ -10591,7 +10619,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
 
                 checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
+                final int verifiedAdj = cpr.proc.verifiedAdj;
                 boolean success = updateOomAdjLocked(cpr.proc);
+                // XXX things have changed so updateOomAdjLocked doesn't actually tell us
+                // if the process has been successfully adjusted.  So to reduce races with
+                // it, we will check whether the process still exists.  Note that this doesn't
+                // completely get rid of races with LMK killing the process, but should make
+                // them much smaller.
+                if (success && verifiedAdj != cpr.proc.setAdj && !isProcessAliveLocked(cpr.proc)) {
+                    success = false;
+                }
                 maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
                 checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
                 if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
@@ -10617,6 +10654,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     providerRunning = false;
                     conn = null;
+                } else {
+                    cpr.proc.verifiedAdj = cpr.proc.setAdj;
                 }
 
                 Binder.restoreCallingIdentity(origId);
@@ -20027,6 +20066,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     "Set " + app.pid + " " + app.processName + " adj " + app.curAdj + ": "
                     + app.adjType);
             app.setAdj = app.curAdj;
+            app.verifiedAdj = ProcessList.INVALID_ADJ;
         }
 
         if (app.setSchedGroup != app.curSchedGroup) {
