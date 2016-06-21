@@ -1038,6 +1038,10 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Razmera"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Uvek prikazuj"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Ponovo omogućite u meniju Sistemska podešavanja &gt; Aplikacije &gt; Preuzeto."</string>
+    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
+    <skip />
+    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
+    <skip />
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) je prekršila samonametnute StrictMode smernice."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> je prekršio samonametnute StrictMode smernice."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se nadograđuje…"</string>
