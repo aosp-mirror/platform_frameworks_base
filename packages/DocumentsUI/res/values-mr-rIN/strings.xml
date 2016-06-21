@@ -34,6 +34,7 @@
     <string name="menu_copy" msgid="3612326052677229148">"यावर कॉपी करा…"</string>
     <string name="menu_move" msgid="1828090633118079817">"यावर हलवा…"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"नवीन विंडो"</string>
+    <string name="menu_cut_to_clipboard" msgid="2467149185452488383">"कट करा"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"कॉपी करा"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"पेस्ट करा"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"अंतर्गत संचयन दर्शवा"</string>
@@ -84,6 +85,8 @@
     <string name="copy_preparing" msgid="3896202461003039386">"कॉपी करण्‍यासाठी तयार करीत आहे…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"हलविण्‍यास तयार होत आहे…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"हटविण्‍यासाठी तयार करीत आहे..."</string>
+    <!-- no translation found for delete_progress (5399405983046157222) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी करणे शक्य झाले नाही</item>
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी करणे शक्य झाले नाही</item>

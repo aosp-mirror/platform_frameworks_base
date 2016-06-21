@@ -34,6 +34,7 @@
     <string name="menu_copy" msgid="3612326052677229148">"...руу хуулах"</string>
     <string name="menu_move" msgid="1828090633118079817">"Байршуулах газар"</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Шинэ цонх"</string>
+    <string name="menu_cut_to_clipboard" msgid="2467149185452488383">"Таслах"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Хуулах"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Буулгах"</string>
     <string name="menu_advanced_show" msgid="4693652895715631401">"Дотоод санг харуулах"</string>
@@ -84,6 +85,8 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Хуулбарлахад бэлтгэж байна..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Зөөвөрлөхөд бэлтгэж байна..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Устгах гэж байна..."</string>
+    <!-- no translation found for delete_progress (5399405983046157222) -->
+    <skip />
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> файлыг хуулж чадсангүй</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> файлыг хуулж чадахгүй байна</item>
