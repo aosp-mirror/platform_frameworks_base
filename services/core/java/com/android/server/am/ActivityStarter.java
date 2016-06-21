@@ -1409,11 +1409,11 @@ class ActivityStarter {
             if (mLaunchSingleInstance) {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
-               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info);
+               intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info, false);
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
-                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info);
+                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info, true);
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity = mSupervisor.findTaskLocked(mStartActivity);
