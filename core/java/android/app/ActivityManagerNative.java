@@ -2370,7 +2370,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IUserSwitchObserver observer = IUserSwitchObserver.Stub.asInterface(
                     data.readStrongBinder());
-            registerUserSwitchObserver(observer);
+            String name = data.readString();
+            registerUserSwitchObserver(observer, name);
             reply.writeNoException();
             return true;
         }
@@ -6058,11 +6059,13 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException {
+    public void registerUserSwitchObserver(IUserSwitchObserver observer,
+            String name) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        data.writeString(name);
         mRemote.transact(REGISTER_USER_SWITCH_OBSERVER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();

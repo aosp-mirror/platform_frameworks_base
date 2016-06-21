@@ -76,6 +76,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -86,6 +87,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService;
@@ -151,9 +153,9 @@ final class UserController {
             = new RemoteCallbackList<>();
 
     /**
-     * Currently active user switch.
+     * Currently active user switch callbacks.
      */
-    Object mCurUserSwitchCallback;
+    private volatile ArraySet<String> mCurWaitingUserSwitchCallbacks;
 
     private volatile UserManagerService mUserManager;
 
@@ -1040,7 +1042,8 @@ final class UserController {
 
     void timeoutUserSwitch(UserState uss, int oldUserId, int newUserId) {
         synchronized (mService) {
-            Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId);
+            Slog.wtf(TAG, "User switch timeout: from " + oldUserId + " to " + newUserId
+                    + ". Observers that didn't send results: " + mCurWaitingUserSwitchCallbacks);
             sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
         }
     }
@@ -1049,28 +1052,34 @@ final class UserController {
         Slog.d(TAG, "Dispatch onUserSwitching oldUser #" + oldUserId + " newUser #" + newUserId);
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         if (observerCount > 0) {
-            final IRemoteCallback callback = new IRemoteCallback.Stub() {
-                int mCount = 0;
-                @Override
-                public void sendResult(Bundle data) throws RemoteException {
-                    synchronized (mService) {
-                        if (mCurUserSwitchCallback == this) {
-                            mCount++;
-                            if (mCount == observerCount) {
-                                sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
-                            }
-                        }
-                    }
-                }
-            };
+            final ArraySet<String> curWaitingUserSwitchCallbacks = new ArraySet<>();
             synchronized (mService) {
                 uss.switching = true;
-                mCurUserSwitchCallback = callback;
+                mCurWaitingUserSwitchCallbacks = curWaitingUserSwitchCallbacks;
             }
             for (int i = 0; i < observerCount; i++) {
                 try {
-                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(
-                            newUserId, callback);
+                    // Prepend with unique prefix to guarantee that keys are unique
+                    final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
+                    mCurWaitingUserSwitchCallbacks.add(name);
+                    final IRemoteCallback callback = new IRemoteCallback.Stub() {
+                        @Override
+                        public void sendResult(Bundle data) throws RemoteException {
+                            synchronized (mService) {
+                                // Early return if this session is no longer valid
+                                if (curWaitingUserSwitchCallbacks
+                                        != mCurWaitingUserSwitchCallbacks) {
+                                    return;
+                                }
+                                curWaitingUserSwitchCallbacks.remove(name);
+                                // Continue switching if all callbacks have been notified
+                                if (curWaitingUserSwitchCallbacks.isEmpty()) {
+                                    sendContinueUserSwitchLocked(uss, oldUserId, newUserId);
+                                }
+                            }
+                        }
+                    };
+                    mUserSwitchObservers.getBroadcastItem(i).onUserSwitching(newUserId, callback);
                 } catch (RemoteException e) {
                 }
             }
@@ -1083,7 +1092,7 @@ final class UserController {
     }
 
     void sendContinueUserSwitchLocked(UserState uss, int oldUserId, int newUserId) {
-        mCurUserSwitchCallback = null;
+        mCurWaitingUserSwitchCallbacks = null;
         mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(ActivityManagerService.CONTINUE_USER_SWITCH_MSG,
                 oldUserId, newUserId, uss));
@@ -1248,7 +1257,8 @@ final class UserController {
                 ? getCurrentUserIdLocked(): userId;
     }
 
-    void registerUserSwitchObserver(IUserSwitchObserver observer) {
+    void registerUserSwitchObserver(IUserSwitchObserver observer, String name) {
+        Preconditions.checkNotNull(name, "Observer name cannot be null");
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             final String msg = "Permission Denial: registerUserSwitchObserver() from pid="
@@ -1258,8 +1268,7 @@ final class UserController {
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
-
-        mUserSwitchObservers.register(observer);
+        mUserSwitchObservers.register(observer, name);
     }
 
     void unregisterUserSwitchObserver(IUserSwitchObserver observer) {
