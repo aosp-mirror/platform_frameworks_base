@@ -216,6 +216,9 @@ public class VolumeDialog implements TunerService.Tunable {
         mExpanded = false;
         mExpandButton = (ImageButton) mDialogView.findViewById(R.id.volume_expand_button);
         mExpandButton.setOnClickListener(mClickExpand);
+
+        mExpandButton.setVisibility(
+                AudioSystem.isSingleVolume(mContext) ? View.GONE : View.VISIBLE);
         updateWindowWidthH();
         updateExpandButtonH();
 
@@ -237,18 +240,21 @@ public class VolumeDialog implements TunerService.Tunable {
                 });
 
         if (mRows.isEmpty()) {
-            addRow(AudioManager.STREAM_RING,
-                    R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true);
             addRow(AudioManager.STREAM_MUSIC,
                     R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true);
-            addRow(AudioManager.STREAM_ALARM,
-                    R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, false);
-            addRow(AudioManager.STREAM_VOICE_CALL,
-                    R.drawable.ic_volume_voice, R.drawable.ic_volume_voice, false);
-            addRow(AudioManager.STREAM_BLUETOOTH_SCO,
-                    R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false);
-            addRow(AudioManager.STREAM_SYSTEM,
-                    R.drawable.ic_volume_system, R.drawable.ic_volume_system_mute, false);
+            if (!AudioSystem.isSingleVolume(mContext)) {
+                addRow(AudioManager.STREAM_RING,
+                        R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true);
+
+                addRow(AudioManager.STREAM_ALARM,
+                        R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, false);
+                addRow(AudioManager.STREAM_VOICE_CALL,
+                        R.drawable.ic_volume_voice, R.drawable.ic_volume_voice, false);
+                addRow(AudioManager.STREAM_BLUETOOTH_SCO,
+                        R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false);
+                addRow(AudioManager.STREAM_SYSTEM,
+                        R.drawable.ic_volume_system, R.drawable.ic_volume_system_mute, false);
+            }
         } else {
             addExistingRows();
         }
