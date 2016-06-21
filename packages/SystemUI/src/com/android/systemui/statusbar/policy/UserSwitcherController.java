@@ -381,6 +381,18 @@ public class UserSwitcherController {
         Log.e(TAG, "Couldn't switch to user, id=" + userId);
     }
 
+    public int getSwitchableUserCount() {
+        int count = 0;
+        final int N = mUsers.size();
+        for (int i = 0; i < N; ++i) {
+            UserRecord record = mUsers.get(i);
+            if (record.info != null && record.info.supportsSwitchTo()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     private void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
