@@ -2044,6 +2044,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void setRestrictBackgroundUL(boolean restrictBackground) {
+        Slog.d(TAG, "setRestrictBackgroundUL(): " + restrictBackground);
         final boolean oldRestrictBackground = mRestrictBackground;
         mRestrictBackground = restrictBackground;
         // Must whitelist foreground apps before turning data saver mode on.
