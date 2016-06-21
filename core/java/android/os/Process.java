@@ -833,6 +833,8 @@ public class Process {
     /** @hide */
     public static final int PROC_QUOTES = 0x400;
     /** @hide */
+    public static final int PROC_CHAR = 0x800;
+    /** @hide */
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */
     public static final int PROC_OUT_LONG = 0x2000;
