@@ -21,6 +21,7 @@ page.image=auto/images/assets/icons/media_app_playback.png
       <li><a href="#config_manifest">Configure Your Manifest</a></li>
       <li><a href="#isconnected">Determine if Your App is Connected</a></li>
       <li><a href="#alarm">Handle Alarms</a></li>
+      <li><a href="#mediaadv">Handle Media Advertisements</a></li>
       <li><a href="#implement_browser">Build a Browser Service</a></li>
       <li><a href="#implement_callback">Implement Play Controls</a></li>
       <li><a href="#support_voice">Support Voice Actions</a></li>
@@ -261,7 +262,7 @@ following things:
 <ul>
 <li>Disable the alarm.</li>
 <li>Play the alarm over
-<a href="{@docRoot}reference/android/media/AudioManager.html">STREAM_ALARM</a>,
+<a href="{@docRoot}reference/android/media/AudioManager.html#STREAM_ALARM">STREAM_ALARM</a>,
  and provide a UI on the phone screen to disable the alarm.</li>
 </ul>
 
@@ -277,6 +278,33 @@ The following code snippet checks whether an app is running in car mode:
           return false;
         }
   }
+</pre>
+
+<h2 id="mediaadv">Handle Media Advertisements</h2>
+<p>By default, Android Auto displays a notification when
+the media metadata changes during an audio playback session. When a media
+app switches from playing music to running an advertisement, it is distracting
+(and unnecessary) to display a notification to the user. To prevent Android Auto
+from displaying a notification in this case, you must set the media metadata
+key {@code android.media.metadata.ADVERTISEMENT} to 1, as shown in the code
+snippet below:
+
+<pre>
+
+&#64;Override
+public static final String EXTRA_METADATA_ADVERTISEMENT =
+            "android.media.metadata.ADVERTISEMENT";
+
+public void onPlayFromMediaId(String mediaId, Bundle extras) {
+    MediaMetadata.Builder builder = new MediaMetadata.Builder();
+    // ...
+    if (isAd(mediaId)) {
+        builder.putLong(EXTRA_METADATA_ADVERTISEMENT, 1);
+    }
+    // ...
+    mediaSession.setMetadata(builder.build());
+}
+
 </pre>
 
 <h2 id="implement_browser">Build a Browser Service</h2>
