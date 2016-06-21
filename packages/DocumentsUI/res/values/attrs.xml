@@ -18,7 +18,7 @@
         <attr name="colorActionMode" format="color"/>
     </declare-styleable>
 
-    <declare-styleable name="RootItemView">
+    <declare-styleable name="HighlightedItemView">
         <attr name="state_highlighted" format="boolean"/>
     </declare-styleable>
 </resources>

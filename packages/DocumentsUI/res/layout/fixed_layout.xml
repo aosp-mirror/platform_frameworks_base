@@ -41,6 +41,7 @@
 
             <com.android.documentsui.HorizontalBreadcrumb
                 android:id="@+id/breadcrumb"
+                android:layout_marginRight="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

@@ -31,16 +31,11 @@ class DirectoryDragListener extends ItemDragListener<DirectoryFragment> {
     public boolean onDrag(View v, DragEvent event) {
         final boolean result = super.onDrag(v, event);
 
-        if (event.getAction() == DragEvent.ACTION_DRAG_ENDED) {
+        if (event.getAction() == DragEvent.ACTION_DRAG_STARTED) {
+            mDragHost.dragStarted();
+        } else if (event.getAction() == DragEvent.ACTION_DRAG_ENDED) {
             // getResult() is true if drag was accepted
-            if (event.getResult()) {
-                mDragHost.clearSelection();
-            } else {
-                // When drag starts we might write a new clip file to disk.
-                // No drop event happens, remove clip file here. This may be called multiple times,
-                // but it should be OK because deletion is idempotent and cheap.
-                mDragHost.deleteDragClipFile();
-            }
+            mDragHost.dragStopped(event.getResult());
         }
 
         return result;

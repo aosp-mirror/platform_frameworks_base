@@ -33,6 +33,8 @@
     <dimen name="grid_padding_vert">4dp</dimen>
     <dimen name="list_item_height">72dp</dimen>
     <dimen name="list_item_padding">16dp</dimen>
+    <dimen name="breadcrumb_item_padding">8dp</dimen>
+    <dimen name="breadcrumb_item_height">36dp</dimen>
     <dimen name="list_divider_inset">72dp</dimen>
     <dimen name="dir_elevation">8dp</dimen>
     <dimen name="drag_shadow_size">120dp</dimen>
