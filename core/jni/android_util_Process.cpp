@@ -832,6 +832,7 @@ enum {
     PROC_COMBINE = 0x100,
     PROC_PARENS = 0x200,
     PROC_QUOTES = 0x400,
+    PROC_CHAR = 0x800,
     PROC_OUT_STRING = 0x1000,
     PROC_OUT_LONG = 0x2000,
     PROC_OUT_FLOAT = 0x4000,
@@ -933,8 +934,13 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
                 floatsData[di] = strtof(buffer+start, &end);
             }
             if ((mode&PROC_OUT_LONG) != 0 && di < NL) {
-                char* end;
-                longsData[di] = strtoll(buffer+start, &end, 10);
+                if ((mode&PROC_CHAR) != 0) {
+                    // Caller wants single first character returned as one long.
+                    longsData[di] = buffer[start];
+                } else {
+                    char* end;
+                    longsData[di] = strtoll(buffer+start, &end, 10);
+                }
             }
             if ((mode&PROC_OUT_STRING) != 0 && di < NS) {
                 jstring str = env->NewStringUTF(buffer+start);
