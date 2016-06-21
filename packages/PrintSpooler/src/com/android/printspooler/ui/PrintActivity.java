@@ -1448,7 +1448,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
      * dismissed if the same {@link PrintService} gets approved by another
      * {@link PrintServiceApprovalDialog}.
      */
-    private static final class PrintServiceApprovalDialog extends DialogFragment
+    public static final class PrintServiceApprovalDialog extends DialogFragment
             implements OnSharedPreferenceChangeListener {
         private static final String PRINTSERVICE_KEY = "PRINTSERVICE";
         private ApprovedPrintServices mApprovedServices;
