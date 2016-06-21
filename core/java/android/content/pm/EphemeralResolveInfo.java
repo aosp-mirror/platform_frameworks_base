@@ -53,7 +53,7 @@ public final class EphemeralResolveInfo implements Parcelable {
             throw new IllegalArgumentException();
         }
 
-        mDigest = new EphemeralDigest(uri, -1);
+        mDigest = new EphemeralDigest(uri, 0xFFFFFFFF, -1);
         mFilters.addAll(filters);
         mPackageName = packageName;
     }
@@ -135,7 +135,7 @@ public final class EphemeralResolveInfo implements Parcelable {
         /** The first 4 bytes of the domain hashes */
         private final int[] mDigestPrefix;
 
-        public EphemeralDigest(@NonNull Uri uri, int maxDigests) {
+        public EphemeralDigest(@NonNull Uri uri, int digestMask, int maxDigests) {
             if (uri == null) {
                 throw new IllegalArgumentException();
             }
@@ -143,10 +143,11 @@ public final class EphemeralResolveInfo implements Parcelable {
             mDigestPrefix = new int[mDigestBytes.length];
             for (int i = 0; i < mDigestBytes.length; i++) {
                 mDigestPrefix[i] =
-                        (mDigestBytes[i][0] & 0xFF) << 24
-                        | (mDigestBytes[i][1] & 0xFF) << 16
-                        | (mDigestBytes[i][2] & 0xFF) << 8
-                        | (mDigestBytes[i][3] & 0xFF) << 0;
+                        ((mDigestBytes[i][0] & 0xFF) << 24
+                                | (mDigestBytes[i][1] & 0xFF) << 16
+                                | (mDigestBytes[i][2] & 0xFF) << 8
+                                | (mDigestBytes[i][3] & 0xFF) << 0)
+                        & digestMask;
             }
         }
 
