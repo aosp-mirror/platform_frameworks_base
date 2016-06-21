@@ -155,8 +155,7 @@ void CanvasContext::setStopped(bool stopped) {
     }
 }
 
-// TODO: don't pass viewport size, it's automatic via EGL
-void CanvasContext::setup(int width, int height, float lightRadius,
+void CanvasContext::setup(float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
 #if HWUI_NEW_OPS
     mLightGeometry.radius = lightRadius;

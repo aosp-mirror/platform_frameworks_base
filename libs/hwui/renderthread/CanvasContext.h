@@ -85,7 +85,7 @@ public:
     void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
 
-    void setup(int width, int height, float lightRadius,
+    void setup(float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);

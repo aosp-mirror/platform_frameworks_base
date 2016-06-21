@@ -87,7 +87,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
     proxy->loadSystemProperties();
     proxy->initialize(surface);
     float lightX = width / 2.0;
-    proxy->setup(width, height, dp(800.0f), 255 * 0.075, 255 * 0.15);
+    proxy->setup(dp(800.0f), 255 * 0.075, 255 * 0.15);
     proxy->setLightCenter((Vector3){lightX, dp(-200.0f), dp(800.0f)});
 
     // Do a few cold runs then reset the stats so that the caches are all hot

@@ -180,19 +180,17 @@ void RenderProxy::setStopped(bool stopped) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE6(setup, CanvasContext* context, int width, int height,
+CREATE_BRIDGE4(setup, CanvasContext* context,
         float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-    args->context->setup(args->width, args->height, args->lightRadius,
+    args->context->setup(args->lightRadius,
             args->ambientShadowAlpha, args->spotShadowAlpha);
     return nullptr;
 }
 
-void RenderProxy::setup(int width, int height, float lightRadius,
+void RenderProxy::setup(float lightRadius,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     SETUP_TASK(setup);
     args->context = mContext;
-    args->width = width;
-    args->height = height;
     args->lightRadius = lightRadius;
     args->ambientShadowAlpha = ambientShadowAlpha;
     args->spotShadowAlpha = spotShadowAlpha;
