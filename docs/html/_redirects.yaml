@@ -1175,3 +1175,5 @@ redirects:
   to: http://tools.android.com/tech-docs/new-build-system/license
 - from: /r/studio-ui/experimental-to-stable-gradle.html
   to: http://tools.android.com/tech-docs/new-build-system/gradle-experimental/experimental-to-stable-gradle
+- from: /r/studio-ui/sdk-manager.html
+  to: https://developer.android.com/studio/intro/update.html#sdk-manager
