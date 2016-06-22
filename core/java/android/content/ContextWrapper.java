@@ -819,6 +819,14 @@ public class ContextWrapper extends Context {
         return mBase.getDisplayAdjustments(displayId);
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public Display getDisplay() {
+        return mBase.getDisplay();
+    }
+
     @Override
     public Context createDeviceProtectedStorageContext() {
         return mBase.createDeviceProtectedStorageContext();
