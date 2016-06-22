@@ -1410,7 +1410,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (shadeEntry == null) {
             return;
         }
-        boolean isHeadsUped = mUseHeadsUp && shouldPeek(shadeEntry);
+        boolean isHeadsUped = shouldPeek(shadeEntry);
         if (isHeadsUped) {
             mHeadsUpManager.showNotification(shadeEntry);
             // Mark as seen immediately
