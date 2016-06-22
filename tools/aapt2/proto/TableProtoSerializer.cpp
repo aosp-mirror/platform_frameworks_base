@@ -361,7 +361,7 @@ bool CompiledFileInputStream::ReadLittleEndian32(uint32_t* out_val) {
 bool CompiledFileInputStream::ReadCompiledFile(pb::CompiledFile* out_val) {
   EnsureAlignedRead();
 
-  uint64_t pb_size = 0u;
+  google::protobuf::uint64 pb_size = 0u;
   if (!in_.ReadLittleEndian64(&pb_size)) {
     return false;
   }
@@ -389,7 +389,7 @@ bool CompiledFileInputStream::ReadDataMetaData(uint64_t* out_offset,
                                                uint64_t* out_len) {
   EnsureAlignedRead();
 
-  uint64_t pb_size = 0u;
+  google::protobuf::uint64 pb_size = 0u;
   if (!in_.ReadLittleEndian64(&pb_size)) {
     return false;
   }

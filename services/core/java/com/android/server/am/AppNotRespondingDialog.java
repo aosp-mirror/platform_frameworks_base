@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;

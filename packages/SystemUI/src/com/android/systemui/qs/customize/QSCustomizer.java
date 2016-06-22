@@ -35,7 +35,7 @@ import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSContainer;
 import com.android.systemui.qs.QSDetailClipper;
