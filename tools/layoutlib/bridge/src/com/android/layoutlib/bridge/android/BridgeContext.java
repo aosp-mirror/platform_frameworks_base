@@ -1841,6 +1841,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public Display getDisplay() {
+        // pass
+        return null;
+    }
+
+    @Override
     public int getUserId() {
         return 0; // not used
     }
