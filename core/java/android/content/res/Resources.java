@@ -51,6 +51,7 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.TypedValue;
+import android.view.DisplayAdjustments;
 import android.view.ViewDebug;
 import android.view.ViewHierarchyEncoder;
 
@@ -1798,6 +1799,11 @@ public class Resources {
      */
     public DisplayMetrics getDisplayMetrics() {
         return mResourcesImpl.getDisplayMetrics();
+    }
+
+    /** @hide */
+    public DisplayAdjustments getDisplayAdjustments() {
+        return mResourcesImpl.getDisplayAdjustments();
     }
 
     /**
