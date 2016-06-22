@@ -796,16 +796,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_COPY = 278;
     /** Key code constant: Paste key. */
     public static final int KEYCODE_PASTE = 279;
-    /** Key code constant: fingerprint navigation up */
-    public static final int KEYCODE_FP_NAV_UP = 280;
-    /** Key code constant: fingerprint navigation down */
-    public static final int KEYCODE_FP_NAV_DOWN = 281;
-    /** Key code constant: fingerprint navigation left*/
-    public static final int KEYCODE_FP_NAV_LEFT = 282;
-    /** Key code constant: fingerprint navigation right */
-    public static final int KEYCODE_FP_NAV_RIGHT = 283;
+    /** Key code constant: Consumed by the system for navigation up */
+    public static final int KEYCODE_SYSTEM_NAVIGATION_UP = 280;
+    /** Key code constant: Consumed by the system for navigation down */
+    public static final int KEYCODE_SYSTEM_NAVIGATION_DOWN = 281;
+    /** Key code constant: Consumed by the system for navigation left*/
+    public static final int KEYCODE_SYSTEM_NAVIGATION_LEFT = 282;
+    /** Key code constant: Consumed by the system for navigation right */
+    public static final int KEYCODE_SYSTEM_NAVIGATION_RIGHT = 283;
 
-    private static final int LAST_KEYCODE = KEYCODE_FP_NAV_RIGHT;
+    private static final int LAST_KEYCODE = KEYCODE_SYSTEM_NAVIGATION_RIGHT;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -1852,10 +1852,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
             case KeyEvent.KEYCODE_BRIGHTNESS_UP:
             case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
-            case KeyEvent.KEYCODE_FP_NAV_UP:
-            case KeyEvent.KEYCODE_FP_NAV_DOWN:
-            case KeyEvent.KEYCODE_FP_NAV_LEFT:
-            case KeyEvent.KEYCODE_FP_NAV_RIGHT:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT:
                 return true;
         }
 
@@ -2941,11 +2941,13 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     public static final Parcelable.Creator<KeyEvent> CREATOR
             = new Parcelable.Creator<KeyEvent>() {
+        @Override
         public KeyEvent createFromParcel(Parcel in) {
             in.readInt(); // skip token, we already know this is a KeyEvent
             return KeyEvent.createFromParcelBody(in);
         }
 
+        @Override
         public KeyEvent[] newArray(int size) {
             return new KeyEvent[size];
         }
@@ -2969,6 +2971,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mEventTime = in.readLong();
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_KEY_EVENT);
 
