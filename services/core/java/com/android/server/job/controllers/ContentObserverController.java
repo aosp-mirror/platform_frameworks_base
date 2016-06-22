@@ -57,7 +57,7 @@ public class ContentObserverController extends StateController {
     private static volatile ContentObserverController sController;
 
     final private List<JobStatus> mTrackedTasks = new ArrayList<JobStatus>();
-    ArrayMap<Uri, ObserverInstance> mObservers = new ArrayMap<>();
+    ArrayMap<JobInfo.TriggerContentUri, ObserverInstance> mObservers = new ArrayMap<>();
     final Handler mHandler;
 
     public static ContentObserverController get(JobSchedulerService taskManagerService) {
@@ -253,10 +253,10 @@ public class ContentObserverController extends StateController {
             final JobInfo.TriggerContentUri[] uris = jobStatus.getJob().getTriggerContentUris();
             if (uris != null) {
                 for (JobInfo.TriggerContentUri uri : uris) {
-                    ObserverInstance obs = mObservers.get(uri.getUri());
+                    ObserverInstance obs = mObservers.get(uri);
                     if (obs == null) {
                         obs = new ObserverInstance(mHandler, uri.getUri());
-                        mObservers.put(uri.getUri(), obs);
+                        mObservers.put(uri, obs);
                         mContext.getContentResolver().registerContentObserver(
                                 uri.getUri(),
                                 (uri.getFlags() &
@@ -316,7 +316,7 @@ public class ContentObserverController extends StateController {
                 obs.mJobs.remove(this);
                 if (obs.mJobs.size() == 0) {
                     mContext.getContentResolver().unregisterContentObserver(obs);
-                    mObservers.remove(obs.mUri);
+                    mObservers.remove(obs);
                 }
             }
         }
@@ -355,7 +355,10 @@ public class ContentObserverController extends StateController {
                     continue;
                 }
                 pw.print("    ");
-                pw.print(mObservers.keyAt(i));
+                JobInfo.TriggerContentUri trigger = mObservers.keyAt(i);
+                pw.print(trigger.getUri());
+                pw.print(" 0x");
+                pw.print(Integer.toHexString(trigger.getFlags()));
                 pw.print(" (");
                 pw.print(System.identityHashCode(obs));
                 pw.println("):");
