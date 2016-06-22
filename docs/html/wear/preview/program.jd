@@ -79,6 +79,11 @@ page.image=images/cards/card-n-sdk_2x.png
           </div>
 
           <div class="col-4of12">
+            <h5>
+            </h5>
+
+            <p>
+            </p>
           </div>
         </div>
       </div>
@@ -90,7 +95,7 @@ page.image=images/cards/card-n-sdk_2x.png
 
     <p>
       The Android Wear 2.0 Developer Preview runs from 18 May 2016 until the
-      final Android Wear public release to OEMs, planned for Q4 2016.
+      final Android Wear public release to OEMs.
     </p>
 
     <p>
@@ -136,7 +141,7 @@ page.image=images/cards/card-n-sdk_2x.png
     </p>
 
     <p>
-      At milestones 4 and 5 you'll have access to the final Android Wear 2.0
+      At milestone 4, you'll have access to the final Android Wear 2.0
       APIs and SDK to develop with, as well as near-final system images to test
       system behaviors and features. Android Wear 2.0 will use the Android N
       API level at this time. You can begin final compatibility testing of your
@@ -196,9 +201,9 @@ page.image=images/cards/card-n-sdk_2x.png
     </h3>
 
     <p>
-      You can download these hardware system images at <a href=
+      You can download these hardware system images from the <a href=
       "{@docRoot}wear/preview/downloads.html">Download and Test with a
-      Device</a>:
+      Device</a> page:
     </p>
 
     <ul>
@@ -210,7 +215,15 @@ page.image=images/cards/card-n-sdk_2x.png
     </ul>
 
     <p>
-     Please keep in mind that the Developer Preview system images
+     To restore your device to its
+     original state during the preview, you can flash the
+     appropriate retail system image from
+     the <a href="{@docRoot}wear/preview/downloads.html">Download and
+     Test with a Device</a> page.
+    </p>
+
+    <p>
+     Please keep in mind that the preview system images
      are for app developers only, and for compatibility testing and
      early development only, and are not ready for day-to-day use.
     </p>
