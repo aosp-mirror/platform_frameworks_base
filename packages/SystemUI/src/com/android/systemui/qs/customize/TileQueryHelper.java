@@ -161,7 +161,7 @@ public class TileQueryHelper {
                     addTile(spec, appLabel, state, false);
                     continue;
                 }
-                if (info.serviceInfo.icon == 0) {
+                if (info.serviceInfo.icon == 0 && info.serviceInfo.applicationInfo.icon == 0) {
                     continue;
                 }
                 Drawable icon = info.serviceInfo.loadIcon(pm);
