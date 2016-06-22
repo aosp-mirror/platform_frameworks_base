@@ -1133,13 +1133,13 @@ interface ITelephony {
      */
     List<CarrierIdentifier> getAllowedCarriers(int slotId);
 
-   /**
-    * Action set from carrier signalling broadcast receivers to enable/disable metered apns
-    * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-    * @param subId the subscription ID that this action applies to.
-    * @param enabled control enable or disable metered apns.
-    * @hide
-    */
+    /**
+     * Action set from carrier signalling broadcast receivers to enable/disable metered apns
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @param enabled control enable or disable metered apns.
+     * @hide
+     */
     void carrierActionSetMeteredApnsEnabled(int subId, boolean visible);
 
     /**
@@ -1150,4 +1150,12 @@ interface ITelephony {
      * @hide
      */
     void carrierActionSetRadioEnabled(int subId, boolean enabled);
+
+    /**
+     * Get aggregated video call data usage since boot.
+     * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
+     * @return total data usage in bytes
+     * @hide
+     */
+    long getVtDataUsage();
 }
