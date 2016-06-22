@@ -656,6 +656,40 @@ public class WifiScanner {
         void onPnoNetworkFound(ScanResult[] results);
     }
 
+    /**
+     * Register a listener that will receive results from all single scans
+     * Either the onSuccess/onFailure will be called once when the listener is registered. After
+     * (assuming onSuccess was called) all subsequent single scan results will be delivered to the
+     * listener. It is possible that onFullResult will not be called for all results of the first
+     * scan if the listener was registered during the scan.
+     *
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this request, and must also be specified to cancel the request.
+     *                 Multiple requests should also not share this object.
+     * {@hide}
+     */
+    public void registerScanListener(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        mAsyncChannel.sendMessage(CMD_REGISTER_SCAN_LISTENER, 0, key);
+    }
+
+    /**
+     * Deregister a listener for ongoing single scans
+     * @param listener specifies which scan to cancel; must be same object as passed in {@link
+     *  #registerScanListener}
+     * {@hide}
+     */
+    public void deregisterScanListener(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
+        validateChannel();
+        mAsyncChannel.sendMessage(CMD_DEREGISTER_SCAN_LISTENER, 0, key);
+    }
+
     /** start wifi scan in background
      * @param settings specifies various parameters for the scan; for more information look at
      * {@link ScanSettings}
@@ -1129,6 +1163,10 @@ public class WifiScanner {
     public static final int CMD_STOP_PNO_SCAN               = BASE + 25;
     /** @hide */
     public static final int CMD_PNO_NETWORK_FOUND           = BASE + 26;
+    /** @hide */
+    public static final int CMD_REGISTER_SCAN_LISTENER      = BASE + 27;
+    /** @hide */
+    public static final int CMD_DEREGISTER_SCAN_LISTENER    = BASE + 28;
 
     private Context mContext;
     private IWifiScanner mService;
