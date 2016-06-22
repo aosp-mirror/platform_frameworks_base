@@ -1866,6 +1866,7 @@
   <java-symbol type="string" name="vpn_title_long" />
   <java-symbol type="string" name="vpn_lockdown_connecting" />
   <java-symbol type="string" name="vpn_lockdown_connected" />
+  <java-symbol type="string" name="vpn_lockdown_disconnected" />
   <java-symbol type="string" name="vpn_lockdown_error" />
   <java-symbol type="string" name="vpn_lockdown_config" />
   <java-symbol type="string" name="wallpaper_binding_label" />
