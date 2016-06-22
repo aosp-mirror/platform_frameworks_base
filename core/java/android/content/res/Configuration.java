@@ -955,6 +955,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         int changed = 0;
         if (delta.fontScale > 0 && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
+            changed |= ActivityInfo.CONFIG_THEME_FONT;
             fontScale = delta.fontScale;
         }
         if (delta.mcc != 0 && mcc != delta.mcc) {
@@ -1121,6 +1122,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         int changed = 0;
         if (delta.fontScale > 0 && fontScale != delta.fontScale) {
             changed |= ActivityInfo.CONFIG_FONT_SCALE;
+            changed |= ActivityInfo.CONFIG_THEME_FONT;
         }
         if (delta.mcc != 0 && mcc != delta.mcc) {
             changed |= ActivityInfo.CONFIG_MCC;
@@ -1211,7 +1213,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public static boolean needNewResources(@Config int configChanges,
             @Config int interestingChanges) {
-        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
+        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE|
+                    ActivityInfo.CONFIG_THEME_FONT)) != 0;
     }
 
     /**
