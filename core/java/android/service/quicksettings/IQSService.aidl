@@ -23,6 +23,7 @@ import android.service.quicksettings.Tile;
  * @hide
  */
 interface IQSService {
+    Tile getTile(in ComponentName component);
     void updateQsTile(in Tile tile);
     void updateStatusIcon(in Tile tile, in Icon icon,
             String contentDescription);
