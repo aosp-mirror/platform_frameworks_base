@@ -263,6 +263,16 @@ public class TileServices extends IQSService.Stub {
     }
 
     @Override
+    public Tile getTile(ComponentName componentName) {
+        verifyCaller(componentName.getPackageName());
+        CustomTile customTile = getTileForComponent(componentName);
+        if (customTile != null) {
+            return customTile.getQsTile();
+        }
+        return null;
+    }
+
+    @Override
     public void startUnlockAndRun(Tile tile) {
         ComponentName componentName = tile.getComponentName();
         verifyCaller(componentName.getPackageName());
