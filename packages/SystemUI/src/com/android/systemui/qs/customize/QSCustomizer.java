@@ -233,6 +233,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 setVisibility(View.GONE);
             }
             mNotifQsContainer.setCustomizerAnimating(false);
+            mRecyclerView.setAdapter(mTileAdapter);
         }
 
         @Override
