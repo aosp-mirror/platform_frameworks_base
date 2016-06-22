@@ -65,6 +65,7 @@ import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1134,6 +1135,12 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
     }
 
+    protected ShortcutInfo makeShortcutWithIntent(String id, Intent intent) {
+        return makeShortcut(
+                id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
+                intent, /* rank =*/ 0);
+    }
+
     protected ShortcutInfo makeShortcutWithActivityAndTitle(String id, ComponentName activity,
             String title) {
         return makeShortcut(
@@ -1153,10 +1160,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
      */
     protected ShortcutInfo makeShortcut(String id, String title, ComponentName activity,
             Icon icon, Intent intent, int rank) {
-        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext)
-                .setId(id)
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
                 .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
-                .setTitle(title)
+                .setShortLabel(title)
                 .setRank(rank)
                 .setIntent(intent);
         if (icon != null) {
@@ -1165,6 +1171,23 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         if (activity != null) {
             b.setActivity(activity);
         }
+        final ShortcutInfo s = b.build();
+
+        s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
+
+        return s;
+    }
+
+    /**
+     * Make a shortcut with details.
+     */
+    protected ShortcutInfo makeShortcutWithExtras(String id, Intent intent,
+            PersistableBundle extras) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "dummy"))
+                .setShortLabel("title-" + id)
+                .setExtras(extras)
+                .setIntent(intent);
         final ShortcutInfo s = b.build();
 
         s.setTimestamp(mInjectedCurrentTimeMillis); // HACK
@@ -1589,5 +1612,39 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("x1"), makeShortcut("x2"), makeShortcut("x3"))));
         });
+    }
+
+    public static List<ShortcutInfo> assertAllHaveIconResId(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
+            assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllHaveIconFile(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
+            assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllHaveIcon(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId() + " has no icon ", s.hasIconFile() || s.hasIconResource());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllStringsResolved(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertTrue("ID " + s.getId(), s.hasStringResourcesResolved());
+        }
+        return actualShortcuts;
     }
 }

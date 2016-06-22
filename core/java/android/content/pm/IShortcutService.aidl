@@ -46,7 +46,7 @@ interface IShortcutService {
 
     void enableShortcuts(String packageName, in List shortcutIds, int userId);
 
-    int getMaxDynamicShortcutCount(String packageName, int userId);
+    int getMaxShortcutCountForActivity(String packageName, int userId);
 
     int getRemainingCallCount(String packageName, int userId);
 
