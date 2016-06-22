@@ -304,10 +304,11 @@ public class ResourcesManager {
     }
 
     private @NonNull ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
-        AssetManager assets = createAssetManager(key);
-        DisplayMetrics dm = getDisplayMetrics(key.mDisplayId);
-        Configuration config = generateConfig(key, dm);
-        ResourcesImpl impl = new ResourcesImpl(assets, dm, config, key.mCompatInfo);
+        final AssetManager assets = createAssetManager(key);
+        final DisplayMetrics dm = getDisplayMetrics(key.mDisplayId);
+        final Configuration config = generateConfig(key, dm);
+        final ResourcesImpl impl = new ResourcesImpl(assets, dm, config, key.mCompatInfo,
+                key.mOverrideConfiguration);
         if (DEBUG) {
             Slog.d(TAG, "- creating impl=" + impl + " with key: " + key);
         }
