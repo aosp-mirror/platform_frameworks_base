@@ -87,8 +87,7 @@ public:
         mProxy->initialize(mAndroidSurface.get());
         float lightX = mSize.width() / 2.0f;
         android::uirenderer::Vector3 lightVector { lightX, -200.0f, 800.0f };
-        mProxy->setup(mSize.width(), mSize.height(), 800.0f,
-                             255 * 0.075f, 255 * 0.15f);
+        mProxy->setup(800.0f, 255 * 0.075f, 255 * 0.15f);
         mProxy->setLightCenter(lightVector);
 #if HWUI_NEW_OPS
         mCanvas.reset(new android::uirenderer::RecordingCanvas(mSize.width(), mSize.height()));

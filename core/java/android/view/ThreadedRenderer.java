@@ -567,7 +567,7 @@ public final class ThreadedRenderer {
         }
 
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, mLightRadius,
+        nSetup(mNativeProxy, mLightRadius,
                 mAmbientShadowAlpha, mSpotShadowAlpha);
 
         setLightCenter(attachInfo);
@@ -991,7 +991,7 @@ public final class ThreadedRenderer {
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetStopped(long nativeProxy, boolean stopped);
-    private static native void nSetup(long nativeProxy, int width, int height,
+    private static native void nSetup(long nativeProxy,
             float lightRadius, int ambientShadowAlpha, int spotShadowAlpha);
     private static native void nSetLightCenter(long nativeProxy,
             float lightX, float lightY, float lightZ);
