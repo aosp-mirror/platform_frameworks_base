@@ -22,13 +22,16 @@ import android.content.ClipDescription;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+
+import com.android.internal.inputmethod.IInputContentUriToken;
 
 import java.security.InvalidParameterException;
 
 /**
  * A container object with which input methods can send content files to the target application.
  */
-public class InputContentInfo implements Parcelable {
+public final class InputContentInfo implements Parcelable {
 
     @NonNull
     private final Uri mContentUri;
@@ -36,6 +39,8 @@ public class InputContentInfo implements Parcelable {
     private final ClipDescription mDescription;
     @Nullable
     private final Uri mLinkUri;
+    @NonNull
+    private IInputContentUriToken mUriToken;
 
     /**
      * Constructs {@link InputContentInfo} object only with mandatory data.
@@ -110,7 +115,7 @@ public class InputContentInfo implements Parcelable {
             return false;
         }
         final String contentUriScheme = contentUri.getScheme();
-        if (contentUriScheme == null || !contentUriScheme.equalsIgnoreCase("content")) {
+        if (!"content".equals(contentUriScheme)) {
             if (throwException) {
                 throw new InvalidParameterException("contentUri must have content scheme");
             }
@@ -137,8 +142,9 @@ public class InputContentInfo implements Parcelable {
     public Uri getContentUri() { return mContentUri; }
 
     /**
-     * @return {@link ClipDescription} object that contains the metadata of {@code contentUri} such
-     * as MIME type(s). {@link ClipDescription#getLabel()} can be used for accessibility purpose.
+     * @return {@link ClipDescription} object that contains the metadata of {@code #getContentUri()}
+     * such as MIME type(s). {@link ClipDescription#getLabel()} can be used for accessibility
+     * purpose.
      */
     @NonNull
     public ClipDescription getDescription() { return mDescription; }
@@ -148,6 +154,47 @@ public class InputContentInfo implements Parcelable {
      */
     @Nullable
     public Uri getLinkUri() { return mLinkUri; }
+
+    void setUriToken(IInputContentUriToken token) {
+        if (mUriToken != null) {
+            throw new IllegalStateException("URI token is already set");
+        }
+        mUriToken = token;
+    }
+
+    /**
+     * Requests a temporary read-only access permission for content URI associated with this object.
+     *
+     * <p>Does nothing if the temporary permission is already granted.</p>
+     */
+    public void requestPermission() {
+        if (mUriToken == null) {
+            return;
+        }
+        try {
+            mUriToken.take();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Releases a temporary read-only access permission for content URI associated with this object.
+     *
+     * <p>Does nothing if the temporary permission is not granted.</p>
+     */
+    public void releasePermission() {
+        if (mUriToken == null) {
+            return;
+        }
+        try {
+            mUriToken.release();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        } finally {
+            mUriToken = null;
+        }
+    }
 
     /**
      * Used to package this object into a {@link Parcel}.
@@ -160,12 +207,23 @@ public class InputContentInfo implements Parcelable {
         Uri.writeToParcel(dest, mContentUri);
         mDescription.writeToParcel(dest, flags);
         Uri.writeToParcel(dest, mLinkUri);
+        if (mUriToken != null) {
+            dest.writeInt(1);
+            dest.writeStrongBinder(mUriToken.asBinder());
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     private InputContentInfo(@NonNull Parcel source) {
         mContentUri = Uri.CREATOR.createFromParcel(source);
         mDescription = ClipDescription.CREATOR.createFromParcel(source);
         mLinkUri = Uri.CREATOR.createFromParcel(source);
+        if (source.readInt() == 1) {
+            mUriToken = IInputContentUriToken.Stub.asInterface(source.readStrongBinder());
+        } else {
+            mUriToken = null;
+        }
     }
 
     /**

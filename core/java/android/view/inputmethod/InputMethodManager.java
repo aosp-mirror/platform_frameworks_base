@@ -16,6 +16,7 @@
 
 package android.view.inputmethod;
 
+import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -30,6 +31,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,6 +58,7 @@ import android.view.ViewRootImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2286,6 +2289,41 @@ public final class InputMethodManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Allow the receiver of {@link InputContentInfo} to obtain a temporary read-only access
+     * permission to the content.
+     *
+     * <p>See {@link android.inputmethodservice.InputMethodService#exposeContent(InputContentInfo, EditorInfo)}
+     * for details.</p>
+     *
+     * @param token Supplies the identifying token given to an input method when it was started,
+     * which allows it to perform this operation on itself.
+     * @param inputContentInfo Content to be temporarily exposed from the input method to the
+     * application.
+     * This cannot be {@code null}.
+     * @param editorInfo The editor that receives {@link InputContentInfo}.
+     * @return {@code false} if we cannot allow a temporary access permission.
+     * @hide
+     */
+    public boolean exposeContent(@NonNull IBinder token, @NonNull InputContentInfo inputContentInfo,
+            @NonNull EditorInfo editorInfo) {
+        final IInputContentUriToken uriToken;
+        final Uri contentUri = inputContentInfo.getContentUri();
+        try {
+            uriToken = mService.createInputContentUriToken(token, contentUri,
+                    editorInfo.packageName);
+            if (uriToken == null) {
+                return false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "createInputContentAccessToken failed. contentUri=" + contentUri.toString()
+                    + " packageName=" + editorInfo.packageName, e);
+            return false;
+        }
+        inputContentInfo.setUriToken(uriToken);
+        return true;
     }
 
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
