@@ -92,6 +92,11 @@ public class WallpaperBackupAgent extends BackupAgent {
                 if (DEBUG) {
                     Slog.v(TAG, "Wallpaper is backup-eligible; linking & writing");
                 }
+
+                // In case of prior muddled state
+                infoStage.delete();
+                imageStage.delete();
+
                 Os.link(mWallpaperInfo.getCanonicalPath(), infoStage.getCanonicalPath());
                 fullBackupFile(infoStage, data);
                 Os.link(mWallpaperFile.getCanonicalPath(), imageStage.getCanonicalPath());
