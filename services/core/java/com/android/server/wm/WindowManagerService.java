@@ -41,8 +41,10 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -291,6 +293,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
+    /** Amount of time (in milliseconds) to delay before declaring a seamless rotation timeout. */
+    static final int SEAMLESS_ROTATION_TIMEOUT_DURATION = 2000;
+
     /** Amount of time (in milliseconds) to delay before declaring a window replacement timeout. */
     static final int WINDOW_REPLACEMENT_TIMEOUT_DURATION = 2000;
 
@@ -516,6 +521,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final Rect mTmpRect = new Rect();
     final Rect mTmpRect2 = new Rect();
     final Rect mTmpRect3 = new Rect();
+    final RectF mTmpRectF = new RectF();
+
+    final Matrix mTmpTransform = new Matrix();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -6573,6 +6581,7 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
+
     // TODO(multidisplay): Rotate any display?
     /**
      * Updates the current rotation.
@@ -6632,6 +6641,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", forceApp=" + mForcedAppOrientation);
         }
 
+        int oldRotation = mRotation;
+
         mRotation = rotation;
         mAltOrientation = altOrientation;
         mPolicy.setRotationLw(mRotation);
@@ -6648,10 +6659,32 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             mPolicy.selectRotationAnimationLw(anim);
         }
-        startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
-        // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
-        screenRotationAnimation =
+        boolean rotateSeamlessly = mPolicy.shouldRotateSeamlessly(oldRotation, mRotation);
+        final WindowList windows = displayContent.getWindowList();
+        // We can't rotate seamlessly while an existing seamless rotation is still
+        // waiting on windows to finish drawing.
+        if (rotateSeamlessly) {
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                WindowState w = windows.get(i);
+                if (w.mSeamlesslyRotated) {
+                    rotateSeamlessly = false;
+                    break;
+                }
+            }
+        }
+
+        if (!rotateSeamlessly) {
+            startFreezingDisplayLocked(inTransaction, anim[0], anim[1]);
+            // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
+            screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
+        } else {
+            // The screen rotation animation uses a screenshot to freeze the screen
+            // while windows resize underneath.
+            // When we are rotating seamlessly, we allow the elements to transition
+            // to their rotated state independently and without a freeze required.
+            screenRotationAnimation = null;
+        }
 
         // We need to update our screen size information to match the new rotation. If the rotation
         // has actually changed then this method will return true and, according to the comment at
@@ -6680,6 +6713,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (rotateSeamlessly) {
+                for (int i = windows.size() - 1; i >= 0; i--) {
+                    WindowState w = windows.get(i);
+                    w.mWinAnimator.seamlesslyRotateWindow(oldRotation, mRotation);
+                }
+            }
+
             mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
         } finally {
             if (!inTransaction) {
@@ -6690,19 +6730,22 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        final WindowList windows = displayContent.getWindowList();
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState w = windows.get(i);
             // Discard surface after orientation change, these can't be reused.
             if (w.mAppToken != null) {
                 w.mAppToken.destroySavedSurfaces();
             }
-            if (w.mHasSurface) {
+            if (w.mHasSurface && !rotateSeamlessly) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
                 w.mOrientationChanging = true;
                 mWindowPlacerLocked.mOrientationChangeComplete = false;
+                w.mLastFreezeDuration = 0;
             }
-            w.mLastFreezeDuration = 0;
+        }
+        if (rotateSeamlessly) {
+            mH.removeMessages(H.SEAMLESS_ROTATION_TIMEOUT);
+            mH.sendEmptyMessageDelayed(H.SEAMLESS_ROTATION_TIMEOUT, SEAMLESS_ROTATION_TIMEOUT_DURATION);
         }
 
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
@@ -6712,7 +6755,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        //TODO (multidisplay): Magnification is supported only for the default display.
+        // TODO (multidisplay): Magnification is supported only for the default display.
         // Announce rotation only if we will not animate as we already have the
         // windows in final state. Otherwise, we make this call at the rotation end.
         if (screenRotationAnimation == null && mAccessibilityController != null
@@ -8000,10 +8043,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 50;
         public static final int UPDATE_ANIMATION_SCALE = 51;
         public static final int WINDOW_REMOVE_TIMEOUT = 52;
-
         public static final int NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED = 53;
+        public static final int SEAMLESS_ROTATION_TIMEOUT = 54;
+        public static final int RESTORE_POINTER_ICON = 55;
 
-        public static final int RESTORE_POINTER_ICON = 54;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -8646,6 +8689,25 @@ public class WindowManagerService extends IWindowManager.Stub
                 case RESTORE_POINTER_ICON: {
                     synchronized (mWindowMap) {
                         restorePointerIconLocked((DisplayContent)msg.obj, msg.arg1, msg.arg2);
+                    }
+                }
+                break;
+                case SEAMLESS_ROTATION_TIMEOUT: {
+                    // Rotation only supported on primary display.
+                    // TODO(multi-display)
+                    final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                    final WindowList windows = displayContent.getWindowList();
+                    boolean layoutNeeded = false;
+                    for (int i = windows.size() - 1; i >= 0; i--) {
+                        WindowState w = windows.get(i);
+                        if (w.mSeamlesslyRotated) {
+                            layoutNeeded = true;
+                            w.setDisplayLayoutNeeded();
+                        }
+                        w.mSeamlesslyRotated = false;
+                    }
+                    if (layoutNeeded) {
+                        mWindowPlacerLocked.performSurfacePlacement();
                     }
                 }
                 break;

@@ -248,10 +248,10 @@ static void nativeSetPosition(JNIEnv* env, jclass clazz, jlong nativeObject, jfl
     }
 }
 
-static void nativeSetPositionAppliesWithResize(JNIEnv* env, jclass clazz,
+static void nativeSetGeometryAppliesWithResize(JNIEnv* env, jclass clazz,
         jlong nativeObject) {
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
-    status_t err = ctrl->setPositionAppliesWithResize();
+    status_t err = ctrl->setGeometryAppliesWithResize();
     if (err < 0 && err != NO_INIT) {
         doThrowIAE(env);
     }
@@ -626,6 +626,16 @@ static jobject nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
     return javaObjectForIBinder(env, ctrl->getHandle());
 }
 
+static jboolean nativeGetTransformToDisplayInverse(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    bool out = false;
+    auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    status_t status = ctrl->getTransformToDisplayInverse(&out);
+    if (status != NO_ERROR) {
+        return false;
+    }
+    return out;
+}
+
 static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject tokenObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return NULL;
@@ -667,8 +677,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetLayer },
     {"nativeSetPosition", "(JFF)V",
             (void*)nativeSetPosition },
-    {"nativeSetPositionAppliesWithResize", "(J)V",
-            (void*)nativeSetPositionAppliesWithResize },
+    {"nativeSetGeometryAppliesWithResize", "(J)V",
+            (void*)nativeSetGeometryAppliesWithResize },
     {"nativeSetSize", "(JII)V",
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JLandroid/graphics/Region;)V",
@@ -722,7 +732,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetOverrideScalingMode", "(JI)V",
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
-            (void*)nativeGetHandle }
+            (void*)nativeGetHandle },
+    {"nativeGetTransformToDisplayInverse", "(J)Z",
+            (void*)nativeGetTransformToDisplayInverse },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

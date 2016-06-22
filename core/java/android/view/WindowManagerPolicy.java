@@ -1415,4 +1415,6 @@ public interface WindowManagerPolicy {
      * Called when the configuration has changed, and it's safe to load new values from resources.
      */
     public void onConfigurationChanged();
+
+    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
 }

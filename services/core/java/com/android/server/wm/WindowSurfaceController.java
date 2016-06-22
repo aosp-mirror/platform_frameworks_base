@@ -259,8 +259,8 @@ class WindowSurfaceController {
         }
     }
 
-    void setPositionAppliesWithResizeInTransaction(boolean recoveringMemory) {
-        mSurfaceControl.setPositionAppliesWithResize();
+    void setGeometryAppliesWithResizeInTransaction(boolean recoveringMemory) {
+        mSurfaceControl.setGeometryAppliesWithResize();
     }
 
     void setMatrixInTransaction(float dsdx, float dtdx, float dsdy, float dtdy,
@@ -457,6 +457,10 @@ class WindowSurfaceController {
         return mSurfaceControl.getHandle();
     }
 
+    boolean getTransformToDisplayInverse() {
+        return mSurfaceControl.getTransformToDisplayInverse();
+    }
+
     void getSurface(Surface outSurface) {
         outSurface.copyFrom(mSurfaceControl);
     }
@@ -581,10 +585,10 @@ class WindowSurfaceController {
         }
 
         @Override
-        public void setPositionAppliesWithResize() {
-            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setPositionAppliesWithResize(): OLD: "
-                    + this + ". Called by" + Debug.getCallers(9));
-            super.setPositionAppliesWithResize();
+        public void setGeometryAppliesWithResize() {
+            if (LOG_SURFACE_TRACE) Slog.v(SURFACE_TAG, "setGeometryAppliesWithResize(): OLD: "
+                    + this + ". Called by" + Debug.getCallers(3));
+            super.setGeometryAppliesWithResize();
         }
 
         @Override

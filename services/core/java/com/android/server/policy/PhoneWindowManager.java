@@ -7671,6 +7671,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation) {
+        // For the upside down rotation we don't rotate seamlessly as the navigation
+        // bar moves position.
+        // Note most apps (using orientation:sensor or user as opposed to fullSensor)
+        // will not enter the reverse portrait orientation, so actually the
+        // orientation won't change at all.
+        if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
+            return false;
+        }
+        int delta = newRotation - oldRotation;
+        if (delta < 0) delta += 4;
+        // Likewise we don't rotate seamlessly for 180 degree rotations
+        // in this case the surfaces never resize, and our logic to 
+        // revert the transformations on size change will fail. We could
+        // fix this in the future with the "tagged" frames idea.
+        if (delta == Surface.ROTATION_180) {
+            return false;
+        }
+
+        if (mTopFullscreenOpaqueWindowState != null && mTopIsFullscreen &&
+                mTopFullscreenOpaqueWindowState.getAttrs().rotationAnimation ==
+                ROTATION_ANIMATION_JUMPCUT) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void dump(String prefix, PrintWriter pw, String[] args) {
         pw.print(prefix); pw.print("mSafeMode="); pw.print(mSafeMode);
                 pw.print(" mSystemReady="); pw.print(mSystemReady);
