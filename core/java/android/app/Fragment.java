@@ -1029,6 +1029,9 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * This may be used by the system to prioritize operations such as fragment lifecycle updates
      * or loader ordering behavior.</p>
      *
+     * <p><strong>Note:</strong> This method may be called outside of the fragment lifecycle
+     * and thus has no ordering guarantees with regard to fragment lifecycle method calls.</p>
+     *
      * <p><strong>Note:</strong> Prior to Android N there was a platform bug that could cause
      * <code>setUserVisibleHint</code> to bring a fragment up to the started state before its
      * <code>FragmentTransaction</code> had been committed. As some apps relied on this behavior,
