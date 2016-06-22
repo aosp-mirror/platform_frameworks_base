@@ -20,8 +20,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import android.perftest.BenchmarkState;
-
+import android.perftests.utils.BenchmarkState;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
@@ -74,9 +73,6 @@ public class TextViewSetTextLocalePerfTest {
             textView.setTextLocale(mSecondLocale);
         }
 
-        Log.i("TextViewSetTextLocalePerfTest", mMetricKey + ": " + state.summaryLine());
-        final Bundle status = new Bundle();
-        status.putLong(mMetricKey, state.median());
-        InstrumentationRegistry.getInstrumentation().sendStatus(Activity.RESULT_OK, status);
+        state.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(), mMetricKey);
     }
 }
