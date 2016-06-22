@@ -30,6 +30,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
+import android.app.UiModeManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -39,6 +40,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -84,6 +86,7 @@ import com.android.systemui.recents.model.ThumbnailData;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -234,6 +237,13 @@ public class SystemServicesProxy {
             // Create a dummy icon
             mDummyIcon = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
             mDummyIcon.eraseColor(0xFF999999);
+        }
+
+        UiModeManager uiModeManager = (UiModeManager) context.
+                getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            Collections.addAll(sRecentsBlacklist,
+                    res.getStringArray(R.array.recents_tv_blacklist_array));
         }
     }
 
