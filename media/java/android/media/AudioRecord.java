@@ -467,11 +467,11 @@ public class AudioRecord implements AudioRouting
      * <p>
      * If the audio source is not set with {@link #setAudioSource(int)},
      * {@link MediaRecorder.AudioSource#DEFAULT} is used.
-     * <br>If the audio format is not specified or is incomplete, its sample rate will be the
-     * default output sample rate of the device (see
-     * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
+     * <br>If the audio format is not specified or is incomplete, its channel configuration will be
      * {@link AudioFormat#CHANNEL_IN_MONO}, and the encoding will be
      * {@link AudioFormat#ENCODING_PCM_16BIT}.
+     * The sample rate will depend on the device actually selected for capture and can be queried
+     * with {@link #getSampleRate()} method.
      * <br>If the buffer size is not specified with {@link #setBufferSizeInBytes(int)},
      * the minimum buffer size for the source is used.
      */
