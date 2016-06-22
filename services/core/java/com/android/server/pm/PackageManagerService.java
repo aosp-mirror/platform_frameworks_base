@@ -12526,13 +12526,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (mSuccess) {
-                final boolean mounted;
-                if (Environment.isExternalStorageEmulated()) {
-                    mounted = true;
-                } else {
+                boolean mounted = false;
+                try {
                     final String status = Environment.getExternalStorageState();
                     mounted = (Environment.MEDIA_MOUNTED.equals(status)
                             || Environment.MEDIA_MOUNTED_READ_ONLY.equals(status));
+                } catch (Exception e) {
                 }
 
                 if (mounted) {
