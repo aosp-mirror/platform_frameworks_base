@@ -255,12 +255,17 @@ public:
 
     void runVectorDrawableAnimators(AnimationContext* context) {
         for (auto it = mVectorDrawableAnimators.begin(); it != mVectorDrawableAnimators.end();) {
-            (*it)->pushStaging(*context);
             if ((*it)->animate(*context)) {
                 it = mVectorDrawableAnimators.erase(it);
             } else {
                 ++it;
             }
+        }
+    }
+
+    void pushStagingVectorDrawableAnimators(AnimationContext* context) {
+        for (auto& anim : mVectorDrawableAnimators) {
+            anim->pushStaging(*context);
         }
     }
 
@@ -328,6 +333,9 @@ public:
         // already ran in each RenderNode. Note that these animators don't damage the RenderNodes.
         // The damaging is done in prepareTree as needed after checking whether a VD has been
         // modified.
+        if (mode == TreeInfo::MODE_FULL) {
+            mRootNode->pushStagingVectorDrawableAnimators(this);
+        }
         mRootNode->runVectorDrawableAnimators(this);
     }
 
