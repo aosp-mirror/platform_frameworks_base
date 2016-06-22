@@ -116,7 +116,7 @@ public class Main {
     private static ArrayList<String> sRenderMessages = Lists.newArrayList();
 
     @Rule
-    public static TestWatcher sRenderMessageWatcher = new TestWatcher() {
+    public TestWatcher sRenderMessageWatcher = new TestWatcher() {
         @Override
         protected void succeeded(Description description) {
             // We only check error messages if the rest of the test case was successful.
