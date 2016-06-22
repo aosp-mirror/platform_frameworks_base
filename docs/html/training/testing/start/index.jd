@@ -9,51 +9,20 @@ page.image=images/tools/studio-main-screen.png
   <div id="tb">
 
     <h2>
-      Dependencies and prerequisites
-    </h2>
-
-    <ul>
-      <li>
-        <a href="{@docRoot}tools/studio/index.html">Android Studio 2.0</a>, or
-        later.
-      </li>
-
-      <li>The Android Support Repository (available from the <a href=
-      "{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>)
-      </li>
-    </ul>
-
-    <h2>
-      This lesson teaches you to
+      In this document
     </h2>
 
       <ol>
-        <li>
-          <a href="#config-local-tests">Configure Your Project for Local Unit
-          Tests</a>
-        </li>
-
-        <li>
-          <a href="#config-instrumented-tests">Configure Your Project for
-          Instrumented Tests</a>
-        </li>
-
-        <li>
-          <a href="#build">Build and Run Your Tests</a>
+        <li><a href="#test-types">Test Types</a></li>
+        <li><a href="#test-apis">Test APIs</a>
           <ol>
-            <li>
-              <a href="#run-local-tests">Run Local Unit Tests</a>
-            </li>
-
-            <li>
-              <a href="#run-instrumented-tests">Run Instrumented Tests</a>
-            </li>
-
-            <li>
-              <a href="#run-ctl">Run Instrumented Tests with Cloud Test Lab</a>
-            </li>
+            <li><a href="#junit">JUnit</a></li>
+            <li><a href="#support-library">Android Testing Support Library</a></li>
+            <li><a href="#assertion">Assertion classes</a></li>
+            <li><a href="#monkeyrunner">Monkey and monkeyrunner</a></li>
           </ol>
         </li>
+        <li><a href="#build">Guides for Building Android Tests</a>
       </ol>
 
     <h2>
@@ -61,10 +30,6 @@ page.image=images/tools/studio-main-screen.png
     </h2>
 
     <ul>
-      <li>
-        <a href="{@docRoot}tools/testing/testing_android.html">Testing
-        Concepts</a>
-      </li>
 
       <li>
         <a href="https://github.com/googlesamples/android-testing" class=
@@ -80,484 +45,356 @@ page.image=images/tools/studio-main-screen.png
 </div>
 
 <p>
-  Writing and running tests are important parts of the Android app development
-  cycle. Well-written tests can help you catch bugs early in development and
-  give you confidence in your code. Using Android Studio, you can run local
-  unit tests or instrumented tests on a variety of physical or virtual Android
-  devices. You can then analyze the results and make changes to your code
-  without leaving the development environment.
+  Android tests are based on <a href="http://junit.org/" class=
+  "external-link">JUnit</a>, and you can run them either as local
+  unit tests on the JVM or as instrumented tests on an Android device.
+  This page provides an introduction to the concepts and
+  tools for building Android tests.
 </p>
 
-<p>
-  <em>Local unit tests</em> are tests that run on your local machine, without
-  needing access to the Android framework or an Android device. To learn how to
-  develop local units tests, see <a href=
-  "{@docRoot}training/testing/unit-testing/local-unit-tests.html">Building
-  Local Unit Tests</a>.
-</p>
 
-<p>
-  <em>Instrumented tests</em> are tests that run on an Android device or
-  emulator. These tests have access to {@link android.app.Instrumentation}
-  information, such as the {@link android.content.Context} for the app under
-  test. Instrumented tests can be used for unit, user interface (UI), or app
-  component integration testing. To learn how to develop instrumented tests for
-  your specific needs, see these additional topics:
-</p>
+<h2 id="test-types">Test Types</h2>
+
+
+<p>When using Android Studio to write any of your tests, your test code must go
+into one of two different code directories (source sets). For each module in
+your project, Android Studio includes both source sets, corresponding to the
+following test types:</p>
+
+<dl>
+<dt><b>Local unit tests</b></dt>
+<dd>Located at <code><var>module-name</var>/src/test/java/</code>.
+<p>These tests run on the local JVM
+and do not have access to functional Android framework APIs.</p>
+<p>To get started, see <a
+href="/training/testing/unit-testing/local-unit-tests.html">Building Local
+Unit Tests</a>.</p>
+</dd>
+
+<dt><b>Instrumented tests</b></dt>
+<dd>Located at <code><var>module-name</var>/src/androidTest/java/</code>.
+<p>These are all tests that must run on an Android hardware device or
+an Android emulator.</p>
+
+<p>Instrumented tests are built into an APK that runs on the device alongside
+your app under test. The system runs your test APK and your app under tests in
+the same process, so your tests can invoke methods and modify fields in the
+app, and automate user interaction with your app.</p>
+
+<p>For information about how to create instrumented tests, see the
+following topics:</p>
 
 <ul>
   <li>
     <a href=
-    "{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html">Building
-    Instrumented Unit Tests</a> - Build more complex unit tests that have
-    Android dependencies which cannot be easily filled by using mock objects.
+    "{@docRoot}training/testing/unit-testing/instrumented-unit-tests.html"
+    >Building Instrumented Unit Tests</a>: Build complex unit tests with
+    Android dependencies that cannot be satisfied with mock objects.
   </li>
 
   <li>
     <a href="{@docRoot}training/testing/ui-testing/index.html">Automating User
-    Interface Tests</a> - Create tests to verify that the user interface
+    Interface Tests</a>: Create tests to verify that the user interface
     behaves correctly for user interactions within a single app or for
     interactions across multiple apps.
   </li>
 
   <li>
     <a href="{@docRoot}training/testing/integration-testing/index.html">Testing
-    App Component Integrations</a> - Verify the behavior of components that
+    App Component Integrations</a>: Verify the behavior of components that
     users do not directly interact with, such as a <a href=
     "{@docRoot}guide/components/services.html">Service</a> or a <a href=
-    "guide/topics/providers/content-providers.html">Content Provider</a>.
+    "{@docRoot}guide/topics/providers/content-providers.html">Content Provider</a>.
   </li>
 </ul>
 
-<p>
-  This lesson teaches you how to build and run your tests using using Android
-  Studio. If you are not using Android Studio, you can learn how to
-  <a href="{@docRoot}tools/testing/testing_otheride.html">run your tests from
-  the command-line</a>.
-</p>
+</dd>
+</dl>
 
-<h3 id="config-local-tests">
-  Configure Your Project for Local Unit Tests
-</h3>
+<img src="/images/testing/test-types_2x.png" alt="" width="798" />
 
-<p>
-  In your Android Studio project, you must store the source files for local
-  unit tests under a specific source directory ({@code src/test/java}). This
-  improves project organization by grouping your unit tests together into a
-  single source set.
-</p>
-
-<p>
-  As with production code, you can create local unit tests for a <a href=
-  "{@docRoot}tools/building/configuring-gradle.html#workBuildVariants">specific
-  flavor or build type</a>. Keep your unit tests in a test source tree location
-  that corresponds to your production source tree, such as:
-</p>
+<p>However, the <em>local unit tests</em> and <em>instrumented tests</em>
+described above are just terms that help distinguish the tests that run on your
+local JVM from the tests that run on the Android platform (on a hardware device
+or emulator). The real testing types that you should understand when building a
+complete test suite are described in the following table.</p>
 
 <table>
-<tr>
-<th>Path to Production Class</th>
-<th>Path to Local Unit Test Class</th>
-</tr>
-<tr>
-<td>{@code src/main/java/Foo.java}</td>
-<td>{@code src/test/java/FooTest.java}</td>
-</tr>
-<tr>
-<td>{@code src/debug/java/Foo.java}</td>
-<td>{@code src/testDebug/java/FooTest.java}</td>
-</tr>
-<tr>
-<td>{@code src/myFlavor/java/Foo.java}</td>
-<td>{@code src/testMyFlavor/java/FooTest.java}</td>
-</tr>
+  <tr>
+    <th>
+      Type
+    </th>
+    <th>
+      Subtype
+    </th>
+    <th>
+      Description
+    </th>
+  </tr>
+
+  <tr>
+    <td rowspan="3">
+      Unit tests
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Local Unit Tests
+    </td>
+    <td>
+      Unit tests that run locally on the Java Virtual Machine (JVM). Use these
+tests to minimize execution time when your tests have no Android framework
+dependencies or when you can mock the Android framework dependencies.
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Instrumented unit tests
+    </td>
+    <td>
+      Unit tests that run on an Android device or emulator. These tests have
+access to <code><a href=
+"/reference/android/app/Instrumentation.html">Instrumentation</a></code>
+information, such as the <code><a href=
+"/reference/android/content/Context.html">Context</a></code> of the app you are
+testing. Use these tests when your tests have Android dependencies that mock
+objects cannot satisfy.
+    </td>
+  </tr>
+
+  <tr>
+    <td style="white-space:nowrap" rowspan="3">
+      Integration Tests
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Components within your app only
+    </td>
+    <td>
+      This type of test verifies that the target app behaves as expected when
+a user performs a specific action or enters a specific input in its activities.
+For example, it allows you to check that the target app returns the correct UI
+output in response to user interactions in the app’s activities. UI testing
+frameworks like <a href=
+      "/tools/testing-support-library/index.html#Espresso">Espresso</a> allow
+you to programmatically simulate user actions and test complex intra-app user
+interactions.
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      Cross-app Components
+    </td>
+    <td>
+      This type of test verifies the correct behavior of interactions between
+different user apps or between user apps and system apps. For example, you might
+want to test that your app behaves correctly when the user performs an action
+in the Android Settings menu. UI testing frameworks that support cross-app
+interactions, such as <a
+href="/topic/libraries/testing-support-library/index.html#UIAutomator"
+>UI Automator</a>, allow you to create tests for such scenarios.
+    </td>
+  </tr>
 </table>
 
-<p>
-  You'll need to configure the testing dependencies for your project to use the
-  standard APIs provided by the JUnit 4 framework. If your test needs to
-  interact with Android dependencies, include the <a href=
-  "https://github.com/mockito/mockito" class="external-link">Mockito</a>
-  library to simplify your local unit tests. To learn more about using mock
-  objects in your local unit tests, see <a href=
-  "{@docRoot}training/testing/unit-testing/local-unit-tests.html#mocking-dependencies">
-  Mocking Android dependencies</a>.
-</p>
 
-<p>
-  In your app's top-level {@code build.gradle} file, you need to specify these
-  libraries as dependencies:
-</p>
 
-<pre>
-dependencies {
-    // Required -- JUnit 4 framework
-    testCompile 'junit:junit:4.12'
-    // Optional -- Mockito framework
-    testCompile 'org.mockito:mockito-core:1.10.19'
-}
-</pre>
 
-<h3 id="config-instrumented-tests">
-  Configure Your Project for Instrumented Tests
-</h3>
 
-<p>
-  In your Android Studio project, you must place the source code for your
-  instrumentated tests under a specific directory
-  (<code>src/androidTest/java</code>).
-</p>
 
-<p>
-  <a href="{@docRoot}tools/testing-support-library/index.html#setup">Download
-  the Android Testing Support Library Setup</a>, which provides APIs that allow
-  you to quickly build and run instrumented test code for your apps. The
-  Testing Support Library includes a JUnit 4 test runner (<a href=
-  "{@docRoot}tools/testing-support-library/index.html#AndroidJUnitRunner">AndroidJUnitRunner</a>
-  ) and APIs for functional UI tests (<a href=
-  "{@docRoot}tools/testing-support-library/index.html#Espresso">Espresso</a>
-  and <a href=
-  "{@docRoot}tools/testing-support-library/index.html#UIAutomator">UI
-  Automator</a>).
-</p>
+<h2 id="test-apis">Test APIs</h2>
 
-<p>
-  You'll need to configure the Android testing dependencies for your project to
-  use the test runner and the rules APIs provided by the Testing Support
-  Library. To simplify your test development, we also recommend that you
-  include the <a href="https://github.com/hamcrest" class=
-  "external-link">Hamcrest</a> library, which lets you create more flexible
-  assertions using the Hamcrest matcher APIs.
-</p>
+<p>The following are common APIs used for testing apps on Android.</p>
 
-<p>
-  In your app's top-level {@code build.gradle} file, you need to specify these
-  libraries as dependencies:
-</p>
+
+<h3 id="junit">JUnit</h3>
+
+<p>You should write your unit or integration test class as a <a href=
+"http://junit.org/" class="external-link">JUnit 4</a> test class. The framework
+offers a convenient way to perform common setup, teardown, and assertion
+operations in your test.</p>
+
+<p>A basic JUnit 4 test class is a Java class that contains one or more test
+methods. A test method begins with the <code>@Test</code> annotation and
+contains the code to exercise and verify a single functionality (that is, a
+logical unit) in the component that you want to test.</p>
+
+<p>The following snippet shows an example JUnit 4 integration test that uses the
+<a href="/topic/libraries/testing-support-library/index.html#Espresso">Espresso
+APIs</a> to perform a click action on a UI element, then checks to see if
+an expected string is displayed.</p>
 
 <pre>
-dependencies {
-    androidTestCompile 'com.android.support:support-annotations:23.0.1'
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
-    androidTestCompile 'com.android.support.test:rules:0.4.1'
-    // Optional -- Hamcrest library
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    // Optional -- UI testing with Espresso
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
-    // Optional -- UI testing with UI Automator
-    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
-}
-</pre>
+&#64;RunWith(AndroidJUnit4.class)
+&#64;LargeTest
+public class MainActivityInstrumentationTest {
 
+    &#64;Rule
+    public ActivityTestRule mActivityRule = new ActivityTestRule<>(
+            MainActivity.class);
 
-<p>
-  To use JUnit 4 test classes, make sure to specify <a href=
-  "{@docRoot}reference/android/support/test/runner/AndroidJUnitRunner.html">{@code
-  AndroidJUnitRunner}</a> as the default test instrumentation runner in your
-  project by including the following setting in your app's module-level {@code build.gradle}
-  file:
-</p>
+    &#64;Test
+    public void sayHello(){
+        onView(withText("Say hello!")).perform(click());
 
-<pre>
-android {
-    defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        onView(withId(R.id.textView)).check(matches(withText("Hello, World!")));
     }
 }
 </pre>
 
-<h3 id="testartifacts">Work With Test Artifacts</h3>
-<p>Android Studio has two types of test artifacts: Android Instrumentation Tests
-and Unit Tests. Previously, you could work with just one test artifact at a
-time. Now, both test artifacts are enabled.
-The advantage of enabling both test artifacts is that any changes you make to
-the underlying code affect
-them both. For example, if you rename a class that both test artifacts access,
-both will know about the class name refactoring.</p>
-
-<p>The figure shows what your project looks like with both test
-artifacts enabled. Notice the shading of both test artifacts.</p>
-
-<!-- Commenting out for now, but leaving it in case we need to add it back.
-<img src="{@docRoot}images/training/testartifactseparate.png" style="float:left;width:250px;margin-right:20px" /> -->
-<img src="{@docRoot}images/training/testartifactcombined.png" style="float:left;width:250px" />
-<!-- Commenting out for now, but leaving it in case we need to add it back.
-<p>
-By default, both test artifacts are enabled in Android Studio. To enable just
-one, deselect <strong>Enable all test artifacts</strong> in your preferences:
-</p>
-
-<ol>
-<li>Select
-<strong>Android Studio</strong> > <strong>Preferences</strong> > <strong>Build,
-Execution, Deployment</strong> > <strong>Build Tools</strong> >
-<strong>Gradle</strong> > <strong>Experimental</strong>.</li>
-<li>Deselect the test artifacts option.</li>
-<li>Click <strong>OK</strong>.</li>
-</ol>
--->
-
-<h2 id="build">Build and Run Your Tests</h2>
-
-
-<p>
-  Android Studio provides all the tools you need to build, run, and analyze
-  your tests within the development environment. You can also run instrumented
-  tests on multiple device configurations, simultaneously, using <a href=
-  "https://developers.google.com/cloud-test-lab/">Cloud Test Lab</a>
-  integration.
-</p>
-
-<p class="note">
-  <strong>Note:</strong> While running or debugging instrumented tests,
-  Android Studio does not inject the additional methods required for <a href=
-  "{@docRoot}tools/building/building-studio.html#instant-run">Instant Run</a>
-  and turns the feature off.
-</p>
-
-<h3 id="run-local-tests">
-  Run Local Unit Tests
-</h3>
-
-<p>
-  To run your local unit tests:
-</p>
-
-<ol>
-
-  <li>In the <em>Project</em> window, right click on the project and
-  synchronize your project.
-  </li>
-
-  <!--
-<li>If you enabled one test artifact only, open the
-<strong>Build Variants</strong> window by clicking the left-hand tab, then
-change the test artifact to <em>Unit Tests</em>.
-</li>
--->
-
-  <li>In the <em>Project</em> window, navigate to your unit test class or
-  method, then right-click it and select <strong>Run</strong> <img src=
-  "{@docRoot}images/tools/as-run.png" alt="" style=
-  "vertical-align:bottom;margin:0;">.
-    <ul>
-      <li>To run all tests in the unit test directory, right-click on the
-      directory and select <strong>Run tests</strong> <img src=
-      "{@docRoot}images/tools/as-run.png" alt="" style=
-      "vertical-align:bottom;margin:0;">.
-      </li>
-    </ul>
-  </li>
-
-</ol>
-
-<p>
-  The Android Plugin for Gradle compiles the local unit test code located in
-  the default directory ({@code src/test/java}), builds a test app, and
-  executes it locally using the default test runner class. Android Studio then
-  displays the results in the <em>Run</em> window.
-</p>
-
-<h3 id="run-instrumented-tests">
-  Run Instrumented Tests
-</h3>
-
-<p>
-  To run your instrumented tests:
-</p>
+<p>In your JUnit 4 test class, you can call out sections in your test code for
+special processing by using the following annotations:</p>
 
 <ul>
-  <!--
-<li>If you enabled one test artifact only, open the
-<strong>Build Variants</strong> window by clicking the left-hand tab, then set
-the test artifact to <em>Android Instrumentation Tests</em>.
-</li>
--->
+<li><code>@Before</code>: Use this annotation to specify a block of code that
+contains test setup operations. The test class invokes this code block before
+each test. You can have multiple <code>@Before</code> methods but the order in
+which the test class calls these methods is not guaranteed.</li>
 
-  <li>In the <em>Project</em> window, navigate to your instrumented test class
-  or method, then right-click and run it using the Android Test configuration.
-  To run all tests in the instrumented test directory, right-click the
-  directory and select <strong>Run tests</strong> <img src=
-  "{@docRoot}images/tools/as-run.png" alt="" style=
-  "vertical-align:bottom;margin:0;">.
-  </li>
+<li><code>@After</code>: This annotation specifies a block of code that
+contains test tear-down operations. The test class calls this code block after
+every test method. You can define multiple <code>@After</code> operations in
+your test code. Use this annotation to release any resources from memory.</li>
+
+<li><code>@Test</code>: Use this annotation to mark a test method. A single
+test class can contain multiple test methods, each prefixed with this
+annotation.</li>
+
+<li><code>@Rule</code>: Rules allow you to flexibly add or redefine the
+behavior of each test method in a reusable way. In Android testing, use this
+annotation together with one of the test rule classes that the Android Testing
+Support Library provides, such as <a href=
+"/reference/android/support/test/rule/ActivityTestRule.html"><code>ActivityTestRule</code></a>
+or <a href=
+"/reference/android/support/test/rule/ServiceTestRule.html"><code>ServiceTestRule</code></a>.</li>
+
+<li><code>@BeforeClass</code>: Use this annotation to specify static methods
+for each test class to invoke only once. This testing step is useful for
+expensive operations such as connecting to a database.</li>
+
+<li><code>@AfterClass</code>: Use this annotation to specify static methods for
+the test class to invoke only after all tests in the class have run. This
+testing step is useful for releasing any resources allocated in the
+<code>@BeforeClass</code> block.</li>
+
+<li><code>@Test(timeout=)</code>: Some annotations support the ability to pass
+in elements for which you can set values. For example, you can specify a
+timeout period for the test. If the test starts but does not complete within
+the given timeout period, it automatically fails. You must specify the timeout
+period in milliseconds, for example: <code>@Test(timeout=5000)</code>.</li>
 </ul>
 
-<p>
-  The <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin
-  for Gradle</a> compiles the instrumented test code located in the default
-  directory ({@code src/androidTest/java}), builds a test APK and production
-  APK, installs both APKs on the connected device or emulator, and runs the
-  tests. Android Studio then displays the results of the instrumented test execution in the
-  <em>Run</em> window.
+<p>For more annotations, see the documentation for <a
+href="http://junit.sourceforge.net/javadoc/org/junit/package-summary.html"
+class="external-link">JUnit annotations</a> and the <a
+href="/reference/android/support/annotation/package-summary.html">Android
+annotations</a>.</p>
+
+<p>Use the JUnit <code><a href=
+"/reference/junit/framework/Assert.html">Assert</a></code> class to verify the
+correctness of an object's state. The assert methods compare values you expect
+from a test to the actual results and throw an exception if the comparison
+fails. <a href="#AssertionClasses">Assertion classes</a> describes these
+methods in more detail.</p>
+
+
+<h3 id="support-library">Android Testing Support Library</h3>
+
+<p>The <a href="/topic/libraries/testing-support-library/index.html">Android
+Testing Support Library</a> provides a set of APIs that allow you
+to quickly build and run test code for your apps, including JUnit 4 and
+functional UI tests. The library includes the following instrumentation-based
+APIs that are useful when you want to automate your tests:</p>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#AndroidJUnitRunner"
+>AndroidJUnitRunner</a></dt>
+<dd>A JUnit 4-compatible test runner for Android.</dd>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#Espresso"
+>Espresso</a></dt>
+<dd>A UI testing framework; suitable for functional UI testing within an
+app.</dd>
+
+<dt><a href="/topic/libraries/testing-support-library/index.html#UIAutomator"
+>UI Automator</a></dt>
+<dd>A UI testing framework suitable for cross-app functional UI testing between
+both system and installed apps.</dd>
+
+
+<h3 id="assertion">Assertion classes</h3>
+
+<p>Because Android Testing Support Library APIs extend JUnit, you can use
+assertion methods to display the results of tests. An assertion method compares
+an actual value returned by a test to an expected value, and throws an
+AssertionException if the comparison test fails. Using assertions is more
+convenient than logging, and provides better test performance.</p>
+
+<p>To simplify test development, you should use the <a href=
+"https://github.com/hamcrest" class="external-link">Hamcrest library</a>, which
+lets you create more flexible tests using the Hamcrest matcher APIs.</p>
+
+
+
+<h3 id="monkeyrunner">Monkey and monkeyrunner</h3>
+
+<p>The Android SDK includes two tools for functional-level app testing:</p>
+
+<dl>
+<dt>Monkey</dt>
+<dd>This is a command-line tool that sends pseudo-random streams of keystrokes,
+touches, and gestures to a device. You run it with the <a href=
+"/studio/command-line/adb.html">Android Debug Bridge (adb)</a> tool, and use it
+to stress-test your app, report back errors any that are encountered, or repeat
+a stream of events by running the tool multiple times with the same random
+number seed.</dd>
+
+
+<dt>monkeyrunner</dt>
+<dd>This tool is an API and execution environment for test programs written in
+Python. The API includes functions for connecting to a device, installing and
+uninstalling packages, taking screenshots, comparing two images, and running a
+test package against an app. Using the API, you can write a wide range of
+large, powerful, and complex tests. You run programs that use the API with the
+<code>monkeyrunner</code> command-line tool.</dd>
+</dl>
+
+
+
+
+<h2 id="build">Guides for Building Android Tests</h2>
+
+<p>The following documents provide more detail about how to build and run
+a variety of test types:
 </p>
 
-<h3 id="run-ctl">Run Instrumented Tests with Cloud Test Lab</h3>
-
-<p>
-  Using <a href="https://developers.google.com/cloud-test-lab/">Cloud Test
-  Lab</a>, you can simultaneously test your app on many popular Android
-  devices, across multiple languages, screen orientations, and versions of the
-  Android platform. These tests run on actual physical devices in remote Google
-  data centers. You can also <a href=
-  "https://developers.google.com/cloud-test-lab/test-screenshots">configure
-  your instrumented tests to take screenshots</a> while Cloud Test Lab runs its
-  tests. You can <a href=
-  "https://developers.google.com/cloud-test-lab/command-line">deploy tests to
-  Cloud Test Lab from the command line</a>, or from Android Studio's integrated
-  testing tools.
-</p>
-
-<p>
-  Android Studio allows you to connect to your Google Cloud Platform account,
-  configure your tests, deploy them to Cloud Test Lab, and analyze the results
-  all within the development environment. Cloud Test Lab in Android Studio
-  supports the following Android test frameworks: <a href=
-  "{@docRoot}training/testing/ui-testing/espresso-testing.html">Espresso</a>,
-  <a href="{@docRoot}tools/testing-support-library/index.html#UIAutomator">UI
-  Automator 2.0</a>, or <a class="external-link" href=
-  "https://github.com/robotiumtech/robotium">Robotium</a>. Test results provide
-  test logs and include the details of any app failures.
-</p>
-
-<p>
-  Before you can start using Cloud Test Lab, you need to:
-</p>
-
-<ol>
-  <li>
-    <a href="https://console.developers.google.com/freetrial">Create a
-    Google Cloud Platform account</a> to use with active billing.
-  </li>
-
-  <li>
-    <a href="https://support.google.com/cloud/answer/6251787">Create a Google
-    Cloud project</a> for your app.
-  </li>
-
-  <li>
-    <a href="https://support.google.com/cloud/answer/6288653">Set up an active
-    billing account</a> and associate it with the project you just created.
-  </li>
-</ol>
-
-
-<h4 id="configure-matrix">
-Configure a test matrix and run a test
-</h4>
-
-<p>
-  Android Studio provides integrated tools that allow you to configure how you
-  want to deploy your tests to Cloud Test Lab. After you have created a Google
-  Cloud project with active billing, you can create a test configuration and
-  run your tests:
-</p>
-
-<ol>
-  <li>Click <strong>Run</strong> &gt; <strong>Edit Configurations</strong> from
-  the main menu.
-  </li>
-
-  <li>Click <strong>Add New Configuration (+)</strong> and select
-  <strong>Android Tests</strong>.
-  </li>
-
-  <li>In the Android Test configuration dialog:
-    <ol type="a">
-      <li>Enter or select the details of your test, such as the test name, module
-      type, test type, and test class.
-      </li>
-
-      <li>From the <em>Target</em> drop-down menu under <em>Deployment Target
-      Options</em>, select <strong>Cloud Test Lab Device Matrix</strong>.
-      </li>
-
-      <li>If you are not logged in, click <strong>Connect to Google Cloud
-      Platform</strong> and allow Android Studio access to your account.
-      </li>
-
-      <li>Next to <em>Cloud Project</em>, click the <img src=
-      "{@docRoot}images/tools/as-wrench.png" alt="wrench and nut" style=
-      "vertical-align:bottom;margin:0;"> button and select your Google Cloud
-      Platform project from the list.
-      </li>
-    </ol>
-  </li>
-
-  <li>Create and configure a test matrix:
-    <ol type="a">
-      <li>Next to the <em>Matrix Configuration</em> drop-down list, click <strong>
-        Open Dialog</strong> <img src="{@docRoot}images/tools/as-launchavdm.png"
-        alt="ellipses button" style="vertical-align:bottom;margin:0;">.
-      </li>
-
-      <li>Click <strong>Add New Configuration (+)</strong>.
-      </li>
-
-      <li>In the <strong>Name</strong> field, enter a name for your new
-      configuration.
-      </li>
-
-      <li>Select the device(s), Android version(s), locale(s) and screen
-      orientation(s) that you want to test your app with. Cloud Test Lab will test
-      your app against every combination of your selections when generating test
-      results.
-      </li>
-
-      <li>Click <strong>OK</strong> to save your configuration.
-      </li>
-    </ol>
-  </li>
-
-  <li>Click <strong>OK</strong> in the <em>Run/Debug Configurations</em> dialog
-  to exit.
-  </li>
-
-  <li>Run your tests by clicking <strong>Run</strong> <img src=
-  "{@docRoot}images/tools/as-run.png" alt="" style=
-  "vertical-align:bottom;margin:0;">.
-  </li>
-</ol>
-
-<img src="{@docRoot}images/training/ctl-config.png" alt="">
-<p class="img-caption">
-  <strong>Figure 1.</strong> Creating a test configuration for Cloud Test
-  Lab.
-</p>
-
-<h4 id="ctl-results">
-  Analyzing test results
-</h4>
-
-<p>
-  When Cloud Test Lab completes running your tests, the <em>Run</em> window will
-  open to show the results, as shown in figure 2. You may need to click
-  <strong>Show Passed</strong> <img src="{@docRoot}images/tools/as-ok.png" alt=
-  "" style="vertical-align:bottom;margin:0;"> to see all your executed tests.
-</p>
-
-<img src="{@docRoot}images/training/ctl-test-results.png" alt="">
-
-<p class="img-caption">
-  <strong>Figure 2.</strong> Viewing the results of instrumented tests using
-  Cloud Test Lab.
-</p>
-
-<p>
-  You can also analyze your tests on the web by following the link displayed at
-  the beginning of the test execution log in the <em>Run</em> window, as shown
-  in figure 3.
-</p>
-
-<img src="{@docRoot}images/training/ctl-exec-log.png" alt="">
-
-<p class="img-caption">
-  <strong>Figure 3.</strong> Click the link to view detailed test results on
-  the web.
-</p>
-
-<p>
-  To learn more about interpreting web results, see <a href=
-  "https://developers.google.com/cloud-test-lab/analyzing-results">Analyzing
-  Cloud Test Lab Web Results</a>.
-</p>
+<dl>
+  <dt><a href="/training/testing/unit-testing/local-unit-tests.html"
+    >Building Local Unit Tests</a></dt>
+  <dd>Build unit tests that have no dependencies or only simple dependencies
+    that you can mock, which run on your local JVM.</dd>
+  <dt><a href=
+    "/training/testing/unit-testing/instrumented-unit-tests.html"
+    >Building Instrumented Unit Tests</a></dt>
+  <dd>Build complex unit tests with
+    Android dependencies that cannot be satisfied with mock objects,
+    which run on a hardware device or emulator.</dd>
+  <dt><a href="/training/testing/ui-testing/index.html">Automating User
+    Interface Tests</a></dt>
+  <dd>Create tests to verify that the user interface
+    behaves correctly for user interactions within a single app or for
+    interactions across multiple apps.</dd>
+  <dt><a href="/training/testing/integration-testing/index.html">Testing App
+    Compontent Integrations</a></dt>
+  <dd>Verify the behavior of components that
+    users do not directly interact with, such as a service or a content
+    provider.</dd>
+  <dt><a href="/training/testing/performance.html">Testing Display
+    Performance</a></dt>
+  <dd>Write tests that measure your app's UI performance to ensure
+    a consistently smooth user experience.</dd>
+</dl>
