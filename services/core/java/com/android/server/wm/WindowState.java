@@ -494,6 +494,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     /** @see #isResizedWhileNotDragResizingReported(). */
     private boolean mResizedWhileNotDragResizingReported;
 
+    /**
+     * During seamless rotation we have two phases, first the old window contents
+     * are rotated to look as if they didn't move in the new coordinate system. Then we
+     * have to freeze updates to this layer (to preserve the transformation) until
+     * the resize actually occurs. This is true from when the transformation is set
+     * and false until the transaction to resize is sent.
+     */
+    boolean mSeamlesslyRotated = false;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
