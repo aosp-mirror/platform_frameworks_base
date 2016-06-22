@@ -55,26 +55,26 @@ import java.util.List;
  */
 public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
-    private final Display mDisplay;
+    private final Context mContext;
     private final Window mParentWindow;
 
     private IBinder mDefaultToken;
 
-    public WindowManagerImpl(Display display) {
-        this(display, null);
+    public WindowManagerImpl(Context context) {
+        this(context, null);
     }
 
-    private WindowManagerImpl(Display display, Window parentWindow) {
-        mDisplay = display;
+    private WindowManagerImpl(Context context, Window parentWindow) {
+        mContext = context;
         mParentWindow = parentWindow;
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
-        return new WindowManagerImpl(mDisplay, parentWindow);
+        return new WindowManagerImpl(mContext, parentWindow);
     }
 
-    public WindowManagerImpl createPresentationWindowManager(Display display) {
-        return new WindowManagerImpl(display, mParentWindow);
+    public WindowManagerImpl createPresentationWindowManager(Context displayContext) {
+        return new WindowManagerImpl(displayContext, mParentWindow);
     }
 
     /**
@@ -90,7 +90,7 @@ public final class WindowManagerImpl implements WindowManager {
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
-        mGlobal.addView(view, params, mDisplay, mParentWindow);
+        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
     }
 
     @Override
@@ -144,6 +144,6 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public Display getDefaultDisplay() {
-        return mDisplay;
+        return mContext.getDisplay();
     }
 }

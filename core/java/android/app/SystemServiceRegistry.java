@@ -559,7 +559,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<WindowManager>() {
             @Override
             public WindowManager createService(ContextImpl ctx) {
-                return new WindowManagerImpl(ctx.getDisplay());
+                return new WindowManagerImpl(ctx);
             }});
 
         registerService(Context.USER_SERVICE, UserManager.class,
