@@ -619,11 +619,11 @@ public class AudioTrack extends PlayerBase
      * <p>
      * If the audio attributes are not set with {@link #setAudioAttributes(AudioAttributes)},
      * attributes comprising {@link AudioAttributes#USAGE_MEDIA} will be used.
-     * <br>If the audio format is not specified or is incomplete, its sample rate will be the
-     * default output sample rate of the device (see
-     * {@link AudioManager#PROPERTY_OUTPUT_SAMPLE_RATE}), its channel configuration will be
+     * <br>If the audio format is not specified or is incomplete, its channel configuration will be
      * {@link AudioFormat#CHANNEL_OUT_STEREO} and the encoding will be
      * {@link AudioFormat#ENCODING_PCM_16BIT}.
+     * The sample rate will depend on the device actually selected for playback and can be queried
+     * with {@link #getSampleRate()} method.
      * <br>If the buffer size is not specified with {@link #setBufferSizeInBytes(int)},
      * and the mode is {@link AudioTrack#MODE_STREAM}, the minimum buffer size is used.
      * <br>If the transfer mode is not specified with {@link #setTransferMode(int)},
