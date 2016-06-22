@@ -44,4 +44,8 @@
     <string name="font_roboto_regular" translatable="false">sans-serif</string>
     <!-- DO NOT TRANSLATE -->
     <string name="font_roboto_light" translatable="false">sans-serif-light</string>
+    <!-- Package names to be blacklisted in Recents, add package names into overlay as needed -->
+    <string-array name="recents_tv_blacklist_array">
+    </string-array>
+
 </resources>
