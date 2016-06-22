@@ -2228,7 +2228,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             @Override
             public void handleMessage(Message message) {
                 final int eventType =  message.what;
-                notifyAccessibilityEventInternal(eventType);
+                AccessibilityEvent event = (AccessibilityEvent) message.obj;
+                notifyAccessibilityEventInternal(eventType, event);
             }
         };
 
@@ -3130,16 +3131,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // be modified to remove its source if the receiving service does
                 // not have permission to access the window content.
                 AccessibilityEvent newEvent = AccessibilityEvent.obtain(event);
-                AccessibilityEvent oldEvent = mPendingEvents.get(eventType);
-                mPendingEvents.put(eventType, newEvent);
-
-                final int what = eventType;
-                if (oldEvent != null) {
-                    mEventDispatchHandler.removeMessages(what);
-                    oldEvent.recycle();
+                Message message;
+                if ((mNotificationTimeout > 0)
+                        && (eventType != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)) {
+                    // Allow at most one pending event
+                    final AccessibilityEvent oldEvent = mPendingEvents.get(eventType);
+                    mPendingEvents.put(eventType, newEvent);
+                    if (oldEvent != null) {
+                        mEventDispatchHandler.removeMessages(eventType);
+                        oldEvent.recycle();
+                    }
+                    message = mEventDispatchHandler.obtainMessage(eventType);
+                } else {
+                    // Send all messages, bypassing mPendingEvents
+                    message = mEventDispatchHandler.obtainMessage(eventType, newEvent);
                 }
 
-                Message message = mEventDispatchHandler.obtainMessage(what);
                 mEventDispatchHandler.sendMessageDelayed(message, mNotificationTimeout);
             }
         }
@@ -3149,9 +3156,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
          *
          * @param eventType The type of the event to dispatch.
          */
-        private void notifyAccessibilityEventInternal(int eventType) {
+        private void notifyAccessibilityEventInternal(int eventType, AccessibilityEvent event) {
             IAccessibilityServiceClient listener;
-            AccessibilityEvent event;
 
             synchronized (mLock) {
                 listener = mServiceInterface;
@@ -3162,28 +3168,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     return;
                 }
 
-                event = mPendingEvents.get(eventType);
-
-                // Check for null here because there is a concurrent scenario in which this
-                // happens: 1) A binder thread calls notifyAccessibilityServiceDelayedLocked
-                // which posts a message for dispatching an event. 2) The message is pulled
-                // from the queue by the handler on the service thread and the latter is
-                // just about to acquire the lock and call this method. 3) Now another binder
-                // thread acquires the lock calling notifyAccessibilityServiceDelayedLocked
-                // so the service thread waits for the lock; 4) The binder thread replaces
-                // the event with a more recent one (assume the same event type) and posts a
-                // dispatch request releasing the lock. 5) Now the main thread is unblocked and
-                // dispatches the event which is removed from the pending ones. 6) And ... now
-                // the service thread handles the last message posted by the last binder call
-                // but the event is already dispatched and hence looking it up in the pending
-                // ones yields null. This check is much simpler that keeping count for each
-                // event type of each service to catch such a scenario since only one message
-                // is processed at a time.
+                // There are two ways we notify for events, throttled and non-throttled. If we
+                // are not throttling, then messages come with events, which we handle with
+                // minimal fuss.
                 if (event == null) {
-                    return;
+                    // We are throttling events, so we'll send the event for this type in
+                    // mPendingEvents as long as it it's null. It can only null due to a race
+                    // condition:
+                    //
+                    //   1) A binder thread calls notifyAccessibilityServiceDelayedLocked
+                    //      which posts a message for dispatching an event and stores the event
+                    //      in mPendingEvents.
+                    //   2) The message is pulled from the queue by the handler on the service
+                    //      thread and this method is just about to acquire the lock.
+                    //   3) Another binder thread acquires the lock in notifyAccessibilityEvent
+                    //   4) notifyAccessibilityEvent recycles the event that this method was about
+                    //      to process, replaces it with a new one, and posts a second message
+                    //   5) This method grabs the new event, processes it, and removes it from
+                    //      mPendingEvents
+                    //   6) The second message dispatched in (4) arrives, but the event has been
+                    //      remvoved in (5).
+                    event = mPendingEvents.get(eventType);
+                    if (event == null) {
+                        return;
+                    }
+                    mPendingEvents.remove(eventType);
                 }
-
-                mPendingEvents.remove(eventType);
                 if (mSecurityPolicy.canRetrieveWindowContentLocked(this)) {
                     event.setConnectionId(mId);
                 } else {
