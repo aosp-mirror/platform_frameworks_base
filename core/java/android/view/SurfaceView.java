@@ -124,6 +124,7 @@ public class SurfaceView extends View {
     int mWindowType = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 
     boolean mIsCreating = false;
+    private volatile boolean mRtHandlingPositionUpdates = false;
 
     final Handler mHandler = new Handler() {
         @Override
@@ -649,7 +650,9 @@ public class SurfaceView extends View {
                 TAG, "Layout: x=" + mLayout.x + " y=" + mLayout.y +
                 " w=" + mLayout.width + " h=" + mLayout.height +
                 ", frame=" + mSurfaceFrame);
-        } else if (!isHardwareAccelerated()) {
+        } else {
+            // Calculate the window position in case RT loses the window
+            // and we need to fallback to a UI-thread driven position update
             getLocationInWindow(mLocation);
             final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
                     || mWindowSpaceTop != mLocation[1];
@@ -670,15 +673,17 @@ public class SurfaceView extends View {
                     mTranslator.translateRectInAppWindowToScreen(mWinFrame);
                 }
 
-                try {
-                    Log.d(TAG, String.format("%d updateWindowPosition UI, " +
-                            "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
-                            mWinFrame.left, mWinFrame.top,
-                            mWinFrame.right, mWinFrame.bottom));
-                    mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
-                            mWinFrame.right, mWinFrame.bottom, -1, mWinFrame);
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "Exception from relayout", ex);
+                if (!isHardwareAccelerated() || !mRtHandlingPositionUpdates) {
+                    try {
+                        if (DEBUG) Log.d(TAG, String.format("%d updateWindowPosition UI, " +
+                                "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
+                                mWinFrame.left, mWinFrame.top,
+                                mWinFrame.right, mWinFrame.bottom));
+                        mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
+                                mWinFrame.right, mWinFrame.bottom, -1, mWinFrame);
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "Exception from relayout", ex);
+                    }
                 }
             }
         }
@@ -698,6 +703,15 @@ public class SurfaceView extends View {
             // Guess we got detached, that sucks
             return;
         }
+        // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
+        // its 2nd frame if RenderThread is running slowly could potentially see
+        // this as false, enter the branch, get pre-empted, then this comes along
+        // and reports a new position, then the UI thread resumes and reports
+        // its position. This could therefore be de-sync'd in that interval, but
+        // the synchronization would violate the rule that RT must never block
+        // on the UI thread which would open up potential deadlocks. The risk of
+        // a single-frame desync is therefore preferable for now.
+        mRtHandlingPositionUpdates = true;
         if (mRTLastReportedPosition.left == left
                 && mRTLastReportedPosition.top == top
                 && mRTLastReportedPosition.right == right
@@ -731,13 +745,26 @@ public class SurfaceView extends View {
             Log.d(TAG, String.format("%d windowPositionLostRT RT, frameNr = %d",
                     System.identityHashCode(this), frameNumber));
         }
-        // TODO: This is a bit of a hack as we don't have an API to report to WM
-        // to hide a window with a frameNumber, so just shift the window very far into
-        // negative space which will do effectively the same thing.
-        // Use the last reported size to avoid influencing the size of the bufferqueue
-        int x = -1000 - mRTLastReportedPosition.width();
-        int y = -1000 - mRTLastReportedPosition.height();
-        updateWindowPositionRT(frameNumber, x, y, -1000, -1000);
+        if (mRtHandlingPositionUpdates) {
+            mRtHandlingPositionUpdates = false;
+            // This callback will happen while the UI thread is blocked, so we can
+            // safely access other member variables at this time.
+            // So do what the UI thread would have done if RT wasn't handling position
+            // updates.
+            if (!mWinFrame.isEmpty() && !mWinFrame.equals(mRTLastReportedPosition)) {
+                try {
+                    if (DEBUG) Log.d(TAG, String.format("%d updateWindowPosition, " +
+                            "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
+                            mWinFrame.left, mWinFrame.top,
+                            mWinFrame.right, mWinFrame.bottom));
+                    mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
+                            mWinFrame.right, mWinFrame.bottom, frameNumber, mWinFrame);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Exception from relayout", ex);
+                }
+            }
+            mRTLastReportedPosition.setEmpty();
+        }
     }
 
     private SurfaceHolder.Callback[] getSurfaceCallbacks() {
