@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -30,6 +32,7 @@ import android.content.IntentSender;
 import android.content.ReceiverCallNotAllowedException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -155,10 +158,9 @@ class ContextImpl extends Context {
     private final String mBasePackageName;
     private final String mOpPackageName;
 
-    private final ResourcesManager mResourcesManager;
-    private final Resources mResources;
-    private final Display mDisplay; // may be null if default display
-    private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
+    private final @NonNull ResourcesManager mResourcesManager;
+    private final @NonNull Resources mResources;
+    private @Nullable Display mDisplay; // may be null if default display
 
     private final int mFlags;
 
@@ -1897,18 +1899,6 @@ class ContextImpl extends Context {
                 mUser, mFlags, display, null, Display.INVALID_DISPLAY);
     }
 
-    Display getDisplay() {
-        if (mDisplay != null) {
-            return mDisplay;
-        }
-        return ResourcesManager.getInstance().getAdjustedDisplay(
-                Display.DEFAULT_DISPLAY, mDisplayAdjustments);
-    }
-
-    private int getDisplayId() {
-        return mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
-    }
-
     @Override
     public Context createDeviceProtectedStorageContext() {
         final int flags = (mFlags & ~Context.CONTEXT_CREDENTIAL_PROTECTED_STORAGE)
@@ -1941,8 +1931,23 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Display getDisplay() {
+        final DisplayAdjustments displayAdjustments = mResources.getDisplayAdjustments();
+        if (mDisplay == null) {
+            return mResourcesManager.getAdjustedDisplay(Display.DEFAULT_DISPLAY,
+                    displayAdjustments);
+        }
+
+        if (!mDisplay.getDisplayAdjustments().equals(displayAdjustments)) {
+            mDisplay = mResourcesManager.getAdjustedDisplay(mDisplay.getDisplayId(),
+                    displayAdjustments);
+        }
+        return mDisplay;
+    }
+
+    @Override
     public DisplayAdjustments getDisplayAdjustments(int displayId) {
-        return mDisplayAdjustments;
+        return mResources.getDisplayAdjustments();
     }
 
     @Override
@@ -2057,11 +2062,6 @@ class ContextImpl extends Context {
                     ? packageInfo.getCompatibilityInfo()
                     : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
         }
-        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
-        mDisplayAdjustments.setConfiguration(overrideConfiguration);
-
-        mDisplay = (createDisplayWithId == Display.INVALID_DISPLAY) ? display
-                : ResourcesManager.getInstance().getAdjustedDisplay(displayId, mDisplayAdjustments);
 
         Resources resources = packageInfo.getResources(mainThread);
         if (resources != null) {
@@ -2100,6 +2100,9 @@ class ContextImpl extends Context {
             }
         }
         mResources = resources;
+
+        mDisplay = (createDisplayWithId == Display.INVALID_DISPLAY) ? display
+                : mResourcesManager.getAdjustedDisplay(displayId, mResources.getDisplayAdjustments());
 
         if (container != null) {
             mBasePackageName = container.mBasePackageName;
