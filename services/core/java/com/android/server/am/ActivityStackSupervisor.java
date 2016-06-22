@@ -111,6 +111,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_DYNAMIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
@@ -1004,6 +1005,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    void reportTaskToFrontNoLaunch(ActivityRecord r) {
+        boolean changed = false;
+        for (int i = mWaitingActivityLaunched.size() - 1; i >= 0; i--) {
+            WaitResult w = mWaitingActivityLaunched.remove(i);
+            if (w.who == null) {
+                changed = true;
+                // Set result to START_TASK_TO_FRONT so that startActivityMayWait() knows that
+                // the starting activity ends up moving another activity to front, and it should
+                // wait for this new activity to become visible instead.
+                // Do not modify other fields.
+                w.result = START_TASK_TO_FRONT;
+            }
+        }
+        if (changed) {
+            mService.notifyAll();
+        }
+    }
+
     void reportActivityLaunchedLocked(boolean timeout, ActivityRecord r,
             long thisTime, long totalTime) {
         boolean changed = false;
@@ -1017,6 +1036,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
                 w.thisTime = thisTime;
                 w.totalTime = totalTime;
+                // Do not modify w.result.
             }
         }
         if (changed) {
