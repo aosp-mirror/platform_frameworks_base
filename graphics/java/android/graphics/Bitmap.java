@@ -1363,7 +1363,8 @@ public final class Bitmap implements Parcelable {
      * @param pixels   The array to receive the bitmap's colors
      * @param offset   The first index to write into pixels[]
      * @param stride   The number of entries in pixels[] to skip between
-     *                 rows (must be >= bitmap's width). Can be negative.
+     *                 rows (absolute value must be >= width parameter).
+     *                 Can be negative.
      * @param x        The x coordinate of the first pixel to read from
      *                 the bitmap
      * @param y        The y coordinate of the first pixel to read from
