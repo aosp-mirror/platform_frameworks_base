@@ -783,6 +783,16 @@ public class CarrierConfigManager {
     /** @hide */
     public static final int CDMA_ROAMING_MODE_ANY = 2;
 
+    /**
+     * The families of Radio Access Technologies that will get clustered and ratcheted,
+     * ie, we will report transitions up within the family, but not down until we change
+     * cells.  This prevents flapping between base technologies and higher techs that are
+     * granted on demand within the cell.
+     * @hide
+     */
+    public static final String KEY_RATCHET_RAT_FAMILIES =
+            "ratchet_rat_families";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -928,6 +938,11 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_SIGNAL_DCFAILURE_RECEIVER_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY, null);
         sDefaults.putString(KEY_CARRIER_SETUP_APP_STRING, "");
+
+        // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP}
+        // Order is important - lowest precidence first
+        sDefaults.putStringArray(KEY_RATCHET_RAT_FAMILIES,
+                new String[]{"1,2","7,8,12","3,11,9,10,15"});
     }
 
     /**
