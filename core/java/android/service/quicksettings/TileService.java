@@ -123,11 +123,6 @@ public class TileService extends Service {
     /**
      * @hide
      */
-    public static final String EXTRA_TILE = "tile";
-
-    /**
-     * @hide
-     */
     public static final String EXTRA_COMPONENT = "android.service.quicksettings.extra.COMPONENT";
 
     private final H mHandler = new H(Looper.getMainLooper());
@@ -315,9 +310,16 @@ public class TileService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        mTile = intent.getParcelableExtra(EXTRA_TILE);
         mService = IQSService.Stub.asInterface(intent.getIBinderExtra(EXTRA_SERVICE));
-        mTile.setService(mService);
+        try {
+            mTile = mService.getTile(new ComponentName(getPackageName(), getClass().getName()));
+        } catch (RemoteException e) {
+            throw new RuntimeException("Unable to reach IQSService", e);
+        }
+        if (mTile != null) {
+            mTile.setService(mService);
+            mHandler.sendEmptyMessage(H.MSG_START_SUCCESS);
+        }
         return new IQSTileService.Stub() {
             @Override
             public void onTileRemoved() throws RemoteException {
@@ -358,6 +360,7 @@ public class TileService extends Service {
         private static final int MSG_TILE_REMOVED = 4;
         private static final int MSG_TILE_CLICKED = 5;
         private static final int MSG_UNLOCK_COMPLETE = 6;
+        private static final int MSG_START_SUCCESS = 7;
 
         public H(Looper looper) {
             super(looper);
@@ -395,6 +398,12 @@ public class TileService extends Service {
                 case MSG_UNLOCK_COMPLETE:
                     if (mUnlockRunnable != null) {
                         mUnlockRunnable.run();
+                    }
+                    break;
+                case MSG_START_SUCCESS:
+                    try {
+                        mService.onStartSuccessful(mTile);
+                    } catch (RemoteException e) {
                     }
                     break;
             }
