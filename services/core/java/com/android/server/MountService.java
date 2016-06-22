@@ -2030,6 +2030,9 @@ class MountService extends IMountService.Stub
         enforcePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
 
+        final VolumeInfo from;
+        final VolumeInfo to;
+
         synchronized (mLock) {
             if (Objects.equals(mPrimaryStorageUuid, volumeUuid)) {
                 throw new IllegalArgumentException("Primary storage already at " + volumeUuid);
@@ -2049,10 +2052,11 @@ class MountService extends IMountService.Stub
                 onMoveStatusLocked(MOVE_STATUS_COPY_FINISHED);
                 onMoveStatusLocked(PackageManager.MOVE_SUCCEEDED);
                 mHandler.obtainMessage(H_RESET).sendToTarget();
+                return;
 
             } else {
-                final VolumeInfo from = findStorageForUuid(mPrimaryStorageUuid);
-                final VolumeInfo to = findStorageForUuid(volumeUuid);
+                from = findStorageForUuid(mPrimaryStorageUuid);
+                to = findStorageForUuid(volumeUuid);
 
                 if (from == null) {
                     Slog.w(TAG, "Failing move due to missing from volume " + mPrimaryStorageUuid);
@@ -2063,13 +2067,13 @@ class MountService extends IMountService.Stub
                     onMoveStatusLocked(PackageManager.MOVE_FAILED_INTERNAL_ERROR);
                     return;
                 }
-
-                try {
-                    mConnector.execute("volume", "move_storage", from.id, to.id);
-                } catch (NativeDaemonConnectorException e) {
-                    throw e.rethrowAsParcelableException();
-                }
             }
+        }
+
+        try {
+            mConnector.execute("volume", "move_storage", from.id, to.id);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
         }
     }
 
