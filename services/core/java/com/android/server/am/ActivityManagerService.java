@@ -19311,6 +19311,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         boolean mayBeTop = false;
+        app.whitelistManager = false;
 
         for (int is = app.services.size()-1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
@@ -19350,8 +19351,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
-
-            app.whitelistManager = false;
 
             for (int conni = s.connections.size()-1;
                     conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
