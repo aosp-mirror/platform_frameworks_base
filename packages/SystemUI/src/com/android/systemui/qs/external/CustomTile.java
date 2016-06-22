@@ -84,11 +84,13 @@ public class CustomTile extends QSTile<QSTile.State> implements TileChangeListen
             PackageManager pm = mContext.getPackageManager();
             ServiceInfo info = pm.getServiceInfo(mComponent,
                     PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+            int icon = info.icon != 0 ? info.icon
+                    : info.applicationInfo.icon;
             // Update the icon if its not set or is the default icon.
             boolean updateIcon = mTile.getIcon() == null
                     || iconEquals(mTile.getIcon(), mDefaultIcon);
-            mDefaultIcon = info.icon != 0 ? android.graphics.drawable.Icon
-                    .createWithResource(mComponent.getPackageName(), info.icon) : null;
+            mDefaultIcon = icon != 0 ? android.graphics.drawable.Icon
+                    .createWithResource(mComponent.getPackageName(), icon) : null;
             if (updateIcon) {
                 mTile.setIcon(mDefaultIcon);
             }
