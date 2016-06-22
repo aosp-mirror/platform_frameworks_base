@@ -899,6 +899,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         // hold wake lock while task runs
         mWakeLock.acquire();
+        Log.i(TAG, "WakeLock acquired by handleInjectNtpTime()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -951,6 +952,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
                 // release wake lock held by task
                 mWakeLock.release();
+                Log.i(TAG, "WakeLock released by handleInjectNtpTime()");
             }
         });
     }
@@ -969,6 +971,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
         // hold wake lock while task runs
         mWakeLock.acquire();
+        Log.i(TAG, "WakeLock acquired by handleDownloadXtraData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -991,6 +994,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
                 // release wake lock held by task
                 mWakeLock.release();
+                Log.i(TAG, "WakeLock released by handleDownloadXtraData()");
             }
         });
     }
@@ -2040,6 +2044,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
         mWakeLock.acquire();
+        Log.i(TAG, "WakeLock acquired by sendMessage(" + message + ", " + arg + ", " + obj + ")");
         mHandler.obtainMessage(message, arg, 1, obj).sendToTarget();
     }
 
@@ -2099,6 +2104,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
+                Log.i(TAG, "WakeLock released by handleMessage(" + message + ", " + msg.arg1 + ", "
+                        + msg.obj + ")");
             }
         }
 
