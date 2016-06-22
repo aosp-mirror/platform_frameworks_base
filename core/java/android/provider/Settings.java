@@ -6147,6 +6147,30 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
+         * Control whether Night display is currently activated.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_ACTIVATED = "night_display_activated";
+
+        /**
+         * Control whether Night display will automatically activate/deactivate.
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_AUTO_MODE = "night_display_auto_mode";
+
+        /**
+         * Custom time when Night display is scheduled to activate.
+         * Represented as milliseconds from midnight (e.g. 79200000 == 10pm).
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_CUSTOM_START_TIME = "night_display_custom_start_time";
+
+        /**
+         * Custom time when Night display is scheduled to deactivate.
+         * Represented as milliseconds from midnight (e.g. 21600000 == 6am).
+         * @hide
+         */
+        public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
          * Behavior of twilight on the device.
