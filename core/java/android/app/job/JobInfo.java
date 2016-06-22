@@ -29,6 +29,7 @@ import android.os.PersistableBundle;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Container of data passed to the {@link android.app.job.JobScheduler} fully encapsulating the
@@ -505,6 +506,20 @@ public class JobInfo implements Parcelable {
          */
         public int getFlags() {
             return mFlags;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof TriggerContentUri)) {
+                return false;
+            }
+            TriggerContentUri t = (TriggerContentUri) o;
+            return Objects.equals(t.mUri, mUri) && t.mFlags == mFlags;
+        }
+
+        @Override
+        public int hashCode() {
+            return (mUri == null ? 0 : mUri.hashCode()) ^ mFlags;
         }
 
         private TriggerContentUri(Parcel in) {
