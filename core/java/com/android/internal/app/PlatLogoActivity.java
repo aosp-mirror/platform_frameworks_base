@@ -53,7 +53,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 public class PlatLogoActivity extends Activity {
-    public static final boolean REVEAL_THE_NAME = true;
+    public static final boolean REVEAL_THE_NAME = false;
 
     FrameLayout mLayout;
     int mTapCount;
@@ -112,7 +112,6 @@ public class PlatLogoActivity extends Activity {
                             ObjectAnimator.ofInt(overlay, "alpha", 0, 255)
                                 .setDuration(500)
                                 .start();
-                            return true;
                         }
 
                         final ContentResolver cr = getContentResolver();
