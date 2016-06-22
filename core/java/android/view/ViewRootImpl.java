@@ -26,7 +26,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
+import android.annotation.NonNull;
 import android.app.ActivityManagerNative;
+import android.app.ResourcesManager;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -163,7 +165,7 @@ public final class ViewRootImpl implements ViewParent,
     final ArrayList<WindowCallbacks> mWindowCallbacks = new ArrayList<>();
     final Context mContext;
     final IWindowSession mWindowSession;
-    final Display mDisplay;
+    @NonNull Display mDisplay;
     final DisplayManager mDisplayManager;
     final String mBasePackageName;
 
@@ -307,8 +309,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mAdded;
     boolean mAddedTouchMode;
 
-    final DisplayAdjustments mDisplayAdjustments;
-
     // These are accessed by multiple threads.
     final Rect mWinFrame; // frame given by window manager.
 
@@ -412,9 +412,6 @@ public final class ViewRootImpl implements ViewParent,
         mWindowSession = WindowManagerGlobal.getWindowSession();
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
-
-        mDisplayAdjustments = display.getDisplayAdjustments();
-
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
         mLocation.fillInStackTrace();
@@ -588,7 +585,8 @@ public final class ViewRootImpl implements ViewParent,
                     attrs.setSurfaceInsets(view, false /*manual*/, true /*preservePrevious*/);
                 }
 
-                CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
+                CompatibilityInfo compatibilityInfo =
+                        mDisplay.getDisplayAdjustments().getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
 
                 // If the application owns the surface, don't enable hardware acceleration
@@ -1468,7 +1466,8 @@ public final class ViewRootImpl implements ViewParent,
             surfaceChanged = true;
             params = lp;
         }
-        CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
+        CompatibilityInfo compatibilityInfo =
+                mDisplay.getDisplayAdjustments().getCompatibilityInfo();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
             params = lp;
             mFullRedrawNeeded = true;
@@ -3306,7 +3305,7 @@ public final class ViewRootImpl implements ViewParent,
                 + mWindowAttributes.getTitle()
                 + ": " + config);
 
-        CompatibilityInfo ci = mDisplayAdjustments.getCompatibilityInfo();
+        CompatibilityInfo ci = mDisplay.getDisplayAdjustments().getCompatibilityInfo();
         if (!ci.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
             config = new Configuration(config);
             ci.applyToConfiguration(mNoncompatDensity, config);
@@ -3321,8 +3320,13 @@ public final class ViewRootImpl implements ViewParent,
             // At this point the resources have been updated to
             // have the most recent config, whatever that is.  Use
             // the one in them which may be newer.
-            config = mView.getResources().getConfiguration();
+            final Resources localResources = mView.getResources();
+            config = localResources.getConfiguration();
             if (force || mLastConfiguration.diff(config) != 0) {
+                // Update the display with new DisplayAdjustments.
+                mDisplay = ResourcesManager.getInstance().getAdjustedDisplay(
+                        mDisplay.getDisplayId(), localResources.getDisplayAdjustments());
+
                 final int lastLayoutDirection = mLastConfiguration.getLayoutDirection();
                 final int currentLayoutDirection = config.getLayoutDirection();
                 mLastConfiguration.setTo(config);

@@ -44,6 +44,8 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.Display;
+import android.view.DisplayAdjustments;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -111,7 +113,8 @@ public class ResourcesImpl {
 
 
     final AssetManager mAssets;
-    final DisplayMetrics mMetrics = new DisplayMetrics();
+    private final DisplayMetrics mMetrics = new DisplayMetrics();
+    private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
 
     private PluralRules mPluralRule;
 
@@ -134,12 +137,40 @@ public class ResourcesImpl {
      *               selecting/computing resource values (optional).
      * @param compatInfo this resource's compatibility info. Must not be null.
      */
-    public ResourcesImpl(AssetManager assets, DisplayMetrics metrics, Configuration config,
-            CompatibilityInfo compatInfo) {
+    public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
+            @Nullable Configuration config, @NonNull CompatibilityInfo compatInfo) {
+        this(assets, metrics, config, compatInfo, null);
+    }
+
+    /**
+     * Creates a new ResourcesImpl object with CompatibilityInfo and assigns a static overrideConfig
+     * that is reported with getDisplayAdjustments(). This is used for updating the Display
+     * when a new ResourcesImpl is created due to multi-window configuration changes.
+     *
+     * @param assets Previously created AssetManager.
+     * @param metrics Current display metrics to consider when selecting/computing resource values.
+     * @param fullConfig Desired device configuration to consider when selecting/computing
+     * resource values.
+     * @param compatInfo this resource's compatibility info. Must not be null.
+     * @param overrideConfig the overrides specific to this ResourcesImpl object. They must already
+     * be applied to the fullConfig and are mainly maintained in order to return a valid
+     * DisplayAdjustments object during configuration changes.
+     */
+    public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
+            @Nullable Configuration fullConfig, @NonNull CompatibilityInfo compatInfo,
+            @Nullable Configuration overrideConfig) {
         mAssets = assets;
         mMetrics.setToDefaults();
-        updateConfiguration(config, metrics, compatInfo);
+        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+        if (overrideConfig != null) {
+            mDisplayAdjustments.setConfiguration(overrideConfig);
+        }
+        updateConfiguration(fullConfig, metrics, compatInfo);
         mAssets.ensureStringBlocks();
+    }
+
+    public DisplayAdjustments getDisplayAdjustments() {
+        return mDisplayAdjustments;
     }
 
     public AssetManager getAssets() {
