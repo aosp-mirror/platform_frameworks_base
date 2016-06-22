@@ -725,6 +725,19 @@ public class BackupManagerService {
         return true;
     }
 
+    /* adb backup: is this app only capable of doing key/value?  We say otherwise if
+     * the app has a backup agent and does not say fullBackupOnly, *unless* it
+     * is a package that we know _a priori_ explicitly supports both key/value and
+     * full-data backup.
+     */
+    private static boolean appIsKeyValueOnly(PackageInfo pkg) {
+        if ("com.android.providers.settings".equals(pkg.packageName)) {
+            return false;
+        }
+
+        return !appGetsFullBackup(pkg);
+    }
+
     // ----- Asynchronous backup/restore handler thread -----
 
     private class BackupHandler extends Handler {
@@ -3446,8 +3459,8 @@ public class BackupManagerService {
             Intent obbIntent = new Intent().setComponent(new ComponentName(
                     "com.android.sharedstoragebackup",
                     "com.android.sharedstoragebackup.ObbBackupService"));
-            BackupManagerService.this.mContext.bindService(
-                    obbIntent, this, Context.BIND_AUTO_CREATE);
+            BackupManagerService.this.mContext.bindServiceAsUser(
+                    obbIntent, this, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
         }
 
         public void tearDown() {
@@ -3965,7 +3978,7 @@ public class BackupManagerService {
     }
 
     // Full backup task variant used for adb backup
-    class PerformAdbBackupTask extends FullBackupTask {
+    class PerformAdbBackupTask extends FullBackupTask implements BackupRestoreTask {
         FullBackupEngine mBackupEngine;
         final AtomicBoolean mLatch;
 
@@ -3979,6 +3992,7 @@ public class BackupManagerService {
         boolean mIncludeSystem;
         boolean mCompress;
         ArrayList<String> mPackages;
+        PackageInfo mCurrentTarget;
         String mCurrentPassword;
         String mEncryptPassword;
 
@@ -4008,6 +4022,9 @@ public class BackupManagerService {
                 mEncryptPassword = curPassword;
             } else {
                 mEncryptPassword = encryptPassword;
+            }
+            if (MORE_DEBUG) {
+                Slog.w(TAG, "Encrypting backup with passphrase=" + mEncryptPassword);
             }
             mCompress = doCompress;
         }
@@ -4165,7 +4182,9 @@ public class BackupManagerService {
             Iterator<Entry<String, PackageInfo>> iter = packagesToBackup.entrySet().iterator();
             while (iter.hasNext()) {
                 PackageInfo pkg = iter.next().getValue();
-                if (!appIsEligibleForBackup(pkg.applicationInfo)) {
+                if (!appIsEligibleForBackup(pkg.applicationInfo)
+                        || appIsStopped(pkg.applicationInfo)
+                        || appIsKeyValueOnly(pkg)) {
                     iter.remove();
                 }
             }
@@ -4267,9 +4286,11 @@ public class BackupManagerService {
                     final boolean isSharedStorage =
                             pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
 
-                    mBackupEngine = new FullBackupEngine(out, null, pkg, mIncludeApks, null);
+                    mBackupEngine = new FullBackupEngine(out, null, pkg, mIncludeApks, this);
                     sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
+
                     // Don't need to check preflight result as there is no preflight hook.
+                    mCurrentTarget = pkg;
                     mBackupEngine.backupOnePackage();
 
                     // after the app's agent runs to handle its private filesystem
@@ -4306,6 +4327,28 @@ public class BackupManagerService {
                 obbConnection.tearDown();
                 if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
                 mWakelock.release();
+            }
+        }
+
+        // BackupRestoreTask methods, used for timeout handling
+        @Override
+        public void execute() {
+            // Unused
+        }
+
+        @Override
+        public void operationComplete(long result) {
+            // Unused
+        }
+
+        @Override
+        public void handleTimeout() {
+            final PackageInfo target = mCurrentTarget;
+            if (DEBUG) {
+                Slog.w(TAG, "adb backup timeout of " + target);
+            }
+            if (target != null) {
+                tearDownAgentAndKill(mCurrentTarget.applicationInfo);
             }
         }
     }
@@ -5255,7 +5298,7 @@ public class BackupManagerService {
         byte[] mWidgetData = null;
 
         // Runner that can be placed in a separate thread to do in-process
-        // invocations of the full restore API asynchronously
+        // invocations of the full restore API asynchronously. Used by adb restore.
         class RestoreFileRunnable implements Runnable {
             IBackupAgent mAgent;
             FileMetadata mInfo;
@@ -6404,6 +6447,46 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // ***** end new engine class ***
 
+    // Used for synchronizing doRestoreFinished during adb restore
+    class AdbRestoreFinishedLatch implements BackupRestoreTask {
+        static final String TAG = "AdbRestoreFinishedLatch";
+        final CountDownLatch mLatch;
+
+        AdbRestoreFinishedLatch() {
+            mLatch = new CountDownLatch(1);
+        }
+
+        void await() {
+            boolean latched = false;
+            try {
+                latched = mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                Slog.w(TAG, "Interrupted!");
+            }
+        }
+
+        @Override
+        public void execute() {
+            // Unused
+        }
+
+        @Override
+        public void operationComplete(long result) {
+            if (MORE_DEBUG) {
+                Slog.w(TAG, "adb onRestoreFinished() complete");
+            }
+            mLatch.countDown();
+        }
+
+        @Override
+        public void handleTimeout() {
+            if (DEBUG) {
+                Slog.w(TAG, "adb onRestoreFinished() timed out");
+            }
+            mLatch.countDown();
+        }
+    }
+
     class PerformAdbRestoreTask implements Runnable {
         ParcelFileDescriptor mInputFile;
         String mCurrentPassword;
@@ -6418,6 +6501,27 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         byte[] mWidgetData = null;
 
         long mBytes;
+
+        // Runner that can be placed on a separate thread to do in-process invocation
+        // of the "restore finished" API asynchronously.  Used by adb restore.
+        class RestoreFinishedRunnable implements Runnable {
+            final IBackupAgent mAgent;
+            final int mToken;
+
+            RestoreFinishedRunnable(IBackupAgent agent, int token) {
+                mAgent = agent;
+                mToken = token;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    mAgent.doRestoreFinished(mToken, mBackupManagerBinder);
+                } catch (RemoteException e) {
+                    // never happens; this is used only for local binder calls
+                }
+            }
+        }
 
         // possible handling states for a given package in the restore dataset
         final HashMap<String, RestorePolicy> mPackagePolicies
@@ -6560,7 +6664,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 Slog.e(TAG, "Unable to read restore input");
             } finally {
                 tearDownPipes();
-                tearDownAgent(mTargetApp);
+                tearDownAgent(mTargetApp, true);
 
                 try {
                     if (rawDataIn != null) rawDataIn.close();
@@ -6714,7 +6818,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             if (DEBUG) Slog.d(TAG, "Saw new package; finalizing old one");
                             // Now we're really done
                             tearDownPipes();
-                            tearDownAgent(mTargetApp);
+                            tearDownAgent(mTargetApp, true);
                             mTargetApp = null;
                             mAgentPackage = null;
                         }
@@ -6936,10 +7040,12 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                             // okay, if the remote end failed at any point, deal with
                             // it by ignoring the rest of the restore on it
                             if (!agentSuccess) {
+                                if (DEBUG) {
+                                    Slog.d(TAG, "Agent failure restoring " + pkg + "; now ignoring");
+                                }
                                 mBackupHandler.removeMessages(MSG_TIMEOUT);
                                 tearDownPipes();
-                                tearDownAgent(mTargetApp);
-                                mAgent = null;
+                                tearDownAgent(mTargetApp, false);
                                 mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
                             }
                         }
@@ -6988,9 +7094,27 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             }
         }
 
-        void tearDownAgent(ApplicationInfo app) {
+        void tearDownAgent(ApplicationInfo app, boolean doRestoreFinished) {
             if (mAgent != null) {
                 try {
+                    // In the adb restore case, we do restore-finished here
+                    if (doRestoreFinished) {
+                        final int token = generateToken();
+                        final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch();
+                        prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL, latch);
+                        if (mTargetApp.processName.equals("system")) {
+                            if (MORE_DEBUG) {
+                                Slog.d(TAG, "system agent - restoreFinished on thread");
+                            }
+                            Runnable runner = new RestoreFinishedRunnable(mAgent, token);
+                            new Thread(runner, "restore-sys-finished-runner").start();
+                        } else {
+                            mAgent.doRestoreFinished(token, mBackupManagerBinder);
+                        }
+
+                        latch.await();
+                    }
+
                     // unbind and tidy up even on timeout or failure, just in case
                     mActivityManager.unbindBackupAgent(app);
 
@@ -9354,7 +9478,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     "com.android.backupconfirm.BackupRestoreConfirmation");
             confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
             confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(confIntent);
+            mContext.startActivityAsUser(confIntent, UserHandle.SYSTEM);
         } catch (ActivityNotFoundException e) {
             return false;
         }
