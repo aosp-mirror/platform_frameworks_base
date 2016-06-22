@@ -49965,9 +49965,9 @@ package java.net {
     ctor public DatagramPacket(byte[], int, int);
     ctor public DatagramPacket(byte[], int);
     ctor public DatagramPacket(byte[], int, int, java.net.InetAddress, int);
-    ctor public DatagramPacket(byte[], int, int, java.net.SocketAddress) throws java.net.SocketException;
+    ctor public DatagramPacket(byte[], int, int, java.net.SocketAddress);
     ctor public DatagramPacket(byte[], int, java.net.InetAddress, int);
-    ctor public DatagramPacket(byte[], int, java.net.SocketAddress) throws java.net.SocketException;
+    ctor public DatagramPacket(byte[], int, java.net.SocketAddress);
     method public synchronized java.net.InetAddress getAddress();
     method public synchronized byte[] getData();
     method public synchronized int getLength();
