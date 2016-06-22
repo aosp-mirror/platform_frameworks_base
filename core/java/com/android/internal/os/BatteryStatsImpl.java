@@ -8186,7 +8186,12 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].reset(false);
         }
-        mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
+
+        if (mPowerProfile != null) {
+            mEstimatedBatteryCapacity = (int) mPowerProfile.getBatteryCapacity();
+        } else {
+            mEstimatedBatteryCapacity = -1;
+        }
         mInteractiveTimer.reset(false);
         mPowerSaveModeEnabledTimer.reset(false);
         mLastIdleTimeStart = elapsedRealtimeMillis;
