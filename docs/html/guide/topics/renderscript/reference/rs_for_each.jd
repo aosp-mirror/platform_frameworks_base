@@ -1,10 +1,10 @@
-page.title=RenderScript Kernel Invocation Functions and Types
+page.title=RenderScript Kernel Launch Functions and Types
 
 @jd:body
 
 <div class='renderscript'>
 <h2>Overview</h2>
-<p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() function can be used to invoke the root kernel of a script.
+<p> The <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>() and <a href='rs_for_each.html#android_rs:rsForEachWithOptions'>rsForEachWithOptions</a>() functions are used to launch foreach kernels.
 </p>
 
 <p> The other functions are used to get the characteristics of the invocation of
@@ -20,6 +20,14 @@ a <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> 
     </td>
     <td class='jd-descrcol' width='100%'>
       Suggested cell processing order
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rs_kernel'>rs_kernel</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Handle to a kernel function
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -46,7 +54,15 @@ a <a href='rs_for_each.html#android_rs:rs_kernel_context'>rs_kernel_context</a> 
       <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>
     </td>
     <td class='jd-descrcol' width='100%'>
-      Invoke the root kernel of a script
+      Launches a kernel
+    </td>
+  </tr>
+  <tr class='alt-color api apilevel-1'>
+    <td class='jd-linkcol'>
+      <a href='rs_for_each.html#android_rs:rsForEachWithOptions'>rsForEachWithOptions</a>
+    </td>
+    <td class='jd-descrcol' width='100%'>
+      Launches a kernel with options
     </td>
   </tr>
   <tr class='alt-color api apilevel-1'>
@@ -198,6 +214,21 @@ locality when the processing is distributed over multiple cores.
   </div>
 </div>
 
+<a name='android_rs:rs_kernel'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rs_kernel</span>
+    <span class='normal'>: Handle to a kernel function</span>
+  </h4>
+  <div class='jd-details-descr'>
+<p>A typedef of: void*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+</p>
+<p>  An opaque type for a function that is defined with the kernel attribute.  A value
+ of this type can be used in a <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a> call to launch a kernel.
+</p>
+  </div>
+</div>
+
 <a name='android_rs:rs_kernel_context'></a>
 <div class='jd-details'>
   <h4 class='jd-details-title'>
@@ -249,7 +280,7 @@ versions, it will also be used to provide hint on how to best iterate over
 the cells.
 </p>
 
-<p> The Start fields are inclusive and the End fields are exclusive.  E.g. to iterate
+<p> The Start fields are inclusive and the End fields are exclusive.  For example, to iterate
 over cells 4, 5, 6, and 7 in the X dimension, set xStart to 4 and xEnd to 8.
 </p>
   </div>
@@ -260,14 +291,20 @@ over cells 4, 5, 6, and 7 in the X dimension, set xStart to 4 and xEnd to 8.
 <div class='jd-details'>
   <h4 class='jd-details-title'>
     <span class='sympad'>rsForEach</span>
-    <span class='normal'>: Invoke the root kernel of a script</span>
+    <span class='normal'>: Launches a kernel</span>
   </h4>
   <div class='jd-details-descr'>
     <table class='jd-tagtable'><tbody>
       <tr>
+        <td>void rsForEach(<a href='rs_for_each.html#android_rs:rs_kernel'>rs_kernel</a> kernel, ... ...);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+      <tr>
         <td>void rsForEach(<a href='rs_object_types.html#android_rs:rs_script'>rs_script</a> script, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> input, <a href='rs_object_types.html#android_rs:rs_allocation'>rs_allocation</a> output);
 </td>
-        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14</a>
+        <td>    <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 14 - 23</a>
         </td>
       </tr>
       <tr>
@@ -300,35 +337,89 @@ over cells 4, 5, 6, and 7 in the X dimension, set xStart to 4 and xEnd to 8.
     <table class='jd-tagtable'><tbody>
     <tr><th>script</th><td>Script to call.</td></tr>
     <tr><th>input</th><td>Allocation to source data from.</td></tr>
-    <tr><th>output</th><td>Allocation to write date into.</td></tr>
+    <tr><th>output</th><td>Allocation to write data into.</td></tr>
     <tr><th>usrData</th><td>User defined data to pass to the script.  May be NULL.</td></tr>
     <tr><th>sc</th><td>Extra control information used to select a sub-region of the allocation to be processed or suggest a walking strategy.  May be NULL.</td></tr>
     <tr><th>usrDataLen</th><td>Size of the userData structure.  This will be used to perform a shallow copy of the data if necessary.</td></tr>
+    <tr><th>kernel</th><td>Function designator of the kernel function to call, which must be defined with the kernel attribute.</td></tr>
+    <tr><th>...</th><td>Input and output allocations</td></tr>
     </tbody></table>
   </div>
   <div class='jd-tagdata jd-tagdescr'>
-<p> Invoke the kernel named "root" of the specified script.  Like other kernels, this root()
-function will be invoked repeatedly over the cells of the specificed allocation, filling
-the output allocation with the results.
+<p> Runs the kernel over zero or more input allocations. They are passed after the
+<a href='rs_for_each.html#android_rs:rs_kernel'>rs_kernel</a> argument. If the specified kernel returns a value, an output allocation
+must be specified as the last argument. All input allocations,
+and the output allocation if it exists, must have the same dimensions.
 </p>
 
-<p> When rsForEach is called, the root script is launched immediately.  rsForEach returns
-only when the script has completed and the output allocation is ready to use.
+<p> This is a synchronous function. A call to this function only returns after all
+the work has completed. If the kernel
+function returns any value, the call waits until all results have been written
+to the output allocation.
 </p>
 
-<p> The rs_script argument is typically initialized using a global variable set from Java.
+<p> Up to API level 23, the kernel is implicitly specified as the kernel named
+"root" in the specified script, and only a single input allocation can be used.
+Starting in API level 24, an arbitrary kernel function can be used,
+as specified by the kernel argument.
+The kernel must be defined in the current script. In addition, more than one
+input can be used.
 </p>
 
-<p> The kernel can be invoked with just an input allocation or just an output allocation.
-This can be done by defining an rs_allocation variable and not initializing it.  E.g.<code><br/>
-rs_script gCustomScript;<br/>
-void specializedProcessing(rs_allocation in) {<br/>
-&nbsp;&nbsp;rs_allocation ignoredOut;<br/>
-&nbsp;&nbsp;rsForEach(gCustomScript, in, ignoredOut);<br/>
-}<br/></code>
+<p> For example,<code><br/>
+float __attribute__((kernel)) square(float a) {<br/>
+&nbsp;&nbsp;return a * a;<br/>
+}<br/>
+<br/>
+void compute(rs_allocation ain, rs_allocation aout) {<br/>
+&nbsp;&nbsp;rsForEach(square, ain, aout);<br/>
+}<br/>
+<br/></code>
+</p>
+  </div>
+</div>
+
+<a name='android_rs:rsForEachWithOptions'></a>
+<div class='jd-details'>
+  <h4 class='jd-details-title'>
+    <span class='sympad'>rsForEachWithOptions</span>
+    <span class='normal'>: Launches a kernel with options</span>
+  </h4>
+  <div class='jd-details-descr'>
+    <table class='jd-tagtable'><tbody>
+      <tr>
+        <td>void rsForEachWithOptions(<a href='rs_for_each.html#android_rs:rs_kernel'>rs_kernel</a> kernel, <a href='rs_for_each.html#android_rs:rs_script_call_t'>rs_script_call_t</a>* options, ... ...);
+</td>
+        <td>    Added in <a href='http://developer.android.com/guide/topics/manifest/uses-sdk-element.html#ApiLevels'>API level 24</a>
+        </td>
+      </tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata'>    <h5 class='jd-tagtitle'>Parameters</h5>
+    <table class='jd-tagtable'><tbody>
+    <tr><th>kernel</th><td>Function designator to a function that is defined with the kernel attribute.</td></tr>
+    <tr><th>options</th><td>Launch options</td></tr>
+    <tr><th>...</th><td>Input and output allocations</td></tr>
+    </tbody></table>
+  </div>
+  <div class='jd-tagdata jd-tagdescr'>
+<p> Launches kernel in a way similar to <a href='rs_for_each.html#android_rs:rsForEach'>rsForEach</a>. However, instead of processing
+all cells in the input, this function only processes cells in the subspace of
+the index space specified in options. With the index space explicitly specified
+by options, no input or output allocation is required for a kernel launch using
+this API. If allocations are passed in, they must match the number of arguments
+and return value expected by the kernel function. The output allocation is
+present if and only if the kernel has a non-void return value.
 </p>
 
-<p> If both input and output allocations are specified, they must have the same dimensions.
+<p> For example,<code><br/>
+   rs_script_call_t opts = {0};<br/>
+   opts.xStart = 0;<br/>
+   opts.xEnd = dimX;<br/>
+   opts.yStart = 0;<br/>
+   opts.yEnd = dimY / 2;<br/>
+   rsForEachWithOptions(foo, &opts, out, out);<br/>
+</code>
 </p>
   </div>
 </div>
@@ -359,7 +450,7 @@ over and rarely used indices, like the Array0 index.
 </p>
 
 <p> You can access the kernel context by adding a special parameter named "context" of
-type rs_kernel_context to your kernel function.  E.g.<br/>
+type rs_kernel_context to your kernel function.  For example,<br/>
 <code>short RS_KERNEL myKernel(short value, uint32_t x, rs_kernel_context context) {<br/>
 &nbsp;&nbsp;// The current index in the common x, y, z dimensions are accessed by<br/>
 &nbsp;&nbsp;// adding these variables as arguments.  For the more rarely used indices<br/>
@@ -644,7 +735,7 @@ over and rarely used indices, like the Array0 index.
 </p>
 
 <p> You can access it by adding a special parameter named "context" of
-type rs_kernel_context to your kernel function.  E.g.<br/>
+type rs_kernel_context to your kernel function.  For example,<br/>
 <code>int4 RS_KERNEL myKernel(int4 value, rs_kernel_context context) {<br/>
 &nbsp;&nbsp;uint32_t size = rsGetDimX(context); //...<br/></code>
 </p>
