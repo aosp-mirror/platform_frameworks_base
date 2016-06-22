@@ -367,6 +367,14 @@ public abstract class Connection extends Conferenceable {
     public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
 
     /**
+     * Boolean connection extra key set on a {@link Connection} in
+     * {@link Connection#STATE_RINGING} state to indicate that answering the call will cause the
+     * current active foreground call to be dropped.
+     */
+    public static final String EXTRA_ANSWERING_DROPS_FG_CALL =
+            "android.telecom.extra.ANSWERING_DROPS_FG_CALL";
+
+    /**
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
      * {@link #sendConnectionEvent(String)}.

@@ -448,6 +448,15 @@ public class ImsCallProfile implements Parcelable {
     }
 
     /**
+     * Determines if the {@link ImsCallProfile} represents a video call.
+     *
+     * @return {@code true} if the profile is for a video call, {@code false} otherwise.
+     */
+    public boolean isVideoCall() {
+        return VideoProfile.isVideo(getVideoStateFromCallType(mCallType));
+    }
+
+    /**
      * Determines if a video state is set in a video state bit-mask.
      *
      * @param videoState The video state bit mask.
