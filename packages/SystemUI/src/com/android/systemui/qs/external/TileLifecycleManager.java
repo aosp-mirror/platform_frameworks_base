@@ -88,7 +88,6 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mHandler = handler;
         mIntent = intent;
         mIntent.putExtra(TileService.EXTRA_SERVICE, service.asBinder());
-        mIntent.putExtra(TileService.EXTRA_TILE, tile);
         mUser = user;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
