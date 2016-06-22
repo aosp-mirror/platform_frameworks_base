@@ -16,12 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
+import android.os.UserManager;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -49,7 +51,8 @@ public class HotspotControllerImpl implements HotspotController {
     @Override
     public boolean isHotspotSupported() {
         return mConnectivityManager.isTetheringSupported()
-                && mConnectivityManager.getTetherableWifiRegexs().length != 0;
+                && mConnectivityManager.getTetherableWifiRegexs().length != 0
+                && UserManager.get(mContext).isUserAdmin(ActivityManager.getCurrentUser());
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
