@@ -933,9 +933,6 @@ final class ActivityStack {
     void setLaunchTime(ActivityRecord r) {
         if (r.displayStartTime == 0) {
             r.fullyDrawnStartTime = r.displayStartTime = SystemClock.uptimeMillis();
-            if (r.task != null) {
-                r.task.isLaunching = true;
-            }
             if (mLaunchStartTime == 0) {
                 startLaunchTraces(r.packageName);
                 mLaunchStartTime = mFullyDrawnStartTime = r.displayStartTime;
@@ -950,9 +947,6 @@ final class ActivityStack {
         // Make sure that there is no activity waiting for this to launch.
         if (mStackSupervisor.mWaitingActivityLaunched.isEmpty()) {
             r.displayStartTime = r.fullyDrawnStartTime = 0;
-            if (r.task != null) {
-                r.task.isLaunching = false;
-            }
         } else {
             mStackSupervisor.removeTimeoutsForActivityLocked(r);
             mStackSupervisor.scheduleIdleTimeoutLocked(r);
@@ -1407,6 +1401,7 @@ final class ActivityStack {
 
         if (next.nowVisible) {
             // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
+            mStackSupervisor.reportActivityVisibleLocked(next);
             mStackSupervisor.notifyActivityDrawnForKeyguard();
         }
 
