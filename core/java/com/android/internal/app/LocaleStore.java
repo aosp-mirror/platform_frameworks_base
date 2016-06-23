@@ -307,6 +307,9 @@ public class LocaleStore {
             localizedLocales.add(li.getLangScriptKey());
         }
 
+        // Serbian in Latin script is only partially localized in N.
+        localizedLocales.remove("sr-Latn");
+
         for (LocaleInfo li : sLocaleCache.values()) {
             li.setTranslated(localizedLocales.contains(li.getLangScriptKey()));
         }
