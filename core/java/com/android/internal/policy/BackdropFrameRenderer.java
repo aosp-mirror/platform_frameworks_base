@@ -217,6 +217,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         synchronized (this) {
             // Make sure no more messages are being sent.
             mChoreographer = null;
+            Choreographer.releaseInstance();
         }
     }
 
