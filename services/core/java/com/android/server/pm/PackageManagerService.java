@@ -6763,11 +6763,26 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private long getLastModifiedTime(PackageParser.Package pkg, File srcFile) {
+        if (srcFile.isDirectory()) {
+            final File baseFile = new File(pkg.baseCodePath);
+            long maxModifiedTime = baseFile.lastModified();
+            if (pkg.splitCodePaths != null) {
+                for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
+                    final File splitFile = new File(pkg.splitCodePaths[i]);
+                    maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
+                }
+            }
+            return maxModifiedTime;
+        }
+        return srcFile.lastModified();
+    }
+
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg, File srcFile,
             final int policyFlags) throws PackageManagerException {
         if (ps != null
                 && ps.codePath.equals(srcFile)
-                && ps.timeStamp == srcFile.lastModified()
+                && ps.timeStamp == getLastModifiedTime(pkg, srcFile)
                 && !isCompatSignatureUpdateNeeded(pkg)
                 && !isRecoverSignatureUpdateNeeded(pkg)) {
             long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
@@ -8403,7 +8418,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final String pkgName = pkg.packageName;
 
-        final long scanFileTime = scanFile.lastModified();
+        final long scanFileTime = getLastModifiedTime(pkg, scanFile);
         final boolean forceDex = (scanFlags & SCAN_FORCE_DEX) != 0;
         pkg.applicationInfo.processName = fixProcessName(
                 pkg.applicationInfo.packageName,
