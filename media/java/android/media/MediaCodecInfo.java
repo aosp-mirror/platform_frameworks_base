@@ -1372,16 +1372,33 @@ public final class MediaCodecInfo {
          * May return {@code null}, if the codec did not publish any measurement
          * data.
          * <p>
-         * This is a performance estimate provided by the device manufacturer
-         * based on full-speed decoding and encoding measurements in various configurations
+         * This is a performance estimate provided by the device manufacturer based on statistical
+         * sampling of full-speed decoding and encoding measurements in various configurations
          * of common video sizes supported by the codec. As such it should only be used to
          * compare individual codecs on the device. The value is not suitable for comparing
          * different devices or even different android releases for the same device.
          * <p>
-         * The returned range corresponds to the fastest frame rates achieved in the tested
-         * configurations. It is interpolated from the nearest frame size(s) tested. Codec
-         * performance is severely impacted by other activity on the device, and can vary
-         * significantly.
+         * <em>On {@link android.os.Build.VERSION_CODES#M} release</em> the returned range
+         * corresponds to the fastest frame rates achieved in the tested configurations. As
+         * such, it should not be used to gauge guaranteed or even average codec performance
+         * on the device.
+         * <p>
+         * <em>On {@link android.os.Build.VERSION_CODES#N} release</em> the returned range
+         * corresponds closer to sustained performance <em>in tested configurations</em>.
+         * One can expect to achieve sustained performance higher than the lower limit more than
+         * 50% of the time, and higher than half of the lower limit at least 90% of the time
+         * <em>in tested configurations</em>.
+         * Conversely, one can expect performance lower than twice the upper limit at least
+         * 90% of the time.
+         * <p class=note>
+         * Tested configurations use a single active codec. For use cases where multiple
+         * codecs are active, applications can expect lower and in most cases significantly lower
+         * performance.
+         * <p class=note>
+         * The returned range value is interpolated from the nearest frame size(s) tested.
+         * Codec performance is severely impacted by other activity on the device as well
+         * as environmental factors (such as battery level, temperature or power source), and can
+         * vary significantly even in a steady environment.
          * <p class=note>
          * Use this method in cases where only codec performance matters, e.g. to evaluate if
          * a codec has any chance of meeting a performance target. Codecs are listed
