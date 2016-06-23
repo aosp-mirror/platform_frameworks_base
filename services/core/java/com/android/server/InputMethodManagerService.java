@@ -18,6 +18,7 @@ package com.android.server;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController;
 import com.android.internal.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.internal.inputmethod.InputMethodUtils;
@@ -137,6 +138,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -3908,6 +3910,52 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             sb.append("Visible");
         }
         return sb.toString();
+    }
+
+    @Override
+    public IInputContentUriToken createInputContentUriToken(@Nullable IBinder token,
+            @Nullable Uri contentUri, @Nullable String packageName) {
+        if (!calledFromValidUser()) {
+            return null;
+        }
+
+        if (token == null) {
+            throw new NullPointerException("token");
+        }
+        if (packageName == null) {
+            throw new NullPointerException("packageName");
+        }
+        if (contentUri == null) {
+            throw new NullPointerException("contentUri");
+        }
+        final String contentUriScheme = contentUri.getScheme();
+        if (!"content".equals(contentUriScheme)) {
+            throw new InvalidParameterException("contentUri must have content scheme");
+        }
+
+        synchronized (mMethodMap) {
+            final int uid = Binder.getCallingUid();
+            if (mCurMethodId == null) {
+                return null;
+            }
+            if (mCurToken != token) {
+                Slog.e(TAG, "Ignoring createInputContentUriToken mCurToken=" + mCurToken
+                        + " token=" + token);
+                return null;
+            }
+            // We cannot simply distinguish a bad IME that reports an arbitrary package name from
+            // an unfortunate IME whose internal state is already obsolete due to the asynchronous
+            // nature of our system.  Let's compare it with our internal record.
+            if (!TextUtils.equals(mCurAttribute.packageName, packageName)) {
+                Slog.e(TAG, "Ignoring createInputContentUriToken mCurAttribute.packageName="
+                    + mCurAttribute.packageName + " packageName=" + packageName);
+                return null;
+            }
+            final int imeUserId = UserHandle.getUserId(uid);
+            final int appUserId = UserHandle.getUserId(mCurClient.uid);
+            return new InputContentUriTokenHandler(contentUri, uid, packageName, imeUserId,
+                    appUserId);
+        }
     }
 
     @Override
