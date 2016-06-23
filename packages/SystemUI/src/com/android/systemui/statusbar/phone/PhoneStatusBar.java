@@ -1235,6 +1235,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
             awakenDreams();
             toggleRecentApps();
@@ -1299,6 +1300,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     private final View.OnTouchListener mHomeActionListener = new View.OnTouchListener() {
+        @Override
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_UP:
@@ -2232,6 +2234,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     /**
      * State is one or more of the DISABLE constants from StatusBarManager.
      */
+    @Override
     public void disable(int state1, int state2, boolean animate) {
         animate &= mStatusBarWindowState != WINDOW_STATE_HIDDEN;
         mDisabledUnmodified1 = state1;
@@ -2461,6 +2464,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     }
 
+    @Override
     protected void updateHeadsUp(String key, Entry entry, boolean shouldPeek,
             boolean alertAgain) {
         final boolean wasHeadsUp = isHeadsUp(key);
@@ -2477,6 +2481,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    @Override
     protected void setHeadsUpUser(int newUserId) {
         if (mHeadsUpManager != null) {
             mHeadsUpManager.setUser(newUserId);
@@ -2487,6 +2492,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return mHeadsUpManager.isHeadsUp(key);
     }
 
+    @Override
     protected boolean isSnoozedPackage(StatusBarNotification sbn) {
         return mHeadsUpManager.isSnoozed(sbn.getPackageName());
     }
@@ -2527,6 +2533,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * All changes to the status bar and notifications funnel through here and are batched.
      */
     private class H extends BaseStatusBar.H {
+        @Override
         public void handleMessage(Message m) {
             super.handleMessage(m);
             switch (m.what) {
@@ -2566,6 +2573,32 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
         mHeadsUpManager.releaseAllImmediately();
+    }
+
+    /**
+     * Called for system navigation gestures. First action opens the panel, second opens
+     * settings. Down action closes the entire panel.
+     */
+    @Override
+    public void handleSystemNavigationKey(int key) {
+        if (SPEW) Log.d(TAG, "handleSystemNavigationKey: " + key);
+        if (!panelsEnabled()) {
+            return;
+        }
+
+        // Panels are not available in setup
+        if (!mUserSetup) return;
+
+        if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP == key) {
+            mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+        } else if (KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN == key) {
+            if (mNotificationPanel.isFullyCollapsed()) {
+                mNotificationPanel.expand(true /* animate */);
+            } else if (!mNotificationPanel.isInSettings() && !mNotificationPanel.isExpanding()){
+                mNotificationPanel.flingSettings(0 /* velocity */, true /* expand */);
+            }
+        }
+
     }
 
     boolean panelsEnabled() {
@@ -2609,15 +2642,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHandler.sendEmptyMessage(MSG_OPEN_SETTINGS_PANEL);
     }
 
+    @Override
     public void animateCollapsePanels(int flags) {
         animateCollapsePanels(flags, false /* force */, false /* delayed */,
                 1.0f /* speedUpFactor */);
     }
 
+    @Override
     public void animateCollapsePanels(int flags, boolean force) {
         animateCollapsePanels(flags, force, false /* delayed */, 1.0f /* speedUpFactor */);
     }
 
+    @Override
     public void animateCollapsePanels(int flags, boolean force, boolean delayed) {
         animateCollapsePanels(flags, force, delayed, 1.0f /* speedUpFactor */);
     }
@@ -3054,6 +3090,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    @Override
     public void topAppWindowChanged(boolean showMenu) {
         if (SPEW) {
             Log.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
@@ -3090,6 +3127,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 + ") " + v.getWidth() + "x" + v.getHeight() + "]";
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
@@ -3167,6 +3205,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 pw.println("see the logcat for a dump of the views we have created.");
                 // must happen on ui thread
                 mHandler.post(new Runnable() {
+                        @Override
                         public void run() {
                             mStatusBarView.getLocationOnScreen(mAbsPos);
                             Log.d(TAG, "mStatusBarView: ----- (" + mAbsPos[0] + "," + mAbsPos[1]
@@ -3277,6 +3316,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mContext, intent, mCurrentUserId);
         final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
         Runnable runnable = new Runnable() {
+            @Override
             public void run() {
                 mAssistManager.hideAssist();
                 intent.setFlags(
@@ -3321,6 +3361,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             @Override
             public boolean onDismiss() {
                 AsyncTask.execute(new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             if (keyguardShowing && !afterKeyguardGone) {
@@ -3344,6 +3385,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Log.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
@@ -3371,6 +3413,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     private BroadcastReceiver mDemoReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (DEBUG) Log.v(TAG, "onReceive: " + intent);
             String action = intent.getAction();
@@ -3630,6 +3673,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     Runnable mStartTracing = new Runnable() {
+        @Override
         public void run() {
             vibrate();
             SystemClock.sleep(250);
@@ -3640,6 +3684,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     Runnable mStopTracing = new Runnable() {
+        @Override
         public void run() {
             android.os.Debug.stopMethodTracing();
             Log.d(TAG, "stopTracing");
