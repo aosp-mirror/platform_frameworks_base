@@ -191,6 +191,9 @@ bool ManifestFixer::buildRules(xml::XmlActionExecutor* executor, IDiagnostics* d
     // Uses library actions.
     applicationAction[u"uses-library"];
 
+    // Meta-data.
+    applicationAction[u"meta-data"] = metaDataAction;
+
     // Activity actions.
     applicationAction[u"activity"].action(requiredNameIsJavaClassName);
     applicationAction[u"activity"][u"intent-filter"] = intentFilterAction;
