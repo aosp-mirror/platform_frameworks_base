@@ -1813,12 +1813,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case KILL_APPLICATION_WITH_APPID_TRANSACTION: {
+        case KILL_APPLICATION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
-            int appid = data.readInt();
+            int appId = data.readInt();
+            int userId = data.readInt();
             String reason = data.readString();
-            killApplicationWithAppId(pkg, appid, reason);
+            killApplication(pkg, appId, userId, reason);
             reply.writeNoException();
             return true;
         }
@@ -5291,15 +5292,16 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void killApplicationWithAppId(String pkg, int appid, String reason)
+    public void killApplication(String pkg, int appId, int userId, String reason)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(pkg);
-        data.writeInt(appid);
+        data.writeInt(appId);
+        data.writeInt(userId);
         data.writeString(reason);
-        mRemote.transact(KILL_APPLICATION_WITH_APPID_TRANSACTION, data, reply, 0);
+        mRemote.transact(KILL_APPLICATION_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
