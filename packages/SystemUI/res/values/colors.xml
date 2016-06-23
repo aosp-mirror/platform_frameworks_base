@@ -30,10 +30,6 @@
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
-
-    <!-- TODO: use a theme color for this and delete it -->
-    <color name="system_secondary_color">#ff37474F</color><!-- blue grey 800 -->
-
     <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
     <color name="qs_text">#FFFFFFFF</color>
     <color name="qs_tile_divider">#29ffffff</color><!-- 16% white -->
@@ -156,14 +152,10 @@
     <color name="qs_tile_tint_inactive">#4dffffff</color>
     <color name="qs_tile_tint_active">#ffffffff</color>
 
-    <color name="switch_bar_background">#ff37474f</color>
-
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_keyword_color">#d9000000</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
 
-    <!-- Background color of edit overflow -->
-    <color name="qs_edit_overflow_bg">#455A64</color>
 </resources>

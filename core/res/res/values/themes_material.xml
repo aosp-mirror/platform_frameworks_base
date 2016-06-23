@@ -1305,6 +1305,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
 
         <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
         <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
@@ -1315,6 +1316,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.NoActionBar" parent="Theme.Material.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
 
         <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
         <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
@@ -1324,6 +1326,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog" />
@@ -1331,6 +1334,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.Light.Dialog.BaseAlert">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
@@ -1338,25 +1342,30 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Settings.DialogWhenLarge" parent="Theme.Material.Light.DialogWhenLarge.DarkActionBar">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.DialogWhenLarge.NoActionBar" parent="Theme.Material.Light.DialogWhenLarge.NoActionBar">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.Light.SearchBar">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 
     <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.Light.CompactMenu">
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
+        <item name="colorSecondary">@color/secondary_material_settings</item>
     </style>
 </resources>
