@@ -9542,6 +9542,10 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void killApplication(String pkgName, int appId, String reason) {
+        killApplication(pkgName, appId, UserHandle.USER_ALL, reason);
+    }
+
+    private void killApplication(String pkgName, int appId, int userId, String reason) {
         // Request the ActivityManager to kill the process(only for existing packages)
         // so that we do not end up in a confused state while the user is still using the older
         // version of the application while the new one gets installed.
@@ -9550,7 +9554,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             IActivityManager am = ActivityManagerNative.getDefault();
             if (am != null) {
                 try {
-                    am.killApplicationWithAppId(pkgName, appId, reason);
+                    am.killApplication(pkgName, appId, userId, reason);
                 } catch (RemoteException e) {
                 }
             }
@@ -15563,10 +15567,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
-        final UserHandle removeForUser = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0
-                ? UserHandle.ALL : new UserHandle(userId);
+        final int removeUser = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0
+                ? UserHandle.USER_ALL : userId;
 
-        if (isPackageDeviceAdmin(packageName, removeForUser.getIdentifier())) {
+        if (isPackageDeviceAdmin(packageName, removeUser)) {
             Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
             return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
@@ -15586,11 +15590,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             info.origUsers = uninstalledPs.queryInstalledUsers(allUsers, true);
         }
 
+        final int freezeUser;
+        if (isUpdatedSystemApp(uninstalledPs)
+                && ((deleteFlags & PackageManager.DELETE_SYSTEM_APP) == 0)) {
+            // We're downgrading a system app, which will apply to all users, so
+            // freeze them all during the downgrade
+            freezeUser = UserHandle.USER_ALL;
+        } else {
+            freezeUser = removeUser;
+        }
+
         synchronized (mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
-            try (PackageFreezer freezer = freezePackageForDelete(packageName, deleteFlags,
-                    "deletePackageX")) {
-                res = deletePackageLIF(packageName, removeForUser, true, allUsers,
+            try (PackageFreezer freezer = freezePackageForDelete(packageName, freezeUser,
+                    deleteFlags, "deletePackageX")) {
+                res = deletePackageLIF(packageName, UserHandle.of(removeUser), true, allUsers,
                         deleteFlags | REMOVE_CHATTY, info, true, null);
             }
             synchronized (mPackages) {
@@ -19845,24 +19859,38 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     public PackageFreezer freezePackage(String packageName, String killReason) {
-        return new PackageFreezer(packageName, killReason);
+        return freezePackage(packageName, UserHandle.USER_ALL, killReason);
+    }
+
+    public PackageFreezer freezePackage(String packageName, int userId, String killReason) {
+        return new PackageFreezer(packageName, userId, killReason);
     }
 
     public PackageFreezer freezePackageForInstall(String packageName, int installFlags,
             String killReason) {
+        return freezePackageForInstall(packageName, UserHandle.USER_ALL, installFlags, killReason);
+    }
+
+    public PackageFreezer freezePackageForInstall(String packageName, int userId, int installFlags,
+            String killReason) {
         if ((installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
             return new PackageFreezer();
         } else {
-            return freezePackage(packageName, killReason);
+            return freezePackage(packageName, userId, killReason);
         }
     }
 
     public PackageFreezer freezePackageForDelete(String packageName, int deleteFlags,
             String killReason) {
+        return freezePackageForDelete(packageName, UserHandle.USER_ALL, deleteFlags, killReason);
+    }
+
+    public PackageFreezer freezePackageForDelete(String packageName, int userId, int deleteFlags,
+            String killReason) {
         if ((deleteFlags & PackageManager.DELETE_DONT_KILL_APP) != 0) {
             return new PackageFreezer();
         } else {
-            return freezePackage(packageName, killReason);
+            return freezePackage(packageName, userId, killReason);
         }
     }
 
@@ -19893,14 +19921,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             mCloseGuard.open("close");
         }
 
-        public PackageFreezer(String packageName, String killReason) {
+        public PackageFreezer(String packageName, int userId, String killReason) {
             synchronized (mPackages) {
                 mPackageName = packageName;
                 mWeFroze = mFrozenPackages.add(mPackageName);
 
                 final PackageSetting ps = mSettings.mPackages.get(mPackageName);
                 if (ps != null) {
-                    killApplication(ps.name, ps.appId, killReason);
+                    killApplication(ps.name, ps.appId, userId, killReason);
                 }
 
                 final PackageParser.Package p = mPackages.get(packageName);
@@ -19909,7 +19937,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     mChildren = new PackageFreezer[N];
                     for (int i = 0; i < N; i++) {
                         mChildren[i] = new PackageFreezer(p.childPackages.get(i).packageName,
-                                killReason);
+                                userId, killReason);
                     }
                 } else {
                     mChildren = null;
@@ -20048,7 +20076,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             seinfo = pkg.applicationInfo.seinfo;
             label = String.valueOf(pm.getApplicationLabel(pkg.applicationInfo));
             targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
-            freezer = new PackageFreezer(packageName, "movePackageInternal");
+            freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
         }
 
