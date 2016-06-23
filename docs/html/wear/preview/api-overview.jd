@@ -4,9 +4,6 @@ page.tags="wear"
 page.image=images/cards/card-n-apis_2x.png
 @jd:body
 
-
-
-
 <div id="qv-wrapper">
 <div id="qv">
   <h2>Key developer features</h2>
@@ -298,36 +295,35 @@ Multiple Network Connections</a>
  authentication capabilities will be more powerful; apps will have new ways to
  authenticate.</p>
 
- <h4> Authentication tokens can be passed over the Wearable Data Layer </h4>
-
-<p>For Android-paired watches (only), the phone will securely transfer authentication
- data to a watch app via the
- <a href="{@docRoot}training/wearables/data-layer/index.html">
- Wearable Data Layer API</a>. The data can be transferred as
- Messages or Data Items. </p>
-
-<p>If your watch app needs to determine if your phone app is installed, you can
-advertise a capability on the phone app and retrieve the capability on the watch.
- For more information, see following sections of
- <a href="{@docRoot}training/wearables/data-layer/messages.html">
- Sending and Receiving Messages</a>:
- <ul>
- <li>Advertise Capabilities</li>
- <li>Retrieve the Nodes with the Required Capabilities</li>
- </ul>
 <h4>Users can enter a username and password on a watch</h4>
 
-<p>Google Keyboard will be standard on Android Wear, allowing for direct text entry.
- This feature will work as expected with standard
- <a href="{@docRoot}reference/android/widget/EditText.html">
-  EditText widgets</a>. For passwords, the {@code textPassword} attribute will be
-   used.
+<p>Google Keyboard will be standard on Android Wear, allowing for direct text
+entry. This feature will work as expected with standard
+<a href="{@docRoot}reference/android/widget/EditText.html">EditText widgets</a>.
+For passwords, the {@code textPassword} attribute will be used.</p>
 
 <h4>Utilizing Account Manager</h4>
-Android Wear will include the <a href="{@docRoot}reference/android/accounts/AccountManager.html">
+
+<p>Android Wear will include the
+<a href="{@docRoot}reference/android/accounts/AccountManager.html">
 AccountManager</a>, which will be accessible for syncing and storing account
- data, as it is on an Android phone.
-</p>
+data, as it is on an Android phone.</p>
 
+<h4>Authentication tokens can be passed over the Wearable Data Layer</h4>
 
+<p>For Android-paired watches (only), a phone securely
+transfers authentication credentials to a watch app via the
+<a href="{@docRoot}training/wearables/data-layer/index.html">
+Wearable Data Layer API</a>. The credentials can be transferred as
+messages or data items.</p>
 
+<p>If your watch app needs to determine if your phone app is installed, you can
+advertise a capability on the phone app and retrieve the capability on the
+watch. For more information, see the following sections of
+<a href="{@docRoot}training/wearables/data-layer/messages.html">
+Sending and Receiving Messages</a>:</p>
+
+<ul>
+  <li>Advertise Capabilities</li>
+  <li>Retrieve the Nodes with the Required Capabilities</li>
+</ul>
