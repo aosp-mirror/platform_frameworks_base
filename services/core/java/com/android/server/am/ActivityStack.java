@@ -4740,6 +4740,8 @@ final class ActivityStack {
                 r.results = null;
                 r.newIntents = null;
             }
+            mService.showUnsupportedZoomDialogIfNeededLocked(r);
+            mService.showAskCompatModeDialogLocked(r);
         } else {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             r.state = ActivityState.PAUSED;
