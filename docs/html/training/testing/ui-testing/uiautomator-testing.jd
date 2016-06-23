@@ -26,7 +26,7 @@ trainingnavtop=true
   <h2>You should also read</h2>
 
   <ul>
-    <li><a href="{@docRoot}reference/android/support/test/package-summary.html">
+    <li><a href="{@docRoot}reference/android/support/test/uiautomator/package-summary.html">
 UI Automator API Reference</a></li>
   </ul>
 
