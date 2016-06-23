@@ -9077,6 +9077,12 @@ public final class Settings {
          */
         public static final String SYSTEM_NAVIGATION_KEYS_ENABLED =
                 "system_navigation_keys_enabled";
+
+        /**
+         * Whether cell is enabled/disabled
+         * @hide
+         */
+        public static final String CELL_ON = "cell_on";
     }
 
     /**

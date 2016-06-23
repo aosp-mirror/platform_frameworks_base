@@ -208,4 +208,14 @@ public class PhoneConstants {
     public static final int AUTH_CONTEXT_EAP_SIM = 128;
     public static final int AUTH_CONTEXT_EAP_AKA = 129;
     public static final int AUTH_CONTEXT_UNDEFINED = -1;
+
+    /**
+     * Value for the global property CELL_ON
+     *  0: Cell radio is off
+     *  1: Cell radio is on
+     *  2: Cell radio is off because airplane mode is enabled
+     */
+    public static final int CELL_OFF_FLAG = 0;
+    public static final int CELL_ON_FLAG = 1;
+    public static final int CELL_OFF_DUE_TO_AIRPLANE_MODE_FLAG = 2;
 }
