@@ -5718,14 +5718,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
 
-            case KeyEvent.KEYCODE_FP_NAV_DOWN:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN:
                 // fall through
-            case KeyEvent.KEYCODE_FP_NAV_UP:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP:
                 // fall through
-            case KeyEvent.KEYCODE_FP_NAV_LEFT:
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_LEFT:
                 // fall through
-            case KeyEvent.KEYCODE_FP_NAV_RIGHT: {
-                interceptStatusBarKey(event);
+            case KeyEvent.KEYCODE_SYSTEM_NAVIGATION_RIGHT: {
+                result &= ~ACTION_PASS_TO_USER;
+                interceptSystemNavigationKey(event);
                 break;
             }
 
@@ -5853,21 +5854,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Handle statusbar expansion events.
      * @param event
      */
-    private void interceptStatusBarKey(KeyEvent event) {
-        final int e = event.getKeyCode();
+    private void interceptSystemNavigationKey(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_UP && areSystemNavigationKeysEnabled()) {
-            boolean doOpen = false;
-            boolean doClose = false;
-            doOpen = (e == KeyEvent.KEYCODE_FP_NAV_DOWN);
-            doClose = (e == KeyEvent.KEYCODE_FP_NAV_UP);
             IStatusBarService sbar = getStatusBarService();
             if (sbar != null) {
                 try {
-                    if (doOpen) {
-                        sbar.expandNotificationsPanel();
-                    } else if (doClose) {
-                        sbar.collapsePanels();
-                    }
+                    sbar.handleSystemNavigationKey(event.getKeyCode());
                 } catch (RemoteException e1) {
                     // oops, no statusbar. Ignore event.
                 }

@@ -31,6 +31,8 @@ import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.KeyEvent;
+
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -409,6 +411,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.clickQsTile(component);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void handleSystemNavigationKey(int key) throws RemoteException {
+        enforceExpandStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.handleSystemNavigationKey(key);
             } catch (RemoteException ex) {
             }
         }
