@@ -1040,10 +1040,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                         public void onForegroundProfileSwitch(int newProfileId) {
                             // Ignore.
                         }
-                    });
+                    }, TAG);
         } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            e.rethrowAsRuntimeException();
         }
 
         IntentFilter strongAuthTimeoutFilter = new IntentFilter();
