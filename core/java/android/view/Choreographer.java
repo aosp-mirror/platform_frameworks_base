@@ -232,6 +232,19 @@ public final class Choreographer {
         return sThreadInstance.get();
     }
 
+    /** Destroys the calling thread's choreographer
+     * @hide
+     */
+    public static void releaseInstance() {
+        Choreographer old = sThreadInstance.get();
+        sThreadInstance.remove();
+        old.dispose();
+    }
+
+    private void dispose() {
+        mDisplayEventReceiver.dispose();
+    }
+
     /**
      * The amount of time, in milliseconds, between each frame of the animation.
      * <p>
