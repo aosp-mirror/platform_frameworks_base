@@ -939,10 +939,11 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_SIGNAL_PCO_RECEIVER_STRING_ARRAY, null);
         sDefaults.putString(KEY_CARRIER_SETUP_APP_STRING, "");
 
-        // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP}
+        // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
+        // {LTE, LTE_CA}
         // Order is important - lowest precidence first
         sDefaults.putStringArray(KEY_RATCHET_RAT_FAMILIES,
-                new String[]{"1,2","7,8,12","3,11,9,10,15"});
+                new String[]{"1,2","7,8,12","3,11,9,10,15","14,19"});
     }
 
     /**

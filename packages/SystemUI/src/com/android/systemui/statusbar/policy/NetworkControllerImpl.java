@@ -781,6 +781,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("1x") ? TelephonyIcons.ONE_X :
                             datatype.equals("3g") ? TelephonyIcons.THREE_G :
                             datatype.equals("4g") ? TelephonyIcons.FOUR_G :
+                            datatype.equals("4g+") ? TelephonyIcons.FOUR_G_PLUS :
                             datatype.equals("e") ? TelephonyIcons.E :
                             datatype.equals("g") ? TelephonyIcons.G :
                             datatype.equals("h") ? TelephonyIcons.H :
