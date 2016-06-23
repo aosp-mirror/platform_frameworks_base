@@ -1013,7 +1013,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     public void onForegroundProfileSwitch(int newProfileId) {
                         // Ignore.
                     }
-                });
+                }, TAG);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to listen for user switching event" ,e);
         }

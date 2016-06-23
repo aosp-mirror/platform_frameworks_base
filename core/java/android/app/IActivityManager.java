@@ -512,7 +512,8 @@ public interface IActivityManager extends IInterface {
     public int getLaunchedFromUid(IBinder activityToken) throws RemoteException;
     public String getLaunchedFromPackage(IBinder activityToken) throws RemoteException;
 
-    public void registerUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
+    public void registerUserSwitchObserver(IUserSwitchObserver observer,
+            String name) throws RemoteException;
     public void unregisterUserSwitchObserver(IUserSwitchObserver observer) throws RemoteException;
 
     public void requestBugReport(int bugreportType) throws RemoteException;
