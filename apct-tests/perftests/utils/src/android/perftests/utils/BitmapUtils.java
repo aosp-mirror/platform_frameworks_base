@@ -27,7 +27,7 @@ import java.io.IOException;
 public class BitmapUtils {
     private static final String TAG = "BitmapUtils";
 
-    public static void saveBitmapIntoPNG(Context context, Bitmap bitmap, int resId) throws IOException {
+    public static void saveBitmapIntoPNG(Context context, Bitmap bitmap, int resId) {
         // Save the image to the disk.
         FileOutputStream out = null;
         try {
@@ -44,13 +44,12 @@ public class BitmapUtils {
 
             out = new FileOutputStream(outputFile, false);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            Log.v(TAG, "Write test No." + outputFile.getAbsolutePath() + " to file successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
             if (out != null) {
                 out.close();
             }
+            Log.v(TAG, "Write test No." + outputFile.getAbsolutePath() + " to file successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -16,22 +16,32 @@
 
 package android.graphics.perftests;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.VectorDrawable;
-
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.BitmapUtils;
-import android.test.ActivityInstrumentationTestCase2;
+import android.perftests.utils.StubActivity;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.android.frameworks.perftests.R;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 
+import static junit.framework.Assert.assertTrue;
+
+@RunWith(AndroidJUnit4.class)
 @LargeTest
-public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<StubActivity> {
+public class VectorDrawablePerfTest {
 
     private static final boolean DUMP_BITMAP = false;
 
@@ -40,14 +50,16 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
 
     private String KEY_VECTORDRAWABLE_DRAW_TIME = "VectorDrawable_Draw_Time_NanoSec";
 
-    public VectorDrawablePerfTest() {
-        super(StubActivity.class);
-    }
+    @Rule
+    public ActivityTestRule<StubActivity> mActivityRule =
+            new ActivityTestRule(StubActivity.class);
 
-    @LargeTest
-    public void testBitmapDrawPerf() throws IOException {
+
+    @Test
+    public void testBitmapDrawPerf() {
         int resId = R.drawable.vector_drawable01;
-        VectorDrawable vd = (VectorDrawable) getActivity().getDrawable(resId);
+        Activity activity = mActivityRule.getActivity();
+        VectorDrawable vd = (VectorDrawable) activity.getDrawable(resId);
 
         int w = 1024, h = 1024;
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
@@ -72,9 +84,10 @@ public class VectorDrawablePerfTest extends ActivityInstrumentationTestCase2<Stu
         assertTrue("The right bottom part should be empty", emptyColor == Color.TRANSPARENT);
 
         if (DUMP_BITMAP) {
-            BitmapUtils.saveBitmapIntoPNG(getActivity(), bmp, resId);
+            BitmapUtils.saveBitmapIntoPNG(activity, bmp, resId);
         }
 
-        state.sendFullStatusReport(getInstrumentation(), KEY_VECTORDRAWABLE_DRAW_TIME);
+        state.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(),
+                KEY_VECTORDRAWABLE_DRAW_TIME);
     }
 }

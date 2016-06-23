@@ -6,7 +6,7 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.graphics.perftests.StubActivity" >
+        <activity android:name="android.perftests.utils.StubActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -15,7 +15,7 @@
         <uses-library android:name="android.test.runner" />
     </application>
 
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
+    <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.frameworks.perftests"/>
 
 </manifest>

@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.StubActivity;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.rule.ActivityTestRule;
