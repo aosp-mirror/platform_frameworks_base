@@ -780,7 +780,8 @@ public class VolumeDialog implements TunerService.Tunable {
 
         // update slider max
         final int max = ss.levelMax * 100;
-        if (max != row.slider.getMax()) {
+        final boolean maxChanged = max != row.slider.getMax();
+        if (maxChanged) {
             row.slider.setMax(max);
         }
 
@@ -853,7 +854,7 @@ public class VolumeDialog implements TunerService.Tunable {
         // update slider value - 0 if silent or vibrate
         final int vlevel = row.ss.muted && (isRingSilent || isNotificationSilent || isRingVibrate && !zenMuted) ? 0
                 : row.ss.level;
-        updateVolumeRowSliderH(row, enableSlider, vlevel);
+        updateVolumeRowSliderH(row, enableSlider, vlevel, maxChanged);
     }
 
     private void updateVolumeRowHeaderVisibleH(VolumeRow row) {
@@ -876,7 +877,7 @@ public class VolumeDialog implements TunerService.Tunable {
         row.slider.setThumbTintList(tint);
     }
 
-    private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel) {
+    private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel, boolean maxChanged) {
         row.slider.setEnabled(enable);
         updateVolumeRowSliderTintH(row, row.stream == mActiveStream);
         if (row.tracking) {
@@ -900,7 +901,7 @@ public class VolumeDialog implements TunerService.Tunable {
             }
         }
         final int newProgress = vlevel * 100;
-        if (progress != newProgress) {
+        if (progress != newProgress || maxChanged) {
             if (mShowing && rowVisible) {
                 // animate!
                 if (row.anim != null && row.anim.isRunning()

@@ -836,6 +836,7 @@ public class VolumeDialogController {
             filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
             filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
             filter.addAction(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+            filter.addAction(AudioManager.VOLUME_STEPS_CHANGED_ACTION);
             filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -886,6 +887,8 @@ public class VolumeDialogController {
                 if (D.BUG) Log.d(TAG, "onReceive STREAM_MUTE_CHANGED_ACTION stream=" + stream
                         + " muted=" + muted);
                 changed = updateStreamMuteW(stream, muted);
+            } else if (action.equals(AudioManager.VOLUME_STEPS_CHANGED_ACTION)) {
+                getState();
             } else if (action.equals(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)) {
                 if (D.BUG) Log.d(TAG, "onReceive ACTION_EFFECTS_SUPPRESSOR_CHANGED");
                 changed = updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
