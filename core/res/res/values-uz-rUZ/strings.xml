@@ -325,9 +325,9 @@
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Ilovaga tizim ishga tushishi bilanoq o‘zi ham ishga tushadigan qilib qo‘yish huquqini beradi. Buning natijasida televizorning ishga tushishi sekinlashishi hamda ilovaning doimiy ravishda ishlab turishi oqibatida butun planshetning ishlashi sekinlashi mumkin."</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Ilova tizim qayta yoqilganidan so‘ng o‘zini ishga tushirishi mumkin. Bu telefonning yonish vaqtini uzaytirishi va doimiy ishlab turivchi ilova tufayli uning tezkor ishlashini kamaytirishi mumkin."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"xabarlarni keyinchalik saqlash sharti bilan yuborish"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ilovaga uzatish tugagandan keyin ham qoladigan yopishqoq uzatishlarni jo‘natishga ruxsat beradi. Bu uzatishdan juda ko‘p foydalanish ko‘p xotiradan foydalanishga olib keladi va natijada planshet sekin yoki beqaror ishlashi mumkin."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Ilovaga efir tugagandan so‘ng ham saqlanib qoladigan turg‘un translatsiyalarni uzatish huquqini beradi. Undan ortiqcha foydalanish televizoringizni sekinlatishi yoki ko‘p xotira sarflaydigan qilib qo‘yishi mumkin."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ilovaga uzatish tugagandan keyin ham qoladigan yopishqoq uzatishlarni jo‘natishga ruxsat beradi. Bu uzatishdan juda ko‘p foydalanish ko‘p xotiradan foydalanishga olib keladi va natijada telefon sekin yoki beqaror ishlashi mumkin."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Ilova yuborilganidan keyin o‘chib ketmaydigan muddatsiz tarqatma xabarlarni yuborishi mumkin. Ulardan noto‘g‘ri maqsadda foydalanish qurilmaning ishlashini sekinlatishi yoki xotiraga haddan ziyod yuklanish tushishi oqibatida qurilma ishdan chiqishi mumkin."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"kontaktlaringizni ko‘rish"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Ilovaga planshetingizda saqlangan kontaktlar ma’lumotlarini, shuningdek, ba‘zi shaxslarga qilgan qo‘ng‘iroqlar muntazamligi, ularga yozgan e-pochta xabarlari yoki boshqa xabar almashish yo‘llari orqali xabarlashganingiz haqidagi ma’lumotlarni o‘qishga ruxsat beradi. Ushbu ruxsat ilovalarga aloqa ma’lumotlaringizni saqlash uchun ruxsat beradi va zararli ilovalar sizga bildirmasdan kontaktlar ma’lumotlaringizni boshqalarga ulashishi mumkin."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Ilovaga televizoringizda saqlanayotgan kontaktlar haqidagi ma’lumotlarni, jumladan, muayyan shaxslar bilan qo‘ng‘iroqlashish, e-pochta orqali xabarlashish yoki muloqot qilish oralig‘i haqidagi ma’lumotlarni o‘qish huquqini beradi. Ushbu ruxsatnoma ilovalarga kontaktlaringiz haqidagi ma’lumotlarni saqlash huquqini berib, zararli ilovalar uning yordamida kontakt ma’lumotlarini sizdan beruxsat boshqalarga ulashishi mumkin."</string>
@@ -486,7 +486,7 @@
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"tarmoq siyosatini boshqarish"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ilova tarmoq siyosatini boshqarishi va alohida ilovalar uchun qoidalarni o‘rnatishi mumkin."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"tarmoqdan foydalanishni hisoblashni o‘zgartirish"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ilovaga ilovalarga nisbadan hisoblanadigan tarmoqdan foydalanish ma’lumotlarini o‘zgartirishga ruxsat beradi. Oddiy ilovalar tomonidan foydalanilmaydi."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ilova turli dasturlar tomonidan ishlatiladigan tarmoq resurslari hisob-kitobini o‘zgartirishi mumkin. Bu ruxsat oddiy ilovalar uchun talab qilinmaydi."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"ruxsat bildirishnomalari"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dasturga bildirishnomalar va boshqa dasturlar jo‘natgan xabarlarni qabul qilish, ko‘rib chiqish hamda tozalash imkonini beradi."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirishnomani tinglash xizmatiga bog‘lash"</string>
@@ -1015,6 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Masshtab"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Doimo ko‘rsatish"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Uni Tizim sozlamalari &gt; Ilovalar &gt; Yuklab olingan menyusidan qayta yoqing."</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"“<xliff:g id="APP_NAME">%1$s</xliff:g>” ilovasi joriy ekran o‘lchami sozlamalariga mos kelmasligi va noto‘g‘ri ishlashi mumkin."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Har doim ko‘rsatilsin"</string>
     <string name="smv_application" msgid="3307209192155442829">"“<xliff:g id="APPLICATION">%1$s</xliff:g>” ilovasi (jarayaon: <xliff:g id="PROCESS">%2$s</xliff:g>) o‘zining StrictMode qoidasini buzdi."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni o‘zining o‘zi-bajaruvchi StrictMode siyosatini buzdi."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android yangilanmoqda…"</string>
@@ -1151,7 +1153,7 @@
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"nomzodlar"</u></string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> tayyorlanmoqda"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolar tekshirilmoqda"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Xatolar qidirilmoqda"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Yangi <xliff:g id="NAME">%s</xliff:g> kartasi aniqlandi"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Rasm va boshqa fayllarni o‘tkazish"</string>
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"“<xliff:g id="NAME">%s</xliff:g>” buzilgan"</string>
@@ -1368,7 +1370,7 @@
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Qurilmalar izlanmoqda..."</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Sozlamalar"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Uzish"</string>
-    <string name="media_route_status_scanning" msgid="7279908761758293783">"Tekshirilmoqda..."</string>
+    <string name="media_route_status_scanning" msgid="7279908761758293783">"Qidirilmoqda..."</string>
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Ulanmoqda..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Mavjud"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Mavjud emas"</string>
