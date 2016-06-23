@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
@@ -44,12 +45,13 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
-
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.am.UserInactivityCountdownDialog.OnCountDownExpiredListener;
+
 import java.io.File;
 
 public class RetailDemoModeService extends SystemService {
@@ -65,6 +67,8 @@ public class RetailDemoModeService extends SystemService {
 
     private static final long SCREEN_WAKEUP_DELAY = 2500;
     private static final long USER_INACTIVITY_TIMEOUT = 30000;
+    private static final long WARNING_DIALOG_TIMEOUT = 6000;
+    private static final long MILLIS_PER_SECOND = 1000;
 
     boolean mDeviceInDemoMode = false;
     private ActivityManagerService mAms;
@@ -110,7 +114,7 @@ public class RetailDemoModeService extends SystemService {
                     mWakeLock.acquire();
                     break;
                 case MSG_INACTIVITY_TIME_OUT:
-                    IPackageManager pm = AppGlobals.getPackageManager();
+                    final IPackageManager pm = AppGlobals.getPackageManager();
                     int enabledState = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
                     String demoLauncherComponent = getContext().getResources()
                             .getString(R.string.config_demoModeLauncherComponent);
@@ -122,8 +126,8 @@ public class RetailDemoModeService extends SystemService {
                         // XXX: shouldn't happen
                     }
                     if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-                        Slog.i(TAG, "Restarting session due to user inactivity timeout");
-                        sendEmptyMessage(MSG_START_NEW_SESSION);
+                        Slog.i(TAG, "User inactivity timeout reached");
+                        showInactivityCountdownDialog();
                     }
                     break;
                 case MSG_START_NEW_SESSION:
@@ -131,7 +135,8 @@ public class RetailDemoModeService extends SystemService {
                         Slog.d(TAG, "Switching to a new demo user");
                     }
                     removeMessages(MSG_START_NEW_SESSION);
-                    UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
+                    removeMessages(MSG_INACTIVITY_TIME_OUT);
+                    final UserInfo demoUser = getUserManager().createUser(DEMO_USER_NAME,
                             UserInfo.FLAG_DEMO | UserInfo.FLAG_EPHEMERAL);
                     if (demoUser != null) {
                         setupDemoUser(demoUser);
@@ -140,6 +145,25 @@ public class RetailDemoModeService extends SystemService {
                     break;
             }
         }
+    }
+
+    private void showInactivityCountdownDialog() {
+        UserInactivityCountdownDialog dialog = new UserInactivityCountdownDialog(getContext(),
+                WARNING_DIALOG_TIMEOUT, MILLIS_PER_SECOND);
+        dialog.setPositiveButtonClickListener(null);
+        dialog.setNegativeButtonClickListener(new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+            }
+        });
+        dialog.setOnCountDownExpiredListener(new OnCountDownExpiredListener() {
+            @Override
+            public void onCountDownExpired() {
+                mHandler.sendEmptyMessage(MSG_START_NEW_SESSION);
+            }
+        });
+        dialog.show();
     }
 
     public RetailDemoModeService(Context context) {
@@ -167,7 +191,7 @@ public class RetailDemoModeService extends SystemService {
         return mResetDemoPendingIntent;
     }
 
-    void setupDemoUser(UserInfo userInfo) {
+    private void setupDemoUser(UserInfo userInfo) {
         UserManager um = getUserManager();
         UserHandle user = UserHandle.of(userInfo.id);
         LockPatternUtils lockPatternUtils = new LockPatternUtils(getContext());
@@ -230,13 +254,13 @@ public class RetailDemoModeService extends SystemService {
                 UserHandle.USER_SYSTEM);
     }
 
-    boolean isDeviceProvisioned() {
+    private boolean isDeviceProvisioned() {
         return Settings.Global.getInt(
                 getContext().getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     private boolean deleteDemoFolderContents() {
-        File dir = Environment.getDataPreloadsDemoDirectory();
+        final File dir = Environment.getDataPreloadsDemoDirectory();
         Slog.i(TAG, "Deleting contents of " + dir);
         return FileUtils.deleteContents(dir);
     }
@@ -286,7 +310,7 @@ public class RetailDemoModeService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "onSwitchUser: " + userId);
         }
-        UserInfo ui = getUserManager().getUserInfo(userId);
+        final UserInfo ui = getUserManager().getUserInfo(userId);
         if (!ui.isDemo()) {
             Slog.wtf(TAG, "Should not allow switch to non-demo user in demo mode");
             return;

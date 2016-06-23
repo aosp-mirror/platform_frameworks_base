@@ -1892,6 +1892,10 @@
   <java-symbol type="string" name="audit_safemode_notification_details" />
   <java-symbol type="string" name="reset_retail_demo_mode_title" />
   <java-symbol type="string" name="reset_retail_demo_mode_text" />
+  <java-symbol type="string" name="demo_user_inactivity_timeout_title" />
+  <java-symbol type="string" name="demo_user_inactivity_timeout_countdown" />
+  <java-symbol type="string" name="demo_user_inactivity_timeout_left_button" />
+  <java-symbol type="string" name="demo_user_inactivity_timeout_right_button" />
 
   <java-symbol type="layout" name="resolver_list" />
   <java-symbol type="id" name="resolver_list" />
