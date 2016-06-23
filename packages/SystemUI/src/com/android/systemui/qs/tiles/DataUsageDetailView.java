@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -65,7 +66,7 @@ public class DataUsageDetailView extends LinearLayout {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;
-        int usageColor = 0;
+        @ColorInt int usageColor = 0;
         final String top;
         String bottom = null;
         if (info.usageLevel < info.warningLevel || info.limitLevel <= 0) {
@@ -90,7 +91,7 @@ public class DataUsageDetailView extends LinearLayout {
                     formatBytes(info.usageLevel));
             bottom = res.getString(R.string.quick_settings_cellular_detail_data_limit,
                     formatBytes(info.limitLevel));
-            usageColor = R.color.system_warning_color;
+            usageColor = mContext.getColor(R.color.system_warning_color);
         }
 
         if (usageColor == 0) {
@@ -101,7 +102,7 @@ public class DataUsageDetailView extends LinearLayout {
         title.setText(titleId);
         final TextView usage = (TextView) findViewById(R.id.usage_text);
         usage.setText(formatBytes(bytes));
-        usage.setTextColor(mContext.getColor(usageColor));
+        usage.setTextColor(usageColor);
         final DataUsageGraph graph = (DataUsageGraph) findViewById(R.id.usage_graph);
         graph.setLevels(info.limitLevel, info.warningLevel, info.usageLevel);
         final TextView carrier = (TextView) findViewById(R.id.usage_carrier_text);
