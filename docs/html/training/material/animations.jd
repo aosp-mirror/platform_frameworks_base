@@ -415,12 +415,16 @@ android.animation.StateListAnimator}  as an XML resource:</p>
 &lt;/selector>
 </pre>
 
-<p>To attach custom view state animations to a view, define an animator using the
-<code>selector</code> element in an XML resource file as in this example, and assign it to your
-view with the <code>android:stateListAnimator</code> attribute. To assign a state list animator
-to a view in your code, use the {@link android.animation.AnimatorInflater#loadStateListAnimator
-AnimationInflater.loadStateListAnimator()} method, and assign the animator to your view with the
-{@link android.view.View#setStateListAnimator View.setStateListAnimator()} method.</p>
+<p>
+  To attach custom view state animations to a view, define an animator using
+  the <code>selector</code> element in an XML resource file as in this example,
+  and assign it to your view with the <code>android:stateListAnimator</code>
+  attribute. To assign a state list animator to a view in your code, use the
+  {@link android.animation.AnimatorInflater#loadStateListAnimator
+  AnimatorInflater.loadStateListAnimator()} method, and assign the animator to
+  your view with the {@link android.view.View#setStateListAnimator
+  View.setStateListAnimator()} method.
+</p>
 
 <p>When your theme extends the material theme, buttons have a Z animation by default. To avoid this
 behavior in your buttons, set the <code>android:stateListAnimator</code> attribute to
