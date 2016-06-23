@@ -168,7 +168,8 @@ public class ShortcutManagerTestUtils {
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
-        runCommandForNoOutput(instrumentation, "cmd package set-home-activity " + component);
+        runCommand(instrumentation, "cmd package set-home-activity " + component,
+                result -> result.contains("Success"));
     }
 
     public static void setDefaultLauncher(Instrumentation instrumentation, Context packageContext) {
@@ -202,6 +203,7 @@ public class ShortcutManagerTestUtils {
         if (!ENABLE_DUMPSYS) {
             return;
         }
+        Log.e(TAG, "Dumpsys shortcut");
         for (String s : runCommand(instrumentation, "dumpsys shortcut")) {
             Log.e(TAG, s);
         }
