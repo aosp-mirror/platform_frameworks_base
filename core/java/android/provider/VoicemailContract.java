@@ -153,6 +153,13 @@ public class VoicemailContract {
     public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
     /**
+     * Extra included in {@link #ACTION_SYNC_VOICEMAIL} broadcast intents to indicate which {@link
+     * PhoneAccountHandle} to sync.
+     */
+    public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
+            "android.provider.extra.PHONE_ACCOUNT_HANDLE";
+
+    /**
      * Name of the source package field, which must be same across all voicemail related tables.
      * This is an internal field.
      * @hide
@@ -454,6 +461,9 @@ public class VoicemailContract {
          * {@link #CONFIGURATION_STATE_OK},
          * {@link #CONFIGURATION_STATE_NOT_CONFIGURED},
          * {@link #CONFIGURATION_STATE_CAN_BE_CONFIGURED}
+         * {@link #CONFIGURATION_STATE_CONFIGURING}
+         * {@link #CONFIGURATION_STATE_FAILED}
+         * {@link #CONFIGURATION_STATE_DISABLED}
          * <P>Type: INTEGER</P>
          */
         public static final String CONFIGURATION_STATE = "configuration_state";
@@ -472,6 +482,21 @@ public class VoicemailContract {
          * upgraded to visual voicemail and would like to show a set up invitation message.
          */
         public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2;
+        /**
+         * Value of {@link #CONFIGURATION_STATE} to indicate that visual voicemail still is being
+         * configured.
+         */
+        public static final int CONFIGURATION_STATE_CONFIGURING = 3;
+        /**
+         * Value of {@link #CONFIGURATION_STATE} to indicate that visual voicemail has failed to
+         * be configured.
+         */
+        public static final int CONFIGURATION_STATE_FAILED = 4;
+        /**
+         * Value of {@link #CONFIGURATION_STATE} to indicate that visual voicemail is disabled by
+         * the user.
+         */
+        public static final int CONFIGURATION_STATE_DISABLED = 5;
         /**
          * The data channel state of the voicemail source. This the channel through which the source
          * pulls voicemail data from a remote server.
