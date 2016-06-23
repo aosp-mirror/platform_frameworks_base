@@ -57,6 +57,8 @@ public final class CompatModePackages {
     public static final int COMPAT_FLAG_DONT_ASK = 1<<0;
     // Compatibility state: compatibility mode is enabled.
     public static final int COMPAT_FLAG_ENABLED = 1<<1;
+    // Unsupported zoom state: don't warn the user about unsupported zoom mode.
+    public static final int UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY = 1<<2;
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
@@ -147,6 +149,24 @@ public final class CompatModePackages {
         return flags != null ? flags : 0;
     }
 
+    public void handlePackageDataClearedLocked(String packageName) {
+        // User has explicitly asked to clear all associated data.
+        removePackage(packageName);
+    }
+
+    public void handlePackageUninstalledLocked(String packageName) {
+        // Clear settings when app is uninstalled since this is an explicit
+        // signal from the user to remove the app and all associated data.
+        removePackage(packageName);
+    }
+
+    private void removePackage(String packageName) {
+        if (mPackages.containsKey(packageName)) {
+            mPackages.remove(packageName);
+            scheduleWrite();
+        }
+    }
+
     public void handlePackageAddedLocked(String packageName, boolean updated) {
         ApplicationInfo ai = null;
         try {
@@ -165,11 +185,15 @@ public final class CompatModePackages {
             // any current settings for it.
             if (!mayCompat && mPackages.containsKey(packageName)) {
                 mPackages.remove(packageName);
-                mHandler.removeMessages(MSG_WRITE);
-                Message msg = mHandler.obtainMessage(MSG_WRITE);
-                mHandler.sendMessageDelayed(msg, 10000);
+                scheduleWrite();
             }
         }
+    }
+
+    private void scheduleWrite() {
+        mHandler.removeMessages(MSG_WRITE);
+        Message msg = mHandler.obtainMessage(MSG_WRITE);
+        mHandler.sendMessageDelayed(msg, 10000);
     }
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
@@ -207,6 +231,10 @@ public final class CompatModePackages {
         return (getPackageFlags(packageName)&COMPAT_FLAG_DONT_ASK) == 0;
     }
 
+    public boolean getPackageNotifyUnsupportedZoomLocked(String packageName) {
+        return (getPackageFlags(packageName)&UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY) == 0;
+    }
+
     public void setFrontActivityAskCompatModeLocked(boolean ask) {
         ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
         if (r != null) {
@@ -223,9 +251,21 @@ public final class CompatModePackages {
             } else {
                 mPackages.remove(packageName);
             }
-            mHandler.removeMessages(MSG_WRITE);
-            Message msg = mHandler.obtainMessage(MSG_WRITE);
-            mHandler.sendMessageDelayed(msg, 10000);
+            scheduleWrite();
+        }
+    }
+
+    public void setPackageNotifyUnsupportedZoomLocked(String packageName, boolean notify) {
+        final int curFlags = getPackageFlags(packageName);
+        final int newFlags = notify ? (curFlags&~UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY) :
+                (curFlags|UNSUPPORTED_ZOOM_FLAG_DONT_NOTIFY);
+        if (curFlags != newFlags) {
+            if (newFlags != 0) {
+                mPackages.put(packageName, newFlags);
+            } else {
+                mPackages.remove(packageName);
+            }
+            scheduleWrite();
         }
     }
 
@@ -321,9 +361,7 @@ public final class CompatModePackages {
             // Need to get compatibility info in new state.
             ci = compatibilityInfoForPackageLocked(ai);
 
-            mHandler.removeMessages(MSG_WRITE);
-            Message msg = mHandler.obtainMessage(MSG_WRITE);
-            mHandler.sendMessageDelayed(msg, 10000);
+            scheduleWrite();
 
             final ActivityStack stack = mService.getFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);

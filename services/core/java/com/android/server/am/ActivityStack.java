@@ -2484,6 +2484,7 @@ final class ActivityStack {
                         System.identityHashCode(next), next.task.taskId, next.shortComponentName);
 
                 next.sleeping = false;
+                mService.showUnsupportedZoomDialogIfNeededLocked(next);
                 mService.showAskCompatModeDialogLocked(next);
                 next.app.pendingUiClean = true;
                 next.app.forceProcessStateUpTo(mService.mTopProcessState);
