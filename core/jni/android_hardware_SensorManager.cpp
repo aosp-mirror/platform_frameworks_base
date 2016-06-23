@@ -30,7 +30,6 @@
 #include <utils/Looper.h>
 #include <utils/Vector.h>
 
-#include <endian.h>   // htobe64
 #include <map>
 
 namespace {
@@ -200,19 +199,9 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
             env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
         }
 
-        // java.util.UUID constructor UUID(long a, long b) assumes the two long inputs a and b
-        // correspond to first half and second half of the 16-byte stream in big-endian,
-        // respectively, if the byte stream is serialized according to RFC 4122 (Sec. 4.1.2).
-        //
-        // For Java UUID 12345678-90AB-CDEF-1122-334455667788, the byte stream will be
-        // (uint8_t) {0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF, ....} according RFC 4122.
-        //
-        // According to Java UUID constructor document, the long parameter a should be always
-        // 0x12345678980ABCDEF regardless of host machine endianess. Thus, htobe64 is used to
-        // convert int64_t read directly, which will be in host-endian, to the big-endian required
-        // by Java constructor.
-        const int64_t (&uuid)[2] = nativeSensor.getUuid().i64;
-        env->CallVoidMethod(sensor, sensorOffsets.setUuid, htobe64(uuid[0]), htobe64(uuid[1]));
+        // TODO(b/29547335): Rename "setUuid" method to "setId".
+        int64_t id = nativeSensor.getId();
+        env->CallVoidMethod(sensor, sensorOffsets.setUuid, id, 0);
     }
     return sensor;
 }

@@ -20,8 +20,6 @@ package android.hardware;
 import android.annotation.SystemApi;
 import android.os.Build;
 
-import java.util.UUID;
-
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
  * the list of available Sensors.
@@ -806,7 +804,7 @@ public final class Sensor {
     private String  mRequiredPermission;
     private int     mMaxDelay;
     private int     mFlags;
-    private UUID    mUuid;
+    private int     mId;
 
     Sensor() {
     }
@@ -895,34 +893,28 @@ public final class Sensor {
     }
 
     /**
-     * @return The UUID of the sensor. If the sensor does not support UUID, the returned value will
-     * be an all zero UUID; if the sensor's combination of type and name is guaranteed to be unique
-     * in system, the return value will be an all "F" UUID.
+     * Do not use.
+     *
+     * This method throws an UnsupportedOperationException.
+     *
+     * Use getId() if you want a unique ID.
+     *
+     * @see getId
      *
      * @hide
      */
     @SystemApi
-    public UUID getUuid() {
-        return mUuid;
+    public java.util.UUID getUuid() {
+        throw new UnsupportedOperationException();
     }
 
     /**
-     * @return The unique id of sensor. Return value of 0 means this sensor does not support UUID;
-     * return value of -1 means this sensor can be uniquely identified in system by combination of
-     * its type and name.
+     * @return The sensor id that will be unique for the same app unless the device is factory
+     * reset. Return value of 0 means this sensor does not support this function; return value of -1
+     * means this sensor can be uniquely identified in system by combination of its type and name.
      */
     public int getId() {
-        if (mUuid.equals(ALL_0_UUID)) {
-            return 0;
-        } else if (mUuid.equals(ALL_F_UUID)) {
-            return -1;
-        } else {
-            int id = Math.abs(mUuid.hashCode()) + 1;
-            if (id <= 0) { // catch corner case when hash is Integer.MIN_VALUE and Integer.MAX_VALUE
-                id = 1;
-            }
-            return id;
-        }
+        return mId;
     }
 
     /**
@@ -1038,10 +1030,6 @@ public final class Sensor {
                 + ", power=" + mPower + ", minDelay=" + mMinDelay + "}";
     }
 
-    //special UUID hash constant
-    private final static UUID ALL_0_UUID = new UUID(0,0);
-    private final static UUID ALL_F_UUID = new UUID(~0L, ~0L);
-
     /**
      * Sets the Type associated with the sensor.
      * NOTE: to be used only by native bindings in SensorManager.
@@ -1141,24 +1129,17 @@ public final class Sensor {
     }
 
     /**
-     * Sets the UUID associated with the sensor.
+     * Sets the ID associated with the sensor.
+     *
+     * The method name is misleading; while this ID is based on the UUID,
+     * we do not pass in the actual UUID.
      *
      * NOTE: to be used only by native bindings in SensorManager.
      *
-     * @see #getUuid
-     * @see UUID
+     * @see #getId
      */
     private void setUuid(long msb, long lsb) {
-        // reuse static object if possible
-        if (msb == lsb) {
-            if (msb == 0L) {
-                mUuid = ALL_0_UUID;
-                return;
-            } else if (msb == ~0L) {
-                mUuid = ALL_F_UUID;
-                return;
-            }
-        }
-        mUuid = new UUID(msb, lsb);
+        // TODO(b/29547335): Rename this method to setId.
+        mId = (int)msb;
     }
 }
