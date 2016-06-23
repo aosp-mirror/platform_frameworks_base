@@ -43,7 +43,7 @@ processors running at different speeds. It's not even generally the case
 that you can simply say "device X is a factor F faster/slower than device Y",
 and scale your results from one device to others. In particular, measurement
 on the emulator tells you very little about performance on any device. There
-are also huge differences between devices with and without a 
+are also huge differences between devices with and without a
 <acronym title="Just In Time compiler">JIT</acronym>: the best
 code for a device with a JIT is not always the best code for a device
 without.</p>
@@ -88,7 +88,7 @@ parallel single one-dimension arrays:</p>
     but this also generalizes to the fact that two parallel arrays of ints
     are also a <strong>lot</strong> more efficient than an array of {@code (int,int)}
     objects.  The same goes for any combination of primitive types.</li>
-    
+
     <li>If you need to implement a container that stores tuples of {@code (Foo,Bar)}
     objects, try to remember that two parallel {@code Foo[]} and {@code Bar[]} arrays are
     generally much better than a single array of custom {@code (Foo,Bar)} objects.
@@ -400,19 +400,6 @@ final fields too.)
 <p>Before you start optimizing, make sure you have a problem that you
 need to solve. Make sure you can accurately measure your existing performance,
 or you won't be able to measure the benefit of the alternatives you try.</p>
-
-<p>Every claim made in this document is backed up by a benchmark. The source
-to these benchmarks can be found in the <a
-href="http://code.google.com/p/dalvik/source/browse/#svn/trunk/benchmarks">code.google.com
-"dalvik" project</a>.</p>
-
-<p>The benchmarks are built with the
-<a href="http://code.google.com/p/caliper/">Caliper</a> microbenchmarking
-framework for Java. Microbenchmarks are hard to get right, so Caliper goes out
-of its way to do the hard work for you, and even detect some cases where you're
-not measuring what you think you're measuring (because, say, the VM has
-managed to optimize all your code away). We highly recommend you use Caliper
-to run your own microbenchmarks.</p>
 
 <p>You may also find
 <a href="{@docRoot}tools/debugging/debugging-tracing.html">Traceview</a> useful
