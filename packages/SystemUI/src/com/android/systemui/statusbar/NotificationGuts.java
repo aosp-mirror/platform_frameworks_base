@@ -173,7 +173,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
     }
 
     void bindImportance(final PackageManager pm, final StatusBarNotification sbn,
-            final ExpandableNotificationRow row, final int importance) {
+            final int importance) {
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mStartingUserImportance = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
@@ -191,8 +191,8 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
             // unlikely.
         }
 
-        final View importanceSlider = row.findViewById(R.id.importance_slider);
-        final View importanceButtons = row.findViewById(R.id.importance_buttons);
+        final View importanceSlider = findViewById(R.id.importance_slider);
+        final View importanceButtons = findViewById(R.id.importance_buttons);
         if (mShowSlider) {
             bindSlider(importanceSlider, systemApp);
             importanceSlider.setVisibility(View.VISIBLE);
