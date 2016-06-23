@@ -1015,10 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Scale"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Always show"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Re-enable this in System settings &gt; Apps &gt; Downloaded."</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> does not support the current Display size setting and may behave unexpectedly."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Always show"</string>
     <string name="smv_application" msgid="3307209192155442829">"The app <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) has violated its self-enforced Strict Mode policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"The process <xliff:g id="PROCESS">%1$s</xliff:g> has violated its self-enforced StrictMode policy."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android is upgrading…"</string>
