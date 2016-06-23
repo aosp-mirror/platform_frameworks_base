@@ -629,7 +629,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final ProtectedPackages mProtectedPackages = new ProtectedPackages();
 
-    boolean mRestoredSettings;
+    boolean mFirstBoot;
 
     // System configuration read by SystemConfig.
     final int[] mGlobalGids;
@@ -2220,6 +2220,34 @@ public class PackageManagerService extends IPackageManager.Stub {
         displayManager.getDisplay(Display.DEFAULT_DISPLAY).getMetrics(metrics);
     }
 
+    /**
+     * Requests that files preopted on a secondary system partition be copied to the data partition
+     * if possible.  Note that the actual copying of the files is accomplished by init for security
+     * reasons. This simply requests that the copy takes place and awaits confirmation of its
+     * completion. See platform/system/extras/cppreopt/ for the implementation of the actual copy.
+     */
+    private static void requestCopyPreoptedFiles() {
+        final int WAIT_TIME_MS = 100;
+        final String CP_PREOPT_PROPERTY = "sys.cppreopt";
+        if (SystemProperties.getInt("ro.cp_system_other_odex", 0) == 1) {
+            SystemProperties.set(CP_PREOPT_PROPERTY, "requested");
+            // We will wait for up to 100 seconds.
+            final long timeEnd = SystemClock.uptimeMillis() + 100 * 1000;
+            while (!SystemProperties.get(CP_PREOPT_PROPERTY).equals("finished")) {
+                try {
+                    Thread.sleep(WAIT_TIME_MS);
+                } catch (InterruptedException e) {
+                    // Do nothing
+                }
+                if (SystemClock.uptimeMillis() > timeEnd) {
+                    SystemProperties.set(CP_PREOPT_PROPERTY, "timed-out");
+                    Slog.wtf(TAG, "cppreopt did not finish!");
+                    break;
+                }
+            }
+        }
+    }
+
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START,
@@ -2321,7 +2349,11 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
 
-            mRestoredSettings = mSettings.readLPw(sUserManager.getUsers(false));
+            mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
+
+            if (mFirstBoot) {
+                requestCopyPreoptedFiles();
+            }
 
             String customResolverActivity = Resources.getSystem().getString(
                     R.string.config_customResolverActivity);
@@ -2698,7 +2730,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // If this is the first boot or an update from pre-M, and it is a normal
             // boot, then we need to initialize the default preferred apps across
             // all defined users.
-            if (!onlyCore && (mPromoteSystemApps || !mRestoredSettings)) {
+            if (!onlyCore && (mPromoteSystemApps || mFirstBoot)) {
                 for (UserInfo user : sUserManager.getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(this, user.id);
                     applyFactoryDefaultBrowserLPw(user.id);
@@ -2856,7 +2888,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public boolean isFirstBoot() {
-        return !mRestoredSettings;
+        return mFirstBoot;
     }
 
     @Override
