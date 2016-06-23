@@ -73,7 +73,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
                 ROOT_1_ID);
 
         // Separate logic for "Documents" root, which presence depends on the config setting
-        if (Shared.shouldShowDocumentsRoot(context, new Intent(DocumentsContract.ACTION_BROWSE))) {
+        if (docsRootEnabled()) {
             bots.roots.assertRootsPresent("Documents");
         } else {
             bots.roots.assertRootsAbsent("Documents");
@@ -87,18 +87,24 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bots.directory.assertDocumentsPresent("file0.log", "file1.png", "file2.csv");
     }
 
-    public void testLoadsDownloadsDirectoryByDefault() throws Exception {
+    public void testLoadsDefaultDirectory() throws Exception {
         initTestFiles();
 
         device.waitForIdle();
-        bots.main.assertWindowTitle("Downloads");
+
+        // Separate logic for "Documents" root, which presence depends on the config setting
+        if (docsRootEnabled()) {
+            bots.main.assertWindowTitle("Documents");
+        } else {
+            bots.main.assertWindowTitle("Downloads");
+        }
     }
 
     public void testRootClickSetsWindowTitle() throws Exception {
         initTestFiles();
 
-        bots.roots.openRoot("Downloads");
-        bots.main.assertWindowTitle("Downloads");
+        bots.roots.openRoot("Images");
+        bots.main.assertWindowTitle("Images");
     }
 
     public void testFilesList_LiveUpdate() throws Exception {
@@ -288,5 +294,9 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         assertTrue(bots.main.findDownloadRetryDialog().exists());
 
         device.pressBack(); // to clear the dialog.
+    }
+
+    private boolean docsRootEnabled() {
+        return Shared.shouldShowDocumentsRoot(context, new Intent(DocumentsContract.ACTION_BROWSE));
     }
 }
