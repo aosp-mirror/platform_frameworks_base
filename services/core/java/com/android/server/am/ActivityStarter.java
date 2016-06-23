@@ -1454,7 +1454,8 @@ class ActivityStarter {
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
-                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info, true);
+                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
+                        !mLaunchSingleTask);
             } else {
                 // Otherwise find the best task to put the activity in.
                 intentActivity = mSupervisor.findTaskLocked(mStartActivity);
