@@ -23,6 +23,7 @@ import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -65,6 +66,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -2595,6 +2597,39 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public int getInputMethodWindowRecommendedHeight() {
         return mImm.getInputMethodWindowVisibleHeight();
+    }
+
+    /**
+     * Allow the receiver of {@link InputContentInfo} to obtain a temporary read-only access
+     * permission to the content.
+     *
+     * <p>Make sure that the content provider owning the Uri sets the
+     * {@link android.R.styleable#AndroidManifestProvider_grantUriPermissions
+     * grantUriPermissions} attribute in its manifest or included the
+     * {@link android.R.styleable#AndroidManifestGrantUriPermission
+     * &lt;grant-uri-permissions&gt;} tag. Otherwise {@link InputContentInfo#requestPermission()}
+     * can fail.</p>
+     *
+     * <p>Although calling this API is allowed only for the IME that is currently selected, the
+     * client is able to request a temporary read-only access even after the current IME is switched
+     * to any other IME as long as the client keeps {@link InputContentInfo} object.</p>
+     *
+     * @param inputContentInfo Content to be temporarily exposed from the input method to the
+     * application.
+     * This cannot be {@code null}.
+     * @param editorInfo The editor that receives {@link InputContentInfo}.
+     * @return {@code false} if we cannot allow a temporary access permission.
+     */
+    public final boolean exposeContent(@NonNull InputContentInfo inputContentInfo,
+            @NonNull EditorInfo editorInfo) {
+        if (inputContentInfo == null) {
+            throw new NullPointerException("inputContentInfo");
+        }
+        if (editorInfo == null) {
+            throw new NullPointerException("editorInfo");
+        }
+
+        return mImm.exposeContent(mToken, inputContentInfo, editorInfo);
     }
 
     /**

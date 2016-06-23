@@ -16,11 +16,13 @@
 
 package com.android.internal.view;
 
+import android.net.Uri;
 import android.os.ResultReceiver;
 import android.text.style.SuggestionSpan;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
+import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -80,6 +82,9 @@ interface IInputMethodManager {
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
     void clearLastInputMethodWindowForTransition(in IBinder token);
+
+    IInputContentUriToken createInputContentUriToken(in IBinder token, in Uri contentUri,
+            in String packageName);
 
     oneway void notifyUserAction(int sequenceNumber);
 }
