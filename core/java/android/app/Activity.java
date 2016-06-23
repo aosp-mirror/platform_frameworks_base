@@ -306,7 +306,7 @@ import java.util.List;
  *     </thead>
  *
  *     <tbody>
- *     <tr><th colspan="3" align="left" border="0">{@link android.app.Activity#onCreate onCreate()}</th>
+ *     <tr><td colspan="3" align="left" border="0">{@link android.app.Activity#onCreate onCreate()}</td>
  *         <td>Called when the activity is first created.
  *             This is where you should do all of your normal static set up:
  *             create views, bind data to lists, etc.  This method also
@@ -318,7 +318,7 @@ import java.util.List;
  *     </tr>
  *
  *     <tr><td rowspan="5" style="border-left: none; border-right: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
- *         <th colspan="2" align="left" border="0">{@link android.app.Activity#onRestart onRestart()}</th>
+ *         <td colspan="2" align="left" border="0">{@link android.app.Activity#onRestart onRestart()}</td>
  *         <td>Called after your activity has been stopped, prior to it being
  *             started again.
  *             <p>Always followed by <code>onStart()</code></td>
@@ -326,7 +326,7 @@ import java.util.List;
  *         <td align="center"><code>onStart()</code></td>
  *     </tr>
  *
- *     <tr><th colspan="2" align="left" border="0">{@link android.app.Activity#onStart onStart()}</th>
+ *     <tr><td colspan="2" align="left" border="0">{@link android.app.Activity#onStart onStart()}</td>
  *         <td>Called when the activity is becoming visible to the user.
  *             <p>Followed by <code>onResume()</code> if the activity comes
  *             to the foreground, or <code>onStop()</code> if it becomes hidden.</td>
@@ -335,7 +335,7 @@ import java.util.List;
  *     </tr>
  *
  *     <tr><td rowspan="2" style="border-left: none;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
- *         <th align="left" border="0">{@link android.app.Activity#onResume onResume()}</th>
+ *         <td align="left" border="0">{@link android.app.Activity#onResume onResume()}</td>
  *         <td>Called when the activity will start
  *             interacting with the user.  At this point your activity is at
  *             the top of the activity stack, with user input going to it.
@@ -344,7 +344,7 @@ import java.util.List;
  *         <td align="center"><code>onPause()</code></td>
  *     </tr>
  *
- *     <tr><th align="left" border="0">{@link android.app.Activity#onPause onPause()}</th>
+ *     <tr><td align="left" border="0">{@link android.app.Activity#onPause onPause()}</td>
  *         <td>Called when the system is about to start resuming a previous
  *             activity.  This is typically used to commit unsaved changes to
  *             persistent data, stop animations and other things that may be consuming
@@ -358,7 +358,7 @@ import java.util.List;
  *                 <code>onStop()</code></td>
  *     </tr>
  *
- *     <tr><th colspan="2" align="left" border="0">{@link android.app.Activity#onStop onStop()}</th>
+ *     <tr><td colspan="2" align="left" border="0">{@link android.app.Activity#onStop onStop()}</td>
  *         <td>Called when the activity is no longer visible to the user, because
  *             another activity has been resumed and is covering this one.  This
  *             may happen either because a new activity is being started, an existing
@@ -372,7 +372,7 @@ import java.util.List;
  *                 <code>onDestroy()</code></td>
  *     </tr>
  *
- *     <tr><th colspan="3" align="left" border="0">{@link android.app.Activity#onDestroy onDestroy()}</th>
+ *     <tr><td colspan="3" align="left" border="0">{@link android.app.Activity#onDestroy onDestroy()}</td>
  *         <td>The final call you receive before your
  *             activity is destroyed.  This can happen either because the
  *             activity is finishing (someone called {@link Activity#finish} on
