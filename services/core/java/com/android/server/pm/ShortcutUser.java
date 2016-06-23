@@ -88,7 +88,7 @@ class ShortcutUser {
 
         @Override
         public String toString() {
-            return String.format("{Package: %d, %s}", userId, packageName);
+            return String.format("[Package: %d, %s]", userId, packageName);
         }
     }
 
@@ -98,8 +98,6 @@ class ShortcutUser {
     private final int mUserId;
 
     private final ArrayMap<String, ShortcutPackage> mPackages = new ArrayMap<>();
-
-    private final SparseArray<ShortcutPackage> mPackagesFromUid = new SparseArray<>();
 
     private final ArrayMap<PackageWithUser, ShortcutLauncher> mLaunchers = new ArrayMap<>();
 
@@ -244,12 +242,12 @@ class ShortcutUser {
         }
     }
 
-    public void handlePackageAddedOrUpdated(@NonNull String packageName) {
+    public void handlePackageAddedOrUpdated(@NonNull String packageName, boolean forceRescan) {
         final boolean isNewApp = !mPackages.containsKey(packageName);
 
         final ShortcutPackage shortcutPackage = getPackageShortcuts(packageName);
 
-        if (!shortcutPackage.handlePackageAddedOrUpdated(isNewApp)) {
+        if (!shortcutPackage.handlePackageAddedOrUpdated(isNewApp, forceRescan)) {
             if (isNewApp) {
                 mPackages.remove(packageName);
             }
@@ -381,8 +379,10 @@ class ShortcutUser {
         pw.print(mUserId);
         pw.print("  Known locale seq#: ");
         pw.print(mKnownLocaleChangeSequenceNumber);
-        pw.print("  Last app scan: ");
+        pw.print("  Last app scan: [");
         pw.print(mLastAppScanTime);
+        pw.print("] ");
+        pw.print(ShortcutService.formatTime(mLastAppScanTime));
         pw.println();
 
         prefix += prefix + "  ";
