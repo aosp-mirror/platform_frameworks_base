@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.ResolveInfo;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -450,20 +451,42 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
     private class EnabledServicesAdapter extends PrintServiceInfoAdapter {
         @Override
         public void performAction(@IntRange(from = 0) int position) {
-            PrintServiceInfo service = (PrintServiceInfo) getItem(position);
+            Intent intent = getAddPrinterIntent((PrintServiceInfo) getItem(position));
+            if (intent != null) {
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException|SecurityException e) {
+                    Log.e(LOG_TAG, "Cannot start add printers activity", e);
+                }
+            }
+        }
+
+        /**
+         * Get the intent used to launch the add printers activity.
+         *
+         * @param service The service the printer should be added for
+         *
+         * @return The intent to launch the activity or null if the activity could not be launched.
+         */
+        private Intent getAddPrinterIntent(@NonNull PrintServiceInfo service) {
             String addPrinterActivityName = service.getAddPrintersActivityName();
 
             if (!TextUtils.isEmpty(addPrinterActivityName)) {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.setComponent(new ComponentName(service.getComponentName().getPackageName(),
-                        addPrinterActivityName));
+                                addPrinterActivityName));
 
-                try {
-                    startActivity(intent);
-                } catch (ActivityNotFoundException e) {
-                    Log.e(LOG_TAG, "Cannot start add printers activity", e);
+                List<ResolveInfo> resolvedActivities = getPackageManager().queryIntentActivities(
+                        intent, 0);
+                if (!resolvedActivities.isEmpty()) {
+                    // The activity is a component name, therefore it is one or none.
+                    if (resolvedActivities.get(0).activityInfo.exported) {
+                        return intent;
+                    }
                 }
             }
+
+            return null;
         }
 
         @Override
@@ -494,7 +517,7 @@ public class AddPrinterActivity extends ListActivity implements AdapterView.OnIt
             title.setText(service.getResolveInfo().loadLabel(getPackageManager()));
             icon.setImageDrawable(service.getResolveInfo().loadIcon(getPackageManager()));
 
-            if (TextUtils.isEmpty(service.getAddPrintersActivityName())) {
+            if (getAddPrinterIntent(service) == null) {
                 subtitle.setText(getString(R.string.cannot_add_printer));
             } else {
                 subtitle.setText(getString(R.string.select_to_add_printers));
