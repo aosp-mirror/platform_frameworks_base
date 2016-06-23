@@ -1061,10 +1061,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Mastelis"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Visada rodyti"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Įgalinkite jį iš naujo nuėję į „Sistemos nustatymai“ &gt; „Programos“ &gt; „Atsisiųsta“."</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"Programoje „<xliff:g id="APP_NAME">%1$s</xliff:g>“ nepalaikomas dabartinis ekrano dydžio nustatymas ir ji gali netinkamai veikti."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Visada rodyti"</string>
     <string name="smv_application" msgid="3307209192155442829">"Programa „<xliff:g id="APPLICATION">%1$s</xliff:g>“ (procesas „<xliff:g id="PROCESS">%2$s</xliff:g>“) pažeidė savo vykdomą „StrictMode“ politiką."</string>
     <string name="smv_process" msgid="5120397012047462446">"„<xliff:g id="PROCESS">%1$s</xliff:g>“ procesas pažeidė savo vykdomą „StrictMode“ politiką."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"„Android“ naujovinama..."</string>

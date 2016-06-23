@@ -1015,10 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Scala"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mostra sempre"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Riattivala in Impostazioni di sistema &gt; Applicazioni &gt; Scaricate."</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le dimensioni di visualizzazione attualmente impostate e potrebbe comportarsi in modo imprevisto."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostra sempre"</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Aggiornamento di Android..."</string>

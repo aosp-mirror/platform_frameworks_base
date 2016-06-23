@@ -1015,10 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"স্কেল"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"সবসময় দেখান"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"সিস্টেম সেটিংস&gt; অ্যাপ্স&gt; ডাউনলোড করাগুলি এ এটি পুনঃসক্ষম করুন৷"</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g>, বর্তমান প্রদর্শনের আকারের সেটিংস সমর্থন করে না এবং অপ্রত্যাশিত আচরণ করতে পারে৷"</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"সর্বদা দেখান"</string>
     <string name="smv_application" msgid="3307209192155442829">"অ্যাপ্লিকেশানটি <xliff:g id="APPLICATION">%1$s</xliff:g> (প্রক্রিয়া <xliff:g id="PROCESS">%2$s</xliff:g>) তার স্ব-প্রয়োগ করা কঠোর মোড নীতি লঙ্ঘন করেছে৷"</string>
     <string name="smv_process" msgid="5120397012047462446">"প্রক্রিয়াটি <xliff:g id="PROCESS">%1$s</xliff:g> তার স্ব-প্রয়োগ করা কঠোর মোড নীতি লঙ্ঘন করেছে৷"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android আপগ্রেড করা হচ্ছে..."</string>
