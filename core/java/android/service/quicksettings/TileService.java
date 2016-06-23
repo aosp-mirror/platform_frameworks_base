@@ -312,7 +312,8 @@ public class TileService extends Service {
     public IBinder onBind(Intent intent) {
         mService = IQSService.Stub.asInterface(intent.getIBinderExtra(EXTRA_SERVICE));
         try {
-            mTile = mService.getTile(new ComponentName(getPackageName(), getClass().getName()));
+            ComponentName component = intent.getParcelableExtra(EXTRA_COMPONENT);
+            mTile = mService.getTile(component);
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to reach IQSService", e);
         }
