@@ -827,8 +827,9 @@ class MountService extends IMountService.Stub
                 if (provider != null) {
                     final IActivityManager am = ActivityManagerNative.getDefault();
                     try {
-                        am.killApplicationWithAppId(provider.applicationInfo.packageName,
-                                UserHandle.getAppId(provider.applicationInfo.uid), "vold reset");
+                        am.killApplication(provider.applicationInfo.packageName,
+                                UserHandle.getAppId(provider.applicationInfo.uid),
+                                UserHandle.USER_ALL, "vold reset");
                         // We only need to run this once. It will kill all users' media processes.
                         break;
                     } catch (RemoteException e) {
