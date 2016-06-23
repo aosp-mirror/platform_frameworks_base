@@ -130,6 +130,28 @@ public class RemoteInputController {
         }
     }
 
+    public void closeRemoteInputs() {
+        if (mOpen.size() == 0) {
+            return;
+        }
+
+        // Make a copy because closing the remote inputs will modify mOpen.
+        ArrayList<NotificationData.Entry> list = new ArrayList<>(mOpen.size());
+        for (int i = mOpen.size() - 1; i >= 0; i--) {
+            NotificationData.Entry item = mOpen.get(i).get();
+            if (item != null && item.row != null) {
+                list.add(item);
+            }
+        }
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            NotificationData.Entry item = list.get(i);
+            if (item.row != null) {
+                item.row.closeRemoteInput();
+            }
+        }
+    }
+
     public interface Callback {
         default void onRemoteInputActive(boolean active) {}
 
