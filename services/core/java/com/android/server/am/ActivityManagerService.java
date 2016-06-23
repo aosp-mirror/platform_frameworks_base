@@ -21374,8 +21374,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void registerUserSwitchObserver(IUserSwitchObserver observer) {
-        mUserController.registerUserSwitchObserver(observer);
+    public void registerUserSwitchObserver(IUserSwitchObserver observer, String name) {
+        mUserController.registerUserSwitchObserver(observer, name);
     }
 
     @Override
