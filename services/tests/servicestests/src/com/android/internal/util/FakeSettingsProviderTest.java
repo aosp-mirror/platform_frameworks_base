@@ -24,6 +24,7 @@ import android.test.AndroidTestCase;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.util.concurrent.CountDownLatch;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Unit tests for FakeSettingsProvider.
  */
+@Suppress
 public class FakeSettingsProviderTest extends AndroidTestCase {
 
     private MockContentResolver mCr;
