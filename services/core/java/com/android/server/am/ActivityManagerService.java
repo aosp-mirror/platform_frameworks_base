@@ -1849,13 +1849,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case KILL_APPLICATION_MSG: {
                 synchronized (ActivityManagerService.this) {
-                    int appid = msg.arg1;
-                    boolean restart = (msg.arg2 == 1);
+                    final int appId = msg.arg1;
+                    final int userId = msg.arg2;
                     Bundle bundle = (Bundle)msg.obj;
                     String pkg = bundle.getString("pkg");
                     String reason = bundle.getString("reason");
-                    forceStopPackageLocked(pkg, appid, restart, false, true, false,
-                            false, UserHandle.USER_ALL, reason);
+                    forceStopPackageLocked(pkg, appId, false, false, true, false,
+                            false, userId, reason);
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -5717,12 +5717,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      * The pkg name and app id have to be specified.
      */
     @Override
-    public void killApplicationWithAppId(String pkg, int appid, String reason) {
+    public void killApplication(String pkg, int appId, int userId, String reason) {
         if (pkg == null) {
             return;
         }
         // Make sure the uid is valid.
-        if (appid < 0) {
+        if (appId < 0) {
             Slog.w(TAG, "Invalid appid specified for pkg : " + pkg);
             return;
         }
@@ -5731,8 +5731,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (UserHandle.getAppId(callerUid) == Process.SYSTEM_UID) {
             // Post an aysnc message to kill the application
             Message msg = mHandler.obtainMessage(KILL_APPLICATION_MSG);
-            msg.arg1 = appid;
-            msg.arg2 = 0;
+            msg.arg1 = appId;
+            msg.arg2 = userId;
             Bundle bundle = new Bundle();
             bundle.putString("pkg", pkg);
             bundle.putString("reason", reason);

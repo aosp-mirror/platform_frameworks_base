@@ -398,7 +398,7 @@ public interface IActivityManager extends IInterface {
 
     public void addPackageDependency(String packageName) throws RemoteException;
 
-    public void killApplicationWithAppId(String pkg, int appid, String reason)
+    public void killApplication(String pkg, int appId, int userId, String reason)
             throws RemoteException;
 
     public void closeSystemDialogs(String reason) throws RemoteException;
@@ -852,7 +852,7 @@ public interface IActivityManager extends IInterface {
     int GET_UID_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+92;
     int HANDLE_INCOMING_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+93;
     int ADD_PACKAGE_DEPENDENCY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+94;
-    int KILL_APPLICATION_WITH_APPID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
+    int KILL_APPLICATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+95;
     int CLOSE_SYSTEM_DIALOGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+96;
     int GET_PROCESS_MEMORY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+97;
     int KILL_APPLICATION_PROCESS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+98;
