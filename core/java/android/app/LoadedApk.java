@@ -1072,6 +1072,7 @@ public final class LoadedApk {
         final class Args extends BroadcastReceiver.PendingResult implements Runnable {
             private Intent mCurIntent;
             private final boolean mOrdered;
+            private boolean mDispatched;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
@@ -1096,9 +1097,13 @@ public final class LoadedApk {
                 
                 final IActivityManager mgr = ActivityManagerNative.getDefault();
                 final Intent intent = mCurIntent;
+                if (intent == null) {
+                    Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched);
+                }
+
                 mCurIntent = null;
-                
-                if (receiver == null || mForgotten) {
+                mDispatched = true;
+                if (receiver == null || intent == null || mForgotten) {
                     if (mRegistered && ordered) {
                         if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
                                 "Finishing null broadcast to " + mReceiver);
