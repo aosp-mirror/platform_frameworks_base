@@ -147,7 +147,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
         // listen for user / profile change.
         try {
-            ActivityManagerNative.getDefault().registerUserSwitchObserver(mUserSwitchListener);
+            ActivityManagerNative.getDefault().registerUserSwitchObserver(mUserSwitchListener, TAG);
         } catch (RemoteException e) {
             // Ignore
         }
