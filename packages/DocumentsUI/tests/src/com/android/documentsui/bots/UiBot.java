@@ -24,12 +24,10 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withResourceName;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import android.content.Context;
@@ -41,16 +39,11 @@ import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toolbar;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.internal.view.menu.ActionMenuItemView;
-
-import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -60,57 +53,59 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
+
 /**
  * A test helper class that provides support for controlling DocumentsUI activities
  * programmatically, and making assertions against the state of the UI.
- *
- * <p>Support for working directly with Roots and Directory view can be found
- * in the respective bots.
+ * <p>
+ * Support for working directly with Roots and Directory view can be found in the respective bots.
  */
 public class UiBot extends BaseBot {
+
     public static final String TARGET_PKG = "com.android.documentsui";
-    private static final String LAUNCHER_PKG = "com.android.launcher";
 
     public UiBot(UiDevice device, Context context, int timeout) {
         super(device, context, timeout);
     }
 
     public void assertWindowTitle(String expected) {
-        onView(allOf(isAssignableFrom(Toolbar.class), withId(R.id.toolbar)))
-            .check(matches(withToolbarTitle(is(expected))));
+        onView(Matchers.TOOLBAR)
+                .check(matches(withToolbarTitle(is(expected))));
     }
 
     public void assertBreadcrumbTitle(String expected) {
         if (!isTablet()) {
-            onView(allOf(isAssignableFrom(Spinner.class), withId(R.id.breadcrumb)))
-            .check(matches(withBreadcrumbTitle(is(expected))));
+            onView(Matchers.BREADCRUMB)
+                    .check(matches(withBreadcrumbTitle(is(expected))));
         }
-  }
+    }
 
     public void assertMenuEnabled(int id, boolean enabled) {
-        UiObject2 menu= findMenuWithName(mContext.getString(id));
+        UiObject2 menu = findMenuWithName(mContext.getString(id));
         assertNotNull(menu);
         assertEquals(enabled, menu.isEnabled());
     }
 
     public void assertSearchTextField(boolean isFocused, String query)
-        throws UiObjectNotFoundException {
+            throws UiObjectNotFoundException {
         UiObject textField = findSearchViewTextField();
         boolean searchIconVisible = isSearchIconVisible();
 
         assertFalse(searchIconVisible);
         assertTrue(textField.exists());
         assertEquals(isFocused, textField.isFocused());
-        if(query != null) {
+        if (query != null) {
             assertEquals(query, textField.getText());
         }
     }
 
-    public void assertSearchTextFiledAndIcon(boolean searchTextFieldExists,
-        boolean searchIconExists) {
-      assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
-      boolean searchIconVisible = isSearchIconVisible();
-      assertEquals(searchIconExists, searchIconVisible);
+    public void assertSearchTextFiledAndIcon(
+            boolean searchTextFieldExists, boolean searchIconExists) {
+        assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
+        boolean searchIconVisible = isSearchIconVisible();
+        assertEquals(searchIconExists, searchIconVisible);
     }
 
     public void assertInActionMode(boolean inActionMode) {
@@ -125,7 +120,7 @@ public class UiBot extends BaseBot {
     }
 
     public void setSearchQuery(String query) throws UiObjectNotFoundException {
-        onView(allOf(withId(R.id.menu_search), isDisplayed())).perform(typeText(query));
+        onView(Matchers.SEARCH_MENU).perform(typeText(query));
     }
 
     public UiObject openOverflowMenu() throws UiObjectNotFoundException {
@@ -141,7 +136,7 @@ public class UiBot extends BaseBot {
 
     public boolean isTablet() {
         return (mContext.getResources().getConfiguration().screenLayout &
-          Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+                Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
     void switchViewMode() {
@@ -154,22 +149,23 @@ public class UiBot extends BaseBot {
     }
 
     boolean isSearchIconVisible() {
-      boolean searchIconVisible = true;
-      boolean isTablet = isTablet();
-      try {
-        if (isTablet) {
-          // Tablets use ImageView for its search icon, and has search_button as its res name
-          onView(allOf(isAssignableFrom(ImageView.class), withResourceName("search_button")))
-          .check(matches(isDisplayed()));
-        } else {
-          // Phones use ActionMenuItemView for its search icon, and has menu_search as its res name
-          onView(allOf(isAssignableFrom(ActionMenuItemView.class), withResourceName("menu_search")))
-          .check(matches(isDisplayed()));
+        boolean searchIconVisible = true;
+        boolean isTablet = isTablet();
+        try {
+            if (isTablet) {
+                // Tablets use ImageView for its search icon, and has search_button as its res name
+                onView(Matchers.SEARCH_BUTTON)
+                        .check(matches(isDisplayed()));
+            } else {
+                // Phones use ActionMenuItemView for its search icon, and has menu_search as its res
+                // name
+                onView(Matchers.MENU_SEARCH)
+                        .check(matches(isDisplayed()));
+            }
+        } catch (Exception | AssertionFailedError e) {
+            searchIconVisible = false;
         }
-      } catch (Exception | AssertionFailedError e) {
-        searchIconVisible = false;
-      }
-      return searchIconVisible;
+        return searchIconVisible;
     }
 
     UiObject2 menuGridMode() {
@@ -177,7 +173,7 @@ public class UiBot extends BaseBot {
         return find(By.desc("Grid view"));
     }
 
-        UiObject2 menuListMode() {
+    UiObject2 menuListMode() {
         // Note that we're using By.desc rather than By.res, because of b/25285770
         return find(By.desc("List view"));
     }
@@ -286,10 +282,10 @@ public class UiBot extends BaseBot {
         Iterator<UiObject2> it = menuItems.iterator();
 
         UiObject2 menuItem = null;
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             menuItem = it.next();
             UiObject2 text = menuItem.findObject(By.text(label));
-            if(text != null) {
+            if (text != null) {
                 break;
             }
         }
@@ -299,7 +295,7 @@ public class UiBot extends BaseBot {
     UiObject findMenuMoreOptions() {
         UiSelector selector = new UiSelector().className("android.widget.ImageButton")
                 .descriptionContains("More options");
-        //TODO: use the system string ? android.R.string.action_menu_overflow_description
+        // TODO: use the system string ? android.R.string.action_menu_overflow_description
         return mDevice.findObject(selector);
     }
 
@@ -312,29 +308,35 @@ public class UiBot extends BaseBot {
     }
 
     private static Matcher<Object> withToolbarTitle(
-        final Matcher<CharSequence> textMatcher) {
-      return new BoundedMatcher<Object, Toolbar>(Toolbar.class) {
-        @Override public boolean matchesSafely(Toolbar toolbar) {
-          return textMatcher.matches(toolbar.getTitle());
-        }
-        @Override public void describeTo(Description description) {
-          description.appendText("with toolbar title: ");
-          textMatcher.describeTo(description);
-        }
-      };
+            final Matcher<CharSequence> textMatcher) {
+        return new BoundedMatcher<Object, Toolbar>(Toolbar.class) {
+            @Override
+            public boolean matchesSafely(Toolbar toolbar) {
+                return textMatcher.matches(toolbar.getTitle());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with toolbar title: ");
+                textMatcher.describeTo(description);
+            }
+        };
     }
 
     private static Matcher<Object> withBreadcrumbTitle(
-        final Matcher<CharSequence> textMatcher) {
-      return new BoundedMatcher<Object, Spinner>(Spinner.class) {
-        @Override public boolean matchesSafely(Spinner breadcrumb) {
-          DocumentInfo selectedDoc = (DocumentInfo) breadcrumb.getSelectedItem();
-          return textMatcher.matches(selectedDoc.displayName);
-        }
-        @Override public void describeTo(Description description) {
-          description.appendText("with breadcrumb title: ");
-          textMatcher.describeTo(description);
-        }
-      };
+            final Matcher<CharSequence> textMatcher) {
+        return new BoundedMatcher<Object, Spinner>(Spinner.class) {
+            @Override
+            public boolean matchesSafely(Spinner breadcrumb) {
+                DocumentInfo selectedDoc = (DocumentInfo) breadcrumb.getSelectedItem();
+                return textMatcher.matches(selectedDoc.displayName);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with breadcrumb title: ");
+                textMatcher.describeTo(description);
+            }
+        };
     }
 }
