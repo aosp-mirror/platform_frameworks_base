@@ -1296,7 +1296,7 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    private void flingSettings(float vel, boolean expand) {
+    public void flingSettings(float vel, boolean expand) {
         flingSettings(vel, expand, null, false /* isClick */);
     }
 
@@ -1390,8 +1390,12 @@ public class NotificationPanelView extends PanelView implements
         return maxHeight;
     }
 
-    private boolean isInSettings() {
+    public boolean isInSettings() {
         return mQsExpanded;
+    }
+
+    public boolean isExpanding() {
+        return mIsExpanding;
     }
 
     @Override
@@ -2108,6 +2112,7 @@ public class NotificationPanelView extends PanelView implements
         onEmptySpaceClick(x);
     }
 
+    @Override
     protected boolean onMiddleClicked() {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
@@ -2257,6 +2262,7 @@ public class NotificationPanelView extends PanelView implements
         mStatusBar.clearNotificationEffects();
     }
 
+    @Override
     protected boolean isPanelVisibleBecauseOfHeadsUp() {
         return mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpAnimatingAway;
     }
