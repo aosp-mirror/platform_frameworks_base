@@ -144,6 +144,10 @@ public final class Events {
         private static final Pools.SimplePool<MotionInputEvent> sPool = new Pools.SimplePool<>(1);
 
         private MotionEvent mEvent;
+        interface PositionProvider {
+            int get(MotionEvent e);
+        }
+
         private int mPosition;
 
         private MotionInputEvent() {
@@ -163,6 +167,19 @@ public final class Events {
             instance.mPosition = (child != null)
                     ? view.getChildAdapterPosition(child)
                     : RecyclerView.NO_POSITION;
+
+            return instance;
+        }
+
+        public static MotionInputEvent obtain(
+                MotionEvent event, PositionProvider positionProvider) {
+            Shared.checkMainLoop();
+
+            MotionInputEvent instance = sPool.acquire();
+            instance = (instance != null ? instance : new MotionInputEvent());
+
+            instance.mEvent = event;
+            instance.mPosition = positionProvider.get(event);
 
             return instance;
         }

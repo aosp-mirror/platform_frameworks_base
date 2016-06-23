@@ -49,7 +49,6 @@ import android.support.v13.view.DragStartHelper;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.BidiFormatter;
@@ -61,14 +60,12 @@ import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -143,7 +140,7 @@ public class DirectoryFragment extends Fragment
     private Model mModel;
     private MultiSelectManager mSelectionManager;
     private Model.UpdateListener mModelUpdateListener = new ModelUpdateListener();
-    private ItemEventListener mItemEventListener = new ItemEventListener();
+    private ItemEventListener mItemEventListener;
     private SelectionModeListener mSelectionModeListener;
     private FocusManager mFocusManager;
 
@@ -321,6 +318,13 @@ public class DirectoryFragment extends Fragment
 
         // Make sure this is done after the RecyclerView is set up.
         mFocusManager = new FocusManager(context, mRecView, mModel);
+
+        mItemEventListener = new ItemEventListener(
+                mSelectionManager,
+                mFocusManager,
+                this::handleViewItem,
+                this::deleteDocuments,
+                this::canSelect);
 
         final BaseActivity activity = getBaseActivity();
         mTuner = activity.createFragmentTuner();
@@ -1395,99 +1399,6 @@ public class DirectoryFragment extends Fragment
         return mSelectionManager.getSelection().contains(modelId);
     }
 
-    private class ItemEventListener implements DocumentHolder.EventListener {
-        @Override
-        public boolean onActivate(DocumentHolder doc) {
-            // Toggle selection if we're in selection mode, othewise, view item.
-            if (mSelectionManager.hasSelection()) {
-                mSelectionManager.toggleSelection(doc.modelId);
-            } else {
-                handleViewItem(doc.modelId);
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onSelect(DocumentHolder doc) {
-            mSelectionManager.toggleSelection(doc.modelId);
-            mSelectionManager.setSelectionRangeBegin(doc.getAdapterPosition());
-            return true;
-        }
-
-        @Override
-        public boolean onKey(DocumentHolder doc, int keyCode, KeyEvent event) {
-            // Only handle key-down events. This is simpler, consistent with most other UIs, and
-            // enables the handling of repeated key events from holding down a key.
-            if (event.getAction() != KeyEvent.ACTION_DOWN) {
-                return false;
-            }
-
-            // Ignore tab key events.  Those should be handled by the top-level key handler.
-            if (keyCode == KeyEvent.KEYCODE_TAB) {
-                return false;
-            }
-
-            if (mFocusManager.handleKey(doc, keyCode, event)) {
-                // Handle range selection adjustments. Extending the selection will adjust the
-                // bounds of the in-progress range selection. Each time an unshifted navigation
-                // event is received, the range selection is restarted.
-                if (shouldExtendSelection(doc, event)) {
-                    if (!mSelectionManager.isRangeSelectionActive()) {
-                        // Start a range selection if one isn't active
-                        mSelectionManager.startRangeSelection(doc.getAdapterPosition());
-                    }
-                    mSelectionManager.snapRangeSelection(mFocusManager.getFocusPosition());
-                } else {
-                    mSelectionManager.endRangeSelection();
-                }
-                return true;
-            }
-
-            // Handle enter key events
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_ENTER:
-                    if (event.isShiftPressed()) {
-                        return onSelect(doc);
-                    }
-                    // For non-shifted enter keypresses, fall through.
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_BUTTON_A:
-                    return onActivate(doc);
-                case KeyEvent.KEYCODE_FORWARD_DEL:
-                    // This has to be handled here instead of in a keyboard shortcut, because
-                    // keyboard shortcuts all have to be modified with the 'Ctrl' key.
-                    if (mSelectionManager.hasSelection()) {
-                        Selection selection = mSelectionManager.getSelection(new Selection());
-                        deleteDocuments(selection);
-                    }
-                    // Always handle the key, even if there was nothing to delete. This is a
-                    // precaution to prevent other handlers from potentially picking up the event
-                    // and triggering extra behaviours.
-                    return true;
-            }
-
-            return false;
-        }
-
-        private boolean shouldExtendSelection(DocumentHolder doc, KeyEvent event) {
-            if (!Events.isNavigationKeyCode(event.getKeyCode()) || !event.isShiftPressed()) {
-                return false;
-            }
-
-            // TODO: Combine this method with onBeforeItemStateChange, as both of them are almost
-            // the same, and responsible for the same thing (whether to select or not).
-            final Cursor cursor = mModel.getItem(doc.modelId);
-            if (cursor == null) {
-                Log.w(TAG, "Couldn't obtain cursor for modelId: " + doc.modelId);
-                return false;
-            }
-
-            final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            return mTuner.canSelectType(docMimeType, docFlags);
-        }
-    }
-
     private final class ModelUpdateListener implements Model.UpdateListener {
         @Override
         public void onModelUpdate(Model model) {
@@ -1594,68 +1505,26 @@ public class DirectoryFragment extends Fragment
         }
     };
 
-    // Previously we listened to events with one class, only to bounce them forward
-    // to GestureDetector. We're still doing that here, but with a single class
-    // that reduces overall complexity in our glue code.
-    private static final class ListeningGestureDetector extends GestureDetector
-            implements OnItemTouchListener, OnTouchListener {
+    private boolean canSelect(String modelId) {
 
-        private DragStartHelper mDragHelper;
-        private GestureListener mGestureListener;
-
-        public ListeningGestureDetector(
-                Context context, DragStartHelper dragHelper, GestureListener listener) {
-            super(context, listener);
-            mDragHelper = dragHelper;
-            mGestureListener = listener;
-            setOnDoubleTapListener(listener);
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-            if (e.getAction() == MotionEvent.ACTION_DOWN && Events.isMouseEvent(e)) {
-                mGestureListener.setLastButtonState(e.getButtonState());
-            }
-
-            // Detect drag events. When a drag is detected, intercept the rest of the gesture.
-            View itemView = rv.findChildViewUnder(e.getX(), e.getY());
-            if (itemView != null && mDragHelper.onTouch(itemView,  e)) {
-                return true;
-            }
-            // Forward unhandled events to the GestureDetector.
-            onTouchEvent(e);
-
+        // TODO: Combine this method with onBeforeItemStateChange, as both of them are almost
+        // the same, and responsible for the same thing (whether to select or not).
+        final Cursor cursor = mModel.getItem(modelId);
+        if (cursor == null) {
+            Log.w(TAG, "Couldn't obtain cursor for modelId: " + modelId);
             return false;
         }
 
-        @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-            View itemView = rv.findChildViewUnder(e.getX(), e.getY());
-            mDragHelper.onTouch(itemView,  e);
-            // Note: even though this event is being handled as part of a drag gesture, continue
-            // forwarding to the GestureDetector. The detector needs to see the entire cluster of
-            // events in order to properly interpret gestures.
-            onTouchEvent(e);
-        }
-
-        @Override
-        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
-
-        // For mEmptyView right-click context menu
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getButtonState() == MotionEvent.BUTTON_SECONDARY) {
-                return mGestureListener.onRightClick(event);
-            }
-            return false;
-        }
+        final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+        return mTuner.canSelectType(docMimeType, docFlags);
     }
 
     /**
      * The gesture listener for items in the list/grid view. Interprets gestures and sends the
      * events to the target DocumentHolder, whence they are routed to the appropriate listener.
      */
-    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+    class GestureListener extends GestureDetector.SimpleOnGestureListener {
         // From the RecyclerView, we get two events sent to
         // ListeningGestureDetector#onInterceptTouchEvent on a mouse click; we first get an
         // ACTION_DOWN Event for clicking on the mouse, and then an ACTION_UP event from releasing
