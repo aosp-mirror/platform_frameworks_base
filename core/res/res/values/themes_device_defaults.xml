@@ -730,13 +730,26 @@ easier.
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
+    </style>
+
+    <!-- DeviceDefault theme for a window that should use Settings theme colors but has
+         a full dark palette (instead of Light with dark action bar like
+         Theme.DeviceDefault.Settings.  -->
+    <style name="Theme.DeviceDefault.Settings.Dark" parent="Theme.Material">
+        <!-- Color palette -->
+        <item name="colorPrimary">@color/primary_device_default_settings</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings</item>
+        <item name="colorAccent">@color/accent_device_default_dark</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogWhenLarge" parent="Theme.Material.Settings.DialogWhenLarge">
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
 
@@ -744,6 +757,7 @@ easier.
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings</item>
         <item name="colorAccent">@color/accent_device_default_light</item>
     </style>
 
