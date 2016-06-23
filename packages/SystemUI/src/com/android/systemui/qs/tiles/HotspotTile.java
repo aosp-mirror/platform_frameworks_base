@@ -85,6 +85,7 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
             mController.addCallback(mCallback);
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            refreshState();
         } else {
             mController.removeCallback(mCallback);
         }
