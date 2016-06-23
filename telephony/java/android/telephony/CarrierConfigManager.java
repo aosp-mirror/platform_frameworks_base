@@ -793,6 +793,27 @@ public class CarrierConfigManager {
     public static final String KEY_RATCHET_RAT_FAMILIES =
             "ratchet_rat_families";
 
+    /**
+     * Flag indicating whether some telephony logic will treat a call which was formerly a video
+     * call as if it is still a video call.  When {@code true}:
+     * <p>
+     * Logic which will automatically drop a video call which takes place over WIFI when a
+     * voice call is answered (see {@link #KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL}.
+     * <p>
+     * Logic which determines whether the user can use TTY calling.
+     */
+    public static final String KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL =
+            "treat_downgraded_video_calls_as_video_calls_bool";
+
+    /**
+     * When {@code true}, if the user is in an ongoing video call over WIFI and answers an incoming
+     * audio call, the video call will be disconnected before the audio call is answered.  This is
+     * in contrast to the usual expected behavior where a foreground video call would be put into
+     * the background and held when an incoming audio call is answered.
+     */
+    public static final String KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL =
+            "drop_video_call_when_answering_audio_call_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -944,6 +965,8 @@ public class CarrierConfigManager {
         // Order is important - lowest precidence first
         sDefaults.putStringArray(KEY_RATCHET_RAT_FAMILIES,
                 new String[]{"1,2","7,8,12","3,11,9,10,15","14,19"});
+        sDefaults.putBoolean(KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL, true);
+        sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, true);
     }
 
     /**
