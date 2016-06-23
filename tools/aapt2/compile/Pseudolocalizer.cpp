@@ -280,13 +280,13 @@ std::u16string PseudoMethodAccent::text(const StringPiece16& source)
             std::u16string chunk;
             bool end = false;
             chunk.append(&c, 1);
-            while (!end && i < I) {
+            while (!end && i + 1 < I) {
                 ++i;
                 c = s[i];
                 chunk.append(&c, 1);
                 if (isPossibleNormalPlaceholderEnd(c)) {
                     end = true;
-                } else if (c == 't') {
+                } else if (i + 1 < I && c == 't') {
                     ++i;
                     c = s[i];
                     chunk.append(&c, 1);

@@ -69,7 +69,7 @@ TEST(PseudolocalizerTest, PlaintextAccent) {
 
     EXPECT_TRUE(simpleHelper("Battery %1d%%",
                              "[βåţţéŕý »%1d«%% one two]", Pseudolocalizer::Method::kAccent));
-
+    EXPECT_TRUE(simpleHelper("^1 %", "[^1 % one]", Pseudolocalizer::Method::kAccent));
     EXPECT_TRUE(compoundHelper("", "", "", "[]", Pseudolocalizer::Method::kAccent));
     EXPECT_TRUE(compoundHelper("Hello,", " world", "",
                                "[Ĥéļļö, ŵöŕļð one two]", Pseudolocalizer::Method::kAccent));
