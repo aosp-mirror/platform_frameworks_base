@@ -81,14 +81,12 @@ NativeDisplayEventReceiver::NativeDisplayEventReceiver(JNIEnv* env,
 NativeDisplayEventReceiver::~NativeDisplayEventReceiver() {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
     env->DeleteGlobalRef(mReceiverWeakGlobal);
+    ALOGV("receiver %p ~ dtor display event receiver.", this);
 }
 
 void NativeDisplayEventReceiver::dispose() {
     ALOGV("receiver %p ~ Disposing display event receiver.", this);
-
-    if (!mReceiver.initCheck()) {
-        mMessageQueue->getLooper()->removeFd(mReceiver.getFd());
-    }
+    DisplayEventDispatcher::dispose();
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count) {
@@ -143,7 +141,7 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
 }
 
 static void nativeDispose(JNIEnv* env, jclass clazz, jlong receiverPtr) {
-    sp<NativeDisplayEventReceiver> receiver =
+    NativeDisplayEventReceiver* receiver =
             reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
     receiver->dispose();
     receiver->decStrong(gDisplayEventReceiverClassInfo.clazz); // drop reference held by the object
