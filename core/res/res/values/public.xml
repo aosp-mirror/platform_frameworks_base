@@ -2741,5 +2741,6 @@
     <public type="attr" name="contextUri" />
     <public type="attr" name="contextDescription" />
     <public type="attr" name="showMetadataInPreview" />
+    <public type="attr" name="colorSecondary" />
 
 </resources>
