@@ -552,6 +552,10 @@ public class ApfTest extends AndroidTestCase {
             assertTrue(mGotApfProgram.block(TIMEOUT_MS));
             return mLastApfProgram;
         }
+
+        public void assertNoProgramUpdate() {
+            assertFalse(mGotApfProgram.block(TIMEOUT_MS));
+        }
     }
 
     private static class TestApfFilter extends ApfFilter {
@@ -863,6 +867,13 @@ public class ApfTest extends AndroidTestCase {
         verifyRaLifetime(ipManagerCallback, packet, lifetime);
     }
 
+    private void assertInvalidRa(TestApfFilter apfFilter, MockIpManagerCallback ipManagerCallback,
+            ByteBuffer packet) throws IOException, ErrnoException {
+        ipManagerCallback.resetApfProgramWait();
+        apfFilter.pretendPacketReceived(packet.array());
+        ipManagerCallback.assertNoProgramUpdate();
+    }
+
     @LargeTest
     public void testApfFilterRa() throws Exception {
         MockIpManagerCallback ipManagerCallback = new MockIpManagerCallback();
@@ -880,6 +891,16 @@ public class ApfTest extends AndroidTestCase {
         assertPass(program, basePacket.array(), 0);
 
         testRaLifetime(apfFilter, ipManagerCallback, basePacket, 1000);
+
+        // Ensure zero-length options cause the packet to be silently skipped.
+        // Do this before we test other packets. http://b/29586253
+        ByteBuffer zeroLengthOptionPacket = ByteBuffer.wrap(
+                new byte[ICMP6_RA_OPTION_OFFSET + ICMP6_4_BYTE_OPTION_LEN]);
+        basePacket.clear();
+        zeroLengthOptionPacket.put(basePacket);
+        zeroLengthOptionPacket.put((byte)ICMP6_PREFIX_OPTION_TYPE);
+        zeroLengthOptionPacket.put((byte)0);
+        assertInvalidRa(apfFilter, ipManagerCallback, zeroLengthOptionPacket);
 
         // Generate several RAs with different options and lifetimes, and verify when
         // ApfFilter is shown these packets, it generates programs to filter them for the

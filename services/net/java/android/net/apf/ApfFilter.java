@@ -367,8 +367,9 @@ public class ApfFilter {
         }
 
         // Note that this parses RA and may throw IllegalArgumentException (from
-        // Buffer.position(int) ) or IndexOutOfBoundsException (from ByteBuffer.get(int) ) if
-        // parsing encounters something non-compliant with specifications.
+        // Buffer.position(int) or due to an invalid-length option) or IndexOutOfBoundsException
+        // (from ByteBuffer.get(int) ) if parsing encounters something non-compliant with
+        // specifications.
         Ra(byte[] packet, int length) {
             mPacket = ByteBuffer.allocate(length).put(ByteBuffer.wrap(packet, 0, length));
             mPacket.clear();
@@ -417,6 +418,10 @@ public class ApfFilter {
                         // RFC4861 section 4.2 dictates we ignore unknown options for fowards
                         // compatibility.
                         break;
+                }
+                if (optionLength <= 0) {
+                    throw new IllegalArgumentException(String.format(
+                        "Invalid option length opt=%d len=%d", optionType, optionLength));
                 }
                 mPacket.position(mPacket.position() + optionLength);
             }
