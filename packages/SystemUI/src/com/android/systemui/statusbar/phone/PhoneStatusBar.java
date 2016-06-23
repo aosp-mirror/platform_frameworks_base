@@ -3351,6 +3351,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
                 KeyboardShortcuts.dismiss();
+                if (mRemoteInputController != null) {
+                    mRemoteInputController.closeRemoteInputs();
+                }
                 if (isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                     String reason = intent.getStringExtra("reason");
