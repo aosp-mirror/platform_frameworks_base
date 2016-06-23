@@ -7350,7 +7350,11 @@ i
         <!-- Title of the uri that specifies a link for further context of this wallpaper, e.g. Explore collection. -->
         <attr name="contextDescription" format="reference" />
 
-        <!-- Whether to show any metadata when previewing the wallpaper. -->
+        <!-- Whether to show any metadata when previewing the wallpaper. If this value is
+             set to true, any component that shows a preview of this live wallpaper should also show
+             accompanying information like the title, the description, the author and the context
+             description of this wallpaper so the user gets to know further information about this
+             wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
     </declare-styleable>
