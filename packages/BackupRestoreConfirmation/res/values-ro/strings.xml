@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"Copiere de rezervă completă"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restabilire completă"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"S-a solicitat crearea unei copii de rezervă complete a tuturor datelor pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu ați solicitat dvs. copierea de rezervă, nu permiteți ca operațiunea să continue."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Creați copii de rezervă pentru datele dvs."</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Faceți backup pentru date"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Nu creați copii de rezervă"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"S-a solicitat o restabilire completă a tuturor datelor de pe un computer desktop conectat. Doriți să permiteți acest lucru?\n\nDacă nu dvs. ați solicitat această restabilire, nu permiteți continuarea operațiunii. Acest proces va înlocui toate datele existente în prezent pe dispozitiv!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restabiliți datele dvs."</string>
