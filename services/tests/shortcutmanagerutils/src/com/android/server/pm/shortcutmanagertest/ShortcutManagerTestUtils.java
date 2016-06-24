@@ -24,9 +24,11 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,11 +37,14 @@ import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherApps;
+import android.content.pm.LauncherApps.Callback;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.BaseBundle;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -54,6 +59,7 @@ import junit.framework.AssertionFailedError;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.BufferedReader;
@@ -69,6 +75,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -664,8 +671,8 @@ public class ShortcutManagerTestUtils {
         }
 
         private ShortcutListAsserter(ShortcutListAsserter original, List<ShortcutInfo> list) {
-            mOriginal = original == null ? this : original;
-            mList = new ArrayList<>(list);
+            mOriginal = (original == null) ? this : original;
+            mList = (list == null) ? new ArrayList<>(0) : new ArrayList<>(list);
         }
 
         public ShortcutListAsserter revertToOriginalList() {
@@ -813,6 +820,11 @@ public class ShortcutManagerTestUtils {
             return this;
         }
 
+        public ShortcutListAsserter areAllWithActivity(ComponentName activity) {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.getActivity().equals(activity)));
+            return this;
+        }
+
         public ShortcutListAsserter forAllShortcuts(Consumer<ShortcutInfo> sa) {
             boolean found = false;
             for (int i = 0; i < mList.size(); i++) {
@@ -901,5 +913,70 @@ public class ShortcutManagerTestUtils {
                 assertEquals(v1, v2);
             }
         }
+    }
+
+    public static void waitOnMainThread() throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        new Handler(Looper.getMainLooper()).post(() -> latch.countDown());
+
+        latch.await();
+    }
+
+    public static class LauncherCallbackAsserter {
+        private final LauncherApps.Callback mCallback = mock(LauncherApps.Callback.class);
+
+        private Callback getMockCallback() {
+            return mCallback;
+        }
+
+        public LauncherCallbackAsserter assertNoCallbackCalled() {
+            verify(mCallback, times(0)).onShortcutsChanged(
+                    anyString(),
+                    any(List.class),
+                    any(UserHandle.class));
+            return this;
+        }
+
+        public LauncherCallbackAsserter assertNoCallbackCalledForPackage(
+                String publisherPackageName) {
+            verify(mCallback, times(0)).onShortcutsChanged(
+                    eq(publisherPackageName),
+                    any(List.class),
+                    any(UserHandle.class));
+            return this;
+        }
+
+        public LauncherCallbackAsserter assertNoCallbackCalledForPackageAndUser(
+                String publisherPackageName, UserHandle publisherUserHandle) {
+            verify(mCallback, times(0)).onShortcutsChanged(
+                    eq(publisherPackageName),
+                    any(List.class),
+                    eq(publisherUserHandle));
+            return this;
+        }
+
+        public ShortcutListAsserter assertCallbackCalledForPackageAndUser(
+                String publisherPackageName, UserHandle publisherUserHandle) {
+            final ArgumentCaptor<List> shortcuts = ArgumentCaptor.forClass(List.class);
+            verify(mCallback, times(1)).onShortcutsChanged(
+                    eq(publisherPackageName),
+                    shortcuts.capture(),
+                    eq(publisherUserHandle));
+            return new ShortcutListAsserter(shortcuts.getValue());
+        }
+    }
+
+    public static LauncherCallbackAsserter assertForLauncherCallback(
+            LauncherApps launcherApps, Runnable body) throws InterruptedException {
+        final LauncherCallbackAsserter asserter = new LauncherCallbackAsserter();
+        launcherApps.registerCallback(asserter.getMockCallback(),
+                new Handler(Looper.getMainLooper()));
+
+        body.run();
+
+        waitOnMainThread();
+
+        return asserter;
     }
 }

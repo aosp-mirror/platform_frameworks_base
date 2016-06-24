@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -58,18 +59,36 @@ public class ShortcutParser {
     @Nullable
     public static List<ShortcutInfo> parseShortcuts(ShortcutService service,
             String packageName, @UserIdInt int userId) throws IOException, XmlPullParserException {
-        final PackageInfo pi = service.injectGetActivitiesWithMetadata(packageName, userId);
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format("Scanning package %s for manifest shortcuts on user %d",
+                    packageName, userId));
+        }
+        final List<ResolveInfo> activities = service.injectGetMainActivities(packageName, userId);
+        if (activities == null || activities.size() == 0) {
+            return null;
+        }
 
         List<ShortcutInfo> result = null;
 
         try {
-            if (pi != null && pi.activities != null) {
-                for (ActivityInfo activityInfo : pi.activities) {
-                    result = parseShortcutsOneFile(service, activityInfo, packageName, userId, result);
+            final int size = activities.size();
+            for (int i = 0; i < size; i++) {
+                final ActivityInfo activityInfoNoMetadata = activities.get(i).activityInfo;
+                if (activityInfoNoMetadata == null) {
+                    continue;
+                }
+
+                final ActivityInfo activityInfoWithMetadata =
+                        service.injectGetActivityInfoWithMetadata(
+                        activityInfoNoMetadata.getComponentName(), userId);
+                if (activityInfoWithMetadata != null) {
+                    result = parseShortcutsOneFile(
+                            service, activityInfoWithMetadata, packageName, userId, result);
                 }
             }
         } catch (RuntimeException e) {
-            // Resource ID mismatch may cause various runtime exceptions when parsing XMLs.
+            // Resource ID mismatch may cause various runtime exceptions when parsing XMLs,
+            // But we don't crash the device, so just swallow them.
             service.wtf(
                     "Exception caught while parsing shortcut XML for package=" + packageName, e);
             return null;
@@ -81,6 +100,11 @@ public class ShortcutParser {
             ShortcutService service,
             ActivityInfo activityInfo, String packageName, @UserIdInt int userId,
             List<ShortcutInfo> result) throws IOException, XmlPullParserException {
+        if (ShortcutService.DEBUG) {
+            Slog.d(TAG, String.format(
+                    "Checking main activity %s", activityInfo.getComponentName()));
+        }
+
         XmlResourceParser parser = null;
         try {
             parser = service.injectXmlMetaData(activityInfo, METADATA_KEY);
@@ -223,7 +247,7 @@ public class ShortcutParser {
                     continue;
                 }
 
-                Log.w(TAG, "Unknown tag " + tag + " at depth " + depth);
+                ShortcutService.warnForInvalidTag(depth, tag);
             }
         } finally {
             if (parser != null) {
