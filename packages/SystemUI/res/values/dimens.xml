@@ -556,6 +556,19 @@
 
     <!-- Volume dialog root view bottom margin, at rest -->
     <dimen name="volume_dialog_margin_bottom">4dp</dimen>
+    <dimen name="volume_dialog_collapsed_padding_top">8dp</dimen>
+    <dimen name="volume_dialog_expanded_padding_top">22dp</dimen>
+    <dimen name="volume_dialog_padding_end">40dp</dimen>
+
+    <dimen name="volume_row_padding_bottom">9.4dp</dimen>
+    <dimen name="volume_row_padding_start">4dp</dimen>
+    <dimen name="volume_row_header_padding_start">16dp</dimen>
+    <dimen name="volume_row_height">64dp</dimen>
+    <dimen name="volume_row_slider_height">48dp</dimen>
+    <dimen name="volume_row_slider_padding_start">12dp</dimen>
+
+    <dimen name="volume_expander_margin_end">2dp</dimen>
+    <dimen name="volume_expander_margin_top">6dp</dimen>
 
     <!-- Padding between icon and text for managed profile toast -->
     <dimen name="managed_profile_toast_padding">4dp</dimen>

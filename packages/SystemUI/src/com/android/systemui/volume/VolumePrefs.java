@@ -43,7 +43,7 @@ public class VolumePrefs {
     public static final String PREF_ADJUST_ALARMS = "pref_adjust_alarms";
     public static final String PREF_ADJUST_NOTIFICATION = "pref_adjust_notification";
 
-    public static final boolean DEFAULT_SHOW_HEADERS = false;
+    public static final boolean DEFAULT_SHOW_HEADERS = true;
     public static final boolean DEFAULT_ENABLE_AUTOMUTE = true;
     public static final boolean DEFAULT_ENABLE_SILENT_MODE = true;
 
