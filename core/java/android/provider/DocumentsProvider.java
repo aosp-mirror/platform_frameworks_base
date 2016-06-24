@@ -19,6 +19,7 @@ package android.provider;
 import static android.provider.DocumentsContract.METHOD_COPY_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_CREATE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
+import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
@@ -458,6 +459,12 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Search not supported");
     }
 
+    /** {@hide} */
+    @SuppressWarnings("unused")
+    public boolean ejectRoot(String rootId) {
+        throw new UnsupportedOperationException("Eject not supported");
+    }
+
     /**
      * Return concrete MIME type of the requested document. Must match the value
      * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
@@ -851,7 +858,17 @@ public abstract class DocumentsProvider extends ContentProvider {
 
             // It's responsibility of the provider to revoke any grants, as the document may be
             // still attached to another parents.
+        } else if (METHOD_EJECT_ROOT.equals(method)) {
+            // Given that certain system apps can hold MOUNT_UNMOUNT permission, but only apps
+            // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
+            // MANAGE_DOCUMENTS here instead
+            getContext().enforceCallingPermission(
+                    android.Manifest.permission.MANAGE_DOCUMENTS, null);
+            final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+            final String rootId = DocumentsContract.getRootId(rootUri);
+            final boolean ejected = ejectRoot(rootId);
 
+            out.putBoolean(DocumentsContract.EXTRA_RESULT, ejected);
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }
