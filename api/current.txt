@@ -47483,7 +47483,10 @@ package java.lang {
     ctor public AbstractMethodError(java.lang.String);
   }
 
-   abstract class AbstractStringBuilder implements java.lang.CharSequence {
+   abstract class AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence {
+    method public java.lang.AbstractStringBuilder append(java.lang.CharSequence);
+    method public java.lang.AbstractStringBuilder append(java.lang.CharSequence, int, int);
+    method public java.lang.AbstractStringBuilder append(char);
     method public int capacity();
     method public char charAt(int);
     method public int codePointAt(int);
@@ -47502,6 +47505,7 @@ package java.lang {
     method public java.lang.CharSequence subSequence(int, int);
     method public java.lang.String substring(int);
     method public java.lang.String substring(int, int);
+    method public abstract java.lang.String toString();
     method public void trimToSize();
   }
 
@@ -49036,6 +49040,8 @@ package java.lang {
     method public int indexOf(java.lang.String, int);
     method public java.lang.String intern();
     method public boolean isEmpty();
+    method public static java.lang.String join(java.lang.CharSequence, java.lang.CharSequence...);
+    method public static java.lang.String join(java.lang.CharSequence, java.lang.Iterable<? extends java.lang.CharSequence>);
     method public int lastIndexOf(int);
     method public int lastIndexOf(int, int);
     method public int lastIndexOf(java.lang.String);
@@ -49074,7 +49080,7 @@ package java.lang {
     field public static final java.util.Comparator<java.lang.String> CASE_INSENSITIVE_ORDER;
   }
 
-  public final class StringBuffer extends java.lang.AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence java.io.Serializable {
+  public final class StringBuffer extends java.lang.AbstractStringBuilder implements java.lang.CharSequence java.io.Serializable {
     ctor public StringBuffer();
     ctor public StringBuffer(int);
     ctor public StringBuffer(java.lang.String);
@@ -49082,7 +49088,7 @@ package java.lang {
     method public synchronized java.lang.StringBuffer append(java.lang.Object);
     method public synchronized java.lang.StringBuffer append(java.lang.String);
     method public synchronized java.lang.StringBuffer append(java.lang.StringBuffer);
-    method public java.lang.StringBuffer append(java.lang.CharSequence);
+    method public synchronized java.lang.StringBuffer append(java.lang.CharSequence);
     method public synchronized java.lang.StringBuffer append(java.lang.CharSequence, int, int);
     method public synchronized java.lang.StringBuffer append(char[]);
     method public synchronized java.lang.StringBuffer append(char[], int, int);
@@ -49112,7 +49118,7 @@ package java.lang {
     method public synchronized java.lang.String toString();
   }
 
-  public final class StringBuilder extends java.lang.AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence java.io.Serializable {
+  public final class StringBuilder extends java.lang.AbstractStringBuilder implements java.lang.CharSequence java.io.Serializable {
     ctor public StringBuilder();
     ctor public StringBuilder(int);
     ctor public StringBuilder(java.lang.String);
