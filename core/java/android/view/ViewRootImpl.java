@@ -1723,7 +1723,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             boolean hwInitialized = false;
-            boolean contentInsetsChanged = false;
+            boolean framesChanged = false;
             boolean hadSurface = mSurface.isValid();
 
             try {
@@ -1763,7 +1763,7 @@ public final class ViewRootImpl implements ViewParent,
 
                 final boolean overscanInsetsChanged = !mPendingOverscanInsets.equals(
                         mAttachInfo.mOverscanInsets);
-                contentInsetsChanged = !mPendingContentInsets.equals(
+                boolean contentInsetsChanged = !mPendingContentInsets.equals(
                         mAttachInfo.mContentInsets);
                 final boolean visibleInsetsChanged = !mPendingVisibleInsets.equals(
                         mAttachInfo.mVisibleInsets);
@@ -1817,7 +1817,7 @@ public final class ViewRootImpl implements ViewParent,
                 // measure cache is cleared. We might have a pending MSG_RESIZED_REPORT
                 // that is supposed to take care of it, but since pending insets are
                 // already modified here, it won't detect the frame change after this.
-                final boolean framesChanged = overscanInsetsChanged
+                framesChanged = overscanInsetsChanged
                         || contentInsetsChanged
                         || stableInsetsChanged
                         || visibleInsetsChanged
@@ -2009,7 +2009,7 @@ public final class ViewRootImpl implements ViewParent,
                 boolean focusChangedDueToTouchMode = ensureTouchModeLocally(
                         (relayoutResult&WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE) != 0);
                 if (focusChangedDueToTouchMode || mWidth != host.getMeasuredWidth()
-                        || mHeight != host.getMeasuredHeight() || contentInsetsChanged ||
+                        || mHeight != host.getMeasuredHeight() || framesChanged ||
                         updatedConfiguration) {
                     int childWidthMeasureSpec = getRootMeasureSpec(mWidth, lp.width);
                     int childHeightMeasureSpec = getRootMeasureSpec(mHeight, lp.height);
@@ -2018,7 +2018,7 @@ public final class ViewRootImpl implements ViewParent,
                             + mWidth + " measuredWidth=" + host.getMeasuredWidth()
                             + " mHeight=" + mHeight
                             + " measuredHeight=" + host.getMeasuredHeight()
-                            + " coveredInsetsChanged=" + contentInsetsChanged);
+                            + " framesChanged=" + framesChanged);
 
                      // Ask host how big it wants to be
                     performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
