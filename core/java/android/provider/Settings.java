@@ -8510,8 +8510,6 @@ public final class Settings {
 
         /**
          * The name of the device
-         *
-         * @hide
          */
         public static final String DEVICE_NAME = "device_name";
 
