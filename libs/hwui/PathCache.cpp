@@ -138,7 +138,7 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 
 PathCache::PathCache():
         mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)) {
+        mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)), mTexNum(0) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_PATH_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting %s cache size to %sMB", name, property);
@@ -202,6 +202,7 @@ void PathCache::removeTexture(PathTexture* texture) {
                         "the cache in an inconsistent state", size);
             }
             mSize -= size;
+            mTexNum--;
         }
 
         PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
@@ -228,7 +229,7 @@ void PathCache::purgeCache(uint32_t width, uint32_t height) {
 }
 
 void PathCache::trim() {
-    while (mSize > mMaxSize) {
+    while (mSize > mMaxSize || mTexNum > DEFAULT_PATH_TEXTURE_CAP) {
         mCache.removeOldest();
     }
 }
@@ -299,6 +300,7 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 
     texture->setFilter(GL_LINEAR);
     texture->setWrap(GL_CLAMP_TO_EDGE);
+    mTexNum++;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
