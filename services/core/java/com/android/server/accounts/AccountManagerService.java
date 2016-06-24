@@ -112,6 +112,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -171,6 +172,13 @@ public class AccountManagerService
     private UserManager mUserManager;
 
     private final MessageHandler mMessageHandler;
+
+    /**
+     * Used to keep data read/write operations for logging purposes in a separate thread
+     * from main thread
+     */
+    private final LinkedList<Runnable> mLogRecordRunnables = new LinkedList<Runnable>();
+    private Thread mLogRecordThread;
 
     // Messages that can be sent on mHandler
     private static final int MESSAGE_TIMED_OUT = 3;
@@ -4269,21 +4277,63 @@ public class AccountManagerService
     }
 
     /*
-     * This function receives an opened writable database.
+     * This function receives an opened writable database and writes to it in a separate thread.
      */
     private void logRecord(SQLiteDatabase db, String action, String tableName, long accountId,
             UserAccounts userAccount, int callingUid) {
-        SQLiteStatement logStatement = userAccount.statementForLogging;
-        logStatement.bindLong(1, accountId);
-        logStatement.bindString(2, action);
-        logStatement.bindString(3, DebugDbHelper.dateFromat.format(new Date()));
-        logStatement.bindLong(4, callingUid);
-        logStatement.bindString(5, tableName);
-        logStatement.bindLong(6, userAccount.debugDbInsertionPoint);
-        logStatement.execute();
-        logStatement.clearBindings();
+
+        class LogRecordTask implements Runnable {
+            private final String action;
+            private final String tableName;
+            private final long accountId;
+            private final UserAccounts userAccount;
+            private final int callingUid;
+            private final long userDebugDbInsertionPoint;
+
+            LogRecordTask(final String action,
+                    final String tableName,
+                    final long accountId,
+                    final UserAccounts userAccount,
+                    final int callingUid,
+                    final long userDebugDbInsertionPoint) {
+                this.action = action;
+                this.tableName = tableName;
+                this.accountId = accountId;
+                this.userAccount = userAccount;
+                this.callingUid = callingUid;
+                this.userDebugDbInsertionPoint = userDebugDbInsertionPoint;
+            }
+
+            public void run() {
+                SQLiteStatement logStatement = userAccount.statementForLogging;
+                logStatement.bindLong(1, accountId);
+                logStatement.bindString(2, action);
+                logStatement.bindString(3, DebugDbHelper.dateFromat.format(new Date()));
+                logStatement.bindLong(4, callingUid);
+                logStatement.bindString(5, tableName);
+                logStatement.bindLong(6, userDebugDbInsertionPoint);
+                logStatement.execute();
+                logStatement.clearBindings();
+            }
+        }
+
+        mLogRecordRunnables.add(new LogRecordTask(action, tableName, accountId, userAccount,
+                callingUid, userAccount.debugDbInsertionPoint));
         userAccount.debugDbInsertionPoint = (userAccount.debugDbInsertionPoint + 1)
                 % MAX_DEBUG_DB_SIZE;
+
+
+        if(mLogRecordThread == null || !mLogRecordThread.isAlive()) {
+            mLogRecordThread = new Thread(new Runnable() {
+                public void run() {
+                    while(mLogRecordRunnables.size() > 0) {
+                        mLogRecordRunnables.pollFirst().run();
+                    }
+                }
+            });
+            mLogRecordThread.start();
+        }
+
     }
 
     /*
