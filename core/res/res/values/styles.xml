@@ -1410,7 +1410,7 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">?attr/dialogPreferredPadding</item>
         <item name="background">?attr/selectableItemBackground</item>
         <item name="drawablePadding">32dp</item>
-        <item name="drawableTint">@color/accent_material_light</item>
+        <item name="drawableTint">?android:attr/colorAccent</item>
         <item name="drawableTintMode">src_atop</item>
     </style>
 
