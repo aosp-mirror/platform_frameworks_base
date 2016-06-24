@@ -880,15 +880,25 @@ public final class RemotePrintDocument {
 
                 int sequence;
                 int what = message.what;
+                CharSequence error = null;
                 switch (what) {
                     case MSG_ON_LAYOUT_FINISHED:
                         removeForceCancel();
                         sequence = message.arg2;
                         break;
                     case MSG_ON_LAYOUT_FAILED:
-                    case MSG_ON_LAYOUT_CANCELED:
+                        error = (CharSequence) message.obj;
                         removeForceCancel();
-                        // $FALL-THROUGH - message uses the same format as "started"
+                        sequence = message.arg1;
+                        break;
+                    case MSG_ON_LAYOUT_CANCELED:
+                        if (!isCanceling()) {
+                            Log.w(LOG_TAG, "Unexpected cancel");
+                            what = MSG_ON_LAYOUT_FAILED;
+                        }
+                        removeForceCancel();
+                        sequence = message.arg1;
+                        break;
                     case MSG_ON_LAYOUT_STARTED:
                         // Don't remote force-cancel as command is still running and might need to
                         // be canceled later
@@ -917,7 +927,6 @@ public final class RemotePrintDocument {
                     } break;
 
                     case MSG_ON_LAYOUT_FAILED: {
-                        CharSequence error = (CharSequence) message.obj;
                         handleOnLayoutFailed(error, sequence);
                     } break;
 
@@ -1168,11 +1177,22 @@ public final class RemotePrintDocument {
                 }
 
                 int what = message.what;
+                CharSequence error = null;
+                int sequence = message.arg1;
                 switch (what) {
-                    case MSG_ON_WRITE_FINISHED:
-                    case MSG_ON_WRITE_FAILED:
                     case MSG_ON_WRITE_CANCELED:
+                        if (!isCanceling()) {
+                            Log.w(LOG_TAG, "Unexpected cancel");
+                            what = MSG_ON_WRITE_FAILED;
+                        }
                         removeForceCancel();
+                        break;
+                    case MSG_ON_WRITE_FAILED:
+                        error = (CharSequence) message.obj;
+                        // $FALL-THROUGH
+                    case MSG_ON_WRITE_FINISHED:
+                        removeForceCancel();
+                        // $FALL-THROUGH
                     case MSG_ON_WRITE_STARTED:
                         // Don't remote force-cancel as command is still running and might need to
                         // be canceled later
@@ -1187,24 +1207,19 @@ public final class RemotePrintDocument {
                 switch (what) {
                     case MSG_ON_WRITE_STARTED: {
                         ICancellationSignal cancellation = (ICancellationSignal) message.obj;
-                        final int sequence = message.arg1;
                         handleOnWriteStarted(cancellation, sequence);
                     } break;
 
                     case MSG_ON_WRITE_FINISHED: {
                         PageRange[] pages = (PageRange[]) message.obj;
-                        final int sequence = message.arg1;
                         handleOnWriteFinished(pages, sequence);
                     } break;
 
                     case MSG_ON_WRITE_FAILED: {
-                        CharSequence error = (CharSequence) message.obj;
-                        final int sequence = message.arg1;
                         handleOnWriteFailed(error, sequence);
                     } break;
 
                     case MSG_ON_WRITE_CANCELED: {
-                        final int sequence = message.arg1;
                         handleOnWriteCanceled(sequence);
                     } break;
                 }
