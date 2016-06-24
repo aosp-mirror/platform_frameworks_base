@@ -16,6 +16,8 @@
 
 package com.android.internal.view;
 
+import android.annotation.NonNull;
+import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -31,9 +33,14 @@ import android.view.inputmethod.InputConnectionInspector;
 import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputContentInfo;
 
+import java.lang.ref.WeakReference;
+
 public class InputConnectionWrapper implements InputConnection {
     private static final int MAX_WAIT_TIME_MILLIS = 2000;
     private final IInputContext mIInputContext;
+    @NonNull
+    private final WeakReference<AbstractInputMethodService> mInputMethodService;
+
     @MissingMethodFlags
     private final int mMissingMethods;
 
@@ -210,8 +217,10 @@ public class InputConnectionWrapper implements InputConnection {
         }
     }
 
-    public InputConnectionWrapper(IInputContext inputContext,
-            @MissingMethodFlags final int missingMethods) {
+    public InputConnectionWrapper(
+            @NonNull WeakReference<AbstractInputMethodService> inputMethodService,
+            IInputContext inputContext, @MissingMethodFlags final int missingMethods) {
+        mInputMethodService = inputMethodService;
         mIInputContext = inputContext;
         mMissingMethods = missingMethods;
     }
@@ -506,15 +515,24 @@ public class InputConnectionWrapper implements InputConnection {
         // Nothing should happen when called from input method.
     }
 
-    public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) {
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
         boolean result = false;
         if (isMethodMissing(MissingMethodFlags.COMMIT_CONTENT)) {
             // This method is not implemented.
             return false;
         }
         try {
+            if ((flags & InputConnection.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+                final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+                if (inputMethodService == null) {
+                    // This basically should not happen, because it's the the caller of this method.
+                    return false;
+                }
+                inputMethodService.exposeContent(inputContentInfo, this);
+            }
+
             InputContextCallback callback = InputContextCallback.getInstance();
-            mIInputContext.commitContent(inputContentInfo, opts, callback.mSeq, callback);
+            mIInputContext.commitContent(inputContentInfo, flags, opts, callback.mSeq, callback);
             synchronized (callback) {
                 callback.waitForResultLocked();
                 if (callback.mHaveValue) {

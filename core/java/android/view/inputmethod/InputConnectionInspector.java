@@ -82,7 +82,7 @@ public final class InputConnectionInspector {
          */
         int CLOSE_CONNECTION = 1 << 6;
         /**
-         * {@link InputConnection#commitContent(InputContentInfo, Bundle)} is available in
+         * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)} is available in
          * {@link android.os.Build.VERSION_CODES#N} MR-1 and later.
          */
         int COMMIT_CONTENT = 1 << 7;
@@ -209,7 +209,7 @@ public final class InputConnectionInspector {
     private static boolean hasCommitContent(@NonNull final Class clazz) {
         try {
             final Method method = clazz.getMethod("commitContent", InputContentInfo.class,
-                    Bundle.class);
+                    int.class, Bundle.class);
             return !Modifier.isAbstract(method.getModifiers());
         } catch (NoSuchMethodException e) {
             return false;

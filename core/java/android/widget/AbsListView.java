@@ -5985,8 +5985,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         @Override
-        public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) {
-            return getTarget().commitContent(inputContentInfo, opts);
+        public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+            return getTarget().commitContent(inputContentInfo, flags, opts);
         }
     }
 

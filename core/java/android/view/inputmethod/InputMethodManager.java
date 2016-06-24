@@ -2304,10 +2304,9 @@ public final class InputMethodManager {
      * application.
      * This cannot be {@code null}.
      * @param editorInfo The editor that receives {@link InputContentInfo}.
-     * @return {@code false} if we cannot allow a temporary access permission.
      * @hide
      */
-    public boolean exposeContent(@NonNull IBinder token, @NonNull InputContentInfo inputContentInfo,
+    public void exposeContent(@NonNull IBinder token, @NonNull InputContentInfo inputContentInfo,
             @NonNull EditorInfo editorInfo) {
         final IInputContentUriToken uriToken;
         final Uri contentUri = inputContentInfo.getContentUri();
@@ -2315,15 +2314,15 @@ public final class InputMethodManager {
             uriToken = mService.createInputContentUriToken(token, contentUri,
                     editorInfo.packageName);
             if (uriToken == null) {
-                return false;
+                return;
             }
         } catch (RemoteException e) {
             Log.e(TAG, "createInputContentAccessToken failed. contentUri=" + contentUri.toString()
                     + " packageName=" + editorInfo.packageName, e);
-            return false;
+            return;
         }
         inputContentInfo.setUriToken(uriToken);
-        return true;
+        return;
     }
 
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {

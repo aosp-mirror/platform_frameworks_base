@@ -168,7 +168,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 int missingMethods = msg.arg1;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(inputContext, missingMethods) : null;
+                        ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.startInput(ic, info);
@@ -180,7 +180,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 int missingMethods = msg.arg1;
                 IInputContext inputContext = (IInputContext)args.arg1;
                 InputConnection ic = inputContext != null
-                        ? new InputConnectionWrapper(inputContext, missingMethods) : null;
+                        ? new InputConnectionWrapper(mTarget, inputContext, missingMethods) : null;
                 EditorInfo info = (EditorInfo)args.arg2;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.restartInput(ic, info);
@@ -251,7 +251,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     public void bindInput(InputBinding binding) {
         // This IInputContext is guaranteed to implement all the methods.
         final int missingMethodFlags = 0;
-        InputConnection ic = new InputConnectionWrapper(
+        InputConnection ic = new InputConnectionWrapper(mTarget,
                 IInputContext.Stub.asInterface(binding.getConnectionToken()), missingMethodFlags);
         InputBinding nu = new InputBinding(ic, binding);
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
