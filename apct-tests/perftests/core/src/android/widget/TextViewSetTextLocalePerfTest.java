@@ -18,6 +18,7 @@ package android.widget;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.perftests.utils.PerfStatusReporter;
 import android.util.Log;
 
 import android.perftests.utils.BenchmarkState;
@@ -40,12 +41,11 @@ import org.junit.runner.RunWith;
 @LargeTest
 @RunWith(Parameterized.class)
 public class TextViewSetTextLocalePerfTest {
-
-    @Parameters
+    @Parameters(name = "{0}")
     public static Collection locales() {
         return Arrays.asList(new Object[][] {
-            { "TextView_setTextLocale_SameLocale", "en-US", "en-US" },
-            { "TextView_setTextLocale_DifferentLocale", "en-US", "ja-JP"}
+            { "SameLocale", "en-US", "en-US" },
+            { "DifferentLocale", "en-US", "ja-JP"}
         });
     }
 
@@ -63,17 +63,18 @@ public class TextViewSetTextLocalePerfTest {
     @Rule
     public ActivityTestRule<StubActivity> mActivityRule = new ActivityTestRule(StubActivity.class);
 
+    @Rule
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+
     @Test
     public void testSetTextLocale() {
         TextView textView = new TextView(mActivityRule.getActivity());
 
-        BenchmarkState state = new BenchmarkState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
 
         while (state.keepRunning()) {
             textView.setTextLocale(mFirstLocale);
             textView.setTextLocale(mSecondLocale);
         }
-
-        state.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(), mMetricKey);
     }
 }
