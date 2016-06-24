@@ -375,7 +375,15 @@ public class WifiEnterpriseConfig implements Parcelable {
             return false;
         }
 
+        // wpa_supplicant can update the anonymous identity for these kinds of networks after
+        // framework reads them, so make sure the framework doesn't try to overwrite them.
+        boolean shouldNotWriteAnonIdentity = mEapMethod == WifiEnterpriseConfig.Eap.SIM
+                || mEapMethod == WifiEnterpriseConfig.Eap.AKA
+                || mEapMethod == WifiEnterpriseConfig.Eap.AKA_PRIME;
         for (String key : mFields.keySet()) {
+            if (shouldNotWriteAnonIdentity && ANON_IDENTITY_KEY.equals(key)) {
+                continue;
+            }
             if (!saver.saveValue(key, mFields.get(key))) {
                 return false;
             }
