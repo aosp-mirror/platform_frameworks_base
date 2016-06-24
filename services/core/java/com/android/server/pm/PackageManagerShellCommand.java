@@ -1099,8 +1099,9 @@ class PackageManagerShellCommand extends ShellCommand {
 
         try {
             mInterface.setHomeActivity(componentName, userId);
+            pw.println("Success");
             return 0;
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             pw.println(e.toString());
             return 1;
         }
