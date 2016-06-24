@@ -586,6 +586,8 @@ public abstract class Connection extends Conferenceable {
         public void onExtrasChanged(Connection c, Bundle extras) {}
         public void onExtrasRemoved(Connection c, List<String> keys) {}
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
+        /** @hide */
+        public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
     }
 
     /**
@@ -2351,6 +2353,19 @@ public abstract class Connection extends Conferenceable {
     protected void notifyConferenceStarted() {
         for (Listener l : mListeners) {
             l.onConferenceStarted();
+        }
+    }
+
+    /**
+     * Notifies listeners when a change has occurred to the Connection which impacts its ability to
+     * be a part of a conference call.
+     * @param isConferenceSupported {@code true} if the connection supports being part of a
+     *      conference call, {@code false} otherwise.
+     * @hide
+     */
+    protected void notifyConferenceSupportedChanged(boolean isConferenceSupported) {
+        for (Listener l : mListeners) {
+            l.onConferenceSupportedChanged(this, isConferenceSupported);
         }
     }
 
