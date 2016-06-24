@@ -98,7 +98,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Noen standardvalg er angitt"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Ingen standardvalg er angitt"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Talesyntese-kontroller"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Tekst-til-tale"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Tekst til tale"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Talehastighet"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Hvor raskt teksten leses"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Stemmeleie"</string>
