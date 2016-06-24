@@ -504,7 +504,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     // How many bytes to write into the dropbox log before truncating
-    static final int DROPBOX_MAX_SIZE = 256 * 1024;
+    static final int DROPBOX_MAX_SIZE = 192 * 1024;
+    // Assumes logcat entries average around 100 bytes; that's not perfect stack traces count
+    // as one line, but close enough for now.
+    static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
 
     // Access modes for handleIncomingUser.
     static final int ALLOW_NON_FULL = 0;
@@ -13544,13 +13547,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @param parent activity related to the error, null if unknown
      * @param subject line related to the error, null if absent
      * @param report in long form describing the error, null if absent
-     * @param logFile to include in the report, null if none
+     * @param dataFile text file to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
             ProcessRecord process, String processName, ActivityRecord activity,
             ActivityRecord parent, String subject,
-            final String report, final File logFile,
+            final String report, final File dataFile,
             final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
@@ -13605,20 +13608,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (report != null) {
                     sb.append(report);
                 }
-                if (logFile != null) {
+
+                String setting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
+                int lines = Settings.Global.getInt(mContext.getContentResolver(), setting, 0);
+                int maxDataFileSize = DROPBOX_MAX_SIZE - sb.length()
+                        - lines * RESERVED_BYTES_PER_LOGCAT_LINE;
+
+                if (dataFile != null && maxDataFileSize > 0) {
                     try {
-                        sb.append(FileUtils.readTextFile(logFile, DROPBOX_MAX_SIZE,
+                        sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
                                     "\n\n[[TRUNCATED]]"));
                     } catch (IOException e) {
-                        Slog.e(TAG, "Error reading " + logFile, e);
+                        Slog.e(TAG, "Error reading " + dataFile, e);
                     }
                 }
                 if (crashInfo != null && crashInfo.stackTrace != null) {
                     sb.append(crashInfo.stackTrace);
                 }
 
-                String setting = Settings.Global.ERROR_LOGCAT_PREFIX + dropboxTag;
-                int lines = Settings.Global.getInt(mContext.getContentResolver(), setting, 0);
                 if (lines > 0) {
                     sb.append("\n");
 
