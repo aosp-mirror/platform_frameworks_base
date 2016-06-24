@@ -16,9 +16,14 @@
 
 package com.android.server.pm;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.os.UserHandle;
 import android.util.SparseArray;
+
+import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * Manages package names that need special protection.
@@ -29,61 +34,87 @@ import android.util.SparseArray;
  */
 public class ProtectedPackages {
     @UserIdInt
+    @GuardedBy("this")
     private int mDeviceOwnerUserId;
 
+    @Nullable
+    @GuardedBy("this")
     private String mDeviceOwnerPackage;
 
+    @Nullable
+    @GuardedBy("this")
     private SparseArray<String> mProfileOwnerPackages;
 
-    private final Object mLock = new Object();
+    @Nullable
+    @GuardedBy("this")
+    private final String mDeviceProvisioningPackage;
+
+    private final Context mContext;
+
+    public ProtectedPackages(Context context) {
+        mContext = context;
+        mDeviceProvisioningPackage = mContext.getResources().getString(
+                R.string.config_deviceProvisioningPackage);
+    }
 
     /**
      * Sets the device/profile owner information.
      */
-    public void setDeviceAndProfileOwnerPackages(
+    public synchronized void setDeviceAndProfileOwnerPackages(
             int deviceOwnerUserId, String deviceOwnerPackage,
             SparseArray<String> profileOwnerPackages) {
-        synchronized (mLock) {
-            mDeviceOwnerUserId = deviceOwnerUserId;
-            mDeviceOwnerPackage =
-                    (deviceOwnerUserId == UserHandle.USER_NULL) ? null : deviceOwnerPackage;
-            mProfileOwnerPackages = (profileOwnerPackages == null) ? null
-                    : profileOwnerPackages.clone();
-        }
+        mDeviceOwnerUserId = deviceOwnerUserId;
+        mDeviceOwnerPackage =
+                (deviceOwnerUserId == UserHandle.USER_NULL) ? null : deviceOwnerPackage;
+        mProfileOwnerPackages = (profileOwnerPackages == null) ? null
+                : profileOwnerPackages.clone();
     }
 
-    private boolean hasDeviceOwnerOrProfileOwner(int userId, String packageName) {
+    private synchronized boolean hasDeviceOwnerOrProfileOwner(int userId, String packageName) {
         if (packageName == null) {
             return false;
         }
-        synchronized (mLock) {
-            if (mDeviceOwnerPackage != null) {
-                if ((mDeviceOwnerUserId == userId)
-                        && (packageName.equals(mDeviceOwnerPackage))) {
-                    return true;
-                }
+        if (mDeviceOwnerPackage != null) {
+            if ((mDeviceOwnerUserId == userId)
+                    && (packageName.equals(mDeviceOwnerPackage))) {
+                return true;
             }
-            if (mProfileOwnerPackages != null) {
-                if (packageName.equals(mProfileOwnerPackages.get(userId))) {
-                    return true;
-                }
+        }
+        if (mProfileOwnerPackages != null) {
+            if (packageName.equals(mProfileOwnerPackages.get(userId))) {
+                return true;
             }
         }
         return false;
     }
 
     /**
-     * Whether a package or the components in a package's enabled state can be changed
-     * by other callers than itself.
+     * Returns {@code true} if a given package is protected. Otherwise, returns {@code false}.
+     *
+     * <p>A protected package means that, apart from the package owner, no system or privileged apps
+     * can modify its data or package state.
      */
-    public boolean canPackageStateBeChanged(@UserIdInt int userId, String packageName) {
-        return hasDeviceOwnerOrProfileOwner(userId, packageName);
+    private synchronized boolean isProtectedPackage(String packageName) {
+        return packageName != null && packageName.equals(mDeviceProvisioningPackage);
     }
 
     /**
-     * Whether a package's data be cleared.
+     * Returns {@code true} if a given package's state is protected. Otherwise, returns
+     * {@code false}.
+     *
+     * <p>This is not applicable if the caller is the package owner.
      */
-    public boolean canPackageBeWiped(@UserIdInt int userId, String packageName) {
-        return hasDeviceOwnerOrProfileOwner(userId, packageName);
+    public boolean isPackageStateProtected(@UserIdInt int userId, String packageName) {
+        return hasDeviceOwnerOrProfileOwner(userId, packageName)
+                || isProtectedPackage(packageName);
+    }
+
+    /**
+     * Returns {@code true} if a given package's data is protected. Otherwise, returns
+     * {@code false}.
+     */
+    public boolean isPackageDataProtected(@UserIdInt int userId, String packageName) {
+        return hasDeviceOwnerOrProfileOwner(userId, packageName)
+                || isProtectedPackage(packageName);
     }
 }
