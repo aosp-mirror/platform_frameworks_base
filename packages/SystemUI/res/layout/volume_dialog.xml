@@ -20,16 +20,14 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
     android:background="@drawable/volume_dialog_background"
-    android:translationZ="4dp"
-    android:paddingTop="8dp">
+    android:translationZ="4dp" >
 
     <LinearLayout
         android:id="@+id/volume_dialog_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingStart="8dp"
+        android:paddingTop="@dimen/volume_dialog_collapsed_padding_top"
         android:animateLayoutChanges="true" >
 
         <!-- volume rows added and removed here! :-) -->
@@ -52,6 +50,8 @@
             android:src="@drawable/ic_volume_collapse_animation"
             tools:ignore="RtlHardcoded"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"/>
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/volume_expander_margin_top"
+            android:layout_marginEnd="@dimen/volume_expander_margin_end"/>
 
 </RelativeLayout>

@@ -122,7 +122,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     private void applyConfiguration() {
         mDialog.setStreamImportant(AudioManager.STREAM_ALARM, true);
         mDialog.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
-        mDialog.setShowHeaders(false);
         mDialog.setAutomute(true);
         mDialog.setSilentMode(false);
         mController.setVolumePolicy(mVolumePolicy);

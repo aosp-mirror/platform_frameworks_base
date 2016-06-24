@@ -563,6 +563,14 @@ public class VolumeDialog implements TunerService.Tunable {
         if (!mExpanded && mExpandButtonAnimationRunning) {
             prepareForCollapse();
         }
+        final Resources res = mContext.getResources();
+        int paddingTop = mExpanded
+                ? res.getDimensionPixelSize(R.dimen.volume_dialog_expanded_padding_top)
+                : res.getDimensionPixelSize(R.dimen.volume_dialog_collapsed_padding_top);
+        mDialogContentView.setPaddingRelative(mDialogContentView.getPaddingStart(),
+                paddingTop,
+                mDialogContentView.getPaddingEnd(),
+                mDialogContentView.getPaddingBottom());
         updateRowsH();
         if (mExpandButtonAnimationRunning) {
             final Drawable d = mExpandButton.getDrawable();
@@ -623,7 +631,6 @@ public class VolumeDialog implements TunerService.Tunable {
             Util.setVisOrGone(row.view, visible);
             Util.setVisOrGone(row.space, visible && mExpanded);
             updateVolumeRowHeaderVisibleH(row);
-            row.header.setAlpha(mExpanded && isActive ? 1 : 0.5f);
             updateVolumeRowSliderTintH(row, isActive);
         }
     }
@@ -741,21 +748,7 @@ public class VolumeDialog implements TunerService.Tunable {
         updateVolumeRowHeaderVisibleH(row);
 
         // update header text
-        String text = ss.name;
-        if (mShowHeaders) {
-            if (isRingZenNone) {
-                text = mContext.getString(R.string.volume_stream_muted_dnd, ss.name);
-            } else if (isRingVibrate && isRingLimited) {
-                text = mContext.getString(R.string.volume_stream_vibrate_dnd, ss.name);
-            } else if (isRingVibrate) {
-                text = mContext.getString(R.string.volume_stream_vibrate, ss.name);
-            } else if (ss.muted || mAutomute && ss.level == 0) {
-                text = mContext.getString(R.string.volume_stream_muted, ss.name);
-            } else if (isRingLimited) {
-                text = mContext.getString(R.string.volume_stream_limited_dnd, ss.name);
-            }
-        }
-        Util.setText(row.header, text);
+        Util.setText(row.header, ss.name);
 
         // update icon
         final boolean iconEnabled = (mAutomute || ss.muteSupported) && !zenMuted;
@@ -824,7 +817,7 @@ public class VolumeDialog implements TunerService.Tunable {
 
     private void updateVolumeRowHeaderVisibleH(VolumeRow row) {
         final boolean dynamic = row.ss != null && row.ss.dynamic;
-        final boolean showHeaders = mShowHeaders || mExpanded && dynamic;
+        final boolean showHeaders = mExpanded && (mShowHeaders || dynamic);
         if (row.cachedShowHeaders != showHeaders) {
             row.cachedShowHeaders = showHeaders;
             Util.setVisOrGone(row.header, showHeaders);
