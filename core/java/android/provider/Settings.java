@@ -6270,6 +6270,24 @@ public final class Settings {
         public static final int AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_DEFAULT = 90;
 
         /**
+         * How many bytes the automatic storage manager has cleared out.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED =
+                "automatic_storage_manager_bytes_cleared";
+
+
+        /**
+         * Last run time for the automatic storage manager.
+         *
+         * @hide
+         */
+        public static final String AUTOMATIC_STORAGE_MANAGER_LAST_RUN =
+                "automatic_storage_manager_last_run";
+
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
