@@ -709,7 +709,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         @Deprecated
         public Builder setId(@NonNull String id) {
-            mId = Preconditions.checkStringNotEmpty(id, "id");
+            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty");
             return this;
         }
 
@@ -721,14 +721,17 @@ public final class ShortcutInfo implements Parcelable {
          */
         public Builder(Context context, String id) {
             mContext = context;
-            mId = Preconditions.checkStringNotEmpty(id, "id");
+            mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty");
         }
 
         /**
          * Sets the target activity. A shortcut will be shown with this activity on the launcher.
          *
-         * <p>This is a mandatory field, unless it's passed to
-         * {@link ShortcutManager#updateShortcuts(List)}.
+         * <p>Only "main" activities -- i.e. ones with an intent filter for
+         * {@link Intent#ACTION_MAIN} and {@link Intent#CATEGORY_LAUNCHER} can be target activities.
+         *
+         * <p>By default, the first main activity defined in the application manifest will be
+         * the target.
          *
          * <p>The package name of the target activity must match the package name of the shortcut
          * publisher.
@@ -738,7 +741,7 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setActivity(@NonNull ComponentName activity) {
-            mActivity = Preconditions.checkNotNull(activity, "activity");
+            mActivity = Preconditions.checkNotNull(activity, "activity cannot be null");
             return this;
         }
 
@@ -785,7 +788,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setShortLabel(@NonNull CharSequence shortLabel) {
             Preconditions.checkState(mTitleResId == 0, "shortLabelResId already set");
-            mTitle = Preconditions.checkStringNotEmpty(shortLabel, "shortLabel");
+            mTitle = Preconditions.checkStringNotEmpty(shortLabel, "shortLabel cannot be empty");
             return this;
         }
 
@@ -810,7 +813,7 @@ public final class ShortcutInfo implements Parcelable {
         @NonNull
         public Builder setLongLabel(@NonNull CharSequence longLabel) {
             Preconditions.checkState(mTextResId == 0, "longLabelResId already set");
-            mText = Preconditions.checkStringNotEmpty(longLabel, "longLabel");
+            mText = Preconditions.checkStringNotEmpty(longLabel, "longLabel cannot be empty");
             return this;
         }
 
@@ -854,7 +857,8 @@ public final class ShortcutInfo implements Parcelable {
             Preconditions.checkState(
                     mDisabledMessageResId == 0, "disabledMessageResId already set");
             mDisabledMessage =
-                    Preconditions.checkStringNotEmpty(disabledMessage, "disabledMessage");
+                    Preconditions.checkStringNotEmpty(disabledMessage,
+                            "disabledMessage cannot be empty");
             return this;
         }
 
@@ -876,8 +880,8 @@ public final class ShortcutInfo implements Parcelable {
          */
         @NonNull
         public Builder setIntent(@NonNull Intent intent) {
-            mIntent = Preconditions.checkNotNull(intent, "intent");
-            Preconditions.checkNotNull(mIntent.getAction(), "Intent action must be set");
+            mIntent = Preconditions.checkNotNull(intent, "intent cannot be null");
+            Preconditions.checkNotNull(mIntent.getAction(), "intent's action must be set");
             return this;
         }
 
@@ -942,6 +946,11 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     public ComponentName getActivity() {
         return mActivity;
+    }
+
+    /** @hide */
+    public void setActivity(ComponentName activity) {
+        mActivity = activity;
     }
 
     /**
