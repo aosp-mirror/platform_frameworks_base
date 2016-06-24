@@ -23,6 +23,8 @@ import android.support.test.filters.SmallTest;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.DisplayAdjustments;
+
 import junit.framework.TestCase;
 
 public class ResourcesManagerTest extends TestCase {
@@ -58,7 +60,7 @@ public class ResourcesManagerTest extends TestCase {
             }
 
             @Override
-            protected DisplayMetrics getDisplayMetrics(int displayId) {
+            protected DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments daj) {
                 return mDisplayMetrics;
             }
         };
