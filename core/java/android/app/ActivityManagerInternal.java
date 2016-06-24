@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.IIntentSender;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.service.voice.IVoiceInteractionSession;
 
@@ -151,4 +152,13 @@ public abstract class ActivityManagerInternal {
      *  such as Power Save mode.
      */
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target, long duration);
+
+    /**
+     * Updates and persists the {@link Configuration} for a given user.
+     *
+     * @param values the configuration to update
+     * @param userId the user to update the configuration for
+     */
+    public abstract void updatePersistentConfigurationForUser(@NonNull Configuration values,
+            int userId);
 }

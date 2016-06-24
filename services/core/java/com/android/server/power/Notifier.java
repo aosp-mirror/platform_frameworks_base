@@ -18,12 +18,12 @@ package com.android.server.power;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.RetailDemoModeServiceInternal;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.am.RetailDemoModeServiceInternal;
 
 import android.app.ActivityManagerNative;
 import android.content.BroadcastReceiver;
