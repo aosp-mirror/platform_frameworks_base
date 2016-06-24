@@ -14,13 +14,15 @@
  * limitations under the License
  */
 
-package com.android.server.am;
+package com.android.server.retaildemo;
 
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RetailDemoModeServiceInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -31,7 +33,13 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -48,11 +56,14 @@ import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
-import com.android.server.am.UserInactivityCountdownDialog.OnCountDownExpiredListener;
+import com.android.server.am.ActivityManagerService;
+import com.android.server.retaildemo.UserInactivityCountdownDialog.OnCountDownExpiredListener;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class RetailDemoModeService extends SystemService {
     private static final boolean DEBUG = false;
@@ -70,8 +81,16 @@ public class RetailDemoModeService extends SystemService {
     private static final long WARNING_DIALOG_TIMEOUT = 6000;
     private static final long MILLIS_PER_SECOND = 1000;
 
+    private static final int[] VOLUME_STREAMS_TO_MUTE = {
+            AudioSystem.STREAM_RING,
+            AudioSystem.STREAM_MUSIC
+    };
+
     boolean mDeviceInDemoMode = false;
+    int mCurrentUserId;
     private ActivityManagerService mAms;
+    private ActivityManagerInternal mAmi;
+    private AudioManager mAudioManager;
     private NotificationManager mNm;
     private UserManager mUm;
     private PowerManager mPm;
@@ -79,6 +98,9 @@ public class RetailDemoModeService extends SystemService {
     Handler mHandler;
     private ServiceThread mHandlerThread;
     private PendingIntent mResetDemoPendingIntent;
+    private CameraManager mCameraManager;
+    private String[] mCameraIdsWithFlash;
+    private Configuration mPrimaryUserConfiguration;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -121,9 +143,9 @@ public class RetailDemoModeService extends SystemService {
                     try {
                         enabledState = pm.getComponentEnabledSetting(
                                 ComponentName.unflattenFromString(demoLauncherComponent),
-                            getActivityManager().getCurrentUser().id);
+                                mCurrentUserId);
                     } catch (RemoteException exc) {
-                        // XXX: shouldn't happen
+                        Slog.e(TAG, "Unable to talk to Package Manager", exc);
                     }
                     if (enabledState == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
                         Slog.i(TAG, "User inactivity timeout reached");
@@ -218,6 +240,13 @@ public class RetailDemoModeService extends SystemService {
         return mUm;
     }
 
+    private AudioManager getAudioManager() {
+        if (mAudioManager == null) {
+            mAudioManager = getContext().getSystemService(AudioManager.class);
+        }
+        return mAudioManager;
+    }
+
     private void registerSettingsChangeObserver() {
         final Uri deviceDemoModeUri = Settings.Global.getUriFor(Settings.Global.DEVICE_DEMO_MODE);
         final Uri deviceProvisionedUri = Settings.Global.getUriFor(
@@ -272,6 +301,46 @@ public class RetailDemoModeService extends SystemService {
         getContext().registerReceiver(mBroadcastReceiver, filter);
     }
 
+    private String[] getCameraIdsWithFlash() {
+        ArrayList<String> cameraIdsList = new ArrayList<String>();
+        try {
+            for (String cameraId : mCameraManager.getCameraIdList()) {
+                CameraCharacteristics c = mCameraManager.getCameraCharacteristics(cameraId);
+                if (Boolean.TRUE.equals(c.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))) {
+                    cameraIdsList.add(cameraId);
+                }
+            }
+        } catch (CameraAccessException e) {
+            Slog.e(TAG, "Unable to access camera while getting camera id list", e);
+        }
+        return cameraIdsList.toArray(new String[cameraIdsList.size()]);
+    }
+
+    private void turnOffAllFlashLights() {
+        for (String cameraId : mCameraIdsWithFlash) {
+            try {
+                mCameraManager.setTorchMode(cameraId, false);
+            } catch (CameraAccessException e) {
+                Slog.e(TAG, "Unable to access camera " + cameraId + " while turning off flash", e);
+            }
+        }
+    }
+
+    private void muteVolumeStreams() {
+        for (int stream : VOLUME_STREAMS_TO_MUTE) {
+            getAudioManager().setStreamVolume(stream, getAudioManager().getStreamMinVolume(stream),
+                    0);
+        }
+    }
+
+    private Configuration getPrimaryUsersConfiguration() {
+        if (mPrimaryUserConfiguration == null) {
+            Settings.System.getConfiguration(getContext().getContentResolver(),
+                    mPrimaryUserConfiguration = new Configuration());
+        }
+        return mPrimaryUserConfiguration;
+    }
+
     @Override
     public void onStart() {
         if (DEBUG) {
@@ -290,9 +359,12 @@ public class RetailDemoModeService extends SystemService {
             return;
         }
         mPm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+        mAmi = LocalServices.getService(ActivityManagerInternal.class);
         mWakeLock = mPm
                 .newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, TAG);
         mNm = NotificationManager.from(getContext());
+        mCameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+        mCameraIdsWithFlash = getCameraIdsWithFlash();
 
         if (UserManager.isDeviceInDemoMode(getContext())) {
             mDeviceInDemoMode = true;
@@ -318,10 +390,14 @@ public class RetailDemoModeService extends SystemService {
         if (!mWakeLock.isHeld()) {
             mWakeLock.acquire();
         }
+        mCurrentUserId = userId;
         mNm.notifyAsUser(TAG, 1, createResetNotification(), UserHandle.of(userId));
+        turnOffAllFlashLights();
+        muteVolumeStreams();
+        mAmi.updatePersistentConfigurationForUser(getPrimaryUsersConfiguration(), userId);
     }
 
-    public RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
+    private RetailDemoModeServiceInternal mLocalService = new RetailDemoModeServiceInternal() {
         private static final long USER_ACTIVITY_DEBOUNCE_TIME = 2000;
         private long mLastUserActivityTime = 0;
 
