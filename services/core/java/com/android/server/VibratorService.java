@@ -487,7 +487,7 @@ public class VibratorService extends IVibratorService.Stub
 
     private boolean shouldVibrateForRingtone() {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        int ringerMode = audioManager.getRingerMode();
+        int ringerMode = audioManager.getRingerModeInternal();
         // "Also vibrate for calls" Setting in Sound
         if (Settings.System.getInt(
                 mContext.getContentResolver(), Settings.System.VIBRATE_WHEN_RINGING, 0) != 0) {
