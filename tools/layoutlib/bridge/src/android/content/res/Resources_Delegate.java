@@ -45,6 +45,7 @@ import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.LruCache;
 import android.util.TypedValue;
 import android.view.ViewGroup.LayoutParams;
 
@@ -58,6 +59,9 @@ import java.util.Iterator;
 public class Resources_Delegate {
 
     private static boolean[] mPlatformResourceFlag = new boolean[1];
+    // TODO: This cache is cleared every time a render session is disposed. Look into making this
+    // more long lived.
+    private static LruCache<String, Drawable.ConstantState> sDrawableCache = new LruCache<>(50);
 
     public static Resources initSystem(BridgeContext context,
             AssetManager assets,
@@ -75,6 +79,7 @@ public class Resources_Delegate {
      * would prevent us from unloading the library.
      */
     public static void disposeSystem() {
+        sDrawableCache.evictAll();
         Resources.mSystem.mContext = null;
         Resources.mSystem.mLayoutlibCallback = null;
         Resources.mSystem = null;
@@ -137,9 +142,23 @@ public class Resources_Delegate {
     @LayoutlibDelegate
     static Drawable getDrawable(Resources resources, int id, Theme theme) {
         Pair<String, ResourceValue> value = getResourceValue(resources, id, mPlatformResourceFlag);
-
         if (value != null) {
-            return ResourceHelper.getDrawable(value.getSecond(), resources.mContext, theme);
+            String key = value.getSecond().getValue();
+
+            Drawable.ConstantState constantState = key != null ? sDrawableCache.get(key) : null;
+            Drawable drawable;
+            if (constantState != null) {
+                drawable = constantState.newDrawable(resources, theme);
+            } else {
+                drawable =
+                        ResourceHelper.getDrawable(value.getSecond(), resources.mContext, theme);
+
+                if (key != null) {
+                    sDrawableCache.put(key, drawable.getConstantState());
+                }
+            }
+
+            return drawable;
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
