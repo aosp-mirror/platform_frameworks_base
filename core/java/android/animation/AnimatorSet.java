@@ -1064,15 +1064,15 @@ public final class AnimatorSet extends Animator {
     /**
      * @hide
      * TODO: For animatorSet defined in XML, we can use a flag to indicate what the play order
-     * if defined (i.e. sequential or together), then we can use the flag instead of calculate
-     * dynamically.
+     * if defined (i.e. sequential or together), then we can use the flag instead of calculating
+     * dynamically. Note that when AnimatorSet is empty this method returns true.
      * @return whether all the animators in the set are supposed to play together
      */
     public boolean shouldPlayTogether() {
         updateAnimatorsDuration();
         createDependencyGraph();
         // All the child nodes are set out to play right after the delay animation
-        return mRootNode.mChildNodes.size() == mNodes.size() - 1;
+        return mRootNode.mChildNodes == null || mRootNode.mChildNodes.size() == mNodes.size() - 1;
     }
 
     @Override

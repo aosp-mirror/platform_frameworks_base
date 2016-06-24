@@ -29,7 +29,6 @@ void PropertyValuesAnimatorSet::addPropertyAnimator(PropertyValuesHolder* proper
     PropertyAnimator* animator = new PropertyAnimator(propertyValuesHolder,
             interpolator, startDelay, duration, repeatCount);
     mAnimators.emplace_back(animator);
-    setListener(new PropertyAnimatorSetListener(this));
 
     // Check whether any child animator is infinite after adding it them to the set.
     if (repeatCount == -1) {
@@ -42,6 +41,7 @@ PropertyValuesAnimatorSet::PropertyValuesAnimatorSet()
     setStartValue(0);
     mLastFraction = 0.0f;
     setInterpolator(new LinearInterpolator());
+    setListener(new PropertyAnimatorSetListener(this));
 }
 
 void PropertyValuesAnimatorSet::onFinished(BaseRenderNodeAnimator* animator) {
@@ -115,7 +115,7 @@ void PropertyValuesAnimatorSet::init() {
     std::sort(mAnimators.begin(), mAnimators.end(), [](auto& a, auto&b) {
         return a->getTotalDuration() < b->getTotalDuration();
     });
-    mDuration = mAnimators[mAnimators.size() - 1]->getTotalDuration();
+    mDuration = mAnimators.empty() ? 0 : mAnimators[mAnimators.size() - 1]->getTotalDuration();
     mInitialized = true;
 }
 
