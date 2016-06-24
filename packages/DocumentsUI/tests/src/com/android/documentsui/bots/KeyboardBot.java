@@ -28,7 +28,7 @@ import android.widget.EditText;
 /**
  * A test helper class that provides support for keyboard manipulation.
  */
-public class KeyboardBot extends BaseBot {
+public class KeyboardBot extends Bots.BaseBot {
 
     public KeyboardBot(UiDevice device, Context context, int timeout) {
         super(device, context, timeout);
@@ -52,5 +52,13 @@ public class KeyboardBot extends BaseBot {
       // This is a temporary workaround that somehow works
       // See b/28399576
         onView(isAssignableFrom(EditText.class)).perform(pressImeActionButton());
+    }
+
+    public void pressKey(int keyCode) {
+        mDevice.pressKeyCode(keyCode);
+    }
+
+    public void pressKey(int keyCode, int metaState) {
+        mDevice.pressKeyCode(keyCode, metaState);
     }
 }
