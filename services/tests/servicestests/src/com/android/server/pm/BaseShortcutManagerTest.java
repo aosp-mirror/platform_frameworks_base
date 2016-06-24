@@ -37,6 +37,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityManagerInternal;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -466,6 +467,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         void injectRestoreCallingIdentity(long token) {
             mInjectedCallingUid = (int) token;
         }
+
+        @Override
+        protected void startShortcutIntentAsPublisher(@NonNull Intent intent,
+                @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
+            // Just forward to startActivityAsUser() during unit tests.
+            mContext.startActivityAsUser(intent, startActivityOptions, UserHandle.of(userId));
+        }
     }
 
     protected class LauncherAppsTestable extends LauncherApps {
@@ -518,6 +526,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
+    protected ActivityManagerInternal mMockActivityManagerInternal;
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -616,11 +625,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
+        mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.addService(UsageStatsManagerInternal.class, mMockUsageStatsManagerInternal);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mMockActivityManagerInternal);
 
         // Prepare injection values.
 
