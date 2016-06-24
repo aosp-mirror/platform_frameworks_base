@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -55,6 +56,7 @@ public class KeyguardStatusView extends GridLayout {
     private TextView mOwnerInfo;
 
     private SettingsObserver mSettingsObserver;
+    private int mLockClockFont;
     private boolean mShowClock;
     private boolean mShowDate;
     private boolean mShowAlarm;
@@ -253,6 +255,45 @@ public class KeyguardStatusView extends GridLayout {
         // Lockscreeen Date
         mDateView = (TextClock) findViewById(R.id.date_view);
         mDateView.setVisibility(mShowDate ? View.VISIBLE : View.GONE);
+
+        // Lockscreeen Font
+        if (mLockClockFont == 0) {
+            mClockView.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        } else if (mLockClockFont == 1) {
+            mClockView.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+        } else if (mLockClockFont == 2) {
+            mClockView.setTypeface(Typeface.create("sans-serif", Typeface.ITALIC));
+        } else if (mLockClockFont == 3) {
+            mClockView.setTypeface(Typeface.create("sans-serif", Typeface.BOLD_ITALIC));
+        } else if (mLockClockFont == 4) {
+            mClockView.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        } else if (mLockClockFont == 5) {
+            mClockView.setTypeface(Typeface.create("sans-serif-light", Typeface.ITALIC));
+        } else if (mLockClockFont == 6) {
+            mClockView.setTypeface(Typeface.create("sans-serif-thin", Typeface.NORMAL));
+        } else if (mLockClockFont == 7) {
+            mClockView.setTypeface(Typeface.create("sans-serif-thin", Typeface.ITALIC));
+        } else if (mLockClockFont == 8) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        } else if (mLockClockFont == 9) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        } else if (mLockClockFont == 10) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.ITALIC));
+        } else if (mLockClockFont == 11) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD_ITALIC));
+        } else if (mLockClockFont == 12) {
+            mClockView.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        } else if (mLockClockFont == 13) {
+            mClockView.setTypeface(Typeface.create("sans-serif-medium", Typeface.ITALIC));
+        } else if (mLockClockFont == 14) {
+            mClockView.setTypeface(Typeface.create("sans-serif-black", Typeface.NORMAL));
+        } else if (mLockClockFont == 15) {
+            mClockView.setTypeface(Typeface.create("sans-serif-black", Typeface.ITALIC));
+        } else if (mLockClockFont == 16) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed-light", Typeface.NORMAL));
+        } else if (mLockClockFont == 17) {
+            mClockView.setTypeface(Typeface.create("sans-serif-condensed-light", Typeface.ITALIC));
+        }
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
@@ -304,6 +345,8 @@ public class KeyguardStatusView extends GridLayout {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_FONTS), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SHOW_LOCKSCREEN_ALARM), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SHOW_LOCKSCREEN_CLOCK), false, this, UserHandle.USER_ALL);
@@ -330,6 +373,8 @@ public class KeyguardStatusView extends GridLayout {
             ContentResolver resolver = mContext.getContentResolver();
             int currentUserId = ActivityManager.getCurrentUser();
 
+            mLockClockFont = Settings.System.getIntForUser(
+                    resolver, Settings.System.LOCK_CLOCK_FONTS, 4, currentUserId);
             mShowAlarm = Settings.System.getIntForUser(
                     resolver, Settings.System.SHOW_LOCKSCREEN_ALARM, 1, currentUserId) == 1;
             mShowClock = Settings.System.getIntForUser(
