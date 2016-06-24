@@ -1007,6 +1007,40 @@ RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_simple) {
     EXPECT_EQ(4, renderer.getIndex());
 }
 
+RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_round) {
+    class SaveLayerUnclippedRoundTestRenderer : public TestRendererBase {
+    public:
+        void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds)
+                    << "Bounds rect should round out";
+        }
+        void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {}
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {}
+        void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            EXPECT_EQ(Rect(10, 10, 190, 190), state.computedState.clippedBounds)
+                    << "Bounds rect should round out";
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        canvas.saveLayerAlpha(10.95f, 10.5f, 189.75f, 189.25f, // values should all round out
+                128, (SaveFlags::Flags)(0));
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.restore();
+    });
+
+    FrameBuilder frameBuilder(SkRect::MakeWH(200, 200), 200, 200,
+            sLightGeometry, Caches::getInstance());
+    frameBuilder.deferRenderNode(*TestUtils::getSyncedNode(node));
+
+    SaveLayerUnclippedRoundTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
 RENDERTHREAD_TEST(FrameBuilder, saveLayerUnclipped_mergedClears) {
     class SaveLayerUnclippedMergedClearsTestRenderer : public TestRendererBase {
     public:
