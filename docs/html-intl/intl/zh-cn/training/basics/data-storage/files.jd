@@ -183,7 +183,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -250,7 +250,7 @@ public boolean isExternalStorageReadable() {
 
 
 
- 
+
   <p>例如，您的应用下载的其他资源或临时介质文件。</p>
   </dd>
 </dl>
@@ -265,7 +265,7 @@ android.os.Environment#DIRECTORY_PICTURES}。
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -287,7 +287,7 @@ android.content.Context#getExternalFilesDir getExternalFilesDir()} 获取相应�
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -311,7 +311,7 @@ getExternalStoragePublicDirectory()}。
 
 <p>无论您对于共享的文件使用 {@link
 android.os.Environment#getExternalStoragePublicDirectory
-getExternalStoragePublicDirectory()} 还是对您的应用专用文件使用 
+getExternalStoragePublicDirectory()} 还是对您的应用专用文件使用
 {@link android.content.Context#getExternalFilesDir
 getExternalFilesDir()} ，您使用诸如
 {@link android.os.Environment#DIRECTORY_PICTURES} 的 API 常数提供的目录名称非常重要。
@@ -332,7 +332,7 @@ java.io.IOException} 。
 此信息也可用来避免填充存储卷以致超出特定阈值。
 </p>
 
-<p>但是，系统并不保证您可以写入与 {@link java.io.File#getFreeSpace} 
+<p>但是，系统并不保证您可以写入与 {@link java.io.File#getFreeSpace}
 指示的一样多的字节。如果返回的数字比您要保存的数据大小大出几 MB，或如果文件系统所占空间不到 90%，则可安全继续操作。否则，您可能不应写入存储。
 
 
@@ -366,7 +366,7 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>注意：</strong>当用户卸载您的应用时，Android 系统会删除以下各项：
-</p> 
+</p>
 <ul>
 <li>您保存在内部存储中的所有文件</li>
 <li>您使用 {@link

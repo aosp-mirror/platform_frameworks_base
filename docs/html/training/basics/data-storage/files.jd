@@ -192,7 +192,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -259,7 +259,7 @@ these files should remain available to the user.
   your app. Although these files are technically accessible by the user and other apps because they
   are on the external storage, they are files that realistically don't provide value to the user
   outside your app. When the user uninstalls your app, the system deletes
-  all files in your app's external private  directory. 
+  all files in your app's external private  directory.
   <p>For example, additional resources downloaded by your app or temporary media files.</p>
   </dd>
 </dl>
@@ -274,7 +274,7 @@ android.os.Environment#DIRECTORY_PICTURES}. For example:</p>
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -296,7 +296,7 @@ user uninstalls your app.</p>
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -375,7 +375,7 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>Note:</strong> When the user uninstalls your app, the Android system deletes
-the following:</p> 
+the following:</p>
 <ul>
 <li>All files you saved on internal storage</li>
 <li>All files you saved on external storage using {@link

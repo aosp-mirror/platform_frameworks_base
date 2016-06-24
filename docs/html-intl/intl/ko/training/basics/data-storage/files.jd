@@ -183,7 +183,7 @@ public File getTempFile(Context context, String url) {
     try {
         String fileName = Uri.parse(url).getLastPathSegment();
         file = File.createTempFile(fileName, null, context.getCacheDir());
-    catch (IOException e) {
+    } catch (IOException e) {
         // Error while creating file
     }
     return file;
@@ -250,7 +250,7 @@ public boolean isExternalStorageReadable() {
 앱을 제거하면 같이 삭제됩니다. 이러한 파일은
 엄밀히 말해 외부 저장소에 저장된 파일이기 때문에 사용자 및 다른 앱의 액세스가 가능하긴 하지만, 앱 외부에서
 사용자에게 값을 실제로 제공하지는 않습니다. 사용자가 앱을 제거하면 앱의 외부 개인 디렉터리 내 모든 파일을 시스템에서
-삭제합니다. 
+삭제합니다.
   <p>예를 들어 앱에서 다운로드한 추가 리소스 또는 임시 미디어 파일이 이에 해당합니다.</p>
   </dd>
 </dl>
@@ -265,7 +265,7 @@ android.os.Environment#DIRECTORY_PICTURES}와 같은 다른 공개
 
 <pre>
 public File getAlbumStorageDir(String albumName) {
-    // Get the directory for the user's public pictures directory. 
+    // Get the directory for the user's public pictures directory.
     File file = new File(Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -287,7 +287,7 @@ android.content.Context#getExternalFilesDir getExternalFilesDir()}을 호출하�
 
 <pre>
 public File getAlbumStorageDir(Context context, String albumName) {
-    // Get the directory for the app's private pictures directory. 
+    // Get the directory for the app's private pictures directory.
     File file = new File(context.getExternalFilesDir(
             Environment.DIRECTORY_PICTURES), albumName);
     if (!file.mkdirs()) {
@@ -357,7 +357,7 @@ JPEG로 변환하여 파일 인코딩을
 myFile.delete();
 </pre>
 
-<p>파일이 내부 저장소에 저장되어 있는 경우, {@link android.content.Context}에 위치를 요청하고 {@link android.content.Context#deleteFile deleteFile()}을 호출하여 파일을 
+<p>파일이 내부 저장소에 저장되어 있는 경우, {@link android.content.Context}에 위치를 요청하고 {@link android.content.Context#deleteFile deleteFile()}을 호출하여 파일을
 삭제할 수도 있습니다.</p>
 
 <pre>
@@ -366,7 +366,7 @@ myContext.deleteFile(fileName);
 
 <div class="note">
 <p><strong>참고:</strong> 사용자가 앱을 제거하면 Android 시스템이
-다음 항목을 삭제합니다.</p> 
+다음 항목을 삭제합니다.</p>
 <ul>
 <li>내부 저장소에 저장한 모든 파일</li>
 <li>{@link
