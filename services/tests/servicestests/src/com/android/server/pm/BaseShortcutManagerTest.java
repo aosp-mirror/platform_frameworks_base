@@ -52,6 +52,7 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
@@ -98,8 +99,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
@@ -113,6 +117,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final boolean DUMP_IN_TEARDOWN = false; // DO NOT SUBMIT WITH true
 
     protected static final String[] EMPTY_STRINGS = new String[0]; // Just for readability.
+
+    protected static final String MAIN_ACTIVITY_CLASS = "MainActivity";
 
     // public for mockito
     public class BaseContext extends MockContext {
@@ -311,8 +317,55 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        PackageInfo injectGetActivitiesWithMetadata(String packageName, @UserIdInt int userId) {
-            return mContext.injectGetActivitiesWithMetadata(packageName, userId);
+        ActivityInfo injectGetActivityInfoWithMetadata(ComponentName activity,
+                @UserIdInt int userId) {
+            final PackageInfo pi = mContext.injectGetActivitiesWithMetadata(
+                    activity.getPackageName(), userId);
+            if (pi == null || pi.activities == null) {
+                return null;
+            }
+            for (ActivityInfo ai : pi.activities) {
+                if (!mEnabledActivityChecker.test(ai.getComponentName(), userId)) {
+                    continue;
+                }
+                if (activity.equals(ai.getComponentName())) {
+                    return ai;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        boolean injectIsMainActivity(@NonNull ComponentName activity, int userId) {
+            if (!mEnabledActivityChecker.test(activity, userId)) {
+                return false;
+            }
+            return mMainActivityChecker.test(activity, userId);
+        }
+
+        @Override
+        List<ResolveInfo> injectGetMainActivities(@NonNull String packageName, int userId) {
+            final PackageInfo pi = mContext.injectGetActivitiesWithMetadata(
+                    packageName, userId);
+            if (pi == null || pi.activities == null) {
+                return null;
+            }
+            final ArrayList<ResolveInfo> ret = new ArrayList<>(pi.activities.length);
+            for (int i = 0; i < pi.activities.length; i++) {
+                if (!mEnabledActivityChecker.test(pi.activities[i].getComponentName(), userId)) {
+                    continue;
+                }
+                final ResolveInfo ri = new ResolveInfo();
+                ri.activityInfo = pi.activities[i];
+                ret.add(ri);
+            }
+
+            return ret;
+        }
+
+        @Override
+        ComponentName injectGetDefaultMainActivity(@NonNull String packageName, int userId) {
+            return mMainActivityFetcher.apply(packageName, userId);
         }
 
         @Override
@@ -332,6 +385,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             if (!mCallerPermissions.contains(permission)) {
                 throw new SecurityException("Missing permission: " + permission);
             }
+        }
+
+        @Override
+        boolean injectIsSafeModeEnabled() {
+            return mSafeMode;
         }
 
         @Override
@@ -441,6 +499,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected File mInjectedFilePathRoot;
 
+    protected boolean mSafeMode;
+
     protected long mInjectedCurrentTimeMillis;
 
     protected boolean mInjectedIsLowRamDevice;
@@ -511,6 +571,15 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
             (callingPackage, userId) ->
             LAUNCHER_1.equals(callingPackage) || LAUNCHER_2.equals(callingPackage)
             || LAUNCHER_3.equals(callingPackage) || LAUNCHER_4.equals(callingPackage);
+
+    protected BiPredicate<ComponentName, Integer> mMainActivityChecker =
+            (activity, userId) -> true;
+
+    protected BiFunction<String, Integer, ComponentName> mMainActivityFetcher =
+            (packageName, userId) -> new ComponentName(packageName, MAIN_ACTIVITY_CLASS);
+
+    protected BiPredicate<ComponentName, Integer> mEnabledActivityChecker
+            = (activity, userId) -> true; // all activities are enabled.
 
     protected static final long START_TIME = 1440000000101L;
 
@@ -1051,10 +1120,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 + "/" + ShortcutService.FILENAME_USER_PACKAGES, message);
     }
 
-    protected void waitOnMainThread() throws Throwable {
-        runTestOnUiThread(() -> {});
-    }
-
     /**
      * Make a shortcut with an ID.
      */
@@ -1407,6 +1472,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         i.setData(Uri.parse("package:" + pakcageName));
         i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         i.putExtra(Intent.EXTRA_REPLACING, true);
+        return i;
+    }
+
+    protected Intent genPackageChangedIntent(String pakcageName, int userId) {
+        Intent i = new Intent(Intent.ACTION_PACKAGE_CHANGED);
+        i.setData(Uri.parse("package:" + pakcageName));
+        i.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         return i;
     }
 
