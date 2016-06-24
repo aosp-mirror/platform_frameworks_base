@@ -1389,6 +1389,7 @@ private:
 int link(const std::vector<StringPiece>& args) {
     LinkContext context;
     LinkOptions options;
+    std::vector<std::string> overlayArgList;
     Maybe<std::string> privateSymbolsPackage;
     Maybe<std::string> minSdkVersion, targetSdkVersion;
     Maybe<std::string> renameManifestPackage, renameInstrumentationTargetPackage;
@@ -1408,7 +1409,7 @@ int link(const std::vector<StringPiece>& args) {
             .optionalFlagList("-I", "Adds an Android APK to link against", &options.includePaths)
             .optionalFlagList("-R", "Compilation unit to link, using `overlay` semantics.\n"
                               "The last conflicting resource given takes precedence.",
-                              &options.overlayFiles)
+                              &overlayArgList)
             .optionalFlag("--java", "Directory in which to generate R.java",
                           &options.generateJavaClassPath)
             .optionalFlag("--proguard", "Output file for generated Proguard rules",
@@ -1490,6 +1491,20 @@ int link(const std::vector<StringPiece>& args) {
             }
         } else {
             argList.push_back(arg);
+        }
+    }
+
+    // Expand all argument-files passed to -R.
+    for (const std::string& arg : overlayArgList) {
+        if (util::stringStartsWith<char>(arg, "@")) {
+            const std::string path = arg.substr(1, arg.size() - 1);
+            std::string error;
+            if (!file::appendArgsFromFile(path, &options.overlayFiles, &error)) {
+                context.getDiagnostics()->error(DiagMessage(path) << error);
+                return 1;
+            }
+        } else {
+            options.overlayFiles.push_back(arg);
         }
     }
 
