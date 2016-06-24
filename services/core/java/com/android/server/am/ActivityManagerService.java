@@ -21664,6 +21664,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                 updateConfigurationLocked(values, null, false, true, userId);
             }
         }
+
+        @Override
+        public IIntentSender getActivityIntentSenderAsPackage(
+                String packageName, int userId, int requestCode, Intent intent,
+                int flags, Bundle bOptions) {
+            String resolvedType = intent != null ? intent.resolveTypeIfNeeded(
+                    mContext.getContentResolver()) : null;
+
+            // UID of the package on user userId.
+            // "= 0" is needed because otherwise catch(RemoteException) would make it look like
+            // packageUid may not be initialized.
+            int packageUid = 0;
+            try {
+                packageUid = AppGlobals.getPackageManager().getPackageUid(
+                        packageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+            } catch (RemoteException e) {
+                // Shouldn't happen.
+            }
+
+            synchronized (ActivityManagerService.this) {
+                return getIntentSenderLocked(
+                        ActivityManager.INTENT_SENDER_ACTIVITY, packageName, packageUid,
+                        UserHandle.getUserId(packageUid), /*token*/ null, /*resultWho*/ null,
+                        requestCode, new Intent[] {intent}, new String[]{resolvedType},
+                        flags, bOptions);
+            }
+        }
     }
 
     private final class SleepTokenImpl extends SleepToken {
