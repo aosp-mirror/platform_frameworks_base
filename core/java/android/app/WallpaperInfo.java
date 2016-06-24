@@ -312,7 +312,12 @@ public final class WallpaperInfo implements Parcelable {
     }
 
     /**
-     * Queries whether any metadata should be shown when previewing the wallpaper.
+     * Queries whether any metadata should be shown when previewing the wallpaper. If this value is
+     * set to true, any component that shows a preview of this live wallpaper should also show
+     * accompanying information like {@link #loadLabel},
+     * {@link #loadDescription}, {@link #loadAuthor} and
+     * {@link #loadContextDescription(PackageManager)}, so the user gets to know further information
+     * about this wallpaper.
      *
      * @return Whether any metadata should be shown when previewing the wallpaper.
      */
