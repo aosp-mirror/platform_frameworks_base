@@ -209,8 +209,7 @@ public class Resources {
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
         this(null);
-        mResourcesImpl = new ResourcesImpl(assets, metrics, config,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
+        mResourcesImpl = new ResourcesImpl(assets, metrics, config, new DisplayAdjustments());
     }
 
     /**
@@ -238,7 +237,7 @@ public class Resources {
         config.setToDefaults();
 
         mResourcesImpl = new ResourcesImpl(AssetManager.getSystem(), metrics, config,
-                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
+                new DisplayAdjustments());
     }
 
     /**
