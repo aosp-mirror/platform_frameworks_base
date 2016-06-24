@@ -81,8 +81,8 @@ accounts.</p>
 
 <p>
   Once authorized for testing access, those users can make purchases without
-  being charged. The <code>orderId</code> field for test purchases remains
-  blank, ensuring that there are no actual charges to user accounts.
+  being charged. Test purchases don't have an <code>orderId</code> field, which
+  ensures that there are no actual charges to user accounts.
 </p>
 
 <p class="note">
@@ -127,10 +127,10 @@ account. Users can confirm the account that is making a purchase by expanding th
 purchase dialog.</p>
 
 <p class="note">
-  <strong>Note:</strong> For test purchases, leave the {@code orderId} field
-  blank. You can use the {@code purchaseToken} field to identify test purchases.
+  <strong>Note:</strong> Test purchases don't have an <code>orderId</code>
+  field. To track test purchases, you use the <code>purchaseToken</code> field
+  instead.
 </p>
-
 
 <h4 id="tp-account">Test purchases and developer account</h4>
 <p>Authorized license test accounts are associated with your developer account
