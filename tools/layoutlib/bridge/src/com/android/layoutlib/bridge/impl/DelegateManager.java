@@ -129,7 +129,7 @@ public final class DelegateManager<T> {
         long native_object = sDelegateCounter.getAndIncrement();
         synchronized (DelegateManager.class) {
             sDelegates.put(native_object, newDelegate);
-            assert !sJavaReferences.contains(newDelegate);
+            // Only for development: assert !sJavaReferences.contains(newDelegate);
             sJavaReferences.add(newDelegate);
         }
 

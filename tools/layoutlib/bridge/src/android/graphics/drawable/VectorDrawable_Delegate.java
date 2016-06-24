@@ -70,6 +70,13 @@ public class VectorDrawable_Delegate {
     private static final DelegateManager<VNativeObject> sPathManager =
             new DelegateManager<>(VNativeObject.class);
 
+    private static long addNativeObject(VNativeObject object) {
+        long ptr = sPathManager.addNewDelegate(object);
+        object.setNativePtr(ptr);
+
+        return ptr;
+    }
+
     /**
      * Obtains styled attributes from the theme, if available, or unstyled resources if the theme is
      * null.
@@ -91,13 +98,13 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateTree(long rootGroupPtr) {
-        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rootGroupPtr));
+        return addNativeObject(new VPathRenderer_Delegate(rootGroupPtr));
     }
 
     @LayoutlibDelegate
     static long nCreateTreeFromCopy(long rendererToCopyPtr, long rootGroupPtr) {
         VPathRenderer_Delegate rendererToCopy = VNativeObject.getDelegate(rendererToCopyPtr);
-        return sPathManager.addNewDelegate(new VPathRenderer_Delegate(rendererToCopy,
+        return addNativeObject(new VPathRenderer_Delegate(rendererToCopy,
                 rootGroupPtr));
     }
 
@@ -155,13 +162,13 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateFullPath() {
-        return sPathManager.addNewDelegate(new VFullPath_Delegate());
+        return addNativeObject(new VFullPath_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateFullPath(long nativeFullPathPtr) {
         VFullPath_Delegate original = VNativeObject.getDelegate(nativeFullPathPtr);
-        return sPathManager.addNewDelegate(new VFullPath_Delegate(original));
+        return addNativeObject(new VFullPath_Delegate(original));
     }
 
     @LayoutlibDelegate
@@ -227,24 +234,24 @@ public class VectorDrawable_Delegate {
 
     @LayoutlibDelegate
     static long nCreateClipPath() {
-        return sPathManager.addNewDelegate(new VClipPath_Delegate());
+        return addNativeObject(new VClipPath_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateClipPath(long clipPathPtr) {
         VClipPath_Delegate original = VNativeObject.getDelegate(clipPathPtr);
-        return sPathManager.addNewDelegate(new VClipPath_Delegate(original));
+        return addNativeObject(new VClipPath_Delegate(original));
     }
 
     @LayoutlibDelegate
     static long nCreateGroup() {
-        return sPathManager.addNewDelegate(new VGroup_Delegate());
+        return addNativeObject(new VGroup_Delegate());
     }
 
     @LayoutlibDelegate
     static long nCreateGroup(long groupPtr) {
         VGroup_Delegate original = VNativeObject.getDelegate(groupPtr);
-        return sPathManager.addNewDelegate(new VGroup_Delegate(original, new ArrayMap<>()));
+        return addNativeObject(new VGroup_Delegate(original, new ArrayMap<>()));
     }
 
     @LayoutlibDelegate
@@ -497,7 +504,9 @@ public class VectorDrawable_Delegate {
      *     not need it
      * </ol>
      */
-    interface VNativeObject {
+    abstract static class VNativeObject {
+        long mNativePtr = 0;
+
         @NonNull
         static <T> T getDelegate(long nativePtr) {
             //noinspection unchecked
@@ -507,7 +516,17 @@ public class VectorDrawable_Delegate {
             return vNativeObject;
         }
 
-        void setName(String name);
+        abstract void setName(String name);
+
+        void setNativePtr(long nativePtr) {
+            mNativePtr = nativePtr;
+        }
+
+        /**
+         * Method to explicitly dispose native objects
+         */
+        void dispose() {
+        }
     }
 
     private static class VClipPath_Delegate extends VPath_Delegate {
@@ -777,7 +796,7 @@ public class VectorDrawable_Delegate {
         }
     }
 
-    static class VGroup_Delegate implements VNativeObject {
+    static class VGroup_Delegate extends VNativeObject {
         // This constants need to be kept in sync with their definitions in VectorDrawable.Group
         private static final int ROTATE_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
@@ -963,9 +982,28 @@ public class VectorDrawable_Delegate {
         public void setName(String name) {
             mGroupName = name;
         }
+
+        @Override
+        protected void dispose() {
+            mChildren.stream().filter(child -> child instanceof VNativeObject).forEach(child
+                    -> {
+                VNativeObject nativeObject = (VNativeObject) child;
+                if (nativeObject.mNativePtr != 0) {
+                    sPathManager.removeJavaReferenceFor(nativeObject.mNativePtr);
+                    nativeObject.mNativePtr = 0;
+                }
+                nativeObject.dispose();
+            });
+            mChildren.clear();
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+        }
     }
 
-    public static class VPath_Delegate implements VNativeObject {
+    public static class VPath_Delegate extends VNativeObject {
         protected PathParser_Delegate.PathDataNode[] mNodes = null;
         String mPathName;
         int mChangingConfigurations;
@@ -1005,9 +1043,14 @@ public class VectorDrawable_Delegate {
                 PathParser_Delegate.updateNodes(mNodes, nodes);
             }
         }
+
+        @Override
+        void dispose() {
+            mNodes = null;
+        }
     }
 
-    static class VPathRenderer_Delegate implements VNativeObject {
+    static class VPathRenderer_Delegate extends VNativeObject {
         /* Right now the internal data structure is organized as a tree.
          * Each node can be a group node, or a path.
          * A group node can have groups or paths as children, but a path node has
@@ -1226,11 +1269,14 @@ public class VectorDrawable_Delegate {
 
         @Override
         protected void finalize() throws Throwable {
-            super.finalize();
-
             // The mRootGroupPtr is not explicitly freed by anything in the VectorDrawable so we
             // need to free it here.
+            VNativeObject nativeObject = sPathManager.getDelegate(mRootGroupPtr);
             sPathManager.removeJavaReferenceFor(mRootGroupPtr);
+            assert nativeObject != null;
+            nativeObject.dispose();
+
+            super.finalize();
         }
     }
 }
