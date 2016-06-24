@@ -20527,8 +20527,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * to the target Views. For example, it can contain flags that differentiate between a
      * a copy operation and a move operation.
      * </p>
-     * @param flags Flags that control the drag and drop operation. No flags are currently defined,
-     * so the parameter should be set to 0.
+     * @param flags Flags that control the drag and drop operation. This can be set to 0 for no
+     * flags, or any combination of the following:
+     *     <ul>
+     *         <li>{@link #DRAG_FLAG_GLOBAL}</li>
+     *         <li>{@link #DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION}</li>
+     *         <li>{@link #DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION}</li>
+     *         <li>{@link #DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION}</li>
+     *         <li>{@link #DRAG_FLAG_GLOBAL_URI_READ}</li>
+     *         <li>{@link #DRAG_FLAG_GLOBAL_URI_WRITE}</li>
+     *         <li>{@link #DRAG_FLAG_OPAQUE}</li>
+     *     </ul>
      * @return {@code true} if the method completes successfully, or
      * {@code false} if it fails anywhere. Returning {@code false} means the system was unable to
      * do a drag, and so no drag operation is in progress.
