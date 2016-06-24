@@ -16,6 +16,7 @@
 
 package android.transition;
 
+import android.annotation.TestApi;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -147,8 +148,10 @@ public class TransitionManager {
      * @return The Transition to be used for the given scene change. If no
      * Transition was specified for this scene change, the default transition
      * will be used instead.
+     * @hide
      */
-    private Transition getTransition(Scene scene) {
+    @TestApi
+    public Transition getTransition(Scene scene) {
         Transition transition = null;
         ViewGroup sceneRoot = scene.getSceneRoot();
         if (sceneRoot != null) {
