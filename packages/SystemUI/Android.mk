@@ -16,17 +16,21 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_USE_AAPT2 := true
+
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-under, src)
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
+LOCAL_STATIC_ANDROID_LIBRARIES := \
     Keyguard \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
     android-support-v14-preference \
-    android-support-v17-leanback \
+    android-support-v17-leanback
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
     framework-protos \
     SystemUI-proto-tags
 
@@ -38,19 +42,6 @@ LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
-
-LOCAL_RESOURCE_DIR := \
-    frameworks/base/packages/Keyguard/res \
-    $(LOCAL_PATH)/res \
-    frameworks/support/v7/preference/res \
-    frameworks/support/v14/preference/res \
-    frameworks/support/v7/appcompat/res \
-    frameworks/support/v7/recyclerview/res \
-    frameworks/support/v17/leanback/res
-
-LOCAL_AAPT_FLAGS := --auto-add-overlay \
-    --extra-packages com.android.keyguard:android.support.v7.recyclerview:android.support.v7.preference:android.support.v14.preference:android.support.v7.appcompat \
-    --extra-packages android.support.v17.leanback
 
 ifneq ($(SYSTEM_UI_INCREMENTAL_BUILDS),)
     LOCAL_PROGUARD_ENABLED := disabled
