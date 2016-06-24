@@ -3009,7 +3009,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
-        if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
+        if (win.isWinVisibleLw() && !winAnimator.isAnimationSet()
+                && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
