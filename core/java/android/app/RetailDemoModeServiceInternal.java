@@ -14,8 +14,16 @@
  * limitations under the License
  */
 
-package com.android.server.am;
+package android.app;
 
+/**
+ * Retail Demo Mode Service interface to be used locally inside system server
+ *
+ * @hide Only for use inside system server
+ */
 public interface RetailDemoModeServiceInternal {
+    /**
+     * Used to notify RetailDemoModeService of any user activity.
+     */
     public void onUserActivity();
 }
