@@ -54,8 +54,6 @@ import java.util.function.Predicate;
  * User information used by {@link ShortcutService}.
  *
  * All methods should be guarded by {@code #mShortcutUser.mService.mLock}.
- *
- * TODO Max dynamic shortcuts cap should be per activity.
  */
 class ShortcutPackage extends ShortcutPackageItem {
     private static final String TAG = ShortcutService.TAG;
@@ -321,9 +319,27 @@ class ShortcutPackage extends ShortcutPackageItem {
     /**
      * Remove a dynamic shortcut by ID.  It'll be removed from the dynamic set, but if the shortcut
      * is pinned, it'll remain as a pinned shortcut, and is still enabled.
+     *
+     * @return true if it's actually removed because it wasn't pinned, or false if it's still
+     * pinned.
      */
-    public void deleteDynamicWithId(@NonNull String shortcutId) {
-        deleteOrDisableWithId(shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false);
+    public boolean deleteDynamicWithId(@NonNull String shortcutId) {
+        final ShortcutInfo removed = deleteOrDisableWithId(
+                shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false);
+        return removed == null;
+    }
+
+    /**
+     * Disable a dynamic shortcut by ID.  It'll be removed from the dynamic set, but if the shortcut
+     * is pinned, it'll remain as a pinned shortcut, but will be disabled.
+     *
+     * @return true if it's actually removed because it wasn't pinned, or false if it's still
+     * pinned.
+     */
+    private boolean disableDynamicWithId(@NonNull String shortcutId) {
+        final ShortcutInfo disabled = deleteOrDisableWithId(
+                shortcutId, /* disable =*/ true, /* overrideImmutable=*/ false);
+        return disabled == null;
     }
 
     /**
@@ -599,14 +615,14 @@ class ShortcutPackage extends ShortcutPackageItem {
      *
      * @return TRUE if any shortcuts have been changed.
      */
-    public boolean handlePackageAddedOrUpdated(boolean isNewApp) {
+    public boolean handlePackageAddedOrUpdated(boolean isNewApp, boolean forceRescan) {
         final PackageInfo pi = mShortcutUser.mService.getPackageInfo(
                 getPackageName(), getPackageUserId());
         if (pi == null) {
             return false; // Shouldn't happen.
         }
 
-        if (!isNewApp) {
+        if (!isNewApp && !forceRescan) {
             // Make sure the version code or last update time has changed.
             // Otherwise, nothing to do.
             if (getPackageInfo().getVersionCode() >= pi.versionCode
@@ -649,11 +665,25 @@ class ShortcutPackage extends ShortcutPackageItem {
         boolean changed = false;
 
         // For existing shortcuts, update timestamps if they have any resources.
+        // Also check if shortcuts' activities are still main activities.  Otherwise, disable them.
         if (!isNewApp) {
             Resources publisherRes = null;
 
             for (int i = mShortcuts.size() - 1; i >= 0; i--) {
                 final ShortcutInfo si = mShortcuts.valueAt(i);
+
+                if (si.isDynamic()) {
+                    if (!s.injectIsMainActivity(si.getActivity(), getPackageUserId())) {
+                        Slog.w(TAG, String.format(
+                                "%s is no longer main activity. Disabling shorcut %s.",
+                                getPackageName(), si.getId()));
+                        if (disableDynamicWithId(si.getId())) {
+                            continue; // Actually removed.
+                        }
+                        // Still pinned, so fall-through and possibly update the resources.
+                    }
+                    changed = true;
+                }
 
                 if (si.hasAnyResources()) {
                     if (!si.isOriginallyFromManifest()) {
@@ -912,9 +942,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             final ComponentName newActivity = newShortcut.getActivity();
             if (newActivity == null) {
                 if (operation != ShortcutService.OPERATION_UPDATE) {
-                    // This method may be called before validating shortcuts, so this may happen,
-                    // and is a caller side error.
-                    throw new NullPointerException("Activity must be provided");
+                    service.wtf("Activity must not be null at this point");
+                    continue; // Just ignore this invalid case.
                 }
                 continue; // Activity can be null for update.
             }
