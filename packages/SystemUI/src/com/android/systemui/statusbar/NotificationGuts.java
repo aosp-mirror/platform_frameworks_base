@@ -256,6 +256,8 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
         } else {
             mReset.setText(mContext.getString(R.string.do_not_silence_block));
         }
+        mBlock.setText(mContext.getString(R.string.block));
+        mSilent.setText(mContext.getString(R.string.show_silently));
         if (importance == NotificationListenerService.Ranking.IMPORTANCE_LOW) {
             mSilent.setChecked(true);
         } else {
