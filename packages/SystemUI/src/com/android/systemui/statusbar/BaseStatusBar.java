@@ -1086,7 +1086,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         ((ImageView) guts.findViewById(R.id.app_icon)).setImageDrawable(pkgicon);
         ((TextView) guts.findViewById(R.id.pkgname)).setText(appname);
 
-        final View settingsButton = guts.findViewById(R.id.more_settings);
+        final TextView settingsButton = (TextView) guts.findViewById(R.id.more_settings);
         if (appUid >= 0) {
             final int appUidF = appUid;
             settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -1096,13 +1096,16 @@ public abstract class BaseStatusBar extends SystemUI implements
                     startAppNotificationSettingsActivity(pkg, appUidF);
                 }
             });
+            settingsButton.setText(R.string.notification_more_settings);
         } else {
             settingsButton.setVisibility(View.GONE);
         }
 
         guts.bindImportance(pmUser, sbn, mNotificationData.getImportance(sbn.getKey()));
 
-        guts.findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
+        final TextView doneButton = (TextView) guts.findViewById(R.id.done);
+        doneButton.setText(R.string.notification_done);
+        doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // If the user has security enabled, show challenge if the setting is changed.
