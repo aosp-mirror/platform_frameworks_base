@@ -183,7 +183,6 @@
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"সেটিংস"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"এক নজরে৷"</string>
     <string name="accessibility_desc_close" msgid="7479755364962766729">"বন্ধ করুন"</string>
-    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ব্যবহারকারী <xliff:g id="USER">%s</xliff:g>৷"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"WiFi বন্ধ হয়েছে।"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"WiFi চালু হয়েছে।"</string>
