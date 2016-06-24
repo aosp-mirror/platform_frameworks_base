@@ -1393,6 +1393,14 @@ public class PopupWindow {
         }
     }
 
+    private int computeGravity() {
+        int gravity = Gravity.START | Gravity.TOP;
+        if (mClipToScreen || mClippingEnabled) {
+            gravity |= Gravity.DISPLAY_CLIP_VERTICAL | Gravity.DISPLAY_CLIP_HORIZONTAL;
+        }
+        return gravity;
+    }
+
     /**
      * <p>Generate the layout parameters for the popup window.</p>
      *
@@ -1407,7 +1415,7 @@ public class PopupWindow {
         // screen. The view is then positioned to the appropriate location by
         // setting the x and y offsets to match the anchor's bottom-left
         // corner.
-        p.gravity = Gravity.START | Gravity.TOP;
+        p.gravity = computeGravity();
         p.flags = computeFlags(p.flags);
         p.type = mWindowLayoutType;
         p.token = token;
@@ -1958,6 +1966,12 @@ public class PopupWindow {
             update = true;
         }
 
+        final int newGravity = computeGravity();
+        if (newGravity != p.gravity) {
+            p.gravity = newGravity;
+            update = true;
+        }
+
         if (update) {
             setLayoutDirectionFromAnchor();
             mWindowManager.updateViewLayout(mDecorView, p);
@@ -2061,6 +2075,12 @@ public class PopupWindow {
         final int newFlags = computeFlags(p.flags);
         if (newFlags != p.flags) {
             p.flags = newFlags;
+            update = true;
+        }
+
+        final int newGravity = computeGravity();
+        if (newGravity != p.gravity) {
+            p.gravity = newGravity;
             update = true;
         }
 
