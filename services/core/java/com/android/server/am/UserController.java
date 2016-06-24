@@ -1061,7 +1061,9 @@ final class UserController {
                 try {
                     // Prepend with unique prefix to guarantee that keys are unique
                     final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
-                    mCurWaitingUserSwitchCallbacks.add(name);
+                    synchronized (mService) {
+                        curWaitingUserSwitchCallbacks.add(name);
+                    }
                     final IRemoteCallback callback = new IRemoteCallback.Stub() {
                         @Override
                         public void sendResult(Bundle data) throws RemoteException {
