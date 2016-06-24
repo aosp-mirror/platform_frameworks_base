@@ -149,17 +149,17 @@ public class ResourcesManager {
     }
 
     DisplayMetrics getDisplayMetrics() {
-        return getDisplayMetrics(Display.DEFAULT_DISPLAY);
+        return getDisplayMetrics(Display.DEFAULT_DISPLAY,
+                DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
     /**
      * Protected so that tests can override and returns something a fixed value.
      */
     @VisibleForTesting
-    protected @NonNull DisplayMetrics getDisplayMetrics(int displayId) {
+    protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
         DisplayMetrics dm = new DisplayMetrics();
-        final Display display =
-                getAdjustedDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+        final Display display = getAdjustedDisplay(displayId, da);
         if (display != null) {
             display.getMetrics(dm);
         } else {
@@ -304,11 +304,13 @@ public class ResourcesManager {
     }
 
     private @NonNull ResourcesImpl createResourcesImpl(@NonNull ResourcesKey key) {
+        final DisplayAdjustments daj = new DisplayAdjustments(key.mOverrideConfiguration);
+        daj.setCompatibilityInfo(key.mCompatInfo);
+
         final AssetManager assets = createAssetManager(key);
-        final DisplayMetrics dm = getDisplayMetrics(key.mDisplayId);
+        final DisplayMetrics dm = getDisplayMetrics(key.mDisplayId, daj);
         final Configuration config = generateConfig(key, dm);
-        final ResourcesImpl impl = new ResourcesImpl(assets, dm, config, key.mCompatInfo,
-                key.mOverrideConfiguration);
+        final ResourcesImpl impl = new ResourcesImpl(assets, dm, config, daj);
         if (DEBUG) {
             Slog.d(TAG, "- creating impl=" + impl + " with key: " + key);
         }
@@ -805,7 +807,16 @@ public class ResourcesManager {
                         }
                         tmpConfig.setTo(config);
                         if (!isDefaultDisplay) {
-                            dm = getDisplayMetrics(displayId);
+                            // Get new DisplayMetrics based on the DisplayAdjustments given
+                            // to the ResourcesImpl. Udate a copy if the CompatibilityInfo
+                            // changed, because the ResourcesImpl object will handle the
+                            // update internally.
+                            DisplayAdjustments daj = r.getDisplayAdjustments();
+                            if (compat != null) {
+                                daj = new DisplayAdjustments(daj);
+                                daj.setCompatibilityInfo(compat);
+                            }
+                            dm = getDisplayMetrics(displayId, daj);
                             applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
                         }
                         if (hasOverrideConfiguration) {
