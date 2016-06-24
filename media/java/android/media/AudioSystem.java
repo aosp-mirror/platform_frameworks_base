@@ -805,6 +805,16 @@ public class AudioSystem
         }
     }
 
+    /**
+     * @hide
+     * @return whether the system uses a single volume stream.
+     */
+    public static boolean isSingleVolume(Context context) {
+        boolean forceSingleVolume = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_single_volume);
+        return getPlatformType(context) == PLATFORM_TELEVISION || forceSingleVolume;
+    }
+
     public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
             (1 << STREAM_MUSIC) |
             (1 << STREAM_RING) |
