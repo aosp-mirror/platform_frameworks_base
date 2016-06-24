@@ -1061,10 +1061,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Шкала"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Заўсёды паказваць"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Зноў уключыце гэта ў раздзеле \"Сістэмныя налады &gt; Прыкладанні &gt; Спампаваныя\"."</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае бягучую наладу Памеру дысплэя і можа паводзіць сябе непрадказальным чынам."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Заўсёды паказваць"</string>
     <string name="smv_application" msgid="3307209192155442829">"Прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> (працэс <xliff:g id="PROCESS">%2$s</xliff:g>) парушыла ўласную палітыку StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> парушыў уласную палітыку StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Абнаўленне Android..."</string>

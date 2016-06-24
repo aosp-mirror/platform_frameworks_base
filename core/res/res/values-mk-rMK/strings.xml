@@ -1015,10 +1015,8 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Размер"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Покажи секогаш"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Повторно овозможете го ова во Системски поставки &gt; Апликации &gt; Преземено."</string>
-    <!-- no translation found for unsupported_display_size_message (6545327290756295232) -->
-    <skip />
-    <!-- no translation found for unsupported_display_size_show (7969129195360353041) -->
-    <skip />
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> не ја поддржува тековната поставка за големина на екранот и може да се однесува непредвидено."</string>
+    <string name="unsupported_display_size_show" msgid="7969129195360353041">"Секогаш прикажувај"</string>
     <string name="smv_application" msgid="3307209192155442829">"Апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) ја прекрши политиката StrictMode што си ја наметна врз себеси."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> ја прекрши својата самонаметната политика на строг режим."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се ажурира…"</string>
