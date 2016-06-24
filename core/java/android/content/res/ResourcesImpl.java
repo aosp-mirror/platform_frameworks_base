@@ -114,12 +114,11 @@ public class ResourcesImpl {
 
     final AssetManager mAssets;
     private final DisplayMetrics mMetrics = new DisplayMetrics();
-    private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
+    private final DisplayAdjustments mDisplayAdjustments;
 
     private PluralRules mPluralRule;
 
     private final Configuration mConfiguration = new Configuration();
-    private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
 
     static {
         sPreloadedDrawables = new LongSparseArray[2];
@@ -135,37 +134,15 @@ public class ResourcesImpl {
      *                selecting/computing resource values.
      * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
-     * @param compatInfo this resource's compatibility info. Must not be null.
+     * @param displayAdjustments this resource's Display override and compatibility info.
+     *                           Must not be null.
      */
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
-            @Nullable Configuration config, @NonNull CompatibilityInfo compatInfo) {
-        this(assets, metrics, config, compatInfo, null);
-    }
-
-    /**
-     * Creates a new ResourcesImpl object with CompatibilityInfo and assigns a static overrideConfig
-     * that is reported with getDisplayAdjustments(). This is used for updating the Display
-     * when a new ResourcesImpl is created due to multi-window configuration changes.
-     *
-     * @param assets Previously created AssetManager.
-     * @param metrics Current display metrics to consider when selecting/computing resource values.
-     * @param fullConfig Desired device configuration to consider when selecting/computing
-     * resource values.
-     * @param compatInfo this resource's compatibility info. Must not be null.
-     * @param overrideConfig the overrides specific to this ResourcesImpl object. They must already
-     * be applied to the fullConfig and are mainly maintained in order to return a valid
-     * DisplayAdjustments object during configuration changes.
-     */
-    public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
-            @Nullable Configuration fullConfig, @NonNull CompatibilityInfo compatInfo,
-            @Nullable Configuration overrideConfig) {
+            @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
         mAssets = assets;
         mMetrics.setToDefaults();
-        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
-        if (overrideConfig != null) {
-            mDisplayAdjustments.setConfiguration(overrideConfig);
-        }
-        updateConfiguration(fullConfig, metrics, compatInfo);
+        mDisplayAdjustments = displayAdjustments;
+        updateConfiguration(config, metrics, displayAdjustments.getCompatibilityInfo());
         mAssets.ensureStringBlocks();
     }
 
@@ -192,7 +169,7 @@ public class ResourcesImpl {
     }
 
     CompatibilityInfo getCompatibilityInfo() {
-        return mCompatibilityInfo;
+        return mDisplayAdjustments.getCompatibilityInfo();
     }
 
     private PluralRules getPluralRule() {
@@ -347,12 +324,13 @@ public class ResourcesImpl {
             synchronized (mAccessLock) {
                 if (false) {
                     Slog.i(TAG, "**** Updating config of " + this + ": old config is "
-                            + mConfiguration + " old compat is " + mCompatibilityInfo);
+                            + mConfiguration + " old compat is "
+                            + mDisplayAdjustments.getCompatibilityInfo());
                     Slog.i(TAG, "**** Updating config of " + this + ": new config is "
                             + config + " new compat is " + compat);
                 }
                 if (compat != null) {
-                    mCompatibilityInfo = compat;
+                    mDisplayAdjustments.setCompatibilityInfo(compat);
                 }
                 if (metrics != null) {
                     mMetrics.setTo(metrics);
@@ -366,7 +344,7 @@ public class ResourcesImpl {
                 // it would be cleaner and more maintainable to just be
                 // consistently dealing with a compatible display everywhere in
                 // the framework.
-                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+                mDisplayAdjustments.getCompatibilityInfo().applyToDisplayMetrics(mMetrics);
 
                 final @Config int configChanges = calcConfigChanges(config);
 
@@ -440,7 +418,8 @@ public class ResourcesImpl {
 
                 if (DEBUG_CONFIG) {
                     Slog.i(TAG, "**** Updating config of " + this + ": final config is "
-                            + mConfiguration + " final compat is " + mCompatibilityInfo);
+                            + mConfiguration + " final compat is "
+                            + mDisplayAdjustments.getCompatibilityInfo());
                 }
 
                 mDrawableCache.onConfigurationChange(configChanges);
@@ -480,7 +459,7 @@ public class ResourcesImpl {
             density = mMetrics.noncompatDensityDpi;
         }
 
-        mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
+        mDisplayAdjustments.getCompatibilityInfo().applyToConfiguration(density, mTmpConfig);
 
         if (mTmpConfig.getLocales().isEmpty()) {
             mTmpConfig.setLocales(LocaleList.getDefault());

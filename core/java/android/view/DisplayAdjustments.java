@@ -62,7 +62,7 @@ public class DisplayAdjustments {
             throw new IllegalArgumentException(
                     "setConfiguration: Cannot modify DEFAULT_DISPLAY_ADJUSTMENTS");
         }
-        mConfiguration = configuration;
+        mConfiguration = configuration != null ? configuration : Configuration.EMPTY;
     }
 
     public Configuration getConfiguration() {
