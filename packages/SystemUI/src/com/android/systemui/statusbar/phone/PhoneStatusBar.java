@@ -4657,7 +4657,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void vibrateForCameraGesture() {
         // Make sure to pass -1 for repeat so VibratorService doesn't stop us when going to sleep.
-        mVibrator.vibrate(new long[]{0, 750L}, -1 /* repeat */);
+        mVibrator.vibrate(new long[]{0, 400}, -1 /* repeat */);
     }
 
     public void onScreenTurnedOn() {
