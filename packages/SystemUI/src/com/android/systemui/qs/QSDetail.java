@@ -152,12 +152,13 @@ public class QSDetail extends LinearLayout {
 
 
 
-    public void handleShowingDetail(final QSTile.DetailAdapter adapter, int x, int y) {
+    public void handleShowingDetail(final QSTile.DetailAdapter adapter, int x, int y,
+            boolean toggleQs) {
         final boolean showingDetail = adapter != null;
         setClickable(showingDetail);
         if (showingDetail) {
             setupDetailHeader(adapter);
-            if (!mFullyExpanded) {
+            if (toggleQs && !mFullyExpanded) {
                 mTriggeredExpand = true;
                 mHost.animateToggleQSExpansion();
             } else {
@@ -169,7 +170,7 @@ public class QSDetail extends LinearLayout {
             // Ensure we collapse into the same point we opened from.
             x = mOpenX;
             y = mOpenY;
-            if (mTriggeredExpand) {
+            if (toggleQs && mTriggeredExpand) {
                 mHost.animateToggleQSExpansion();
                 mTriggeredExpand = false;
             }
@@ -291,7 +292,7 @@ public class QSDetail extends LinearLayout {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    handleShowingDetail(detail, x, y);
+                    handleShowingDetail(detail, x, y, true /* toggleQs */);
                 }
             });
         }
