@@ -24,6 +24,12 @@ import android.view.View;
 public final class Snackbars {
     private Snackbars() {}
 
+    public static final void showDocumentsClipped(Activity activity, int docCount) {
+        String msg = Shared.getQuantityString(
+                activity, R.plurals.clipboard_files_clipped, docCount);
+        Snackbars.makeSnackbar(activity, msg, Snackbar.LENGTH_SHORT).show();
+    }
+
     public static final void showMove(Activity activity, int docCount) {
         CharSequence message = Shared.getQuantityString(activity, R.plurals.move_begin, docCount);
         makeSnackbar(activity, message, Snackbar.LENGTH_SHORT).show();

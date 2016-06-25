@@ -25,7 +25,6 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
@@ -123,9 +122,6 @@ public class State implements android.os.Parcelable {
     /** Instance state for every shown directory */
     public HashMap<String, SparseArray<Parcelable>> dirState = new HashMap<>();
 
-    /** Currently copying file */
-    public List<DocumentInfo> selectedDocumentsForCopy = new ArrayList<>();
-
     /** Name of the package that started DocsUI */
     public List<String> excludedAuthorities = new ArrayList<>();
 
@@ -199,7 +195,6 @@ public class State implements android.os.Parcelable {
         out.writeInt(external ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
         out.writeMap(dirState);
-        out.writeList(selectedDocumentsForCopy);
         out.writeList(excludedAuthorities);
         out.writeInt(openableOnly ? 1 : 0);
         out.writeInt(mStackTouched ? 1 : 0);
@@ -229,7 +224,6 @@ public class State implements android.os.Parcelable {
             state.external = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             in.readMap(state.dirState, loader);
-            in.readList(state.selectedDocumentsForCopy, loader);
             in.readList(state.excludedAuthorities, loader);
             state.openableOnly = in.readInt() != 0;
             state.mStackTouched = in.readInt() != 0;

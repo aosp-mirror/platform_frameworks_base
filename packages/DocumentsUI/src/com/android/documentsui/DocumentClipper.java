@@ -21,25 +21,23 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.provider.DocumentsContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.android.documentsui.ClipStorage.Writer;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,26 +47,49 @@ import java.util.function.Function;
  * ClipboardManager wrapper class providing higher level logical
  * support for dealing with Documents.
  */
-public final class DocumentClipper {
+public final class DocumentClipper implements ClipboardManager.OnPrimaryClipChangedListener {
 
     private static final String TAG = "DocumentClipper";
-    private static final String SRC_PARENT_KEY = "srcParent";
-    private static final String OP_TYPE_KEY = "opType";
-    private static final String OP_JUMBO_SELECTION_SIZE = "jumboSelection-size";
+
+    static final String SRC_PARENT_KEY = "srcParent";
+    static final String OP_TYPE_KEY = "opType";
+    static final String OP_JUMBO_SELECTION_SIZE = "jumboSelection-size";
+    static final String OP_JUMBO_SELECTION_TAG = "jumboSelection-tag";
+
+    // Use shared preference to store last seen primary clip tag, so that we can delete the file
+    // when we realize primary clip has been changed when we're not running.
+    private static final String PREF_NAME = "DocumentClipperPref";
+    private static final String LAST_PRIMARY_CLIP_TAG = "lastPrimaryClipTag";
 
     private final Context mContext;
     private final ClipStorage mClipStorage;
     private final ClipboardManager mClipboard;
 
+    // Here we're tracking the last clipped tag ids so we can delete them later.
+    private long mLastDragClipTag = ClipStorage.NO_SELECTION_TAG;
+    private long mLastUnusedPrimaryClipTag = ClipStorage.NO_SELECTION_TAG;
+
+    private final SharedPreferences mPref;
+
     DocumentClipper(Context context, ClipStorage storage) {
         mContext = context;
         mClipStorage = storage;
         mClipboard = context.getSystemService(ClipboardManager.class);
+
+        mClipboard.addPrimaryClipChangedListener(this);
+
+        // Primary clips may be changed when we're not running, now it's time to clean up the
+        // remnant.
+        mPref = context.getSharedPreferences(PREF_NAME, 0);
+        mLastUnusedPrimaryClipTag =
+                mPref.getLong(LAST_PRIMARY_CLIP_TAG, ClipStorage.NO_SELECTION_TAG);
+        deleteLastUnusedPrimaryClip();
     }
 
     public boolean hasItemsToPaste() {
         if (mClipboard.hasPrimaryClip()) {
             ClipData clipData = mClipboard.getPrimaryClip();
+
             int count = clipData.getItemCount();
             if (count > 0) {
                 for (int i = 0; i < count; ++i) {
@@ -87,51 +108,27 @@ public final class DocumentClipper {
         return uri != null && DocumentsContract.isDocumentUri(mContext, uri);
     }
 
-    public ClipDetails getClipDetails(@Nullable ClipData clipData) {
-        if (clipData == null) {
-            return null;
-        }
+    /**
+     * Returns {@link ClipData} representing the selection, or null if selection is empty,
+     * or cannot be converted.
+     *
+     * This is specialized for drag and drop so that we know which file to delete if nobody accepts
+     * the drop.
+     */
+    public @Nullable ClipData getClipDataForDrag(
+            Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
+        ClipData data = getClipDataForDocuments(uriBuilder, selection, opType);
 
-        String srcParent = clipData.getDescription().getExtras().getString(SRC_PARENT_KEY);
+        mLastDragClipTag = getTag(data);
 
-        ClipDetails clipDetails = new ClipDetails(
-                clipData.getDescription().getExtras().getInt(OP_TYPE_KEY),
-                getDocumentsFromClipData(clipData),
-                createDocument((srcParent != null) ? Uri.parse(srcParent) : null));
-
-        return clipDetails;
-    }
-
-    private List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
-        assert(clipData != null);
-
-        int count = clipData.getItemCount();
-        if (count == 0) {
-            return Collections.EMPTY_LIST;
-        }
-
-        final List<DocumentInfo> srcDocs = new ArrayList<>();
-
-        for (int i = 0; i < count; ++i) {
-            ClipData.Item item = clipData.getItemAt(i);
-            Uri itemUri = item.getUri();
-            DocumentInfo docInfo = createDocument(itemUri);
-            if (docInfo != null) {
-                srcDocs.add(docInfo);
-            } else {
-                // This uri either doesn't exist, or is invalid.
-                Log.w(TAG, "Can't create document info from uri: " + itemUri);
-            }
-        }
-
-        return srcDocs;
+        return data;
     }
 
     /**
      * Returns {@link ClipData} representing the selection, or null if selection is empty,
      * or cannot be converted.
      */
-    public @Nullable ClipData getClipDataForDocuments(
+    private @Nullable ClipData getClipDataForDocuments(
         Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(selection != null);
@@ -153,6 +150,7 @@ public final class DocumentClipper {
             Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(!selection.isEmpty());
+        assert(selection.size() <= Shared.MAX_DOCS_IN_INTENT);
 
         final ContentResolver resolver = mContext.getContentResolver();
         final ArrayList<ClipData.Item> clipItems = new ArrayList<>();
@@ -161,15 +159,11 @@ public final class DocumentClipper {
         PersistableBundle bundle = new PersistableBundle();
         bundle.putInt(OP_TYPE_KEY, opType);
 
-        int clipCount = 0;
         for (String id : selection) {
             assert(id != null);
             Uri uri = uriBuilder.apply(id);
-            if (clipCount <= Shared.MAX_DOCS_IN_INTENT) {
-                DocumentInfo.addMimeTypes(resolver, uri, clipTypes);
-                clipItems.add(new ClipData.Item(uri));
-            }
-            clipCount++;
+            DocumentInfo.addMimeTypes(resolver, uri, clipTypes);
+            clipItems.add(new ClipData.Item(uri));
         }
 
         ClipDescription description = new ClipDescription(
@@ -181,45 +175,50 @@ public final class DocumentClipper {
     }
 
     /**
-     * Returns ClipData representing the list of docs, or null if docs is empty,
-     * or docs cannot be converted.
+     * Returns ClipData representing the list of docs
      */
     private @Nullable ClipData createJumboClipData(
             Function<String, Uri> uriBuilder, Selection selection, @OpType int opType) {
 
         assert(!selection.isEmpty());
+        assert(selection.size() > Shared.MAX_DOCS_IN_INTENT);
 
+        final List<Uri> uris = new ArrayList<>(selection.size());
+
+        final int capacity = Math.min(selection.size(), Shared.MAX_DOCS_IN_INTENT);
+        final ArrayList<ClipData.Item> clipItems = new ArrayList<>(capacity);
+
+        // Set up mime types for the first Shared.MAX_DOCS_IN_INTENT
         final ContentResolver resolver = mContext.getContentResolver();
-        final ArrayList<ClipData.Item> clipItems = new ArrayList<>();
         final Set<String> clipTypes = new HashSet<>();
+        int docCount = 0;
+        for (String id : selection) {
+            assert(id != null);
+            Uri uri = uriBuilder.apply(id);
+            if (docCount++ < Shared.MAX_DOCS_IN_INTENT) {
+                DocumentInfo.addMimeTypes(resolver, uri, clipTypes);
+                clipItems.add(new ClipData.Item(uri));
+            }
 
+            uris.add(uri);
+        }
+
+        // Prepare metadata
         PersistableBundle bundle = new PersistableBundle();
         bundle.putInt(OP_TYPE_KEY, opType);
         bundle.putInt(OP_JUMBO_SELECTION_SIZE, selection.size());
 
-        int clipCount = 0;
-        synchronized (mClipStorage) {
-            try (Writer writer = mClipStorage.createWriter()) {
-                for (String id : selection) {
-                    assert(id != null);
-                    Uri uri = uriBuilder.apply(id);
-                    if (clipCount <= Shared.MAX_DOCS_IN_INTENT) {
-                        DocumentInfo.addMimeTypes(resolver, uri, clipTypes);
-                        clipItems.add(new ClipData.Item(uri));
-                    }
-                    writer.write(uri);
-                    clipCount++;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Caught exception trying to write jumbo clip to disk.", e);
-                return null;
-            }
-        }
+        // Creates a clip tag
+        long tag = mClipStorage.createTag();
+        bundle.putLong(OP_JUMBO_SELECTION_TAG, tag);
 
         ClipDescription description = new ClipDescription(
                 "", // Currently "label" is not displayed anywhere in the UI.
                 clipTypes.toArray(new String[0]));
         description.setExtras(bundle);
+
+        // Persists clip items
+        new ClipStorage.PersistTask(mClipStorage, uris, tag).execute();
 
         return new ClipData(description, clipItems);
     }
@@ -232,7 +231,7 @@ public final class DocumentClipper {
                 getClipDataForDocuments(uriBuilder, selection, FileOperationService.OPERATION_COPY);
         assert(data != null);
 
-        mClipboard.setPrimaryClip(data);
+        setPrimaryClip(data);
     }
 
     /**
@@ -250,20 +249,65 @@ public final class DocumentClipper {
         PersistableBundle bundle = data.getDescription().getExtras();
         bundle.putString(SRC_PARENT_KEY, parent.derivedUri.toString());
 
+        setPrimaryClip(data);
+    }
+
+    private void setPrimaryClip(ClipData data) {
+        deleteLastPrimaryClip();
+
+        long tag = getTag(data);
+        setLastUnusedPrimaryClipTag(tag);
+
         mClipboard.setPrimaryClip(data);
     }
 
-    private DocumentInfo createDocument(Uri uri) {
-        DocumentInfo doc = null;
-        if (isDocumentUri(uri)) {
-            ContentResolver resolver = mContext.getContentResolver();
-            try {
-                doc = DocumentInfo.fromUri(resolver, uri);
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage());
-            }
+    /**
+     * Sets this primary tag to both class variable and shared preference.
+     */
+    private void setLastUnusedPrimaryClipTag(long tag) {
+        mLastUnusedPrimaryClipTag = tag;
+        mPref.edit().putLong(LAST_PRIMARY_CLIP_TAG, tag).commit();
+    }
+
+    /**
+     * This is a good chance for us to remove previous clip file for cut/copy because we know a new
+     * primary clip is set.
+     */
+    @Override
+    public void onPrimaryClipChanged() {
+        deleteLastUnusedPrimaryClip();
+    }
+
+    private void deleteLastUnusedPrimaryClip() {
+        ClipData primary = mClipboard.getPrimaryClip();
+        long primaryTag = getTag(primary);
+
+        // onPrimaryClipChanged is also called after we call setPrimaryClip(), so make sure we don't
+        // delete the clip file we just created.
+        if (mLastUnusedPrimaryClipTag != primaryTag) {
+            deleteLastPrimaryClip();
         }
-        return doc;
+    }
+
+    private void deleteLastPrimaryClip() {
+        deleteClip(mLastUnusedPrimaryClipTag);
+        setLastUnusedPrimaryClipTag(ClipStorage.NO_SELECTION_TAG);
+    }
+
+    /**
+     * Deletes the last seen drag clip file.
+     */
+    public void deleteDragClip() {
+        deleteClip(mLastDragClipTag);
+        mLastDragClipTag = ClipStorage.NO_SELECTION_TAG;
+    }
+
+    private void deleteClip(long tag) {
+        try {
+            mClipStorage.delete(tag);
+        } catch (IOException e) {
+            Log.w(TAG, "Error deleting clip file with tag: " + tag, e);
+        }
     }
 
     /**
@@ -278,6 +322,10 @@ public final class DocumentClipper {
             DocumentInfo destination,
             DocumentStack docStack,
             FileOperations.Callback callback) {
+
+        // The primary clip has been claimed by a file operation. It's now the operation's duty
+        // to make sure the clip file is deleted after use.
+        setLastUnusedPrimaryClipTag(ClipStorage.NO_SELECTION_TAG);
 
         copyFromClipData(destination, docStack, mClipboard.getPrimaryClip(), callback);
     }
@@ -301,65 +349,28 @@ public final class DocumentClipper {
             return;
         }
 
-        new AsyncTask<Void, Void, ClipDetails>() {
+        ClipDetails details = ClipDetails.createClipDetails(clipData);
 
-            @Override
-            protected ClipDetails doInBackground(Void... params) {
-                return getClipDetails(clipData);
-            }
-
-            @Override
-            protected void onPostExecute(ClipDetails clipDetails) {
-                if (clipDetails == null) {
-                    Log.w(TAG,  "Received null clipDetails. Ignoring.");
-                    return;
-                }
-
-                List<DocumentInfo> docs = clipDetails.docs;
-                @OpType int type = clipDetails.opType;
-                DocumentInfo srcParent = clipDetails.parent;
-                moveDocuments(docs, destination, docStack, type, srcParent, callback);
-            }
-        }.execute();
-    }
-
-    /**
-     * Moves {@code docs} from {@code srcParent} to {@code destination}.
-     * operationType can be copy or cut
-     * srcParent Must be non-null for move operations.
-     */
-    private void moveDocuments(
-            List<DocumentInfo> docs,
-            DocumentInfo destination,
-            DocumentStack docStack,
-            @OpType int operationType,
-            DocumentInfo srcParent,
-            FileOperations.Callback callback) {
-
-        RootInfo destRoot = docStack.root;
-        if (!canCopy(docs, destRoot, destination)) {
-            callback.onOperationResult(FileOperations.Callback.STATUS_REJECTED, operationType, 0);
+        if (!canCopy(destination)) {
+            callback.onOperationResult(
+                    FileOperations.Callback.STATUS_REJECTED, details.getOpType(), 0);
             return;
         }
 
-        if (docs.isEmpty()) {
-            callback.onOperationResult(FileOperations.Callback.STATUS_ACCEPTED, operationType, 0);
+        if (details.getItemCount() == 0) {
+            callback.onOperationResult(
+                    FileOperations.Callback.STATUS_ACCEPTED, details.getOpType(), 0);
             return;
         }
 
         DocumentStack dstStack = new DocumentStack();
         dstStack.push(destination);
         dstStack.addAll(docStack);
-        switch (operationType) {
-            case FileOperationService.OPERATION_MOVE:
-                FileOperations.move(mContext, docs, srcParent, dstStack, callback);
-                break;
-            case FileOperationService.OPERATION_COPY:
-                FileOperations.copy(mContext, docs, dstStack, callback);
-                break;
-            default:
-                throw new UnsupportedOperationException("Unsupported operation: " + operationType);
-        }
+
+        // Pass root here so that we can perform "download" root check when
+        dstStack.root = docStack.root;
+
+        FileOperations.start(mContext, details, dstStack, callback);
     }
 
     /**
@@ -370,32 +381,26 @@ public final class DocumentClipper {
      *
      * @return true if the list of files can be copied to destination.
      */
-    private static boolean canCopy(List<DocumentInfo> files, RootInfo root, DocumentInfo dest) {
+    private static boolean canCopy(DocumentInfo dest) {
         if (dest == null || !dest.isDirectory() || !dest.isCreateSupported()) {
             return false;
-        }
-
-        // Can't copy folders to downloads, because we don't show folders there.
-        if (root.isDownloads()) {
-            for (DocumentInfo docs : files) {
-                if (docs.isDirectory()) {
-                    return false;
-                }
-            }
         }
 
         return true;
     }
 
-    public static class ClipDetails {
-        public final @OpType int opType;
-        public final List<DocumentInfo> docs;
-        public final @Nullable DocumentInfo parent;
-
-        ClipDetails(@OpType int opType, List<DocumentInfo> docs, @Nullable DocumentInfo parent) {
-            this.opType = opType;
-            this.docs = docs;
-            this.parent = parent;
+    /**
+     * Obtains tag from {@link ClipData}. Returns {@link ClipStorage#NO_SELECTION_TAG}
+     * if it's not a jumbo clip.
+     */
+    private static long getTag(@Nullable ClipData data) {
+        if (data == null) {
+            return ClipStorage.NO_SELECTION_TAG;
         }
+
+        ClipDescription description = data.getDescription();
+        BaseBundle bundle = description.getExtras();
+        return bundle.getLong(OP_JUMBO_SELECTION_TAG, ClipStorage.NO_SELECTION_TAG);
     }
+
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.documentsui.services;
+package com.android.documentsui.testing;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
@@ -47,7 +47,7 @@ public class TestScheduledExecutorService implements ScheduledExecutorService {
         return new ArrayList<>();
     }
 
-    void assertShutdown() {
+    public void assertShutdown() {
         if (!shutdown) {
             fail("Executor wasn't shut down.");
         }
@@ -109,7 +109,7 @@ public class TestScheduledExecutorService implements ScheduledExecutorService {
 
     @Override
     public void execute(Runnable command) {
-        throw new UnsupportedOperationException();
+        schedule(command, 0, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -136,13 +136,13 @@ public class TestScheduledExecutorService implements ScheduledExecutorService {
         throw new UnsupportedOperationException();
     }
 
-    void runAll() {
+    public void runAll() {
         for (TestFuture future : scheduled) {
             future.runnable.run();
         }
     }
 
-    void run(int taskIndex) {
+    public void run(int taskIndex) {
         scheduled.get(taskIndex).runnable.run();
     }
 

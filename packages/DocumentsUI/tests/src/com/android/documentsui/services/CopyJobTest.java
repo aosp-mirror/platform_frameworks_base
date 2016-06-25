@@ -22,10 +22,8 @@ import android.net.Uri;
 import android.provider.DocumentsContract.Document;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.model.DocumentStack;
-
-import java.util.List;
 
 @MediumTest
 public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
@@ -78,10 +76,9 @@ public class CopyJobTest extends AbstractCopyJobTest<CopyJob> {
     }
 
     @Override
-    // TODO: Stop passing srcParent here, as it's not used for copying.
-    CopyJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+    CopyJob createJob(ClipDetails details, DocumentStack stack)
             throws Exception {
         return new CopyJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
     }
 }

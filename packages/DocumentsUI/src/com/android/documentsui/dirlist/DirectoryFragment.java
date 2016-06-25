@@ -72,10 +72,10 @@ import android.widget.TextView;
 import android.widget.Toolbar;
 
 import com.android.documentsui.BaseActivity;
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.DirectoryLoader;
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.DocumentClipper;
-import com.android.documentsui.DocumentClipper.ClipDetails;
 import com.android.documentsui.DocumentsActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.Events;
@@ -96,7 +96,6 @@ import com.android.documentsui.State;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
@@ -171,6 +170,9 @@ public class DirectoryFragment extends Fragment
     // Note, we use !null to indicate that selection was restored (from rotation).
     // So don't fiddle with this field unless you've got the bigger picture in mind.
     private @Nullable Selection mRestoredSelection = null;
+    // Here we save the clip details of moveTo/copyTo actions when picker shows up.
+    // This will be written to saved instance.
+    private @Nullable ClipDetails mDetailsForCopy;
     private boolean mSearchMode = false;
 
     private @Nullable BandController mBandController;
@@ -199,6 +201,9 @@ public class DirectoryFragment extends Fragment
                 break;
             case FileOperationService.OPERATION_COPY:
                 Snackbars.showCopy(getActivity(), docCount);
+                break;
+            case FileOperationService.OPERATION_DELETE:
+                // We don't show anything for deletion.
                 break;
             default:
                 throw new UnsupportedOperationException("Unsupported Operation: " + opType);
@@ -264,6 +269,7 @@ public class DirectoryFragment extends Fragment
         mQuery = args.getString(Shared.EXTRA_QUERY);
         mType = args.getInt(Shared.EXTRA_TYPE);
         mSearchMode = args.getBoolean(Shared.EXTRA_SEARCH_MODE);
+        mDetailsForCopy = args.getParcelable(FileOperationService.EXTRA_CLIP_DETAILS);
 
         // Restore any selection we may have squirreled away in retained state.
         @Nullable RetainedState retained = getBaseActivity().getRetainedState();
@@ -353,6 +359,7 @@ public class DirectoryFragment extends Fragment
         outState.putParcelable(Shared.EXTRA_DOC, mDocument);
         outState.putString(Shared.EXTRA_QUERY, mQuery);
         outState.putBoolean(Shared.EXTRA_SEARCH_MODE, mSearchMode);
+        outState.putParcelable(FileOperationService.EXTRA_CLIP_DETAILS, mDetailsForCopy);
     }
 
     @Override
@@ -392,22 +399,21 @@ public class DirectoryFragment extends Fragment
     }
 
     private void handleCopyResult(int resultCode, Intent data) {
+
+        ClipDetails details = mDetailsForCopy;
+        mDetailsForCopy = null;
+
         if (resultCode == Activity.RESULT_CANCELED || data == null) {
             // User pressed the back button or otherwise cancelled the destination pick. Don't
             // proceed with the copy.
+            details.dispose(getContext());
             return;
         }
 
-        @OpType int operationType = data.getIntExtra(
-                FileOperationService.EXTRA_OPERATION,
-                FileOperationService.OPERATION_COPY);
-
         FileOperations.start(
                 getContext(),
-                getDisplayState().selectedDocumentsForCopy,
-                getDisplayState().stack.peek(),
-                (DocumentStack) data.getParcelableExtra(Shared.EXTRA_STACK),
-                operationType,
+                details,
+                data.getParcelableExtra(Shared.EXTRA_STACK),
                 mFileOpCallback);
     }
 
@@ -984,8 +990,14 @@ public class DirectoryFragment extends Fragment
                                     Log.w(TAG, "Action mode is null before deleting documents.");
                                 }
 
-                                FileOperations.delete(
-                                        getActivity(), docs, srcParent, getDisplayState().stack);
+                                ClipDetails details = ClipDetails.createClipDetails(
+                                        FileOperationService.OPERATION_DELETE,
+                                        srcParent.derivedUri,
+                                        selected,
+                                        mModel::getItemUri,
+                                        getContext());
+                                FileOperations.start(getActivity(), details,
+                                        getDisplayState().stack, mFileOpCallback);
                             }
                         })
                     .setNegativeButton(android.R.string.cancel, null)
@@ -1009,6 +1021,9 @@ public class DirectoryFragment extends Fragment
                 getActivity(),
                 DocumentsActivity.class);
 
+        Uri srcParent = getDisplayState().stack.peek().derivedUri;
+        mDetailsForCopy = ClipDetails.createClipDetails(
+                mode, srcParent, selected, mModel::getItemUri, getContext());
 
         // Relay any config overrides bits present in the original intent.
         Intent original = getActivity().getIntent();
@@ -1028,15 +1043,11 @@ public class DirectoryFragment extends Fragment
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
-                // TODO: Can this move to Fragment bundle state?
-                getDisplayState().selectedDocumentsForCopy = docs;
-
                 // Determine if there is a directory in the set of documents
                 // to be copied? Why? Directory creation isn't supported by some roots
                 // (like Downloads). This informs DocumentsActivity (the "picker")
                 // to restrict available roots to just those with support.
                 intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, hasDirectory(docs));
-                intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
 
                 // This just identifies the type of request...we'll check it
                 // when we reveive a response.
@@ -1164,13 +1175,9 @@ public class DirectoryFragment extends Fragment
         }
         mSelectionManager.clearSelection();
 
-        // Clips the docs in the background, then displays a message
-        new ClipTask(
-                getActivity(),
-                () -> {
-                    mClipper.clipDocumentsForCopy(mModel::getItemUri, selection);
-                },
-                selection.size()).execute();
+        mClipper.clipDocumentsForCopy(mModel::getItemUri, selection);
+
+        Snackbars.showDocumentsClipped(getActivity(), selection.size());
     }
 
     public void cutSelectedToClipboard() {
@@ -1182,16 +1189,9 @@ public class DirectoryFragment extends Fragment
         }
         mSelectionManager.clearSelection();
 
-        // Clips the docs in the background, then displays a message
-        new ClipTask(
-                getActivity(),
-                () -> {
-                    mClipper.clipDocumentsForCut(
-                            mModel::getItemUri,
-                            selection,
-                            getDisplayState().stack.peek());
-                },
-                selection.size()).execute();
+        mClipper.clipDocumentsForCut(mModel::getItemUri, selection, getDisplayState().stack.peek());
+
+        Snackbars.showDocumentsClipped(getActivity(), selection.size());
     }
 
     public void pasteFromClipboard() {
@@ -1273,15 +1273,19 @@ public class DirectoryFragment extends Fragment
         activity.setRootsDrawerOpen(false);
     }
 
-    public boolean handleDropEvent(View v, DragEvent event) {
+    void deleteDragClipFile() {
+        mClipper.deleteDragClip();
+    }
+
+    boolean handleDropEvent(View v, DragEvent event) {
         BaseActivity activity = (BaseActivity) getActivity();
         activity.setRootsDrawerOpen(false);
 
         ClipData clipData = event.getClipData();
         assert (clipData != null);
 
-        ClipDetails clipDetails = mClipper.getClipDetails(clipData);
-        assert(clipDetails.opType == FileOperationService.OPERATION_COPY);
+        assert(ClipDetails.createClipDetails(clipData).getOpType()
+                == FileOperationService.OPERATION_COPY);
 
         // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
         // multi-window drag, because localState isn't carried over from one process to
@@ -1478,7 +1482,7 @@ public class DirectoryFragment extends Fragment
                     // the current code layout and framework assumptions don't support
                     // this. So for now, we could end up doing a bunch of i/o on main thread.
                     v.startDragAndDrop(
-                            mClipper.getClipDataForDocuments(
+                            mClipper.getClipDataForDrag(
                                     mModel::getItemUri,
                                     selection,
                                     FileOperationService.OPERATION_COPY),

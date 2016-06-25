@@ -22,11 +22,13 @@ import static junit.framework.Assert.assertTrue;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
-import android.icu.text.NumberFormat;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+
+import java.text.NumberFormat;
 
 public class TestJob extends Job {
 
@@ -37,8 +39,8 @@ public class TestJob extends Job {
 
     TestJob(
             Context service, Context appContext, Listener listener,
-            int operationType, String id, DocumentStack stack, Runnable startRunnable) {
-        super(service, appContext, listener, operationType, id, stack);
+            String id, DocumentStack stack, ClipDetails details, Runnable startRunnable) {
+        super(service, appContext, listener, id, stack, details);
 
         mStartRunnable = startRunnable;
     }

@@ -28,14 +28,13 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
-import java.io.File;
-
 public class DocumentsApplication extends Application {
     private static final long PROVIDER_ANR_TIMEOUT = 20 * DateUtils.SECOND_IN_MILLIS;
 
     private RootsCache mRoots;
 
     private ThumbnailCache mThumbnailCache;
+    private ClipStorage mClipStorage;
     private DocumentClipper mClipper;
 
     public static RootsCache getRootsCache(Context context) {
@@ -62,6 +61,10 @@ public class DocumentsApplication extends Application {
         return ((DocumentsApplication) context.getApplicationContext()).mClipper;
     }
 
+    public static ClipStorage getClipStorage(Context context) {
+        return ((DocumentsApplication) context.getApplicationContext()).mClipStorage;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -74,7 +77,8 @@ public class DocumentsApplication extends Application {
 
         mThumbnailCache = new ThumbnailCache(memoryClassBytes / 4);
 
-        mClipper = createClipper(this.getApplicationContext());
+        mClipStorage = new ClipStorage(ClipStorage.prepareStorage(getCacheDir()));
+        mClipper = new DocumentClipper(this, mClipStorage);
 
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -87,12 +91,6 @@ public class DocumentsApplication extends Application {
         final IntentFilter localeFilter = new IntentFilter();
         localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
         registerReceiver(mCacheReceiver, localeFilter);
-    }
-
-    private static DocumentClipper createClipper(Context context) {
-        // prepare storage handles initialization and cleanup of the clip directory.
-        File clipDir = ClipStorage.prepareStorage(context.getCacheDir());
-        return new DocumentClipper(context, new ClipStorage(clipDir));
     }
 
     @Override

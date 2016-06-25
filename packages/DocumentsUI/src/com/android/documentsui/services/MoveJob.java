@@ -17,28 +17,29 @@
 package com.android.documentsui.services;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 
 import android.app.Notification;
 import android.app.Notification.Builder;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 
-import java.util.List;
+import java.io.FileNotFoundException;
 
 // TODO: Stop extending CopyJob.
 final class MoveJob extends CopyJob {
 
     private static final String TAG = "MoveJob";
 
-    final DocumentInfo mSrcParent;
+    DocumentInfo mSrcParent;
 
     /**
      * Moves files to a destination identified by {@code destination}.
@@ -47,13 +48,11 @@ final class MoveJob extends CopyJob {
      *
      * @see @link {@link Job} constructor for most param descriptions.
      *
-     * @param srcs List of files to be moved.
-     * @param srcParent Parent of all source files.
+     * @param details {@link ClipDetails} that contains list of files to be moved and their parent
      */
     MoveJob(Context service, Context appContext, Listener listener,
-            String id, DocumentStack destination, List<DocumentInfo> srcs, DocumentInfo srcParent) {
-        super(service, appContext, listener, OPERATION_MOVE, id, destination, srcs);
-        this.mSrcParent = srcParent;
+            String id, DocumentStack destination, ClipDetails details) {
+        super(service, appContext, listener, id, destination, details);
     }
 
     @Override
@@ -79,6 +78,20 @@ final class MoveJob extends CopyJob {
     Notification getFailureNotification() {
         return getFailureNotification(
                 R.plurals.move_error_notification_title, R.drawable.ic_menu_copy);
+    }
+
+    @Override
+    public void start() {
+        final ContentResolver resolver = appContext.getContentResolver();
+        try {
+            mSrcParent = DocumentInfo.fromUri(resolver, details.getSrcParent());
+        } catch(FileNotFoundException e) {
+            Log.e(TAG, "Failed to create srcParent.", e);
+            failedFileCount += details.getItemCount();
+            return;
+        }
+
+        super.start();
     }
 
     void processDocument(DocumentInfo src, DocumentInfo srcParent, DocumentInfo dest)

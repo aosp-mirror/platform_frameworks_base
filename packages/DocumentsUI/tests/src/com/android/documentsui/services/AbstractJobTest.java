@@ -24,17 +24,17 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.DocumentsProviderHelper;
 import com.android.documentsui.StubProvider;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
-
-import com.google.common.collect.Lists;
+import com.android.documentsui.services.FileOperationService.OpType;
+import com.android.documentsui.testing.ClipDetailsFactory;
 
 import java.util.List;
 
@@ -85,18 +85,16 @@ public abstract class AbstractJobTest<T extends Job> extends AndroidTestCase {
         mDestRoot = mDocs.getRoot(ROOT_1_ID);
     }
 
-    final T createJob(List<Uri> srcs, Uri srcParent, Uri destination) throws Exception {
+    final T createJob(@OpType int opType, List<Uri> srcs, Uri srcParent, Uri destination)
+            throws Exception {
         DocumentStack stack = new DocumentStack();
         stack.push(DocumentInfo.fromUri(mResolver, destination));
+        stack.root = mSrcRoot;
 
-        List<DocumentInfo> srcDocs = Lists.newArrayList();
-        for (Uri src : srcs) {
-            srcDocs.add(DocumentInfo.fromUri(mResolver, src));
-        }
-
-        return createJob(srcDocs, DocumentInfo.fromUri(mResolver, srcParent), stack);
+        ClipDetails details = ClipDetailsFactory.createClipDetails(opType, srcParent, srcs);
+        return createJob(details, stack);
     }
 
-    abstract T createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack destination)
+    abstract T createJob(ClipDetails details, DocumentStack destination)
             throws Exception;
 }

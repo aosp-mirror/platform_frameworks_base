@@ -29,10 +29,13 @@ import android.net.Uri;
 import android.test.ServiceTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.Job.Listener;
+import com.android.documentsui.testing.ClipDetailsFactory;
 import com.android.documentsui.testing.TestHandler;
+import com.android.documentsui.testing.TestScheduledExecutorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,8 @@ import java.util.List;
 @MediumTest
 public class FileOperationServiceTest extends ServiceTestCase<FileOperationService> {
 
+    private static final Uri SRC_PARENT =
+            Uri.parse("content://com.android.documentsui.testing/parent");
     private static final DocumentInfo ALPHA_DOC = createDoc("alpha");
     private static final DocumentInfo BETA_DOC = createDoc("alpha");
     private static final DocumentInfo GAMMA_DOC = createDoc("gamma");
@@ -90,7 +95,11 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
     }
 
     public void testRunsCopyJobs_AfterExceptionInJobCreation() throws Exception {
-        startService(createCopyIntent(new ArrayList<DocumentInfo>(), BETA_DOC));
+        try {
+            startService(createCopyIntent(new ArrayList<>(), BETA_DOC));
+        } catch(AssertionError e) {
+            // Expected AssertionError
+        }
         startService(createCopyIntent(newArrayList(GAMMA_DOC), DELTA_DOC));
 
         mJobFactory.assertJobsCreated(1);
@@ -219,13 +228,29 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
         DocumentStack stack = new DocumentStack();
         stack.push(dest);
 
-        return createBaseIntent(OPERATION_COPY, getContext(), createJobId(), files, stack);
+        List<Uri> uris = new ArrayList<>(files.size());
+        for (DocumentInfo file: files) {
+            uris.add(file.derivedUri);
+        }
+
+        ClipDetails details =
+                ClipDetailsFactory.createClipDetails(OPERATION_COPY, SRC_PARENT, uris);
+
+        return createBaseIntent(getContext(), createJobId(), details, stack);
     }
 
     private Intent createDeleteIntent(ArrayList<DocumentInfo> files) {
         DocumentStack stack = new DocumentStack();
 
-        return createBaseIntent(OPERATION_DELETE, getContext(), createJobId(), files, stack);
+        List<Uri> uris = new ArrayList<>(files.size());
+        for (DocumentInfo file: files) {
+            uris.add(file.derivedUri);
+        }
+
+        ClipDetails details =
+                ClipDetailsFactory.createClipDetails(OPERATION_DELETE, SRC_PARENT, uris);
+
+        return createBaseIntent(getContext(), createJobId(), details, stack);
     }
 
     private static DocumentInfo createDoc(String name) {
@@ -291,28 +316,28 @@ public class FileOperationServiceTest extends ServiceTestCase<FileOperationServi
 
         @Override
         Job createCopy(Context service, Context appContext, Listener listener, String id,
-                DocumentStack stack, List<DocumentInfo> srcs) {
+                DocumentStack stack, ClipDetails details) {
 
-            if (srcs.isEmpty()) {
+            if (details.getItemCount() == 0) {
                 throw new RuntimeException("Empty srcs not supported!");
             }
 
             TestJob job = new TestJob(
-                    service, appContext, listener, OPERATION_COPY, id, stack, mJobRunnable);
+                    service, appContext, listener, id, stack, details, mJobRunnable);
             copyJobs.add(job);
             return job;
         }
 
         @Override
         Job createDelete(Context service, Context appContext, Listener listener, String id,
-                DocumentStack stack, List<DocumentInfo> srcs, DocumentInfo srcParent) {
+                DocumentStack stack, ClipDetails details) {
 
-            if (srcs.isEmpty()) {
+            if (details.getItemCount() == 0) {
                 throw new RuntimeException("Empty srcs not supported!");
             }
 
             TestJob job = new TestJob(
-                    service, appContext, listener, OPERATION_DELETE, id, stack, mJobRunnable);
+                    service, appContext, listener, id, stack, details, mJobRunnable);
             deleteJobs.add(job);
 
             return job;

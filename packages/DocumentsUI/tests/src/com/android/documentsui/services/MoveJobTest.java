@@ -20,13 +20,10 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
 import android.provider.DocumentsContract.Document;
-import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
-import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.ClipDetails;
 import com.android.documentsui.model.DocumentStack;
-
-import java.util.List;
 
 @MediumTest
 public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
@@ -110,10 +107,9 @@ public class MoveJobTest extends AbstractCopyJobTest<MoveJob> {
     // TODO: Add test cases for moving when multi-parented.
 
     @Override
-    MoveJob createJob(List<DocumentInfo> srcs, DocumentInfo srcParent, DocumentStack stack)
+    MoveJob createJob(ClipDetails details, DocumentStack stack)
             throws Exception {
         return new MoveJob(
-                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, srcs,
-                srcParent);
+                mContext, mContext, mJobListener, FileOperations.createJobId(), stack, details);
     }
 }

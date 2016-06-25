@@ -16,6 +16,8 @@
 
 package com.android.documentsui.services;
 
+import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 import android.net.Uri;
@@ -23,7 +25,6 @@ import android.provider.DocumentsContract;
 import android.test.suitebuilder.annotation.MediumTest;
 
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.DocumentStack;
 
 import java.util.List;
 
@@ -110,7 +111,8 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
     public void runNoCopyDirToSelfTest() throws Exception {
         Uri testDir = mDocs.createFolder(mSrcRoot, "someDir");
 
-        createJob(newArrayList(testDir),
+        createJob(OPERATION_COPY,
+                newArrayList(testDir),
                 DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId),
                 testDir).run();
 
@@ -125,7 +127,8 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
         Uri testDir = mDocs.createFolder(mSrcRoot, "someDir");
         Uri destDir = mDocs.createFolder(testDir, "theDescendent");
 
-        createJob(newArrayList(testDir),
+        createJob(OPERATION_COPY,
+                newArrayList(testDir),
                 DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId),
                 destDir).run();
 
@@ -160,6 +163,6 @@ public abstract class AbstractCopyJobTest<T extends CopyJob> extends AbstractJob
     final T createJob(List<Uri> srcs) throws Exception {
         Uri srcParent = DocumentsContract.buildDocumentUri(AUTHORITY, mSrcRoot.documentId);
         Uri destination = DocumentsContract.buildDocumentUri(AUTHORITY, mDestRoot.documentId);
-        return createJob(srcs, srcParent, destination);
+        return createJob(OPERATION_COPY, srcs, srcParent, destination);
     }
 }

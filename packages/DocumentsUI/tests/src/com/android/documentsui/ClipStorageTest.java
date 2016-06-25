@@ -21,22 +21,25 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.documentsui.ClipStorage.Writer;
+import com.android.documentsui.ClipStorage.Reader;
 import com.android.documentsui.dirlist.TestModel;
+import com.android.documentsui.testing.TestScheduledExecutorService;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -48,38 +51,52 @@ public class ClipStorageTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
+    private TestScheduledExecutorService mExecutor;
+
     private ClipStorage mStorage;
     private TestModel mModel;
+
+    private long mTag;
 
     @Before
     public void setUp() {
         File clipDir = ClipStorage.prepareStorage(folder.getRoot());
         mStorage = new ClipStorage(clipDir);
+
+        mExecutor = new TestScheduledExecutorService();
+        AsyncTask.setDefaultExecutor(mExecutor);
+
+        mTag = mStorage.createTag();
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        AsyncTask.setDefaultExecutor(AsyncTask.SERIAL_EXECUTOR);
     }
 
     @Test
-    public void testWritePrimary() throws Exception {
-        Writer writer = mStorage.createWriter();
-        writeAll(TEST_URIS, writer);
+    public void testWrite() throws Exception {
+        writeAll(mTag, TEST_URIS);
     }
 
     @Test
     public void testRead() throws Exception {
-        Writer writer = mStorage.createWriter();
-        writeAll(TEST_URIS, writer);
-        long tag = mStorage.savePrimary();
-        List<Uri> uris = mStorage.read(tag);
+        writeAll(mTag, TEST_URIS);
+        List<Uri> uris = new ArrayList<>();
+        try(Reader provider = mStorage.createReader(mTag)) {
+            for (Uri uri : provider) {
+                uris.add(uri);
+            }
+        }
         assertEquals(TEST_URIS, uris);
     }
 
     @Test
     public void testDelete() throws Exception {
-        Writer writer = mStorage.createWriter();
-        writeAll(TEST_URIS, writer);
-        long tag = mStorage.savePrimary();
-        mStorage.delete(tag);
+        writeAll(mTag, TEST_URIS);
+        mStorage.delete(mTag);
         try {
-            mStorage.read(tag);
+            mStorage.createReader(mTag);
         } catch (IOException expected) {}
     }
 
@@ -91,21 +108,9 @@ public class ClipStorageTest {
         assertFalse(clipDir.equals(folder.getRoot()));
     }
 
-    @Test
-    public void testPrepareStorage_DeletesPreviousClipFiles() throws Exception {
-        File clipDir = ClipStorage.prepareStorage(folder.getRoot());
-        new File(clipDir, "somefakefile.poodles").createNewFile();
-        new File(clipDir, "yodles.yam").createNewFile();
-
-        assertEquals(2, clipDir.listFiles().length);
-        clipDir = ClipStorage.prepareStorage(folder.getRoot());
-        assertEquals(0, clipDir.listFiles().length);
-    }
-
-    private static void writeAll(List<Uri> uris, Writer writer) throws IOException {
-        for (Uri uri : uris) {
-            writer.write(uri);
-        }
+    private void writeAll(long tag, List<Uri> uris) {
+        new ClipStorage.PersistTask(mStorage, uris, tag).execute();
+        mExecutor.runAll();
     }
 
     private static List<Uri> createList(String... values) {

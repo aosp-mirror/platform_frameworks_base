@@ -17,16 +17,17 @@
 package com.android.documentsui;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.channels.FileLock;
+import java.util.Scanner;
 
 /**
  * Provides support for storing lists of documents identified by Uri.
@@ -36,9 +37,10 @@ import java.util.List;
  */
 public final class ClipStorage {
 
-    private static final String PRIMARY_SELECTION = "primary-selection.txt";
+    private static final String TAG = "ClipStorage";
+
     private static final byte[] LINE_SEPARATOR = System.lineSeparator().getBytes();
-    private static final int NO_SELECTION_TAG = -1;
+    public static final long NO_SELECTION_TAG = -1;
 
     private final File mOutDir;
 
@@ -51,46 +53,27 @@ public final class ClipStorage {
     }
 
     /**
-     * Returns a writer. Callers must...
+     * Creates a clip tag.
      *
-     * <li>synchronize on the {@link ClipStorage} instance while writing to this writer.
-     * <li>closed the write when finished.
+     * NOTE: this tag doesn't guarantee perfect uniqueness, but should work well unless user creates
+     * clips more than hundreds of times per second.
      */
-    public Writer createWriter() throws IOException {
-        File primary = new File(mOutDir, PRIMARY_SELECTION);
-        return new Writer(new FileOutputStream(primary));
+    public long createTag() {
+        return System.currentTimeMillis();
     }
 
     /**
-     * Saves primary uri list to persistent storage.
-     * @return tag identifying the saved set.
+     * Returns a writer. Callers must close the writer when finished.
      */
-    @VisibleForTesting
-    public long savePrimary() throws IOException {
-        File primary = new File(mOutDir, PRIMARY_SELECTION);
-
-        if (!primary.exists()) {
-            return NO_SELECTION_TAG;
-        }
-
-        long tag = System.currentTimeMillis();
-        File dest = toTagFile(tag);
-        primary.renameTo(dest);
-
-        return tag;
+    public Writer createWriter(long tag) throws IOException {
+        File file = toTagFile(tag);
+        return new Writer(file);
     }
 
     @VisibleForTesting
-    public List<Uri> read(long tag) throws IOException {
-        List<Uri> uris = new ArrayList<>();
-        File tagFile = toTagFile(tag);
-        try (BufferedReader in = new BufferedReader(new FileReader(tagFile))) {
-            String line = null;
-            while ((line = in.readLine()) != null) {
-                uris.add(Uri.parse(line));
-            }
-        }
-        return uris;
+    public Reader createReader(long tag) throws IOException {
+        File file = toTagFile(tag);
+        return new Reader(file);
     }
 
     @VisibleForTesting
@@ -102,12 +85,87 @@ public final class ClipStorage {
         return new File(mOutDir, String.valueOf(tag));
     }
 
-    public static final class Writer implements Closeable {
+    /**
+     * Provides initialization of the clip data storage directory.
+     */
+    static File prepareStorage(File cacheDir) {
+        File clipDir = getClipDir(cacheDir);
+        clipDir.mkdir();
+
+        assert(clipDir.isDirectory());
+        return clipDir;
+    }
+
+    public static boolean hasDocList(long tag) {
+        return tag != NO_SELECTION_TAG;
+    }
+
+    private static File getClipDir(File cacheDir) {
+        return new File(cacheDir, "clippings");
+    }
+
+    static final class Reader implements Iterable<Uri>, Closeable {
+
+        private final Scanner mScanner;
+        private final FileLock mLock;
+
+        private Reader(File file) throws IOException {
+            FileInputStream inStream = new FileInputStream(file);
+
+            // Lock the file here so it won't pass this line until the corresponding writer is done
+            // writing.
+            mLock = inStream.getChannel().lock(0L, Long.MAX_VALUE, true);
+
+            mScanner = new Scanner(inStream);
+        }
+
+        @Override
+        public Iterator iterator() {
+            return new Iterator(mScanner);
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (mLock != null) {
+                mLock.release();
+            }
+
+            if (mScanner != null) {
+                mScanner.close();
+            }
+        }
+    }
+
+    private static final class Iterator implements java.util.Iterator {
+        private final Scanner mScanner;
+
+        private Iterator(Scanner scanner) {
+            mScanner = scanner;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return mScanner.hasNextLine();
+        }
+
+        @Override
+        public Uri next() {
+            String line = mScanner.nextLine();
+            return Uri.parse(line);
+        }
+    }
+
+    private static final class Writer implements Closeable {
 
         private final FileOutputStream mOut;
+        private final FileLock mLock;
 
-        public Writer(FileOutputStream out) {
-            mOut = out;
+        private Writer(File file) throws IOException {
+            mOut = new FileOutputStream(file);
+
+            // Lock the file here so copy tasks would wait until everything is flushed to disk
+            // before start to run.
+            mLock = mOut.getChannel().lock();
         }
 
         public void write(Uri uri) throws IOException {
@@ -117,20 +175,43 @@ public final class ClipStorage {
 
         @Override
         public void close() throws IOException {
-            mOut.close();
+            if (mLock != null) {
+                mLock.release();
+            }
+
+            if (mOut != null) {
+                mOut.close();
+            }
         }
     }
 
     /**
-     * Provides initialization and cleanup of the clip data storage directory.
+     * An {@link AsyncTask} that persists doc uris in {@link ClipStorage}.
      */
-    static File prepareStorage(File cacheDir) {
-        File clipDir = new File(cacheDir, "clippings");
-        if (clipDir.exists()) {
-            Files.deleteRecursively(clipDir);
+    static final class PersistTask extends AsyncTask<Void, Void, Void> {
+
+        private final ClipStorage mClipStorage;
+        private final Iterable<Uri> mUris;
+        private final long mTag;
+
+        PersistTask(ClipStorage clipStorage, Iterable<Uri> uris, long tag) {
+            mClipStorage = clipStorage;
+            mUris = uris;
+            mTag = tag;
         }
-        assert(!clipDir.exists());
-        clipDir.mkdir();
-        return clipDir;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try (ClipStorage.Writer writer = mClipStorage.createWriter(mTag)) {
+                for (Uri uri: mUris) {
+                    assert(uri != null);
+                    writer.write(uri);
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Caught exception trying to write jumbo clip to disk.", e);
+            }
+
+            return null;
+        }
     }
 }
