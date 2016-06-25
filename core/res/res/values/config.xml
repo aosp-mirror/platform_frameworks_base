@@ -2505,7 +2505,7 @@
     </string-array>
 
     <!-- Component that is the default launcher when demo mode is enabled. -->
-    <string name="config_demoModeLauncherComponent"></string>
+    <string name="config_demoModeLauncherComponent">com.android.retaildemo/.DemoPlayer</string>
 
     <!-- Flag indicating whether round icons should be parsed from the application manifest. -->
     <bool name="config_useRoundIcon">false</bool>
