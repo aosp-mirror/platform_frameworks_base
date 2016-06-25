@@ -34,6 +34,11 @@ public class ChangeScroll extends Transition {
     private static final String PROPNAME_SCROLL_X = "android:changeScroll:x";
     private static final String PROPNAME_SCROLL_Y = "android:changeScroll:y";
 
+    private static final String[] PROPERTIES = {
+            PROPNAME_SCROLL_X,
+            PROPNAME_SCROLL_Y,
+    };
+
     public ChangeScroll() {}
 
     public ChangeScroll(Context context, AttributeSet attrs) {
@@ -48,6 +53,11 @@ public class ChangeScroll extends Transition {
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
         captureValues(transitionValues);
+    }
+
+    @Override
+    public String[] getTransitionProperties() {
+        return PROPERTIES;
     }
 
     private void captureValues(TransitionValues transitionValues) {
