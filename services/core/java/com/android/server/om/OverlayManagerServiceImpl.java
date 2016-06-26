@@ -324,7 +324,7 @@ final class OverlayManagerServiceImpl {
     }
 
     boolean onSetEnabled(@NonNull final String packageName, final boolean enable,
-            final int userId) {
+            final int userId, final boolean shouldWait) {
         if (DEBUG) {
             Slog.d(TAG, String.format("onSetEnabled packageName=%s enable=%s userId=%d",
                         packageName, enable, userId));
@@ -340,7 +340,7 @@ final class OverlayManagerServiceImpl {
             final PackageInfo targetPackage =
                 mPackageManager.getPackageInfo(oi.targetPackageName, userId);
             mSettings.setEnabled(packageName, userId, enable);
-            updateState(targetPackage, overlayPackage, userId);
+            updateState(targetPackage, overlayPackage, userId, shouldWait);
             return true;
         } catch (OverlayManagerSettings.BadKeyException e) {
             return false;
@@ -379,6 +379,12 @@ final class OverlayManagerServiceImpl {
     private void updateState(@Nullable final PackageInfo targetPackage,
             @NonNull final PackageInfo overlayPackage, final int userId)
         throws OverlayManagerSettings.BadKeyException {
+        updateState(targetPackage, overlayPackage, userId, false);
+    }
+
+    private void updateState(@Nullable final PackageInfo targetPackage,
+            @NonNull final PackageInfo overlayPackage, final int userId,
+            final boolean shouldWait) throws OverlayManagerSettings.BadKeyException {
         if (targetPackage != null) {
             mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
         }
@@ -395,7 +401,7 @@ final class OverlayManagerServiceImpl {
                             OverlayInfo.stateToString(currentState),
                             OverlayInfo.stateToString(newState)));
             }
-            mSettings.setState(overlayPackage.packageName, userId, newState);
+            mSettings.setState(overlayPackage.packageName, userId, newState, shouldWait);
         }
     }
 

@@ -25,8 +25,10 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Implementation of 'cmd overlay' commands.
@@ -45,7 +47,9 @@ final class OverlayManagerShellCommand extends ShellCommand {
     @Override
     public int onCommand(@Nullable final String cmd) {
         if (cmd == null) {
-            return handleDefaultCommands(cmd);
+            final PrintWriter out = getOutPrintWriter();
+            out.println("The overlay manager has already been initialized.");
+            return -1;
         }
         final PrintWriter err = getErrPrintWriter();
         try {
@@ -56,6 +60,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runEnableDisable(true);
                 case "disable":
                     return runEnableDisable(false);
+                case "disable-all":
+                	return runDisableAll();
                 case "set-priority":
                     return runSetPriority();
                 default:
@@ -82,10 +88,12 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Overlay packages are printed in priority order. With optional");
         out.println("    parameters PACKAGEs, limit output to the specified packages");
         out.println("    but include more information about each package.");
-        out.println("  enable [--user USER_ID] PACKAGE");
-        out.println("    Enable overlay package PACKAGE.");
-        out.println("  disable [--user USER_ID] PACKAGE");
-        out.println("    Disable overlay package PACKAGE.");
+        out.println("  enable [--user USER_ID] [PACKAGE [PACKAGE [...]]]");
+        out.println("    Enable overlay package PACKAGE or subsequent counts of PACKAGE.");
+        out.println("  disable [--user USER_ID] [PACKAGE [PACKAGE [...]]]");
+        out.println("    Disable overlay package PACKAGE or subsequent counts of PACKAGE.");
+        out.println("  disable-all [--user USER_ID]");
+        out.println("    Disable all overlay packages.");
         out.println("  set-priority [--user USER_ID] PACKAGE PARENT|lowest|highest");
         out.println("    Change the priority of the overlay PACKAGE to be just higher than");
         out.println("    the priority of PACKAGE_PARENT If PARENT is the special keyword");
@@ -145,8 +153,90 @@ final class OverlayManagerShellCommand extends ShellCommand {
             }
         }
 
-        final String packageName = getNextArgRequired();
-        return mInterface.setEnabled(packageName, enable, userId) ? 0 : 1;
+        int argc = 0;
+        String packageName = getNextArgRequired();
+        ArrayList<String> packages = new ArrayList<>();
+        if (packageName == null) {
+            System.err.println("Error: no packages specified");
+            return 1;
+        }
+        while (packageName != null) {
+            argc++;
+            packages.add(packageName);
+            packageName = getNextArg();
+        }
+        if (argc > 1) {
+            for (String pkg : packages) {
+                boolean ret = mInterface.setEnabled(pkg, enable, userId, false);
+                if (!ret) {
+                    System.err.println("Error: Failed to " + ((enable) ? "enable ": "disable ") + pkg);
+                }
+            }
+            return 0;
+        } else if (argc == 1) {
+            return mInterface.setEnabled(packages.get(0), enable, userId, false) ? 0 : 1;
+        } else {
+            System.err.println("Error: A fatal exception has occurred.");
+            return 1;
+        }
+    }
+
+    private int runDisableAll() {
+        int userId = UserHandle.USER_OWNER;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                	break;
+                default:
+                    System.err.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        try {
+            Map<String, List<OverlayInfo>> targetsAndOverlays = mInterface.getAllOverlays(userId);
+            int iterator = 0;
+            int overlaySize = targetsAndOverlays.entrySet().size();
+            for (Entry<String, List<OverlayInfo>> targetEntry : targetsAndOverlays.entrySet()) {
+                int iterator_nested = 0;
+                int targetSize_nested = targetEntry.getValue().size();
+                iterator++;
+                for (OverlayInfo oi : targetEntry.getValue()) {
+                    if (iterator_nested < targetSize_nested) {
+                        if (oi.isEnabled()) {
+                            boolean worked = mInterface.setEnabled(oi.packageName, false, userId, true);
+                            if (!worked) {
+                                System.err.println("Failed to disable " + oi.packageName);
+                            }
+                        }
+                    } else {
+                        if (iterator == overlaySize) {
+                            if (oi.isEnabled()) {
+                                boolean worked = mInterface.setEnabled(oi.packageName, false, userId, false);
+                                if (!worked) {
+                                    System.err.println("Failed to disable " + oi.packageName);
+                                }
+                            }
+                        } else {
+                            if (oi.isEnabled()) {
+                                boolean worked = mInterface.setEnabled(oi.packageName, false, userId, true);
+                                if (!worked) {
+                                    System.err.println("Failed to disable " + oi.packageName);
+                                }
+                            }
+                        }
+                    }
+                    iterator_nested++;
+                }
+            }
+            mInterface.refresh(userId);
+        } catch (RemoteException re) {
+            System.err.println(re.toString());
+            System.err.println("Error: A fatal exception has occurred.");
+        }
+        return 0;
     }
 
     private int runSetPriority() throws RemoteException {
