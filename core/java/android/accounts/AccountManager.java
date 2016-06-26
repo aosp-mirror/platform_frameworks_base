@@ -245,18 +245,14 @@ public class AccountManager {
      * Bundle key used for a {@link Bundle} in result from
      * {@link #startAddAccountSession} and friends which returns session data
      * for installing an account later.
-     * @hide
      */
-    @SystemApi
     public static final String KEY_ACCOUNT_SESSION_BUNDLE = "accountSessionBundle";
 
     /**
      * Bundle key used for the {@link String} account status token in result
      * from {@link #startAddAccountSession} and friends which returns
      * information about a particular account.
-     * @hide
      */
-    @SystemApi
     public static final String KEY_ACCOUNT_STATUS_TOKEN = "accountStatusToken";
 
     public static final String ACTION_AUTHENTICATOR_INTENT =
@@ -2705,9 +2701,7 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #finishSession
-     * @hide
      */
-    @SystemApi
     public AccountManagerFuture<Bundle> startAddAccountSession(
             final String accountType,
             final String authTokenType,
@@ -2789,9 +2783,7 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #finishSession
-     * @hide
      */
-    @SystemApi
     public AccountManagerFuture<Bundle> startUpdateCredentialsSession(
             final Account account,
             final String authTokenType,
@@ -2850,6 +2842,8 @@ public class AccountManager {
      *         <ul>
      *         <li>{@link #KEY_ACCOUNT_NAME} - the name of the account created
      *         <li>{@link #KEY_ACCOUNT_TYPE} - the type of the account
+     *         <li>{@link #KEY_ACCOUNT_STATUS_TOKEN} - optional, token to check
+     *         status of the account
      *         </ul>
      *         If no activity was specified and additional information is needed
      *         from user, the returned Bundle may contains only
@@ -2869,9 +2863,7 @@ public class AccountManager {
      *         trouble
      *         </ul>
      * @see #startAddAccountSession and #startUpdateCredentialsSession
-     * @hide
      */
-    @SystemApi
     public AccountManagerFuture<Bundle> finishSession(
             final Bundle sessionBundle,
             final Activity activity,
@@ -2931,9 +2923,7 @@ public class AccountManager {
      * @param handler {@link Handler} identifying the callback thread, null for the main thread
      * @return An {@link AccountManagerFuture} which resolves to a Boolean, true if the credentials
      *         of the account should be updated.
-     * @hide
      */
-    @SystemApi
     public AccountManagerFuture<Boolean> isCredentialsUpdateSuggested(
             final Account account,
             final String statusToken,

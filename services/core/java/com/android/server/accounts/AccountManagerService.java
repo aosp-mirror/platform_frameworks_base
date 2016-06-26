@@ -2641,14 +2641,6 @@ public class AccountManagerService
         }
 
         final int uid = Binder.getCallingUid();
-        // Only allow system to start session
-        if (!isSystemUid(uid)) {
-            String msg = String.format(
-                    "uid %s cannot stat add account session.",
-                    uid);
-            throw new SecurityException(msg);
-        }
-
         final int userId = UserHandle.getUserId(uid);
         if (!canUserModifyAccounts(userId, uid)) {
             try {
@@ -2852,14 +2844,6 @@ public class AccountManagerService
                             "User %s trying to finish session for %s without cross user permission",
                             UserHandle.getCallingUserId(),
                             userId));
-        }
-
-        // Only allow system to finish session
-        if (!isSystemUid(callingUid)) {
-            String msg = String.format(
-                    "uid %s cannot finish session because it's not system uid.",
-                    callingUid);
-            throw new SecurityException(msg);
         }
 
         if (!canUserModifyAccounts(userId, callingUid)) {
@@ -3083,14 +3067,6 @@ public class AccountManagerService
         }
 
         final int uid = Binder.getCallingUid();
-        // Only allow system to start session
-        if (!isSystemUid(uid)) {
-            String msg = String.format(
-                    "uid %s cannot start update credentials session.",
-                    uid);
-            throw new SecurityException(msg);
-        }
-
         int userId = UserHandle.getCallingUserId();
 
         // Check to see if the Password should be included to the caller.
@@ -3151,15 +3127,6 @@ public class AccountManagerService
         }
         if (TextUtils.isEmpty(statusToken)) {
             throw new IllegalArgumentException("status token is empty");
-        }
-
-        int uid = Binder.getCallingUid();
-        // Only allow system to start session
-        if (!isSystemUid(uid)) {
-            String msg = String.format(
-                    "uid %s cannot stat add account session.",
-                    uid);
-            throw new SecurityException(msg);
         }
 
         int usrId = UserHandle.getCallingUserId();
