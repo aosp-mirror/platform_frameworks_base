@@ -338,11 +338,12 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
 
     public void dump(PrintWriter pw) {
         int N = mStatusIcons.getChildCount();
-        pw.println("  system icons: " + N);
+        pw.println("  icon views: " + N);
         for (int i=0; i<N; i++) {
             StatusBarIconView ic = (StatusBarIconView) mStatusIcons.getChildAt(i);
             pw.println("    [" + i + "] icon=" + ic);
         }
+        super.dump(pw);
     }
 
     public void dispatchDemoCommand(String command, Bundle args) {
