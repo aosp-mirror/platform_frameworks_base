@@ -448,8 +448,6 @@
     <string name="allow_mock_location_summary">Allow mock locations</string>
     <!-- Setting Checkbox title whether to enable view attribute inspection -->
     <string name="debug_view_attributes">Enable view attribute inspection</string>
-    <!-- Setting Checkbox summary whether to use DHCP client from Lollipop (Android 5.0) [CHAR LIMIT=130] -->
-    <string name="legacy_dhcp_client_summary">Use the DHCP client from Lollipop instead of the new Android DHCP client.</string>
     <string name="mobile_data_always_on_summary">Always keep mobile data active, even when Wi\u2011Fi is active (for fast network switching).</string>
     <!-- Title of warning dialog about the implications of enabling USB debugging -->
     <string name="adb_warning_title">Allow USB debugging?</string>
