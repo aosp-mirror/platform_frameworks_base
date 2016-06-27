@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lejon një aplikacion të lexojë sesionet e instalimit. Kjo e lejon atë të shohë detaje rreth instalimeve të paketave aktive."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"kërko paketat e instalimit"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Lejon që një aplikacion të kërkojë instalimin e paketave."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Trokit dy herë për të kontrolluar zmadhimin"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Nuk mundi të shtonte miniaplikacion."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Shko"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Kërko"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Shërbimi i klasifikimit të njoftimeve"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN-ja u aktivizua"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN-ja është aktivizuar nga <xliff:g id="APP">%s</xliff:g>"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Trokit për të menaxhuar rrjetin."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Lidhur me <xliff:g id="SESSION">%s</xliff:g>. Trokit për të menaxhuar rrjetin."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Po lidh VPN-në për aktivizim të përhershëm…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN e lidhur në mënyrë të përhershme"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Gabimi VPN-je për aktivizimin e përhershëm"</string>
@@ -1654,10 +1651,22 @@
     <string name="unpin_target" msgid="3556545602439143442">"Zhgozhdo"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacioni mbi aplikacionin"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Rinis sesionin"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Trokit për të nisur një sesion të ri të demonstrimit"</string>
-    <string name="demo_starting_message" msgid="7574017688324606624">"Demonstrimi po niset"</string>
-    <string name="demo_restarting_message" msgid="1363894248779727028">"Sesioni po riniset"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2370249087943803584) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5481925817590883246) -->
+    <skip />
+    <!-- no translation found for demo_starting_message (5268556852031489931) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (952118052531642451) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_title (6596109959002331334) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (1743456683091721620) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_left_button (5314271347014802475) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_right_button (5019306703066964808) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Rivendos cilësimet e fabrikës për ta përdorur këtë pajisje pa kufizime"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Prek për të mësuar më shumë."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> u çaktivizua"</string>
