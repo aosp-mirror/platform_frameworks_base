@@ -457,8 +457,6 @@
     <!-- Content description for the close button in the zen mode panel introduction message. [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_close">Close</string>
 
-    <!-- Content description of the user tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_user">User <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
     <!-- Content description of the wifi tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_wifi"><xliff:g id="signal" example="Three bars">%1$s</xliff:g>.</string>
     <!-- Announcement made when the wifi is turned off (not shown on the screen). [CHAR LIMIT=NONE] -->

@@ -18,8 +18,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/card_info_field"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:showIn="@layout/recents_tv_task_card_view_fallback_banner">
+        android:layout_height="wrap_content">
     <ImageView
             android:id="@+id/card_extra_badge"
             android:layout_width="@dimen/recents_tv_card_extra_badge_size"
