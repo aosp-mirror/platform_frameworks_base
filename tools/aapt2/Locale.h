@@ -57,8 +57,6 @@ struct LocaleValue {
      */
     void writeTo(android::ResTable_config* out) const;
 
-    std::string toDirName() const;
-
     inline int compare(const LocaleValue& other) const;
 
     inline bool operator<(const LocaleValue& o) const;

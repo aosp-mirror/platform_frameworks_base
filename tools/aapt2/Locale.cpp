@@ -223,33 +223,6 @@ ssize_t LocaleValue::initFromParts(std::vector<std::string>::iterator iter,
     return static_cast<ssize_t>(iter - startIter);
 }
 
-
-std::string LocaleValue::toDirName() const {
-    std::string dirName;
-    if (language[0]) {
-        dirName += language;
-    } else {
-        return dirName;
-    }
-
-    if (script[0]) {
-        dirName += "-s";
-        dirName += script;
-    }
-
-    if (region[0]) {
-        dirName += "-r";
-        dirName += region;
-    }
-
-    if (variant[0]) {
-        dirName += "-v";
-        dirName += variant;
-    }
-
-    return dirName;
-}
-
 void LocaleValue::initFromResTable(const ResTable_config& config) {
     config.unpackLanguage(language);
     config.unpackRegion(region);
