@@ -77,6 +77,7 @@ public final class ResourceHelper {
      */
     public static int getColor(String value) {
         if (value != null) {
+            value = value.trim();
             if (!value.startsWith("#")) {
                 if (value.startsWith(SdkConstants.PREFIX_THEME_REF)) {
                     throw new NumberFormatException(String.format(

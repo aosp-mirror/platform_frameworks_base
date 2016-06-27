@@ -110,6 +110,7 @@ import static com.android.layoutlib.bridge.android.RenderParamsFlags.FLAG_KEY_AP
  */
 @SuppressWarnings("deprecation")  // For use of Pair.
 public final class BridgeContext extends Context {
+    private static final String PREFIX_THEME_APPCOMPAT = "Theme.AppCompat";
 
     /** The map adds cookies to each view so that IDE can link xml tags to views. */
     private final HashMap<View, Object> mViewKeyMap = new HashMap<>();
@@ -153,6 +154,7 @@ public final class BridgeContext extends Context {
     private ClassLoader mClassLoader;
     private IBinder mBinder;
     private PackageManager mPackageManager;
+    private Boolean mIsThemeAppCompat;
 
     /**
      * Some applications that target both pre API 17 and post API 17, set the newer attrs to
@@ -477,6 +479,36 @@ public final class BridgeContext extends Context {
         }
 
         return Pair.of(null, Boolean.FALSE);
+    }
+
+    /**
+     * Returns whether the current selected theme is based on AppCompat
+     */
+    public boolean isAppCompatTheme() {
+        // If a cached value exists, return it.
+        if (mIsThemeAppCompat != null) {
+            return mIsThemeAppCompat;
+        }
+        // Ideally, we should check if the corresponding activity extends
+        // android.support.v7.app.ActionBarActivity, and not care about the theme name at all.
+        StyleResourceValue defaultTheme = mRenderResources.getDefaultTheme();
+        // We can't simply check for parent using resources.themeIsParentOf() since the
+        // inheritance structure isn't really what one would expect. The first common parent
+        // between Theme.AppCompat.Light and Theme.AppCompat is Theme.Material (for v21).
+        boolean isThemeAppCompat = false;
+        for (int i = 0; i < 50; i++) {
+            if (defaultTheme == null) {
+                break;
+            }
+            // for loop ensures that we don't run into cyclic theme inheritance.
+            if (defaultTheme.getName().startsWith(PREFIX_THEME_APPCOMPAT)) {
+                isThemeAppCompat = true;
+                break;
+            }
+            defaultTheme = mRenderResources.getParent(defaultTheme);
+        }
+        mIsThemeAppCompat = isThemeAppCompat;
+        return isThemeAppCompat;
     }
 
     @SuppressWarnings("deprecation")
