@@ -39,17 +39,21 @@ static sp<RenderNode> createSyncedNode(uint32_t width, uint32_t height) {
 TEST(LayerUpdateQueue, enqueueSimple) {
     sp<RenderNode> a = createSyncedNode(100, 100);
     sp<RenderNode> b = createSyncedNode(200, 200);
+    sp<RenderNode> c = createSyncedNode(200, 200);
 
     LayerUpdateQueue queue;
     queue.enqueueLayerWithDamage(a.get(), Rect(25, 25, 75, 75));
     queue.enqueueLayerWithDamage(b.get(), Rect(100, 100, 300, 300));
+    queue.enqueueLayerWithDamage(c.get(), Rect(.5, .5, .5, .5));
 
-    EXPECT_EQ(2u, queue.entries().size());
+    EXPECT_EQ(3u, queue.entries().size());
 
     EXPECT_EQ(a.get(), queue.entries()[0].renderNode);
     EXPECT_EQ(Rect(25, 25, 75, 75), queue.entries()[0].damage);
     EXPECT_EQ(b.get(), queue.entries()[1].renderNode);
     EXPECT_EQ(Rect(100, 100, 200, 200), queue.entries()[1].damage); // clipped to bounds
+    EXPECT_EQ(c.get(), queue.entries()[2].renderNode);
+    EXPECT_EQ(Rect(0, 0, 1, 1), queue.entries()[2].damage); // rounded out
 }
 
 TEST(LayerUpdateQueue, enqueueUnion) {
