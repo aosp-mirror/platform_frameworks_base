@@ -361,7 +361,7 @@ $('#Downloads').after($('#download-table'));
     documentation</a>.
   </li>
 
-  <li>Removed all sysroots for platform levels prior to Android 2.3 (API level 10).
+  <li>Removed all sysroots for platform levels prior to Android 2.3 (API level 9).
     We dropped support for them in NDK r11, but neglected to actually remove them.
   </li>
 
