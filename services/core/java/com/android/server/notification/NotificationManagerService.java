@@ -305,6 +305,7 @@ public class NotificationManagerService extends SystemService {
     private RankingHandler mRankingHandler;
     private long mLastOverRateLogTime;
     private float mMaxPackageEnqueueRate = DEFAULT_MAX_NOTIFICATION_ENQUEUE_RATE;
+    private String mSystemNotificationSound;
 
     private static class Archive {
         final int mBufferSize;
@@ -817,6 +818,8 @@ public class NotificationManagerService extends SystemService {
     private final class SettingsObserver extends ContentObserver {
         private final Uri NOTIFICATION_LIGHT_PULSE_URI
                 = Settings.System.getUriFor(Settings.System.NOTIFICATION_LIGHT_PULSE);
+        private final Uri NOTIFICATION_SOUND_URI
+                = Settings.System.getUriFor(Settings.System.NOTIFICATION_SOUND);
         private final Uri NOTIFICATION_RATE_LIMIT_URI
                 = Settings.Global.getUriFor(Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE);
 
@@ -827,6 +830,8 @@ public class NotificationManagerService extends SystemService {
         void observe() {
             ContentResolver resolver = getContext().getContentResolver();
             resolver.registerContentObserver(NOTIFICATION_LIGHT_PULSE_URI,
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(NOTIFICATION_SOUND_URI,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
                     false, this, UserHandle.USER_ALL);
@@ -850,6 +855,10 @@ public class NotificationManagerService extends SystemService {
             if (uri == null || NOTIFICATION_RATE_LIMIT_URI.equals(uri)) {
                 mMaxPackageEnqueueRate = Settings.Global.getFloat(resolver,
                             Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE, mMaxPackageEnqueueRate);
+            }
+            if (uri == null || NOTIFICATION_SOUND_URI.equals(uri)) {
+                mSystemNotificationSound = Settings.System.getString(resolver,
+                        Settings.System.NOTIFICATION_SOUND);
             }
         }
     }
@@ -901,6 +910,11 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setHandler(Handler handler) {
         mHandler = handler;
+    }
+
+    @VisibleForTesting
+    void setSystemNotificationSound(String systemNotificationSound) {
+        mSystemNotificationSound = systemNotificationSound;
     }
 
     @Override
@@ -2869,9 +2883,7 @@ public class NotificationManagerService extends SystemService {
                 soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
 
                 // check to see if the default notification sound is silent
-                ContentResolver resolver = getContext().getContentResolver();
-                hasValidSound = Settings.System.getString(resolver,
-                       Settings.System.NOTIFICATION_SOUND) != null;
+                hasValidSound = mSystemNotificationSound != null;
             } else if (notification.sound != null) {
                 soundUri = notification.sound;
                 hasValidSound = (soundUri != null);

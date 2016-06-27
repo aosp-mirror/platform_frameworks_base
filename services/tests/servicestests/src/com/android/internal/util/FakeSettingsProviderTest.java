@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Unit tests for FakeSettingsProvider.
  */
-@Suppress
 public class FakeSettingsProviderTest extends AndroidTestCase {
 
     private MockContentResolver mCr;
