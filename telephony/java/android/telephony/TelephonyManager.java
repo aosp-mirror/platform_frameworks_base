@@ -5423,7 +5423,7 @@ public class TelephonyManager {
         return null;
     }
 
-    /*
+    /**
      * Get snapshot of Telephony histograms
      * @return List of Telephony histograms
      * Requires Permission:
