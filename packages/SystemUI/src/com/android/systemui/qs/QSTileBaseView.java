@@ -63,6 +63,7 @@ public class QSTileBaseView extends LinearLayout {
         setClipChildren(false);
         setClipToPadding(false);
         mCollapsedView = collapsedView;
+        setFocusable(true);
     }
 
     private Drawable newTileBackground() {
