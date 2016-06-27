@@ -127,7 +127,8 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
     // operations will be able to store and restore the current clip and transform info, and
     // quick rejection will be correct (for display lists)
 
-    const Rect unmappedBounds(left, top, right, bottom);
+    Rect unmappedBounds(left, top, right, bottom);
+    unmappedBounds.roundOut();
 
     // determine clipped bounds relative to previous viewport.
     Rect visibleBounds = unmappedBounds;
