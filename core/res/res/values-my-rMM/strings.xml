@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"အပလီကေးရှင်းအား တပ်ဆင်ရေး ချိတ်ဆက်မှုများကို ဖတ်ခွင့်ပြုသည်။ ၎င်းသည် ဖွင့်သုံးနေသည့် အထုပ်အား တပ်ဆင်မှုဆိုင်ရာ အသေးိစတ်များကို ကြည့်ရှုခွင့် ပြုသည်။"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"တပ်ဆင်ရေး အထုပ်များကို တောင်းဆိုပါ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ပက်ကေ့များ သွင်းယူခြင်းအတွက် တောင်းဆိုရန် အပ္ပလီကေးရှင်းအား ခွင့်ပြုပါ"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ဇူးမ်အသုံးပြုရန် နှစ်ချက်တို့ပါ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ဝဒ်ဂျက်ထည့်လို့ မရပါ"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"သွားပါ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ရှာဖွေခြင်း"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"သတိပေးချက် အဆင့်သတ်မှတ်ခြင်းဝန်ဆောင်မှု"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ဖွင့်ထားပါသည်"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g>မှVPNအလုပ်လုပ်နေသည်"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"ကွန်ရက်ကို စီမံခန့်ခွဲရန် တို့ပါ။"</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> သို့ ချိတ်ဆက်ထားသည်။ ကွန်ရက်ကို စီမံခန့်ခွဲရန် တို့ပါ။"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်နေစဉ်…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"အမြဲတမ်းဖွင့်ထား VPN ဆက်သွယ်မှုရှိ"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"အမြဲတမ်းဖွင့်ထား VPN အမှား"</string>

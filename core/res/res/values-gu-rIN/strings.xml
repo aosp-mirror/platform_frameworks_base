@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"એપ્લિકેશનને ઇન્સ્ટોલ સત્રોને વાંચવાની મંજૂરી આપે છે. આ તેને સક્રિય પૅકેજ ઇન્સ્ટોલેશન્સ વિશે વિગતો જોવાની મંજૂરી આપે છે."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"પૅકેજેસ ઇન્સ્ટૉલ કરવાની વિનંતી કરો"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"એપ્લિકેશનને પૅકેજેસના ઇન્સ્ટોલેશનની વિનંતી કરવાની મંજૂરી આપો."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ઝૂમ નિયંત્રણ માટે બેવાર ટૅપ કરો"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"વિજેટ ઉમેરી શકાયું નથી."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"જાઓ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"શોધો"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"સૂચના રેંકર સેવા"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN સક્રિય કર્યું"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> દ્વારા VPN સક્રિય થયું"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"નેટવર્કને સંચાલિત કરવા માટે ટૅપ કરો."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> થી કનેક્ટ થયાં. નેટવર્કને સંચાલિત કરવા માટે ટૅપ કરો."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"હંમેશા-ચાલુ VPN કનેક્ટ થઈ રહ્યું છે…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"હંમેશા-ચાલુ VPN કનેક્ટ થયું"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"હંમેશાં ચાલુ VPN ભૂલ"</string>

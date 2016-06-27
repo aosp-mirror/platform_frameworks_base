@@ -1015,7 +1015,7 @@
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Шкала"</string>
     <string name="screen_compat_mode_show" msgid="4013878876486655892">"Ар дайым көрсөтүлсүн"</string>
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Муну тутум жөндөөлөрүнөн кайра иштетүү &gt; Колдонмолор &gt; Жүктөлүп алынган."</string>
-    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу учурдагы дисплей өлчөмүнүн жөндөөлөрүн колдоого албагандыктан, күтүүсүз аракеттерди жасашы мүмкүн."</string>
+    <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу көрүнүштүн тандалган өлчөмүн экранда көрсөтө албайт жана туура эмес иштеши мүмкүн."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Ар дайым көрсөтүлсүн"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу (<xliff:g id="PROCESS">%2$s</xliff:g> процесси) өз алдынча иштеткен StrictMode саясатын бузду."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> процесси өзүнүн мажбурланган StrictMode саясатын бузуп койду."</string>
