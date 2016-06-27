@@ -26,6 +26,7 @@ void LayerUpdateQueue::clear() {
 }
 
 void LayerUpdateQueue::enqueueLayerWithDamage(RenderNode* renderNode, Rect damage) {
+    damage.roundOut();
     damage.doIntersect(0, 0, renderNode->getWidth(), renderNode->getHeight());
     if (!damage.isEmpty()) {
         for (Entry& entry : mEntries) {
