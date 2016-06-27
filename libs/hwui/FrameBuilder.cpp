@@ -946,6 +946,7 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
 
     Rect dstRect(op.unmappedBounds);
     boundsTransform.mapRect(dstRect);
+    dstRect.roundOut();
     dstRect.doIntersect(mCanvasState.currentSnapshot()->getRenderTargetClip());
 
     if (dstRect.isEmpty()) {
