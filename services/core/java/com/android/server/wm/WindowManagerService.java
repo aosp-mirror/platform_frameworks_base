@@ -3519,6 +3519,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // can re-appear and inflict its own orientation on us.  Keep the
                 // orientation stable until this all settles down.
                 return mLastWindowForcedOrientation;
+            } else if (mPolicy.isKeyguardLocked()
+                    && mLastKeyguardForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                // Use the last orientation the keyguard forced while the display is frozen with the
+                // keyguard locked.
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
+                        + "return " + mLastKeyguardForcedOrientation);
+                return mLastKeyguardForcedOrientation;
             }
         } else {
             // TODO(multidisplay): Change to the correct display.
