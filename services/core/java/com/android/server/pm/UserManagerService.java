@@ -471,6 +471,8 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo ui = mUsers.valueAt(i).info;
                 if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
                     partials.add(ui);
+                    mRemovingUserIds.append(ui.id, true);
+                    ui.partial = true;
                 }
             }
         }
