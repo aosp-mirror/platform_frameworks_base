@@ -85,8 +85,7 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Menyiapkan salinan..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Menyiapkan pemindahan…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Bersiap menghapus…"</string>
-    <!-- no translation found for delete_progress (5399405983046157222) -->
-    <skip />
+    <string name="delete_progress" msgid="5399405983046157222">"<xliff:g id="COUNT_0">%1$d</xliff:g> / <xliff:g id="TOTALCOUNT">%2$d</xliff:g>"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other">Tidak dapat menyalin <xliff:g id="COUNT_1">%1$d</xliff:g> file</item>
       <item quantity="one">Tidak dapat menyalin <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>

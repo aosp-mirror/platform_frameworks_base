@@ -88,8 +88,7 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Priprema se kopiranje…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprema se premeštanje..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Priprema se brisanje…"</string>
-    <!-- no translation found for delete_progress (5399405983046157222) -->
-    <skip />
+    <string name="delete_progress" msgid="5399405983046157222">"<xliff:g id="COUNT_0">%1$d</xliff:g> / <xliff:g id="TOTALCOUNT">%2$d</xliff:g>"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku</item>
       <item quantity="few">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>
