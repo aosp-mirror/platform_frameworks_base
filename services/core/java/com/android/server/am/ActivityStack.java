@@ -3759,6 +3759,10 @@ final class ActivityStack {
         if (getVisibleBehindActivity() == r) {
             mStackSupervisor.requestVisibleBehindLocked(r, false);
         }
+
+        // Clean-up activities are no longer relaunching (e.g. app process died). Notify window
+        // manager so it can update its bookkeeping.
+        mWindowManager.notifyAppRelaunchesCleared(r.appToken);
     }
 
     private void removeTimeoutsForActivityLocked(ActivityRecord r) {
