@@ -130,6 +130,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
 
     public interface Callback {
         public void sessionConnectionGone(VoiceInteractionSessionConnection connection);
+        public void onSessionShown(VoiceInteractionSessionConnection connection);
+        public void onSessionHidden(VoiceInteractionSessionConnection connection);
     }
 
     final ServiceConnection mFullConnection = new ServiceConnection() {
@@ -313,6 +315,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
             } else if (showCallback != null) {
                 mPendingShowCallbacks.add(showCallback);
             }
+            mCallback.onSessionShown(this);
             return true;
         }
         if (showCallback != null) {
@@ -468,6 +471,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection {
                     } catch (RemoteException e) {
                     }
                 }
+                mCallback.onSessionHidden(this);
             }
             if (mFullyBound) {
                 mContext.unbindService(mFullConnection);
