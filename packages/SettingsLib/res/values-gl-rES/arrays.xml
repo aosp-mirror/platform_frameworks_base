@@ -125,10 +125,10 @@
     <item msgid="3414540279805870511">"720 p (seguro)"</item>
     <item msgid="9039818062847141551">"1080 p"</item>
     <item msgid="4939496949750174834">"1080 p (seguro)"</item>
-    <item msgid="1833612718524903568">"4 K"</item>
-    <item msgid="238303513127879234">"4 K (seguro)"</item>
-    <item msgid="3547211260846843098">"4 K (mellorado)"</item>
-    <item msgid="5411365648951414254">"4 K (mellorado e seguro)"</item>
+    <item msgid="1833612718524903568">"4K"</item>
+    <item msgid="238303513127879234">"4K (seguro)"</item>
+    <item msgid="3547211260846843098">"4K (mellorado)"</item>
+    <item msgid="5411365648951414254">"4K (mellorado e seguro)"</item>
     <item msgid="1311305077526792901">"720 p, 1080 p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
