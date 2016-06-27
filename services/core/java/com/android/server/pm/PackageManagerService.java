@@ -627,7 +627,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     @GuardedBy("mPackages")
     final ArraySet<String> mFrozenPackages = new ArraySet<>();
 
-    final ProtectedPackages mProtectedPackages = new ProtectedPackages();
+    final ProtectedPackages mProtectedPackages;
 
     boolean mRestoredSettings;
 
@@ -2280,6 +2280,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         mGlobalGids = systemConfig.getGlobalGids();
         mSystemPermissions = systemConfig.getSystemPermissions();
         mAvailableFeatures = systemConfig.getAvailableFeatures();
+
+        mProtectedPackages = new ProtectedPackages(mContext);
 
         synchronized (mInstallLock) {
         // writer
@@ -11661,6 +11663,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkgSetting == null) {
                     return false;
                 }
+                // Only allow protected packages to hide themselves.
+                if (hidden && !UserHandle.isSameApp(uid, pkgSetting.appId)
+                        && mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                    Slog.w(TAG, "Not hiding protected package: " + packageName);
+                    return false;
+                }
                 if (pkgSetting.getHidden(userId) != hidden) {
                     pkgSetting.setHidden(hidden, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
@@ -16431,8 +16439,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
 
-        if (mProtectedPackages.canPackageBeWiped(userId, packageName)) {
-            throw new SecurityException("Cannot clear data for a device owner or a profile owner");
+        if (mProtectedPackages.isPackageDataProtected(userId, packageName)) {
+            throw new SecurityException("Cannot clear data for a protected package: "
+                    + packageName);
         }
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
@@ -17758,9 +17767,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                         + Binder.getCallingPid()
                         + ", uid=" + uid + ", package uid=" + pkgSetting.appId);
             }
-            // Don't allow changing profile and device owners.
-            if (mProtectedPackages.canPackageStateBeChanged(userId, packageName)) {
-                throw new SecurityException("Cannot disable a device owner or a profile owner");
+            // Don't allow changing protected packages.
+            if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
+                throw new SecurityException("Cannot disable a protected package: " + packageName);
             }
         }
 
@@ -20892,9 +20901,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
-        public boolean canPackageBeWiped(int userId, String packageName) {
-            return mProtectedPackages.canPackageBeWiped(userId,
-                    packageName);
+        public boolean isPackageDataProtected(int userId, String packageName) {
+            return mProtectedPackages.isPackageDataProtected(userId, packageName);
         }
     }
 
