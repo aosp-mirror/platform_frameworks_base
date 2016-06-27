@@ -243,9 +243,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         dispatchMessage(obtainMessage(DO_CLOSE_CONNECTION));
     }
 
-    public void commitContent(InputContentInfo inputContentInfo, Bundle opts,
+    public void commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts,
             int seq, IInputContextCallback callback) {
-        dispatchMessage(obtainMessageOOSC(DO_COMMIT_CONTENT, inputContentInfo, opts, seq, callback));
+        dispatchMessage(obtainMessageIOOSC(DO_COMMIT_CONTENT, flags, inputContentInfo, opts, seq,
+                callback));
     }
 
     void dispatchMessage(Message msg) {
@@ -560,6 +561,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 return;
             }
             case DO_COMMIT_CONTENT: {
+                final int flags = msg.arg1;
                 SomeArgs args = (SomeArgs) msg.obj;
                 try {
                     InputConnection ic = getInputConnection();
@@ -576,7 +578,8 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                         return;
                     }
                     args.callback.setCommitContentResult(
-                            ic.commitContent(inputContentInfo, (Bundle) args.arg2), args.seq);
+                            ic.commitContent(inputContentInfo, flags, (Bundle) args.arg2),
+                            args.seq);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Got RemoteException calling commitContent", e);
                 }
@@ -612,14 +615,14 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
         return mH.obtainMessage(what, arg1, arg2, args);
     }
 
-    Message obtainMessageOOSC(int what, Object arg1, Object arg2, int seq,
+    Message obtainMessageIOOSC(int what, int arg1, Object objArg1, Object objArg2, int seq,
             IInputContextCallback callback) {
         SomeArgs args = new SomeArgs();
-        args.arg1 = arg1;
-        args.arg2 = arg2;
+        args.arg1 = objArg1;
+        args.arg2 = objArg2;
         args.callback = callback;
         args.seq = seq;
-        return mH.obtainMessage(what, 0, 0, args);
+        return mH.obtainMessage(what, arg1, 0, args);
     }
 
     Message obtainMessageIOSC(int what, int arg1, Object arg2, int seq,
