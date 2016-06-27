@@ -10220,6 +10220,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void notifyAppRelaunchesCleared(IBinder token) {
+        synchronized (mWindowMap) {
+            final AppWindowToken appWindow = findAppWindowToken(token);
+            if (appWindow != null) {
+                appWindow.clearRelaunching();
+            }
+        }
+    }
+
     @Override
     public int getDockedDividerInsetsLw() {
         return getDefaultDisplayContentLocked().getDockedDividerController().getContentInsets();

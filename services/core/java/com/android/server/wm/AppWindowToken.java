@@ -625,6 +625,13 @@ class AppWindowToken extends WindowToken {
         }
     }
 
+    void clearRelaunching() {
+        if (canFreezeBounds()) {
+            unfreezeBounds();
+        }
+        mPendingRelaunchCount = 0;
+    }
+
     void addWindow(WindowState w) {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState candidate = allAppWindows.get(i);
