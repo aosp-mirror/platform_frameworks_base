@@ -25,14 +25,14 @@ Copyright (C) 2016 The Android Open Source Project
         <item>Empty dish</item>
         <item>Bits</item>
         <item>Fish</item>
-        <item>Bacon</item>
+        <item>Chicken</item>
         <item>Treat</item>
     </string-array>
     <array name="food_icons">
         <item>@drawable/food_dish</item>
         <item>@drawable/food_bits</item>
         <item>@drawable/food_sysuituna</item>
-        <item>@drawable/food_bacon</item>
+        <item>@drawable/food_chicken</item>
         <item>@drawable/food_donut</item>
     </array>
     <integer-array name="food_intervals">
@@ -45,8 +45,8 @@ Copyright (C) 2016 The Android Open Source Project
     <integer-array name="food_new_cat_prob">
         <item>0</item>
         <item>5</item>
-        <item>25</item>
-        <item>50</item>
-        <item>75</item>
+        <item>35</item>
+        <item>65</item>
+        <item>90</item>
     </integer-array>
 </resources>
