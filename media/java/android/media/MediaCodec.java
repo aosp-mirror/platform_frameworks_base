@@ -125,6 +125,77 @@ import java.util.Map;
  All video codecs support flexible YUV 4:2:0 buffers since {@link
  android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
 
+ <h4>Accessing Raw Video ByteBuffers on Older Devices</h4>
+ <p>
+ Prior to {@link android.os.Build.VERSION_CODES#LOLLIPOP} and {@link Image} support, you need to
+ use the {@link MediaFormat#KEY_STRIDE} and {@link MediaFormat#KEY_SLICE_HEIGHT} output format
+ values to understand the layout of the raw output buffers.
+ <p class=note>
+ Note that on some devices the slice-height is advertised as 0. This could mean either that the
+ slice-height is the same as the frame height, or that the slice-height is the frame height
+ aligned to some value (usually a power of 2). Unfortunately, there is no way to tell the actual
+ slice height in this case. Furthermore, the vertical stride of the {@code U} plane in planar
+ formats is also not specified or defined, though usually it is half of the slice height.
+ <p>
+ The {@link MediaFormat#KEY_WIDTH} and {@link MediaFormat#KEY_HEIGHT} keys specify the size of the
+ video frames; however, for most encondings the video (picture) only occupies a portion of the
+ video frame. This is represented by the 'crop rectangle'.
+ <p>
+ You need to use the following keys to get the crop rectangle of raw output images from the
+ {@linkplain #getOutputFormat output format}. If these keys are not present, the video occupies the
+ entire video frame.The crop rectangle is understood in the context of the output frame
+ <em>before</em> applying any {@linkplain MediaFormat#KEY_ROTATION rotation}.
+ <table style="width: 0%">
+  <thead>
+   <tr>
+    <th>Format Key</th>
+    <th>Type</th>
+    <th>Description</th>
+   </tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>{@code "crop-left"}</td>
+    <td>Integer</td>
+    <td>The left-coordinate (x) of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-top"}</td>
+    <td>Integer</td>
+    <td>The top-coordinate (y) of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-right"}</td>
+    <td>Integer</td>
+    <td>The right-coordinate (x) <strong>MINUS 1</strong> of the crop rectangle</td>
+   </tr><tr>
+    <td>{@code "crop-bottom"}</td>
+    <td>Integer</td>
+    <td>The bottom-coordinate (y) <strong>MINUS 1</strong> of the crop rectangle</td>
+   </tr><tr>
+    <td colspan=3>
+     The right and bottom coordinates can be understood as the coordinates of the right-most
+     valid column/bottom-most valid row of the cropped output image.
+    </td>
+   </tr>
+  </tbody>
+ </table>
+ <p>
+ The size of the video frame (before rotation) can be calculated as such:
+ <pre class=prettyprint>
+ MediaFormat format = decoder.getOutputFormat(&hellip;);
+ int width = format.getInteger(MediaFormat.KEY_WIDTH);
+ if (format.containsKey("crop-left") && format.containsKey("crop-right")) {
+     width = format.getInteger("crop-right") + 1 - format.getInteger("crop-left");
+ }
+ int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+ if (format.containsKey("crop-top") && format.containsKey("crop-bottom")) {
+     height = format.getInteger("crop-bottom") + 1 - format.getInteger("crop-top");
+ }
+ </pre>
+ <p class=note>
+ Also note that the meaning of {@link BufferInfo#offset BufferInfo.offset} was not consistent across
+ devices. On some devices the offset pointed to the top-left pixel of the crop rectangle, while on
+ most devices it pointed to the top-left pixel of the entire frame.
+
  <h3>States</h3>
  <p>
  During its life a codec conceptually exists in one of three states: Stopped, Executing or
