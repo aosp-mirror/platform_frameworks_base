@@ -3758,8 +3758,8 @@ METADATA['en'].carousel = {
   },
   "distribute/googleplay/guide.html": {
     "image": "images/distribute/hero-secrets-to-app-success.jpg",
-    "title": "Secrets to App Success on Google Play",
-    "summary": "Get the updated guide full of useful features, tips, and best practices that will help you grow a successful app or game business on Google Play.",
+    "title": "Playbook for Developers",
+    "summary": "Stay up to date with features, best practices, and strategies to help you grow your business and find success on Google Play.",
   },
   "about/versions/lollipop.html": {
     "image": "images/home/hero-lollipop_2x.png",
