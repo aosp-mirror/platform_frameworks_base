@@ -838,9 +838,15 @@ public final class PageContentRepository {
 
                     try (ParcelFileDescriptor source = pipe[0]) {
                         try (ParcelFileDescriptor destination = pipe[1]) {
-
-                            mRenderer.renderPage(mPageIndex, bitmap.getWidth(), bitmap.getHeight(),
-                                    mRenderSpec.printAttributes, destination);
+                            synchronized (mLock) {
+                                if (mRenderer != null) {
+                                    mRenderer.renderPage(mPageIndex, bitmap.getWidth(),
+                                            bitmap.getHeight(), mRenderSpec.printAttributes,
+                                            destination);
+                                } else {
+                                    throw new IllegalStateException("Renderer is disconnected");
+                                }
+                            }
                         }
 
                         BitmapSerializeUtils.readBitmapPixels(bitmap, source);
