@@ -808,6 +808,16 @@ public class CarrierConfigManager {
     public static final String KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL =
             "drop_video_call_when_answering_audio_call_bool";
 
+    /**
+     * Flag indicating whether the carrier supports merging wifi calls when VoWIFI is disabled.
+     * This can happen in the case of a carrier which allows offloading video calls to WIFI
+     * separately of whether voice over wifi is enabled.  In such a scenario when two video calls
+     * are downgraded to voice, they remain over wifi.  However, if VoWIFI is disabled, these calls
+     * cannot be merged.
+     */
+    public static final String KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL =
+            "allow_merge_wifi_calls_when_vowifi_off_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -959,8 +969,9 @@ public class CarrierConfigManager {
         // Order is important - lowest precidence first
         sDefaults.putStringArray(KEY_RATCHET_RAT_FAMILIES,
                 new String[]{"1,2","7,8,12","3,11,9,10,15","14,19"});
-        sDefaults.putBoolean(KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL, true);
-        sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_TREAT_DOWNGRADED_VIDEO_CALLS_AS_VIDEO_CALLS_BOOL, false);
+        sDefaults.putBoolean(KEY_DROP_VIDEO_CALL_WHEN_ANSWERING_AUDIO_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_ALLOW_MERGE_WIFI_CALLS_WHEN_VOWIFI_OFF_BOOL, true);
     }
 
     /**
