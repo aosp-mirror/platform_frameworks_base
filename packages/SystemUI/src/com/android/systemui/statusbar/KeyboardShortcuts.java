@@ -85,6 +85,12 @@ public final class KeyboardShortcuts {
     private final SparseArray<String> mModifierNames = new SparseArray<>();
     private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
     private final SparseArray<Drawable> mModifierDrawables = new SparseArray<>();
+    // Ordered list of modifiers that are supported. All values in this array must exist in
+    // mModifierNames.
+    private final int[] mModifierList = new int[] {
+            KeyEvent.META_META_ON, KeyEvent.META_CTRL_ON, KeyEvent.META_ALT_ON,
+            KeyEvent.META_SHIFT_ON, KeyEvent.META_SYM_ON, KeyEvent.META_FUNCTION_ON
+    };
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;
@@ -724,8 +730,8 @@ public final class KeyboardShortcuts {
         if (modifiers == 0) {
             return shortcutKeys;
         }
-        for(int i = 0; i < mModifierNames.size(); ++i) {
-            final int supportedModifier = mModifierNames.keyAt(i);
+        for(int i = 0; i < mModifierList.length; ++i) {
+            final int supportedModifier = mModifierList[i];
             if ((modifiers & supportedModifier) != 0) {
                 shortcutKeys.add(new StringDrawableContainer(
                         mModifierNames.get(supportedModifier),
