@@ -5423,10 +5423,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             IPackageManager pm = AppGlobals.getPackageManager();
             int pkgUid = -1;
             synchronized(this) {
-                if (getPackageManagerInternalLocked().canPackageBeWiped(
+                if (getPackageManagerInternalLocked().isPackageDataProtected(
                         userId, packageName)) {
                     throw new SecurityException(
-                            "Cannot clear data for a device owner or a profile owner");
+                            "Cannot clear data for a protected package: " + packageName);
                 }
 
                 try {

@@ -157,7 +157,7 @@ public abstract class PackageManagerInternal {
             int deviceOwnerUserId, String deviceOwner, SparseArray<String> profileOwners);
 
     /**
-     * Whether a package's data be cleared.
+     * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
      */
-    public abstract boolean canPackageBeWiped(int userId, String packageName);
+    public abstract boolean isPackageDataProtected(int userId, String packageName);
 }

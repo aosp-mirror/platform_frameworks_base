@@ -2502,4 +2502,6 @@
     <!-- True if the device supports system navigation keys. -->
     <bool name="config_supportSystemNavigationKeys">false</bool>
 
+    <!-- Package name for the device provisioning package. -->
+    <string name="config_deviceProvisioningPackage"></string>
 </resources>
