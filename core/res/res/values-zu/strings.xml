@@ -1651,10 +1651,14 @@
     <string name="unpin_target" msgid="3556545602439143442">"Susa ukuphina"</string>
     <string name="app_info" msgid="6856026610594615344">"Ulwazi lohlelo lokusebenza"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"Qalisa kabusha isikhathi"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"Thepha ukuze uqale isikhathi esisha sedemo"</string>
-    <string name="demo_starting_message" msgid="7574017688324606624">"Ukuqalisa idemo"</string>
-    <string name="demo_restarting_message" msgid="1363894248779727028">"Ukuqalisa kabusha iseshini"</string>
+    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Setha kabusha idivayisi?"</string>
+    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Thepha ukuze usethe kabusha idivayisi"</string>
+    <string name="demo_starting_message" msgid="5268556852031489931">"Iqalisa i-demo..."</string>
+    <string name="demo_restarting_message" msgid="952118052531642451">"Isetha kabusha idivayisi..."</string>
+    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Setha kabusha idivayisi?"</string>
+    <string name="demo_user_inactivity_timeout_countdown" msgid="1743456683091721620">"Uzolahlekelwa inoma iluphi ushintsho futhi idemo izoqala futhi kumasekhondi angu-<xliff:g id="TIMEOUT">%1$s</xliff:g>..."</string>
+    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Khansela"</string>
+    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Setha kabusha manje"</string>
     <string name="audit_safemode_notification" msgid="6416076898350685856">"Setha kabusha ukuze usebenzise idivayisi ngaphandle kwemikhawulo"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"Thinta ukuze ufunde kabanzi."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"I-<xliff:g id="LABEL">%1$s</xliff:g> ekhutshaziwe"</string>
