@@ -36,7 +36,7 @@ public class PrintServiceRecommendationsLoader extends Loader<List<Recommendatio
     private final @NonNull PrintManager mPrintManager;
 
     /** Handler to sequentialize the delivery of the results to the main thread */
-    private final Handler mHandler;
+    private final @NonNull Handler mHandler;
 
     /** Listens for updates to the data from the platform */
     private PrintManager.PrintServiceRecommendationsChangeListener mListener;
@@ -90,9 +90,7 @@ public class PrintServiceRecommendationsLoader extends Loader<List<Recommendatio
             mListener = null;
         }
 
-        if (mHandler != null) {
-            mHandler.removeMessages(0);
-        }
+        mHandler.removeMessages(0);
     }
 
     @Override
