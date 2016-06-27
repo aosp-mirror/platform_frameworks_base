@@ -2632,4 +2632,7 @@
 
   <java-symbol type="layout" name="unsupported_display_size_dialog_content" />
   <java-symbol type="string" name="unsupported_display_size_message" />
+
+  <!-- Package name for the device provisioning package -->
+  <java-symbol type="string" name="config_deviceProvisioningPackage" />
 </resources>
