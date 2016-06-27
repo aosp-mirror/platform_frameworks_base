@@ -3186,7 +3186,7 @@ public final class ViewRootImpl implements ViewParent,
             }
             focusNode.recycle();
         }
-        if (mAccessibilityFocusedHost != null) {
+        if ((mAccessibilityFocusedHost != null) && (mAccessibilityFocusedHost != view))  {
             // Clear accessibility focus in the view.
             mAccessibilityFocusedHost.clearAccessibilityFocusNoCallbacks(
                     AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
