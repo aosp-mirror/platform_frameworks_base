@@ -19294,7 +19294,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         boolean mayBeTop = false;
-        app.whitelistManager = false;
 
         for (int is = app.services.size()-1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
@@ -19352,9 +19351,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (cr.binding.client == app) {
                         // Binding to ourself is not interesting.
                         continue;
-                    }
-                    if ((cr.flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
-                        app.whitelistManager = true;
                     }
 
                     if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {

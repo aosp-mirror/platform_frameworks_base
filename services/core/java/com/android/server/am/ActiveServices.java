@@ -43,7 +43,6 @@ import android.os.TransactionTooLargeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
@@ -751,6 +750,17 @@ public final class ActiveServices {
         mAm.updateProcessForegroundLocked(proc, anyForeground, oomAdj);
     }
 
+    private void updateWhitelistManagerLocked(ProcessRecord proc) {
+        proc.whitelistManager = false;
+        for (int i=proc.services.size()-1; i>=0; i--) {
+            ServiceRecord sr = proc.services.valueAt(i);
+            if (sr.whitelistManager) {
+                proc.whitelistManager = true;
+                break;
+            }
+        }
+    }
+
     public void updateServiceConnectionActivitiesLocked(ProcessRecord clientProc) {
         ArraySet<ProcessRecord> updatedProcesses = null;
         for (int i = 0; i < clientProc.connections.size(); i++) {
@@ -997,6 +1007,9 @@ public final class ActiveServices {
             if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
                 b.client.hasAboveClient = true;
             }
+            if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                s.whitelistManager = true;
+            }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app, c, true);
             }
@@ -1018,6 +1031,9 @@ public final class ActiveServices {
             if (s.app != null) {
                 if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
                     s.app.treatLikeActivity = true;
+                }
+                if (s.whitelistManager) {
+                    s.app.whitelistManager = true;
                 }
                 // This could have made the service more important.
                 mAm.updateLruProcessLocked(s.app, s.app.hasClientActivities
@@ -1807,6 +1823,10 @@ public final class ActiveServices {
             }
         }
 
+        if (r.whitelistManager) {
+            app.whitelistManager = true;
+        }
+
         requestServiceBindingsLocked(r, execInFg);
 
         updateServiceClientActivitiesLocked(app, null, true);
@@ -2018,6 +2038,9 @@ public final class ActiveServices {
                 r.stats.stopLaunchedLocked();
             }
             r.app.services.remove(r);
+            if (r.whitelistManager) {
+                updateWhitelistManagerLocked(r.app);
+            }
             if (r.app.thread != null) {
                 updateServiceForegroundLocked(r.app, false);
                 try {
@@ -2084,6 +2107,14 @@ public final class ActiveServices {
             b.client.connections.remove(c);
             if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
                 b.client.updateHasAboveClientLocked();
+            }
+            // If this connection requested whitelist management, see if we should
+            // now clear that state.
+            if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                s.updateWhitelistManager();
+                if (!s.whitelistManager && s.app != null) {
+                    updateWhitelistManagerLocked(s.app);
+                }
             }
             if (s.app != null) {
                 updateServiceClientActivitiesLocked(s.app, c, true);
@@ -2284,6 +2315,9 @@ public final class ActiveServices {
             if (finishing) {
                 if (r.app != null && !r.app.persistent) {
                     r.app.services.remove(r);
+                    if (r.whitelistManager) {
+                        updateWhitelistManagerLocked(r.app);
+                    }
                 }
                 r.app = null;
             }
@@ -2379,6 +2413,9 @@ public final class ActiveServices {
                     service.app.removed = killProcess;
                     if (!service.app.persistent) {
                         service.app.services.remove(service);
+                        if (service.whitelistManager) {
+                            updateWhitelistManagerLocked(service.app);
+                        }
                     }
                 }
                 service.app = null;
@@ -2496,6 +2533,8 @@ public final class ActiveServices {
         }
         updateServiceConnectionActivitiesLocked(app);
         app.connections.clear();
+
+        app.whitelistManager = false;
 
         // Clear app state from services.
         for (int i = app.services.size() - 1; i >= 0; i--) {
