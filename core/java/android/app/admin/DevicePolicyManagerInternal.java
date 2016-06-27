@@ -80,15 +80,25 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
 
     /**
-     * Creates an intent to show the admin support dialog to let the user know that the package is
-     * suspended by the admin. This assumes that {@param packageName} is suspended by the
-     * device/profile owner. The caller should check if the package is suspended or not.
+     * Creates an intent to show the admin support dialog to say that an action is disallowed by
+     * the device/profile owner.
      *
      * <p>This method does not take the DPMS lock.  Safe to be called from anywhere.
-     *
-     * @param packageName The package that is suspended
-     * @param userId The user having the suspended package.
+     * @param userId The user where the action is disallowed.
+     * @param useDefaultIfNoAdmin If true, a non-null intent will be returned, even if we couldn't
+     * find a profile/device owner.
      * @return The intent to trigger the admin support dialog.
      */
-    public abstract Intent createPackageSuspendedDialogIntent(String packageName, int userId);
+    public abstract Intent createShowAdminSupportIntent(int userId, boolean useDefaultIfNoAdmin);
+
+    /**
+     * Creates an intent to show the admin support dialog showing the admin who has set a user
+     * restriction.
+     *
+     * <p>This method does not take the DPMS lock. Safe to be called from anywhere.
+     * @param userId The user where the user restriction is set.
+     * @return The intent to trigger the admin support dialog, or null if the user restriction is
+     * not enforced by the profile/device owner.
+     */
+    public abstract Intent createUserRestrictionSupportIntent(int userId, String userRestriction);
 }

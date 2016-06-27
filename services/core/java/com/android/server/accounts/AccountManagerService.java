@@ -2962,15 +2962,34 @@ public class AccountManagerService
     }
 
     private void showCantAddAccount(int errorCode, int userId) {
-        Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
-        cantAddAccount.putExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, errorCode);
-        cantAddAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        Intent intent = null;
+        if (errorCode == AccountManager.ERROR_CODE_USER_RESTRICTED) {
+            intent = dpmi.createUserRestrictionSupportIntent(userId,
+                    UserManager.DISALLOW_MODIFY_ACCOUNTS);
+        } else if (errorCode == AccountManager.ERROR_CODE_MANAGEMENT_DISABLED_FOR_ACCOUNT_TYPE) {
+            intent = dpmi.createShowAdminSupportIntent(userId, false);
+        }
+        if (intent == null) {
+            intent = getDefaultCantAddAccountIntent(errorCode);
+        }
         long identityToken = clearCallingIdentity();
         try {
-            mContext.startActivityAsUser(cantAddAccount, new UserHandle(userId));
+            mContext.startActivityAsUser(intent, new UserHandle(userId));
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    /**
+     * Called when we don't know precisely who is preventing us from adding an account.
+     */
+    private Intent getDefaultCantAddAccountIntent(int errorCode) {
+        Intent cantAddAccount = new Intent(mContext, CantAddAccountActivity.class);
+        cantAddAccount.putExtra(CantAddAccountActivity.EXTRA_ERROR_CODE, errorCode);
+        cantAddAccount.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        return cantAddAccount;
     }
 
     @Override

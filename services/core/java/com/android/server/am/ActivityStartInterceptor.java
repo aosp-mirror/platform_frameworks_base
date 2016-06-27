@@ -150,8 +150,7 @@ class ActivityStartInterceptor {
         if (devicePolicyManager == null) {
             return false;
         }
-        mIntent = devicePolicyManager.createPackageSuspendedDialogIntent(
-                mAInfo.packageName, mUserId);
+        mIntent = devicePolicyManager.createShowAdminSupportIntent(mUserId, true);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
