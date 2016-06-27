@@ -855,5 +855,7 @@ public class BaseInputConnection implements InputConnection {
     /**
      * The default implementation does nothing.
      */
-    public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) { return false; }
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        return false;
+    }
 }

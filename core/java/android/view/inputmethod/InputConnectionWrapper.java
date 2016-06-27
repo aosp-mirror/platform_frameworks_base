@@ -274,7 +274,7 @@ public class InputConnectionWrapper implements InputConnection {
      * {@inheritDoc}
      * @throws NullPointerException if the target is {@code null}.
      */
-    public boolean commitContent(InputContentInfo inputContentInfo, Bundle opts) {
-        return mTarget.commitContent(inputContentInfo, opts);
+    public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
+        return mTarget.commitContent(inputContentInfo, flags, opts);
     }
 }
