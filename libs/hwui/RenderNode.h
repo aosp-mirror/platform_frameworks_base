@@ -232,7 +232,7 @@ public:
     // the frameNumber to appropriately batch/synchronize these transactions.
     // There is no other filtering/batching to ensure that only the "final"
     // state called once per frame.
-    class ANDROID_API PositionListener {
+    class ANDROID_API PositionListener : public VirtualLightRefBase {
     public:
         virtual ~PositionListener() {}
         // Called when the RenderNode's position changes
@@ -247,7 +247,7 @@ public:
     // before the RenderNode is used for drawing.
     // RenderNode takes ownership of the pointer
     ANDROID_API void setPositionListener(PositionListener* listener) {
-        mPositionListener.reset(listener);
+        mPositionListener = listener;
     }
 
     // This is only modified in MODE_FULL, so it can be safely accessed
@@ -366,7 +366,7 @@ private:
     // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
 
-    std::unique_ptr<PositionListener> mPositionListener;
+    sp<PositionListener> mPositionListener;
 }; // class RenderNode
 
 } /* namespace uirenderer */
