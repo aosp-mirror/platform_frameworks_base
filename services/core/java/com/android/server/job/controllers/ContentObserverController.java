@@ -22,6 +22,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -40,6 +41,7 @@ import java.util.List;
  */
 public class ContentObserverController extends StateController {
     private static final String TAG = "JobScheduler.Content";
+    private static final boolean DEBUG = false;
 
     /**
      * Maximum number of changing URIs we will batch together to report.
@@ -87,6 +89,9 @@ public class ContentObserverController extends StateController {
         if (taskStatus.hasContentTriggerConstraint()) {
             if (taskStatus.contentObserverJobInstance == null) {
                 taskStatus.contentObserverJobInstance = new JobInstance(taskStatus);
+            }
+            if (DEBUG) {
+                Slog.i(TAG, "Tracking content-trigger job " + taskStatus);
             }
             mTrackedTasks.add(taskStatus);
             boolean havePendingUris = false;
@@ -175,6 +180,9 @@ public class ContentObserverController extends StateController {
                     taskStatus.contentObserverJobInstance = null;
                 }
             }
+            if (DEBUG) {
+                Slog.i(TAG, "No longer tracking job " + taskStatus);
+            }
             mTrackedTasks.remove(taskStatus);
         }
     }
@@ -194,16 +202,20 @@ public class ContentObserverController extends StateController {
     }
 
     final class ObserverInstance extends ContentObserver {
-        final Uri mUri;
+        final JobInfo.TriggerContentUri mUri;
         final ArraySet<JobInstance> mJobs = new ArraySet<>();
 
-        public ObserverInstance(Handler handler, Uri uri) {
+        public ObserverInstance(Handler handler, JobInfo.TriggerContentUri uri) {
             super(handler);
             mUri = uri;
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
+            if (DEBUG) {
+                Slog.i(TAG, "onChange(self=" + selfChange + ") for " + uri
+                        + " when mUri=" + mUri);
+            }
             synchronized (mLock) {
                 final int N = mJobs.size();
                 for (int i=0; i<N; i++) {
@@ -255,14 +267,25 @@ public class ContentObserverController extends StateController {
                 for (JobInfo.TriggerContentUri uri : uris) {
                     ObserverInstance obs = mObservers.get(uri);
                     if (obs == null) {
-                        obs = new ObserverInstance(mHandler, uri.getUri());
+                        obs = new ObserverInstance(mHandler, uri);
                         mObservers.put(uri, obs);
+                        final boolean andDescendants = (uri.getFlags() &
+                                JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS) != 0;
+                        if (DEBUG) {
+                            Slog.v(TAG, "New observer " + obs + " for " + uri.getUri()
+                                    + " andDescendants=" + andDescendants);
+                        }
                         mContext.getContentResolver().registerContentObserver(
                                 uri.getUri(),
-                                (uri.getFlags() &
-                                        JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS)
-                                    != 0,
+                                andDescendants,
                                 obs);
+                    } else {
+                        if (DEBUG) {
+                            final boolean andDescendants = (uri.getFlags() &
+                                    JobInfo.TriggerContentUri.FLAG_NOTIFY_FOR_DESCENDANTS) != 0;
+                            Slog.v(TAG, "Reusing existing observer " + obs + " for " + uri.getUri()
+                                    + " andDescendants=" + andDescendants);
+                        }
                     }
                     obs.mJobs.add(this);
                     mMyObservers.add(obs);
@@ -315,8 +338,11 @@ public class ContentObserverController extends StateController {
                 final ObserverInstance obs = mMyObservers.get(i);
                 obs.mJobs.remove(this);
                 if (obs.mJobs.size() == 0) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Unregistering observer " + obs + " for " + obs.mUri.getUri());
+                    }
                     mContext.getContentResolver().unregisterContentObserver(obs);
-                    mObservers.remove(obs);
+                    mObservers.remove(obs.mUri);
                 }
             }
         }
