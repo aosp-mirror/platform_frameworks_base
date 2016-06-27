@@ -90,6 +90,7 @@ final class ServiceRecord extends Binder {
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
     ServiceState tracker; // tracking service execution, may be null
     ServiceState restartTracker; // tracking service restart
+    boolean whitelistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
     boolean delayed;        // are we waiting to start this service in the background?
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
@@ -224,6 +225,9 @@ final class ServiceRecord extends Binder {
         pw.print(prefix); pw.print("app="); pw.println(app);
         if (isolatedProc != null) {
             pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
+        }
+        if (whitelistManager) {
+            pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
         }
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
@@ -389,6 +393,19 @@ final class ServiceRecord extends Binder {
             }
         }
         return false;
+    }
+
+    public void updateWhitelistManager() {
+        whitelistManager = false;
+        for (int conni=connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
+            for (int i=0; i<cr.size(); i++) {
+                if ((cr.get(i).flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                    whitelistManager = true;
+                    return;
+                }
+            }
+        }
     }
 
     public void resetRestartCounter() {
