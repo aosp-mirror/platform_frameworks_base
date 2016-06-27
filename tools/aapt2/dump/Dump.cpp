@@ -20,6 +20,7 @@
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
 #include "proto/ProtoSerialize.h"
+#include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
 #include "util/StringPiece.h"
 
@@ -44,18 +45,9 @@ void dumpCompiledFile(const pb::CompiledFile& pbFile, const void* data, size_t l
               << "Source:   " << file->source << "\n";
 }
 
-void dumpCompiledTable(const pb::ResourceTable& pbTable, const Source& source,
-                       IAaptContext* context) {
-    std::unique_ptr<ResourceTable> table = deserializeTableFromPb(pbTable, source,
-                                                                  context->getDiagnostics());
-    if (!table) {
-        return;
-    }
-
-    Debug::printTable(table.get());
-}
-
 void tryDumpFile(IAaptContext* context, const std::string& filePath) {
+    std::unique_ptr<ResourceTable> table;
+
     std::string err;
     std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::create(filePath, &err);
     if (zip) {
@@ -75,37 +67,62 @@ void tryDumpFile(IAaptContext* context, const std::string& filePath) {
                 return;
             }
 
-            std::unique_ptr<ResourceTable> table = deserializeTableFromPb(
+            table = deserializeTableFromPb(
                     pbTable, Source(filePath), context->getDiagnostics());
-            if (table) {
-                DebugPrintTableOptions debugPrintTableOptions;
-                debugPrintTableOptions.showSources = true;
-                Debug::printTable(table.get(), debugPrintTableOptions);
+            if (!table) {
+                return;
             }
         }
-        return;
+
+        if (!table) {
+            file = zip->findFile("resources.arsc");
+            if (file) {
+                std::unique_ptr<io::IData> data = file->openAsData();
+                if (!data) {
+                    context->getDiagnostics()->error(DiagMessage(filePath)
+                                                     << "failed to open resources.arsc");
+                    return;
+                }
+
+                table = util::make_unique<ResourceTable>();
+                BinaryResourceParser parser(context, table.get(), Source(filePath),
+                                            data->data(), data->size());
+                if (!parser.parse()) {
+                    return;
+                }
+            }
+        }
     }
 
-    Maybe<android::FileMap> file = file::mmapPath(filePath, &err);
-    if (!file) {
-        context->getDiagnostics()->error(DiagMessage(filePath) << err);
-        return;
+    if (!table) {
+        Maybe<android::FileMap> file = file::mmapPath(filePath, &err);
+        if (!file) {
+            context->getDiagnostics()->error(DiagMessage(filePath) << err);
+            return;
+        }
+
+        android::FileMap* fileMap = &file.value();
+
+        // Try as a compiled table.
+        pb::ResourceTable pbTable;
+        if (pbTable.ParseFromArray(fileMap->getDataPtr(), fileMap->getDataLength())) {
+            table = deserializeTableFromPb(pbTable, Source(filePath), context->getDiagnostics());
+        }
+
+        if (!table) {
+            // Try as a compiled file.
+            CompiledFileInputStream input(fileMap->getDataPtr(), fileMap->getDataLength());
+            if (const pb::CompiledFile* pbFile = input.CompiledFile()) {
+               dumpCompiledFile(*pbFile, input.data(), input.size(), Source(filePath), context);
+               return;
+            }
+        }
     }
 
-    android::FileMap* fileMap = &file.value();
-
-    // Try as a compiled table.
-    pb::ResourceTable pbTable;
-    if (pbTable.ParseFromArray(fileMap->getDataPtr(), fileMap->getDataLength())) {
-        dumpCompiledTable(pbTable, Source(filePath), context);
-        return;
-    }
-
-    // Try as a compiled file.
-    CompiledFileInputStream input(fileMap->getDataPtr(), fileMap->getDataLength());
-    if (const pb::CompiledFile* pbFile = input.CompiledFile()) {
-       dumpCompiledFile(*pbFile, input.data(), input.size(), Source(filePath), context);
-       return;
+    if (table) {
+        DebugPrintTableOptions debugPrintTableOptions;
+        debugPrintTableOptions.showSources = true;
+        Debug::printTable(table.get(), debugPrintTableOptions);
     }
 }
 

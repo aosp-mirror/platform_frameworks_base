@@ -61,7 +61,6 @@ public:
         auto cacheIter = mMapping->find(id);
         if (cacheIter != mMapping->end()) {
             reference->name = cacheIter->second;
-            reference->id = {};
         }
     }
 };
