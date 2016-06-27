@@ -37,6 +37,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -59,6 +60,9 @@ public class UnlaunchableAppActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // As this activity has nothing to show, we should hide the title bar also
+        // TODO: Use AlertActivity so we don't need to hide title bar and create a dialog
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         Intent intent = getIntent();
         mReason = intent.getIntExtra(EXTRA_UNLAUNCHABLE_REASON, -1);
         mUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
