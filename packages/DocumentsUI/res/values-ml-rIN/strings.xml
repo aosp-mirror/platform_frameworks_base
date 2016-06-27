@@ -85,8 +85,7 @@
     <string name="copy_preparing" msgid="3896202461003039386">"പകർപ്പിനായി തയ്യാറെടുക്കുന്നു…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"നീക്കാനൊരുങ്ങുന്നു…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ഇല്ലാതാക്കാൻ തയ്യാറെടുക്കുന്നു..."</string>
-    <!-- no translation found for delete_progress (5399405983046157222) -->
-    <skip />
+    <string name="delete_progress" msgid="5399405983046157222">"<xliff:g id="COUNT_0">%1$d</xliff:g> / <xliff:g id="TOTALCOUNT">%2$d</xliff:g>"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ഫയലുകൾ പകർത്താനായില്ല</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ഫയൽ പകർത്താനായില്ല</item>
