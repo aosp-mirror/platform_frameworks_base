@@ -1160,7 +1160,7 @@ redirects:
 - from: /r/studio-ui/avd-manager.html
   to: /studio/run/managing-avds.html
 - from: /r/studio-ui/rundebugconfig.html
-  to: /studio/run/index.html
+  to: /studio/run/rundebugconfig.html
 - from: /r/studio-ui/devicechooser.html
   to: /studio/run/emulator.html
 - from: /r/studio-ui/virtualdeviceconfig.html
