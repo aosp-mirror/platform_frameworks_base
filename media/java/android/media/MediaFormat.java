@@ -295,17 +295,19 @@ public final class MediaFormat {
      * Stride (or row increment) is the difference between the index of a pixel
      * and that of the pixel directly underneath. For YUV 420 formats, the
      * stride corresponds to the Y plane; the stride of the U and V planes can
-     * be calculated based on the color format.
+     * be calculated based on the color format, though it is generally undefined
+     * and depends on the device and release.
      * The associated value is an integer, representing number of bytes.
      */
     public static final String KEY_STRIDE = "stride";
 
     /**
      * A key describing the plane height of a multi-planar (YUV) video bytebuffer layout.
-     * Slice height (or plane height) is the number of rows that must be skipped to get
-     * from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
+     * Slice height (or plane height/vertical stride) is the number of rows that must be skipped
+     * to get from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
      * the offset of the U plane is sliceHeight * stride. The height of the U/V planes
-     * can be calculated based on the color format.
+     * can be calculated based on the color format, though it is generally undefined
+     * and depends on the device and release.
      * The associated value is an integer, representing number of rows.
      */
     public static final String KEY_SLICE_HEIGHT = "slice-height";
