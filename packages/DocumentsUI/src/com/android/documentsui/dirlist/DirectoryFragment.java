@@ -499,6 +499,26 @@ public class DirectoryFragment extends Fragment
         state.dirState.put(mStateKey, container);
     }
 
+    void dragStarted() {
+        // When files are selected for dragging, ActionMode is started. This obscures the breadcrumb
+        // with an ActionBar. In order to make drag and drop to the breadcrumb possible, we first
+        // end ActionMode so the breadcrumb is visible to the user.
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+    }
+
+    void dragStopped(boolean result) {
+        if (result) {
+            clearSelection();
+        } else {
+            // When drag starts we might write a new clip file to disk.
+            // No drop event happens, remove clip file here. This may be called multiple times,
+            // but it should be OK because deletion is idempotent and cheap.
+            deleteDragClipFile();
+        }
+    }
+
     public void onDisplayStateChanged() {
         updateDisplayState();
     }
@@ -1273,7 +1293,7 @@ public class DirectoryFragment extends Fragment
         activity.setRootsDrawerOpen(false);
     }
 
-    void deleteDragClipFile() {
+    private void deleteDragClipFile() {
         mClipper.deleteDragClip();
     }
 

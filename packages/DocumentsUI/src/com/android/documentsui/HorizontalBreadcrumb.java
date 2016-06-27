@@ -26,7 +26,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.android.documentsui.NavigationViewManager.Breadcrumb;
 import com.android.documentsui.NavigationViewManager.Environment;
@@ -38,7 +37,10 @@ import java.util.function.Consumer;
 /**
  * Horizontal implementation of breadcrumb used for tablet / desktop device layouts
  */
-public final class HorizontalBreadcrumb extends RecyclerView implements Breadcrumb {
+public final class HorizontalBreadcrumb extends RecyclerView
+        implements Breadcrumb, ItemDragListener.DragHost {
+
+    private static final int USER_NO_SCROLL_OFFSET_THRESHOLD = 5;
 
     private LinearLayoutManager mLayoutManager;
     private BreadcrumbAdapter mAdapter;
@@ -64,7 +66,8 @@ public final class HorizontalBreadcrumb extends RecyclerView implements Breadcru
         mListener = listener;
         mLayoutManager = new LinearLayoutManager(
                 getContext(), LinearLayoutManager.HORIZONTAL, false);
-        mAdapter = new BreadcrumbAdapter(state, env);
+        mAdapter = new BreadcrumbAdapter(
+                state, env, new ItemDragListener<>(this));
 
         setLayoutManager(mLayoutManager);
         addOnItemTouchListener(new ClickListener(getContext(), this::onSingleTapUp));
@@ -74,16 +77,60 @@ public final class HorizontalBreadcrumb extends RecyclerView implements Breadcru
     public void show(boolean visibility) {
         if (visibility) {
             setVisibility(VISIBLE);
-            setAdapter(mAdapter);
-            mLayoutManager.scrollToPosition(mAdapter.getItemCount() - 1);
+            boolean shouldScroll = !hasUserDefineScrollOffset();
+            if (getAdapter() == null) {
+                setAdapter(mAdapter);
+            } else {
+                int currentItemCount = mAdapter.getItemCount();
+                int lastItemCount = mAdapter.getLastItemSize();
+                if (currentItemCount > lastItemCount) {
+                    mAdapter.notifyItemRangeInserted(lastItemCount,
+                            currentItemCount - lastItemCount);
+                    mAdapter.notifyItemChanged(lastItemCount - 1);
+                } else if (currentItemCount < lastItemCount) {
+                    mAdapter.notifyItemRangeRemoved(currentItemCount,
+                            lastItemCount - currentItemCount);
+                    mAdapter.notifyItemChanged(currentItemCount - 1);
+                }
+            }
+            if (shouldScroll) {
+                mLayoutManager.scrollToPosition(mAdapter.getItemCount() - 1);
+            }
         } else {
             setVisibility(GONE);
             setAdapter(null);
         }
+        mAdapter.updateLastItemSize();
+    }
+
+    private boolean hasUserDefineScrollOffset() {
+        final int maxOffset = computeHorizontalScrollRange() - computeHorizontalScrollExtent();
+        return (maxOffset - computeHorizontalScrollOffset() > USER_NO_SCROLL_OFFSET_THRESHOLD);
     }
 
     @Override
     public void postUpdate() {
+    }
+
+    @Override
+    public void runOnUiThread(Runnable runnable) {
+        post(runnable);
+    }
+
+    @Override
+    public void setDropTargetHighlight(View v, boolean highlight) {
+        RecyclerView.ViewHolder vh = getChildViewHolder(v);
+        if (vh instanceof BreadcrumbHolder) {
+            ((BreadcrumbHolder) vh).setHighlighted(highlight);
+        }
+    }
+
+    @Override
+    public void onViewHovered(View v) {
+        int pos = getChildAdapterPosition(v);
+        if (pos != mAdapter.getItemCount() - 1) {
+            mListener.accept(pos);
+        }
     }
 
     private void onSingleTapUp(MotionEvent e) {
@@ -97,12 +144,19 @@ public final class HorizontalBreadcrumb extends RecyclerView implements Breadcru
     private static final class BreadcrumbAdapter
             extends RecyclerView.Adapter<BreadcrumbHolder> {
 
-        private Environment mEnv;
-        private com.android.documentsui.State mState;
+        private final Environment mEnv;
+        private final com.android.documentsui.State mState;
+        private final OnDragListener mDragListener;
+        // We keep the old item size so the breadcrumb will only re-render views that are necessary
+        private int mLastItemSize;
 
-        public BreadcrumbAdapter(com.android.documentsui.State state, Environment env) {
+        public BreadcrumbAdapter(com.android.documentsui.State state,
+                Environment env,
+                OnDragListener dragListener) {
             mState = state;
             mEnv = env;
+            mDragListener = dragListener;
+            mLastItemSize = mState.stack.size();
         }
 
         @Override
@@ -125,7 +179,10 @@ public final class HorizontalBreadcrumb extends RecyclerView implements Breadcru
 
             if (position == getItemCount() - 1) {
                 holder.arrow.setVisibility(View.GONE);
+            } else {
+                holder.arrow.setVisibility(View.VISIBLE);
             }
+            holder.itemView.setOnDragListener(mDragListener);
         }
 
         private DocumentInfo getItem(int position) {
@@ -136,17 +193,33 @@ public final class HorizontalBreadcrumb extends RecyclerView implements Breadcru
         public int getItemCount() {
             return mState.stack.size();
         }
+
+        public int getLastItemSize() {
+            return mLastItemSize;
+        }
+
+        public void updateLastItemSize() {
+            mLastItemSize = mState.stack.size();
+        }
     }
 
     private static class BreadcrumbHolder extends RecyclerView.ViewHolder {
 
-        protected TextView title;
+        protected DragOverTextView title;
         protected ImageView arrow;
 
         public BreadcrumbHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.breadcrumb_text);
+            title = (DragOverTextView) itemView.findViewById(R.id.breadcrumb_text);
             arrow = (ImageView) itemView.findViewById(R.id.breadcrumb_arrow);
+        }
+
+        /**
+         * Highlights the associated item view.
+         * @param highlighted
+         */
+        public void setHighlighted(boolean highlighted) {
+            title.setHighlight(highlighted);
         }
     }
 

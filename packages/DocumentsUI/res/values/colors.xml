@@ -43,5 +43,6 @@
     <!-- TODO: Would be nice to move this to a color-set, but not sure how to support animation -->
     <color name="item_doc_background">#fffafafa</color>
     <color name="item_doc_background_selected">#ffe0f2f1</color>
+    <color name="item_breadcrumb_background_hovered">#1affffff</color>
 
 </resources>

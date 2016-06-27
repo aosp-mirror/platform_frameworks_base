@@ -28,17 +28,20 @@
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
-  android:layout_height="match_parent"
+  android:layout_height="@dimen/breadcrumb_item_height"
   android:layout_alignParentTop="true"
   android:gravity="center_vertical"
   android:orientation="horizontal">
 
-    <TextView
+    <com.android.documentsui.DragOverTextView
         android:id="@+id/breadcrumb_text"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:textAppearance="@android:style/TextAppearance.Material.Widget.ActionBar.Title" />
+        android:paddingRight="@dimen/breadcrumb_item_padding"
+        android:paddingLeft="@dimen/breadcrumb_item_padding"
+        android:textAppearance="@android:style/TextAppearance.Material.Widget.ActionBar.Title"
+        android:background="@drawable/breadcrumb_item_background" />
 
     <ImageView
         android:id="@+id/breadcrumb_arrow"
