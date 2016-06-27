@@ -39,6 +39,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.widget.NumberPicker;
 
 import java.io.File;
 import java.util.HashMap;
@@ -318,6 +319,17 @@ public final class BridgeInflater extends LayoutInflater {
                         BridgeConstants.ATTR_OPEN_DRAWER);
                 if (attrVal != null) {
                     getDrawerLayoutMap().put(view, attrVal);
+                }
+            }
+            else if (view instanceof NumberPicker) {
+                NumberPicker numberPicker = (NumberPicker) view;
+                String minValue = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI, "minValue");
+                if (minValue != null) {
+                    numberPicker.setMinValue(Integer.parseInt(minValue));
+                }
+                String maxValue = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI, "maxValue");
+                if (maxValue != null) {
+                    numberPicker.setMaxValue(Integer.parseInt(maxValue));
                 }
             }
 
