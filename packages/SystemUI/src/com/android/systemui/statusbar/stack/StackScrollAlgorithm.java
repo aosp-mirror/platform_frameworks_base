@@ -154,8 +154,8 @@ public class StackScrollAlgorithm {
             float newNotificationEnd = newYTranslation + newHeight;
             boolean isHeadsUp = (child instanceof ExpandableNotificationRow)
                     && ((ExpandableNotificationRow) child).isPinned();
-            if (newYTranslation < previousNotificationEnd && ambientState.isShadeExpanded()
-                    && !isHeadsUp) {
+            if (newYTranslation < previousNotificationEnd
+                    && (!isHeadsUp || ambientState.isShadeExpanded())) {
                 // The previous view is overlapping on top, clip!
                 float overlapAmount = previousNotificationEnd - newYTranslation;
                 state.clipTopAmount = (int) overlapAmount;
