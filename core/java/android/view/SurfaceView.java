@@ -745,6 +745,12 @@ public class SurfaceView extends View {
             Log.d(TAG, String.format("%d windowPositionLostRT RT, frameNr = %d",
                     System.identityHashCode(this), frameNumber));
         }
+        IWindowSession session = mSession;
+        MyWindow window = mWindow;
+        if (session == null || window == null) {
+            // We got detached prior to receiving this, abort
+            return;
+        }
         if (mRtHandlingPositionUpdates) {
             mRtHandlingPositionUpdates = false;
             // This callback will happen while the UI thread is blocked, so we can
@@ -757,7 +763,7 @@ public class SurfaceView extends View {
                             "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
                             mWinFrame.left, mWinFrame.top,
                             mWinFrame.right, mWinFrame.bottom));
-                    mSession.repositionChild(mWindow, mWinFrame.left, mWinFrame.top,
+                    session.repositionChild(window, mWinFrame.left, mWinFrame.top,
                             mWinFrame.right, mWinFrame.bottom, frameNumber, mWinFrame);
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Exception from relayout", ex);
