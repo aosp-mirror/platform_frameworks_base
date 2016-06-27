@@ -85,6 +85,6 @@ public class ArgbEvaluator implements TypeEvaluator {
         g = (float) Math.pow(g, 1.0 / 2.2) * 255.0f;
         b = (float) Math.pow(b, 1.0 / 2.2) * 255.0f;
 
-        return ((int) a) << 24 | ((int) r) << 16 | ((int) g) << 8 | (int) b;
+        return Math.round(a) << 24 | Math.round(r) << 16 | Math.round(g) << 8 | Math.round(b);
     }
 }
