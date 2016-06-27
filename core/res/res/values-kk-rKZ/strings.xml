@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Қолданбаға орнату сеанстарын оқуға рұқсат етеді. Бұл оған белсенді бума орнатулары туралы мәліметтерді көруге рұқсат етеді."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"орнату бумаларын сұрау"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Қолданбаның бумаларды орнатуға рұқсат сұрауына мүмкіндік береді."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Масштабтау параметрін басқару үшін екі рет түртіңіз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетті қосу."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Өту"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Іздеу"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Хабарландыруларды жіктеу қызметі"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN белсенді"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"ВЖЭ <xliff:g id="APP">%s</xliff:g> арқылы қосылған"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Желіні басқару үшін түртіңіз"</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> жүйесіне жалғанған. Желіні басқару үшін түріңіз."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Әрқашан қосылған ВЖЖ жалғануда…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Әрқашан қосылған ВЖЖ жалғанған"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Әрқашан қосылған ВЖЖ қателігі"</string>

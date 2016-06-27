@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ਇੱਕ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਇੰਸਟੌਲ ਸੈਸ਼ਨ ਪੜ੍ਹਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਇਸਨੂੰ ਸਕਿਰਿਆ ਪੈਕੇਜ ਇੰਸਟੌਲੇਸ਼ਨਾਂ ਬਾਰੇ ਵੇਰਵੇ ਦੇਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"ਪੈਕੇਜ ਸਥਾਪਿਤ ਕਰਨ ਦੀ ਬੇਨਤੀ ਕਰੋ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ਪੈਕੇਜ ਦੀ ਸਥਾਪਨਾ ਦੀ ਬੇਨਤੀ ਕਰਨ ਲਈ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਅਨੁਮਤੀ ਦਿੰਦਾ ਹੈ"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"ਜ਼ੂਮ ਕੰਟਰੋਲ ਲਈ ਦੋ ਵਾਰ ਟੈਪ ਕਰੋ"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"ਵਿਜੇਟ ਨਹੀਂ ਜੋੜ ਸਕਿਆ।"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"ਜਾਓ"</string>
     <string name="ime_action_search" msgid="658110271822807811">"ਖੋਜੋ"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"ਸੂਚਨਾ ਰੈਂਕਰ ਸੇਵਾ"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN ਸਕਿਰਿਆ ਕੀਤਾ"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"VPN <xliff:g id="APP">%s</xliff:g> ਰਾਹੀਂ ਸਕਿਰਿਆ ਬਣਾਇਆ ਗਿਆ ਹੈ"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ। ਨੈੱਟਵਰਕ ਦੇ ਪ੍ਰਬੰਧਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"ਹਮੇਸ਼ਾਂ-ਚਾਲੂ VPN ਅਸ਼ੁੱਧੀ"</string>

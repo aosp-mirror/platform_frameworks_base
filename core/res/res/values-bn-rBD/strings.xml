@@ -1195,8 +1195,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"কোনো অ্যাপ্লিকেশানকে সেশনগুলি পড়ার অনুমতি দেয়। এটি সক্রিয় প্যাকেজ ইনস্টলেশনের বিশদ বিবরণ দেখতে দেয়।"</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"প্যাকেজগুলি ইনস্টল করার অনুরোধ"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"একটি অ্যাপ্লিকেশানকে প্যাকেজগুলির ইনস্টল করার অনুরোধ জানাতে অনুমতি দেয়৷"</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"জুম নিয়ন্ত্রণের জন্য দুবার আলতো চাপুন"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"উইজেট যোগ করা যায়নি৷"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"যান"</string>
     <string name="ime_action_search" msgid="658110271822807811">"অনুসন্ধান করুন"</string>
@@ -1227,10 +1226,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"বিজ্ঞপ্তি র‌্যাঙ্কার পরিষেবা"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN সক্রিয়"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"<xliff:g id="APP">%s</xliff:g> এর দ্বারা VPN সক্রিয় করা হয়েছে"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"নেটওয়ার্ক পরিচালনা করতে আলতো চাপুন।"</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"<xliff:g id="SESSION">%s</xliff:g> তে সংযুক্ত হয়েছে৷ নেটওয়ার্ক পরিচালনা করতে আলতো চাপুন৷"</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"সর্বদা-চালু VPN সংযুক্ত হচ্ছে..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"সর্বদা-চালু VPN সংযুক্ত হয়েছে"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"সর্বদা-চালু VPN ত্রুটি"</string>

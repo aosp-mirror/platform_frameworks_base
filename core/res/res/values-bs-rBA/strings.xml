@@ -1222,8 +1222,7 @@
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Dozvoljava aplikaciji da čita sesije instalacija. Ovim se aplikaciji omogućava da vidi detalje o aktivnim instalacijama paketa."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"zahtijevanje paketa za instaliranje"</string>
     <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Omogućava aplikaciji da zahtijeva instalaciju paket ā."</string>
-    <!-- no translation found for tutorial_double_tap_to_zoom_message_short (1311810005957319690) -->
-    <skip />
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dodirnite dvaput za kontrolu uvećanja"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Dodavanje vidžeta nije uspjelo."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Počni"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Traži"</string>
@@ -1254,10 +1253,8 @@
     <string name="notification_ranker_binding_label" msgid="774540592299064747">"Usluga rangiranja obavještenja"</string>
     <string name="vpn_title" msgid="19615213552042827">"VPN aktiviran"</string>
     <string name="vpn_title_long" msgid="6400714798049252294">"Aplikacija <xliff:g id="APP">%s</xliff:g> je aktivirala VPN"</string>
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Dodirnite da upravljate mrežom."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Povezano sa sesijom <xliff:g id="SESSION">%s</xliff:g>. Dodirnite da upravljate mrežom."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Povezivanje na uvijek aktivni VPN…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Povezan na uvijek aktivni VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Greška u povezivanju na uvijek aktivni VPN"</string>
