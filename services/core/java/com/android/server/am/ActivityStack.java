@@ -1706,7 +1706,8 @@ final class ActivityStack {
         final boolean stackInvisible = stackVisibility != STACK_VISIBLE;
         final boolean stackVisibleBehind = stackVisibility == STACK_VISIBLE_ACTIVITY_BEHIND;
         boolean behindFullscreenActivity = stackInvisible;
-        boolean resumeNextActivity = isFocusable() && (isInStackLocked(starting) == null);
+        boolean resumeNextActivity = mStackSupervisor.isFocusedStack(this)
+                && (isInStackLocked(starting) == null);
         boolean behindTranslucentActivity = false;
         final ActivityRecord visibleBehind = getVisibleBehindActivity();
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
