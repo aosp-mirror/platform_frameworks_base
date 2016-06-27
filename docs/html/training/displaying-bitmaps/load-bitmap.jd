@@ -115,8 +115,8 @@ public static int calculateInSampleSize(
 
         // Calculate the largest inSampleSize value that is a power of 2 and keeps both
         // height and width larger than the requested height and width.
-        while ((halfHeight / inSampleSize) &gt; reqHeight
-                && (halfWidth / inSampleSize) &gt; reqWidth) {
+        while ((halfHeight / inSampleSize) &gt;= reqHeight
+                && (halfWidth / inSampleSize) &gt;= reqWidth) {
             inSampleSize *= 2;
         }
     }
