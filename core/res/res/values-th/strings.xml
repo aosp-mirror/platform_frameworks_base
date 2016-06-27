@@ -1651,10 +1651,22 @@
     <string name="unpin_target" msgid="3556545602439143442">"เลิกปักหมุด"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2187220736280147886">"เริ่มเซสชันอีกครั้ง"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5687062656885515019">"แตะเพื่อเริ่มเซสชันสาธิตใหม่"</string>
-    <string name="demo_starting_message" msgid="7574017688324606624">"กำลังเริ่มการสาธิต"</string>
-    <string name="demo_restarting_message" msgid="1363894248779727028">"กำลังเริ่มเซสชันอีกครั้ง"</string>
+    <!-- no translation found for reset_retail_demo_mode_title (2370249087943803584) -->
+    <skip />
+    <!-- no translation found for reset_retail_demo_mode_text (5481925817590883246) -->
+    <skip />
+    <!-- no translation found for demo_starting_message (5268556852031489931) -->
+    <skip />
+    <!-- no translation found for demo_restarting_message (952118052531642451) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_title (6596109959002331334) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_countdown (1743456683091721620) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_left_button (5314271347014802475) -->
+    <skip />
+    <!-- no translation found for demo_user_inactivity_timeout_right_button (5019306703066964808) -->
+    <skip />
     <string name="audit_safemode_notification" msgid="6416076898350685856">"รีเซ็ตเป็นค่าเริ่มต้นเพื่อใช้อุปกรณ์นี้โดยไร้ข้อจำกัด"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"แตะเพื่อเรียนรู้เพิ่มเติม"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"ปิดใช้ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
