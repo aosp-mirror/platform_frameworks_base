@@ -626,6 +626,9 @@ class AppWindowToken extends WindowToken {
     }
 
     void clearRelaunching() {
+        if (mPendingRelaunchCount == 0) {
+            return;
+        }
         if (canFreezeBounds()) {
             unfreezeBounds();
         }
@@ -711,8 +714,12 @@ class AppWindowToken extends WindowToken {
      * Unfreezes the previously frozen bounds. See {@link #freezeBounds}.
      */
     private void unfreezeBounds() {
-        mFrozenBounds.remove();
-        mFrozenMergedConfig.remove();
+        if (!mFrozenBounds.isEmpty()) {
+            mFrozenBounds.remove();
+        }
+        if (!mFrozenMergedConfig.isEmpty()) {
+            mFrozenMergedConfig.remove();
+        }
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             if (!win.mHasSurface) {
