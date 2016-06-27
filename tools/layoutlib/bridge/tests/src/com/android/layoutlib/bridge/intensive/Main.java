@@ -433,6 +433,24 @@ public class Main {
         renderAndVerify(params, "vector_drawable.png", TimeUnit.SECONDS.toNanos(2));
     }
 
+    /**
+     * Regression test for http://b.android.com/91383 and http://b.android.com/203797
+     */
+    @Test
+    public void testVectorDrawable91383() throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = createLayoutPullParser("vector_drawable_android.xml");
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "vector_drawable_91383.png", TimeUnit.SECONDS.toNanos(2));
+    }
+
     /** Test activity.xml */
     @Test
     public void testScrolling() throws ClassNotFoundException {
