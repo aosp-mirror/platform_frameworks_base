@@ -275,7 +275,6 @@ public final class MediaMetadata implements Parcelable {
      * {@link MediaController.TransportControls#playFromUri(Uri, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser} connected to
      * the same app.
-     * @hide
      */
     public static final String METADATA_KEY_MEDIA_URI = "android.media.metadata.MEDIA_URI";
 
