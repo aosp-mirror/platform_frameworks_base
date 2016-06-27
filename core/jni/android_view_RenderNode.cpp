@@ -573,8 +573,9 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 bounds.roundOut();
             }
 
+            incStrong(0);
             auto functor = std::bind(
-                std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePosition), this,
+                std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePositionAsync), this,
                 (jlong) info.canvasContext.getFrameNumber(),
                 (jint) bounds.left, (jint) bounds.top,
                 (jint) bounds.right, (jint) bounds.bottom);
@@ -585,15 +586,18 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
             if (CC_UNLIKELY(!mWeakRef || (info && !info->updateWindowPositions))) return;
 
-            if (info) {
-                auto functor = std::bind(
-                    std::mem_fn(&SurfaceViewPositionUpdater::doNotifyPositionLost), this,
-                    (jlong) info->canvasContext.getFrameNumber());
-
-                info->canvasContext.enqueueFrameWork(std::move(functor));
-            } else {
-                doNotifyPositionLost(0);
+            ATRACE_NAME("SurfaceView position lost");
+            JNIEnv* env = jnienv();
+            jobject localref = env->NewLocalRef(mWeakRef);
+            if (CC_UNLIKELY(!localref)) {
+                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                mWeakRef = nullptr;
+                return;
             }
+
+            env->CallVoidMethod(localref, gSurfaceViewPositionLostMethod,
+                    info ? info->canvasContext.getFrameNumber() : 0);
+            env->DeleteLocalRef(localref);
         }
 
     private:
@@ -605,36 +609,23 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             return env;
         }
 
-        void doUpdatePosition(jlong frameNumber, jint left, jint top,
+        void doUpdatePositionAsync(jlong frameNumber, jint left, jint top,
                 jint right, jint bottom) {
             ATRACE_NAME("Update SurfaceView position");
 
             JNIEnv* env = jnienv();
             jobject localref = env->NewLocalRef(mWeakRef);
             if (CC_UNLIKELY(!localref)) {
-                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                env->DeleteWeakGlobalRef(mWeakRef);
                 mWeakRef = nullptr;
-                return;
+            } else {
+                env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
+                        frameNumber, left, top, right, bottom);
+                env->DeleteLocalRef(localref);
             }
 
-            env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
-                    frameNumber, left, top, right, bottom);
-            env->DeleteLocalRef(localref);
-        }
-
-        void doNotifyPositionLost(jlong frameNumber) {
-            ATRACE_NAME("SurfaceView position lost");
-
-            JNIEnv* env = jnienv();
-            jobject localref = env->NewLocalRef(mWeakRef);
-            if (CC_UNLIKELY(!localref)) {
-                jnienv()->DeleteWeakGlobalRef(mWeakRef);
-                mWeakRef = nullptr;
-                return;
-            }
-
-            env->CallVoidMethod(localref, gSurfaceViewPositionLostMethod, frameNumber);
-            env->DeleteLocalRef(localref);
+            // We need to release ourselves here
+            decStrong(0);
         }
 
         JavaVM* mVm;
