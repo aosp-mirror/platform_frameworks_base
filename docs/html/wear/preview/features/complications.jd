@@ -113,8 +113,8 @@ page.image=/wear/preview/images/complications-main-image.png
 
     <p>
       To start receiving complication data, a watch face calls
-      <code>setActiveComplications</code> within the
-      <code>WatchFaceService.Engine</code> class with a list of watch face
+      <code>setActiveComplications</code>, in the
+      <code>WatchFaceService.Engine</code> class, with a list of watch face
       complication IDs. A watch face creates these IDs to uniquely identify
       slots on the watch face where complications can appear, and passes them
       to the <code>createProviderChooserIntent</code> method (of the
@@ -283,7 +283,12 @@ android.support.wearable.complications.UPDATE_PERIOD_SECONDS
     </p>
 
     <p>
-      The configuration activity may also be used as an opportunity to request
+      If a data provider needs a specific permission to access a user's data,
+      then standard code
+      for runtime <a href="{@docRoot}training/articles/wear-permissions.html">
+      permissions</a> is needed.
+      A <a href="{@docRoot}training/wearables/watch-faces/configuration.html">
+      configuration activity</a> may be used as an opportunity to request
       any permissions required by the provider.
     </p>
 
