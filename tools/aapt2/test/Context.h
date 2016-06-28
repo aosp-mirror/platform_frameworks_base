@@ -58,17 +58,19 @@ public:
         return false;
     }
 
+    int getMinSdkVersion() override {
+        return mMinSdkVersion;
+    }
+
 private:
     friend class ContextBuilder;
-
-    Context() : mNameMangler({}) {
-    }
 
     Maybe<std::u16string> mCompilationPackage;
     Maybe<uint8_t> mPackageId;
     StdErrDiagnostics mDiagnostics;
     SymbolTable mSymbols;
-    NameMangler mNameMangler;
+    NameMangler mNameMangler = NameMangler({});
+    int mMinSdkVersion = 0;
 };
 
 class ContextBuilder {
@@ -93,6 +95,11 @@ public:
 
     ContextBuilder& addSymbolSource(std::unique_ptr<ISymbolSource> src) {
         mContext->getExternalSymbols()->appendSource(std::move(src));
+        return *this;
+    }
+
+    ContextBuilder& setMinSdkVersion(int minSdk) {
+        mContext->mMinSdkVersion = minSdk;
         return *this;
     }
 

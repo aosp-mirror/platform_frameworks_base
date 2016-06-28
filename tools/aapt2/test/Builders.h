@@ -50,6 +50,11 @@ public:
         return addValue(name, id, util::make_unique<Id>());
     }
 
+    ResourceTableBuilder& addSimple(const StringPiece16& name, const ConfigDescription& config,
+                                    const ResourceId id = {}) {
+        return addValue(name, config, id, util::make_unique<Id>());
+    }
+
     ResourceTableBuilder& addReference(const StringPiece16& name, const StringPiece16& ref) {
         return addReference(name, {}, ref);
     }
@@ -70,7 +75,7 @@ public:
 
     ResourceTableBuilder& addString(const StringPiece16& name, const ResourceId id,
                                     const ConfigDescription& config, const StringPiece16& str) {
-        return addValue(name, id, config,
+        return addValue(name, config, id,
                         util::make_unique<String>(mTable->stringPool.makeRef(str)));
     }
 
@@ -86,7 +91,7 @@ public:
 
     ResourceTableBuilder& addFileReference(const StringPiece16& name, const StringPiece16& path,
                                            const ConfigDescription& config) {
-        return addValue(name, {}, config,
+        return addValue(name, config, {},
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
     }
 
@@ -96,13 +101,12 @@ public:
     }
 
     ResourceTableBuilder& addValue(const StringPiece16& name, const ResourceId id,
-                                       std::unique_ptr<Value> value) {
-        return addValue(name, id, {}, std::move(value));
+                                   std::unique_ptr<Value> value) {
+        return addValue(name, {}, id, std::move(value));
     }
 
-    ResourceTableBuilder& addValue(const StringPiece16& name, const ResourceId id,
-                                   const ConfigDescription& config,
-                                   std::unique_ptr<Value> value) {
+    ResourceTableBuilder& addValue(const StringPiece16& name, const ConfigDescription& config,
+                                   const ResourceId id, std::unique_ptr<Value> value) {
         ResourceName resName = parseNameOrDie(name);
         bool result = mTable->addResourceAllowMangled(resName, id, config, std::string(),
                                                       std::move(value), &mDiagnostics);

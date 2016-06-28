@@ -15,10 +15,7 @@
  */
 
 #include "split/TableSplitter.h"
-#include "test/Builders.h"
-#include "test/Common.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
@@ -32,7 +29,7 @@ TEST(TableSplitterTest, NoSplitPreferredDensity) {
                               test::parseConfigOrDie("xhdpi"))
             .addFileReference(u"@android:drawable/icon", u"res/drawable-xxhdpi/icon.png",
                               test::parseConfigOrDie("xxhdpi"))
-            .addSimple(u"@android:string/one", {})
+            .addSimple(u"@android:string/one")
             .build();
 
     TableSplitterOptions options;

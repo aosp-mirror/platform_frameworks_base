@@ -17,6 +17,8 @@
 #ifndef AAPT_APP_INFO_H
 #define AAPT_APP_INFO_H
 
+#include "util/Maybe.h"
+
 #include <string>
 
 namespace aapt {
@@ -30,6 +32,11 @@ struct AppInfo {
      * App's package name.
      */
     std::u16string package;
+
+    /**
+     * The App's minimum SDK version.
+     */
+    Maybe<std::u16string> minSdkVersion;
 };
 
 } // namespace aapt

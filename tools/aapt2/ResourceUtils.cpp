@@ -16,6 +16,7 @@
 
 #include "NameMangler.h"
 #include "ResourceUtils.h"
+#include "SdkConstants.h"
 #include "flatten/ResourceTypeExtensions.h"
 #include "util/Files.h"
 #include "util/Util.h"
@@ -400,6 +401,21 @@ bool tryParseBool(const StringPiece16& str, bool* outValue) {
         return true;
     }
     return false;
+}
+
+Maybe<int> tryParseSdkVersion(const StringPiece16& str) {
+    StringPiece16 trimmedStr(util::trimWhitespace(str));
+    android::Res_value value;
+    if (android::ResTable::stringToInt(trimmedStr.data(), trimmedStr.size(), &value)) {
+        return static_cast<int>(value.data);
+    }
+
+    // Try parsing the code name.
+    std::pair<StringPiece16, int> entry = getDevelopmentSdkCodeNameAndVersion();
+    if (entry.first == trimmedStr) {
+        return entry.second;
+    }
+    return {};
 }
 
 std::unique_ptr<BinaryPrimitive> tryParseBool(const StringPiece16& str) {

@@ -39,6 +39,7 @@ sources := \
 	link/PrivateAttributeMover.cpp \
 	link/ReferenceLinker.cpp \
 	link/TableMerger.cpp \
+	link/VersionCollapser.cpp \
 	link/XmlReferenceLinker.cpp \
 	process/SymbolTable.cpp \
 	proto/ProtoHelpers.cpp \
@@ -87,6 +88,7 @@ testSources := \
 	link/ProductFilter_test.cpp \
 	link/ReferenceLinker_test.cpp \
 	link/TableMerger_test.cpp \
+	link/VersionCollapser_test.cpp \
 	link/XmlReferenceLinker_test.cpp \
 	process/SymbolTable_test.cpp \
 	proto/TableProtoSerializer_test.cpp \
