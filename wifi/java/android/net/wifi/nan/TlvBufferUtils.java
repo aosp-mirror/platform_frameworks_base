@@ -224,7 +224,8 @@ public class TlvBufferUtils {
          *         {@code ctr.putXXX(..).putXXX(..)}.
          */
         public TlvConstructor putString(int type, String data) {
-            return putByteArray(type, data.getBytes(), 0, data.length());
+            byte[] bytes = data.getBytes();
+            return putByteArray(type, bytes, 0, bytes.length);
         }
 
         /**
