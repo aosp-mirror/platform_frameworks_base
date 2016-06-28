@@ -61,6 +61,13 @@ public final class Installer extends SystemService {
         mInstaller = new InstallerConnection();
     }
 
+    // Package-private installer that accepts a custom InstallerConnection. Used for
+    // OtaDexoptService.
+    Installer(Context context, InstallerConnection connection) {
+        super(context);
+        mInstaller = connection;
+    }
+
     /**
      * Yell loudly if someone tries making future calls while holding a lock on
      * the given object.
