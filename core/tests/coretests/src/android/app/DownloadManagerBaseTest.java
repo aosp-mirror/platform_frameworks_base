@@ -245,6 +245,12 @@ public class DownloadManagerBaseTest extends InstrumentationTestCase {
         // Note: callers overriding this should call mServer.play() with the desired port #
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        mServer.shutdown();
+        super.tearDown();
+    }
+
     /**
      * Helper to build a response from the MockWebServer with no body.
      *

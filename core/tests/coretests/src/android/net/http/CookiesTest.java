@@ -36,7 +36,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 public final class CookiesTest extends TestCase {
 
-    private MockWebServer server = new MockWebServer();
+    private MockWebServer server;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        server = new MockWebServer();
+    }
 
     @Override protected void tearDown() throws Exception {
         server.shutdown();
