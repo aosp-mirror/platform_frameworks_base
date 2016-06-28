@@ -859,15 +859,17 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling app is running in a demo user.
-     * <p>
-     * Caller must hold the MANAGE_USERS permission.
+     * Checks if the calling app is running in a demo user. When running in a demo user,
+     * apps can be more helpful to the user, or explain their features in more detail.
+     *
      * @return whether the caller is a demo user.
-     * @hide
      */
     public boolean isDemoUser() {
-        UserInfo user = getUserInfo(UserHandle.myUserId());
-        return user != null && user.isDemo();
+        try {
+            return mService.isDemoUser(UserHandle.myUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
