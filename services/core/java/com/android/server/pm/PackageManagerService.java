@@ -179,6 +179,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -4723,20 +4724,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             final ResolveInfo bestChoice =
                     chooseBestActivity(intent, resolvedType, flags, query, userId);
-
-            if (isEphemeralAllowed(intent, query, userId)) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
-                final EphemeralResolveInfo ai =
-                        getEphemeralResolveInfo(intent, resolvedType, userId);
-                if (ai != null) {
-                    if (DEBUG_EPHEMERAL) {
-                        Slog.v(TAG, "Returning an EphemeralResolveInfo");
-                    }
-                    bestChoice.ephemeralInstaller = mEphemeralInstallerInfo;
-                    bestChoice.ephemeralResolveInfo = ai;
-                }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            }
             return bestChoice;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -4777,9 +4764,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 false, false, false, userId);
     }
 
-
     private boolean isEphemeralAllowed(
-            Intent intent, List<ResolveInfo> resolvedActivites, int userId) {
+            Intent intent, List<ResolveInfo> resolvedActivities, int userId,
+            boolean skipPackageCheck) {
         // Short circuit and return early if possible.
         if (DISABLE_EPHEMERAL_APPS) {
             return false;
@@ -4794,18 +4781,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (intent.getComponent() != null) {
             return false;
         }
-        if (intent.getPackage() != null) {
+        if ((intent.getFlags() & Intent.FLAG_IGNORE_EPHEMERAL) != 0) {
+            return false;
+        }
+        if (!skipPackageCheck && intent.getPackage() != null) {
             return false;
         }
         final boolean isWebUri = hasWebURI(intent);
-        if (!isWebUri) {
+        if (!isWebUri || intent.getData().getHost() == null) {
             return false;
         }
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
         synchronized (mPackages) {
-            final int count = resolvedActivites.size();
+            final int count = (resolvedActivities == null ? 0 : resolvedActivities.size());
             for (int n = 0; n < count; n++) {
-                ResolveInfo info = resolvedActivites.get(n);
+                ResolveInfo info = resolvedActivities.get(n);
                 String packageName = info.activityInfo.packageName;
                 PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
@@ -4827,19 +4817,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private EphemeralResolveInfo getEphemeralResolveInfo(Intent intent, String resolvedType,
-            int userId) {
-        final int ephemeralPrefixMask = Global.getInt(mContext.getContentResolver(),
+    private static EphemeralResolveInfo getEphemeralResolveInfo(
+            Context context, EphemeralResolverConnection resolverConnection, Intent intent,
+            String resolvedType, int userId, String packageName) {
+        final int ephemeralPrefixMask = Global.getInt(context.getContentResolver(),
                 Global.EPHEMERAL_HASH_PREFIX_MASK, DEFAULT_EPHEMERAL_HASH_PREFIX_MASK);
-        final int ephemeralPrefixCount = Global.getInt(mContext.getContentResolver(),
+        final int ephemeralPrefixCount = Global.getInt(context.getContentResolver(),
                 Global.EPHEMERAL_HASH_PREFIX_COUNT, DEFAULT_EPHEMERAL_HASH_PREFIX_COUNT);
         final EphemeralDigest digest = new EphemeralDigest(intent.getData(), ephemeralPrefixMask,
                 ephemeralPrefixCount);
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
         final List<EphemeralResolveInfo> ephemeralResolveInfoList =
-                mEphemeralResolverConnection.getEphemeralResolveInfoList(
-                        shaPrefix, ephemeralPrefixMask);
+                resolverConnection.getEphemeralResolveInfoList(shaPrefix, ephemeralPrefixMask);
         if (ephemeralResolveInfoList == null || ephemeralResolveInfoList.size() == 0) {
             // No hash prefix match; there are no ephemeral apps for this domain.
             return null;
@@ -4854,6 +4844,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final List<IntentFilter> filters = ephemeralApplication.getFilters();
                 // No filters; this should never happen.
                 if (filters.isEmpty()) {
+                    continue;
+                }
+                if (packageName != null
+                        && !packageName.equals(ephemeralApplication.getPackageName())) {
                     continue;
                 }
                 // We have a domain match; resolve the filters to see if anything matches.
@@ -5259,8 +5253,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // reader
+        boolean sortResult = false;
+        boolean addEphemeral = false;
+        boolean matchEphemeralPackage = false;
+        List<ResolveInfo> result;
+        final String pkgName = intent.getPackage();
         synchronized (mPackages) {
-            final String pkgName = intent.getPackage();
             if (pkgName == null) {
                 List<CrossProfileIntentFilter> matchingFilters =
                         getMatchingCrossProfileIntentFilters(intent, resolvedType, userId);
@@ -5268,15 +5266,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ResolveInfo xpResolveInfo  = querySkipCurrentProfileIntents(matchingFilters, intent,
                         resolvedType, flags, userId);
                 if (xpResolveInfo != null) {
-                    List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
-                    result.add(xpResolveInfo);
-                    return filterIfNotSystemUser(result, userId);
+                    List<ResolveInfo> xpResult = new ArrayList<ResolveInfo>(1);
+                    xpResult.add(xpResolveInfo);
+                    return filterIfNotSystemUser(xpResult, userId);
                 }
 
                 // Check for results in the current profile.
-                List<ResolveInfo> result = mActivities.queryIntent(
-                        intent, resolvedType, flags, userId);
-                result = filterIfNotSystemUser(result, userId);
+                result = filterIfNotSystemUser(mActivities.queryIntent(
+                        intent, resolvedType, flags, userId), userId);
+                addEphemeral =
+                        isEphemeralAllowed(intent, result, userId, false /*skipPackageCheck*/);
 
                 // Check for cross profile results.
                 boolean hasNonNegativePriorityResult = hasNonNegativePriority(result);
@@ -5288,7 +5287,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Collections.singletonList(xpResolveInfo), userId).size() > 0;
                     if (isVisibleToUser) {
                         result.add(xpResolveInfo);
-                        Collections.sort(result, mResolvePrioritySorter);
+                        sortResult = true;
                     }
                 }
                 if (hasWebURI(intent)) {
@@ -5304,28 +5303,61 @@ public class PackageManagerService extends IPackageManager.Stub {
                             // in the result.
                             result.remove(xpResolveInfo);
                         }
-                        if (result.size() == 0) {
+                        if (result.size() == 0 && !addEphemeral) {
                             result.add(xpDomainInfo.resolveInfo);
                             return result;
                         }
-                    } else if (result.size() <= 1) {
-                        return result;
                     }
-                    result = filterCandidatesWithDomainPreferredActivitiesLPr(intent, flags, result,
-                            xpDomainInfo, userId);
-                    Collections.sort(result, mResolvePrioritySorter);
+                    if (result.size() > 1 || addEphemeral) {
+                        result = filterCandidatesWithDomainPreferredActivitiesLPr(
+                                intent, flags, result, xpDomainInfo, userId);
+                        sortResult = true;
+                    }
                 }
-                return result;
+            } else {
+                final PackageParser.Package pkg = mPackages.get(pkgName);
+                if (pkg != null) {
+                    result = filterIfNotSystemUser(
+                            mActivities.queryIntentForPackage(
+                                    intent, resolvedType, flags, pkg.activities, userId),
+                            userId);
+                } else {
+                    // the caller wants to resolve for a particular package; however, there
+                    // were no installed results, so, try to find an ephemeral result
+                    addEphemeral = isEphemeralAllowed(
+                            intent, null /*result*/, userId, true /*skipPackageCheck*/);
+                    matchEphemeralPackage = true;
+                    result = new ArrayList<ResolveInfo>();
+                }
             }
-            final PackageParser.Package pkg = mPackages.get(pkgName);
-            if (pkg != null) {
-                return filterIfNotSystemUser(
-                        mActivities.queryIntentForPackage(
-                                intent, resolvedType, flags, pkg.activities, userId),
-                        userId);
-            }
-            return new ArrayList<ResolveInfo>();
         }
+        if (addEphemeral) {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "resolveEphemeral");
+            final EphemeralResolveInfo ai = getEphemeralResolveInfo(
+                    mContext, mEphemeralResolverConnection, intent, resolvedType, userId,
+                    matchEphemeralPackage ? pkgName : null);
+            if (ai != null) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
+                }
+                final ResolveInfo ephemeralInstaller = new ResolveInfo(mEphemeralInstallerInfo);
+                ephemeralInstaller.ephemeralResolveInfo = ai;
+                // make sure this resolver is the default
+                ephemeralInstaller.isDefault = true;
+                ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                // add a non-generic filter
+                ephemeralInstaller.filter = new IntentFilter(intent.getAction());
+                ephemeralInstaller.filter.addDataPath(
+                        intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
+                result.add(ephemeralInstaller);
+            }
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+        if (sortResult) {
+            Collections.sort(result, mResolvePrioritySorter);
+        }
+        return result;
     }
 
     private static class CrossProfileDomainInfo {
@@ -9190,15 +9222,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         mEphemeralInstallerActivity.packageName = pkg.applicationInfo.packageName;
         mEphemeralInstallerActivity.processName = pkg.applicationInfo.packageName;
         mEphemeralInstallerActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-        mEphemeralInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS |
-                ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+        mEphemeralInstallerActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS
+                | ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
         mEphemeralInstallerActivity.theme = 0;
         mEphemeralInstallerActivity.exported = true;
         mEphemeralInstallerActivity.enabled = true;
         mEphemeralInstallerInfo.activityInfo = mEphemeralInstallerActivity;
         mEphemeralInstallerInfo.priority = 0;
-        mEphemeralInstallerInfo.preferredOrder = 0;
-        mEphemeralInstallerInfo.match = 0;
+        mEphemeralInstallerInfo.preferredOrder = 1;
+        mEphemeralInstallerInfo.isDefault = true;
+        mEphemeralInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
 
         if (DEBUG_EPHEMERAL) {
             Slog.d(TAG, "Set ephemeral installer activity: " + mEphemeralInstallerComponent);
