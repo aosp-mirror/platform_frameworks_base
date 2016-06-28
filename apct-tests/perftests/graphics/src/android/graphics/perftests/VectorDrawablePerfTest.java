@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.drawable.VectorDrawable;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.BitmapUtils;
+import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
@@ -48,12 +49,12 @@ public class VectorDrawablePerfTest {
     private int[] mTestWidths = {1024, 512};
     private int[] mTestHeights = {512, 1024};
 
-    private String KEY_VECTORDRAWABLE_DRAW_TIME = "VectorDrawable_Draw_Time_NanoSec";
-
     @Rule
     public ActivityTestRule<StubActivity> mActivityRule =
             new ActivityTestRule(StubActivity.class);
 
+    @Rule
+    public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Test
     public void testBitmapDrawPerf() {
@@ -66,7 +67,7 @@ public class VectorDrawablePerfTest {
         Bitmap bmp = Bitmap.createBitmap(w, h, conf);
         Canvas canvas = new Canvas(bmp);
 
-        BenchmarkState state = new BenchmarkState();
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         int i = 0;
         while (state.keepRunning()) {
             // Use different width / height each to force the vectorDrawable abandon the cache.
@@ -86,8 +87,5 @@ public class VectorDrawablePerfTest {
         if (DUMP_BITMAP) {
             BitmapUtils.saveBitmapIntoPNG(activity, bmp, resId);
         }
-
-        state.sendFullStatusReport(InstrumentationRegistry.getInstrumentation(),
-                KEY_VECTORDRAWABLE_DRAW_TIME);
     }
 }
