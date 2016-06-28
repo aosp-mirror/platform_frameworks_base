@@ -25,7 +25,7 @@ import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
 
 /**
- * A Canvas implementation that records drawing operations for deferred rendering.
+ * A Canvas implementation that records view system drawing operations for deferred rendering.
  * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
@@ -72,17 +72,6 @@ public class DisplayListCanvas extends Canvas {
     @Override
     public boolean isRecordingFor(Object o) {
         return o == mNode;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // JNI
-    ///////////////////////////////////////////////////////////////////////////
-
-    private static native boolean nIsAvailable();
-    private static boolean sIsAvailable = nIsAvailable();
-
-    static boolean isAvailable() {
-        return sIsAvailable;
     }
 
     ///////////////////////////////////////////////////////////////////////////

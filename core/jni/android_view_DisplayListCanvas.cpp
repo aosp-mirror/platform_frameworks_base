@@ -199,22 +199,6 @@ static void android_view_DisplayListCanvas_drawLayer(JNIEnv* env, jobject clazz,
 }
 
 // ----------------------------------------------------------------------------
-// Common
-// ----------------------------------------------------------------------------
-
-static jboolean android_view_DisplayListCanvas_isAvailable(JNIEnv* env, jobject clazz) {
-    char prop[PROPERTY_VALUE_MAX];
-    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
-        // not in the emulator
-        return JNI_TRUE;
-    }
-    // In the emulator this property will be set > 0 when OpenGL ES 2.0 is
-    // enabled, 0 otherwise. On old emulator versions it will be undefined.
-    property_get("qemu.gles", prop, "0");
-    return atoi(prop) > 0 ? JNI_TRUE : JNI_FALSE;
-}
-
-// ----------------------------------------------------------------------------
 // Logging
 // ----------------------------------------------------------------------------
 
@@ -231,7 +215,6 @@ android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject java
 const char* const kClassPathName = "android/view/DisplayListCanvas";
 
 static JNINativeMethod gMethods[] = {
-    { "nIsAvailable",       "!()Z",             (void*) android_view_DisplayListCanvas_isAvailable },
     { "nInsertReorderBarrier","!(JZ)V",         (void*) android_view_DisplayListCanvas_insertReorderBarrier },
 
     { "nCallDrawGLFunction", "!(JJLjava/lang/Runnable;)V",

@@ -226,6 +226,9 @@ public final class ThreadedRenderer {
         sTrimForeground = true;
     }
 
+    private static native boolean nSupportsOpenGL();
+    private static boolean sSupportsOpenGL = nSupportsOpenGL();
+
     /**
      * Indicates whether threaded rendering is available under any form for
      * the view hierarchy.
@@ -234,7 +237,7 @@ public final class ThreadedRenderer {
      *         false otherwise
      */
     public static boolean isAvailable() {
-        return DisplayListCanvas.isAvailable();
+        return sSupportsOpenGL;
     }
 
     /**
@@ -258,7 +261,7 @@ public final class ThreadedRenderer {
      */
     public static ThreadedRenderer create(Context context, boolean translucent) {
         ThreadedRenderer renderer = null;
-        if (DisplayListCanvas.isAvailable()) {
+        if (isAvailable()) {
             renderer = new ThreadedRenderer(context, translucent);
         }
         return renderer;
