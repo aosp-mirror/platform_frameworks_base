@@ -5058,8 +5058,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        // Keep track of the window if it's dimming but not necessarily fullscreen.
         final boolean reallyVisible = win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw();
+
+        // Voice interaction overrides both top fullscreen and top docked.
+        if (reallyVisible && win.getAttrs().type == TYPE_VOICE_INTERACTION) {
+            if (mTopFullscreenOpaqueWindowState == null) {
+                mTopFullscreenOpaqueWindowState = win;
+                if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
+                    mTopFullscreenOpaqueOrDimmingWindowState = win;
+                }
+            }
+            if (mTopDockedOpaqueWindowState == null) {
+                mTopDockedOpaqueWindowState = win;
+                if (mTopDockedOpaqueOrDimmingWindowState == null) {
+                    mTopDockedOpaqueOrDimmingWindowState = win;
+                }
+            }
+        }
+
+        // Keep track of the window if it's dimming but not necessarily fullscreen.
         if (mTopFullscreenOpaqueOrDimmingWindowState == null && reallyVisible
                 && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
