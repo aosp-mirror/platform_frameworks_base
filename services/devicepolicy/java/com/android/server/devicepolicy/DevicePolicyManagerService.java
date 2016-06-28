@@ -6083,7 +6083,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             final int userId = UserHandle.getCallingUserId();
             enforceManagedProfile(userId, "enable the profile");
-
+            // Check if the profile is already enabled.
+            UserInfo managedProfile = getUserInfo(userId);
+            if (managedProfile.isEnabled()) {
+                Slog.e(LOG_TAG,
+                        "setProfileEnabled is called when the profile is already enabled");
+                return;
+            }
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mUserManager.setUserEnabled(userId);
