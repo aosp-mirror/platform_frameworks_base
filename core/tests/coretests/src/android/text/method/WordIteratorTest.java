@@ -49,6 +49,23 @@ public class WordIteratorTest  extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testWindowWidth() {
+        final String text = "aaaa bbbb cccc dddd eeee ffff gggg hhhh iiii jjjj kkkk llll mmmm nnnn";
+        WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
+
+        // The first 'n' is more than 50 characters into the string.
+        wordIterator.setCharSequence(text, text.indexOf('n'), text.length());
+        final int expectedWindowStart = text.indexOf('n') - 50;
+        assertEquals(expectedWindowStart, wordIterator.preceding(expectedWindowStart + 1));
+        assertEquals(BreakIterator.DONE, wordIterator.preceding(expectedWindowStart));
+
+        wordIterator.setCharSequence(text, 0, 1);
+        final int expectedWindowEnd = 1 + 50;
+        assertEquals(expectedWindowEnd, wordIterator.following(expectedWindowEnd - 1));
+        assertEquals(BreakIterator.DONE, wordIterator.following(expectedWindowEnd));
+    }
+
+    @SmallTest
     public void testPreceding() {
         final String text = "abc def-ghi. jkl";
         WordIterator wordIterator = new WordIterator(Locale.ENGLISH);
@@ -64,6 +81,19 @@ public class WordIteratorTest  extends AndroidTestCase {
             fail("preceding with invalid offset should throw IllegalArgumentException.");
         } catch (IllegalArgumentException e) {
         }
+
+        assertEquals(BreakIterator.DONE, wordIterator.preceding(text.indexOf('a')));
+        assertEquals(text.indexOf('a'), wordIterator.preceding(text.indexOf('c')));
+        assertEquals(text.indexOf('a'), wordIterator.preceding(text.indexOf('d')));
+        assertEquals(text.indexOf('d'), wordIterator.preceding(text.indexOf('e')));
+        assertEquals(text.indexOf('d'), wordIterator.preceding(text.indexOf('g')));
+        assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('h')));
+        assertEquals(text.indexOf('g'), wordIterator.preceding(text.indexOf('j')));
+        assertEquals(text.indexOf('j'), wordIterator.preceding(text.indexOf('l')));
+
+        // The results should be the same even if we set an smaller window, since WordIterator
+        // enlargens the window by 50 code units on each side anyway.
+        wordIterator.setCharSequence(text, text.indexOf('d'), text.indexOf('e'));
 
         assertEquals(BreakIterator.DONE, wordIterator.preceding(text.indexOf('a')));
         assertEquals(text.indexOf('a'), wordIterator.preceding(text.indexOf('c')));
@@ -91,6 +121,19 @@ public class WordIteratorTest  extends AndroidTestCase {
             fail("following with invalid offset should throw IllegalArgumentException.");
         } catch (IllegalArgumentException e) {
         }
+
+        assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('a')));
+        assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('c')));
+        assertEquals(text.indexOf('f') + 1, wordIterator.following(text.indexOf('c') + 1));
+        assertEquals(text.indexOf('f') + 1, wordIterator.following(text.indexOf('d')));
+        assertEquals(text.indexOf('i') + 1, wordIterator.following(text.indexOf('-')));
+        assertEquals(text.indexOf('i') + 1, wordIterator.following(text.indexOf('g')));
+        assertEquals(text.length(), wordIterator.following(text.indexOf('j')));
+        assertEquals(BreakIterator.DONE, wordIterator.following(text.length()));
+
+        // The results should be the same even if we set an smaller window, since WordIterator
+        // enlargens the window by 50 code units on each side anyway.
+        wordIterator.setCharSequence(text, text.indexOf('d'), text.indexOf('e'));
 
         assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('a')));
         assertEquals(text.indexOf('c') + 1, wordIterator.following(text.indexOf('c')));
