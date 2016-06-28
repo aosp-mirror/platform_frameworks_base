@@ -496,6 +496,10 @@ LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_RMTYPEDEFS := true
 
+ifeq ($(EMMA_INSTRUMENT_FRAMEWORK),true)
+LOCAL_EMMA_INSTRUMENT := true
+endif
+
 include $(BUILD_JAVA_LIBRARY)
 framework_module := $(LOCAL_INSTALLED_MODULE)
 
