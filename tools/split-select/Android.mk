@@ -48,8 +48,8 @@ hostStaticLibs := \
     libaapt \
     libandroidfw \
     libpng \
-    liblog \
     libutils \
+    liblog \
     libcutils \
     libexpat \
     libziparchive-host \
